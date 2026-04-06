@@ -1365,18 +1365,6 @@ function renderVenuePage(venueId) {
   const cs = CAT_STYLE[v.category] || { bg:'rgba(26,39,68,.08)', color:'#4A5568', label:v.category };
 
   /* ── Highlights per venue ── */
-  const HIGHLIGHTS = {
-    'behram-kafe':          ['☕ Köy kahvesi ve bitki çayları','🏛 Tapınağa yürüme mesafesi','📸 Manzara fotoğraf sevenler için','🤝 Yerel halkın buluşma noktası'],
-    'korfez-balik':         ['🐟 Günlük taze avlanmış balık','⚓ Tarihi rıhtımda deniz kenarı masa','🫒 Ege zeytinyağlı mezeler','🌊 Antik liman manzarası'],
-    'assos-tas-kahvalti':   ['🧀 Yerel çiftlik peynirleri ve ev yapımı reçeller','🌿 Organik ve taze malzemeler','🏡 Tarihi taş bahçede servis','☀️ Sabahın en keyifli kahvaltısı'],
-    'gun-batimi-kafe':      ['🌅 Gün batımı manzarası eşsiz','☕ Filtre kahve ve espresso seçeneği','📸 Fotoğrafçılar için vazgeçilmez adres','🏛 Athena Tapınağı\'na 2 dakika'],
-    'kayalar-koy-evi':      ['🪨 Restore edilmiş otantik taş ev','🌿 Doğayla baş başa konaklama','🤫 Sessizlik ve huzur garantisi','🌄 Sabah sisi ve panoramik manzara'],
-    'antik-liman-restoran': ['🍋 Ege mutfağının özgün tatları','🫒 Mevsim zeytinyağlıları','⚓ Tarihi taş yapı içinde yemek','🌊 Açık teras seçeneği mevcut'],
-    'kadirga-plaj':         ['🏖 Koyun tam bitişiğinde ahşap platform','🥤 Soğuk içecek ve hafif yemek','🌊 Yüzme molası için mükemmel','☀️ Sabah 09:00\'dan itibaren açık'],
-    'ahmetce-iskele-kafe':  ['⚓ Ahşap iskele üzerinde servis','🎣 Sabah balıkçılarıyla çay molası','🐟 Taze günlük balık imkânı','🤫 Kalabalıktan uzak, sakin atmosfer'],
-    'sivrice-beach':        ['🥾 Yürüyüş patikası bitişiğinde','💧 Soğuk içecek ve su temini','🌊 Kristal berrak koy manzarası','🌿 Tamamen doğal ve minimal'],
-    'sunaba-kasri-otel':   ['🏨 Taş mimarili butik otel','🏊 Yetişkin ve çocuk havuzları','🌅 Ege Denizi ve Midilli manzarası','🍳 Serpme köy kahvaltısı dahil'],
-  };
   /* ── Tag → cümle üreteci ── */
   const TAG_SENTENCES = {
     'manzaralı':     ['🌅 Eşsiz manzarası ile nefes kesici bir deneyim sunar','🌅 Manzara eşliğinde unutulmaz anlar yaşarsınız'],
@@ -1451,7 +1439,7 @@ function renderVenuePage(venueId) {
     }
     return result;
   }
-  const highlights = HIGHLIGHTS[v.id] || generateHighlights(v.tags);
+  const highlights = generateHighlights(v.tags);
 
   /* ── Related data ── */
   const similar      = DATA.venues.filter(x => x.id !== v.id && x.category === v.category).slice(0,6);
