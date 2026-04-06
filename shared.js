@@ -1614,19 +1614,25 @@ function renderVenuePage(venueId) {
       .vp-note-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.84rem;color:#1A2744;margin-bottom:5px;}
       .vp-note-text{font-size:.8rem;color:#4A5568;line-height:1.65;}
 
-      /* ── Share Dropdown ── */
-      .vp-share-wrap{position:relative;}
-      .vp-share-dd{position:absolute;top:calc(100% + 8px);right:0;min-width:200px;background:#fff;border-radius:16px;box-shadow:0 12px 40px rgba(26,39,68,.18);padding:8px;opacity:0;visibility:hidden;transform:translateY(-6px);transition:all .22s cubic-bezier(.16,1,.3,1);z-index:20;}
-      .vp-share-dd.open{opacity:1;visibility:visible;transform:translateY(0);}
-      .vp-sm-opt{display:flex;align-items:center;gap:11px;padding:10px 14px;border-radius:11px;border:none;background:none;cursor:pointer;transition:background .15s;text-decoration:none;font-family:inherit;font-size:.82rem;font-weight:600;color:#1A2744;width:100%;text-align:left;white-space:nowrap;}
-      .vp-sm-opt:hover{background:rgba(26,39,68,.05);}
-      .vp-sm-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-      @media(max-width:700px){
-        .vp-share-dd{position:fixed;top:auto;bottom:0;left:0;right:0;border-radius:22px 22px 0 0;padding:20px 16px 28px;min-width:unset;transform:translateY(100%);box-shadow:0 -8px 40px rgba(26,39,68,.2);}
-        .vp-share-dd.open{transform:translateY(0);}
-        .vp-share-dd::before{content:'';position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:-1;opacity:0;transition:opacity .2s;}
-        .vp-share-dd.open::before{opacity:1;}
-      }
+      /* ── Share Inline Buttons ── */
+      .vp-share-wrap{position:relative;display:inline-flex;height:36px;}
+      .vp-share-main{display:inline-flex;align-items:center;gap:5px;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.16);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,.25);color:rgba(255,255,255,.9);font-size:.74rem;font-weight:600;cursor:pointer;transition:all .3s;font-family:inherit;white-space:nowrap;position:absolute;right:0;top:0;}
+      .vp-share-main:hover{background:rgba(255,255,255,.28);}
+      .vp-share-wrap:hover .vp-share-main,.vp-share-wrap.touch-open .vp-share-main{opacity:0;pointer-events:none;transform:scale(.9);}
+      .vp-share-icons{display:flex;position:absolute;right:0;top:0;height:36px;}
+      .vp-share-icon-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;transition:all .25s cubic-bezier(.16,1,.3,1);opacity:0;transform:translateX(8px) scale(.8);text-decoration:none;color:#fff;}
+      .vp-share-icon-btn:nth-child(1){transition-delay:0ms;}
+      .vp-share-icon-btn:nth-child(2){transition-delay:40ms;}
+      .vp-share-icon-btn:nth-child(3){transition-delay:80ms;}
+      .vp-share-icon-btn:nth-child(4){transition-delay:120ms;}
+      .vp-share-icon-btn:nth-child(5){transition-delay:160ms;}
+      .vp-share-wrap:hover .vp-share-icon-btn,.vp-share-wrap.touch-open .vp-share-icon-btn{opacity:1;transform:translateX(0) scale(1);}
+      .vp-share-icon-btn:hover{transform:translateY(-2px) scale(1.12) !important;}
+      .vp-si-wa{background:#25D366;border-radius:999px 0 0 999px;}
+      .vp-si-fb{background:#1877F2;}
+      .vp-si-ig{background:linear-gradient(135deg,#F58529,#DD2A7B,#8134AF);}
+      .vp-si-x{background:#000;}
+      .vp-si-cp{background:#718096;border-radius:0 999px 999px 0;}
     `;
     document.head.appendChild(s);
   }
@@ -1649,9 +1655,9 @@ function renderVenuePage(venueId) {
             <span id="vp-save-icon">${isSaved?'♥':'♡'}</span>
             <span id="vp-save-label">${isSaved?'Kaydedildi':'Kaydet'}</span>
           </button>
-          <div class="vp-share-wrap" id="vp-share-wrap" onmouseleave="if(window.innerWidth>768)vpShareClose()">
-            <button class="vp-act-btn" id="vp-share-btn" onclick="vpShare()" onmouseenter="if(window.innerWidth>768)vpShareOpen()">↑ <span>Paylaş</span></button>
-            <div class="vp-share-dd" id="vp-share-dd"></div>
+          <div class="vp-share-wrap" id="vp-share-wrap" onclick="if(window.innerWidth<=768)this.classList.toggle('touch-open')">
+            <button class="vp-share-main">↑ Paylaş</button>
+            <div class="vp-share-icons" id="vp-share-icons"></div>
           </div>
         </div>
       </div>
@@ -1915,51 +1921,20 @@ function renderVenuePage(venueId) {
     if (window.updateSaveNavCount) window.updateSaveNavCount();
   };
 
-  const shareMenuHTML = (() => {
+  /* ── Share icons ── */
+  (function() {
     const url = window.location.href;
-    const text = v.title + ' — Assos\'u Kesfet';
+    const text = v.title + ' - Assos\'u Kesfet';
     const waText = v.title + ' - Assos\'u Kesfet\n' + v.location + '\n\n' + url;
-    const waUrl = 'https://wa.me/?text=' + encodeURIComponent(waText);
-    const fbUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
-    const xUrl = 'https://x.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url);
-    return `
-      <a href="${waUrl}" target="_blank" rel="noopener" class="vp-sm-opt">
-        <span class="vp-sm-icon" style="background:#25D366;"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg></span>
-        <span>WhatsApp</span>
-      </a>
-      <a href="${fbUrl}" target="_blank" rel="noopener" class="vp-sm-opt">
-        <span class="vp-sm-icon" style="background:#1877F2;"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></span>
-        <span>Facebook</span>
-      </a>
-      <a href="https://www.instagram.com/" target="_blank" rel="noopener" class="vp-sm-opt">
-        <span class="vp-sm-icon" style="background:linear-gradient(135deg,#F58529,#DD2A7B,#8134AF,#515BD4);"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></span>
-        <span>Instagram</span>
-      </a>
-      <a href="${xUrl}" target="_blank" rel="noopener" class="vp-sm-opt">
-        <span class="vp-sm-icon" style="background:#000;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span>
-        <span>X</span>
-      </a>
-      <button class="vp-sm-opt" onclick="navigator.clipboard.writeText(window.location.href).then(()=>{this.querySelector('span:last-child').textContent='Kopyalandı!';setTimeout(()=>vpShareClose(),800)})">
-        <span class="vp-sm-icon" style="background:#718096;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></span>
-        <span>Bağlantıyı Kopyala</span>
-      </button>
-    `;
+    const icons = document.getElementById('vp-share-icons');
+    if (!icons) return;
+    icons.innerHTML =
+      '<a href="https://wa.me/?text=' + encodeURIComponent(waText) + '" target="_blank" rel="noopener" class="vp-share-icon-btn vp-si-wa" title="WhatsApp"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg></a>' +
+      '<a href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url) + '" target="_blank" rel="noopener" class="vp-share-icon-btn vp-si-fb" title="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>' +
+      '<a href="https://www.instagram.com/" target="_blank" rel="noopener" class="vp-share-icon-btn vp-si-ig" title="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>' +
+      '<a href="https://x.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url) + '" target="_blank" rel="noopener" class="vp-share-icon-btn vp-si-x" title="X"><svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>' +
+      '<button class="vp-share-icon-btn vp-si-cp" title="Kopyala" onclick="event.stopPropagation();navigator.clipboard.writeText(window.location.href).then(()=>{this.innerHTML=\'✓\';setTimeout(()=>{this.innerHTML=\'<svg width=14 height=14 viewBox=&quot;0 0 24 24&quot; fill=none stroke=#fff stroke-width=2><rect x=9 y=9 width=13 height=13 rx=2/><path d=&quot;M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1&quot;/></svg>\'},1500)})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>';
   })();
-
-  window.vpShareOpen = function () {
-    const dd = document.getElementById('vp-share-dd');
-    if (!dd.innerHTML) dd.innerHTML = shareMenuHTML;
-    dd.classList.add('open');
-  };
-  window.vpShareClose = function () {
-    const dd = document.getElementById('vp-share-dd');
-    dd.classList.remove('open');
-  };
-  window.vpShare = function () {
-    const dd = document.getElementById('vp-share-dd');
-    if (!dd.innerHTML) dd.innerHTML = shareMenuHTML;
-    dd.classList.toggle('open');
-  };
 
   window.vpSendRezervasyon = function () {
     const name     = (document.getElementById('rezv-name')?.value || '').trim();
