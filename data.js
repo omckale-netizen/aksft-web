@@ -1150,7 +1150,8 @@ window.DATA = {
           "days": "Diğer Günler Kapalı",
           "hours": ""
         }
-      ]
+      ],
+      "active": false
     }
   ],
   "villages": [
