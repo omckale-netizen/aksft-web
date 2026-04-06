@@ -386,6 +386,17 @@ function renderNav(opts = {}) {
       .sd-venue-remove { width:26px; height:26px; border-radius:50%; background:rgba(26,39,68,.06); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:.7rem; color:#A0AEC0; transition:all .2s; flex-shrink:0; }
       .sd-venue-remove:hover { background:rgba(196,82,26,.1); color:#C4521A; }
       .sd-footer { padding:14px 14px 20px; border-top:1px solid rgba(26,39,68,.07); }
+      .sd-sync{background:rgba(26,39,68,.03);border:1px solid rgba(26,39,68,.07);border-radius:12px;padding:14px;}
+      .sd-sync-row{display:flex;align-items:center;gap:8px;}
+      .sd-sync-label{font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(26,39,68,.4);}
+      .sd-sync-code{font-family:'Plus Jakarta Sans',monospace;font-weight:800;font-size:1rem;color:#1A2744;letter-spacing:.15em;cursor:pointer;padding:4px 10px;border-radius:8px;background:rgba(196,82,26,.06);border:1px solid rgba(196,82,26,.12);position:relative;transition:all .15s;}
+      .sd-sync-code:hover{background:rgba(196,82,26,.12);}
+      .sd-sync-code[data-tip]:not([data-tip=""])::after{content:attr(data-tip);position:absolute;top:-28px;left:50%;transform:translateX(-50%);background:#1A2744;color:#fff;padding:3px 10px;border-radius:6px;font-size:.65rem;font-weight:600;white-space:nowrap;letter-spacing:0;}
+      .sd-sync-hint{font-size:.68rem;color:rgba(26,39,68,.35);margin-top:6px;}
+      .sd-sync-inp{flex:1;padding:8px 12px;border:1.5px solid rgba(26,39,68,.1);border-radius:8px;font-size:.82rem;font-family:inherit;outline:none;letter-spacing:.1em;text-transform:uppercase;}
+      .sd-sync-inp:focus{border-color:#C4521A;}
+      .sd-sync-load{padding:8px 14px;border:none;border-radius:8px;background:#1A2744;color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit;transition:background .2s;}
+      .sd-sync-load:hover{background:#2A3A5A;}
       .sd-clear-btn { width:100%; padding:10px; border-radius:12px; border:1.5px solid rgba(26,39,68,.1); background:transparent; color:#718096; font-size:.78rem; font-weight:600; cursor:pointer; transition:all .2s; font-family:inherit; }
       .sd-clear-btn:hover { border-color:rgba(196,82,26,.3); color:#C4521A; background:rgba(196,82,26,.04); }
       .sd-go-btn { display:flex; align-items:center; justify-content:center; gap:6px; width:100%; padding:11px; border-radius:12px; background:#1A2744; color:#fff; font-size:.8rem; font-weight:700; text-decoration:none; margin-top:8px; transition:background .2s; }
@@ -408,8 +419,21 @@ function renderNav(opts = {}) {
         </div>
         <div class="sd-body" id="sd-body"></div>
         <div class="sd-footer" id="sd-footer" style="display:none;">
-          <button class="sd-clear-btn" onclick="clearAllSaves()">Tümünü Temizle</button>
-          <a class="sd-go-btn" id="sd-go-link" href="mekanlar.html">Mekanlar Sayfasına Git →</a>
+          <div class="sd-sync" id="sd-sync">
+            <div class="sd-sync-row">
+              <span class="sd-sync-label">Favori Kodunuz</span>
+              <span class="sd-sync-code" id="sd-sync-code" onclick="navigator.clipboard.writeText(this.textContent).then(()=>{this.dataset.tip='Kopyalandi!';setTimeout(()=>this.dataset.tip='',1500)})">—</span>
+            </div>
+            <div class="sd-sync-hint">Bu kodu paylasin veya baska cihazda kullanin</div>
+            <div class="sd-sync-row" style="margin-top:8px;">
+              <input type="text" id="sd-sync-input" class="sd-sync-inp" placeholder="Kod girin..." maxlength="8">
+              <button class="sd-sync-load" onclick="loadFavCode()">Yukle</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button class="sd-clear-btn" onclick="clearAllSaves()" style="flex:1">Tumunu Temizle</button>
+            <a class="sd-go-btn" id="sd-go-link" href="mekanlar.html" style="flex:1;text-align:center">Mekanlar →</a>
+          </div>
         </div>
       </div>
     `);
@@ -566,7 +590,81 @@ function renderNav(opts = {}) {
     }).join('');
 
     if (footer) footer.style.display = 'block';
+    // Favori kodunu göster ve senkronla
+    const codeEl = document.getElementById('sd-sync-code');
+    if (codeEl) codeEl.textContent = getFavCode();
+    window.syncFavToFirebase();
   }
+
+  /* ── Favori Senkronizasyon ── */
+  const FAV_CODE_KEY = 'assos_fav_code';
+
+  function generateFavCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    return code;
+  }
+
+  function getFavCode() {
+    let code = localStorage.getItem(FAV_CODE_KEY);
+    if (!code) {
+      code = generateFavCode();
+      localStorage.setItem(FAV_CODE_KEY, code);
+    }
+    return code;
+  }
+
+  // Favorileri Firebase'e kaydet
+  window.syncFavToFirebase = function() {
+    if (typeof firebase === 'undefined' || !firebase.firestore) return;
+    const code = getFavCode();
+    let saved;
+    try { saved = JSON.parse(localStorage.getItem(SD_KEY) || '[]'); } catch { saved = []; }
+    firebase.firestore().collection('favorites').doc(code).set({
+      venues: saved,
+      updatedAt: new Date().toISOString()
+    }, { merge: true }).catch(() => {});
+    // Kodu göster
+    const codeEl = document.getElementById('sd-sync-code');
+    if (codeEl) codeEl.textContent = code;
+  };
+
+  // Kod ile favorileri yükle
+  window.loadFavCode = async function() {
+    const input = document.getElementById('sd-sync-input');
+    const code = (input?.value || '').trim().toUpperCase();
+    if (!code || code.length < 4) { alert('Gecerli bir kod girin.'); return; }
+    if (typeof firebase === 'undefined' || !firebase.firestore) { alert('Baglanti hatasi.'); return; }
+    try {
+      const doc = await firebase.firestore().collection('favorites').doc(code).get();
+      if (!doc.exists) { alert('Bu kodla eslesen favori bulunamadi.'); return; }
+      const data = doc.data();
+      if (data.venues && Array.isArray(data.venues)) {
+        localStorage.setItem(SD_KEY, JSON.stringify(data.venues));
+        localStorage.setItem(FAV_CODE_KEY, code);
+        renderSaveDrawer();
+        window.updateSaveNavCount();
+        if (input) input.value = '';
+        const codeEl = document.getElementById('sd-sync-code');
+        if (codeEl) codeEl.textContent = code;
+      }
+    } catch(err) {
+      alert('Yukleme hatasi: ' + err.message);
+    }
+  };
+
+  // removeSave ve clearAllSaves sonrası senkron
+  const origRemoveSave = window.removeSave;
+  window.removeSave = function(id, e) {
+    origRemoveSave(id, e);
+    setTimeout(() => window.syncFavToFirebase(), 300);
+  };
+  const origClearAll = window.clearAllSaves;
+  window.clearAllSaves = function() {
+    origClearAll();
+    setTimeout(() => window.syncFavToFirebase(), 300);
+  };
 
   /* Initialize count */
   window.updateSaveNavCount();
@@ -2019,6 +2117,7 @@ function renderVenuePage(venueId) {
       btn.classList.toggle('saved', isSavedNow);
     }
     if (window.updateSaveNavCount) window.updateSaveNavCount();
+    if (window.syncFavToFirebase) window.syncFavToFirebase();
   };
 
   /* ── Share dropdown ── */
