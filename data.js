@@ -687,7 +687,7 @@ window.DATA = {
   "venues": [
     {
       "id": "behram-kafe",
-      "featured": true,
+      "featured": false,
       "title": "Behram Kafe",
       "emoji": "☕",
       "category": "kafe",
