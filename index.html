@@ -690,50 +690,70 @@
       max-width: 420px;
       margin-bottom: 36px;
     }
+    .hero-search-area { max-width: 560px; width: 100%; margin: 0 auto; position: relative; }
     .hero-search-wrap {
-      max-width: 520px;
       width: 100%;
-      margin: 0 auto;
-      background: rgba(255,255,255,.07);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255,255,255,.13);
-      border-radius: 18px;
-      padding: 5px 5px 5px 18px;
+      background: rgba(255,255,255,.08);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1.5px solid rgba(255,255,255,.12);
+      border-radius: 16px;
+      padding: 6px 6px 6px 20px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      box-shadow: 0 8px 40px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.08);
+      gap: 12px;
+      box-shadow: 0 12px 48px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.1);
       transition: border-color .3s, box-shadow .3s;
     }
     .hero-search-wrap:focus-within {
-      border-color: rgba(212,147,90,.45);
-      box-shadow: 0 8px 40px rgba(0,0,0,.22), 0 0 0 4px rgba(212,147,90,.1), inset 0 1px 0 rgba(255,255,255,.08);
+      border-color: rgba(212,147,90,.5);
+      box-shadow: 0 12px 48px rgba(0,0,0,.25), 0 0 0 4px rgba(212,147,90,.12), inset 0 1px 0 rgba(255,255,255,.1);
     }
+    .hero-search-wrap svg.hs-icon { flex-shrink: 0; opacity: .4; transition: opacity .2s; }
+    .hero-search-wrap:focus-within svg.hs-icon { opacity: .7; }
     .hero-search-wrap input {
       flex: 1; min-width: 0;
       background: transparent; border: none; outline: none;
       color: var(--cream);
-      font-family: 'DM Sans', sans-serif;
-      font-size: .9rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: .92rem;
+      font-weight: 500;
       caret-color: var(--amber);
     }
-    .hero-search-wrap input::placeholder { color: rgba(245,237,224,.3); }
+    .hero-search-wrap input::placeholder { color: rgba(245,237,224,.28); }
     .hero-search-btn {
       flex-shrink: 0;
       background: var(--terra);
       color: #fff;
       border: none;
-      border-radius: 12px;
-      padding: 10px 22px;
-      font-family: 'DM Sans', sans-serif;
+      border-radius: 11px;
+      padding: 11px 24px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: .82rem;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      transition: background .2s, transform .2s;
+      transition: background .2s, transform .2s, box-shadow .2s;
       white-space: nowrap;
     }
-    .hero-search-btn:hover { background: var(--terra-light); transform: translateY(-1px); }
+    .hero-search-btn:hover { background: var(--terra-light); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(196,82,26,.35); }
+    .hero-search-shortcuts {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 14px;
+    }
+    .hero-shortcut {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 12px; border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      color: rgba(245,237,224,.45);
+      font-size: .7rem; font-weight: 600;
+      cursor: pointer; transition: all .2s;
+      text-decoration: none; white-space: nowrap;
+    }
+    .hero-shortcut:hover { background: rgba(255,255,255,.12); color: rgba(245,237,224,.8); border-color: rgba(255,255,255,.18); }
 
 
     /* Bottom glass nav tiles */
@@ -873,10 +893,19 @@
         </p>
 
         <!-- Search -->
-        <div class="hero-search-wrap">
-          <svg width="15" height="15" fill="none" stroke="rgba(245,237,224,0.35)" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input type="text" id="hero-search-input" placeholder="Assos'ta keşfetmek istediğin yeri ara…" aria-label="Keşif arama">
-          <button class="hero-search-btn" aria-label="Arama yap" onclick="heroSearchSubmit()">Keşfet →</button>
+        <div class="hero-search-area" data-search-wrapper>
+          <div class="hero-search-wrap">
+            <svg class="hs-icon" width="16" height="16" fill="none" stroke="rgba(245,237,224,.5)" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" id="hero-search-input" placeholder="Nereyi keşfetmek istersin?" aria-label="Keşif arama" autocomplete="off">
+            <button class="hero-search-btn" aria-label="Arama yap" onclick="heroSearchSubmit()">Keşfet →</button>
+          </div>
+          <div class="hero-search-shortcuts">
+            <a class="hero-shortcut" onclick="heroQuickSearch('Athena Tapınağı')">🏛 Athena Tapınağı</a>
+            <a class="hero-shortcut" onclick="heroQuickSearch('Kadırga')">🌊 Kadırga Koyu</a>
+            <a class="hero-shortcut" onclick="heroQuickSearch('kahvaltı')">🥚 Kahvaltı</a>
+            <a class="hero-shortcut" onclick="heroQuickSearch('gün batımı')">🌅 Gün Batımı</a>
+            <a class="hero-shortcut" onclick="heroQuickSearch('Babakale')">⚓ Babakale</a>
+          </div>
         </div>
 
       </div>
@@ -1610,9 +1639,16 @@
     const input = document.getElementById('hero-search-input');
     if (!input) return;
     const q = input.value.trim();
-    if (!q) return;
-    // trigger Enter key behavior on the input
+    if (!q) { input.focus(); return; }
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+  }
+
+  function heroQuickSearch(term) {
+    const input = document.getElementById('hero-search-input');
+    if (!input) return;
+    input.value = term;
+    input.focus();
+    input.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
   /* ── RENDER PLACES ── */

@@ -849,20 +849,47 @@ function initSearch(inputId, opts = {}) {
     dropdown.classList.add('open');
   }
 
-  input.addEventListener('input', e => renderDropdown(e.target.value.trim()));
+  let activeIdx = -1;
+
+  function highlightActive() {
+    const items = dropdown.querySelectorAll('.search-result-item');
+    items.forEach((el, i) => {
+      el.style.background = i === activeIdx ? 'rgba(255,255,255,.08)' : '';
+    });
+  }
+
+  input.addEventListener('input', e => { activeIdx = -1; renderDropdown(e.target.value.trim()); });
   input.addEventListener('keydown', e => {
-    if (e.key === 'Escape') dropdown.classList.remove('open');
+    const items = dropdown.querySelectorAll('.search-result-item');
+    if (e.key === 'Escape') { dropdown.classList.remove('open'); activeIdx = -1; }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeIdx = Math.min(activeIdx + 1, items.length - 1);
+      highlightActive();
+      if (items[activeIdx]) items[activeIdx].scrollIntoView({ block: 'nearest' });
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIdx = Math.max(activeIdx - 1, 0);
+      highlightActive();
+      if (items[activeIdx]) items[activeIdx].scrollIntoView({ block: 'nearest' });
+    }
     if (e.key === 'Enter') {
       e.preventDefault();
-      const q = input.value.trim().toLowerCase();
-      const results = searchAll(q);
-      if (results.length > 0) window.location.href = getUrl(results[0].type, results[0].id);
-      else { dropdown.classList.remove('open'); }
+      const items2 = dropdown.querySelectorAll('.search-result-item');
+      if (activeIdx >= 0 && items2[activeIdx]) {
+        window.location.href = items2[activeIdx].href;
+      } else {
+        const q = input.value.trim().toLowerCase();
+        const results = searchAll(q);
+        if (results.length > 0) window.location.href = getUrl(results[0].type, results[0].id);
+        else { dropdown.classList.remove('open'); }
+      }
     }
   });
 
   document.addEventListener('click', e => {
-    if (!wrapper.contains(e.target)) dropdown.classList.remove('open');
+    if (!wrapper.contains(e.target)) { dropdown.classList.remove('open'); activeIdx = -1; }
   });
 }
 
