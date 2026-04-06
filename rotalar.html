@@ -813,6 +813,12 @@ function pageInit() {
   renderGrid();
   const initId = new URLSearchParams(window.location.search).get('id');
   if (initId) setTimeout(() => openRoute(initId), 100);
+
+  // Expose functions to global scope for onclick handlers
+  window.filterRoutes = filterRoutes;
+  window.openRoute = openRoute;
+  window.closeRoute = closeRoute;
+  window.shareRoute = shareRoute;
 }
 document.addEventListener('dataReady', pageInit);
 </script>

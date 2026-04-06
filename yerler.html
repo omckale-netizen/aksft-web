@@ -357,6 +357,11 @@ function pageInit() {
     if (e.target === document.getElementById('place-modal')) closeModal();
   });
 
+  // Expose functions to global scope for onclick handlers
+  window.filterPlaces = filterPlaces;
+  window.openPlace = openPlace;
+  window.closeModal = closeModal;
+
   renderGrid();
 }
 document.addEventListener('dataReady', pageInit);

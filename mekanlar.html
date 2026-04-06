@@ -928,6 +928,14 @@ function pageInit() {
   /* ?id= param — navigate to detail page */
   const paramId = getParam('id');
   if (paramId && /^[a-z0-9-]+$/.test(paramId)) window.location.replace('mekanlar/' + paramId + '.html');
+
+  // Expose functions to global scope for onclick handlers
+  window.featuredNav = featuredNav;
+  window.clearFilters = clearFilters;
+  window.setCat = setCat;
+  window.setStatus = setStatus;
+  window.toggleSave = toggleSave;
+  window.toggleSavedView = toggleSavedView;
 }
 document.addEventListener('dataReady', pageInit);
 </script>

@@ -904,6 +904,11 @@ function pageInit() {
     if (paramId) setTimeout(() => openVillage(paramId), 200);
   }
 
+  // Expose functions to global scope for onclick handlers
+  window.openVillage = openVillage;
+  window.closeModal = closeModal;
+  window.filterAllVillages = filterAllVillages;
+
   init();
 }
 document.addEventListener('dataReady', pageInit);

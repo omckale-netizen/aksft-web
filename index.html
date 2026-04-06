@@ -1928,6 +1928,13 @@ function pageInit() {
     const stayGrid = document.getElementById('hp-stay-grid');
     if (stayGrid) stayGrid.innerHTML = stayVenues.map(venueCard).join('');
   })();
+
+  // Expose functions to global scope for onclick handlers
+  window.heroSearchSubmit = heroSearchSubmit;
+  window.heroQuickSearch = heroQuickSearch;
+  window.filterPlaces = filterPlaces;
+  window.filterVenues = filterVenues;
+  window.toggleGuide = toggleGuide;
 }
 document.addEventListener('dataReady', pageInit);
 </script>

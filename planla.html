@@ -750,6 +750,13 @@ function pageInit() {
     goStep(1);
     window.scrollTo({ top: document.getElementById('wizard-section').offsetTop - 80, behavior: 'smooth' });
   }
+
+  // Global scope'a aktar (onclick handler'lar icin)
+  window.goStep = goStep;
+  window.pickCard = pickCard;
+  window.pickMulti = pickMulti;
+  window.generatePlan = generatePlan;
+  window.resetPlan = resetPlan;
 }
 document.addEventListener('dataReady', pageInit);
 </script>
