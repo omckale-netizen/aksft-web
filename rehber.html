@@ -582,8 +582,7 @@ function pageInit() {
     });
   });
 
-if (window.DATA) pageInit();
-else document.addEventListener('dataReady', pageInit);
+document.addEventListener('dataReady', pageInit);
 </script>
 </body>
 </html>

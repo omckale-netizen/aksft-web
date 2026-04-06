@@ -610,8 +610,7 @@ function pageInit() {
     if (DATA.places)   document.getElementById('hk-stat-yerler').textContent   = DATA.places.length + '+';
   })();
 }
-if (window.DATA) pageInit();
-else document.addEventListener('dataReady', pageInit);
+document.addEventListener('dataReady', pageInit);
 </script>
 </body>
 </html>

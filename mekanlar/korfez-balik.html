@@ -20,8 +20,7 @@ function pageInit() {
   renderFooter({ basePath: '../' });
   renderVenuePage('korfez-balik');
 }
-if (window.DATA) pageInit();
-else document.addEventListener('dataReady', pageInit);
+document.addEventListener('dataReady', pageInit);
 </script>
 </body>
 </html>

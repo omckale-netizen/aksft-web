@@ -1929,8 +1929,7 @@ function pageInit() {
     if (stayGrid) stayGrid.innerHTML = stayVenues.map(venueCard).join('');
   })();
 }
-if (window.DATA) pageInit();
-else document.addEventListener('dataReady', pageInit);
+document.addEventListener('dataReady', pageInit);
 </script>
 
 </body>

@@ -751,8 +751,7 @@ function pageInit() {
     window.scrollTo({ top: document.getElementById('wizard-section').offsetTop - 80, behavior: 'smooth' });
   }
 }
-if (window.DATA) pageInit();
-else document.addEventListener('dataReady', pageInit);
+document.addEventListener('dataReady', pageInit);
 </script>
 </body>
 </html>

@@ -929,8 +929,7 @@ function pageInit() {
   const paramId = getParam('id');
   if (paramId && /^[a-z0-9-]+$/.test(paramId)) window.location.replace('mekanlar/' + paramId + '.html');
 }
-if (window.DATA) pageInit();
-else document.addEventListener('dataReady', pageInit);
+document.addEventListener('dataReady', pageInit);
 </script>
 </body>
 </html>
