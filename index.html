@@ -1916,12 +1916,13 @@
 
     /* 1. Yeme-İçme (kafe, restoran, kahvalti, beach, iskele) */
     const foodCats = ['kafe', 'restoran', 'kahvalti', 'beach', 'iskele'];
-    const foodVenues = dailySorted(DATA.venues.filter(v => foodCats.includes(v.category)));
+    const activeVenues = DATA.venues.filter(v => v.active !== false);
+    const foodVenues = dailySorted(activeVenues.filter(v => foodCats.includes(v.category)));
     const foodGrid = document.getElementById('hp-food-grid');
     if (foodGrid) foodGrid.innerHTML = foodVenues.map(venueCard).join('');
 
     /* 2. Konaklama */
-    const stayVenues = dailySorted(DATA.venues.filter(v => v.category === 'konaklama'));
+    const stayVenues = dailySorted(activeVenues.filter(v => v.category === 'konaklama'));
     const stayGrid = document.getElementById('hp-stay-grid');
     if (stayGrid) stayGrid.innerHTML = stayVenues.map(venueCard).join('');
   })();

@@ -582,7 +582,7 @@
   })();
 
   /* Tüm mekanlar (data.js'deki tüm venues) */
-  const ALL_VENUES = DATA.venues.map(v => {
+  const ALL_VENUES = DATA.venues.filter(v => v.active !== false).map(v => {
     const meta = VMETA[v.id] || { popular:false, gradient:'linear-gradient(160deg,#1A2744,#2A3A5A)' };
     return { ...v, ...meta, featured: !!v.featured };
   });

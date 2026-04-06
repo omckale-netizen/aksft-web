@@ -358,6 +358,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
               <option value="iskele">⚓ İskeleler</option>
             </select>
             <button class="btn btn-secondary btn-sm" id="venue-featured-filter" onclick="toggleFeaturedFilter()" style="white-space:nowrap">⭐ Öne Çıkanlar</button>
+            <select id="venue-active-filter" onchange="renderVenueTable()" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:#fff;color:var(--text);cursor:pointer">
+              <option value="all">Tümü</option>
+              <option value="active" selected>✅ Aktif</option>
+              <option value="inactive">⏸ Pasif</option>
+            </select>
           </div>
           <button class="btn btn-primary" onclick="openVenueModal()" style="white-space:nowrap">+ Yeni Mekan Ekle</button>
         </div>
@@ -370,6 +375,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
                 <th>Kategori</th>
                 <th>Konum</th>
                 <th>⭐</th>
+                <th>Aktif</th>
                 <th>Durum</th>
                 <th>Islemler</th>
               </tr>
@@ -1228,29 +1234,45 @@ function toggleFeatured(id, e) {
   showToast(v.featured ? '⭐ "' + v.title + '" one cikanlara eklendi.' : '"' + v.title + '" one cikanlardan kaldirildi.', 'success');
 }
 
+function toggleActive(id, e) {
+  e.stopPropagation();
+  const v = draftData.venues.find(x => x.id === id);
+  if (!v) return;
+  v.active = v.active === false ? true : false;
+  saveDraft();
+  renderVenueTable();
+  showToast(v.active !== false ? '✅ "' + v.title + '" aktif edildi.' : '⏸ "' + v.title + '" pasife alindi.', 'success');
+}
+
 function renderVenueTable() {
   const q = (document.getElementById('venue-search')?.value || '').toLowerCase();
   const catFilter = document.getElementById('venue-cat-filter')?.value || 'all';
+  const activeFilter = document.getElementById('venue-active-filter')?.value || 'all';
   const catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvalti',konaklama:'Konaklama',beach:'Beach',iskele:'Iskele'};
   let venues = draftData.venues || [];
   if (q) venues = venues.filter(v => v.title.toLowerCase().includes(q) || (v.category||'').toLowerCase().includes(q) || (v.location||'').toLowerCase().includes(q));
   if (catFilter !== 'all') venues = venues.filter(v => v.category === catFilter);
   if (showFeaturedOnly) venues = venues.filter(v => v.featured);
+  if (activeFilter === 'active') venues = venues.filter(v => v.active !== false);
+  if (activeFilter === 'inactive') venues = venues.filter(v => v.active === false);
 
   document.getElementById('venue-tbody').innerHTML = venues.length === 0
-    ? '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted)">Mekan bulunamadi.</td></tr>'
+    ? '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-muted)">Mekan bulunamadi.</td></tr>'
     : venues.map(v => {
       const s = getVenueStatus(v);
       const sBadge = s === true ? '<span class="badge badge-open">Acik</span>'
                     : s === false ? '<span class="badge badge-closed">Kapali</span>'
                     : '<span class="badge" style="color:var(--text-muted)">-</span>';
       const starStyle = v.featured ? 'color:#D4935A;font-size:1.1rem;cursor:pointer' : 'color:var(--text-muted);font-size:1.1rem;cursor:pointer;opacity:.4';
-      return `<tr>
+      const isActive = v.active !== false;
+      const rowStyle = isActive ? '' : 'opacity:.5;';
+      return `<tr style="${rowStyle}">
         <td class="emoji-col">${v.emoji || ''}</td>
-        <td><strong>${v.title}</strong></td>
+        <td><strong>${v.title}</strong>${!isActive ? ' <span style="font-size:.65rem;color:var(--red);font-weight:700">PASIF</span>' : ''}</td>
         <td><span class="badge badge-cat">${catLabels[v.category] || v.category || '-'}</span></td>
         <td>${v.location || '-'}</td>
         <td><span style="${starStyle}" onclick="toggleFeatured('${v.id}',event)" title="${v.featured ? 'Öne çıkanlardan kaldır' : 'Öne çıkanlara ekle'}">${v.featured ? '★' : '☆'}</span></td>
+        <td><button class="btn-icon" onclick="toggleActive('${v.id}',event)" title="${isActive ? 'Pasife al' : 'Aktif et'}" style="font-size:1rem;${isActive ? 'color:var(--green)' : 'color:var(--text-muted)'}">${isActive ? '✅' : '⏸'}</button></td>
         <td>${sBadge}</td>
         <td>
           <a class="btn-icon" href="mekanlar/${v.id}.html" target="_blank" title="Mekani Gor" style="text-decoration:none">&#128065;</a>
