@@ -779,9 +779,16 @@ async function ghCommitFile(filePath, content, message) {
   } catch(e) {}
 
   // Base64 encode
-  const base64 = typeof content === 'string'
-    ? btoa(unescape(encodeURIComponent(content)))
-    : await blobToBase64(content);
+  let base64;
+  if (typeof content === 'string') {
+    // Metin dosyası (data.js) — UTF-8 safe base64
+    const encoder = new TextEncoder();
+    const bytes = encoder.encode(content);
+    base64 = arrayBufferToBase64(bytes);
+  } else {
+    // Binary dosya (görsel)
+    base64 = await blobToBase64(content);
+  }
 
   const body = {
     message: message || 'Admin panel guncelleme',
@@ -803,10 +810,22 @@ async function ghCommitFile(filePath, content, message) {
   return await res.json();
 }
 
+function arrayBufferToBase64(bytes) {
+  let binary = '';
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+
 function blobToBase64(blob) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.onloadend = () => {
+      const result = reader.result;
+      const base64 = result.substring(result.indexOf(',') + 1);
+      resolve(base64);
+    };
     reader.readAsDataURL(blob);
   });
 }
@@ -831,11 +850,15 @@ function saveDraft(showSuccess) {
 
 /* ── Görsel yükle: GitHub'a commit'le ── */
 function uploadImageToServer(blob, path) {
+  showToast('Gorsel yukleniyor...', 'success');
   return ghCommitFile(path, blob, 'Gorsel ekleme: ' + path)
-    .then(() => showToast('Gorsel yuklendi: ' + path.split('/').pop(), 'success'))
+    .then(() => {
+      showToast('Gorsel yuklendi! Deploy 10-30 sn icinde tamamlanir.', 'success');
+    })
     .catch(err => {
       showToast('Gorsel yukleme hatasi: ' + err.message, 'error');
       console.error('Upload hatasi:', err);
+      throw err;
     });
 }
 
