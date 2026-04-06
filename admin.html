@@ -1037,7 +1037,7 @@ function toggleFeatured(id, e) {
   v.featured = !v.featured;
   saveDraft();
   renderVenueTable();
-  showToast(v.featured ? '⭐ Öne çıkanlara eklendi.' : 'Öne çıkanlardan kaldırıldı.', 'success');
+  showToast(v.featured ? '⭐ "' + v.title + '" one cikanlara eklendi.' : '"' + v.title + '" one cikanlardan kaldirildi.', 'success');
 }
 
 function renderVenueTable() {
@@ -1065,7 +1065,8 @@ function renderVenueTable() {
         <td><span style="${starStyle}" onclick="toggleFeatured('${v.id}',event)" title="${v.featured ? 'Öne çıkanlardan kaldır' : 'Öne çıkanlara ekle'}">${v.featured ? '★' : '☆'}</span></td>
         <td>${sBadge}</td>
         <td>
-          <button class="btn-icon" title="Duzenle" onclick="openVenueModal('${v.id}')">&#9998;</button>
+          <a class="btn-icon" href="mekanlar/${v.id}.html" target="_blank" title="Mekani Gor" style="text-decoration:none">&#128065;</a>
+          <button class="btn-icon" title="Duzenle" onclick="openVenueModal('${v.id}')" style="margin-left:4px">&#9998;</button>
           <button class="btn-icon" title="Sil" onclick="confirmDeleteVenue('${v.id}')" style="margin-left:4px;color:var(--red)">&#128465;</button>
         </td>
       </tr>`;
@@ -1238,7 +1239,8 @@ function saveVenue(e) {
   saveDraft();
   closeVenueModal();
   renderVenueTable();
-  showToast(editingVenueId ? 'Mekan guncellendi.' : 'Yeni mekan eklendi.', 'success');
+  const toastMsg = editingVenueId ? '"' + venue.title + '" guncellendi.' : '"' + venue.title + '" eklendi.';
+  showToast(toastMsg, 'success');
 }
 
 /* ══════════════════════════════════════════════════
@@ -1254,7 +1256,7 @@ function confirmDeleteVenue(id) {
       draftData.venues = draftData.venues.filter(x => x.id !== id);
       saveDraft();
       renderVenueTable();
-      showToast('Mekan silindi.', 'success');
+      showToast('"' + v.title + '" silindi.', 'success');
     }
   );
 }
@@ -1451,7 +1453,7 @@ function savePlaceImage() {
   saveDraft();
   closePlaceImgModal();
   renderVPTable();
-  showToast('Gorsel ve konum kaydedildi.', 'success');
+  showToast('"' + p.title + '" gorseli kaydedildi.', 'success');
 }
 
 function removePlaceImage() {
@@ -1471,7 +1473,8 @@ function removePlaceImage() {
   document.getElementById('place-img-remove-btn').style.display = 'none';
   cropPosY = 50;
   updatePosLabel();
-  showToast('Gorsel kaldirildi.', 'success');
+  const pName = p ? p.title : '';
+  showToast('"' + pName + '" gorseli kaldirildi.', 'success');
 }
 
 /* ══════════════════════════════════════════════════
@@ -1818,7 +1821,7 @@ function botAddVenue() {
   document.getElementById('bot-name').value = '';
   document.getElementById('bot-location').value = '';
 
-  showToast('Mekan eklendi! Mekanlar sayfasından düzenleyebilirsiniz.', 'success');
+  showToast('"' + title + '" eklendi! Mekanlar sayfasindan duzenleyebilirsiniz.', 'success');
 }
 
 /* ══════════════════════════════════════════════════
@@ -2001,7 +2004,7 @@ function pbotAddPlace() {
   document.getElementById('pbot-location').value = '';
   pbotPendingImage = null;
 
-  showToast('Yer eklendi! Köyler & Yerler sayfasından görüntüleyebilirsiniz.', 'success');
+  showToast('"' + title + '" eklendi! Koyler & Yerler sayfasindan goruntuleyebilirsiniz.', 'success');
 }
 </script>
 </body>
