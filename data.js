@@ -1149,6 +1149,41 @@ window.DATA = {
           "hours": "Kapalı"
         }
       ]
+    },
+    {
+      "id": "kafe-meraa",
+      "title": "Kafe Meraa",
+      "emoji": "☕",
+      "category": "kafe",
+      "iconBg": "rgba(196,82,26,0.1)",
+      "tagBg": "rgba(196,82,26,0.1)",
+      "tagColor": "#C4521A",
+      "tagText": "Kafe",
+      "shortDesc": "Tatlım",
+      "description": "",
+      "location": "Cemaller Köyü",
+      "tags": [],
+      "keywords": [
+        "kafe",
+        "meraa",
+        "kafe"
+      ],
+      "hours": "",
+      "images": [],
+      "phone": "0542 724 35 26",
+      "address": "küme evleri no:1, 17860 Cemaller/Ayvacık/",
+      "website": "",
+      "featured": true,
+      "weeklyHours": [
+        {
+          "days": "Perşembe - Pazar",
+          "hours": "10:00 - 18:00"
+        },
+        {
+          "days": "Diğer Günler Kapalı",
+          "hours": ""
+        }
+      ]
     }
   ],
   "villages": [
