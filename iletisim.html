@@ -26,13 +26,13 @@
 </section>
 
 <!-- İçerik -->
-<section style="padding:0 24px 120px;background:var(--cream-light);margin-top:-40px;position:relative;z-index:2;">
+<section class="ct-section" style="padding:0 24px 80px;background:var(--cream-light);margin-top:-40px;position:relative;z-index:2;">
   <div style="max-width:900px;margin:0 auto;">
 
-    <div style="display:grid;grid-template-columns:1fr 340px;gap:32px;align-items:start;">
+    <div class="ct-layout" style="display:grid;grid-template-columns:1fr 340px;gap:32px;align-items:start;">
 
       <!-- Sol: Form -->
-      <div class="fade-up" style="background:#fff;border-radius:22px;padding:40px 36px;box-shadow:0 8px 32px rgba(26,39,68,.07);border:1px solid rgba(26,39,68,.05);">
+      <div class="fade-up ct-form-card" style="background:#fff;border-radius:22px;padding:40px 36px;box-shadow:0 8px 32px rgba(26,39,68,.07);border:1px solid rgba(26,39,68,.05);">
         <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.15rem;color:var(--navy);margin-bottom:4px;">Mesaj Gönderin</h3>
         <p style="font-size:.8rem;color:var(--text-mid);margin-bottom:28px;">Tüm alanları doldurarak bize ulaşabilirsiniz.</p>
 
@@ -162,6 +162,7 @@
 <style>
   @media(max-width:768px) {
     section:last-of-type .fade-up > div { grid-template-columns: 1fr !important; }
+    section:last-of-type { padding: 48px 24px !important; }
   }
 </style>
 
@@ -201,9 +202,11 @@
   .ct-card-val:hover{color:var(--terra);}
 
   @media(max-width:768px){
-    .ct-hero{padding:100px 24px 60px;}
-    section > div > div:first-child{grid-template-columns:1fr !important;}
+    .ct-hero{padding:100px 24px 50px;}
+    .ct-layout{grid-template-columns:1fr !important;gap:20px !important;}
     .ct-row{grid-template-columns:1fr !important;}
+    .ct-form-card{padding:28px 20px !important;}
+    .ct-section{padding-bottom:60px !important;}
   }
 </style>
 
