@@ -1201,12 +1201,12 @@
 <section id="mekanlar" style="padding:100px 0;background:var(--cream-mid);" aria-label="Mekanlar bölümü">
   <div style="max-width:1280px;margin:0 auto;padding:0 24px;">
 
-    <!-- Header -->
-    <div class="fade-up" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:20px;margin-bottom:48px;">
+    <!-- Ana Başlık -->
+    <div class="fade-up" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:20px;margin-bottom:56px;">
       <div>
         <p class="section-label" style="margin-bottom:10px;">Mekanlar</p>
         <div class="section-rule" style="margin-bottom:16px;"></div>
-        <h2 class="section-title" style="font-size:clamp(2rem,5vw,3rem);">Assos'ta<br>nerede ne yenir, içilir?</h2>
+        <h2 class="section-title" style="font-size:clamp(2rem,5vw,3rem);">Assos'ta</h2>
       </div>
       <a href="mekanlar.html" style="display:inline-flex;align-items:center;gap:8px;padding:13px 28px;border-radius:999px;background:#1A2744;color:#fff;font-size:.84rem;font-weight:700;text-decoration:none;transition:background .2s;white-space:nowrap;" onmouseover="this.style.background='#2A3A5A'" onmouseout="this.style.background='#1A2744'">
         Tüm Mekanları Keşfet
@@ -1214,25 +1214,25 @@
       </a>
     </div>
 
-    <!-- Öne Çıkan -->
-    <div class="fade-up" style="animation-delay:.1s;">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-        <span style="font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--terra);">⭐ Öne Çıkan</span>
-        <div style="flex:1;height:1px;background:rgba(26,39,68,.1);"></div>
+    <!-- 1. Nerede Ne Yenir, İçilir? -->
+    <div class="fade-up" style="margin-bottom:56px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+        <span style="width:28px;height:28px;border-radius:8px;background:rgba(196,82,26,.1);display:flex;align-items:center;justify-content:center;font-size:.85rem;">🍽</span>
+        <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.3rem;color:var(--navy);margin:0;">Nerede Ne Yenir, İçilir?</h3>
+        <div style="flex:1;height:1px;background:rgba(26,39,68,.08);"></div>
       </div>
-      <div class="hp-vc-grid" id="hp-featured-grid"></div>
+      <div class="hp-vc-grid" id="hp-food-grid"></div>
     </div>
 
-    <!-- Diğer Mekanlar (günlük değişir) -->
-    <div class="fade-up" style="margin-top:36px;animation-delay:.2s;">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-        <span style="font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#1A2744;">Diğer Mekanlar</span>
-        <div style="flex:1;height:1px;background:rgba(26,39,68,.1);"></div>
-        <span style="font-size:.6rem;font-weight:600;color:rgba(26,39,68,.38);display:flex;align-items:center;gap:4px;white-space:nowrap;">🔄 Her gün değişir</span>
+    <!-- 2. Konaklama -->
+    <div class="fade-up" style="animation-delay:.15s;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+        <span style="width:28px;height:28px;border-radius:8px;background:rgba(90,122,86,.1);display:flex;align-items:center;justify-content:center;font-size:.85rem;">🏨</span>
+        <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.3rem;color:var(--navy);margin:0;">Konaklama</h3>
+        <div style="flex:1;height:1px;background:rgba(26,39,68,.08);"></div>
       </div>
-      <div class="hp-vc-grid" id="hp-daily-grid"></div>
+      <div class="hp-vc-grid" id="hp-stay-grid"></div>
     </div>
-
 
   </div>
 </section>
@@ -1885,39 +1885,45 @@
 
     function venueCard(v) {
       const g = VENUE_G[v.id] || 'linear-gradient(160deg,#1A2744,#2A3A5A)';
-      return `<a class="hp-vc" href="mekanlar/${v.id}.html">
-        <div class="hp-vc-img" style="background:${g};">
-          <span style="font-size:2rem;line-height:1;">${v.emoji}</span>
-        </div>
-        <div class="hp-vc-body">
-          <span class="hp-vc-cat" style="background:${v.tagBg};color:${v.tagColor};">${v.tagText}</span>
-          <div class="hp-vc-name">${v.title}</div>
-          <div class="hp-vc-loc">📍 ${v.location}</div>
-        </div>
-      </a>`;
+      const hasImg = v.images && v.images.length > 0;
+      const featBadge = v.featured ? '<span style="position:absolute;top:8px;left:8px;z-index:2;font-size:.52rem;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:999px;background:rgba(212,147,90,.22);color:#D4935A;border:1px solid rgba(212,147,90,.35);backdrop-filter:blur(6px);display:inline-flex;align-items:center;gap:3px;">⭐ Öne Çıkan</span>' : '';
+      return '<a class="hp-vc" href="mekanlar/' + v.id + '.html">' +
+        '<div class="hp-vc-img" style="background:' + g + ';position:relative;overflow:hidden;">' +
+          (hasImg ? '<img src="' + v.images[0] + '" alt="' + v.title + '" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">' : '<span style="font-size:2rem;line-height:1;">' + v.emoji + '</span>') +
+          featBadge +
+        '</div>' +
+        '<div class="hp-vc-body">' +
+          '<span class="hp-vc-cat" style="background:' + v.tagBg + ';color:' + v.tagColor + ';">' + v.tagText + '</span>' +
+          '<div class="hp-vc-name">' + v.title + '</div>' +
+          '<div class="hp-vc-loc">📍 ' + v.location + '</div>' +
+        '</div>' +
+      '</a>';
     }
 
-    /* Öne çıkan — data.js'deki featured: true olanlar */
-    const featuredVenues = DATA.venues.filter(v => v.featured);
-    const featGrid = document.getElementById('hp-featured-grid');
-    if (featGrid) {
-      featGrid.innerHTML = featuredVenues.map(venueCard).join('');
+    /* Gün bazlı sıralama (öne çıkanlar başta) */
+    const seed = Math.floor(Date.now() / 86400000);
+    function seededHash(str) {
+      let h = seed;
+      for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) & 0xFFFFFF;
+      return h;
+    }
+    function dailySorted(arr) {
+      const featured = arr.filter(v => v.featured);
+      const rest = arr.filter(v => !v.featured);
+      const shuffled = [...rest].sort((a, b) => seededHash(a.id) - seededHash(b.id));
+      return [...featured, ...shuffled];
     }
 
-    /* Diğer mekanlar — gün bazlı rastgele seçim */
-    const dailyGrid = document.getElementById('hp-daily-grid');
-    if (dailyGrid) {
-      const featIds = new Set(featuredVenues.map(v => v.id));
-      const seed = Math.floor(Date.now() / 86400000);
-      function seededHash(str) {
-        let h = seed;
-        for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) & 0xFFFFFF;
-        return h;
-      }
-      const pool = DATA.venues.filter(v => !featIds.has(v.id));
-      const daily = [...pool].sort((a, b) => seededHash(a.id) - seededHash(b.id)).slice(0, 4);
-      dailyGrid.innerHTML = daily.map(venueCard).join('');
-    }
+    /* 1. Yeme-İçme (kafe, restoran, kahvalti, beach, iskele) */
+    const foodCats = ['kafe', 'restoran', 'kahvalti', 'beach', 'iskele'];
+    const foodVenues = dailySorted(DATA.venues.filter(v => foodCats.includes(v.category)));
+    const foodGrid = document.getElementById('hp-food-grid');
+    if (foodGrid) foodGrid.innerHTML = foodVenues.map(venueCard).join('');
+
+    /* 2. Konaklama */
+    const stayVenues = dailySorted(DATA.venues.filter(v => v.category === 'konaklama'));
+    const stayGrid = document.getElementById('hp-stay-grid');
+    if (stayGrid) stayGrid.innerHTML = stayVenues.map(venueCard).join('');
   })();
 </script>
 
