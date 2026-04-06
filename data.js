@@ -1118,10 +1118,17 @@ window.DATA = {
       "shortDesc": "Tatlım",
       "description": "",
       "location": "Cemaller Köyü",
-      "tags": [],
+      "tags": [
+        "köy içinde",
+        "sakin",
+        "huzurlu"
+      ],
       "keywords": [
         "kafe",
         "mera",
+        "köy içinde",
+        "sakin",
+        "huzurlu",
         "kafe"
       ],
       "hours": "",
