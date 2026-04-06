@@ -591,9 +591,11 @@ function renderNav(opts = {}) {
 
     if (footer) footer.style.display = 'block';
     // Favori kodunu göster ve senkronla
-    const codeEl = document.getElementById('sd-sync-code');
-    if (codeEl) codeEl.textContent = getFavCode();
-    window.syncFavToFirebase();
+    try {
+      const codeEl = document.getElementById('sd-sync-code');
+      if (codeEl) codeEl.textContent = getFavCode();
+      if (window.syncFavToFirebase) window.syncFavToFirebase();
+    } catch(e) {}
   }
 
   /* ── Favori Senkronizasyon ── */
@@ -662,17 +664,21 @@ function renderNav(opts = {}) {
     }
   };
 
-  // removeSave ve clearAllSaves sonrası senkron
-  const origRemoveSave = window.removeSave;
-  window.removeSave = function(id, e) {
-    origRemoveSave(id, e);
-    setTimeout(() => window.syncFavToFirebase(), 300);
-  };
-  const origClearAll = window.clearAllSaves;
-  window.clearAllSaves = function() {
-    origClearAll();
-    setTimeout(() => window.syncFavToFirebase(), 300);
-  };
+  // removeSave ve clearAllSaves sonrası senkron (güvenli override)
+  const _origRemove = window.removeSave;
+  if (_origRemove) {
+    window.removeSave = function(id, e) {
+      try { _origRemove(id, e); } catch(err) { console.warn(err); }
+      try { if (window.syncFavToFirebase) setTimeout(window.syncFavToFirebase, 300); } catch(err) {}
+    };
+  }
+  const _origClear = window.clearAllSaves;
+  if (_origClear) {
+    window.clearAllSaves = function() {
+      try { _origClear(); } catch(err) { console.warn(err); }
+      try { if (window.syncFavToFirebase) setTimeout(window.syncFavToFirebase, 300); } catch(err) {}
+    };
+  }
 
   /* Initialize count */
   window.updateSaveNavCount();
