@@ -794,7 +794,7 @@ function initSearch(inputId, opts = {}) {
 
   function getUrl(type, id) {
     const base = window.location.pathname.includes('/mekanlar/') || window.location.pathname.includes('/rotalar/') ? '../' : '';
-    if (type === 'route')   return `${base}rotalar/${id}.html`;
+    if (type === 'route')   return `${base}rotalar/rota-detay.html?id=${id}`;
     if (type === 'place')   return `${base}yerler.html#${id}`;
     if (type === 'venue')   return `${base}mekanlar/mekan-detay.html?id=${id}`;
     if (type === 'village') return `${base}koyler.html#${id}`;
@@ -921,7 +921,7 @@ function getParam(name) {
 ═══════════════════ */
 function routeCardHTML(r, delay = 0) {
   return `
-    <a class="route-card fade-up" href="rotalar/${r.id}.html" data-delay="${delay}" aria-label="${r.title}">
+    <a class="route-card fade-up" href="rotalar/rota-detay.html?id=${r.id}" data-delay="${delay}" aria-label="${r.title}">
       <div style="height:130px;background:${r.headerBg};border-bottom:1px solid rgba(245,237,224,.06);position:relative;overflow:hidden;display:flex;align-items:center;padding:22px 26px;gap:14px;">
         <div style="font-size:3rem;line-height:1;flex-shrink:0;filter:drop-shadow(0 4px 10px ${r.glowColor}66);">${r.emoji}</div>
         <div>
@@ -1198,7 +1198,7 @@ function renderRoutePage(routeId) {
   const basePath = window.location.pathname.includes('/rotalar/') ? '../' : '';
 
   const othersHTML = DATA.routes.filter(x => x.id !== routeId).slice(0, 3).map(x => `
-    <a class="rp-other-link" href="${basePath}rotalar/${x.id}.html">
+    <a class="rp-other-link" href="${basePath}rotalar/rota-detay.html?id=${x.id}">
       <span style="font-size:1.5rem;">${x.emoji}</span>
       <div style="flex:1;min-width:0;">
         <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.85rem;color:var(--cream);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${x.title}</div>
@@ -1959,7 +1959,7 @@ function renderVenuePage(venueId) {
           <h2 class="vp-stitle">Bu Mekan Şu Rotalarda Yer Alıyor</h2>
           <div class="vp-route-list">
             ${relatedRoutes.map(r=>`
-              <a class="vp-route-item" href="${base}rotalar/${r.id}.html">
+              <a class="vp-route-item" href="${base}rotalar/rota-detay.html?id=${r.id}">
                 <div class="vp-route-badge" style="background:${r.headerBg||'rgba(26,39,68,.06)'};">${r.emoji}</div>
                 <div class="vp-route-info">
                   <div class="vp-route-name">${r.title}</div>
