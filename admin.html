@@ -1201,6 +1201,35 @@ function generateId(title) {
     .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 }
 
+function createVenuePageHTML(id, title, shortDesc) {
+  return '<!DOCTYPE html>\n<html lang="tr">\n<head>\n' +
+    '  <meta charset="UTF-8">\n' +
+    '  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
+    '  <title>' + title + ' — Assos\'u Kesfet</title>\n' +
+    '  <meta name="description" content="' + (shortDesc || '').replace(/"/g, '&quot;') + '">\n' +
+    '</head>\n<body>\n' +
+    '<div id="nav-placeholder"></div>\n' +
+    '<div id="vp-hero"></div>\n' +
+    '<div id="vp-body"></div>\n' +
+    '<div id="footer-placeholder"></div>\n' +
+    '<script src="../data.js"><\/script>\n' +
+    '<script src="../shared.js"><\/script>\n' +
+    '<script>\n' +
+    '  renderNav({ heroMode: false, basePath: \'../\' });\n' +
+    '  renderFooter({ basePath: \'../\' });\n' +
+    '  renderVenuePage(\'' + id + '\');\n' +
+    '<\/script>\n' +
+    '</body>\n</html>\n';
+}
+
+function commitVenuePage(id, title, shortDesc) {
+  const html = createVenuePageHTML(id, title, shortDesc);
+  const path = 'mekanlar/' + id + '.html';
+  ghCommitFile(path, html, 'Mekan sayfasi: ' + title)
+    .then(() => showToast('"' + title + '" sayfasi olusturuldu.', 'success'))
+    .catch(err => showToast('Sayfa olusturma hatasi: ' + err.message, 'error'));
+}
+
 function autoId() {
   if (!editingVenueId) {
     document.getElementById('f-id').value = generateId(document.getElementById('f-title').value);
@@ -1350,6 +1379,8 @@ function saveVenue(e) {
       return;
     }
     draftData.venues.push(venue);
+    // Yeni mekan sayfası oluştur
+    commitVenuePage(venue.id, venue.title, venue.shortDesc);
   }
 
   saveDraft();
@@ -1931,6 +1962,7 @@ function botAddVenue() {
   }
 
   draftData.venues.push(venue);
+  commitVenuePage(venue.id, venue.title, venue.shortDesc);
   saveDraft();
 
   document.getElementById('bot-results').style.display = 'none';
