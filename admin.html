@@ -272,6 +272,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
       <a class="admin-nav-item" data-page="export" onclick="showPage('export')">
         <span class="nav-icon">&#128230;</span> Disa Aktar
       </a>
+      <a class="admin-nav-item" data-page="settings" onclick="showPage('settings')">
+        <span class="nav-icon">⚙️</span> Ayarlar
+      </a>
       <div class="admin-nav-sep"></div>
       <a class="admin-nav-item" onclick="logout()">
         <span class="nav-icon">&#128682;</span> Cikis
@@ -677,6 +680,32 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
       </div>
     </div>
 
+    <!-- ══════ SETTINGS ══════ -->
+    <div class="admin-page" id="page-settings">
+      <h2>Ayarlar</h2>
+      <p class="page-sub">Panel sifrenizi degistirin.</p>
+
+      <div class="panel-card" style="max-width:480px">
+        <div class="panel-card-head"><h3>🔒 Sifre Degistir</h3></div>
+        <div style="padding:20px">
+          <div class="form-group">
+            <label>Mevcut Sifre</label>
+            <input type="password" id="pw-current" placeholder="Mevcut sifrenizi girin">
+          </div>
+          <div class="form-group">
+            <label>Yeni Sifre</label>
+            <input type="password" id="pw-new" placeholder="Yeni sifre">
+          </div>
+          <div class="form-group">
+            <label>Yeni Sifre (Tekrar)</label>
+            <input type="password" id="pw-confirm" placeholder="Yeni sifreyi tekrar girin">
+          </div>
+          <div id="pw-error" style="color:var(--red);font-size:.82rem;min-height:20px;margin-bottom:12px"></div>
+          <button class="btn btn-primary" onclick="changePassword()">Sifreyi Degistir</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -880,7 +909,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 const ORIGINAL_DATA = JSON.parse(JSON.stringify(window.DATA));
 let draftData = JSON.parse(JSON.stringify(window.DATA));
 /* Şifre hash olarak saklanır — kaynak kodda açık şifre yok */
-const PW_HASH = 'ce35f32ce1444d606709acc3ec7a3341137922f08d45f2433ba99ad07cf27e90';
+let PW_HASH = 'ce35f32ce1444d606709acc3ec7a3341137922f08d45f2433ba99ad07cf27e90';
 async function sha256(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
@@ -1030,6 +1059,56 @@ function logout() {
   location.reload();
 }
 
+async function changePassword() {
+  const errEl = document.getElementById('pw-error');
+  errEl.textContent = '';
+  const current = document.getElementById('pw-current').value;
+  const newPw = document.getElementById('pw-new').value;
+  const confirm = document.getElementById('pw-confirm').value;
+
+  if (!current) { errEl.textContent = 'Mevcut sifreyi girin.'; return; }
+  if (!newPw) { errEl.textContent = 'Yeni sifreyi girin.'; return; }
+  if (newPw.length < 6) { errEl.textContent = 'Yeni sifre en az 6 karakter olmali.'; return; }
+  if (newPw !== confirm) { errEl.textContent = 'Yeni sifreler eslesmiyor.'; return; }
+
+  const currentHash = await sha256(current);
+  if (currentHash !== PW_HASH) { errEl.textContent = 'Mevcut sifre yanlis.'; return; }
+
+  const newHash = await sha256(newPw);
+
+  // admin.html'deki PW_HASH satırını güncelle ve GitHub'a commit et
+  try {
+    // Mevcut admin.html'i GitHub'dan çek
+    const token = getGHToken();
+    const apiBase = 'https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/admin.html';
+    const headers = { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github.v3+json' };
+    const fileData = await fetch(apiBase, { headers }).then(r => r.json());
+    const content = atob(fileData.content.replace(/\n/g, ''));
+    const updated = content.replace(
+      "const PW_HASH = '" + PW_HASH + "'",
+      "const PW_HASH = '" + newHash + "'"
+    );
+    const base64 = arrayBufferToBase64(new TextEncoder().encode(updated));
+    await fetch(apiBase, {
+      method: 'PUT',
+      headers: { ...headers, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: 'Sifre degistirildi', content: base64, sha: fileData.sha, branch: 'main' })
+    });
+
+    // Bellekteki hash'i güncelle
+    PW_HASH = newHash;
+    API_KEY = newPw;
+    localStorage.setItem('_ak', newPw);
+
+    document.getElementById('pw-current').value = '';
+    document.getElementById('pw-new').value = '';
+    document.getElementById('pw-confirm').value = '';
+    showToast('Sifre basariyla degistirildi!', 'success');
+  } catch (err) {
+    errEl.textContent = 'Sifre degistirme hatasi: ' + err.message;
+  }
+}
+
 if (localStorage.getItem('admin_auth') === 'true') {
   document.getElementById('auth-gate').classList.add('hidden');
   document.getElementById('admin-wrap').style.display = 'flex';
@@ -1074,7 +1153,7 @@ function toggleSidebar() {
 function initApp() {
   // Hash'ten son kaldığı sekmeyi aç
   const hash = window.location.hash.replace('#', '');
-  const validPages = ['dashboard','venues','bot','placebot','routes','villages','export'];
+  const validPages = ['dashboard','venues','bot','placebot','routes','villages','export','settings'];
   if (hash && validPages.includes(hash)) {
     showPage(hash);
   } else {
