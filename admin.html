@@ -6,7 +6,10 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Assos'u Kesfet - Yonetim Paneli</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="data.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-storage-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -682,8 +685,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
       <p class="page-sub">Degisiklikleriniz otomatik olarak sunucuya kaydedilir.</p>
       <div class="export-section">
         <div class="export-info" style="background:rgba(56,161,105,.06);border:1.5px solid rgba(56,161,105,.15);border-radius:var(--radius);padding:20px">
-          <h4 style="color:var(--green)">✓ GitHub + Vercel Entegrasyonu Aktif</h4>
-          <p>Degisiklikler GitHub'a commit edilir, Vercel otomatik deploy eder. Genellikle 10-30 saniye icinde site guncellenir.</p>
+          <h4 style="color:var(--green)">✓ Firebase Entegrasyonu Aktif</h4>
+          <p>Degisiklikler Firebase Firestore'a anlik olarak kaydedilir. Gorsel dosyalar Firebase Storage'a yuklenir.</p>
         </div>
         <div class="export-info">
           <h4>Degisiklik Ozeti</h4>
@@ -694,9 +697,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
           <p>Yedek almak veya sorun durumunda kullanmak icin asagidaki butonlari kullanabilirsiniz.</p>
         </div>
         <div class="export-btns" style="flex-wrap:wrap">
-          <button class="btn btn-primary" onclick="forceSaveToServer()">🔄 GitHub'a Kaydet & Yayinla</button>
+          <button class="btn btn-primary" onclick="forceSaveAll()">&#128260; Firestore'a Kaydet</button>
           <button class="btn btn-secondary" onclick="exportDataJS()">&#128229; data.js Indir (Yedek)</button>
-          <button class="btn btn-secondary" onclick="changeGHToken()">🔑 GitHub Token Degistir</button>
           <button class="btn btn-danger" onclick="confirmReset()">&#128465; Degisiklikleri Sifirla</button>
         </div>
       </div>
@@ -926,172 +928,110 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 
 <script>
 /* ══════════════════════════════════════════════════
-   DATA MANAGEMENT
+   DATA MANAGEMENT — Firebase
 ══════════════════════════════════════════════════ */
-const ORIGINAL_DATA = JSON.parse(JSON.stringify(window.DATA));
-let draftData = JSON.parse(JSON.stringify(window.DATA));
-/* Şifre hash olarak saklanır — kaynak kodda açık şifre yok */
-let PW_HASH = 'ce35f32ce1444d606709acc3ec7a3341137922f08d45f2433ba99ad07cf27e90';
-const EMAIL_HASH = 'a6f69b7c705aa7c6abade5fd3f7af0856e5e00272560c0b90e055944e0ec453d';
-async function sha256(str) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+// Initialize Firebase
+firebase.initializeApp({
+  apiKey: "AIzaSyCXqgczplchzjClAZt-Wl2eqgqmUMhLVJs",
+  authDomain: "assosu-kesfet.firebaseapp.com",
+  projectId: "assosu-kesfet",
+  storageBucket: "assosu-kesfet.firebasestorage.app",
+  messagingSenderId: "225032191860",
+  appId: "1:225032191860:web:61ac6ba36764b530be3621"
+});
+
+const db = firebase.firestore();
+const fbAuth = firebase.auth();
+const fbStorage = firebase.storage();
+
+let draftData = { venues: [], places: [], villages: [], routes: [] };
+let ORIGINAL_DATA = { venues: [], places: [], villages: [], routes: [] };
+
+// Load data from Firestore
+async function loadDataFromFirestore() {
+  const [venuesSnap, placesSnap, villagesSnap, routesSnap] = await Promise.all([
+    db.collection('venues').get(),
+    db.collection('places').get(),
+    db.collection('villages').get(),
+    db.collection('routes').get()
+  ]);
+  draftData.venues = venuesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  draftData.places = placesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  draftData.villages = villagesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  draftData.routes = routesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  ORIGINAL_DATA = JSON.parse(JSON.stringify(draftData));
 }
-/* API key — oturumdan alınır */
-let API_KEY = localStorage.getItem('_ak') || '';
 
-/* ── GitHub API ayarları ── */
-const GH_OWNER = 'omckale-netizen';
-const GH_REPO  = 'aksft-web';
-let GH_TOKEN   = localStorage.getItem('gh_token') || '';
-
-function getGHToken() {
-  if (GH_TOKEN) return GH_TOKEN;
-  const t = prompt('GitHub Personal Access Token girin (ilk seferde bir kere gerekli):');
-  if (t) {
-    GH_TOKEN = t.trim();
-    localStorage.setItem('gh_token', GH_TOKEN);
-  }
-  return GH_TOKEN;
+/* ── Firestore save/delete helpers ── */
+function saveDraft() {
+  // No-op — individual saves happen in saveVenue, deleteVenue, etc.
 }
 
-/* ── GitHub'a dosya commit'le ── */
-async function ghCommitFile(filePath, content, message) {
-  const token = getGHToken();
-  if (!token) throw new Error('Token yok');
+async function saveVenueToFirestore(venue) {
+  const data = { ...venue };
+  delete data.id;
+  await db.collection('venues').doc(venue.id).set(data);
+}
 
-  const apiBase = 'https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/' + filePath;
-  const headers = {
-    'Authorization': 'Bearer ' + token,
-    'Content-Type': 'application/json',
-    'Accept': 'application/vnd.github.v3+json'
-  };
+async function deleteVenueFromFirestore(id) {
+  await db.collection('venues').doc(id).delete();
+}
 
-  // Mevcut dosyanın SHA'sını al (güncelleme için gerekli)
-  let sha = '';
+async function savePlaceToFirestore(place) {
+  const data = { ...place };
+  delete data.id;
+  await db.collection('places').doc(place.id).set(data);
+}
+
+async function saveVillageToFirestore(village) {
+  const data = { ...village };
+  delete data.id;
+  await db.collection('villages').doc(village.id).set(data);
+}
+
+/* ── Gorsel yukle: Firebase Storage ── */
+async function uploadImageToServer(blob, path) {
   try {
-    const existing = await fetch(apiBase, { headers }).then(r => r.json());
-    if (existing.sha) sha = existing.sha;
-  } catch(e) {}
-
-  // Base64 encode
-  let base64;
-  if (typeof content === 'string') {
-    // Metin dosyası (data.js) — UTF-8 safe base64
-    const encoder = new TextEncoder();
-    const bytes = encoder.encode(content);
-    base64 = arrayBufferToBase64(bytes);
-  } else {
-    // Binary dosya (görsel)
-    base64 = await blobToBase64(content);
+    showToast('Gorsel yukleniyor...', 'success');
+    const ref = fbStorage.ref(path);
+    await ref.put(blob);
+    const url = await ref.getDownloadURL();
+    showToast('Gorsel yuklendi.', 'success');
+    return url;
+  } catch(err) {
+    showToast('Gorsel yukleme hatasi: ' + err.message, 'error');
+    throw err;
   }
-
-  const body = {
-    message: message || 'Admin panel guncelleme',
-    content: base64,
-    branch: 'main'
-  };
-  if (sha) body.sha = sha;
-
-  const res = await fetch(apiBase, {
-    method: 'PUT',
-    headers: headers,
-    body: JSON.stringify(body)
-  });
-
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.message || 'GitHub API hatasi');
-  }
-  return await res.json();
-}
-
-function arrayBufferToBase64(bytes) {
-  let binary = '';
-  const len = bytes.byteLength;
-  for (let i = 0; i < len; i++) binary += String.fromCharCode(bytes[i]);
-  return btoa(binary);
-}
-
-function blobToBase64(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = reject;
-    reader.onloadend = () => {
-      const result = reader.result;
-      const base64 = result.substring(result.indexOf(',') + 1);
-      resolve(base64);
-    };
-    reader.readAsDataURL(blob);
-  });
-}
-
-/* ── Kaydet: data.js'i GitHub'a commit'le ── */
-let saveTimer = null;
-function saveDraft(showSuccess) {
-  // Debounce: 2 saniye bekle, art arda kayıtlarda tek commit
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    const content = 'window.DATA = ' + JSON.stringify(draftData, null, 2) + ';\n';
-    ghCommitFile('data.js', content, 'Veri guncelleme (admin panel)')
-      .then(() => {
-        if (showSuccess) showToast('Kaydedildi ve yayinlandi!', 'success');
-      })
-      .catch(err => {
-        showToast('GitHub hatasi: ' + err.message, 'error');
-        console.error('saveDraft hatasi:', err);
-      });
-  }, 2000);
-}
-
-/* ── Görsel yükle: GitHub'a commit'le ── */
-function uploadImageToServer(blob, path) {
-  showToast('Gorsel yukleniyor...', 'success');
-  return ghCommitFile(path, blob, 'Gorsel ekleme: ' + path)
-    .then(() => {
-      showToast('Gorsel yuklendi! Deploy 10-30 sn icinde tamamlanir.', 'success');
-    })
-    .catch(err => {
-      showToast('Gorsel yukleme hatasi: ' + err.message, 'error');
-      console.error('Upload hatasi:', err);
-      throw err;
-    });
 }
 
 /* ══════════════════════════════════════════════════
-   AUTH
+   AUTH — Firebase Auth
 ══════════════════════════════════════════════════ */
 async function checkAuth() {
-  const email = (document.getElementById('auth-email').value || '').trim().toLowerCase();
+  const email = (document.getElementById('auth-email').value || '').trim();
   const pw = document.getElementById('auth-pw').value;
   const errEl = document.getElementById('auth-err');
 
   if (!email) { errEl.textContent = 'E-posta adresinizi girin.'; return; }
   if (!pw) { errEl.textContent = 'Sifrenizi girin.'; return; }
 
-  const emailHash = await sha256(email);
-  const pwHash = await sha256(pw);
-
-  if (emailHash !== EMAIL_HASH) {
-    errEl.textContent = 'E-posta adresi hatali.';
-    return;
+  try {
+    await fbAuth.signInWithEmailAndPassword(email, pw);
+    document.getElementById('auth-gate').classList.add('hidden');
+    document.getElementById('admin-wrap').style.display = 'flex';
+    await loadDataFromFirestore();
+    initApp();
+  } catch(err) {
+    if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+      errEl.textContent = 'E-posta veya sifre hatali.';
+    } else {
+      errEl.textContent = 'Giris hatasi: ' + err.message;
+    }
   }
-  if (pwHash !== PW_HASH) {
-    errEl.textContent = 'Sifre hatali.';
-    return;
-  }
-
-  API_KEY = pw;
-  localStorage.setItem('_ak', pw);
-  localStorage.setItem('admin_auth', 'true');
-  document.getElementById('auth-gate').classList.add('hidden');
-  document.getElementById('admin-wrap').style.display = 'flex';
-  initApp();
 }
 
 function logout() {
-  localStorage.removeItem('admin_auth');
-  localStorage.removeItem('_ak');
+  fbAuth.signOut();
   location.reload();
 }
 
@@ -1107,51 +1047,30 @@ async function changePassword() {
   if (newPw.length < 6) { errEl.textContent = 'Yeni sifre en az 6 karakter olmali.'; return; }
   if (newPw !== confirm) { errEl.textContent = 'Yeni sifreler eslesmiyor.'; return; }
 
-  const currentHash = await sha256(current);
-  if (currentHash !== PW_HASH) { errEl.textContent = 'Mevcut sifre yanlis.'; return; }
-
-  const newHash = await sha256(newPw);
-
-  // admin.html'deki PW_HASH satırını güncelle ve GitHub'a commit et
   try {
-    // Mevcut admin.html'i GitHub'dan çek
-    const token = getGHToken();
-    const apiBase = 'https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/contents/admin.html';
-    const headers = { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github.v3+json' };
-    const fileData = await fetch(apiBase, { headers }).then(r => r.json());
-    const content = atob(fileData.content.replace(/\n/g, ''));
-    const updated = content.replace(
-      "const PW_HASH = '" + PW_HASH + "'",
-      "const PW_HASH = '" + newHash + "'"
-    );
-    const base64 = arrayBufferToBase64(new TextEncoder().encode(updated));
-    await fetch(apiBase, {
-      method: 'PUT',
-      headers: { ...headers, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: 'Sifre degistirildi', content: base64, sha: fileData.sha, branch: 'main' })
-    });
-
-    // Bellekteki hash'i güncelle
-    PW_HASH = newHash;
-    API_KEY = newPw;
-    localStorage.setItem('_ak', newPw);
-
+    const user = fbAuth.currentUser;
+    const credential = firebase.auth.EmailAuthProvider.credential(user.email, current);
+    await user.reauthenticateWithCredential(credential);
+    await user.updatePassword(newPw);
     document.getElementById('pw-current').value = '';
     document.getElementById('pw-new').value = '';
     document.getElementById('pw-confirm').value = '';
     showToast('Sifre basariyla degistirildi!', 'success');
-  } catch (err) {
-    errEl.textContent = 'Sifre degistirme hatasi: ' + err.message;
+  } catch(err) {
+    if (err.code === 'auth/wrong-password') errEl.textContent = 'Mevcut sifre yanlis.';
+    else errEl.textContent = 'Hata: ' + err.message;
   }
 }
 
-if (localStorage.getItem('admin_auth') === 'true') {
-  document.getElementById('auth-gate').classList.add('hidden');
-  document.getElementById('admin-wrap').style.display = 'flex';
-  document.addEventListener('DOMContentLoaded', initApp);
-} else {
-  document.getElementById('auth-gate').classList.remove('hidden');
-}
+// Auto-login if session exists
+fbAuth.onAuthStateChanged(async (user) => {
+  if (user) {
+    document.getElementById('auth-gate').classList.add('hidden');
+    document.getElementById('admin-wrap').style.display = 'flex';
+    await loadDataFromFirestore();
+    initApp();
+  }
+});
 
 /* ══════════════════════════════════════════════════
    NAVIGATION
@@ -1355,7 +1274,7 @@ function toggleFeatured(id, e) {
   const v = draftData.venues.find(x => x.id === id);
   if (!v) return;
   v.featured = !v.featured;
-  saveDraft();
+  saveVenueToFirestore(v);
   renderVenueTable();
   showToast(v.featured ? '⭐ "' + v.title + '" one cikanlara eklendi.' : '"' + v.title + '" one cikanlardan kaldirildi.', 'success');
 }
@@ -1365,7 +1284,7 @@ function toggleActive(id, e) {
   const v = draftData.venues.find(x => x.id === id);
   if (!v) return;
   v.active = v.active === false ? true : false;
-  saveDraft();
+  saveVenueToFirestore(v);
   renderVenueTable();
   showToast(v.active !== false ? '✅ "' + v.title + '" aktif edildi.' : '⏸ "' + v.title + '" pasife alindi.', 'success');
 }
@@ -1419,35 +1338,6 @@ function generateId(title) {
     .replace(/\u00e7/g,'c').replace(/\u011f/g,'g').replace(/\u0131/g,'i')
     .replace(/\u00f6/g,'o').replace(/\u015f/g,'s').replace(/\u00fc/g,'u')
     .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-}
-
-function createVenuePageHTML(id, title, shortDesc) {
-  return '<!DOCTYPE html>\n<html lang="tr">\n<head>\n' +
-    '  <meta charset="UTF-8">\n' +
-    '  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
-    '  <title>' + title + ' — Assos\'u Kesfet</title>\n' +
-    '  <meta name="description" content="' + (shortDesc || '').replace(/"/g, '&quot;') + '">\n' +
-    '</head>\n<body>\n' +
-    '<div id="nav-placeholder"></div>\n' +
-    '<div id="vp-hero"></div>\n' +
-    '<div id="vp-body"></div>\n' +
-    '<div id="footer-placeholder"></div>\n' +
-    '<script src="../data.js"><\/script>\n' +
-    '<script src="../shared.js"><\/script>\n' +
-    '<script>\n' +
-    '  renderNav({ heroMode: false, basePath: \'../\' });\n' +
-    '  renderFooter({ basePath: \'../\' });\n' +
-    '  renderVenuePage(\'' + id + '\');\n' +
-    '<\/script>\n' +
-    '</body>\n</html>\n';
-}
-
-function commitVenuePage(id, title, shortDesc) {
-  const html = createVenuePageHTML(id, title, shortDesc);
-  const path = 'mekanlar/' + id + '.html';
-  ghCommitFile(path, html, 'Mekan sayfasi: ' + title)
-    .then(() => showToast('"' + title + '" sayfasi olusturuldu.', 'success'))
-    .catch(err => showToast('Sayfa olusturma hatasi: ' + err.message, 'error'));
 }
 
 const CAT_EMOJIS = { kafe:'☕', restoran:'🍽', kahvalti:'🥚', konaklama:'🏨', beach:'🏖', iskele:'⚓' };
@@ -1529,7 +1419,7 @@ const CAT_DEFAULTS = {
   iskele:    { iconBg:'rgba(26,39,68,0.08)',   tagBg:'rgba(26,39,68,0.08)',   tagColor:'#3A5A8A', tagText:'Iskele' }
 };
 
-function saveVenue(e) {
+async function saveVenue(e) {
   e.preventDefault();
   const id = document.getElementById('f-id').value || generateId(document.getElementById('f-title').value);
   const category = document.getElementById('f-category').value;
@@ -1549,16 +1439,22 @@ function saveVenue(e) {
   // Image handling: combine existing images with new pending uploads
   const venueId = id;
   const existingImgs = editingVenueId ? (draftData.venues.find(v => v.id === editingVenueId)?.images || []) : [];
-  const newImgPaths = pendingImages.map((img, i) => `images/mekanlar/${venueId}/${existingImgs.length + i + 1}.${img.ext || 'webp'}`);
-  const allImages = [...existingImgs, ...newImgPaths];
 
-  // Görselleri sunucuya yükle
+  // Upload new images to Firebase Storage and get download URLs
+  const uploadedUrls = [];
   if (pendingImages.length > 0) {
-    pendingImages.forEach((img, i) => {
+    for (let i = 0; i < pendingImages.length; i++) {
+      const img = pendingImages[i];
       const path = `images/mekanlar/${venueId}/${existingImgs.length + i + 1}.${img.ext || 'webp'}`;
-      uploadImageToServer(img.blob, path).catch(err => console.warn('Gorsel yukleme hatasi:', err));
-    });
+      try {
+        const url = await uploadImageToServer(img.blob, path);
+        uploadedUrls.push(url);
+      } catch(err) {
+        console.warn('Gorsel yukleme hatasi:', err);
+      }
+    }
   }
+  const allImages = [...existingImgs, ...uploadedUrls];
   pendingImages = [];
 
   const venue = {
@@ -1574,7 +1470,7 @@ function saveVenue(e) {
     description: document.getElementById('f-description').value.trim(),
     location: document.getElementById('f-location').value.trim(),
     tags: tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [],
-    keywords: [], // auto from tags/title
+    keywords: [],
     hours: document.getElementById('f-hours').value.trim(),
     images: allImages,
     phone: document.getElementById('f-phone').value.trim(),
@@ -1592,24 +1488,21 @@ function saveVenue(e) {
   ].filter(Boolean);
 
   if (editingVenueId) {
-    // Update existing — mevcut verileri koru, formdan gelenleri üstüne yaz
     const idx = draftData.venues.findIndex(v => v.id === editingVenueId);
     if (idx >= 0) {
       const existing = draftData.venues[idx];
       draftData.venues[idx] = { ...existing, ...venue };
+      await saveVenueToFirestore(draftData.venues[idx]);
     }
   } else {
-    // Check duplicate id
     if (draftData.venues.some(v => v.id === venue.id)) {
       showToast('Bu ID ile baska bir mekan zaten var.', 'error');
       return;
     }
     draftData.venues.push(venue);
-    // Yeni mekan sayfası oluştur
-    commitVenuePage(venue.id, venue.title, venue.shortDesc);
+    await saveVenueToFirestore(venue);
   }
 
-  saveDraft();
   closeVenueModal();
   renderVenueTable();
   const toastMsg = editingVenueId ? '"' + venue.title + '" guncellendi.' : '"' + venue.title + '" eklendi.';
@@ -1627,7 +1520,7 @@ function confirmDeleteVenue(id) {
     `"${v.title}" mekanini silmek istediginize emin misiniz? Bu islem geri alinamaz.`,
     () => {
       draftData.venues = draftData.venues.filter(x => x.id !== id);
-      saveDraft();
+      deleteVenueFromFirestore(id);
       renderVenueTable();
       showToast('"' + v.title + '" silindi.', 'success');
     }
@@ -1809,7 +1702,7 @@ function resetCropPos() {
   window.addEventListener('touchend', endDrag);
 })();
 
-function savePlaceImage() {
+async function savePlaceImage() {
   if (!editingPlaceId) return;
   const arr = draftData[editingPlaceType] || [];
   const p = arr.find(x => x.id === editingPlaceId);
@@ -1819,12 +1712,20 @@ function savePlaceImage() {
     const folder = editingPlaceType === 'villages' ? 'koyler' : 'yerler';
     const placeExt = pendingPlaceImage.ext || 'webp';
     const imgPath = 'images/' + folder + '/' + editingPlaceId + '.' + placeExt;
-    p.image = imgPath;
-    uploadImageToServer(pendingPlaceImage.blob, imgPath).catch(err => console.warn('Gorsel yukleme hatasi:', err));
+    try {
+      const url = await uploadImageToServer(pendingPlaceImage.blob, imgPath);
+      p.image = url;
+    } catch(err) {
+      console.warn('Gorsel yukleme hatasi:', err);
+    }
   }
 
   p.imagePos = Math.round(cropPosY);
-  saveDraft();
+  if (editingPlaceType === 'villages') {
+    await saveVillageToFirestore(p);
+  } else {
+    await savePlaceToFirestore(p);
+  }
   closePlaceImgModal();
   renderVPTable();
   showToast('"' + p.title + '" gorseli kaydedildi.', 'success');
@@ -1837,7 +1738,11 @@ function removePlaceImage() {
   if (p) {
     p.image = '';
     p.imagePos = 50;
-    saveDraft();
+    if (editingPlaceType === 'villages') {
+      saveVillageToFirestore(p);
+    } else {
+      savePlaceToFirestore(p);
+    }
   }
   pendingPlaceImage = null;
   const cropImg = document.getElementById('crop-img');
@@ -1882,20 +1787,15 @@ function renderExport() {
   document.getElementById('export-summary').innerHTML = summary;
 }
 
-function forceSaveToServer() {
-  const content = 'window.DATA = ' + JSON.stringify(draftData, null, 2) + ';\n';
-  showToast('GitHub\'a kaydediliyor...', 'success');
-  ghCommitFile('data.js', content, 'Manuel kayit (admin panel)')
-    .then(() => showToast('GitHub\'a kaydedildi! Vercel birkaç saniye içinde güncelleyecek.', 'success'))
-    .catch(err => showToast('Hata: ' + err.message, 'error'));
-}
-
-function changeGHToken() {
-  const t = prompt('Yeni GitHub Personal Access Token girin:');
-  if (t && t.trim()) {
-    GH_TOKEN = t.trim();
-    localStorage.setItem('gh_token', GH_TOKEN);
-    showToast('Token guncellendi.', 'success');
+async function forceSaveAll() {
+  showToast('Kaydediliyor...', 'success');
+  try {
+    for (const v of draftData.venues) await saveVenueToFirestore(v);
+    for (const p of draftData.places) await savePlaceToFirestore(p);
+    for (const v of draftData.villages) await saveVillageToFirestore(v);
+    showToast('Tum veriler Firestore\'a kaydedildi!', 'success');
+  } catch(err) {
+    showToast('Hata: ' + err.message, 'error');
   }
 }
 
@@ -1917,7 +1817,6 @@ function confirmReset() {
     'Degisiklikleri Sifirla',
     'Tum taslak degisiklikler silinecek ve orijinal verilere donulecek. Emin misiniz?',
     () => {
-      localStorage.removeItem('admin_draft_data');
       draftData = JSON.parse(JSON.stringify(ORIGINAL_DATA));
       renderExport();
       renderDashboard();
@@ -2049,7 +1948,7 @@ function removeExistingImage(i) {
   const v = draftData.venues.find(x => x.id === editingVenueId);
   if (v && v.images) {
     v.images.splice(i, 1);
-    saveDraft();
+    saveVenueToFirestore(v);
     renderImagePreviews();
   }
 }
@@ -2193,8 +2092,7 @@ function botAddVenue() {
   }
 
   draftData.venues.push(venue);
-  commitVenuePage(venue.id, venue.title, venue.shortDesc);
-  saveDraft();
+  saveVenueToFirestore(venue);
 
   document.getElementById('bot-results').style.display = 'none';
   document.getElementById('bot-name').value = '';
@@ -2371,12 +2269,16 @@ function pbotAddPlace() {
   // Handle image
   if (pbotPendingImage) {
     const imgPath = 'images/yerler/' + id + '.' + (pbotPendingImage.ext || 'webp');
-    place.image = imgPath;
-    uploadImageToServer(pbotPendingImage.blob, imgPath).catch(err => console.warn('Gorsel yukleme hatasi:', err));
+    uploadImageToServer(pbotPendingImage.blob, imgPath)
+      .then(url => {
+        place.image = url;
+        savePlaceToFirestore(place);
+      })
+      .catch(err => console.warn('Gorsel yukleme hatasi:', err));
   }
 
   draftData.places.push(place);
-  saveDraft();
+  savePlaceToFirestore(place);
 
   document.getElementById('pbot-results').style.display = 'none';
   document.getElementById('pbot-name').value = '';
