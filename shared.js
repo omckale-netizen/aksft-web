@@ -1296,6 +1296,9 @@ function renderRoutePage(routeId) {
   }
 
   scrollFadeIn();
+
+  // Track route page view
+  if (window.trackPageView) trackPageView('route_' + routeId);
 }
 
 /* ── Share helper (used by renderRoutePage) ── */
@@ -1819,6 +1822,9 @@ function renderVenuePage(venueId) {
     ).join('');
   })();
 
+  // Track venue page view
+  if (window.trackPageView) trackPageView('venue_' + v.id);
+
   document.getElementById('vp-body').innerHTML = `
     <!-- Info bar -->
     <div class="vp-info-bar">
@@ -1877,7 +1883,7 @@ function renderVenuePage(venueId) {
                 <div class="vp-contact-label">Telefon</div>
                 <div class="vp-contact-val">${v.phone || '—'}</div>
               </div>
-              ${v.phone ? `<a href="tel:${v.phone.replace(/\s/g,'')}" class="vp-contact-btn-outline">Ara</a>` : ''}
+              ${v.phone ? `<a href="tel:${v.phone.replace(/\s/g,'')}" class="vp-contact-btn-outline" onclick="if(window.trackAction)trackAction('${v.id}','call')">Ara</a>` : ''}
             </div>
             ${v.category !== 'konaklama' ? `
             <div class="vp-contact-card vp-contact-wa">
@@ -1886,7 +1892,7 @@ function renderVenuePage(venueId) {
                 <div class="vp-contact-label">WhatsApp</div>
                 <div class="vp-contact-val">Mesaj Gönder</div>
               </div>
-              <a href="${waContactUrl}" target="_blank" rel="noopener" class="vp-wa-btn">WhatsApp ile Yaz</a>
+              <a href="${waContactUrl}" target="_blank" rel="noopener" class="vp-wa-btn" onclick="if(window.trackAction)trackAction('${v.id}','whatsapp')">WhatsApp ile Yaz</a>
             </div>` : ''}
           </div>
           ${v.category === 'konaklama' ? `
@@ -2057,6 +2063,7 @@ function renderVenuePage(venueId) {
     if (!name)     { alert('Lütfen ad soyad giriniz.'); return; }
     if (!checkin)  { alert('Lütfen giriş tarihini seçiniz.'); return; }
     if (!checkout) { alert('Lütfen çıkış tarihini seçiniz.'); return; }
+    if (window.trackAction) trackAction(v.id, 'reservation');
     const fmt = d => { if (!d) return '—'; const [y,m,day]=d.split('-'); return `${day}.${m}.${y}`; };
     const lines = [
       '━━━━━━━━━━━━━━━━━━━━',
@@ -2083,3 +2090,45 @@ function renderVenuePage(venueId) {
 
   scrollFadeIn();
 }
+
+/* ═══════════════════
+   ANALYTICS TRACKER
+═══════════════════ */
+(function() {
+  // Wait for Firebase to be ready
+  function initAnalytics() {
+    if (typeof firebase === 'undefined' || !firebase.firestore) {
+      setTimeout(initAnalytics, 500);
+      return;
+    }
+    const adb = firebase.firestore();
+
+    // Track page view
+    window.trackPageView = function(pageId) {
+      if (!pageId) return;
+      const docRef = adb.collection('analytics').doc(pageId);
+      docRef.set({
+        views: firebase.firestore.FieldValue.increment(1),
+        lastViewed: new Date().toISOString(),
+        id: pageId
+      }, { merge: true }).catch(() => {});
+    };
+
+    // Track action (call, whatsapp, reservation)
+    window.trackAction = function(venueId, action) {
+      if (!venueId || !action) return;
+      const docRef = adb.collection('analytics').doc(venueId);
+      const field = action + '_count';
+      const update = { [field]: firebase.firestore.FieldValue.increment(1) };
+      update[action + '_last'] = new Date().toISOString();
+      update.id = venueId;
+      docRef.set(update, { merge: true }).catch(() => {});
+    };
+
+    // Auto-track current page
+    const path = window.location.pathname.replace(/\/$/, '') || '/';
+    const page = path.split('/').pop().replace('.html', '') || 'index';
+    if (window.trackPageView) trackPageView('page_' + page);
+  }
+  initAnalytics();
+})();
