@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mekan — Assos'u Keşfet</title>
+  <meta name="description" content="Assos ve Ayvacık'ta mekan detayı.">
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div id="vp-hero"></div>
+<div id="vp-body"></div>
+<div id="footer-placeholder"></div>
+<script src="../firebase-loader.js"></script>
+<script src="../data.js"></script>
+<script src="../shared.js"></script>
+<script>
+function pageInit() {
+  renderNav({ heroMode: false, basePath: '../' });
+  renderFooter({ basePath: '../' });
+
+  // URL'den mekan ID'si al: ?id=behram-kafe veya #behram-kafe
+  const params = new URLSearchParams(window.location.search);
+  let venueId = params.get('id');
+  if (!venueId) venueId = window.location.hash.replace('#', '');
+  if (!venueId) {
+    document.getElementById('vp-hero').innerHTML = '';
+    document.getElementById('vp-body').innerHTML = '<div style="padding:120px 24px;text-align:center;"><h2 style="font-family:Plus Jakarta Sans,sans-serif;color:#1A2744;margin-bottom:12px;">Mekan bulunamadı</h2><p style="color:#718096;margin-bottom:24px;">Lütfen geçerli bir mekan seçin.</p><a href="../mekanlar.html" style="color:#C4521A;font-weight:600;">← Mekanlara Dön</a></div>';
+    return;
+  }
+
+  // Mekanı render et
+  renderVenuePage(venueId);
+
+  // Sayfa başlığını güncelle
+  const venue = (window.DATA?.venues || []).find(v => v.id === venueId);
+  if (venue) {
+    document.title = venue.title + ' — Assos\'u Keşfet';
+    const descMeta = document.querySelector('meta[name="description"]');
+    if (descMeta) descMeta.content = venue.shortDesc || '';
+  }
+}
+document.addEventListener('dataReady', pageInit);
+</script>
+</body>
+</html>

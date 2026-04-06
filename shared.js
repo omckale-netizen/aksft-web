@@ -432,9 +432,9 @@ function renderNav(opts = {}) {
 
   function getMekanPath(id) {
     const p = window.location.pathname;
-    if (p.includes('/mekanlar/')) return id + '.html';
-    if (p.includes('/rotalar/'))  return '../mekanlar/' + id + '.html';
-    return 'mekanlar/' + id + '.html';
+    if (p.includes('/mekanlar/')) return 'detay.html?id=' + id;
+    if (p.includes('/rotalar/'))  return '../mekanlar/detay.html?id=' + id;
+    return 'mekanlar/detay.html?id=' + id;
   }
   function getMekanListPath() {
     const p = window.location.pathname;
@@ -796,7 +796,7 @@ function initSearch(inputId, opts = {}) {
     const base = window.location.pathname.includes('/mekanlar/') || window.location.pathname.includes('/rotalar/') ? '../' : '';
     if (type === 'route')   return `${base}rotalar/${id}.html`;
     if (type === 'place')   return `${base}yerler.html#${id}`;
-    if (type === 'venue')   return `${base}mekanlar/${id}.html`;
+    if (type === 'venue')   return `${base}mekanlar/detay.html?id=${id}`;
     if (type === 'village') return `${base}koyler.html#${id}`;
     return '#';
   }
@@ -1938,7 +1938,7 @@ function renderVenuePage(venueId) {
             ${similar.map(s => {
               const sm  = VMETA[s.id] || { g:'linear-gradient(160deg,#1A2744,#2A3A5A)' };
               const scs = CAT_STYLE[s.category] || { bg:'rgba(26,39,68,.08)', color:'#4A5568', label:s.category };
-              return `<a class="vp-sim-card" href="${base}mekanlar/${s.id}.html">
+              return `<a class="vp-sim-card" href="${base}mekanlar/detay.html?id=${s.id}">
                 <div class="vp-sim-img" style="background:${sm.g};">
                   <span class="vp-sim-emoji">${s.emoji}</span>
                 </div>
