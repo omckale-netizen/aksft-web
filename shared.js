@@ -1377,7 +1377,33 @@ function renderVenuePage(venueId) {
     'sivrice-beach':        ['🥾 Yürüyüş patikası bitişiğinde','💧 Soğuk içecek ve su temini','🌊 Kristal berrak koy manzarası','🌿 Tamamen doğal ve minimal'],
     'sunaba-kasri-otel':   ['🏨 Taş mimarili butik otel','🏊 Yetişkin ve çocuk havuzları','🌅 Ege Denizi ve Midilli manzarası','🍳 Serpme köy kahvaltısı dahil'],
   };
-  const highlights = HIGHLIGHTS[v.id] || (v.tags||[]).map(t=>'✦ '+t);
+  /* ── Tag → emoji eşleştirme ── */
+  const TAG_EMOJI = {
+    'manzaralı':'🌅','manzara':'🌅','deniz kenarı':'🌊','deniz':'🌊','köy içinde':'🏘','köy':'🏘',
+    'gün batımı':'🌅','sakin':'🤫','sessiz':'🤫','huzur':'🤫','iskele':'⚓','liman':'⚓',
+    'taş ev':'🪨','organik':'🌿','doğa':'🌿','doğal':'🌿','plaj':'🏖','sahil':'🏖',
+    'fotoğraf':'📸','kahve':'☕','çay':'☕','kahvaltı':'🍳','serpme':'🍳',
+    'balık':'🐟','deniz ürünleri':'🐟','taze':'🐟','zeytinyağlı':'🫒','zeytin':'🫒','ege mutfağı':'🫒',
+    'tarihi':'🏛','antik':'🏛','tapınak':'🏛','kale':'🏰',
+    'havuzlu':'🏊','havuz':'🏊','butik':'🏨','butik otel':'🏨','konaklama':'🏨',
+    'yürüyüş':'🥾','patika':'🥾','kamp':'⛺','wifi':'📶',
+    'romantik':'💕','aile':'👨‍👩‍👧‍👦','çocuk':'👶','evcil hayvan':'🐾',
+    'müzik':'🎵','canlı müzik':'🎵','bar':'🍸','kokteyl':'🍸',
+    'yerel':'🤝','otantik':'🤝','köy kahvaltısı':'🍳','peynir':'🧀','reçel':'🍯',
+    'teras':'☀️','bahçe':'🌳','manzaralı teras':'🌅',
+    'otopark':'🅿️','ücretsiz':'✓','klima':'❄️','internet':'📶',
+    'koy':'🌊','berrak':'💎','kristal':'💎','gizli':'🤫',
+    'popüler':'⭐','öne çıkan':'⭐','önerilen':'⭐',
+  };
+  function tagToEmoji(tag) {
+    const lower = tag.toLowerCase().trim();
+    if (TAG_EMOJI[lower]) return TAG_EMOJI[lower];
+    for (const [key, emoji] of Object.entries(TAG_EMOJI)) {
+      if (lower.includes(key) || key.includes(lower)) return emoji;
+    }
+    return '✦';
+  }
+  const highlights = HIGHLIGHTS[v.id] || (v.tags||[]).map(t => tagToEmoji(t) + ' ' + t);
 
   /* ── Related data ── */
   const similar      = DATA.venues.filter(x => x.id !== v.id && x.category === v.category).slice(0,6);
