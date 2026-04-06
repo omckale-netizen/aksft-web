@@ -617,14 +617,22 @@ function renderNav(opts = {}) {
 
   // Favorileri Firebase'e kaydet
   window.syncFavToFirebase = function() {
-    if (typeof firebase === 'undefined' || !firebase.firestore) return;
-    const code = getFavCode();
-    let saved;
-    try { saved = JSON.parse(localStorage.getItem(SD_KEY) || '[]'); } catch { saved = []; }
-    firebase.firestore().collection('favorites').doc(code).set({
-      venues: saved,
-      updatedAt: new Date().toISOString()
-    }, { merge: true }).catch(() => {});
+    function doSync() {
+      if (typeof firebase === 'undefined' || !firebase.firestore) {
+        setTimeout(doSync, 1000);
+        return;
+      }
+      const code = getFavCode();
+      let saved;
+      try { saved = JSON.parse(localStorage.getItem(SD_KEY) || '[]'); } catch { saved = []; }
+      firebase.firestore().collection('favorites').doc(code).set({
+        venues: saved,
+        updatedAt: new Date().toISOString()
+      }, { merge: true }).then(() => {
+        console.log('Favoriler senkronlandi:', code, saved.length, 'mekan');
+      }).catch(err => console.warn('Favori sync hatasi:', err));
+    }
+    doSync();
     // Kodu göster
     const codeEl = document.getElementById('sd-sync-code');
     if (codeEl) codeEl.textContent = code;
