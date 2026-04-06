@@ -925,7 +925,7 @@
 
   /* ?id= param — navigate to detail page */
   const paramId = getParam('id');
-  if (paramId) window.location.replace('mekanlar/' + paramId + '.html');
+  if (paramId && /^[a-z0-9-]+$/.test(paramId)) window.location.replace('mekanlar/' + paramId + '.html');
 </script>
 </body>
 </html>

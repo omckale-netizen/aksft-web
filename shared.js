@@ -831,7 +831,7 @@ function initSearch(inputId, opts = {}) {
     if (!q || q.length < 2) { dropdown.classList.remove('open'); return; }
 
     if (results.length === 0) {
-      dropdown.innerHTML = `<div class="search-no-results">Sonuç bulunamadı: "<strong style="color:var(--cream)">${q}</strong>"</div>`;
+      dropdown.innerHTML = '<div class="search-no-results">Sonuc bulunamadi: "<strong style="color:var(--cream)">' + q.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') + '</strong>"</div>';
     } else {
       dropdown.innerHTML = results.map(r => {
         const lbl = getTypeLabel(r.type);
