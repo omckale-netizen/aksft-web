@@ -1108,7 +1108,7 @@ window.DATA = {
     },
     {
       "id": "kafe-meraa",
-      "title": "Kafe Meraa",
+      "title": "Kafe Mera",
       "emoji": "☕",
       "category": "kafe",
       "iconBg": "rgba(196,82,26,0.1)",
@@ -1121,7 +1121,7 @@ window.DATA = {
       "tags": [],
       "keywords": [
         "kafe",
-        "meraa",
+        "mera",
         "kafe"
       ],
       "hours": "",
