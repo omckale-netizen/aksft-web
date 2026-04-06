@@ -1422,13 +1422,13 @@ function saveVenue(e) {
   // Image handling: combine existing images with new pending uploads
   const venueId = id;
   const existingImgs = editingVenueId ? (draftData.venues.find(v => v.id === editingVenueId)?.images || []) : [];
-  const newImgPaths = pendingImages.map((img, i) => `images/mekanlar/${venueId}/${existingImgs.length + i + 1}.jpg`);
+  const newImgPaths = pendingImages.map((img, i) => `images/mekanlar/${venueId}/${existingImgs.length + i + 1}.${img.ext || 'webp'}`);
   const allImages = [...existingImgs, ...newImgPaths];
 
   // Görselleri sunucuya yükle
   if (pendingImages.length > 0) {
     pendingImages.forEach((img, i) => {
-      const path = `images/mekanlar/${venueId}/${existingImgs.length + i + 1}.jpg`;
+      const path = `images/mekanlar/${venueId}/${existingImgs.length + i + 1}.${img.ext || 'webp'}`;
       uploadImageToServer(img.blob, path).catch(err => console.warn('Gorsel yukleme hatasi:', err));
     });
   }
@@ -1604,8 +1604,8 @@ function closePlaceImgModal() {
 
 function handlePlaceImage(file) {
   if (!file) return;
-  compressImage(file, function(blob, dataUrl) {
-    pendingPlaceImage = { blob, dataUrl };
+  compressImage(file, function(blob, dataUrl, ext) {
+    pendingPlaceImage = { blob, dataUrl, ext: ext || 'webp' };
     const cropImg = document.getElementById('crop-img');
     cropImg.src = dataUrl;
     cropImg.style.display = '';
@@ -1690,7 +1690,8 @@ function savePlaceImage() {
 
   if (pendingPlaceImage) {
     const folder = editingPlaceType === 'villages' ? 'koyler' : 'yerler';
-    const imgPath = 'images/' + folder + '/' + editingPlaceId + '.jpg';
+    const placeExt = pendingPlaceImage.ext || 'webp';
+    const imgPath = 'images/' + folder + '/' + editingPlaceId + '.' + placeExt;
     p.image = imgPath;
     uploadImageToServer(pendingPlaceImage.blob, imgPath).catch(err => console.warn('Gorsel yukleme hatasi:', err));
   }
@@ -1855,8 +1856,8 @@ let pendingImages = []; // { blob, name, dataUrl }
 function handleImageUpload(files) {
   Array.from(files).forEach(file => {
     if (pendingImages.length >= 6) return;
-    compressImage(file, (blob, dataUrl) => {
-      pendingImages.push({ blob, name: file.name, dataUrl });
+    compressImage(file, (blob, dataUrl, ext) => {
+      pendingImages.push({ blob, name: file.name, dataUrl, ext: ext || 'jpg' });
       renderImagePreviews();
     });
   });
@@ -1876,9 +1877,13 @@ function compressImage(file, callback) {
       canvas.height = h;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, w, h);
+      // WebP destekleniyorsa WebP, yoksa JPEG fallback
+      const useWebP = canvas.toDataURL('image/webp').startsWith('data:image/webp');
+      const format = useWebP ? 'image/webp' : 'image/jpeg';
+      const quality = useWebP ? 0.82 : 0.8;
       canvas.toBlob(blob => {
-        callback(blob, canvas.toDataURL('image/jpeg', 0.8));
-      }, 'image/jpeg', 0.8);
+        callback(blob, canvas.toDataURL(format, quality), useWebP ? 'webp' : 'jpg');
+      }, format, quality);
     };
     img.src = e.target.result;
   };
@@ -2143,8 +2148,8 @@ function pbotSearchImages() {
 
 function pbotHandleImage(file) {
   if (!file) return;
-  compressImage(file, function(blob, dataUrl) {
-    pbotPendingImage = { blob, dataUrl };
+  compressImage(file, function(blob, dataUrl, ext) {
+    pbotPendingImage = { blob, dataUrl, ext: ext || 'webp' };
     const img = document.getElementById('pbot-crop-img');
     img.src = dataUrl;
     img.style.display = '';
@@ -2238,7 +2243,7 @@ function pbotAddPlace() {
 
   // Handle image
   if (pbotPendingImage) {
-    const imgPath = 'images/yerler/' + id + '.jpg';
+    const imgPath = 'images/yerler/' + id + '.' + (pbotPendingImage.ext || 'webp');
     place.image = imgPath;
     uploadImageToServer(pbotPendingImage.blob, imgPath).catch(err => console.warn('Gorsel yukleme hatasi:', err));
   }
