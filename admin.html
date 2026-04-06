@@ -899,6 +899,8 @@ function showPage(page) {
   document.querySelectorAll('.admin-nav-item[data-page]').forEach(n => {
     n.classList.toggle('active', n.dataset.page === page);
   });
+  // URL hash'i güncelle (F5'te kalması için)
+  history.replaceState(null, '', '#' + page);
   // Close sidebar on mobile
   if (window.innerWidth <= 900) {
     document.getElementById('admin-sidebar').classList.remove('open');
@@ -922,7 +924,14 @@ function toggleSidebar() {
    INIT
 ══════════════════════════════════════════════════ */
 function initApp() {
-  renderDashboard();
+  // Hash'ten son kaldığı sekmeyi aç
+  const hash = window.location.hash.replace('#', '');
+  const validPages = ['dashboard','venues','bot','placebot','routes','villages','export'];
+  if (hash && validPages.includes(hash)) {
+    showPage(hash);
+  } else {
+    renderDashboard();
+  }
   setupDragDrop();
 }
 
