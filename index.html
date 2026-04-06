@@ -642,6 +642,25 @@
       padding-top: 48px;
     }
     .hero-top-left { max-width: 680px; }
+    .hero-weather {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      font-size: .72rem;
+      font-weight: 600;
+      color: rgba(245,237,224,.45);
+      letter-spacing: .02em;
+      min-height: 20px;
+    }
+    .hero-weather-icon { font-size: .9rem; line-height: 1; }
+    .hero-weather-temp {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: .82rem;
+      color: rgba(245,237,224,.7);
+    }
+    .hero-weather-sep { width: 1px; height: 12px; background: rgba(245,237,224,.12); }
     .hero-badge {
       display: inline-flex;
       align-items: center;
@@ -873,6 +892,9 @@
     <!-- TOP: Headline + floating stat card -->
     <div class="hero-top">
       <div class="hero-top-left">
+
+        <!-- Weather -->
+        <div id="hero-weather" class="hero-weather"></div>
 
         <!-- Badge -->
         <div class="hero-badge">
@@ -1634,6 +1656,49 @@
   renderFooter();
   scrollFadeIn();
   initSearch('hero-search-input');
+
+  /* ── Hava Durumu (Open-Meteo API — ücretsiz, key gerektirmez) ── */
+  (function() {
+    const el = document.getElementById('hero-weather');
+    if (!el) return;
+    // Ayvacık/Assos koordinatları
+    const lat = 39.49, lon = 26.34;
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current=temperature_2m,weather_code&timezone=Europe%2FIstanbul';
+    fetch(url)
+      .then(r => r.json())
+      .then(data => {
+        if (!data.current) return;
+        const temp = Math.round(data.current.temperature_2m);
+        const code = data.current.weather_code;
+        // WMO hava kodu → emoji
+        const wmo = {
+          0:'☀️', 1:'🌤', 2:'⛅', 3:'☁️',
+          45:'🌫', 48:'🌫',
+          51:'🌦', 53:'🌦', 55:'🌧',
+          61:'🌧', 63:'🌧', 65:'🌧',
+          71:'🌨', 73:'🌨', 75:'❄️',
+          80:'🌦', 81:'🌧', 82:'⛈',
+          95:'⛈', 96:'⛈', 99:'⛈'
+        };
+        const emoji = wmo[code] || '🌡';
+        const labels = {
+          0:'Açık', 1:'Az bulutlu', 2:'Parçalı bulutlu', 3:'Bulutlu',
+          45:'Sisli', 48:'Sisli',
+          51:'Hafif yağmur', 53:'Yağmurlu', 55:'Yoğun yağmur',
+          61:'Yağmurlu', 63:'Yağmurlu', 65:'Şiddetli yağmur',
+          71:'Kar', 73:'Kar', 75:'Yoğun kar',
+          80:'Sağanak', 81:'Sağanak', 82:'Şiddetli sağanak',
+          95:'Gök gürültülü', 96:'Dolu', 99:'Dolu'
+        };
+        const label = labels[code] || '';
+        el.innerHTML =
+          '<span class="hero-weather-icon">' + emoji + '</span>' +
+          '<span class="hero-weather-temp">' + temp + '°C</span>' +
+          '<span class="hero-weather-sep"></span>' +
+          '<span>Ayvacık' + (label ? ' · ' + label : '') + '</span>';
+      })
+      .catch(() => {});
+  })();
 
   function heroSearchSubmit() {
     const input = document.getElementById('hero-search-input');
