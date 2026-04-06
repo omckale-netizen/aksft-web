@@ -420,15 +420,23 @@ function renderNav(opts = {}) {
         <div class="sd-body" id="sd-body"></div>
         <div class="sd-footer" id="sd-footer" style="display:none;">
           <div class="sd-sync" id="sd-sync">
-            <div class="sd-sync-row">
-              <span class="sd-sync-label">Favori Kodunuz</span>
-              <span class="sd-sync-code" id="sd-sync-code" onclick="navigator.clipboard.writeText(this.textContent).then(()=>{this.dataset.tip='Kopyalandi!';setTimeout(()=>this.dataset.tip='',1500)})">—</span>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+              <span style="font-size:1.1rem;">🔗</span>
+              <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);">Kesif Listenizi Paylasin</span>
             </div>
-            <div class="sd-sync-hint">Bu kodu paylasin veya baska cihazda kullanin</div>
-            <div class="sd-sync-row" style="margin-top:8px;">
-              <input type="text" id="sd-sync-input" class="sd-sync-inp" placeholder="Kod girin..." maxlength="8">
+            <div class="sd-sync-hint" style="margin-bottom:12px;">Bu kod sizin Assos rotaniz! Arkadaslariniza gonderin, ayni listeyi gorsunler. Baska bir cihazdan da erisebilirsiniz.</div>
+            <div class="sd-sync-row" style="margin-bottom:10px;">
+              <span class="sd-sync-label">Kodunuz</span>
+              <span class="sd-sync-code" id="sd-sync-code" onclick="navigator.clipboard.writeText(this.textContent).then(()=>{this.dataset.tip='Kopyalandi!';setTimeout(()=>this.dataset.tip='',1500)})">—</span>
+              <button onclick="navigator.clipboard.writeText(document.getElementById('sd-sync-code').textContent).then(()=>{this.textContent='Kopyalandi!';setTimeout(()=>this.textContent='Kopyala',1500)})" style="padding:5px 10px;border:1px solid rgba(26,39,68,.12);border-radius:6px;background:#fff;font-size:.68rem;font-weight:600;cursor:pointer;color:var(--navy);font-family:inherit;transition:all .15s;">Kopyala</button>
+            </div>
+            <div style="height:1px;background:rgba(26,39,68,.06);margin:10px 0;"></div>
+            <div class="sd-sync-hint" style="margin-bottom:6px;">Baskasinin listesini yukleme</div>
+            <div class="sd-sync-row">
+              <input type="text" id="sd-sync-input" class="sd-sync-inp" placeholder="Kodu yapistirin..." maxlength="8">
               <button class="sd-sync-load" onclick="loadFavCode()">Yukle</button>
             </div>
+            <div id="sd-sync-status" style="font-size:.72rem;margin-top:6px;min-height:16px;"></div>
           </div>
           <div style="display:flex;gap:8px;margin-top:12px;">
             <button class="sd-clear-btn" onclick="clearAllSaves()" style="flex:1">Tumunu Temizle</button>
@@ -643,12 +651,15 @@ function renderNav(opts = {}) {
   // Kod ile favorileri yükle
   window.loadFavCode = async function() {
     const input = document.getElementById('sd-sync-input');
+    const statusEl = document.getElementById('sd-sync-status');
     const code = (input?.value || '').trim().toUpperCase();
-    if (!code || code.length < 4) { alert('Gecerli bir kod girin.'); return; }
-    if (typeof firebase === 'undefined' || !firebase.firestore) { alert('Baglanti hatasi.'); return; }
+    if (statusEl) statusEl.innerHTML = '';
+    if (!code || code.length < 4) { if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Gecerli bir kod girin.</span>'; return; }
+    if (typeof firebase === 'undefined' || !firebase.firestore) { if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Baglanti hatasi.</span>'; return; }
+    if (statusEl) statusEl.innerHTML = '<span style="color:var(--text-muted)">Yukleniyor...</span>';
     try {
       const doc = await firebase.firestore().collection('favorites').doc(code).get();
-      if (!doc.exists) { alert('Bu kodla eslesen favori bulunamadi.'); return; }
+      if (!doc.exists) { if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Bu kodla eslesen liste bulunamadi.</span>'; return; }
       const data = doc.data();
       if (data.venues && Array.isArray(data.venues)) {
         localStorage.setItem(SD_KEY, JSON.stringify(data.venues));
@@ -658,9 +669,10 @@ function renderNav(opts = {}) {
         if (input) input.value = '';
         const codeEl = document.getElementById('sd-sync-code');
         if (codeEl) codeEl.textContent = code;
+        if (statusEl) statusEl.innerHTML = '<span style="color:#38A169">✓ ' + data.venues.length + ' mekan basariyla yuklendi!</span>';
       }
     } catch(err) {
-      alert('Yukleme hatasi: ' + err.message);
+      if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Yukleme hatasi: ' + err.message + '</span>';
     }
   };
 
