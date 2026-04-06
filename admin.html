@@ -463,59 +463,53 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
     <!-- ══════ MEKAN BOTU ══════ -->
     <div class="admin-page" id="page-bot">
       <h2>Mekan Botu</h2>
-      <p class="page-sub">Mekan adı ve konumu girin, bot bilgileri araştırsın.</p>
+      <p class="page-sub">Mekan bilgilerini girin, gorseli yukleyin. Onay sonrasi yayina alinir.</p>
 
-      <div class="panel-card" style="max-width:600px">
-        <div class="form-group" style="padding:20px 20px 0">
-          <label>Mekan Adı</label>
-          <input type="text" id="bot-name" placeholder="örn: Sunaba Kasrı Otel">
-        </div>
-        <div class="form-group" style="padding:0 20px">
-          <label>Konum / İlçe</label>
-          <input type="text" id="bot-location" placeholder="örn: Büyükhusun, Ayvacık">
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;padding:0 20px 20px">
-          <button class="btn btn-primary" onclick="botSearch()">&#128269; Araştır</button>
-          <button class="btn btn-secondary" onclick="botSearchGoogle()">Google'da Ara</button>
-          <button class="btn btn-secondary" onclick="botSearchMaps()">Google Maps'te Ara</button>
-          <button class="btn btn-secondary" onclick="botSearchInsta()">Instagram'da Ara</button>
+      <!-- Step 1: Arama -->
+      <div class="panel-card" style="max-width:700px">
+        <div class="panel-card-head"><h3>1. Mekan Bilgisi</h3></div>
+        <div style="padding:20px">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Mekan Adi *</label>
+              <input type="text" id="bot-name" placeholder="örn: Sunaba Kasrı Otel" oninput="document.getElementById('bot-id-preview').textContent=generateId(this.value)">
+            </div>
+            <div class="form-group">
+              <label>Konum *</label>
+              <input type="text" id="bot-location" list="konum-list" placeholder="Konum secin veya yazin">
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-secondary btn-sm" onclick="botSearchGoogle()">&#128269; Google'da Ara</button>
+            <button class="btn btn-secondary btn-sm" onclick="botSearchMaps()">&#128205; Google Maps</button>
+            <button class="btn btn-secondary btn-sm" onclick="botSearchInsta()">&#128247; Instagram</button>
+            <button class="btn btn-secondary btn-sm" onclick="botSearchImages()">&#128444; Google Gorseller</button>
+          </div>
+          <div style="font-size:.7rem;color:var(--text-muted);margin-top:8px">ID: <strong id="bot-id-preview">—</strong></div>
         </div>
       </div>
 
-      <div id="bot-results" style="margin-top:24px;display:none">
-        <div class="panel-card" style="padding:20px">
-          <h4 style="margin-bottom:16px">&#128203; Araştırma Sonuçları</h4>
-          <p class="page-sub">Aşağıdaki bilgileri gözden geçirin ve "Mekan Olarak Ekle" butonuna tıklayın.</p>
-
-          <div class="form-group">
-            <label>Mekan Adı</label>
-            <input type="text" id="bot-r-title">
-          </div>
+      <!-- Step 2: Detaylar -->
+      <div class="panel-card" style="max-width:700px;margin-top:16px">
+        <div class="panel-card-head"><h3>2. Detaylar</h3></div>
+        <div style="padding:20px">
           <div class="form-row">
             <div class="form-group">
-              <label>Kategori</label>
-              <select id="bot-r-category">
-                <option value="">Seçin</option>
-                <option value="kafe">Kafe</option>
-                <option value="restoran">Restoran</option>
-                <option value="kahvalti">Kahvaltı</option>
-                <option value="konaklama">Konaklama</option>
-                <option value="beach">Beach</option>
-                <option value="iskele">İskele</option>
+              <label>Kategori *</label>
+              <select id="bot-r-category" onchange="botAutoCatEmoji()">
+                <option value="">Secin</option>
+                <option value="kafe">☕ Kafe</option>
+                <option value="restoran">🍽 Restoran</option>
+                <option value="kahvalti">🥚 Kahvalti</option>
+                <option value="konaklama">🏨 Konaklama</option>
+                <option value="beach">🏖 Beach</option>
+                <option value="iskele">⚓ Iskele</option>
               </select>
             </div>
             <div class="form-group">
               <label>Emoji</label>
-              <input type="text" id="bot-r-emoji" placeholder="☕">
+              <input type="text" id="bot-r-emoji" placeholder="Otomatik" readonly>
             </div>
-          </div>
-          <div class="form-group">
-            <label>Konum</label>
-            <input type="text" id="bot-r-location">
-          </div>
-          <div class="form-group">
-            <label>Adres</label>
-            <input type="text" id="bot-r-address">
           </div>
           <div class="form-row">
             <div class="form-group">
@@ -528,27 +522,54 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
             </div>
           </div>
           <div class="form-group">
-            <label>Kısa Açıklama</label>
-            <textarea id="bot-r-shortDesc" rows="2"></textarea>
+            <label>Adres</label>
+            <input type="text" id="bot-r-address" placeholder="Tam adres">
           </div>
           <div class="form-group">
-            <label>Detaylı Açıklama</label>
-            <textarea id="bot-r-description" rows="4"></textarea>
+            <label>Kisa Aciklama</label>
+            <textarea id="bot-r-shortDesc" rows="2" placeholder="Kisa tanitim metni"></textarea>
           </div>
           <div class="form-group">
-            <label>Etiketler (virgül ile)</label>
-            <input type="text" id="bot-r-tags" placeholder="manzaralı, sakin, doğa">
+            <label>Detayli Aciklama</label>
+            <textarea id="bot-r-description" rows="3" placeholder="Detayli bilgi"></textarea>
           </div>
           <div class="form-group">
-            <label>Çalışma Saatleri</label>
-            <input type="text" id="bot-r-hours" placeholder="08:00–22:00">
+            <label>Etiketler (virgul ile)</label>
+            <input type="text" id="bot-r-tags" placeholder="manzarali, sakin, doga">
           </div>
 
-          <div style="display:flex;gap:8px;margin-top:20px">
-            <button class="btn btn-primary" onclick="botAddVenue()">&#9989; Mekan Olarak Ekle</button>
-            <button class="btn btn-secondary" onclick="document.getElementById('bot-results').style.display='none'">İptal</button>
+          <!-- Calisma Saatleri -->
+          <div class="form-group">
+            <label>Calisma Saatleri</label>
+            <div id="bot-wh-rows"></div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="addBotWhRow()" style="margin-top:6px">+ Satir Ekle</button>
+          </div>
+
+          <!-- Gorsel -->
+          <div class="form-group">
+            <label>Gorseller</label>
+            <div class="img-upload-area" id="bot-img-area">
+              <div class="img-upload-drop" onclick="document.getElementById('bot-img-file').click()">
+                <span style="font-size:1.5rem">&#128247;</span>
+                <p>Gorsel yuklemek icin tiklayin (maks 6)</p>
+              </div>
+              <input type="file" id="bot-img-file" multiple accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleBotImages(this.files)">
+              <div class="img-preview-grid" id="bot-img-preview"></div>
+            </div>
           </div>
         </div>
+      </div>
+
+      <!-- Step 3: Kaydet -->
+      <div style="max-width:700px;margin-top:16px;display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="botSubmitForApproval()" style="flex:1">&#128203; Onaya Gonder</button>
+        <button class="btn btn-secondary" onclick="botClearForm()">Temizle</button>
+      </div>
+
+      <!-- Onay Bekleyen Mekanlar -->
+      <div class="panel-card" style="max-width:700px;margin-top:32px">
+        <div class="panel-card-head"><h3>&#9203; Onay Bekleyenler</h3></div>
+        <div id="bot-pending-list"></div>
       </div>
     </div>
 
@@ -1392,7 +1413,7 @@ function showPage(page) {
   if (page === 'routes') renderRoutesTable();
   if (page === 'villages') { switchVillageTab(currentVPTab); }
   if (page === 'export') renderExport();
-  if (page === 'bot') { /* static form, no render needed */ }
+  if (page === 'bot') { renderPendingVenues(); addBotWhRow(); }
   if (page === 'analytics') renderAnalytics();
   if (page === 'messages') renderMessages();
 }
@@ -3029,90 +3050,111 @@ async function exportImages() {
 }
 
 /* ══════════════════════════════════════════════════
-   MEKAN BOTU
+   VENUE BOT (improved)
 ══════════════════════════════════════════════════ */
-function botSearch() {
-  const name = document.getElementById('bot-name').value.trim();
-  const loc = document.getElementById('bot-location').value.trim();
-  if (!name) { showToast('Mekan adı girin.', 'error'); return; }
+const BOT_CAT_EMOJIS = { kafe:'☕', restoran:'🍽', kahvalti:'🥚', konaklama:'🏨', beach:'🏖', iskele:'⚓' };
+let botPendingImages = [];
 
-  document.getElementById('bot-r-title').value = name;
-  document.getElementById('bot-r-location').value = loc;
-  document.getElementById('bot-r-address').value = loc ? loc + ', Ayvacık / Çanakkale' : '';
-  document.getElementById('bot-r-emoji').value = '';
-  document.getElementById('bot-r-category').value = '';
-  document.getElementById('bot-r-phone').value = '';
-  document.getElementById('bot-r-website').value = '';
-  document.getElementById('bot-r-shortDesc').value = '';
-  document.getElementById('bot-r-description').value = '';
-  document.getElementById('bot-r-tags').value = '';
-  document.getElementById('bot-r-hours').value = '';
-
-  const lower = name.toLowerCase();
-  if (lower.includes('otel') || lower.includes('pansiyon') || lower.includes('konaklama') || lower.includes('ev')) {
-    document.getElementById('bot-r-category').value = 'konaklama';
-    document.getElementById('bot-r-emoji').value = '🏨';
-  } else if (lower.includes('kafe') || lower.includes('cafe') || lower.includes('kahve')) {
-    document.getElementById('bot-r-category').value = 'kafe';
-    document.getElementById('bot-r-emoji').value = '☕';
-  } else if (lower.includes('restoran') || lower.includes('balık') || lower.includes('lokanta')) {
-    document.getElementById('bot-r-category').value = 'restoran';
-    document.getElementById('bot-r-emoji').value = '🍽';
-  } else if (lower.includes('kahvaltı') || lower.includes('kahvalti')) {
-    document.getElementById('bot-r-category').value = 'kahvalti';
-    document.getElementById('bot-r-emoji').value = '🥚';
-  } else if (lower.includes('beach') || lower.includes('plaj')) {
-    document.getElementById('bot-r-category').value = 'beach';
-    document.getElementById('bot-r-emoji').value = '🏖';
-  } else if (lower.includes('iskele')) {
-    document.getElementById('bot-r-category').value = 'iskele';
-    document.getElementById('bot-r-emoji').value = '⚓';
-  }
-
-  document.getElementById('bot-results').style.display = 'block';
-
-  const query = encodeURIComponent(name + ' ' + loc + ' Ayvacık Çanakkale telefon adres');
-  window.open('https://www.google.com/search?q=' + query, '_blank');
-
-  showToast('Google araması açıldı. Bilgileri formda doldurun.', 'success');
+function botAutoCatEmoji() {
+  const cat = document.getElementById('bot-r-category').value;
+  if (cat && BOT_CAT_EMOJIS[cat]) document.getElementById('bot-r-emoji').value = BOT_CAT_EMOJIS[cat];
 }
 
 function botSearchGoogle() {
   const name = document.getElementById('bot-name').value.trim();
   const loc = document.getElementById('bot-location').value.trim();
-  if (!name) { showToast('Mekan adı girin.', 'error'); return; }
-  const query = encodeURIComponent(name + ' ' + loc + ' Ayvacık Çanakkale');
-  window.open('https://www.google.com/search?q=' + query, '_blank');
+  if (!name) { showToast('Mekan adi girin.', 'error'); return; }
+  window.open('https://www.google.com/search?q=' + encodeURIComponent(name + ' ' + loc + ' Ayvacık Çanakkale telefon adres'), '_blank');
 }
-
 function botSearchMaps() {
   const name = document.getElementById('bot-name').value.trim();
   const loc = document.getElementById('bot-location').value.trim();
-  if (!name) { showToast('Mekan adı girin.', 'error'); return; }
-  const query = encodeURIComponent(name + ' ' + loc + ' Ayvacık');
-  window.open('https://www.google.com/maps/search/' + query, '_blank');
+  if (!name) { showToast('Mekan adi girin.', 'error'); return; }
+  window.open('https://www.google.com/maps/search/' + encodeURIComponent(name + ' ' + loc + ' Ayvacık'), '_blank');
 }
-
 function botSearchInsta() {
   const name = document.getElementById('bot-name').value.trim();
-  if (!name) { showToast('Mekan adı girin.', 'error'); return; }
-  const query = encodeURIComponent(name.replace(/\s+/g, ''));
-  window.open('https://www.instagram.com/explore/tags/' + query, '_blank');
+  if (!name) { showToast('Mekan adi girin.', 'error'); return; }
+  window.open('https://www.instagram.com/explore/tags/' + encodeURIComponent(name.replace(/\s+/g,'')), '_blank');
+}
+function botSearchImages() {
+  const name = document.getElementById('bot-name').value.trim();
+  const loc = document.getElementById('bot-location').value.trim();
+  if (!name) { showToast('Mekan adi girin.', 'error'); return; }
+  window.open('https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(name + ' ' + loc), '_blank');
 }
 
-function botAddVenue() {
-  const title = document.getElementById('bot-r-title').value.trim();
-  if (!title) { showToast('Mekan adı boş olamaz.', 'error'); return; }
+function addBotWhRow(days, hours) {
+  const container = document.getElementById('bot-wh-rows');
+  const row = document.createElement('div');
+  row.className = 'wh-row';
+  row.innerHTML = '<input type="text" class="wh-days" value="' + (days||'') + '" placeholder="Pazartesi - Cuma">' +
+    '<input type="text" class="wh-hours" value="' + (hours||'') + '" placeholder="08:00 - 22:00">' +
+    '<button type="button" class="btn-icon" onclick="this.parentElement.remove()" style="color:var(--red)">&times;</button>';
+  container.appendChild(row);
+}
+
+function handleBotImages(files) {
+  Array.from(files).forEach(file => {
+    if (botPendingImages.length >= 6) return;
+    compressImage(file, (blob, dataUrl, ext) => {
+      botPendingImages.push({ blob, dataUrl, ext: ext || 'webp' });
+      renderBotImagePreviews();
+    });
+  });
+}
+
+function renderBotImagePreviews() {
+  const grid = document.getElementById('bot-img-preview');
+  grid.innerHTML = botPendingImages.map((img, i) =>
+    '<div class="img-preview-item"><img src="' + img.dataUrl + '">' +
+    '<button class="img-preview-remove" onclick="botPendingImages.splice(' + i + ',1);renderBotImagePreviews()">×</button>' +
+    '<div class="img-preview-name">' + Math.round(img.blob.size/1024) + 'KB</div></div>'
+  ).join('');
+}
+
+function botClearForm() {
+  document.getElementById('bot-name').value = '';
+  document.getElementById('bot-location').value = '';
+  document.getElementById('bot-r-category').value = '';
+  document.getElementById('bot-r-emoji').value = '';
+  document.getElementById('bot-r-phone').value = '';
+  document.getElementById('bot-r-website').value = '';
+  document.getElementById('bot-r-address').value = '';
+  document.getElementById('bot-r-shortDesc').value = '';
+  document.getElementById('bot-r-description').value = '';
+  document.getElementById('bot-r-tags').value = '';
+  document.getElementById('bot-wh-rows').innerHTML = '';
+  document.getElementById('bot-id-preview').textContent = '—';
+  botPendingImages = [];
+  renderBotImagePreviews();
+  addBotWhRow();
+}
+
+async function botSubmitForApproval() {
+  const title = document.getElementById('bot-name').value.trim();
+  const location = document.getElementById('bot-location').value.trim();
+  const category = document.getElementById('bot-r-category').value;
+  if (!title) { showToast('Mekan adi girin.', 'error'); return; }
+  if (!category) { showToast('Kategori secin.', 'error'); return; }
 
   const id = generateId(title);
-  const category = document.getElementById('bot-r-category').value;
   const catDef = CAT_DEFAULTS[category] || {};
-
   const tagsStr = document.getElementById('bot-r-tags').value;
+
+  // Calisma saatleri
+  const whRows = document.querySelectorAll('#bot-wh-rows .wh-row');
+  const weeklyHours = [];
+  whRows.forEach(row => {
+    const d = row.querySelector('.wh-days').value.trim();
+    const h = row.querySelector('.wh-hours').value.trim();
+    if (d || h) weeklyHours.push({ days: d, hours: h });
+  });
+
   const venue = {
     id: id,
     title: title,
-    emoji: document.getElementById('bot-r-emoji').value.trim() || '📍',
+    emoji: document.getElementById('bot-r-emoji').value.trim() || BOT_CAT_EMOJIS[category] || '📍',
     category: category,
     iconBg: catDef.iconBg || '',
     tagBg: catDef.tagBg || '',
@@ -3120,31 +3162,106 @@ function botAddVenue() {
     tagText: catDef.tagText || '',
     shortDesc: document.getElementById('bot-r-shortDesc').value.trim(),
     description: document.getElementById('bot-r-description').value.trim(),
-    location: document.getElementById('bot-r-location').value.trim(),
+    location: location,
     tags: tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [],
     keywords: [],
-    hours: document.getElementById('bot-r-hours').value.trim(),
+    hours: weeklyHours.length > 0 ? weeklyHours[0].hours : '',
     images: [],
     phone: document.getElementById('bot-r-phone').value.trim(),
     address: document.getElementById('bot-r-address').value.trim(),
     website: document.getElementById('bot-r-website').value.trim(),
-    weeklyHours: []
+    weeklyHours: weeklyHours,
+    active: false,
+    featured: false,
+    status: 'pending',
+    submittedAt: new Date().toISOString()
   };
   venue.keywords = [...venue.title.toLowerCase().split(/\s+/), ...venue.tags.map(t => t.toLowerCase()), venue.category].filter(Boolean);
 
-  if (draftData.venues.some(v => v.id === venue.id)) {
-    showToast('Bu ID ile başka bir mekan zaten var.', 'error');
-    return;
+  showToast('Kaydediliyor...', 'success');
+
+  try {
+    // Gorselleri yukle
+    if (botPendingImages.length > 0) {
+      const imgPaths = [];
+      for (let i = 0; i < botPendingImages.length; i++) {
+        const path = 'images/mekanlar/' + id + '/' + (i+1) + '.' + (botPendingImages[i].ext || 'webp');
+        await uploadImageToServer(botPendingImages[i].blob, path);
+        imgPaths.push(path);
+      }
+      venue.images = imgPaths;
+    }
+
+    // pending_venues koleksiyonuna kaydet
+    await db.collection('pending_venues').doc(id).set(venue);
+    showToast('"' + title + '" onay icin gonderildi!', 'success');
+    botClearForm();
+    renderPendingVenues();
+  } catch(err) {
+    showToast('Hata: ' + err.message, 'error');
   }
+}
 
-  draftData.venues.push(venue);
-  saveVenueToFirestore(venue);
+async function renderPendingVenues() {
+  const el = document.getElementById('bot-pending-list');
+  if (!el) return;
+  try {
+    const snap = await db.collection('pending_venues').orderBy('submittedAt', 'desc').get();
+    const items = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
+    el.innerHTML = items.length === 0
+      ? '<div style="padding:24px;text-align:center;color:var(--text-muted)">Onay bekleyen mekan yok.</div>'
+      : items.map(v =>
+        '<div class="recent-item" style="flex-wrap:wrap;gap:8px">' +
+          '<div class="recent-emoji">' + (v.emoji || '📍') + '</div>' +
+          '<div class="recent-info" style="flex:1;min-width:150px">' +
+            '<div class="ri-title">' + v.title + '</div>' +
+            '<div class="ri-meta">' + (v.category || '-') + ' · ' + (v.location || '-') + ' · ' + (v.images?.length || 0) + ' gorsel</div>' +
+          '</div>' +
+          '<div style="display:flex;gap:6px">' +
+            '<button class="btn btn-sm btn-primary" onclick="approveVenue(\'' + v._id + '\')" style="padding:5px 12px">✓ Onayla</button>' +
+            '<button class="btn btn-sm btn-secondary" onclick="openVenueModal(\'' + v._id + '\');showPage(\'venues\')" style="padding:5px 12px">✏ Duzenle</button>' +
+            '<button class="btn btn-sm btn-danger" onclick="rejectVenue(\'' + v._id + '\')" style="padding:5px 12px;background:var(--red);color:#fff;border-color:var(--red)">✕ Reddet</button>' +
+          '</div>' +
+        '</div>').join('');
+  } catch(err) {
+    el.innerHTML = '<div style="padding:16px;color:var(--red)">Yukleme hatasi.</div>';
+  }
+}
 
-  document.getElementById('bot-results').style.display = 'none';
-  document.getElementById('bot-name').value = '';
-  document.getElementById('bot-location').value = '';
+async function approveVenue(id) {
+  try {
+    const doc = await db.collection('pending_venues').doc(id).get();
+    if (!doc.exists) return;
+    const venue = doc.data();
+    venue.status = 'active';
+    venue.active = true;
+    venue.approvedAt = new Date().toISOString();
+    delete venue.submittedAt;
 
-  showToast('"' + title + '" eklendi! Mekanlar sayfasindan duzenleyebilirsiniz.', 'success');
+    // venues koleksiyonuna tasi
+    await db.collection('venues').doc(id).set(venue);
+    await db.collection('pending_venues').doc(id).delete();
+
+    // draftData guncelle
+    draftData.venues.push(venue);
+
+    renderPendingVenues();
+    showToast('"' + venue.title + '" onaylandi ve yayina alindi!', 'success');
+  } catch(err) {
+    showToast('Onay hatasi: ' + err.message, 'error');
+  }
+}
+
+async function rejectVenue(id) {
+  showConfirm('Mekan Reddedilecek', 'Bu mekan talebi silinecek. Emin misiniz?', async () => {
+    try {
+      await db.collection('pending_venues').doc(id).delete();
+      renderPendingVenues();
+      showToast('Mekan talebi reddedildi.', 'success');
+    } catch(err) {
+      showToast('Hata: ' + err.message, 'error');
+    }
+  });
 }
 
 /* ══════════════════════════════════════════════════
