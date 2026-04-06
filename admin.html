@@ -1466,16 +1466,11 @@ function saveVenue(e) {
   ].filter(Boolean);
 
   if (editingVenueId) {
-    // Update existing
+    // Update existing — mevcut verileri koru, formdan gelenleri üstüne yaz
     const idx = draftData.venues.findIndex(v => v.id === editingVenueId);
     if (idx >= 0) {
-      // Preserve fields we don't edit
       const existing = draftData.venues[idx];
-      venue.iconBg = venue.iconBg || existing.iconBg;
-      venue.tagBg = venue.tagBg || existing.tagBg;
-      venue.tagColor = venue.tagColor || existing.tagColor;
-      venue.tagText = venue.tagText || existing.tagText;
-      draftData.venues[idx] = venue;
+      draftData.venues[idx] = { ...existing, ...venue };
     }
   } else {
     // Check duplicate id
