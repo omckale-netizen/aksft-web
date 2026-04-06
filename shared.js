@@ -1001,8 +1001,8 @@ function renderRoutePage(routeId) {
       /* ── HERO ── */
       .rp-hero{
         position:relative;overflow:hidden;
-        display:flex;align-items:center;justify-content:center;
-        padding:0 24px;
+        display:flex;flex-direction:column;align-items:center;justify-content:center;
+        padding:90px 24px 0;
       }
       .rp-hero::before{
         content:'';position:absolute;inset:0;pointer-events:none;
@@ -1016,8 +1016,12 @@ function renderRoutePage(routeId) {
       .rp-orb-1{animation:rpOrb 17s ease-in-out infinite;}
       .rp-orb-2{animation:rpOrb 14s ease-in-out infinite reverse 1s;}
       /* Back button */
+      .rp-hero-topbar{
+        display:flex;align-items:center;justify-content:space-between;
+        width:100%;max-width:900px;margin:0 auto;
+        padding:0 28px;position:relative;z-index:10;margin-bottom:16px;
+      }
       .rp-back-btn{
-        position:absolute;top:88px;left:28px;z-index:10;
         display:inline-flex;align-items:center;gap:7px;
         font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
         color:rgba(245,237,224,.4);text-decoration:none;
@@ -1030,7 +1034,6 @@ function renderRoutePage(routeId) {
       .rp-back-btn:hover{color:rgba(245,237,224,.85);border-color:rgba(245,237,224,.22);background:rgba(255,255,255,.07);}
       /* Share */
       .rp-share-hero{
-        position:absolute;top:88px;right:28px;z-index:10;
         display:inline-flex;align-items:center;gap:7px;
         font-size:.72rem;font-weight:600;
         color:rgba(245,237,224,.4);
@@ -1047,7 +1050,7 @@ function renderRoutePage(routeId) {
         max-width:900px;width:100%;
         display:grid;grid-template-columns:1fr auto;
         gap:40px;align-items:center;
-        padding:110px 0 80px;
+        padding:24px 0 80px;
       }
       /* Eyebrow tag */
       .rp-tag{
@@ -1156,8 +1159,8 @@ function renderRoutePage(routeId) {
         .rp-hero-inner{grid-template-columns:1fr;padding:100px 0 64px;}
         .rp-stat-card{flex-direction:row;flex-wrap:wrap;justify-content:center;min-width:unset;padding:20px 24px;gap:16px;}
         .rp-stat-sep{display:none;}
-        .rp-back-btn,.rp-share-hero{top:76px;}
-        .rp-back-btn{left:16px;} .rp-share-hero{right:16px;}
+        .rp-hero{padding-top:72px;}
+        .rp-hero-topbar{padding:0 16px;}
         .rp-wrap{padding:36px 18px 80px;}
         .rp-desc-box{padding:22px 20px;}
         .rp-stops{padding-left:38px;}
@@ -1213,14 +1216,16 @@ function renderRoutePage(routeId) {
     <div class="rp-hero" style="background:${p.bg};">
       <div class="rp-orb rp-orb-1" style="width:480px;height:480px;background:${p.g1};top:-130px;right:-80px;opacity:.55;"></div>
       <div class="rp-orb rp-orb-2" style="width:360px;height:360px;background:${p.g2};bottom:-100px;left:-60px;opacity:.5;"></div>
-      <a href="${basePath}rotalar.html" class="rp-back-btn">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-        Rotalar
-      </a>
-      <button class="rp-share-hero" onclick="rpShare('${routeId}','${encodeURIComponent(r.title)}','${encodeURIComponent(r.shortDesc)}')">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-        Paylaş
-      </button>
+      <div class="rp-hero-topbar">
+        <a href="${basePath}rotalar.html" class="rp-back-btn">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+          Rotalar
+        </a>
+        <button class="rp-share-hero" onclick="rpShare('${routeId}','${encodeURIComponent(r.title)}','${encodeURIComponent(r.shortDesc)}')">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Paylaş
+        </button>
+      </div>
       <div class="rp-hero-inner" style="--rp-ac:${p.stop};">
         <div>
           <div class="rp-tag rp-anim" style="background:${r.tagColor};color:${r.tagTextColor};border-color:${r.tagTextColor}33;animation-delay:.05s;">${r.tag}</div>
