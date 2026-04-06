@@ -1099,33 +1099,6 @@ window.DATA = {
           "hours": "08:00 – 00:00"
         }
       ]
-    },
-    {
-      "id": "dafd",
-      "title": "dafd",
-      "emoji": "",
-      "category": "kahvalti",
-      "iconBg": "rgba(212,147,90,0.12)",
-      "tagBg": "rgba(212,147,90,0.15)",
-      "tagColor": "#8A5520",
-      "tagText": "Kahvalti",
-      "shortDesc": "",
-      "description": "",
-      "location": "",
-      "tags": [],
-      "keywords": [
-        "dafd",
-        "kahvalti"
-      ],
-      "hours": "",
-      "images": [
-        "images/mekanlar/dafd/1.jpg"
-      ],
-      "phone": "",
-      "address": "",
-      "website": "",
-      "featured": false,
-      "weeklyHours": []
     }
   ],
   "villages": [
