@@ -28,8 +28,13 @@ html{font-size:15px}
 body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh}
 
 /* ── AUTH GATE ── */
-#auth-gate{position:fixed;inset:0;z-index:9999;background:linear-gradient(150deg,#06101E 0%,#0C1A30 55%,#091420 100%);display:flex;align-items:center;justify-content:center;flex-direction:column}
+#auth-gate{position:fixed;inset:0;z-index:9999;background:linear-gradient(150deg,#06101E 0%,#0C1A30 55%,#091420 100%);display:none;align-items:center;justify-content:center;flex-direction:column}
+#auth-gate.show{display:flex}
 #auth-gate.hidden{display:none}
+#admin-loading{position:fixed;inset:0;z-index:9998;background:var(--cream);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+#admin-loading.hidden{display:none}
+.ld-spinner{width:28px;height:28px;border:3px solid rgba(26,39,68,.1);border-top-color:var(--terra);border-radius:50%;animation:ld-spin .6s linear infinite}
+@keyframes ld-spin{to{transform:rotate(360deg)}}
 #auth-gate::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(245,237,224,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(245,237,224,.02) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
 .auth-orb{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none}
 .auth-orb-1{width:400px;height:400px;background:rgba(196,82,26,.12);top:-100px;left:-80px}
@@ -268,6 +273,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 </style>
 </head>
 <body>
+
+<!-- LOADING -->
+<div id="admin-loading">
+  <div class="ld-spinner"></div>
+  <span style="font-size:.8rem;color:var(--text-muted)">Yukleniyor...</span>
+</div>
 
 <!-- AUTH GATE -->
 <div id="auth-gate">
@@ -1348,9 +1359,14 @@ async function changePassword() {
 fbAuth.onAuthStateChanged(async (user) => {
   if (user) {
     document.getElementById('auth-gate').classList.add('hidden');
+    document.getElementById('auth-gate').classList.remove('show');
     document.getElementById('admin-wrap').style.display = 'flex';
     await loadDataFromFirestore();
+    document.getElementById('admin-loading').classList.add('hidden');
     initApp();
+  } else {
+    document.getElementById('admin-loading').classList.add('hidden');
+    document.getElementById('auth-gate').classList.add('show');
   }
 });
 
