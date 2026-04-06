@@ -143,6 +143,20 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 .export-btns{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
 
 /* ── RECENT LIST ── */
+.dash-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+@media(max-width:900px){.dash-row{grid-template-columns:1fr}}
+.dash-half{margin-bottom:0 !important}
+.dash-actions{padding:12px 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dash-action-btn{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--radius-sm);border:1px solid rgba(0,0,0,.05);background:#fff;cursor:pointer;transition:all .15s;font-family:inherit;font-size:.82rem;font-weight:600;color:var(--text);text-align:left}
+.dash-action-btn:hover{background:var(--cream-dark);transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.da-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.85rem;font-weight:700;flex-shrink:0}
+.dash-cat-row{display:flex;align-items:center;gap:12px;padding:10px 20px;border-bottom:1px solid rgba(0,0,0,.03)}
+.dash-cat-row:last-child{border-bottom:none}
+.dash-cat-emoji{font-size:1rem;width:24px;text-align:center;flex-shrink:0}
+.dash-cat-name{flex:1;font-size:.84rem;font-weight:600;color:var(--text)}
+.dash-cat-bar{flex:2;height:6px;border-radius:3px;background:rgba(0,0,0,.04);overflow:hidden}
+.dash-cat-fill{height:100%;border-radius:3px;transition:width .5s}
+.dash-cat-count{font-size:.78rem;font-weight:700;color:var(--text-light);min-width:20px;text-align:right}
 .recent-item{display:flex;align-items:center;gap:14px;padding:13px 20px;border-bottom:1px solid rgba(0,0,0,.03)}
 .recent-item:last-child{border-bottom:none}
 .recent-emoji{font-size:1.4rem;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:var(--cream);border-radius:var(--radius-sm);flex-shrink:0}
@@ -271,10 +285,55 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
     <div class="admin-page active" id="page-dashboard">
       <h2>Genel Bakis</h2>
       <p class="page-sub">Sitenin genel durumuna hizli bir bakis.</p>
+
+      <!-- Stats -->
       <div class="stats-grid" id="stats-grid"></div>
+
+      <!-- İki kolon: Hızlı İşlemler + Kategori Dağılımı -->
+      <div class="dash-row">
+        <div class="panel-card dash-half">
+          <div class="panel-card-head"><h3>Hizli Islemler</h3></div>
+          <div class="dash-actions">
+            <button class="dash-action-btn" onclick="showPage('venues');openVenueModal()">
+              <span class="da-icon" style="background:var(--terra)">+</span>
+              <span>Yeni Mekan Ekle</span>
+            </button>
+            <button class="dash-action-btn" onclick="showPage('bot')">
+              <span class="da-icon" style="background:var(--blue)">&#129302;</span>
+              <span>Mekan Botu</span>
+            </button>
+            <button class="dash-action-btn" onclick="showPage('placebot')">
+              <span class="da-icon" style="background:var(--green)">📍</span>
+              <span>Yer Botu</span>
+            </button>
+            <button class="dash-action-btn" onclick="showPage('export')">
+              <span class="da-icon" style="background:var(--navy)">📦</span>
+              <span>Disa Aktar</span>
+            </button>
+          </div>
+        </div>
+        <div class="panel-card dash-half">
+          <div class="panel-card-head"><h3>Kategori Dagilimi</h3></div>
+          <div id="dash-categories"></div>
+        </div>
+      </div>
+
+      <!-- İki kolon: Son Eklenenler + Öne Çıkanlar -->
+      <div class="dash-row">
+        <div class="panel-card dash-half">
+          <div class="panel-card-head"><h3>Son Eklenen Mekanlar</h3></div>
+          <div id="recent-venues"></div>
+        </div>
+        <div class="panel-card dash-half">
+          <div class="panel-card-head"><h3>&#11088; One Cikan Mekanlar</h3></div>
+          <div id="dash-featured"></div>
+        </div>
+      </div>
+
+      <!-- Görselsiz Mekanlar -->
       <div class="panel-card">
-        <div class="panel-card-head"><h3>Son Eklenen Mekanlar</h3></div>
-        <div id="recent-venues"></div>
+        <div class="panel-card-head"><h3>&#128247; Gorselsiz Mekanlar</h3></div>
+        <div id="dash-no-images"></div>
       </div>
     </div>
 
@@ -990,30 +1049,87 @@ function renderDashboard() {
   const vi = draftData.villages || [];
   const p = draftData.places || [];
   const konaklama = v.filter(x => x.category === 'konaklama').length;
+  const featured = v.filter(x => x.featured).length;
+  const withImages = v.filter(x => x.images && x.images.length > 0).length;
   let openCount = 0;
   v.forEach(x => { if (getVenueStatus(x) === true) openCount++; });
 
+  const catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvalti',konaklama:'Konaklama',beach:'Beach',iskele:'Iskele'};
+  const catEmojis = {kafe:'☕',restoran:'🍽',kahvalti:'🥚',konaklama:'🏨',beach:'🏖',iskele:'⚓'};
+  const catColors = {kafe:'#C4521A',restoran:'#1A6B8A',kahvalti:'#D4935A',konaklama:'#5A7A56',beach:'#1A9A8A',iskele:'#3A5A8A'};
+
+  /* Stats */
   document.getElementById('stats-grid').innerHTML = `
     <div class="stat-card"><div class="stat-label">Toplam Mekan</div><div class="stat-val">${v.length}</div></div>
     <div class="stat-card"><div class="stat-label">Toplam Rota</div><div class="stat-val">${r.length}</div></div>
     <div class="stat-card"><div class="stat-label">Toplam Koy</div><div class="stat-val">${vi.length}</div></div>
     <div class="stat-card"><div class="stat-label">Toplam Yer</div><div class="stat-val">${p.length}</div></div>
-    <div class="stat-card terra"><div class="stat-label">Konaklama</div><div class="stat-val">${konaklama}</div></div>
+    <div class="stat-card terra"><div class="stat-label">One Cikan</div><div class="stat-val">${featured}</div></div>
     <div class="stat-card green"><div class="stat-label">Su An Acik</div><div class="stat-val">${openCount}</div></div>
   `;
 
+  /* Kategori dağılımı */
+  const catCounts = {};
+  v.forEach(x => { catCounts[x.category] = (catCounts[x.category] || 0) + 1; });
+  const maxCat = Math.max(...Object.values(catCounts), 1);
+  const catEl = document.getElementById('dash-categories');
+  if (catEl) {
+    catEl.innerHTML = Object.keys(catLabels).map(cat => {
+      const count = catCounts[cat] || 0;
+      const pct = Math.round(count / maxCat * 100);
+      return '<div class="dash-cat-row">' +
+        '<span class="dash-cat-emoji">' + (catEmojis[cat]||'') + '</span>' +
+        '<span class="dash-cat-name">' + (catLabels[cat]||cat) + '</span>' +
+        '<div class="dash-cat-bar"><div class="dash-cat-fill" style="width:' + pct + '%;background:' + (catColors[cat]||'#718096') + '"></div></div>' +
+        '<span class="dash-cat-count">' + count + '</span>' +
+      '</div>';
+    }).join('');
+  }
+
+  /* Son eklenenler */
   const recent = v.slice(-5).reverse();
-  const catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvalti',konaklama:'Konaklama',beach:'Beach',iskele:'Iskele'};
   document.getElementById('recent-venues').innerHTML = recent.length === 0
     ? '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:.88rem">Henuz mekan yok.</div>'
     : recent.map(x => `
-      <div class="recent-item">
+      <div class="recent-item" style="cursor:pointer" onclick="showPage('venues');openVenueModal('${x.id}')">
         <div class="recent-emoji">${x.emoji || '?'}</div>
         <div class="recent-info">
           <div class="ri-title">${x.title}</div>
           <div class="ri-meta">${catLabels[x.category] || x.category} &middot; ${x.location || '-'}</div>
         </div>
       </div>`).join('');
+
+  /* Öne çıkanlar */
+  const featList = v.filter(x => x.featured);
+  const featEl = document.getElementById('dash-featured');
+  if (featEl) {
+    featEl.innerHTML = featList.length === 0
+      ? '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:.88rem">Henuz one cikan mekan yok.</div>'
+      : featList.map(x => `
+        <div class="recent-item" style="cursor:pointer" onclick="showPage('venues');openVenueModal('${x.id}')">
+          <div class="recent-emoji">${x.emoji || '?'}</div>
+          <div class="recent-info">
+            <div class="ri-title">⭐ ${x.title}</div>
+            <div class="ri-meta">${catLabels[x.category] || x.category} &middot; ${x.location || '-'}</div>
+          </div>
+        </div>`).join('');
+  }
+
+  /* Görselsiz mekanlar */
+  const noImg = v.filter(x => !x.images || x.images.length === 0);
+  const noImgEl = document.getElementById('dash-no-images');
+  if (noImgEl) {
+    noImgEl.innerHTML = noImg.length === 0
+      ? '<div style="padding:24px;text-align:center;color:var(--green);font-size:.88rem">✓ Tum mekanlarin gorseli var!</div>'
+      : noImg.map(x => `
+        <div class="recent-item" style="cursor:pointer" onclick="showPage('venues');openVenueModal('${x.id}')">
+          <div class="recent-emoji">${x.emoji || '?'}</div>
+          <div class="recent-info">
+            <div class="ri-title">${x.title}</div>
+            <div class="ri-meta" style="color:var(--red)">Gorsel eklenmemis</div>
+          </div>
+        </div>`).join('');
+  }
 }
 
 /* ══════════════════════════════════════════════════
