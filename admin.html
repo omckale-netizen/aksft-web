@@ -238,6 +238,22 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 .crop-safe-zone{position:absolute;inset:0;border:2px dashed rgba(255,255,255,.35);border-radius:var(--radius-sm);pointer-events:none}
 .btn-sm{padding:6px 12px;font-size:.75rem}
 .ana-filter.active{background:var(--navy) !important;color:#fff !important;border-color:var(--navy) !important}
+.msg-tab.active{background:var(--navy) !important;color:#fff !important;border-color:var(--navy) !important}
+.msg-item{display:flex;gap:14px;padding:16px 20px;border-bottom:1px solid rgba(0,0,0,.04);cursor:pointer;transition:background .15s}
+.msg-item:hover{background:rgba(0,0,0,.02)}
+.msg-item:last-child{border-bottom:none}
+.msg-item.unread{background:rgba(196,82,26,.03);border-left:3px solid var(--terra)}
+.msg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:6px}
+.msg-dot.unread{background:var(--terra)}
+.msg-dot.read{background:transparent}
+.msg-info{flex:1;min-width:0}
+.msg-name{font-weight:700;font-size:.88rem;color:var(--navy)}
+.msg-subject{font-size:.75rem;color:var(--terra);font-weight:600;margin-top:2px}
+.msg-preview{font-size:.78rem;color:var(--text-light);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg-date{font-size:.68rem;color:var(--text-muted);flex-shrink:0;text-align:right}
+.msg-detail-row{display:flex;gap:8px;margin-bottom:10px;font-size:.85rem}
+.msg-detail-label{font-weight:700;color:var(--navy);min-width:70px}
+.msg-detail-val{color:var(--text)}
 .ana-bar{flex:1;min-width:8px;border-radius:3px 3px 0 0;background:var(--terra);transition:height .4s;position:relative;cursor:default}
 .ana-bar:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:4px 8px;border-radius:6px;font-size:.65rem;white-space:nowrap;z-index:5}
 
@@ -311,6 +327,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
       </a>
       <a class="admin-nav-item" data-page="settings" onclick="showPage('settings')">
         <span class="nav-icon">⚙️</span> Ayarlar
+      </a>
+      <a class="admin-nav-item" data-page="messages" onclick="showPage('messages')">
+        <span class="nav-icon">✉️</span> Mesajlar <span id="msg-badge" style="background:var(--red);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;display:none"></span>
       </a>
       <a class="admin-nav-item" data-page="analytics" onclick="showPage('analytics')">
         <span class="nav-icon">📊</span> Istatistikler
@@ -724,6 +743,33 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
           <button class="btn btn-secondary" onclick="exportDataJS()">&#128229; data.js Indir (Yedek)</button>
           <button class="btn btn-danger" onclick="confirmReset()">&#128465; Degisiklikleri Sifirla</button>
         </div>
+      </div>
+    </div>
+
+    <!-- ══════ MESSAGES ══════ -->
+    <div class="admin-page" id="page-messages">
+      <h2>Mesajlar</h2>
+      <p class="page-sub">Iletisim formundan gelen mesajlar.</p>
+      <div class="panel-card">
+        <div class="panel-card-head">
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn-sm btn-secondary msg-tab active" onclick="setMsgFilter('all',this)">Tumu</button>
+            <button class="btn btn-sm btn-secondary msg-tab" onclick="setMsgFilter('unread',this)">Okunmamis</button>
+            <button class="btn btn-sm btn-secondary msg-tab" onclick="setMsgFilter('read',this)">Okunmus</button>
+          </div>
+        </div>
+        <div id="messages-list"></div>
+      </div>
+    </div>
+
+    <!-- Mesaj Detay Modal -->
+    <div class="modal-overlay" id="msg-modal">
+      <div class="modal" style="max-width:560px">
+        <div class="modal-head">
+          <h3 id="msg-modal-title">Mesaj</h3>
+          <button class="modal-close" onclick="closeMsgModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="msg-modal-body"></div>
       </div>
     </div>
 
@@ -1265,6 +1311,7 @@ function showPage(page) {
   if (page === 'export') renderExport();
   if (page === 'bot') { /* static form, no render needed */ }
   if (page === 'analytics') renderAnalytics();
+  if (page === 'messages') renderMessages();
 }
 
 function toggleSidebar() {
@@ -1278,7 +1325,7 @@ function toggleSidebar() {
 function initApp() {
   // Hash'ten son kaldığı sekmeyi aç
   const hash = window.location.hash.replace('#', '');
-  const validPages = ['dashboard','venues','bot','placebot','routes','villages','export','settings','analytics'];
+  const validPages = ['dashboard','venues','bot','placebot','routes','villages','export','settings','analytics','messages'];
   if (hash && validPages.includes(hash)) {
     showPage(hash);
   } else {
@@ -1286,6 +1333,115 @@ function initApp() {
   }
   setupDragDrop();
 }
+
+/* ══════════════════════════════════════════════════
+   MESSAGES
+══════════════════════════════════════════════════ */
+let msgFilter = 'all';
+let allMessages = [];
+
+function setMsgFilter(f, btn) {
+  msgFilter = f;
+  document.querySelectorAll('.msg-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderMessageList();
+}
+
+async function renderMessages() {
+  try {
+    const snap = await db.collection('messages').orderBy('timestamp', 'desc').limit(100).get();
+    allMessages = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
+    updateMsgBadge();
+    renderMessageList();
+  } catch(err) {
+    document.getElementById('messages-list').innerHTML = '<div style="padding:24px;color:var(--red)">Mesajlar yuklenemedi: ' + err.message + '</div>';
+  }
+}
+
+function updateMsgBadge() {
+  const unread = allMessages.filter(m => !m.read).length;
+  const badge = document.getElementById('msg-badge');
+  if (badge) {
+    badge.textContent = unread;
+    badge.style.display = unread > 0 ? '' : 'none';
+  }
+}
+
+function renderMessageList() {
+  let msgs = allMessages;
+  if (msgFilter === 'unread') msgs = msgs.filter(m => !m.read);
+  if (msgFilter === 'read') msgs = msgs.filter(m => m.read);
+
+  document.getElementById('messages-list').innerHTML = msgs.length === 0
+    ? '<div style="padding:32px;text-align:center;color:var(--text-muted)">' + (msgFilter === 'unread' ? 'Okunmamis mesaj yok.' : 'Henuz mesaj yok.') + '</div>'
+    : msgs.map(m => {
+      const date = m.timestamp ? new Date(m.timestamp) : null;
+      const dateStr = date ? date.toLocaleDateString('tr-TR', { day:'2-digit', month:'short', year:'numeric' }) : '';
+      const timeStr = date ? date.toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' }) : '';
+      return '<div class="msg-item ' + (m.read ? '' : 'unread') + '" onclick="openMessage(\'' + m._id + '\')">' +
+        '<div class="msg-dot ' + (m.read ? 'read' : 'unread') + '"></div>' +
+        '<div class="msg-info">' +
+          '<div class="msg-name">' + (m.name || 'Isimsiz') + '</div>' +
+          '<div class="msg-subject">' + (m.subject || 'Genel') + '</div>' +
+          '<div class="msg-preview">' + (m.message || '').substring(0, 80) + '</div>' +
+        '</div>' +
+        '<div class="msg-date">' + dateStr + '<br>' + timeStr + '</div>' +
+      '</div>';
+    }).join('');
+}
+
+async function openMessage(docId) {
+  const m = allMessages.find(x => x._id === docId);
+  if (!m) return;
+
+  // Okundu olarak işaretle
+  if (!m.read) {
+    m.read = true;
+    await db.collection('messages').doc(docId).update({ read: true });
+    updateMsgBadge();
+    renderMessageList();
+  }
+
+  document.getElementById('msg-modal-title').textContent = m.subject || 'Mesaj';
+  document.getElementById('msg-modal-body').innerHTML =
+    '<div class="msg-detail-row"><span class="msg-detail-label">Gonderen:</span><span class="msg-detail-val">' + (m.name || '-') + '</span></div>' +
+    '<div class="msg-detail-row"><span class="msg-detail-label">E-posta:</span><span class="msg-detail-val"><a href="mailto:' + (m.email || '') + '" style="color:var(--terra)">' + (m.email || '-') + '</a></span></div>' +
+    (m.phone ? '<div class="msg-detail-row"><span class="msg-detail-label">Telefon:</span><span class="msg-detail-val"><a href="tel:' + m.phone + '" style="color:var(--terra)">' + m.phone + '</a></span></div>' : '') +
+    '<div class="msg-detail-row"><span class="msg-detail-label">Konu:</span><span class="msg-detail-val">' + (m.subject || 'Genel') + '</span></div>' +
+    '<div class="msg-detail-row"><span class="msg-detail-label">Tarih:</span><span class="msg-detail-val">' + (m.timestamp ? new Date(m.timestamp).toLocaleString('tr-TR') : '-') + '</span></div>' +
+    '<hr style="border:none;border-top:1px solid rgba(0,0,0,.06);margin:16px 0">' +
+    '<div style="font-size:.88rem;color:var(--text);line-height:1.8;white-space:pre-wrap">' + (m.message || '') + '</div>' +
+    '<div style="display:flex;gap:8px;margin-top:20px">' +
+      '<a href="mailto:' + (m.email || '') + '?subject=Re: ' + encodeURIComponent(m.subject || 'Mesajiniz') + '" class="btn btn-primary btn-sm">Yanit Gonder</a>' +
+      '<button class="btn btn-danger btn-sm" onclick="deleteMessage(\'' + docId + '\')">Sil</button>' +
+    '</div>';
+  document.getElementById('msg-modal').classList.add('show');
+}
+
+function closeMsgModal() {
+  document.getElementById('msg-modal').classList.remove('show');
+}
+
+async function deleteMessage(docId) {
+  await db.collection('messages').doc(docId).delete();
+  allMessages = allMessages.filter(m => m._id !== docId);
+  closeMsgModal();
+  renderMessageList();
+  updateMsgBadge();
+  showToast('Mesaj silindi.', 'success');
+}
+
+// Mesaj modalı kapatma
+document.getElementById('msg-modal')?.addEventListener('click', function(e) { if (e.target === this) closeMsgModal(); });
+
+// Okunmamış sayısını başlangıçta kontrol et
+(async function() {
+  try {
+    const snap = await db.collection('messages').where('read', '==', false).get();
+    const badge = document.getElementById('msg-badge');
+    if (badge && snap.size > 0) { badge.textContent = snap.size; badge.style.display = ''; }
+  } catch(e) {}
+})();
 
 /* ══════════════════════════════════════════════════
    ANALYTICS
