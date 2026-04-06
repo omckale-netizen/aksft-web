@@ -1159,8 +1159,9 @@ function renderRoutePage(routeId) {
         .rp-hero-inner{grid-template-columns:1fr;padding:100px 0 64px;}
         .rp-stat-card{flex-direction:row;flex-wrap:wrap;justify-content:center;min-width:unset;padding:20px 24px;gap:16px;}
         .rp-stat-sep{display:none;}
-        .rp-hero{padding-top:72px;}
+        .rp-hero{padding-top:80px;}
         .rp-hero-topbar{padding:0 16px;}
+        .rp-hero-inner{padding:16px 0 60px;}
         .rp-wrap{padding:36px 18px 80px;}
         .rp-desc-box{padding:22px 20px;}
         .rp-stops{padding-left:38px;}
