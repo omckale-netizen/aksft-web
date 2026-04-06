@@ -1115,20 +1115,13 @@ window.DATA = {
       "tagBg": "rgba(196,82,26,0.1)",
       "tagColor": "#C4521A",
       "tagText": "Kafe",
-      "shortDesc": "Tatlım",
+      "shortDesc": "Assos’un Cemaller Köyü’nde saklı bir durak: Kafe Mera.Taş duvarların içinde, sıcak bir ışık, sakin bir ortam ve gerçekten keyifli kahveler…Şehrin gürültüsünden uzak,kahvenin tadını gerçekten hissettiğiniz o nadir yerlerden biri.",
       "description": "",
       "location": "Cemaller Köyü",
-      "tags": [
-        "köy içinde",
-        "sakin",
-        "huzurlu"
-      ],
+      "tags": [],
       "keywords": [
         "kafe",
         "mera",
-        "köy içinde",
-        "sakin",
-        "huzurlu",
         "kafe"
       ],
       "hours": "",
