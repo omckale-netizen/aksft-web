@@ -767,7 +767,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 
       <!-- Dönem Karşılaştırma -->
       <div class="panel-card" style="margin-top:20px">
-        <div class="panel-card-head"><h3>📊 Donem Karsilastirmasi</h3></div>
+        <div class="panel-card-head" style="justify-content:space-between"><h3>📊 Donem Karsilastirmasi</h3><span id="analytics-compare-label" style="font-size:.72rem;color:var(--text-muted);font-weight:500"></span></div>
         <div id="analytics-compare" style="padding:20px"></div>
       </div>
 
@@ -1425,6 +1425,10 @@ async function renderAnalytics() {
       const now = new Date();
       const currentStart = new Date(now); currentStart.setDate(now.getDate() - analyticsPeriod);
       const prevStart = new Date(currentStart); prevStart.setDate(currentStart.getDate() - analyticsPeriod);
+
+      const fmt = d => d.toISOString().split('T')[0].split('-').reverse().join('.');
+      const cmpLabel = document.getElementById('analytics-compare-label');
+      if (cmpLabel) cmpLabel.textContent = fmt(currentStart) + ' – ' + fmt(now) + '  vs  ' + fmt(prevStart) + ' – ' + fmt(currentStart);
 
       const currentEvents = events;
       // Önceki dönem eventlerini çek
