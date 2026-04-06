@@ -725,7 +725,7 @@ window.DATA = {
           "hours": "08:00 – 23:00"
         }
       ],
-      "active": false
+      "active": true
     },
     {
       "id": "korfez-balik",
