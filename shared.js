@@ -1883,7 +1883,7 @@ function renderVenuePage(venueId) {
                 <div class="vp-contact-label">Telefon</div>
                 <div class="vp-contact-val">${v.phone || '—'}</div>
               </div>
-              ${v.phone ? `<a href="tel:${v.phone.replace(/\s/g,'')}" class="vp-contact-btn-outline" onclick="if(window.trackAction)trackAction('${v.id}','call')">Ara</a>` : ''}
+              ${v.phone ? `<a href="tel:${v.phone.replace(/\s/g,'')}" class="vp-contact-btn-outline" onclick="event.preventDefault();if(window.trackAction)trackAction('${v.id}','call');setTimeout(()=>{window.location.href=this.href},300)">Ara</a>` : ''}
             </div>
             ${v.category !== 'konaklama' ? `
             <div class="vp-contact-card vp-contact-wa">
@@ -1892,7 +1892,7 @@ function renderVenuePage(venueId) {
                 <div class="vp-contact-label">WhatsApp</div>
                 <div class="vp-contact-val">Mesaj Gönder</div>
               </div>
-              <a href="${waContactUrl}" target="_blank" rel="noopener" class="vp-wa-btn" onclick="if(window.trackAction)trackAction('${v.id}','whatsapp')">WhatsApp ile Yaz</a>
+              <a href="${waContactUrl}" target="_blank" rel="noopener" class="vp-wa-btn" onclick="if(window.trackAction)trackAction('${v.id}','whatsapp');">WhatsApp ile Yaz</a>
             </div>` : ''}
           </div>
           ${v.category === 'konaklama' ? `
@@ -2117,7 +2117,7 @@ function renderVenuePage(venueId) {
     // Track action (call, whatsapp, reservation)
     window.trackAction = function(venueId, action) {
       if (!venueId || !action) return;
-      const docRef = adb.collection('analytics').doc(venueId);
+      const docRef = adb.collection('analytics').doc('venue_' + venueId);
       const field = action + '_count';
       const update = { [field]: firebase.firestore.FieldValue.increment(1) };
       update[action + '_last'] = new Date().toISOString();
