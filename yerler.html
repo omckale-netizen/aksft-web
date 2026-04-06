@@ -263,9 +263,11 @@
   .place-card-wrap:hover { transform:translateY(-5px);box-shadow:0 20px 50px rgba(26,39,68,.1); }
 </style>
 
+<script src="firebase-loader.js"></script>
 <script src="data.js"></script>
 <script src="shared.js"></script>
 <script>
+function pageInit() {
   renderNav({ heroMode: false });
   renderFooter();
 
@@ -356,6 +358,9 @@
   });
 
   renderGrid();
+}
+if (window.DATA) pageInit();
+else document.addEventListener('dataReady', pageInit);
 </script>
 </body>
 </html>

@@ -547,9 +547,11 @@
 
 <div id="footer-placeholder"></div>
 
+<script src="firebase-loader.js"></script>
 <script src="data.js"></script>
 <script src="shared.js"></script>
 <script>
+function pageInit() {
   renderNav({ heroMode: false });
   renderFooter();
 
@@ -926,6 +928,9 @@
   /* ?id= param — navigate to detail page */
   const paramId = getParam('id');
   if (paramId && /^[a-z0-9-]+$/.test(paramId)) window.location.replace('mekanlar/' + paramId + '.html');
+}
+if (window.DATA) pageInit();
+else document.addEventListener('dataReady', pageInit);
 </script>
 </body>
 </html>

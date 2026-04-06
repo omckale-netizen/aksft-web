@@ -770,9 +770,11 @@
   }
 </style>
 
+<script src="firebase-loader.js"></script>
 <script src="data.js"></script>
 <script src="shared.js"></script>
 <script>
+function pageInit() {
   renderNav({ heroMode: false });
   renderFooter();
 
@@ -903,6 +905,9 @@
   }
 
   init();
+}
+if (window.DATA) pageInit();
+else document.addEventListener('dataReady', pageInit);
 </script>
 </body>
 </html>

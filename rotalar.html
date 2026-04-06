@@ -580,9 +580,11 @@
   }
 </style>
 
+<script src="firebase-loader.js"></script>
 <script src="data.js"></script>
 <script src="shared.js"></script>
 <script>
+function pageInit() {
   renderNav({ heroMode: false });
   renderFooter();
 
@@ -811,6 +813,9 @@
   renderGrid();
   const initId = new URLSearchParams(window.location.search).get('id');
   if (initId) setTimeout(() => openRoute(initId), 100);
+}
+if (window.DATA) pageInit();
+else document.addEventListener('dataReady', pageInit);
 </script>
 </body>
 </html>

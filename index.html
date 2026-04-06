@@ -1656,9 +1656,11 @@
 
 <div id="footer-placeholder"></div>
 
+<script src="firebase-loader.js"></script>
 <script src="data.js"></script>
 <script src="shared.js"></script>
 <script>
+function pageInit() {
   renderNav({ heroMode: true });
   renderFooter();
   scrollFadeIn();
@@ -1926,6 +1928,9 @@
     const stayGrid = document.getElementById('hp-stay-grid');
     if (stayGrid) stayGrid.innerHTML = stayVenues.map(venueCard).join('');
   })();
+}
+if (window.DATA) pageInit();
+else document.addEventListener('dataReady', pageInit);
 </script>
 
 </body>

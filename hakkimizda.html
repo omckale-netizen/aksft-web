@@ -593,9 +593,11 @@
 
 <div id="footer-placeholder"></div>
 
+<script src="firebase-loader.js"></script>
 <script src="data.js"></script>
 <script src="shared.js"></script>
 <script>
+function pageInit() {
   renderNav({ heroMode: false, basePath: '' });
   renderFooter({ basePath: '' });
   scrollFadeIn();
@@ -607,6 +609,9 @@
     if (DATA.villages) document.getElementById('hk-stat-koyler').textContent   = DATA.villages.length + '+';
     if (DATA.places)   document.getElementById('hk-stat-yerler').textContent   = DATA.places.length + '+';
   })();
+}
+if (window.DATA) pageInit();
+else document.addEventListener('dataReady', pageInit);
 </script>
 </body>
 </html>

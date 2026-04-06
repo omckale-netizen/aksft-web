@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Firebase Migration — Assos'u Keşfet</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #1A2744; color: #F5EDE0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+  .container { max-width: 600px; width: 90%; padding: 40px; }
+  h1 { font-size: 1.5rem; margin-bottom: 8px; }
+  .sub { color: rgba(245,237,224,.5); font-size: .85rem; margin-bottom: 32px; }
+  .btn { display: block; width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-bottom: 12px; transition: all .2s; font-family: inherit; }
+  .btn-primary { background: #C4521A; color: #fff; }
+  .btn-primary:hover { background: #D4682E; }
+  .btn-secondary { background: rgba(255,255,255,.1); color: #F5EDE0; border: 1px solid rgba(255,255,255,.15); }
+  .btn:disabled { opacity: .4; cursor: default; }
+  #log { background: rgba(0,0,0,.3); border-radius: 12px; padding: 20px; margin-top: 20px; font-size: .82rem; line-height: 1.8; max-height: 400px; overflow-y: auto; white-space: pre-wrap; }
+  .ok { color: #4ADE80; }
+  .err { color: #F87171; }
+  .info { color: #60A5FA; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🔥 Firebase Migration</h1>
+  <p class="sub">Mevcut data.js verilerini Firebase Firestore'a aktarır.</p>
+
+  <button class="btn btn-primary" id="btn-migrate" onclick="startMigration()">Verileri Firebase'e Aktar</button>
+  <button class="btn btn-secondary" id="btn-auth" onclick="createAdmin()">Admin Kullanıcı Oluştur</button>
+
+  <div id="log"></div>
+</div>
+
+<script src="data.js"></script>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
+import { getFirestore, collection, doc, setDoc, getDocs } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCXqgczplchzjClAZt-Wl2eqgqmUMhLVJs",
+  authDomain: "assosu-kesfet.firebaseapp.com",
+  projectId: "assosu-kesfet",
+  storageBucket: "assosu-kesfet.firebasestorage.app",
+  messagingSenderId: "225032191860",
+  appId: "1:225032191860:web:61ac6ba36764b530be3621"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const logEl = document.getElementById('log');
+function log(msg, cls) {
+  logEl.innerHTML += '<span class="' + (cls||'') + '">' + msg + '</span>\n';
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+// Migration fonksiyonu
+window.startMigration = async function() {
+  const btn = document.getElementById('btn-migrate');
+  btn.disabled = true;
+  btn.textContent = 'Aktariliyor...';
+  logEl.innerHTML = '';
+
+  try {
+    // Önce giriş yap
+    log('🔐 Giris yapiliyor...', 'info');
+    await signInWithEmailAndPassword(auth, 'info@onyedimedya.com', 'assos2026');
+    log('✓ Giris basarili\n', 'ok');
+
+    const data = window.DATA;
+    if (!data) { log('HATA: data.js yuklenemedi!', 'err'); return; }
+
+    // Venues
+    const venues = data.venues || [];
+    log('📦 ' + venues.length + ' mekan aktariliyor...', 'info');
+    for (const v of venues) {
+      await setDoc(doc(db, 'venues', v.id), v);
+      log('  ✓ ' + v.title, 'ok');
+    }
+
+    // Places
+    const places = data.places || [];
+    log('\n📦 ' + places.length + ' yer aktariliyor...', 'info');
+    for (const p of places) {
+      await setDoc(doc(db, 'places', p.id), p);
+      log('  ✓ ' + p.title, 'ok');
+    }
+
+    // Villages
+    const villages = data.villages || [];
+    log('\n📦 ' + villages.length + ' koy aktariliyor...', 'info');
+    for (const v of villages) {
+      await setDoc(doc(db, 'villages', v.id), v);
+      log('  ✓ ' + v.title, 'ok');
+    }
+
+    // Routes
+    const routes = data.routes || [];
+    log('\n📦 ' + routes.length + ' rota aktariliyor...', 'info');
+    for (const r of routes) {
+      await setDoc(doc(db, 'routes', r.id), r);
+      log('  ✓ ' + r.title, 'ok');
+    }
+
+    const total = venues.length + places.length + villages.length + routes.length;
+    log('\n━━━━━━━━━━━━━━━━━━━━', '');
+    log('✅ TAMAMLANDI! ' + total + ' kayit basariyla aktarildi.', 'ok');
+    log('Firebase Console\'dan kontrol edebilirsiniz.', 'info');
+
+  } catch(err) {
+    log('\n❌ HATA: ' + err.message, 'err');
+    console.error(err);
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Tekrar Aktar';
+};
+
+// Admin kullanıcı oluştur
+window.createAdmin = async function() {
+  const btn = document.getElementById('btn-auth');
+  btn.disabled = true;
+
+  try {
+    log('\n🔐 Admin kullanici olusturuluyor...', 'info');
+    const email = 'info@onyedimedya.com';
+    const password = 'assos2026';
+
+    await createUserWithEmailAndPassword(auth, email, password);
+    log('✅ Admin olusturuldu: ' + email, 'ok');
+    log('Sifre: ' + password + ' (giris yapildiktan sonra degistirebilirsiniz)', 'info');
+
+  } catch(err) {
+    if (err.code === 'auth/email-already-in-use') {
+      log('ℹ️ Bu e-posta zaten kayitli.', 'info');
+    } else {
+      log('❌ Auth hatasi: ' + err.message, 'err');
+    }
+  }
+
+  btn.disabled = false;
+};
+</script>
+</body>
+</html>
