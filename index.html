@@ -735,47 +735,6 @@
     }
     .hero-search-btn:hover { background: var(--terra-light); transform: translateY(-1px); }
 
-    /* Right floating glass card */
-    /* Stats bar */
-    .hero-stats-bar {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0;
-      margin-top: 40px;
-      padding: 16px 28px;
-      background: rgba(255,255,255,.05);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 999px;
-    }
-    .hero-stat-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 0 20px;
-    }
-    .hero-stat-icon { font-size: 1rem; flex-shrink: 0; }
-    .hero-stat-num {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-weight: 800;
-      font-size: 1.05rem;
-      color: #F5EDE0;
-      letter-spacing: -.02em;
-    }
-    .hero-stat-label {
-      font-size: .7rem;
-      font-weight: 600;
-      color: rgba(245,237,224,.4);
-      white-space: nowrap;
-    }
-    .hero-stat-sep {
-      width: 1px;
-      height: 28px;
-      background: rgba(255,255,255,.1);
-      flex-shrink: 0;
-    }
 
     /* Bottom glass nav tiles */
     .hero-bottom {
@@ -843,9 +802,6 @@
 
     /* ── RESPONSIVE ── */
     @media (max-width: 960px) {
-      .hero-stats-bar { flex-wrap: wrap; border-radius: 16px; gap: 8px; padding: 14px 16px; }
-      .hero-stat-sep { display: none; }
-      .hero-stat-item { padding: 0 8px; }
       .hero-tiles { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 640px) {
@@ -926,32 +882,6 @@
       </div>
     </div>
 
-    <!-- Stats bar -->
-    <div class="hero-stats-bar">
-      <div class="hero-stat-item">
-        <span class="hero-stat-icon">🗺</span>
-        <span class="hero-stat-num" id="stat-rotalar"></span>
-        <span class="hero-stat-label">Hazır Rota</span>
-      </div>
-      <div class="hero-stat-sep"></div>
-      <div class="hero-stat-item">
-        <span class="hero-stat-icon">☕</span>
-        <span class="hero-stat-num" id="stat-mekanlar"></span>
-        <span class="hero-stat-label">Yerel Mekan</span>
-      </div>
-      <div class="hero-stat-sep"></div>
-      <div class="hero-stat-item">
-        <span class="hero-stat-icon">🏘</span>
-        <span class="hero-stat-num">63+</span>
-        <span class="hero-stat-label">Taş Köy</span>
-      </div>
-      <div class="hero-stat-sep"></div>
-      <div class="hero-stat-item">
-        <span class="hero-stat-icon">🌊</span>
-        <span class="hero-stat-num" id="stat-yerler"></span>
-        <span class="hero-stat-label">Gezilecek Yer</span>
-      </div>
-    </div>
 
   </div>
 </section>

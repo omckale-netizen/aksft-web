@@ -65,16 +65,21 @@
     #mobile-menu .btn-terra{padding:9px 20px;font-size:.78rem;}
 
     /* SEARCH OVERLAY */
-    .search-dropdown{position:absolute;top:calc(100% + 10px);left:0;right:0;z-index:500;background:rgba(15,24,41,.95);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.1);border-radius:16px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.4);display:none;}
+    .search-dropdown{position:absolute;top:calc(100% + 10px);left:0;right:0;z-index:500;background:rgba(15,24,41,.97);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.1);border-radius:16px;overflow:hidden;overflow-y:auto;max-height:420px;box-shadow:0 24px 64px rgba(0,0,0,.5);display:none;}
     .search-dropdown.open{display:block;}
-    .search-result-item{display:flex;align-items:center;gap:14px;padding:14px 18px;cursor:pointer;text-decoration:none;transition:background .15s;}
+    .search-result-item{display:flex;align-items:center;gap:14px;padding:14px 18px;cursor:pointer;text-decoration:none;transition:background .15s;border-bottom:1px solid rgba(255,255,255,.04);}
+    .search-result-item:last-child{border-bottom:none;}
     .search-result-item:hover{background:rgba(255,255,255,.06);}
-    .search-result-emoji{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
-    .search-result-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.88rem;color:var(--cream);line-height:1.3;}
-    .search-result-sub{font-size:.72rem;color:rgba(245,237,224,.4);margin-top:2px;}
-    .search-result-type{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:999px;flex-shrink:0;}
-    .search-no-results{padding:24px;text-align:center;color:rgba(245,237,224,.35);font-size:.85rem;}
+    .search-result-emoji{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;}
+    .search-result-info{flex:1;min-width:0;}
+    .search-result-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.88rem;color:#F5EDE0;line-height:1.3;}
+    .search-result-sub{font-size:.72rem;color:rgba(245,237,224,.4);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .search-result-type{font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:999px;flex-shrink:0;}
+    .search-no-results{padding:28px;text-align:center;color:rgba(245,237,224,.35);font-size:.85rem;}
     .search-group-label{padding:10px 18px 6px;font-size:.65rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(245,237,224,.25);}
+    @media(max-width:640px){
+      .search-dropdown{position:fixed;top:auto;bottom:0;left:0;right:0;border-radius:20px 20px 0 0;max-height:60vh;box-shadow:0 -12px 48px rgba(0,0,0,.5);}
+    }
 
     /* FOOTER */
     #site-footer{position:relative;overflow:hidden;background:linear-gradient(170deg,#0C1730 0%,#0A1220 60%,#0E1A2E 100%);padding:0 24px 0;border-top:1px solid rgba(245,237,224,.07);}
