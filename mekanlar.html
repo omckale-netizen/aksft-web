@@ -770,7 +770,7 @@ function pageInit() {
       const cs = CAT_STYLE[v.category] || { bg:'rgba(26,39,68,.08)', color:'#4A5568', label:v.category };
       const status = getVenueStatus(v);
       return `
-        <div class="mk-fc" onclick="window.location.href='mekanlar/detay.html?id=${v.id}'">
+        <div class="mk-fc" onclick="window.location.href='mekanlar/mekan-detay.html?id=${v.id}'">
           <div class="mk-fc-img" style="background:${v.gradient};">
             <span class="mk-fc-badge${status.isOpen === true ? ' mk-fc-badge-open' : status.isOpen === false ? ' mk-fc-badge-closed' : ''}">${status.isOpen === true ? 'Açık' : status.isOpen === false ? 'Kapalı' : 'Önerilen'}</span>
             <button class="mk-fc-save save-btn${saved.has(v.id)?' saved':''}" data-id="${v.id}" onclick="toggleSave('${v.id}',event)">
@@ -864,7 +864,7 @@ function pageInit() {
       const cs = CAT_STYLE[v.category] || { bg:'rgba(26,39,68,.08)', color:'#4A5568', label:v.category };
       const status = getVenueStatus(v);
       return `
-        <div class="mk-vc fade-up" data-delay="${i * 0.05}" onclick="window.location.href='mekanlar/detay.html?id=${v.id}'">
+        <div class="mk-vc fade-up" data-delay="${i * 0.05}" onclick="window.location.href='mekanlar/mekan-detay.html?id=${v.id}'">
           <div class="mk-vc-img" style="background:${v.gradient};">
             ${(v.images && v.images.length > 0) ? '<img class="mk-vc-photo" src="' + v.images[0] + '" alt="' + v.title + '" loading="lazy">' : '<span class="mk-vc-emoji">' + v.emoji + '</span>'}
             <div class="mk-vc-badges">
@@ -927,7 +927,7 @@ function pageInit() {
 
   /* ?id= param — navigate to detail page */
   const paramId = getParam('id');
-  if (paramId && /^[a-z0-9-]+$/.test(paramId)) window.location.replace('mekanlar/detay.html?id=' + paramId);
+  if (paramId && /^[a-z0-9-]+$/.test(paramId)) window.location.replace('mekanlar/mekan-detay.html?id=' + paramId);
 
   // Expose functions to global scope for onclick handlers
   window.featuredNav = featuredNav;

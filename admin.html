@@ -1320,7 +1320,7 @@ function renderVenueTable() {
         <td><button class="btn-icon" onclick="toggleActive('${v.id}',event)" title="${isActive ? 'Pasife al' : 'Aktif et'}" style="font-size:1rem;${isActive ? 'color:var(--green)' : 'color:var(--text-muted)'}">${isActive ? '✅' : '⏸'}</button></td>
         <td>${sBadge}</td>
         <td>
-          <a class="btn-icon" href="mekanlar/detay.html?id=${v.id}" target="_blank" title="Mekani Gor" style="text-decoration:none">&#128065;</a>
+          <a class="btn-icon" href="mekanlar/mekan-detay.html?id=${v.id}" target="_blank" title="Mekani Gor" style="text-decoration:none">&#128065;</a>
           <button class="btn-icon" title="Duzenle" onclick="openVenueModal('${v.id}')" style="margin-left:4px">&#9998;</button>
           <button class="btn-icon" title="Sil" onclick="confirmDeleteVenue('${v.id}')" style="margin-left:4px;color:var(--red)">&#128465;</button>
         </td>
