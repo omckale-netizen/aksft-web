@@ -879,7 +879,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 ══════════════════════════════════════════════════ */
 const ORIGINAL_DATA = JSON.parse(JSON.stringify(window.DATA));
 let draftData = JSON.parse(JSON.stringify(window.DATA));
-const API_KEY = 'assos2026';
+/* Şifre hash olarak saklanır — kaynak kodda açık şifre yok */
+const PW_HASH = 'ce35f32ce1444d606709acc3ec7a3341137922f08d45f2433ba99ad07cf27e90';
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+/* API key — oturumdan alınır */
+let API_KEY = localStorage.getItem('_ak') || '';
 
 /* ── GitHub API ayarları ── */
 const GH_OWNER = 'omckale-netizen';
@@ -1002,9 +1009,12 @@ function uploadImageToServer(blob, path) {
 /* ══════════════════════════════════════════════════
    AUTH
 ══════════════════════════════════════════════════ */
-function checkAuth() {
+async function checkAuth() {
   const pw = document.getElementById('auth-pw').value;
-  if (pw === 'assos2026') {
+  const hash = await sha256(pw);
+  if (hash === PW_HASH) {
+    API_KEY = pw;
+    localStorage.setItem('_ak', pw);
     localStorage.setItem('admin_auth', 'true');
     document.getElementById('auth-gate').classList.add('hidden');
     document.getElementById('admin-wrap').style.display = 'flex';
@@ -1016,6 +1026,7 @@ function checkAuth() {
 
 function logout() {
   localStorage.removeItem('admin_auth');
+  localStorage.removeItem('_ak');
   location.reload();
 }
 
