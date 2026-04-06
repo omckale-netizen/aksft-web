@@ -9,72 +9,115 @@
 <body>
 
 <div id="nav-placeholder"></div>
-<div id="page-hero"></div>
 
-<section style="padding:80px 24px 120px;background:var(--cream-light);">
-  <div style="max-width:700px;margin:0 auto;">
-
-    <div class="fade-up" style="text-align:center;margin-bottom:48px;">
-      <p class="section-label" style="margin-bottom:10px;">İletişim</p>
-      <div class="section-rule" style="margin:0 auto 16px;"></div>
-      <h2 class="section-title" style="font-size:clamp(1.8rem,4vw,2.4rem);margin-bottom:12px;">Bize Ulaşın</h2>
-      <p style="font-size:.9rem;color:var(--text-mid);max-width:480px;margin:0 auto;line-height:1.7;">Öneri, görüş veya işbirliği talepleriniz için aşağıdaki formu doldurun. En kısa sürede dönüş yapacağız.</p>
+<!-- Hero -->
+<section class="ct-hero">
+  <div class="ct-hero-orb ct-orb-1"></div>
+  <div class="ct-hero-orb ct-orb-2"></div>
+  <div class="ct-hero-grid"></div>
+  <div class="ct-hero-inner">
+    <div class="ct-hero-badge">
+      <span class="ct-hero-dot"></span>
+      <span>İletişim</span>
     </div>
+    <h1 class="ct-hero-h1">Bize<br><em>Ulaşın</em></h1>
+    <p class="ct-hero-sub">Öneri, görüş veya işbirliği talepleriniz için buradayız.<br>En kısa sürede dönüş yapacağız.</p>
+  </div>
+</section>
 
-    <!-- Form -->
-    <div class="fade-up" style="background:#fff;border-radius:20px;padding:36px 32px;box-shadow:0 4px 24px rgba(26,39,68,.06);border:1px solid rgba(26,39,68,.06);">
-      <form id="contact-form" onsubmit="submitContact(event)">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
-          <div>
-            <label style="display:block;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-mid);margin-bottom:6px;">Ad Soyad *</label>
-            <input type="text" id="ct-name" required placeholder="Adınız ve soyadınız" style="width:100%;padding:12px 16px;border:1.5px solid rgba(26,39,68,.12);border-radius:12px;font-size:.88rem;font-family:inherit;outline:none;transition:border-color .2s;background:#FAFAFA;" onfocus="this.style.borderColor='#C4521A'" onblur="this.style.borderColor='rgba(26,39,68,.12)'">
-          </div>
-          <div>
-            <label style="display:block;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-mid);margin-bottom:6px;">E-posta *</label>
-            <input type="email" id="ct-email" required placeholder="ornek@mail.com" style="width:100%;padding:12px 16px;border:1.5px solid rgba(26,39,68,.12);border-radius:12px;font-size:.88rem;font-family:inherit;outline:none;transition:border-color .2s;background:#FAFAFA;" onfocus="this.style.borderColor='#C4521A'" onblur="this.style.borderColor='rgba(26,39,68,.12)'">
-          </div>
-        </div>
-        <div style="margin-bottom:16px;">
-          <label style="display:block;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-mid);margin-bottom:6px;">Konu</label>
-          <select id="ct-subject" style="width:100%;padding:12px 16px;border:1.5px solid rgba(26,39,68,.12);border-radius:12px;font-size:.88rem;font-family:inherit;outline:none;background:#FAFAFA;color:var(--navy);cursor:pointer;">
-            <option value="Genel">Genel</option>
-            <option value="Öneri">Öneri</option>
-            <option value="Şikayet">Şikayet</option>
-            <option value="İşbirliği">İşbirliği</option>
-            <option value="Mekan Ekleme Talebi">Mekan Ekleme Talebi</option>
-            <option value="Hata Bildirimi">Hata Bildirimi</option>
-          </select>
-        </div>
-        <div style="margin-bottom:16px;">
-          <label style="display:block;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-mid);margin-bottom:6px;">Telefon (opsiyonel)</label>
-          <input type="tel" id="ct-phone" placeholder="0532 xxx xx xx" style="width:100%;padding:12px 16px;border:1.5px solid rgba(26,39,68,.12);border-radius:12px;font-size:.88rem;font-family:inherit;outline:none;transition:border-color .2s;background:#FAFAFA;" onfocus="this.style.borderColor='#C4521A'" onblur="this.style.borderColor='rgba(26,39,68,.12)'">
-        </div>
-        <div style="margin-bottom:24px;">
-          <label style="display:block;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-mid);margin-bottom:6px;">Mesajınız *</label>
-          <textarea id="ct-message" required rows="5" placeholder="Mesajınızı buraya yazın..." style="width:100%;padding:12px 16px;border:1.5px solid rgba(26,39,68,.12);border-radius:12px;font-size:.88rem;font-family:inherit;outline:none;resize:vertical;transition:border-color .2s;background:#FAFAFA;line-height:1.7;" onfocus="this.style.borderColor='#C4521A'" onblur="this.style.borderColor='rgba(26,39,68,.12)'"></textarea>
-        </div>
-        <button type="submit" id="ct-submit" style="width:100%;padding:14px;border:none;border-radius:13px;background:#C4521A;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='#D4682E';this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#C4521A';this.style.transform=''">
-          Mesaj Gönder
-        </button>
-        <div id="ct-status" style="text-align:center;margin-top:14px;font-size:.82rem;min-height:20px;"></div>
-      </form>
-    </div>
+<!-- İçerik -->
+<section style="padding:0 24px 120px;background:var(--cream-light);margin-top:-40px;position:relative;z-index:2;">
+  <div style="max-width:900px;margin:0 auto;">
 
-    <!-- İletişim bilgileri -->
-    <div class="fade-up" style="margin-top:32px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-      <div style="background:#fff;border-radius:16px;padding:22px 20px;border:1px solid rgba(26,39,68,.06);display:flex;align-items:center;gap:14px;">
-        <div style="width:44px;height:44px;border-radius:12px;background:rgba(196,82,26,.08);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">📧</div>
-        <div>
-          <div style="font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-mid);margin-bottom:3px;">E-posta</div>
-          <a href="mailto:info@onyedimedya.com" style="font-size:.85rem;font-weight:600;color:var(--navy);text-decoration:none;">info@onyedimedya.com</a>
-        </div>
+    <div style="display:grid;grid-template-columns:1fr 340px;gap:32px;align-items:start;">
+
+      <!-- Sol: Form -->
+      <div class="fade-up" style="background:#fff;border-radius:22px;padding:40px 36px;box-shadow:0 8px 32px rgba(26,39,68,.07);border:1px solid rgba(26,39,68,.05);">
+        <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.15rem;color:var(--navy);margin-bottom:4px;">Mesaj Gönderin</h3>
+        <p style="font-size:.8rem;color:var(--text-mid);margin-bottom:28px;">Tüm alanları doldurarak bize ulaşabilirsiniz.</p>
+
+        <form id="contact-form" onsubmit="submitContact(event)">
+          <div class="ct-row">
+            <div class="ct-field">
+              <label>Ad Soyad *</label>
+              <input type="text" id="ct-name" required placeholder="Adınız ve soyadınız">
+            </div>
+            <div class="ct-field">
+              <label>E-posta *</label>
+              <input type="email" id="ct-email" required placeholder="ornek@mail.com">
+            </div>
+          </div>
+          <div class="ct-row">
+            <div class="ct-field">
+              <label>Konu</label>
+              <select id="ct-subject">
+                <option value="Genel">Genel</option>
+                <option value="Öneri">Öneri</option>
+                <option value="Şikayet">Şikayet</option>
+                <option value="İşbirliği">İşbirliği</option>
+                <option value="Mekan Ekleme Talebi">Mekan Ekleme Talebi</option>
+                <option value="Hata Bildirimi">Hata Bildirimi</option>
+              </select>
+            </div>
+            <div class="ct-field">
+              <label>Telefon <span style="font-weight:400;color:var(--text-muted)">(opsiyonel)</span></label>
+              <input type="tel" id="ct-phone" placeholder="0532 xxx xx xx">
+            </div>
+          </div>
+          <div class="ct-field">
+            <label>Mesajınız *</label>
+            <textarea id="ct-message" required rows="5" placeholder="Mesajınızı buraya yazın..."></textarea>
+          </div>
+          <button type="submit" id="ct-submit" class="ct-btn">Mesaj Gönder →</button>
+          <div id="ct-status" style="text-align:center;margin-top:12px;font-size:.82rem;min-height:20px;"></div>
+        </form>
       </div>
-      <div style="background:#fff;border-radius:16px;padding:22px 20px;border:1px solid rgba(26,39,68,.06);display:flex;align-items:center;gap:14px;">
-        <div style="width:44px;height:44px;border-radius:12px;background:rgba(37,211,102,.08);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">💬</div>
-        <div>
-          <div style="font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-mid);margin-bottom:3px;">Instagram</div>
-          <a href="https://www.instagram.com/assosukesfet/" target="_blank" rel="noopener" style="font-size:.85rem;font-weight:600;color:var(--navy);text-decoration:none;">@assosukesfet</a>
+
+      <!-- Sağ: İletişim kartları -->
+      <div class="fade-up" style="display:flex;flex-direction:column;gap:16px;">
+
+        <div class="ct-card">
+          <div class="ct-card-icon" style="background:rgba(196,82,26,.08);">📧</div>
+          <div>
+            <div class="ct-card-label">E-posta</div>
+            <a href="mailto:assosukesfet@gmail.com" class="ct-card-val">assosukesfet@gmail.com</a>
+          </div>
         </div>
+
+        <div class="ct-card">
+          <div class="ct-card-icon" style="background:linear-gradient(135deg,rgba(245,133,41,.08),rgba(221,42,123,.08));">📷</div>
+          <div>
+            <div class="ct-card-label">Instagram</div>
+            <a href="https://www.instagram.com/assosukesfet/" target="_blank" rel="noopener" class="ct-card-val">@assosukesfet</a>
+          </div>
+        </div>
+
+        <div class="ct-card">
+          <div class="ct-card-icon" style="background:rgba(26,39,68,.06);">📍</div>
+          <div>
+            <div class="ct-card-label">Konum</div>
+            <span class="ct-card-val" style="cursor:default;">Ayvacık / Çanakkale</span>
+          </div>
+        </div>
+
+        <div class="ct-card">
+          <div class="ct-card-icon" style="background:rgba(37,211,102,.08);">💬</div>
+          <div>
+            <div class="ct-card-label">WhatsApp</div>
+            <a href="https://wa.me/905309467138" target="_blank" rel="noopener" class="ct-card-val">WhatsApp ile Yazın</a>
+          </div>
+        </div>
+
+        <!-- SSS -->
+        <div style="background:rgba(196,82,26,.04);border:1px solid rgba(196,82,26,.1);border-radius:16px;padding:20px;">
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.85rem;color:var(--navy);margin-bottom:8px;">💡 Sıkça Sorulan</div>
+          <div style="font-size:.78rem;color:var(--text-mid);line-height:1.7;">
+            <p style="margin-bottom:6px;">• Mekanınızı eklemek mi istiyorsunuz? <strong>"Mekan Ekleme Talebi"</strong> konusunu seçin.</p>
+            <p style="margin-bottom:6px;">• İşbirliği için detaylı bilgiyi mesajınızda belirtin.</p>
+            <p>• Yanıt süresi genellikle 24 saat içindedir.</p>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -82,9 +125,44 @@
 </section>
 
 <style>
-  @media(max-width:600px) {
-    #contact-form > div:first-child { grid-template-columns: 1fr !important; }
-    .fade-up > div:last-child { grid-template-columns: 1fr !important; }
+  /* Hero */
+  .ct-hero{position:relative;overflow:hidden;background:linear-gradient(150deg,#06101E 0%,#0C1A30 55%,#091420 100%);padding:120px 24px 80px;text-align:center;}
+  .ct-hero-grid{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(245,237,224,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(245,237,224,.03) 1px,transparent 1px);background-size:60px 60px;}
+  .ct-hero-orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;}
+  .ct-orb-1{width:400px;height:400px;background:rgba(196,82,26,.12);top:-100px;left:-60px;}
+  .ct-orb-2{width:300px;height:300px;background:rgba(26,107,138,.1);bottom:-80px;right:-60px;}
+  .ct-hero-inner{position:relative;z-index:1;max-width:600px;margin:0 auto;}
+  .ct-hero-badge{display:inline-flex;align-items:center;gap:10px;background:rgba(196,82,26,.1);border:1px solid rgba(196,82,26,.25);border-radius:999px;padding:6px 16px;margin-bottom:24px;}
+  .ct-hero-dot{width:7px;height:7px;border-radius:50%;background:#C4521A;flex-shrink:0;}
+  .ct-hero-badge span{font-size:.65rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#D4935A;}
+  .ct-hero-h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(2.2rem,5vw,3.4rem);letter-spacing:-.03em;line-height:1;color:#F5EDE0;margin-bottom:16px;}
+  .ct-hero-h1 em{font-style:italic;font-family:'Lora',serif;font-weight:500;font-size:.9em;background:linear-gradient(135deg,#D4935A,#E8A07A);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .ct-hero-sub{font-size:.92rem;color:rgba(245,237,224,.5);line-height:1.75;}
+
+  /* Form */
+  .ct-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+  .ct-field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+  .ct-field:last-child{margin-bottom:0;}
+  .ct-field label{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-mid);}
+  .ct-field input,.ct-field select,.ct-field textarea{width:100%;padding:11px 15px;border:1.5px solid rgba(26,39,68,.1);border-radius:11px;font-size:.86rem;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s;background:#FAFAFA;}
+  .ct-field input:focus,.ct-field select:focus,.ct-field textarea:focus{border-color:var(--terra);box-shadow:0 0 0 3px rgba(196,82,26,.08);background:#fff;}
+  .ct-field textarea{resize:vertical;line-height:1.7;}
+  .ct-field select{cursor:pointer;color:var(--navy);}
+  .ct-btn{width:100%;padding:14px;border:none;border-radius:13px;background:var(--terra);color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;margin-top:8px;}
+  .ct-btn:hover{background:#D4682E;transform:translateY(-1px);box-shadow:0 6px 20px rgba(196,82,26,.3);}
+
+  /* Kartlar */
+  .ct-card{background:#fff;border-radius:16px;padding:20px;border:1px solid rgba(26,39,68,.05);display:flex;align-items:center;gap:14px;transition:transform .2s,box-shadow .2s;}
+  .ct-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(26,39,68,.07);}
+  .ct-card-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+  .ct-card-label{font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:3px;}
+  .ct-card-val{font-size:.84rem;font-weight:600;color:var(--navy);text-decoration:none;}
+  .ct-card-val:hover{color:var(--terra);}
+
+  @media(max-width:768px){
+    .ct-hero{padding:100px 24px 60px;}
+    section > div > div:first-child{grid-template-columns:1fr !important;}
+    .ct-row{grid-template-columns:1fr !important;}
   }
 </style>
 
@@ -97,11 +175,6 @@
 function pageInit() {
   renderNav({ heroMode: false });
   renderFooter();
-  renderPageHero({
-    title: 'İletişim',
-    subtitle: 'Bize ulaşın. Öneri, görüş veya işbirliği talepleriniz için buradayız.',
-    nextBg: '#FAF7F2',
-  });
   scrollFadeIn();
 }
 document.addEventListener('dataReady', pageInit);
@@ -126,34 +199,26 @@ async function submitContact(e) {
   };
 
   try {
-    // Firebase hazır olana kadar bekle
     function waitForFirebase() {
       return new Promise((resolve, reject) => {
         let tries = 0;
         function check() {
-          if (typeof firebase !== 'undefined' && firebase.firestore) {
-            resolve(firebase.firestore());
-          } else if (tries++ > 20) {
-            reject(new Error('Firebase yuklenemedi'));
-          } else {
-            setTimeout(check, 300);
-          }
+          if (typeof firebase !== 'undefined' && firebase.firestore) resolve(firebase.firestore());
+          else if (tries++ > 20) reject(new Error('Firebase yuklenemedi'));
+          else setTimeout(check, 300);
         }
         check();
       });
     }
     const db = await waitForFirebase();
     await db.collection('messages').add(msg);
-
     status.innerHTML = '<span style="color:#38A169">✓ Mesajiniz basariyla gonderildi! En kisa surede donus yapacagiz.</span>';
     document.getElementById('contact-form').reset();
   } catch(err) {
     status.innerHTML = '<span style="color:#E53E3E">Gonderme hatasi. Lutfen tekrar deneyin.</span>';
-    console.error(err);
   }
-
   btn.disabled = false;
-  btn.textContent = 'Mesaj Gonder';
+  btn.textContent = 'Mesaj Gonder →';
 }
 </script>
 </body>

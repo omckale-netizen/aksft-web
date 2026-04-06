@@ -639,6 +639,7 @@ function renderFooter(opts = {}) {
               <a href="${basePath}rehber.html">Assos Rehberi</a>
               <a href="${basePath}rehber.html">Mevsimler</a>
               <a href="${basePath}hakkimizda.html">Hakkımızda</a>
+              <a href="${basePath}iletisim.html">İletişim</a>
             </div>
           </div>
         </div>
