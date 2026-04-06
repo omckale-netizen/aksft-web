@@ -1503,10 +1503,10 @@ async function saveVenue(e) {
     await saveVenueToFirestore(venue);
   }
 
+  const isEdit = !!editingVenueId;
   closeVenueModal();
   renderVenueTable();
-  const toastMsg = editingVenueId ? '"' + venue.title + '" guncellendi.' : '"' + venue.title + '" eklendi.';
-  showToast(toastMsg, 'success');
+  showToast('"' + venue.title + '" ' + (isEdit ? 'guncellendi.' : 'eklendi.'), 'success');
 }
 
 /* ══════════════════════════════════════════════════
