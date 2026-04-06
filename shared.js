@@ -2103,18 +2103,31 @@ function renderVenuePage(venueId) {
     }
     const adb = firebase.firestore();
 
-    // Track page view
+    // Log event with timestamp
+    function logEvent(type, target, action) {
+      const now = new Date();
+      adb.collection('analytics_events').add({
+        type: type,
+        target: target,
+        action: action || 'view',
+        timestamp: now.toISOString(),
+        date: now.toISOString().split('T')[0],
+        hour: now.getHours()
+      }).catch(() => {});
+    }
+
+    // Track page view (counter + event log)
     window.trackPageView = function(pageId) {
       if (!pageId) return;
-      const docRef = adb.collection('analytics').doc(pageId);
-      docRef.set({
+      adb.collection('analytics').doc(pageId).set({
         views: firebase.firestore.FieldValue.increment(1),
         lastViewed: new Date().toISOString(),
         id: pageId
       }, { merge: true }).catch(() => {});
+      logEvent('pageview', pageId);
     };
 
-    // Track action (call, whatsapp, reservation)
+    // Track action (counter + event log)
     window.trackAction = function(venueId, action) {
       if (!venueId || !action) return;
       const docRef = adb.collection('analytics').doc('venue_' + venueId);
@@ -2123,6 +2136,7 @@ function renderVenuePage(venueId) {
       update[action + '_last'] = new Date().toISOString();
       update.id = venueId;
       docRef.set(update, { merge: true }).catch(() => {});
+      logEvent('action', venueId, action);
     };
 
     // Auto-track current page

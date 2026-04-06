@@ -237,6 +237,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 .crop-container:hover .crop-hint,.crop-container:active .crop-hint{opacity:1}
 .crop-safe-zone{position:absolute;inset:0;border:2px dashed rgba(255,255,255,.35);border-radius:var(--radius-sm);pointer-events:none}
 .btn-sm{padding:6px 12px;font-size:.75rem}
+.ana-filter.active{background:var(--navy) !important;color:#fff !important;border-color:var(--navy) !important}
+.ana-bar{flex:1;min-width:8px;border-radius:3px 3px 0 0;background:var(--terra);transition:height .4s;position:relative;cursor:default}
+.ana-bar:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:4px 8px;border-radius:6px;font-size:.65rem;white-space:nowrap;z-index:5}
 
 /* ── STOP ROWS ── */
 .stop-row{background:rgba(0,0,0,.02);border:1px solid rgba(0,0,0,.06);border-radius:var(--radius-sm);padding:14px;margin-bottom:8px;position:relative}
@@ -729,7 +732,22 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
       <h2>Istatistikler</h2>
       <p class="page-sub">Sayfa goruntulenmeleri ve kullanici aksiyonlari.</p>
 
+      <!-- Tarih filtresi -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;align-items:center">
+        <button class="btn btn-sm btn-secondary ana-filter active" onclick="setAnalyticsPeriod(7,this)">Son 7 Gun</button>
+        <button class="btn btn-sm btn-secondary ana-filter" onclick="setAnalyticsPeriod(30,this)">Son 30 Gun</button>
+        <button class="btn btn-sm btn-secondary ana-filter" onclick="setAnalyticsPeriod(90,this)">Son 90 Gun</button>
+        <button class="btn btn-sm btn-secondary ana-filter" onclick="setAnalyticsPeriod(0,this)">Tum Zamanlar</button>
+        <span style="margin-left:auto;font-size:.75rem;color:var(--text-muted)" id="analytics-period-label">Son 7 gun</span>
+      </div>
+
       <div class="stats-grid" id="analytics-stats"></div>
+
+      <!-- Günlük grafik -->
+      <div class="panel-card" style="margin-bottom:20px">
+        <div class="panel-card-head"><h3>Gunluk Goruntuleme</h3></div>
+        <div id="analytics-chart" style="padding:16px 20px;display:flex;align-items:flex-end;gap:3px;height:160px;overflow-x:auto"></div>
+      </div>
 
       <div class="dash-row">
         <div class="panel-card dash-half">
@@ -1254,101 +1272,134 @@ function initApp() {
 /* ══════════════════════════════════════════════════
    ANALYTICS
 ══════════════════════════════════════════════════ */
+let analyticsPeriod = 7;
+
+function setAnalyticsPeriod(days, btn) {
+  analyticsPeriod = days;
+  document.querySelectorAll('.ana-filter').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const labels = { 7: 'Son 7 gun', 30: 'Son 30 gun', 90: 'Son 90 gun', 0: 'Tum zamanlar' };
+  document.getElementById('analytics-period-label').textContent = labels[days] || '';
+  renderAnalytics();
+}
+
 async function renderAnalytics() {
   try {
+    // Toplam sayaçlar (tüm zamanlar)
     const snap = await db.collection('analytics').get();
-    const data = {};
-    snap.docs.forEach(d => { data[d.id] = d.data(); });
+    const totals = {};
+    snap.docs.forEach(d => { totals[d.id] = d.data(); });
 
-    // Separate venue analytics from page analytics
-    const venueStats = [];
-    const pageStats = [];
+    // Event logları (tarih filtrelemeli)
+    let eventsQuery = db.collection('analytics_events').orderBy('timestamp', 'desc');
+    if (analyticsPeriod > 0) {
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - analyticsPeriod);
+      eventsQuery = eventsQuery.where('timestamp', '>=', cutoff.toISOString());
+    }
+    const eventsSnap = await eventsQuery.limit(5000).get();
+    const events = eventsSnap.docs.map(d => d.data());
 
-    Object.entries(data).forEach(([key, val]) => {
-      if (key.startsWith('venue_')) {
-        const venueId = key.replace('venue_', '');
-        const venue = draftData.venues.find(v => v.id === venueId);
-        venueStats.push({
-          id: venueId,
-          title: venue ? venue.title : venueId,
-          emoji: venue ? venue.emoji : '📍',
-          views: val.views || 0,
-          calls: val.call_count || 0,
-          whatsapp: val.whatsapp_count || 0,
-          reservations: val.reservation_count || 0
-        });
-      } else if (key.startsWith('page_')) {
-        pageStats.push({
-          page: key.replace('page_', ''),
-          views: val.views || 0,
-          lastViewed: val.lastViewed || ''
-        });
+    // Günlük sayılar (grafik için)
+    const dailyCounts = {};
+    const venueViews = {};
+    const venueActions = {};
+    const pageCounts = {};
+    let totalViews = 0, totalCalls = 0, totalWA = 0, totalRez = 0;
+
+    events.forEach(ev => {
+      const date = ev.date || ev.timestamp?.split('T')[0] || '';
+      // Günlük grafik
+      dailyCounts[date] = (dailyCounts[date] || 0) + 1;
+
+      if (ev.type === 'pageview') {
+        totalViews++;
+        if (ev.target?.startsWith('venue_')) {
+          const vid = ev.target.replace('venue_', '');
+          venueViews[vid] = (venueViews[vid] || 0) + 1;
+        } else if (ev.target?.startsWith('page_')) {
+          const pg = ev.target.replace('page_', '');
+          pageCounts[pg] = (pageCounts[pg] || 0) + 1;
+        }
+      } else if (ev.type === 'action') {
+        const vid = ev.target;
+        if (!venueActions[vid]) venueActions[vid] = { call: 0, whatsapp: 0, reservation: 0 };
+        if (ev.action === 'call') { venueActions[vid].call++; totalCalls++; }
+        if (ev.action === 'whatsapp') { venueActions[vid].whatsapp++; totalWA++; }
+        if (ev.action === 'reservation') { venueActions[vid].reservation++; totalRez++; }
       }
     });
 
-    // Sort by views
-    venueStats.sort((a, b) => b.views - a.views);
-    pageStats.sort((a, b) => b.views - a.views);
+    // Stats
+    document.getElementById('analytics-stats').innerHTML =
+      '<div class="stat-card"><div class="stat-label">Goruntuleme</div><div class="stat-val">' + totalViews + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">Telefon Arama</div><div class="stat-val">' + totalCalls + '</div></div>' +
+      '<div class="stat-card terra"><div class="stat-label">WhatsApp</div><div class="stat-val">' + totalWA + '</div></div>' +
+      '<div class="stat-card green"><div class="stat-label">Rezervasyon</div><div class="stat-val">' + totalRez + '</div></div>';
 
-    // Total stats
-    const totalViews = Object.values(data).reduce((s, d) => s + (d.views || 0), 0);
-    const totalCalls = venueStats.reduce((s, v) => s + v.calls, 0);
-    const totalWA = venueStats.reduce((s, v) => s + v.whatsapp, 0);
-    const totalRez = venueStats.reduce((s, v) => s + v.reservations, 0);
+    // Günlük grafik
+    const dates = Object.keys(dailyCounts).sort();
+    const maxDaily = Math.max(...Object.values(dailyCounts), 1);
+    const chartEl = document.getElementById('analytics-chart');
+    if (dates.length === 0) {
+      chartEl.innerHTML = '<div style="width:100%;text-align:center;color:var(--text-muted);align-self:center">Henuz veri yok</div>';
+    } else {
+      chartEl.innerHTML = dates.map(date => {
+        const count = dailyCounts[date];
+        const pct = Math.max(Math.round(count / maxDaily * 100), 4);
+        const label = date.slice(5);
+        return '<div style="display:flex;flex-direction:column;align-items:center;flex:1;min-width:12px;gap:4px">' +
+          '<div class="ana-bar" style="height:' + pct + '%" data-tip="' + date + ': ' + count + ' etkinlik"></div>' +
+          '<span style="font-size:.55rem;color:var(--text-muted);writing-mode:vertical-lr;transform:rotate(180deg);white-space:nowrap">' + label + '</span>' +
+        '</div>';
+      }).join('');
+    }
 
-    document.getElementById('analytics-stats').innerHTML = `
-      <div class="stat-card"><div class="stat-label">Toplam Goruntuleme</div><div class="stat-val">${totalViews}</div></div>
-      <div class="stat-card"><div class="stat-label">Telefon Aramalari</div><div class="stat-val">${totalCalls}</div></div>
-      <div class="stat-card terra"><div class="stat-label">WhatsApp Mesajlari</div><div class="stat-val">${totalWA}</div></div>
-      <div class="stat-card green"><div class="stat-label">Rezervasyon Talepleri</div><div class="stat-val">${totalRez}</div></div>
-    `;
+    // Top mekanlar
+    const venueList = Object.entries(venueViews).map(([id, views]) => {
+      const venue = draftData.venues.find(v => v.id === id);
+      const acts = venueActions[id] || { call: 0, whatsapp: 0, reservation: 0 };
+      return { id, title: venue ? venue.title : id, emoji: venue ? venue.emoji : '📍', views, ...acts };
+    }).sort((a, b) => b.views - a.views);
 
-    // Top venues
-    document.getElementById('analytics-top-venues').innerHTML = venueStats.length === 0
+    document.getElementById('analytics-top-venues').innerHTML = venueList.length === 0
       ? '<div style="padding:24px;text-align:center;color:var(--text-muted)">Henuz veri yok.</div>'
-      : venueStats.slice(0, 10).map((v, i) => `
-        <div class="recent-item">
-          <div class="recent-emoji">${v.emoji}</div>
-          <div class="recent-info" style="flex:1">
-            <div class="ri-title">${v.title}</div>
-            <div class="ri-meta">${v.views} goruntuleme</div>
-          </div>
-          <div style="text-align:right;font-size:.75rem;color:var(--text-light)">
-            ${v.calls > 0 ? '<span style="margin-right:8px">📞 ' + v.calls + '</span>' : ''}
-            ${v.whatsapp > 0 ? '<span style="margin-right:8px">💬 ' + v.whatsapp + '</span>' : ''}
-            ${v.reservations > 0 ? '<span>📋 ' + v.reservations + '</span>' : ''}
-          </div>
-        </div>`).join('');
+      : venueList.slice(0, 10).map(v =>
+        '<div class="recent-item"><div class="recent-emoji">' + v.emoji + '</div>' +
+        '<div class="recent-info" style="flex:1"><div class="ri-title">' + v.title + '</div>' +
+        '<div class="ri-meta">' + v.views + ' goruntuleme</div></div>' +
+        '<div style="text-align:right;font-size:.75rem;color:var(--text-light)">' +
+          (v.call > 0 ? '<span style="margin-right:8px">📞 ' + v.call + '</span>' : '') +
+          (v.whatsapp > 0 ? '<span style="margin-right:8px">💬 ' + v.whatsapp + '</span>' : '') +
+          (v.reservation > 0 ? '<span>📋 ' + v.reservation + '</span>' : '') +
+        '</div></div>').join('');
 
-    // Actions breakdown
-    const actVenues = venueStats.filter(v => v.calls > 0 || v.whatsapp > 0 || v.reservations > 0);
-    actVenues.sort((a, b) => (b.calls + b.whatsapp + b.reservations) - (a.calls + a.whatsapp + a.reservations));
-    document.getElementById('analytics-actions').innerHTML = actVenues.length === 0
+    // Aksiyonlar
+    const actList = Object.entries(venueActions).map(([id, acts]) => {
+      const venue = draftData.venues.find(v => v.id === id);
+      return { id, title: venue ? venue.title : id, emoji: venue ? venue.emoji : '📍', ...acts };
+    }).filter(v => v.call > 0 || v.whatsapp > 0 || v.reservation > 0)
+      .sort((a, b) => (b.call + b.whatsapp + b.reservation) - (a.call + a.whatsapp + a.reservation));
+
+    document.getElementById('analytics-actions').innerHTML = actList.length === 0
       ? '<div style="padding:24px;text-align:center;color:var(--text-muted)">Henuz aksiyon yok.</div>'
-      : actVenues.map(v => `
-        <div class="recent-item">
-          <div class="recent-emoji">${v.emoji}</div>
-          <div class="recent-info" style="flex:1">
-            <div class="ri-title">${v.title}</div>
-          </div>
-          <div style="display:flex;gap:12px;font-size:.78rem;font-weight:600">
-            <span style="color:#1A6B8A" title="Arama">📞 ${v.calls}</span>
-            <span style="color:#25D366" title="WhatsApp">💬 ${v.whatsapp}</span>
-            <span style="color:var(--terra)" title="Rezervasyon">📋 ${v.reservations}</span>
-          </div>
-        </div>`).join('');
+      : actList.map(v =>
+        '<div class="recent-item"><div class="recent-emoji">' + v.emoji + '</div>' +
+        '<div class="recent-info" style="flex:1"><div class="ri-title">' + v.title + '</div></div>' +
+        '<div style="display:flex;gap:12px;font-size:.78rem;font-weight:600">' +
+          '<span style="color:#1A6B8A">📞 ' + v.call + '</span>' +
+          '<span style="color:#25D366">💬 ' + v.whatsapp + '</span>' +
+          '<span style="color:var(--terra)">📋 ' + v.reservation + '</span>' +
+        '</div></div>').join('');
 
-    // Page views
-    document.getElementById('analytics-pages').innerHTML = pageStats.length === 0
+    // Sayfa görüntüleme
+    const pageList = Object.entries(pageCounts).map(([page, views]) => ({ page, views })).sort((a, b) => b.views - a.views);
+    document.getElementById('analytics-pages').innerHTML = pageList.length === 0
       ? '<div style="padding:24px;text-align:center;color:var(--text-muted)">Henuz veri yok.</div>'
-      : pageStats.map(p => `
-        <div class="recent-item">
-          <div class="recent-emoji">📄</div>
-          <div class="recent-info" style="flex:1">
-            <div class="ri-title">${p.page}</div>
-          </div>
-          <div style="font-size:.85rem;font-weight:700;color:var(--navy)">${p.views}</div>
-        </div>`).join('');
+      : pageList.map(p =>
+        '<div class="recent-item"><div class="recent-emoji">📄</div>' +
+        '<div class="recent-info" style="flex:1"><div class="ri-title">' + p.page + '</div></div>' +
+        '<div style="font-size:.85rem;font-weight:700;color:var(--navy)">' + p.views + '</div></div>').join('');
 
   } catch(err) {
     console.error('Analytics error:', err);
