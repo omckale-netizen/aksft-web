@@ -1,0 +1,1867 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assos'u Kesfet - Yonetim Paneli</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="data.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1A2744;--navy-light:#243255;--navy-dark:#111B30;
+  --terra:#C4521A;--terra-light:#D4682E;--terra-dark:#A8440F;
+  --cream:#FAF7F2;--cream-dark:#EDE8DF;
+  --text:#2D3748;--text-light:#718096;--text-muted:#A0AEC0;
+  --green:#38A169;--green-bg:rgba(56,161,105,.08);
+  --red:#E53E3E;--red-bg:rgba(229,62,62,.08);
+  --blue:#3182CE;--blue-bg:rgba(49,130,206,.08);
+  --sidebar-w:260px;
+  --radius:12px;--radius-sm:8px;
+}
+html{font-size:15px}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh}
+
+/* ── AUTH GATE ── */
+#auth-gate{position:fixed;inset:0;z-index:9999;background:var(--navy);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px}
+#auth-gate.hidden{display:none}
+.auth-box{background:var(--navy-light);border-radius:var(--radius);padding:48px 40px;text-align:center;max-width:380px;width:90%}
+.auth-box h1{color:#fff;font-size:1.5rem;margin-bottom:6px}
+.auth-box p{color:var(--text-muted);font-size:.85rem;margin-bottom:28px}
+.auth-box input{width:100%;padding:12px 16px;border:2px solid rgba(255,255,255,.1);border-radius:var(--radius-sm);background:rgba(255,255,255,.05);color:#fff;font-size:1rem;font-family:inherit;outline:none;transition:border .2s}
+.auth-box input:focus{border-color:var(--terra)}
+.auth-box input::placeholder{color:var(--text-muted)}
+.auth-box button{margin-top:16px;width:100%;padding:12px;border:none;border-radius:var(--radius-sm);background:var(--terra);color:#fff;font-size:1rem;font-weight:600;font-family:inherit;cursor:pointer;transition:background .2s}
+.auth-box button:hover{background:var(--terra-light)}
+.auth-err{color:var(--red);font-size:.82rem;margin-top:12px;min-height:20px}
+
+/* ── LAYOUT ── */
+.admin-wrap{display:flex;min-height:100vh}
+
+/* ── SIDEBAR ── */
+.admin-sidebar{width:var(--sidebar-w);background:var(--navy);color:#fff;position:fixed;top:0;left:0;bottom:0;z-index:100;display:flex;flex-direction:column;transition:transform .3s ease;overflow-y:auto}
+.admin-logo{padding:28px 24px 8px;font-size:1.15rem;font-weight:800;line-height:1.3}
+.admin-logo small{font-weight:500;font-size:.72rem;color:var(--terra-light);letter-spacing:.5px;text-transform:uppercase}
+.admin-nav{flex:1;padding:20px 12px}
+.admin-nav-item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:var(--radius-sm);color:rgba(255,255,255,.7);font-size:.88rem;font-weight:500;cursor:pointer;transition:all .15s;text-decoration:none;margin-bottom:2px;user-select:none}
+.admin-nav-item:hover{background:rgba(255,255,255,.07);color:#fff}
+.admin-nav-item.active{background:var(--terra);color:#fff;font-weight:600}
+.admin-nav-item .nav-icon{font-size:1.1rem;width:24px;text-align:center;flex-shrink:0}
+.admin-nav-sep{height:1px;background:rgba(255,255,255,.08);margin:12px 14px}
+.admin-nav-bottom{padding:12px;border-top:1px solid rgba(255,255,255,.08)}
+
+/* ── MAIN ── */
+.admin-main{margin-left:var(--sidebar-w);flex:1;padding:32px 36px;min-height:100vh}
+.admin-main h2{font-size:1.5rem;font-weight:700;color:var(--navy);margin-bottom:4px}
+.admin-main .page-sub{color:var(--text-light);font-size:.88rem;margin-bottom:28px}
+
+/* ── HAMBURGER ── */
+.hamburger{display:none;position:fixed;top:14px;left:14px;z-index:200;background:var(--navy);border:none;color:#fff;width:42px;height:42px;border-radius:var(--radius-sm);font-size:1.3rem;cursor:pointer;align-items:center;justify-content:center}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99}
+
+/* ── STATS CARDS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:32px}
+.stat-card{background:#fff;border-radius:var(--radius);padding:22px 20px;box-shadow:0 1px 3px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.04)}
+.stat-card .stat-label{font-size:.78rem;color:var(--text-light);font-weight:500;margin-bottom:6px;text-transform:uppercase;letter-spacing:.3px}
+.stat-card .stat-val{font-size:1.8rem;font-weight:800;color:var(--navy)}
+.stat-card.terra .stat-val{color:var(--terra)}
+.stat-card.green .stat-val{color:var(--green)}
+
+/* ── TABLE ── */
+.panel-card{background:#fff;border-radius:var(--radius);box-shadow:0 1px 3px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.04);overflow:hidden;margin-bottom:24px}
+.panel-card-head{padding:18px 22px;border-bottom:1px solid var(--cream-dark);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.panel-card-head h3{font-size:1.05rem;font-weight:700;color:var(--navy)}
+.panel-table{width:100%;border-collapse:collapse}
+.panel-table th{text-align:left;padding:11px 16px;font-size:.76rem;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:.4px;background:var(--cream);border-bottom:1px solid var(--cream-dark)}
+.panel-table td{padding:12px 16px;border-bottom:1px solid rgba(0,0,0,.03);font-size:.88rem;vertical-align:middle}
+.panel-table tr:last-child td{border-bottom:none}
+.panel-table tr:hover td{background:rgba(250,247,242,.6)}
+.panel-table .emoji-col{font-size:1.3rem;width:44px;text-align:center}
+
+/* ── STATUS BADGES ── */
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:600}
+.badge-open{background:var(--green-bg);color:var(--green)}
+.badge-closed{background:var(--red-bg);color:var(--red)}
+.badge-cat{background:rgba(26,39,68,.06);color:var(--navy);font-weight:500}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:none;border-radius:var(--radius-sm);font-family:inherit;font-size:.84rem;font-weight:600;cursor:pointer;transition:all .15s;text-decoration:none}
+.btn-primary{background:var(--terra);color:#fff}
+.btn-primary:hover{background:var(--terra-light)}
+.btn-secondary{background:var(--cream);color:var(--navy);border:1px solid var(--cream-dark)}
+.btn-secondary:hover{background:var(--cream-dark)}
+.btn-danger{background:var(--red-bg);color:var(--red)}
+.btn-danger:hover{background:rgba(229,62,62,.15)}
+.btn-sm{padding:5px 10px;font-size:.78rem}
+.btn-icon{padding:6px 8px;font-size:1rem;background:transparent;border:1px solid var(--cream-dark);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s}
+.btn-icon:hover{background:var(--cream)}
+
+/* ── SEARCH BAR ── */
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--cream);border:1px solid var(--cream-dark);border-radius:var(--radius-sm);padding:8px 14px;flex:1;max-width:400px}
+.search-bar input{border:none;background:none;outline:none;font-family:inherit;font-size:.88rem;color:var(--text);flex:1}
+.search-bar input::placeholder{color:var(--text-muted)}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.show{opacity:1;pointer-events:auto}
+.modal{background:#fff;border-radius:var(--radius);width:100%;max-width:680px;max-height:calc(100vh - 80px);overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-head{padding:22px 28px;border-bottom:1px solid var(--cream-dark);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:2;border-radius:var(--radius) var(--radius) 0 0}
+.modal-head h3{font-size:1.1rem;font-weight:700;color:var(--navy)}
+.modal-close{background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text-light);padding:4px;transition:color .15s}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:24px 28px 32px}
+
+/* ── FORM ── */
+.form-group{margin-bottom:18px}
+.form-group label{display:block;font-size:.8rem;font-weight:600;color:var(--text);margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 14px;border:1.5px solid var(--cream-dark);border-radius:var(--radius-sm);font-family:inherit;font-size:.9rem;color:var(--text);background:#fff;outline:none;transition:border .2s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--terra)}
+.form-group input[readonly]{background:var(--cream);color:var(--text-light)}
+.form-group textarea{resize:vertical;min-height:80px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* Weekly Hours Rows */
+.wh-rows{display:flex;flex-direction:column;gap:8px}
+.wh-row{display:flex;gap:8px;align-items:center}
+.wh-row input{flex:1}
+.wh-row .btn-icon{flex-shrink:0}
+.wh-add{margin-top:6px}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:4px;margin-bottom:20px}
+.tab{padding:9px 20px;border:none;border-radius:var(--radius-sm);background:transparent;font-family:inherit;font-size:.88rem;font-weight:500;color:var(--text-light);cursor:pointer;transition:all .15s}
+.tab.active{background:var(--navy);color:#fff;font-weight:600}
+.tab:hover:not(.active){background:var(--cream-dark)}
+
+/* ── EXPORT ── */
+.export-section{max-width:640px}
+.export-info{background:#fff;border:1px solid var(--cream-dark);border-radius:var(--radius);padding:20px 24px;margin-bottom:20px}
+.export-info h4{font-size:.95rem;font-weight:700;color:var(--navy);margin-bottom:8px}
+.export-info p{font-size:.85rem;color:var(--text-light);line-height:1.6}
+.export-info .change-count{font-size:1.6rem;font-weight:800;color:var(--terra);margin-right:6px}
+.export-btns{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+
+/* ── RECENT LIST ── */
+.recent-item{display:flex;align-items:center;gap:14px;padding:13px 20px;border-bottom:1px solid rgba(0,0,0,.03)}
+.recent-item:last-child{border-bottom:none}
+.recent-emoji{font-size:1.4rem;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:var(--cream);border-radius:var(--radius-sm);flex-shrink:0}
+.recent-info{flex:1;min-width:0}
+.recent-info .ri-title{font-weight:600;font-size:.9rem;color:var(--navy)}
+.recent-info .ri-meta{font-size:.78rem;color:var(--text-light);margin-top:2px}
+
+/* ── CONFIRM DIALOG ── */
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:600;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.confirm-overlay.show{opacity:1;pointer-events:auto}
+.confirm-box{background:#fff;border-radius:var(--radius);padding:32px 28px;max-width:380px;width:90%;text-align:center;box-shadow:0 16px 50px rgba(0,0,0,.15)}
+.confirm-box h4{font-size:1.05rem;font-weight:700;color:var(--navy);margin-bottom:8px}
+.confirm-box p{font-size:.88rem;color:var(--text-light);margin-bottom:20px}
+.confirm-box .confirm-btns{display:flex;gap:10px;justify-content:center}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:#fff;padding:12px 22px;border-radius:var(--radius-sm);font-size:.88rem;font-weight:500;z-index:700;transform:translateY(80px);opacity:0;transition:all .3s ease;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:var(--green)}
+.toast.error{background:var(--red)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .admin-sidebar{transform:translateX(-100%)}
+  .admin-sidebar.open{transform:translateX(0)}
+  .admin-main{margin-left:0;padding:68px 20px 32px}
+  .hamburger{display:flex}
+  .sidebar-overlay.show{display:block}
+  .form-row{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:540px){
+  .stats-grid{grid-template-columns:1fr}
+  .panel-table-wrap{overflow-x:auto}
+  .panel-table{min-width:600px}
+  .admin-main{padding:68px 14px 28px}
+}
+
+/* Pages hidden by default */
+.admin-page{display:none}
+.admin-page.active{display:block}
+
+/* Scrollbar */
+.admin-sidebar::-webkit-scrollbar,.modal::-webkit-scrollbar{width:5px}
+.admin-sidebar::-webkit-scrollbar-thumb,.modal::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px}
+
+.img-upload-area{border:2px dashed rgba(26,39,68,.15);border-radius:var(--radius);padding:8px;transition:border-color .2s}
+.img-upload-area.dragover{border-color:var(--terra);background:rgba(196,82,26,.03)}
+.img-upload-drop{padding:32px 20px;text-align:center;cursor:pointer;border-radius:var(--radius-sm)}
+.img-upload-drop p{margin:6px 0 0;font-size:.82rem;color:var(--text-light)}
+.img-preview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.img-preview-item{position:relative;border-radius:var(--radius-sm);overflow:hidden;aspect-ratio:4/3;background:#eee}
+.img-preview-item img{width:100%;height:100%;object-fit:cover}
+.img-preview-remove{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;border:none;cursor:pointer;font-size:.7rem;display:flex;align-items:center;justify-content:center}
+.img-preview-remove:hover{background:var(--red)}
+.img-preview-name{position:absolute;bottom:0;left:0;right:0;padding:3px 6px;background:rgba(0,0,0,.5);font-size:.6rem;color:#fff;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+
+/* ── Crop / Position Container ── */
+.crop-container{position:relative;aspect-ratio:4/3;border-radius:var(--radius);overflow:hidden;background:var(--cream-dark);cursor:grab;user-select:none;-webkit-user-select:none;border:2px solid rgba(26,39,68,.1)}
+.crop-container:active{cursor:grabbing}
+.crop-container .crop-empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;color:var(--text-muted);font-size:.85rem}
+.crop-container .crop-empty p{margin:0;font-size:.82rem}
+.crop-img{position:absolute;left:0;width:100%;min-height:100%;object-fit:cover;pointer-events:none;transition:none}
+.crop-hint{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#fff;font-size:.68rem;font-weight:600;padding:4px 12px;border-radius:999px;pointer-events:none;opacity:0;transition:opacity .3s}
+.crop-container:hover .crop-hint,.crop-container:active .crop-hint{opacity:1}
+.crop-safe-zone{position:absolute;inset:0;border:2px dashed rgba(255,255,255,.35);border-radius:var(--radius-sm);pointer-events:none}
+.btn-sm{padding:6px 12px;font-size:.75rem}
+</style>
+</head>
+<body>
+
+<!-- AUTH GATE -->
+<div id="auth-gate">
+  <div class="auth-box">
+    <h1>Assos'u Kesfet</h1>
+    <p>Yonetim paneline erisim icin sifrenizi girin.</p>
+    <input type="password" id="auth-pw" placeholder="Sifre" onkeydown="if(event.key==='Enter')checkAuth()">
+    <button onclick="checkAuth()">Giris</button>
+    <div class="auth-err" id="auth-err"></div>
+  </div>
+</div>
+
+<!-- HAMBURGER -->
+<button class="hamburger" id="hamburger" onclick="toggleSidebar()">&#9776;</button>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- APP -->
+<div class="admin-wrap" id="admin-wrap" style="display:none">
+
+  <!-- SIDEBAR -->
+  <nav class="admin-sidebar" id="admin-sidebar">
+    <div class="admin-logo">Assos'u Kesfet<br><small>Yonetim Paneli</small></div>
+    <div class="admin-nav">
+      <a class="admin-nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
+        <span class="nav-icon">&#128202;</span> Genel Bakis
+      </a>
+      <a class="admin-nav-item" data-page="venues" onclick="showPage('venues')">
+        <span class="nav-icon">&#127978;</span> Mekanlar
+      </a>
+      <a class="admin-nav-item" data-page="bot" onclick="showPage('bot')">
+        <span class="nav-icon">&#129302;</span> Mekan Botu
+      </a>
+      <a class="admin-nav-item" data-page="placebot" onclick="showPage('placebot')">
+        <span class="nav-icon">📍</span> Yer Botu
+      </a>
+      <a class="admin-nav-item" data-page="routes" onclick="showPage('routes')">
+        <span class="nav-icon">&#128506;</span> Rotalar
+      </a>
+      <a class="admin-nav-item" data-page="villages" onclick="showPage('villages')">
+        <span class="nav-icon">&#127960;</span> Koyler & Yerler
+      </a>
+      <a class="admin-nav-item" data-page="export" onclick="showPage('export')">
+        <span class="nav-icon">&#128230;</span> Disa Aktar
+      </a>
+      <div class="admin-nav-sep"></div>
+      <a class="admin-nav-item" onclick="logout()">
+        <span class="nav-icon">&#128682;</span> Cikis
+      </a>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <div class="admin-main">
+
+    <!-- ══════ DASHBOARD ══════ -->
+    <div class="admin-page active" id="page-dashboard">
+      <h2>Genel Bakis</h2>
+      <p class="page-sub">Sitenin genel durumuna hizli bir bakis.</p>
+      <div class="stats-grid" id="stats-grid"></div>
+      <div class="panel-card">
+        <div class="panel-card-head"><h3>Son Eklenen Mekanlar</h3></div>
+        <div id="recent-venues"></div>
+      </div>
+    </div>
+
+    <!-- ══════ VENUES ══════ -->
+    <div class="admin-page" id="page-venues">
+      <h2>Mekanlar Yonetimi</h2>
+      <p class="page-sub">Tum mekanlari goruntuleyin, duzenleyin veya yeni mekan ekleyin.</p>
+      <div class="panel-card">
+        <div class="panel-card-head">
+          <div style="display:flex;gap:8px;flex:1;flex-wrap:wrap;align-items:center">
+            <div class="search-bar" style="flex:1;min-width:160px">
+              <span>&#128269;</span>
+              <input type="text" id="venue-search" placeholder="Mekan ara..." oninput="renderVenueTable()">
+            </div>
+            <select id="venue-cat-filter" onchange="renderVenueTable()" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:#fff;color:var(--text);cursor:pointer">
+              <option value="all">Tüm Kategoriler</option>
+              <option value="kafe">☕ Kafeler</option>
+              <option value="restoran">🍽 Restoranlar</option>
+              <option value="kahvalti">🥚 Kahvaltı</option>
+              <option value="konaklama">🏨 Konaklama</option>
+              <option value="beach">🏖 Beach</option>
+              <option value="iskele">⚓ İskeleler</option>
+            </select>
+            <button class="btn btn-secondary btn-sm" id="venue-featured-filter" onclick="toggleFeaturedFilter()" style="white-space:nowrap">⭐ Öne Çıkanlar</button>
+          </div>
+          <button class="btn btn-primary" onclick="openVenueModal()" style="white-space:nowrap">+ Yeni Mekan Ekle</button>
+        </div>
+        <div class="panel-table-wrap">
+          <table class="panel-table" id="venue-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Ad</th>
+                <th>Kategori</th>
+                <th>Konum</th>
+                <th>⭐</th>
+                <th>Durum</th>
+                <th>Islemler</th>
+              </tr>
+            </thead>
+            <tbody id="venue-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ MEKAN BOTU ══════ -->
+    <div class="admin-page" id="page-bot">
+      <h2>Mekan Botu</h2>
+      <p class="page-sub">Mekan adı ve konumu girin, bot bilgileri araştırsın.</p>
+
+      <div class="panel-card" style="max-width:600px">
+        <div class="form-group" style="padding:20px 20px 0">
+          <label>Mekan Adı</label>
+          <input type="text" id="bot-name" placeholder="örn: Sunaba Kasrı Otel">
+        </div>
+        <div class="form-group" style="padding:0 20px">
+          <label>Konum / İlçe</label>
+          <input type="text" id="bot-location" placeholder="örn: Büyükhusun, Ayvacık">
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;padding:0 20px 20px">
+          <button class="btn btn-primary" onclick="botSearch()">&#128269; Araştır</button>
+          <button class="btn btn-secondary" onclick="botSearchGoogle()">Google'da Ara</button>
+          <button class="btn btn-secondary" onclick="botSearchMaps()">Google Maps'te Ara</button>
+          <button class="btn btn-secondary" onclick="botSearchInsta()">Instagram'da Ara</button>
+        </div>
+      </div>
+
+      <div id="bot-results" style="margin-top:24px;display:none">
+        <div class="panel-card" style="padding:20px">
+          <h4 style="margin-bottom:16px">&#128203; Araştırma Sonuçları</h4>
+          <p class="page-sub">Aşağıdaki bilgileri gözden geçirin ve "Mekan Olarak Ekle" butonuna tıklayın.</p>
+
+          <div class="form-group">
+            <label>Mekan Adı</label>
+            <input type="text" id="bot-r-title">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Kategori</label>
+              <select id="bot-r-category">
+                <option value="">Seçin</option>
+                <option value="kafe">Kafe</option>
+                <option value="restoran">Restoran</option>
+                <option value="kahvalti">Kahvaltı</option>
+                <option value="konaklama">Konaklama</option>
+                <option value="beach">Beach</option>
+                <option value="iskele">İskele</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Emoji</label>
+              <input type="text" id="bot-r-emoji" placeholder="☕">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Konum</label>
+            <input type="text" id="bot-r-location">
+          </div>
+          <div class="form-group">
+            <label>Adres</label>
+            <input type="text" id="bot-r-address">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Telefon</label>
+              <input type="text" id="bot-r-phone" placeholder="0532 xxx xx xx">
+            </div>
+            <div class="form-group">
+              <label>Website</label>
+              <input type="text" id="bot-r-website" placeholder="https://...">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Kısa Açıklama</label>
+            <textarea id="bot-r-shortDesc" rows="2"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Detaylı Açıklama</label>
+            <textarea id="bot-r-description" rows="4"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Etiketler (virgül ile)</label>
+            <input type="text" id="bot-r-tags" placeholder="manzaralı, sakin, doğa">
+          </div>
+          <div class="form-group">
+            <label>Çalışma Saatleri</label>
+            <input type="text" id="bot-r-hours" placeholder="08:00–22:00">
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:20px">
+            <button class="btn btn-primary" onclick="botAddVenue()">&#9989; Mekan Olarak Ekle</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('bot-results').style.display='none'">İptal</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ PLACE BOT ══════ -->
+    <div class="admin-page" id="page-placebot">
+      <h2>Yer Botu</h2>
+      <p class="page-sub">Yer adı ve konumu girin, bot bilgileri ve görseli araştırsın.</p>
+
+      <div class="panel-card" style="max-width:600px">
+        <div class="form-group" style="padding:20px 20px 0">
+          <label>Yer Adı</label>
+          <input type="text" id="pbot-name" placeholder="örn: Athena Tapınağı, Kadırga Koyu">
+        </div>
+        <div class="form-group" style="padding:0 20px">
+          <label>Konum / Bölge</label>
+          <input type="text" id="pbot-location" placeholder="örn: Behramkale, Assos">
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;padding:0 20px 20px">
+          <button class="btn btn-primary" onclick="pbotSearch()">🔍 Araştır</button>
+          <button class="btn btn-secondary" onclick="pbotSearchGoogle()">Google'da Ara</button>
+          <button class="btn btn-secondary" onclick="pbotSearchMaps()">Google Maps'te Ara</button>
+          <button class="btn btn-secondary" onclick="pbotSearchImages()">Google Görseller</button>
+        </div>
+      </div>
+
+      <div id="pbot-results" style="margin-top:24px;display:none">
+        <div class="panel-card" style="padding:20px">
+          <h4 style="margin-bottom:16px">📋 Yer Bilgileri</h4>
+          <p class="page-sub">Araştırma sonuçlarını doldurun.</p>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Yer Adı</label>
+              <input type="text" id="pbot-r-title">
+            </div>
+            <div class="form-group">
+              <label>Emoji</label>
+              <input type="text" id="pbot-r-emoji" placeholder="🏛">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Kategori</label>
+              <select id="pbot-r-category">
+                <option value="">Seçin</option>
+                <option value="tarihi">Tarihi Alan</option>
+                <option value="koy">Koy</option>
+                <option value="koyu">Köy</option>
+                <option value="iskele">İskele</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Konum</label>
+              <input type="text" id="pbot-r-location" placeholder="Behramkale Tepesi">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Kısa Açıklama</label>
+            <textarea id="pbot-r-shortDesc" rows="2" placeholder="Kısa tanıtım"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Detaylı Açıklama</label>
+            <textarea id="pbot-r-description" rows="4" placeholder="Detaylı bilgi"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Etiketler (virgül ile)</label>
+            <input type="text" id="pbot-r-tags" placeholder="Manzara, Antik, UNESCO">
+          </div>
+
+          <div class="form-group">
+            <label>Görsel</label>
+            <div class="crop-container" id="pbot-crop-container" style="margin-bottom:8px">
+              <div class="crop-empty" id="pbot-crop-empty" onclick="document.getElementById('pbot-img-file').click()">
+                <span style="font-size:2rem">📷</span>
+                <p>Görsel yüklemek için tıklayın</p>
+              </div>
+              <img id="pbot-crop-img" class="crop-img" style="display:none" draggable="false">
+              <div class="crop-hint" id="pbot-crop-hint" style="display:none">↕ Sürükleyerek konumlandır</div>
+            </div>
+            <input type="file" id="pbot-img-file" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="pbotHandleImage(this.files[0])">
+            <div style="display:flex;gap:8px">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('pbot-img-file').click()">📷 Görsel Seç</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="pbotResetCrop()">↺ Ortala</button>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:20px">
+            <button class="btn btn-primary" onclick="pbotAddPlace()">✅ Yer Olarak Ekle</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('pbot-results').style.display='none'">İptal</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ ROUTES ══════ -->
+    <div class="admin-page" id="page-routes">
+      <h2>Rotalar</h2>
+      <p class="page-sub">Tum rotalari goruntuleyin. (Salt okunur)</p>
+      <div class="panel-card">
+        <div class="panel-table-wrap">
+          <table class="panel-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Baslik</th>
+                <th>Sure</th>
+                <th>Zorluk</th>
+                <th>Durak</th>
+              </tr>
+            </thead>
+            <tbody id="routes-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ VILLAGES ══════ -->
+    <div class="admin-page" id="page-villages">
+      <h2>Koyler & Yerler</h2>
+      <p class="page-sub">Koyleri ve ozel yerleri goruntuleyin, gorsel ekleyin.</p>
+      <div class="tabs">
+        <button class="tab active" onclick="switchVillageTab('villages')">Koyler</button>
+        <button class="tab" onclick="switchVillageTab('places')">Yerler</button>
+      </div>
+      <div class="panel-card">
+        <div class="panel-table-wrap">
+          <table class="panel-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Baslik</th>
+                <th>Kategori</th>
+                <th>Gorsel</th>
+                <th>Islemler</th>
+              </tr>
+            </thead>
+            <tbody id="vp-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLACE IMAGE MODAL -->
+    <div class="modal-overlay" id="place-img-modal">
+      <div class="modal" style="max-width:480px">
+        <div class="modal-head">
+          <h3 id="place-modal-title">Gorsel Duzenle</h3>
+          <button class="modal-close" onclick="closePlaceImgModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Gorsel Onizleme <span id="place-pos-label" style="font-weight:400;color:var(--text-muted);font-size:.75rem"></span></label>
+            <div class="crop-container" id="crop-container">
+              <div class="crop-empty" id="crop-empty">
+                <span style="font-size:2rem">📷</span>
+                <p>Gorsel yuklemek icin tiklayin</p>
+              </div>
+              <img id="crop-img" class="crop-img" style="display:none" draggable="false">
+              <div class="crop-hint" id="crop-hint" style="display:none">↕ Surukleyerek konumlandir</div>
+            </div>
+            <input type="file" id="place-img-file" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handlePlaceImage(this.files[0])">
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('place-img-file').click()">📷 Gorsel Sec</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="resetCropPos()">↺ Ortala</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+            <button class="btn btn-secondary" onclick="closePlaceImgModal()">Iptal</button>
+            <button class="btn btn-danger" onclick="removePlaceImage()" id="place-img-remove-btn" style="display:none">Gorseli Kaldir</button>
+            <button class="btn btn-primary" onclick="savePlaceImage()">Kaydet</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ EXPORT ══════ -->
+    <div class="admin-page" id="page-export">
+      <h2>Disa Aktar</h2>
+      <p class="page-sub">Yaptaginiz degisiklikleri data.js dosyasi olarak indirin.</p>
+      <div class="export-section">
+        <div class="export-info">
+          <h4>Degisiklik Ozeti</h4>
+          <p id="export-summary">Henuz degisiklik yok.</p>
+        </div>
+        <div class="export-info">
+          <h4>Nasil Calisir?</h4>
+          <p>Yaptaginiz tum degisiklikler tarayicinin yerel deposunda (localStorage) taslak olarak saklanir. "data.js Indir" butonuna bastiginizda, guncellenm is veri dosyasi bilgisayariniza indirilir. Bu dosyayi sunucunuzdaki mevcut data.js ile degistirmeniz yeterlidir.</p>
+        </div>
+        <div class="export-btns">
+          <button class="btn btn-primary" onclick="exportDataJS()">&#128229; data.js Indir</button>
+          <button class="btn btn-primary" onclick="exportImages()" style="margin-left:10px">&#128247; Görselleri İndir</button>
+          <button class="btn btn-danger" onclick="confirmReset()">&#128465; Degisiklikleri Sifirla</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- VENUE MODAL -->
+<div class="modal-overlay" id="venue-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-title">Yeni Mekan Ekle</h3>
+      <button class="modal-close" onclick="closeVenueModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="venue-form" onsubmit="saveVenue(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label>ID</label>
+            <input type="text" id="f-id" readonly placeholder="Otomatik olusturulur">
+          </div>
+          <div class="form-group">
+            <label>Emoji</label>
+            <input type="text" id="f-emoji" placeholder="&#9749;">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Mekan Adi</label>
+          <input type="text" id="f-title" required placeholder="Mekan adi" oninput="autoId()">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Kategori</label>
+            <select id="f-category" required>
+              <option value="">Secin</option>
+              <option value="kafe">Kafe</option>
+              <option value="restoran">Restoran</option>
+              <option value="kahvalti">Kahvalti</option>
+              <option value="konaklama">Konaklama</option>
+              <option value="beach">Beach</option>
+              <option value="iskele">Iskele</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Konum</label>
+            <input type="text" id="f-location" placeholder="orn: Behramkale Koyu">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Kisa Aciklama</label>
+          <textarea id="f-shortDesc" rows="2" placeholder="Kisa tanitim metni"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Detayli Aciklama</label>
+          <textarea id="f-description" rows="4" placeholder="Mekan hakkinda detayli bilgi"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Adres</label>
+            <input type="text" id="f-address" placeholder="Tam adres">
+          </div>
+          <div class="form-group">
+            <label>Telefon</label>
+            <input type="text" id="f-phone" placeholder="0532 xxx xx xx">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Website</label>
+          <input type="text" id="f-website" placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+            <input type="checkbox" id="f-featured" style="width:18px;height:18px;accent-color:var(--terra);cursor:pointer">
+            <span>⭐ Öne Çıkan Mekan</span>
+            <span style="font-size:.72rem;color:var(--text-muted);font-weight:400">(Anasayfada gösterilir)</span>
+          </label>
+        </div>
+        <div class="form-group">
+          <label>Etiketler (virgul ile ayirin)</label>
+          <input type="text" id="f-tags" placeholder="manzarali, deniz kenari, sakin">
+        </div>
+        <div class="form-group">
+          <label>Calisma Saatleri (genel)</label>
+          <input type="text" id="f-hours" placeholder="08:00-22:00">
+        </div>
+
+        <div class="form-group">
+          <label>Haftalik Calisma Saatleri</label>
+          <div class="wh-rows" id="wh-rows"></div>
+          <button type="button" class="btn btn-secondary btn-sm wh-add" onclick="addWhRow()">+ Satir Ekle</button>
+        </div>
+
+        <div class="form-group">
+          <label>Görseller</label>
+          <div class="img-upload-area" id="img-upload-area">
+            <div class="img-upload-drop" id="img-drop" onclick="document.getElementById('img-file-input').click()">
+              <span style="font-size:2rem">&#128247;</span>
+              <p>Görselleri sürükleyip bırakın veya tıklayarak seçin</p>
+              <p style="font-size:.72rem;color:var(--text-muted)">JPG, PNG · Otomatik sıkıştırılır · Maks 6 görsel</p>
+            </div>
+            <input type="file" id="img-file-input" multiple accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleImageUpload(this.files)">
+            <div class="img-preview-grid" id="img-preview-grid"></div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:24px">
+          <button type="button" class="btn btn-secondary" onclick="closeVenueModal()">Iptal</button>
+          <button type="submit" class="btn btn-primary">Kaydet</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <h4 id="confirm-title">Emin misiniz?</h4>
+    <p id="confirm-msg"></p>
+    <div class="confirm-btns">
+      <button class="btn btn-secondary" onclick="closeConfirm()">Iptal</button>
+      <button class="btn btn-danger" id="confirm-yes">Evet</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════════
+   DATA MANAGEMENT
+══════════════════════════════════════════════════ */
+const ORIGINAL_DATA = JSON.parse(JSON.stringify(window.DATA));
+let draftData = JSON.parse(localStorage.getItem('admin_draft_data') || 'null') || JSON.parse(JSON.stringify(window.DATA));
+
+function saveDraft() {
+  localStorage.setItem('admin_draft_data', JSON.stringify(draftData));
+}
+
+/* ══════════════════════════════════════════════════
+   AUTH
+══════════════════════════════════════════════════ */
+function checkAuth() {
+  const pw = document.getElementById('auth-pw').value;
+  if (pw === 'assos2026') {
+    localStorage.setItem('admin_auth', 'true');
+    document.getElementById('auth-gate').classList.add('hidden');
+    document.getElementById('admin-wrap').style.display = 'flex';
+    initApp();
+  } else {
+    document.getElementById('auth-err').textContent = 'Yanlis sifre. Tekrar deneyin.';
+  }
+}
+
+function logout() {
+  localStorage.removeItem('admin_auth');
+  location.reload();
+}
+
+if (localStorage.getItem('admin_auth') === 'true') {
+  document.getElementById('auth-gate').classList.add('hidden');
+  document.getElementById('admin-wrap').style.display = 'flex';
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  document.getElementById('auth-gate').classList.remove('hidden');
+}
+
+/* ══════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════ */
+function showPage(page) {
+  document.querySelectorAll('.admin-page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.admin-nav-item[data-page]').forEach(n => {
+    n.classList.toggle('active', n.dataset.page === page);
+  });
+  // Close sidebar on mobile
+  if (window.innerWidth <= 900) {
+    document.getElementById('admin-sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('show');
+  }
+  // Refresh page data
+  if (page === 'dashboard') renderDashboard();
+  if (page === 'venues') renderVenueTable();
+  if (page === 'routes') renderRoutesTable();
+  if (page === 'villages') renderVPTable();
+  if (page === 'export') renderExport();
+  if (page === 'bot') { /* static form, no render needed */ }
+}
+
+function toggleSidebar() {
+  document.getElementById('admin-sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('show');
+}
+
+/* ══════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════ */
+function initApp() {
+  renderDashboard();
+  setupDragDrop();
+}
+
+/* ══════════════════════════════════════════════════
+   VENUE STATUS (open/closed)
+══════════════════════════════════════════════════ */
+function getVenueStatus(v) {
+  const now = new Date();
+  const dayNames = ['Pazar','Pazartesi','Sali','Carsamba','Persembe','Cuma','Cumartesi'];
+  const todayName = dayNames[now.getDay()];
+  const mins = now.getHours() * 60 + now.getMinutes();
+
+  if (!v.weeklyHours || v.weeklyHours.length === 0) {
+    if (!v.hours) return null;
+    const m = v.hours.match(/(\d{2}):(\d{2})\s*[–\-]\s*(\d{2}):(\d{2})/);
+    if (!m) return null;
+    const open = parseInt(m[1]) * 60 + parseInt(m[2]);
+    const close = parseInt(m[3]) * 60 + parseInt(m[4]);
+    return mins >= open && mins < close;
+  }
+
+  let todayHours = null;
+  for (const entry of v.weeklyHours) {
+    const d = entry.days.toLowerCase();
+    if (d.includes('24 saat')) return true;
+    if (d.includes('her g\u00FCn') || d.includes('resepsiyon')) { todayHours = entry.hours; break; }
+    if (d.includes('pazartesi') && d.includes('per\u015Fembe') && ['Pazartesi','Sali','Carsamba','Persembe'].includes(todayName)) { todayHours = entry.hours; break; }
+    if (d.includes('cuma') && d.includes('pazar') && ['Cuma','Cumartesi','Pazar'].includes(todayName)) { todayHours = entry.hours; break; }
+    if (d.includes('nisan') && d.includes('ekim')) {
+      const mo = now.getMonth();
+      if (mo >= 3 && mo <= 9) { todayHours = entry.hours; break; }
+      else { todayHours = 'Kapali'; break; }
+    }
+    if (d.includes('kas\u0131m') && d.includes('mart')) {
+      const mo = now.getMonth();
+      if (mo <= 2 || mo >= 10) { todayHours = entry.hours; break; }
+    }
+  }
+
+  if (!todayHours) todayHours = v.weeklyHours[0].hours;
+  if (!todayHours || todayHours.toLowerCase().includes('kapal')) return false;
+
+  const m = todayHours.match(/(\d{2}):(\d{2})\s*[–\-]\s*(\d{2}):(\d{2})/);
+  if (!m) return null;
+  const open = parseInt(m[1]) * 60 + parseInt(m[2]);
+  const close = parseInt(m[3]) * 60 + parseInt(m[4]);
+  return mins >= open && mins < close;
+}
+
+/* ══════════════════════════════════════════════════
+   DASHBOARD
+══════════════════════════════════════════════════ */
+function renderDashboard() {
+  const v = draftData.venues || [];
+  const r = draftData.routes || [];
+  const vi = draftData.villages || [];
+  const p = draftData.places || [];
+  const konaklama = v.filter(x => x.category === 'konaklama').length;
+  let openCount = 0;
+  v.forEach(x => { if (getVenueStatus(x) === true) openCount++; });
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Toplam Mekan</div><div class="stat-val">${v.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Toplam Rota</div><div class="stat-val">${r.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Toplam Koy</div><div class="stat-val">${vi.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Toplam Yer</div><div class="stat-val">${p.length}</div></div>
+    <div class="stat-card terra"><div class="stat-label">Konaklama</div><div class="stat-val">${konaklama}</div></div>
+    <div class="stat-card green"><div class="stat-label">Su An Acik</div><div class="stat-val">${openCount}</div></div>
+  `;
+
+  const recent = v.slice(-5).reverse();
+  const catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvalti',konaklama:'Konaklama',beach:'Beach',iskele:'Iskele'};
+  document.getElementById('recent-venues').innerHTML = recent.length === 0
+    ? '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:.88rem">Henuz mekan yok.</div>'
+    : recent.map(x => `
+      <div class="recent-item">
+        <div class="recent-emoji">${x.emoji || '?'}</div>
+        <div class="recent-info">
+          <div class="ri-title">${x.title}</div>
+          <div class="ri-meta">${catLabels[x.category] || x.category} &middot; ${x.location || '-'}</div>
+        </div>
+      </div>`).join('');
+}
+
+/* ══════════════════════════════════════════════════
+   VENUES TABLE
+══════════════════════════════════════════════════ */
+let showFeaturedOnly = false;
+
+function toggleFeaturedFilter() {
+  showFeaturedOnly = !showFeaturedOnly;
+  const btn = document.getElementById('venue-featured-filter');
+  btn.style.background = showFeaturedOnly ? 'var(--terra)' : '';
+  btn.style.color = showFeaturedOnly ? '#fff' : '';
+  btn.style.borderColor = showFeaturedOnly ? 'var(--terra)' : '';
+  renderVenueTable();
+}
+
+function toggleFeatured(id, e) {
+  e.stopPropagation();
+  const v = draftData.venues.find(x => x.id === id);
+  if (!v) return;
+  v.featured = !v.featured;
+  saveDraft();
+  renderVenueTable();
+  showToast(v.featured ? '⭐ Öne çıkanlara eklendi.' : 'Öne çıkanlardan kaldırıldı.', 'success');
+}
+
+function renderVenueTable() {
+  const q = (document.getElementById('venue-search')?.value || '').toLowerCase();
+  const catFilter = document.getElementById('venue-cat-filter')?.value || 'all';
+  const catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvalti',konaklama:'Konaklama',beach:'Beach',iskele:'Iskele'};
+  let venues = draftData.venues || [];
+  if (q) venues = venues.filter(v => v.title.toLowerCase().includes(q) || (v.category||'').toLowerCase().includes(q) || (v.location||'').toLowerCase().includes(q));
+  if (catFilter !== 'all') venues = venues.filter(v => v.category === catFilter);
+  if (showFeaturedOnly) venues = venues.filter(v => v.featured);
+
+  document.getElementById('venue-tbody').innerHTML = venues.length === 0
+    ? '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-muted)">Mekan bulunamadi.</td></tr>'
+    : venues.map(v => {
+      const s = getVenueStatus(v);
+      const sBadge = s === true ? '<span class="badge badge-open">Acik</span>'
+                    : s === false ? '<span class="badge badge-closed">Kapali</span>'
+                    : '<span class="badge" style="color:var(--text-muted)">-</span>';
+      const starStyle = v.featured ? 'color:#D4935A;font-size:1.1rem;cursor:pointer' : 'color:var(--text-muted);font-size:1.1rem;cursor:pointer;opacity:.4';
+      return `<tr>
+        <td class="emoji-col">${v.emoji || ''}</td>
+        <td><strong>${v.title}</strong></td>
+        <td><span class="badge badge-cat">${catLabels[v.category] || v.category || '-'}</span></td>
+        <td>${v.location || '-'}</td>
+        <td><span style="${starStyle}" onclick="toggleFeatured('${v.id}',event)" title="${v.featured ? 'Öne çıkanlardan kaldır' : 'Öne çıkanlara ekle'}">${v.featured ? '★' : '☆'}</span></td>
+        <td>${sBadge}</td>
+        <td>
+          <button class="btn-icon" title="Duzenle" onclick="openVenueModal('${v.id}')">&#9998;</button>
+          <button class="btn-icon" title="Sil" onclick="confirmDeleteVenue('${v.id}')" style="margin-left:4px;color:var(--red)">&#128465;</button>
+        </td>
+      </tr>`;
+    }).join('');
+}
+
+/* ══════════════════════════════════════════════════
+   VENUE MODAL
+══════════════════════════════════════════════════ */
+let editingVenueId = null;
+
+function generateId(title) {
+  return title.toLowerCase()
+    .replace(/\u00e7/g,'c').replace(/\u011f/g,'g').replace(/\u0131/g,'i')
+    .replace(/\u00f6/g,'o').replace(/\u015f/g,'s').replace(/\u00fc/g,'u')
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+}
+
+function autoId() {
+  if (!editingVenueId) {
+    document.getElementById('f-id').value = generateId(document.getElementById('f-title').value);
+  }
+}
+
+function openVenueModal(id) {
+  editingVenueId = id || null;
+  pendingImages = [];
+  const form = document.getElementById('venue-form');
+  form.reset();
+  document.getElementById('wh-rows').innerHTML = '';
+
+  if (id) {
+    const v = draftData.venues.find(x => x.id === id);
+    if (!v) return;
+    document.getElementById('modal-title').textContent = 'Mekan Duzenle';
+    document.getElementById('f-id').value = v.id;
+    document.getElementById('f-title').value = v.title || '';
+    document.getElementById('f-emoji').value = v.emoji || '';
+    document.getElementById('f-category').value = v.category || '';
+    document.getElementById('f-shortDesc').value = v.shortDesc || '';
+    document.getElementById('f-description').value = v.description || '';
+    document.getElementById('f-location').value = v.location || '';
+    document.getElementById('f-address').value = v.address || '';
+    document.getElementById('f-phone').value = v.phone || '';
+    document.getElementById('f-website').value = v.website || '';
+    document.getElementById('f-featured').checked = !!v.featured;
+    document.getElementById('f-tags').value = (v.tags || []).join(', ');
+    document.getElementById('f-hours').value = v.hours || '';
+    (v.weeklyHours || []).forEach(wh => addWhRow(wh.days, wh.hours));
+  } else {
+    document.getElementById('modal-title').textContent = 'Yeni Mekan Ekle';
+    document.getElementById('f-id').value = '';
+    addWhRow('', '');
+  }
+
+  renderImagePreviews();
+  document.getElementById('venue-modal').classList.add('show');
+}
+
+function closeVenueModal() {
+  document.getElementById('venue-modal').classList.remove('show');
+  editingVenueId = null;
+}
+
+function addWhRow(days, hours) {
+  const container = document.getElementById('wh-rows');
+  const row = document.createElement('div');
+  row.className = 'wh-row';
+  row.innerHTML = `
+    <input type="text" class="wh-days" value="${days || ''}" placeholder="Pazartesi - Cuma">
+    <input type="text" class="wh-hours" value="${hours || ''}" placeholder="08:00 - 22:00">
+    <button type="button" class="btn-icon" onclick="this.parentElement.remove()" style="color:var(--red)" title="Kaldir">&times;</button>
+  `;
+  container.appendChild(row);
+}
+
+/* Category style defaults */
+const CAT_DEFAULTS = {
+  kafe:      { iconBg:'rgba(196,82,26,0.1)',  tagBg:'rgba(196,82,26,0.1)',  tagColor:'#C4521A', tagText:'Kafe' },
+  restoran:  { iconBg:'rgba(26,107,138,0.1)',  tagBg:'rgba(26,107,138,0.1)',  tagColor:'#1A6B8A', tagText:'Restoran' },
+  kahvalti:  { iconBg:'rgba(212,147,90,0.12)', tagBg:'rgba(212,147,90,0.15)', tagColor:'#8A5520', tagText:'Kahvalti' },
+  konaklama: { iconBg:'rgba(90,122,86,0.12)',  tagBg:'rgba(90,122,86,0.12)',  tagColor:'#5A7A56', tagText:'Konaklama' },
+  beach:     { iconBg:'rgba(26,107,138,0.1)',  tagBg:'rgba(26,107,138,0.1)',  tagColor:'#1A9A8A', tagText:'Beach' },
+  iskele:    { iconBg:'rgba(26,39,68,0.08)',   tagBg:'rgba(26,39,68,0.08)',   tagColor:'#3A5A8A', tagText:'Iskele' }
+};
+
+function saveVenue(e) {
+  e.preventDefault();
+  const id = document.getElementById('f-id').value || generateId(document.getElementById('f-title').value);
+  const category = document.getElementById('f-category').value;
+  const catDef = CAT_DEFAULTS[category] || {};
+
+  // Gather weekly hours
+  const whRows = document.querySelectorAll('#wh-rows .wh-row');
+  const weeklyHours = [];
+  whRows.forEach(row => {
+    const d = row.querySelector('.wh-days').value.trim();
+    const h = row.querySelector('.wh-hours').value.trim();
+    if (d || h) weeklyHours.push({ days: d, hours: h });
+  });
+
+  const tagsStr = document.getElementById('f-tags').value;
+
+  // Image handling: combine existing images with new pending uploads
+  const venueId = id;
+  const existingImgs = editingVenueId ? (draftData.venues.find(v => v.id === editingVenueId)?.images || []) : [];
+  const newImgPaths = pendingImages.map((img, i) => `images/mekanlar/${venueId}/${existingImgs.length + i + 1}.jpg`);
+  const allImages = [...existingImgs, ...newImgPaths];
+
+  // Store pending images for download
+  if (pendingImages.length > 0) {
+    if (!window._pendingImageExports) window._pendingImageExports = [];
+    pendingImages.forEach((img, i) => {
+      window._pendingImageExports.push({
+        path: `images/mekanlar/${venueId}/${existingImgs.length + i + 1}.jpg`,
+        blob: img.blob
+      });
+    });
+  }
+  pendingImages = [];
+
+  const venue = {
+    id: id,
+    title: document.getElementById('f-title').value.trim(),
+    emoji: document.getElementById('f-emoji').value.trim(),
+    category: category,
+    iconBg: catDef.iconBg || '',
+    tagBg: catDef.tagBg || '',
+    tagColor: catDef.tagColor || '',
+    tagText: catDef.tagText || '',
+    shortDesc: document.getElementById('f-shortDesc').value.trim(),
+    description: document.getElementById('f-description').value.trim(),
+    location: document.getElementById('f-location').value.trim(),
+    tags: tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [],
+    keywords: [], // auto from tags/title
+    hours: document.getElementById('f-hours').value.trim(),
+    images: allImages,
+    phone: document.getElementById('f-phone').value.trim(),
+    address: document.getElementById('f-address').value.trim(),
+    website: document.getElementById('f-website').value.trim(),
+    featured: document.getElementById('f-featured').checked,
+    weeklyHours: weeklyHours
+  };
+
+  // Generate keywords from title + tags
+  venue.keywords = [
+    ...venue.title.toLowerCase().split(/\s+/),
+    ...venue.tags.map(t => t.toLowerCase()),
+    venue.category
+  ].filter(Boolean);
+
+  if (editingVenueId) {
+    // Update existing
+    const idx = draftData.venues.findIndex(v => v.id === editingVenueId);
+    if (idx >= 0) {
+      // Preserve fields we don't edit
+      const existing = draftData.venues[idx];
+      venue.iconBg = venue.iconBg || existing.iconBg;
+      venue.tagBg = venue.tagBg || existing.tagBg;
+      venue.tagColor = venue.tagColor || existing.tagColor;
+      venue.tagText = venue.tagText || existing.tagText;
+      draftData.venues[idx] = venue;
+    }
+  } else {
+    // Check duplicate id
+    if (draftData.venues.some(v => v.id === venue.id)) {
+      showToast('Bu ID ile baska bir mekan zaten var.', 'error');
+      return;
+    }
+    draftData.venues.push(venue);
+  }
+
+  saveDraft();
+  closeVenueModal();
+  renderVenueTable();
+  showToast(editingVenueId ? 'Mekan guncellendi.' : 'Yeni mekan eklendi.', 'success');
+}
+
+/* ══════════════════════════════════════════════════
+   DELETE VENUE
+══════════════════════════════════════════════════ */
+function confirmDeleteVenue(id) {
+  const v = draftData.venues.find(x => x.id === id);
+  if (!v) return;
+  showConfirm(
+    'Mekan Silinecek',
+    `"${v.title}" mekanini silmek istediginize emin misiniz? Bu islem geri alinamaz.`,
+    () => {
+      draftData.venues = draftData.venues.filter(x => x.id !== id);
+      saveDraft();
+      renderVenueTable();
+      showToast('Mekan silindi.', 'success');
+    }
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   ROUTES TABLE
+══════════════════════════════════════════════════ */
+function renderRoutesTable() {
+  const routes = draftData.routes || [];
+  document.getElementById('routes-tbody').innerHTML = routes.length === 0
+    ? '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted)">Rota yok.</td></tr>'
+    : routes.map(r => `<tr>
+        <td class="emoji-col">${r.emoji || ''}</td>
+        <td><strong>${r.title}</strong></td>
+        <td>${r.sure || '-'}</td>
+        <td>${r.zorluk || '-'}</td>
+        <td>${r.durak || (r.stops||[]).length}</td>
+      </tr>`).join('');
+}
+
+/* ══════════════════════════════════════════════════
+   VILLAGES & PLACES TABLE
+══════════════════════════════════════════════════ */
+let currentVPTab = 'villages';
+
+function switchVillageTab(tab) {
+  currentVPTab = tab;
+  document.querySelectorAll('#page-villages .tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`#page-villages .tab[onclick*="${tab}"]`).classList.add('active');
+  renderVPTable();
+}
+
+function renderVPTable() {
+  const isPlaces = currentVPTab === 'places';
+  const items = isPlaces ? (draftData.places || []) : (draftData.villages || []);
+  document.getElementById('vp-tbody').innerHTML = items.length === 0
+    ? '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted)">Veri yok.</td></tr>'
+    : items.map((x, i) => `<tr>
+        <td class="emoji-col">${x.emoji || ''}</td>
+        <td><strong>${x.title}</strong></td>
+        <td><span class="badge badge-cat">${x.category || '-'}</span></td>
+        <td>${x.image ? '<span class="badge badge-open" style="font-size:.65rem">Var</span>' : '<span class="badge" style="color:var(--text-muted);font-size:.65rem">Yok</span>'}</td>
+        <td><button class="btn-icon" title="Gorsel Duzenle" onclick="openPlaceImgModal('${x.id}','${isPlaces ? 'places' : 'villages'}')">&#128247;</button></td>
+      </tr>`).join('');
+}
+
+/* ══════════════════════════════════════════════════
+   PLACE IMAGE MODAL
+══════════════════════════════════════════════════ */
+let editingPlaceId = null;
+let editingPlaceType = 'places'; // 'places' or 'villages'
+let pendingPlaceImage = null; // { blob, dataUrl }
+
+let cropPosY = 50; // percentage 0-100 (50 = center)
+let cropDragging = false;
+let cropStartY = 0;
+let cropStartPos = 50;
+
+function openPlaceImgModal(id, type) {
+  editingPlaceId = id;
+  editingPlaceType = type || 'places';
+  pendingPlaceImage = null;
+  cropPosY = 50;
+  const arr = draftData[editingPlaceType] || [];
+  const p = arr.find(x => x.id === id);
+  if (!p) return;
+
+  document.getElementById('place-modal-title').textContent = p.title + ' — Gorsel';
+  const removeBtn = document.getElementById('place-img-remove-btn');
+  const cropImg = document.getElementById('crop-img');
+  const cropEmpty = document.getElementById('crop-empty');
+  const cropHint = document.getElementById('crop-hint');
+
+  if (p.image) {
+    cropImg.src = p.image;
+    cropImg.style.display = '';
+    cropEmpty.style.display = 'none';
+    cropHint.style.display = '';
+    removeBtn.style.display = '';
+    cropPosY = p.imagePos != null ? p.imagePos : 50;
+    applyCropPos();
+  } else {
+    cropImg.style.display = 'none';
+    cropEmpty.style.display = '';
+    cropHint.style.display = 'none';
+    removeBtn.style.display = 'none';
+  }
+
+  document.getElementById('place-img-file').value = '';
+  document.getElementById('place-img-modal').classList.add('show');
+  updatePosLabel();
+}
+
+function closePlaceImgModal() {
+  document.getElementById('place-img-modal').classList.remove('show');
+  editingPlaceId = null;
+  pendingPlaceImage = null;
+}
+
+function handlePlaceImage(file) {
+  if (!file) return;
+  compressImage(file, function(blob, dataUrl) {
+    pendingPlaceImage = { blob, dataUrl };
+    const cropImg = document.getElementById('crop-img');
+    cropImg.src = dataUrl;
+    cropImg.style.display = '';
+    document.getElementById('crop-empty').style.display = 'none';
+    document.getElementById('crop-hint').style.display = '';
+    document.getElementById('place-img-remove-btn').style.display = '';
+    cropPosY = 50;
+    applyCropPos();
+    updatePosLabel();
+    showToast('Gorsel yuklendi. Surukleyerek konumlandirin.', 'success');
+  });
+}
+
+function applyCropPos() {
+  const img = document.getElementById('crop-img');
+  if (!img) return;
+  img.style.top = 'auto';
+  img.style.bottom = 'auto';
+  img.style.objectPosition = 'center ' + cropPosY + '%';
+  img.style.objectFit = 'cover';
+  img.style.position = 'absolute';
+  img.style.left = '0';
+  img.style.width = '100%';
+  img.style.height = '100%';
+}
+
+function updatePosLabel() {
+  const label = document.getElementById('place-pos-label');
+  if (label) label.textContent = '(konum: ' + Math.round(cropPosY) + '%)';
+}
+
+function resetCropPos() {
+  cropPosY = 50;
+  applyCropPos();
+  updatePosLabel();
+}
+
+// Drag to reposition
+(function() {
+  const container = document.getElementById('crop-container');
+  if (!container) return;
+
+  container.querySelector('.crop-empty').addEventListener('click', function() {
+    document.getElementById('place-img-file').click();
+  });
+
+  function startDrag(y) {
+    const img = document.getElementById('crop-img');
+    if (!img || img.style.display === 'none') return;
+    cropDragging = true;
+    cropStartY = y;
+    cropStartPos = cropPosY;
+  }
+
+  function moveDrag(y) {
+    if (!cropDragging) return;
+    const delta = cropStartY - y;
+    const sensitivity = 0.3;
+    cropPosY = Math.max(0, Math.min(100, cropStartPos + delta * sensitivity));
+    applyCropPos();
+    updatePosLabel();
+  }
+
+  function endDrag() {
+    cropDragging = false;
+  }
+
+  container.addEventListener('mousedown', function(e) { e.preventDefault(); startDrag(e.clientY); });
+  window.addEventListener('mousemove', function(e) { if (cropDragging) { e.preventDefault(); moveDrag(e.clientY); } });
+  window.addEventListener('mouseup', endDrag);
+
+  container.addEventListener('touchstart', function(e) { startDrag(e.touches[0].clientY); }, { passive: true });
+  window.addEventListener('touchmove', function(e) { if (cropDragging) moveDrag(e.touches[0].clientY); }, { passive: true });
+  window.addEventListener('touchend', endDrag);
+})();
+
+function savePlaceImage() {
+  if (!editingPlaceId) return;
+  const arr = draftData[editingPlaceType] || [];
+  const p = arr.find(x => x.id === editingPlaceId);
+  if (!p) return;
+
+  if (pendingPlaceImage) {
+    const folder = editingPlaceType === 'villages' ? 'koyler' : 'yerler';
+    const imgPath = 'images/' + folder + '/' + editingPlaceId + '.jpg';
+    p.image = imgPath;
+    if (!window._pendingImageExports) window._pendingImageExports = [];
+    window._pendingImageExports.push({ path: imgPath, blob: pendingPlaceImage.blob });
+  }
+
+  p.imagePos = Math.round(cropPosY);
+  saveDraft();
+  closePlaceImgModal();
+  renderVPTable();
+  showToast('Gorsel ve konum kaydedildi.', 'success');
+}
+
+function removePlaceImage() {
+  if (!editingPlaceId) return;
+  const arr = draftData[editingPlaceType] || [];
+  const p = arr.find(x => x.id === editingPlaceId);
+  if (p) {
+    p.image = '';
+    p.imagePos = 50;
+    saveDraft();
+  }
+  pendingPlaceImage = null;
+  const cropImg = document.getElementById('crop-img');
+  cropImg.style.display = 'none';
+  document.getElementById('crop-empty').style.display = '';
+  document.getElementById('crop-hint').style.display = 'none';
+  document.getElementById('place-img-remove-btn').style.display = 'none';
+  cropPosY = 50;
+  updatePosLabel();
+  showToast('Gorsel kaldirildi.', 'success');
+}
+
+/* ══════════════════════════════════════════════════
+   EXPORT
+══════════════════════════════════════════════════ */
+function renderExport() {
+  const origStr = JSON.stringify(ORIGINAL_DATA);
+  const draftStr = JSON.stringify(draftData);
+  const hasChanges = origStr !== draftStr;
+
+  let summary = '';
+  if (!hasChanges) {
+    summary = 'Orijinal verilerle karsilastirildiginda herhangi bir degisiklik bulunamadi.';
+  } else {
+    const ov = ORIGINAL_DATA.venues.length;
+    const dv = draftData.venues.length;
+    const added = dv - ov;
+    const modified = draftData.venues.filter(v => {
+      const orig = ORIGINAL_DATA.venues.find(o => o.id === v.id);
+      return orig && JSON.stringify(orig) !== JSON.stringify(v);
+    }).length;
+    const removed = ORIGINAL_DATA.venues.filter(o => !draftData.venues.find(v => v.id === o.id)).length;
+
+    const parts = [];
+    if (added > 0) parts.push(`<strong>${added}</strong> yeni mekan eklendi`);
+    if (modified > 0) parts.push(`<strong>${modified}</strong> mekan duzenlendi`);
+    if (removed > 0) parts.push(`<strong>${removed}</strong> mekan silindi`);
+    summary = parts.length > 0 ? parts.join(', ') + '.' : 'Mekan disi alanlarda degisiklik yapildi.';
+  }
+
+  document.getElementById('export-summary').innerHTML = summary;
+}
+
+function exportDataJS() {
+  const content = 'window.DATA = ' + JSON.stringify(draftData, null, 2) + ';\n';
+  const blob = new Blob([content], { type: 'text/javascript' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'data.js';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+  showToast('data.js dosyasi indirildi.', 'success');
+}
+
+function confirmReset() {
+  showConfirm(
+    'Degisiklikleri Sifirla',
+    'Tum taslak degisiklikler silinecek ve orijinal verilere donulecek. Emin misiniz?',
+    () => {
+      localStorage.removeItem('admin_draft_data');
+      draftData = JSON.parse(JSON.stringify(ORIGINAL_DATA));
+      renderExport();
+      renderDashboard();
+      showToast('Tum degisiklikler sifirlandi.', 'success');
+    }
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   CONFIRM DIALOG
+══════════════════════════════════════════════════ */
+function showConfirm(title, msg, onYes) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-msg').textContent = msg;
+  const yesBtn = document.getElementById('confirm-yes');
+  yesBtn.onclick = () => { closeConfirm(); onYes(); };
+  document.getElementById('confirm-overlay').classList.add('show');
+}
+
+function closeConfirm() {
+  document.getElementById('confirm-overlay').classList.remove('show');
+}
+
+/* ══════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════ */
+function showToast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast ' + (type || '');
+  el.classList.add('show');
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+/* ══════════════════════════════════════════════════
+   CLOSE MODALS ON OVERLAY CLICK
+══════════════════════════════════════════════════ */
+document.getElementById('venue-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeVenueModal();
+});
+document.getElementById('place-img-modal').addEventListener('click', function(e) {
+  if (e.target === this) closePlaceImgModal();
+});
+document.getElementById('confirm-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeConfirm();
+});
+
+/* ESC key */
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    if (document.getElementById('confirm-overlay').classList.contains('show')) closeConfirm();
+    else if (document.getElementById('place-img-modal').classList.contains('show')) closePlaceImgModal();
+    else if (document.getElementById('venue-modal').classList.contains('show')) closeVenueModal();
+  }
+});
+
+/* ══════════════════════════════════════════════════
+   IMAGE UPLOAD SYSTEM
+══════════════════════════════════════════════════ */
+let pendingImages = []; // { blob, name, dataUrl }
+
+function handleImageUpload(files) {
+  Array.from(files).forEach(file => {
+    if (pendingImages.length >= 6) return;
+    compressImage(file, (blob, dataUrl) => {
+      pendingImages.push({ blob, name: file.name, dataUrl });
+      renderImagePreviews();
+    });
+  });
+}
+
+function compressImage(file, callback) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const MAX = 1200;
+      let w = img.width, h = img.height;
+      if (w > MAX) { h = h * MAX / w; w = MAX; }
+      if (h > MAX) { w = w * MAX / h; h = MAX; }
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      canvas.toBlob(blob => {
+        callback(blob, canvas.toDataURL('image/jpeg', 0.8));
+      }, 'image/jpeg', 0.8);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderImagePreviews() {
+  const grid = document.getElementById('img-preview-grid');
+  const existingImgs = editingVenueId ? (draftData.venues.find(v => v.id === editingVenueId)?.images || []) : [];
+
+  grid.innerHTML = existingImgs.map((path, i) => `
+    <div class="img-preview-item">
+      <img src="${path}" onerror="this.style.display='none'">
+      <button class="img-preview-remove" onclick="removeExistingImage(${i})">×</button>
+      <div class="img-preview-name">${path.split('/').pop()}</div>
+    </div>
+  `).join('') + pendingImages.map((img, i) => `
+    <div class="img-preview-item">
+      <img src="${img.dataUrl}">
+      <button class="img-preview-remove" onclick="removePendingImage(${i})">×</button>
+      <div class="img-preview-name">Yeni · ${Math.round(img.blob.size/1024)}KB</div>
+    </div>
+  `).join('');
+
+  const total = existingImgs.length + pendingImages.length;
+  document.getElementById('img-drop').style.display = total >= 6 ? 'none' : '';
+}
+
+function removePendingImage(i) {
+  pendingImages.splice(i, 1);
+  renderImagePreviews();
+}
+
+function removeExistingImage(i) {
+  if (!editingVenueId) return;
+  const v = draftData.venues.find(x => x.id === editingVenueId);
+  if (v && v.images) {
+    v.images.splice(i, 1);
+    saveDraft();
+    renderImagePreviews();
+  }
+}
+
+function setupDragDrop() {
+  const area = document.getElementById('img-upload-area');
+  if (!area) return;
+  ['dragenter','dragover'].forEach(e => area.addEventListener(e, ev => { ev.preventDefault(); area.classList.add('dragover'); }));
+  ['dragleave','drop'].forEach(e => area.addEventListener(e, ev => { ev.preventDefault(); area.classList.remove('dragover'); }));
+  area.addEventListener('drop', ev => { handleImageUpload(ev.dataTransfer.files); });
+}
+
+/* ══════════════════════════════════════════════════
+   IMAGE EXPORT (ZIP)
+══════════════════════════════════════════════════ */
+async function exportImages() {
+  const exports = window._pendingImageExports || [];
+  if (exports.length === 0) {
+    showToast('İndirilecek yeni görsel yok.', 'error');
+    return;
+  }
+  const zip = new JSZip();
+  exports.forEach(item => { zip.file(item.path, item.blob); });
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'mekan-gorselleri.zip';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast(exports.length + ' görsel indirildi.', 'success');
+}
+
+/* ══════════════════════════════════════════════════
+   MEKAN BOTU
+══════════════════════════════════════════════════ */
+function botSearch() {
+  const name = document.getElementById('bot-name').value.trim();
+  const loc = document.getElementById('bot-location').value.trim();
+  if (!name) { showToast('Mekan adı girin.', 'error'); return; }
+
+  document.getElementById('bot-r-title').value = name;
+  document.getElementById('bot-r-location').value = loc;
+  document.getElementById('bot-r-address').value = loc ? loc + ', Ayvacık / Çanakkale' : '';
+  document.getElementById('bot-r-emoji').value = '';
+  document.getElementById('bot-r-category').value = '';
+  document.getElementById('bot-r-phone').value = '';
+  document.getElementById('bot-r-website').value = '';
+  document.getElementById('bot-r-shortDesc').value = '';
+  document.getElementById('bot-r-description').value = '';
+  document.getElementById('bot-r-tags').value = '';
+  document.getElementById('bot-r-hours').value = '';
+
+  const lower = name.toLowerCase();
+  if (lower.includes('otel') || lower.includes('pansiyon') || lower.includes('konaklama') || lower.includes('ev')) {
+    document.getElementById('bot-r-category').value = 'konaklama';
+    document.getElementById('bot-r-emoji').value = '🏨';
+  } else if (lower.includes('kafe') || lower.includes('cafe') || lower.includes('kahve')) {
+    document.getElementById('bot-r-category').value = 'kafe';
+    document.getElementById('bot-r-emoji').value = '☕';
+  } else if (lower.includes('restoran') || lower.includes('balık') || lower.includes('lokanta')) {
+    document.getElementById('bot-r-category').value = 'restoran';
+    document.getElementById('bot-r-emoji').value = '🍽';
+  } else if (lower.includes('kahvaltı') || lower.includes('kahvalti')) {
+    document.getElementById('bot-r-category').value = 'kahvalti';
+    document.getElementById('bot-r-emoji').value = '🥚';
+  } else if (lower.includes('beach') || lower.includes('plaj')) {
+    document.getElementById('bot-r-category').value = 'beach';
+    document.getElementById('bot-r-emoji').value = '🏖';
+  } else if (lower.includes('iskele')) {
+    document.getElementById('bot-r-category').value = 'iskele';
+    document.getElementById('bot-r-emoji').value = '⚓';
+  }
+
+  document.getElementById('bot-results').style.display = 'block';
+
+  const query = encodeURIComponent(name + ' ' + loc + ' Ayvacık Çanakkale telefon adres');
+  window.open('https://www.google.com/search?q=' + query, '_blank');
+
+  showToast('Google araması açıldı. Bilgileri formda doldurun.', 'success');
+}
+
+function botSearchGoogle() {
+  const name = document.getElementById('bot-name').value.trim();
+  const loc = document.getElementById('bot-location').value.trim();
+  if (!name) { showToast('Mekan adı girin.', 'error'); return; }
+  const query = encodeURIComponent(name + ' ' + loc + ' Ayvacık Çanakkale');
+  window.open('https://www.google.com/search?q=' + query, '_blank');
+}
+
+function botSearchMaps() {
+  const name = document.getElementById('bot-name').value.trim();
+  const loc = document.getElementById('bot-location').value.trim();
+  if (!name) { showToast('Mekan adı girin.', 'error'); return; }
+  const query = encodeURIComponent(name + ' ' + loc + ' Ayvacık');
+  window.open('https://www.google.com/maps/search/' + query, '_blank');
+}
+
+function botSearchInsta() {
+  const name = document.getElementById('bot-name').value.trim();
+  if (!name) { showToast('Mekan adı girin.', 'error'); return; }
+  const query = encodeURIComponent(name.replace(/\s+/g, ''));
+  window.open('https://www.instagram.com/explore/tags/' + query, '_blank');
+}
+
+function botAddVenue() {
+  const title = document.getElementById('bot-r-title').value.trim();
+  if (!title) { showToast('Mekan adı boş olamaz.', 'error'); return; }
+
+  const id = generateId(title);
+  const category = document.getElementById('bot-r-category').value;
+  const catDef = CAT_DEFAULTS[category] || {};
+
+  const tagsStr = document.getElementById('bot-r-tags').value;
+  const venue = {
+    id: id,
+    title: title,
+    emoji: document.getElementById('bot-r-emoji').value.trim() || '📍',
+    category: category,
+    iconBg: catDef.iconBg || '',
+    tagBg: catDef.tagBg || '',
+    tagColor: catDef.tagColor || '',
+    tagText: catDef.tagText || '',
+    shortDesc: document.getElementById('bot-r-shortDesc').value.trim(),
+    description: document.getElementById('bot-r-description').value.trim(),
+    location: document.getElementById('bot-r-location').value.trim(),
+    tags: tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [],
+    keywords: [],
+    hours: document.getElementById('bot-r-hours').value.trim(),
+    images: [],
+    phone: document.getElementById('bot-r-phone').value.trim(),
+    address: document.getElementById('bot-r-address').value.trim(),
+    website: document.getElementById('bot-r-website').value.trim(),
+    weeklyHours: []
+  };
+  venue.keywords = [...venue.title.toLowerCase().split(/\s+/), ...venue.tags.map(t => t.toLowerCase()), venue.category].filter(Boolean);
+
+  if (draftData.venues.some(v => v.id === venue.id)) {
+    showToast('Bu ID ile başka bir mekan zaten var.', 'error');
+    return;
+  }
+
+  draftData.venues.push(venue);
+  saveDraft();
+
+  document.getElementById('bot-results').style.display = 'none';
+  document.getElementById('bot-name').value = '';
+  document.getElementById('bot-location').value = '';
+
+  showToast('Mekan eklendi! Mekanlar sayfasından düzenleyebilirsiniz.', 'success');
+}
+
+/* ══════════════════════════════════════════════════
+   PLACE BOT
+══════════════════════════════════════════════════ */
+let pbotPendingImage = null;
+let pbotCropY = 50;
+let pbotDragging = false;
+let pbotStartY = 0;
+let pbotStartPos = 50;
+
+function pbotSearch() {
+  const name = document.getElementById('pbot-name').value.trim();
+  const loc = document.getElementById('pbot-location').value.trim();
+  if (!name) { showToast('Yer adı girin.', 'error'); return; }
+
+  document.getElementById('pbot-r-title').value = name;
+  document.getElementById('pbot-r-location').value = loc;
+  document.getElementById('pbot-r-emoji').value = '';
+  document.getElementById('pbot-r-category').value = '';
+  document.getElementById('pbot-r-shortDesc').value = '';
+  document.getElementById('pbot-r-description').value = '';
+  document.getElementById('pbot-r-tags').value = '';
+  pbotPendingImage = null;
+  pbotCropY = 50;
+  document.getElementById('pbot-crop-img').style.display = 'none';
+  document.getElementById('pbot-crop-empty').style.display = '';
+  document.getElementById('pbot-crop-hint').style.display = 'none';
+
+  const lower = name.toLowerCase();
+  if (lower.includes('tapınak') || lower.includes('tapinag') || lower.includes('antik') || lower.includes('nekropol') || lower.includes('kalıntı')) {
+    document.getElementById('pbot-r-category').value = 'tarihi';
+    document.getElementById('pbot-r-emoji').value = '🏛';
+  } else if (lower.includes('koy') || lower.includes('koyu')) {
+    document.getElementById('pbot-r-category').value = 'koy';
+    document.getElementById('pbot-r-emoji').value = '🌊';
+  } else if (lower.includes('köy') || lower.includes('koyu')) {
+    document.getElementById('pbot-r-category').value = 'koyu';
+    document.getElementById('pbot-r-emoji').value = '🏘';
+  } else if (lower.includes('iskele') || lower.includes('liman')) {
+    document.getElementById('pbot-r-category').value = 'iskele';
+    document.getElementById('pbot-r-emoji').value = '⚓';
+  }
+
+  document.getElementById('pbot-results').style.display = 'block';
+
+  const query = encodeURIComponent(name + ' ' + loc + ' Ayvacık Çanakkale');
+  window.open('https://www.google.com/search?q=' + query, '_blank');
+  showToast('Google araması açıldı. Bilgileri doldurun.', 'success');
+}
+
+function pbotSearchGoogle() {
+  const name = document.getElementById('pbot-name').value.trim();
+  const loc = document.getElementById('pbot-location').value.trim();
+  if (!name) { showToast('Yer adı girin.', 'error'); return; }
+  window.open('https://www.google.com/search?q=' + encodeURIComponent(name + ' ' + loc + ' Ayvacık Çanakkale'), '_blank');
+}
+
+function pbotSearchMaps() {
+  const name = document.getElementById('pbot-name').value.trim();
+  const loc = document.getElementById('pbot-location').value.trim();
+  if (!name) { showToast('Yer adı girin.', 'error'); return; }
+  window.open('https://www.google.com/maps/search/' + encodeURIComponent(name + ' ' + loc + ' Ayvacık'), '_blank');
+}
+
+function pbotSearchImages() {
+  const name = document.getElementById('pbot-name').value.trim();
+  const loc = document.getElementById('pbot-location').value.trim();
+  if (!name) { showToast('Yer adı girin.', 'error'); return; }
+  window.open('https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(name + ' ' + loc + ' Ayvacık'), '_blank');
+}
+
+function pbotHandleImage(file) {
+  if (!file) return;
+  compressImage(file, function(blob, dataUrl) {
+    pbotPendingImage = { blob, dataUrl };
+    const img = document.getElementById('pbot-crop-img');
+    img.src = dataUrl;
+    img.style.display = '';
+    img.style.position = 'absolute';
+    img.style.left = '0';
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'cover';
+    img.style.objectPosition = 'center 50%';
+    document.getElementById('pbot-crop-empty').style.display = 'none';
+    document.getElementById('pbot-crop-hint').style.display = '';
+    pbotCropY = 50;
+    showToast('Görsel yüklendi. Sürükleyerek konumlandırın.', 'success');
+  });
+}
+
+function pbotResetCrop() {
+  pbotCropY = 50;
+  const img = document.getElementById('pbot-crop-img');
+  if (img) img.style.objectPosition = 'center 50%';
+}
+
+// Drag support for place bot crop
+(function() {
+  const container = document.getElementById('pbot-crop-container');
+  if (!container) return;
+
+  function startDrag(y) {
+    const img = document.getElementById('pbot-crop-img');
+    if (!img || img.style.display === 'none') return;
+    pbotDragging = true;
+    pbotStartY = y;
+    pbotStartPos = pbotCropY;
+  }
+  function moveDrag(y) {
+    if (!pbotDragging) return;
+    const delta = pbotStartY - y;
+    pbotCropY = Math.max(0, Math.min(100, pbotStartPos + delta * 0.3));
+    const img = document.getElementById('pbot-crop-img');
+    if (img) img.style.objectPosition = 'center ' + pbotCropY + '%';
+  }
+  function endDrag() { pbotDragging = false; }
+
+  container.addEventListener('mousedown', function(e) { e.preventDefault(); startDrag(e.clientY); });
+  window.addEventListener('mousemove', function(e) { if (pbotDragging) { e.preventDefault(); moveDrag(e.clientY); } });
+  window.addEventListener('mouseup', endDrag);
+  container.addEventListener('touchstart', function(e) { startDrag(e.touches[0].clientY); }, { passive: true });
+  window.addEventListener('touchmove', function(e) { if (pbotDragging) moveDrag(e.touches[0].clientY); }, { passive: true });
+  window.addEventListener('touchend', endDrag);
+})();
+
+const PLACE_CAT_DEFAULTS = {
+  tarihi: { bgGradient:'linear-gradient(135deg,#2A3F6A,#1A2744)', badgeBg:'rgba(26,39,68,0.7)', badgeColor:'#F5EDE0', badgeText:'Antik Alan' },
+  koy:    { bgGradient:'linear-gradient(135deg,#1A5060,#0D3040)', badgeBg:'rgba(26,107,138,0.75)', badgeColor:'#fff', badgeText:'Koy' },
+  koyu:   { bgGradient:'linear-gradient(135deg,#3A2A1A,#5A3C20)', badgeBg:'rgba(196,82,26,0.75)', badgeColor:'#fff', badgeText:'Köy' },
+  iskele: { bgGradient:'linear-gradient(135deg,#1A3050,#0D2040)', badgeBg:'rgba(26,39,68,0.75)', badgeColor:'#F5EDE0', badgeText:'İskele' },
+};
+
+function pbotAddPlace() {
+  const title = document.getElementById('pbot-r-title').value.trim();
+  if (!title) { showToast('Yer adı boş olamaz.', 'error'); return; }
+
+  const id = generateId(title);
+  const category = document.getElementById('pbot-r-category').value;
+  const catDef = PLACE_CAT_DEFAULTS[category] || PLACE_CAT_DEFAULTS.tarihi;
+  const tagsStr = document.getElementById('pbot-r-tags').value;
+
+  const place = {
+    id: id,
+    title: title,
+    emoji: document.getElementById('pbot-r-emoji').value.trim() || '📍',
+    category: category,
+    bgGradient: catDef.bgGradient,
+    badgeBg: catDef.badgeBg,
+    badgeColor: catDef.badgeColor,
+    badgeText: catDef.badgeText,
+    shortDesc: document.getElementById('pbot-r-shortDesc').value.trim(),
+    description: document.getElementById('pbot-r-description').value.trim(),
+    location: document.getElementById('pbot-r-location').value.trim(),
+    tags: tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [],
+    keywords: [],
+    image: '',
+    imagePos: Math.round(pbotCropY)
+  };
+  place.keywords = [...place.title.toLowerCase().split(/\s+/), ...place.tags.map(t => t.toLowerCase()), place.category].filter(Boolean);
+
+  if (draftData.places.some(p => p.id === place.id)) {
+    showToast('Bu ID ile başka bir yer zaten var.', 'error');
+    return;
+  }
+
+  // Handle image
+  if (pbotPendingImage) {
+    const imgPath = 'images/yerler/' + id + '.jpg';
+    place.image = imgPath;
+    if (!window._pendingImageExports) window._pendingImageExports = [];
+    window._pendingImageExports.push({ path: imgPath, blob: pbotPendingImage.blob });
+  }
+
+  draftData.places.push(place);
+  saveDraft();
+
+  document.getElementById('pbot-results').style.display = 'none';
+  document.getElementById('pbot-name').value = '';
+  document.getElementById('pbot-location').value = '';
+  pbotPendingImage = null;
+
+  showToast('Yer eklendi! Köyler & Yerler sayfasından görüntüleyebilirsiniz.', 'success');
+}
+</script>
+</body>
+</html>

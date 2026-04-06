@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rota — Assos'u Keşfet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div id="route-hero"></div>
+<div id="route-body"></div>
+<div id="footer-placeholder"></div>
+<script src="../data.js"></script>
+<script src="../shared.js"></script>
+<script>
+  renderNav({ heroMode: false, basePath: '../' });
+  renderFooter({ basePath: '../' });
+  renderRoutePage('bir-gunde-assos');
+</script>
+</body>
+</html>

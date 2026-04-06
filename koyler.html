@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Köyler — Assos'u Keşfet</title>
+  <meta name="description" content="Ayvacık'ın 64 köyü: Behramkale, Adatepe, Babakale, Kayalar ve daha fazlası. Öne çıkan, sahil ve sık gezilen köyler.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400;1,500&display=swap');
+
+    @keyframes kvHeroOrb  { 0%,100%{transform:translateY(0) scale(1);} 50%{transform:translateY(-20px) scale(1.06);} }
+    @keyframes kvFadeUp   { from{opacity:0;transform:translateY(22px);} to{opacity:1;transform:translateY(0);} }
+    @keyframes kvPulse    { 0%,100%{box-shadow:0 0 0 0 rgba(90,122,86,.5);} 50%{box-shadow:0 0 0 8px rgba(90,122,86,0);} }
+    @keyframes kvLineGrow { from{transform:scaleX(0);} to{transform:scaleX(1);} }
+
+    .kv-hero {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(150deg, #06101E 0%, #0A1A10 45%, #0C1E14 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 24px;
+    }
+    .kv-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(245,237,224,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,237,224,.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+    }
+
+    .kv-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+    }
+    .kv-orb-1 { width:480px;height:480px;background:rgba(90,122,86,.18);top:-130px;right:-80px;animation:kvHeroOrb 17s ease-in-out infinite; }
+    .kv-orb-2 { width:360px;height:360px;background:rgba(26,107,138,.13);bottom:-100px;left:-60px;animation:kvHeroOrb 14s ease-in-out infinite reverse 1s; }
+    .kv-orb-3 { width:240px;height:240px;background:rgba(196,82,26,.1);top:40%;left:40%;animation:kvHeroOrb 20s ease-in-out infinite 2s; }
+
+    .kv-hero-inner {
+      position: relative;
+      z-index: 2;
+      max-width: 900px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 40px;
+      align-items: center;
+      padding: 110px 0 80px;
+    }
+
+    .kv-hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(90,122,86,.15);
+      border: 1px solid rgba(90,122,86,.3);
+      border-radius: 999px;
+      padding: 6px 16px;
+      margin-bottom: 22px;
+      animation: kvFadeUp .7s both;
+    }
+    .kv-hero-eyebrow-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #7FB87B;
+      animation: kvPulse 2.4s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    .kv-hero-eyebrow span {
+      font-size: .65rem; font-weight: 700;
+      letter-spacing: .13em; text-transform: uppercase;
+      color: #7FB87B;
+    }
+
+    .kv-hero-h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2.4rem, 5.5vw, 3.8rem);
+      letter-spacing: -.03em;
+      line-height: 1.0;
+      color: #F5EDE0;
+      margin-bottom: 16px;
+      animation: kvFadeUp .8s .1s both;
+    }
+    .kv-hero-h1 em {
+      font-style: italic;
+      font-family: 'Lora', serif;
+      font-weight: 500;
+      font-size: .88em;
+      background: linear-gradient(135deg, #7FB87B, #A8D4A4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .kv-hero-divider {
+      width: 52px; height: 2px;
+      background: linear-gradient(90deg, #5A7A56, transparent);
+      margin-bottom: 16px;
+      transform-origin: left;
+      animation: kvLineGrow .9s .3s cubic-bezier(.16,1,.3,1) both;
+    }
+
+    .kv-hero-sub {
+      font-size: .95rem;
+      color: rgba(245,237,224,.6);
+      line-height: 1.75;
+      max-width: 440px;
+      animation: kvFadeUp .8s .22s both;
+    }
+
+    .kv-hero-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 28px;
+      animation: kvFadeUp .8s .45s both;
+    }
+    .kv-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: .72rem;
+      font-weight: 600;
+      color: rgba(245,237,224,.55);
+      backdrop-filter: blur(8px);
+    }
+
+    .kv-hero-card {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 20px;
+      padding: 28px 32px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      min-width: 180px;
+      animation: kvFadeUp .8s .35s both;
+    }
+    .kv-hstat { text-align: center; }
+    .kv-hstat-num {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: 1.9rem;
+      color: #F5EDE0;
+      letter-spacing: -.03em;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .kv-hstat-num span { color: #7FB87B; }
+    .kv-hstat-label {
+      font-size: .65rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: rgba(245,237,224,.4);
+    }
+    .kv-hstat-sep { height:1px; background:rgba(255,255,255,.08); }
+
+    @media(max-width:700px){
+      .kv-hero-inner { grid-template-columns:1fr; padding:100px 0 60px; }
+      .kv-hero-card { flex-direction:row; flex-wrap:wrap; justify-content:center; min-width:unset; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<!-- KÖYLER HERO -->
+<div class="kv-hero">
+  <div class="kv-orb kv-orb-1"></div>
+  <div class="kv-orb kv-orb-2"></div>
+  <div class="kv-orb kv-orb-3"></div>
+  <div class="kv-hero-inner">
+    <div class="kv-hero-left">
+      <div class="kv-hero-eyebrow">
+        <span class="kv-hero-eyebrow-dot"></span>
+        <span>Ayvacık Köyleri</span>
+      </div>
+      <h1 class="kv-hero-h1">64 köy,<br><em>her biri farklı</em></h1>
+      <div class="kv-hero-divider"></div>
+      <p class="kv-hero-sub">Sahil köylerinden yayla köylerine, tarihi duraklardan sessiz Ege yerleşimlerine — Ayvacık'ın tüm köyleri.</p>
+      <div class="kv-hero-chips">
+        <span class="kv-chip">⭐ Öne Çıkan</span>
+        <span class="kv-chip">🌊 Sahil</span>
+        <span class="kv-chip">📍 Sık Gezilen</span>
+        <span class="kv-chip">🗺 Tüm Köyler</span>
+      </div>
+    </div>
+    <div class="kv-hero-card">
+      <div class="kv-hstat">
+        <div class="kv-hstat-num" id="kv-stat-toplam"><span></span></div>
+        <div class="kv-hstat-label">Toplam Köy</div>
+      </div>
+      <div class="kv-hstat-sep"></div>
+      <div class="kv-hstat">
+        <div class="kv-hstat-num" id="kv-stat-one"><span></span></div>
+        <div class="kv-hstat-label">Öne Çıkan</div>
+      </div>
+      <div class="kv-hstat-sep"></div>
+      <div class="kv-hstat">
+        <div class="kv-hstat-num" id="kv-stat-sahil"><span></span></div>
+        <div class="kv-hstat-label">Sahil Köyü</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VILLAGE DETAIL MODAL -->
+<div id="village-modal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(13,24,41,.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:24px;">
+  <div style="background:var(--cream-light);border-radius:24px;max-width:540px;width:100%;max-height:85vh;overflow-y:auto;position:relative;box-shadow:0 32px 80px rgba(0,0,0,.4);">
+    <button onclick="closeModal()" style="position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(26,39,68,.08);border:none;font-size:1rem;cursor:pointer;color:var(--text-mid);z-index:1;transition:background .2s;" onmouseover="this.style.background='rgba(26,39,68,.15)'" onmouseout="this.style.background='rgba(26,39,68,.08)'">✕</button>
+    <div id="village-modal-body"></div>
+  </div>
+</div>
+
+<!-- ═══ ÖNE ÇIKAN KÖYLER ═══ -->
+<section class="kv-featured-sec">
+  <div class="kv-feat-container">
+    <div class="kv-feat-head fade-up">
+      <div class="kv-feat-head-center">
+        <div class="kv-glow-badge" aria-label="Editörün Seçimi">
+          <svg class="kv-glow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"/></svg>
+          <span class="kv-glow-txt"><span class="kv-gl">E</span><span class="kv-gl">d</span><span class="kv-gl">i</span><span class="kv-gl">t</span><span class="kv-gl">ö</span><span class="kv-gl">r</span><span class="kv-gl">ü</span><span class="kv-gl">n</span><span class="kv-gl">&nbsp;</span><span class="kv-gl">S</span><span class="kv-gl">e</span><span class="kv-gl">ç</span><span class="kv-gl">i</span><span class="kv-gl">m</span><span class="kv-gl">i</span></span>
+        </div>
+        <h2 class="kv-feat-title">Mutlaka Görülmesi Gereken Köyler</h2>
+        <p class="kv-feat-sub">Bölgeye ilk kez geliyorsan bu 9 köyden başla.<br>Her biri farklı bir Assos hikayesi anlatıyor.</p>
+      </div>
+    </div>
+    <div id="grid-one-cikan" class="kv-feat-grid"></div>
+  </div>
+</section>
+
+<!-- ═══ SAHİL KÖYLERİ ═══ -->
+<section style="padding:80px 24px;background:var(--navy-deep);">
+  <div style="max-width:1280px;margin:0 auto;">
+    <div class="fade-up" style="margin-bottom:40px;">
+      <p class="section-label" style="color:#2490B8;margin-bottom:10px;">Sahil</p>
+      <div class="section-rule" style="background:linear-gradient(90deg,var(--aegean),#2490B8);margin-bottom:16px;"></div>
+      <h2 class="section-title" style="color:var(--cream);font-size:clamp(1.8rem,4vw,2.4rem);">Sahil Köyleri</h2>
+      <p style="font-family:'Lora',serif;font-style:italic;color:rgba(245,237,224,.45);font-size:.88rem;margin-top:10px;max-width:480px;line-height:1.7;">Ege kıyısına yaslanmış, denizin hemen yanı başındaki köyler.</p>
+    </div>
+    <div id="grid-sahil" class="kv-feat-grid"></div>
+  </div>
+</section>
+
+
+<!-- ═══ TÜM KÖYLER ═══ -->
+<section style="padding:80px 24px 100px;background:var(--cream-light);">
+  <div style="max-width:1280px;margin:0 auto;">
+    <div class="fade-up" style="margin-bottom:40px;">
+      <p class="section-label" style="margin-bottom:10px;">Tam Liste</p>
+      <div class="section-rule" style="margin-bottom:16px;"></div>
+      <h2 class="section-title" style="font-size:clamp(1.8rem,4vw,2.4rem);">Tüm Ayvacık Köyleri</h2>
+      <p style="color:var(--text-mid);font-size:.88rem;margin-top:10px;">Toplam <strong id="village-count">64</strong> köy — alfabetik sırayla.</p>
+    </div>
+
+    <!-- Search/Filter -->
+    <div class="fade-up" style="margin-bottom:28px;max-width:400px;">
+      <div style="position:relative;">
+        <svg width="15" height="15" fill="none" stroke="var(--text-soft)" stroke-width="2" viewBox="0 0 24 24" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);pointer-events:none;flex-shrink:0;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="village-search" placeholder="Köy ara…" oninput="filterAllVillages(this.value)"
+          style="width:100%;padding:10px 14px 10px 38px;border-radius:12px;border:1.5px solid rgba(26,39,68,.12);background:#fff;font-family:'DM Sans',sans-serif;font-size:.85rem;color:var(--navy);outline:none;transition:border-color .2s;"
+          onfocus="this.style.borderColor='var(--terra)'" onblur="this.style.borderColor='rgba(26,39,68,.12)'">
+      </div>
+    </div>
+
+    <div id="grid-all" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;"></div>
+    <div id="no-village" style="display:none;text-align:center;padding:40px 0;color:var(--text-soft);font-size:.9rem;">Sonuç bulunamadı.</div>
+  </div>
+</section>
+
+<!-- CTA — Köy Rotası -->
+<section class="kv-cta-sec">
+  <div class="kv-cta-orb kv-cta-orb-1"></div>
+  <div class="kv-cta-orb kv-cta-orb-2"></div>
+
+  <div class="kv-cta-inner fade-up">
+
+    <!-- Rota çizgisi -->
+    <div class="kv-cta-route">
+      <div class="kv-cta-stop">
+        <div class="kv-cta-dot">🏛</div>
+        <span>Behramkale</span>
+      </div>
+      <div class="kv-cta-line"><div class="kv-cta-line-fill"></div></div>
+      <div class="kv-cta-stop">
+        <div class="kv-cta-dot">🌿</div>
+        <span>Adatepe</span>
+      </div>
+      <div class="kv-cta-line"><div class="kv-cta-line-fill"></div></div>
+      <div class="kv-cta-stop">
+        <div class="kv-cta-dot">🪨</div>
+        <span>Kayalar</span>
+      </div>
+      <div class="kv-cta-line"><div class="kv-cta-line-fill"></div></div>
+      <div class="kv-cta-stop">
+        <div class="kv-cta-dot kv-cta-dot--more">+5</div>
+        <span>ve daha fazlası</span>
+      </div>
+    </div>
+
+    <!-- Metin -->
+    <div class="kv-cta-text">
+      <div class="kv-cta-eyebrow">✦ Hazır Rota</div>
+      <h2 class="kv-cta-title">Köy Köy<br><em>Assos Rotası</em></h2>
+      <p class="kv-cta-sub">Öne çıkan köyleri tek bir rotada keşfet. Sıralı duraklar, tahmini süreler ve yerel ipuçlarıyla hazırlandı.</p>
+      <a href="rotalar/koy-koy-assos.html" class="kv-cta-btn">
+        <span>Rotayı Keşfet</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<div id="footer-placeholder"></div>
+
+<style>
+  /* ── Öne Çıkan section ── */
+  .kv-featured-sec {
+    background: linear-gradient(160deg, #FDF6EE 0%, #F0E4CC 100%);
+    padding: 72px 24px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  /* Dekoratif arka plan deseni */
+  .kv-featured-sec::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 80% 20%, rgba(196,82,26,.08) 0%, transparent 55%),
+                      radial-gradient(circle at 10% 80%, rgba(212,147,90,.07) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .kv-feat-container { position: relative; z-index: 1; }
+
+  /* Başlık alanı — ortalı */
+  .kv-feat-head-center {
+    text-align: center;
+    margin-bottom: 36px;
+    padding-bottom: 28px;
+    border-bottom: 1.5px solid rgba(196,82,26,.12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Glow badge */
+  @keyframes kv-letter-shimmer {
+    0%,100% { color: rgba(255,255,255,.45); text-shadow: none; }
+    50%      { color: #fff; text-shadow: 0 0 6px rgba(255,255,255,.7); }
+  }
+  @keyframes kv-icon-flicker {
+    0%,100% { opacity:1; filter: drop-shadow(0 0 3px rgba(255,200,80,.8)); }
+    50%      { opacity:.4; filter: drop-shadow(0 0 1px rgba(255,200,80,.3)); }
+  }
+
+  .kv-glow-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #1A1008;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 999px;
+    padding: 7px 18px 7px 12px;
+    margin-bottom: 16px;
+    cursor: default;
+    box-shadow:
+      inset 0 1px 1px rgba(255,255,255,.12),
+      inset 0 4px 8px rgba(255,255,255,.05),
+      0 -4px 8px rgba(0,0,0,.3),
+      0 4px 12px rgba(0,0,0,.25);
+    position: relative;
+    overflow: hidden;
+  }
+  .kv-glow-badge::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(180deg, rgba(255,200,80,.12) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .kv-glow-icon {
+    width: 16px; height: 16px;
+    fill: #FFD060;
+    flex-shrink: 0;
+    animation: kv-icon-flicker 2s linear infinite;
+  }
+  .kv-glow-txt {
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+  }
+  .kv-gl {
+    display: inline-block;
+    animation: kv-letter-shimmer 2.4s ease-in-out infinite;
+  }
+  .kv-gl:nth-child(1)  { animation-delay: 0s; }
+  .kv-gl:nth-child(2)  { animation-delay: .08s; }
+  .kv-gl:nth-child(3)  { animation-delay: .16s; }
+  .kv-gl:nth-child(4)  { animation-delay: .24s; }
+  .kv-gl:nth-child(5)  { animation-delay: .32s; }
+  .kv-gl:nth-child(6)  { animation-delay: .40s; }
+  .kv-gl:nth-child(7)  { animation-delay: .48s; }
+  .kv-gl:nth-child(8)  { animation-delay: .56s; }
+  .kv-gl:nth-child(9)  { animation-delay: .64s; }
+  .kv-gl:nth-child(10) { animation-delay: .72s; }
+  .kv-gl:nth-child(11) { animation-delay: .80s; }
+  .kv-gl:nth-child(12) { animation-delay: .88s; }
+  .kv-gl:nth-child(13) { animation-delay: .96s; }
+  .kv-gl:nth-child(14) { animation-delay: 1.04s; }
+  .kv-gl:nth-child(15) { animation-delay: 1.12s; }
+
+  .kv-feat-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    color: #0D1829;
+    letter-spacing: -.03em;
+    line-height: 1.1;
+    margin-bottom: 10px;
+  }
+  .kv-feat-sub {
+    font-size: .88rem;
+    color: #4A3828;
+    line-height: 1.7;
+    max-width: 480px;
+    font-weight: 500;
+  }
+
+  @media(max-width:600px) {
+    .kv-feat-head-center { text-align: left; align-items: flex-start; }
+  }
+
+  /* Kartlar — açık arka plan için */
+  .kv-featured-sec .kv-pcard {
+    background: #fff;
+    border-color: rgba(196,82,26,.1);
+    box-shadow: 0 2px 12px rgba(196,82,26,.07);
+  }
+  .kv-featured-sec .kv-pcard:hover {
+    border-color: rgba(196,82,26,.28);
+    box-shadow: 0 14px 36px rgba(196,82,26,.13);
+  }
+  .kv-featured-sec .kv-pcard-name { color: #1A2744; }
+  .kv-featured-sec .kv-pcard-desc { color: rgba(26,39,68,.5); }
+  .kv-featured-sec .kv-pcard-arrow { color: rgba(196,82,26,.28); }
+  .kv-featured-sec .kv-pcard:hover .kv-pcard-arrow { color: #C4521A; }
+  .kv-feat-container { max-width: 1280px; margin: 0 auto; }
+
+  .kv-feat-head { margin-bottom: 36px; }
+
+  /* Grid — 3 cols desktop, 2 tablet, 1 mobile */
+  .kv-feat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  @media(max-width:860px){ .kv-feat-grid { grid-template-columns: repeat(2,1fr); } }
+  @media(max-width:520px){ .kv-feat-grid { grid-template-columns: 1fr; } }
+
+  /* Icon card */
+  .kv-pcard {
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.08);
+    transition: transform .3s cubic-bezier(.16,1,.3,1), box-shadow .3s, border-color .3s;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+  }
+  .kv-pcard:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 40px rgba(0,0,0,.35);
+    border-color: rgba(255,255,255,.15);
+  }
+
+  /* Icon bubble */
+  .kv-pcard-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+    transition: transform .3s cubic-bezier(.16,1,.3,1);
+  }
+  .kv-pcard:hover .kv-pcard-icon { transform: scale(1.08); }
+
+  /* Text area */
+  .kv-pcard-body { flex: 1; min-width: 0; }
+  .kv-pcard-name {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700; font-size: .9rem;
+    color: #F5EDE0; line-height: 1.3;
+    margin-bottom: 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .kv-pcard-desc {
+    font-size: .72rem; color: rgba(245,237,224,.45);
+    line-height: 1.5;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+
+  /* Arrow */
+  .kv-pcard-arrow {
+    font-size: .75rem; font-weight: 700;
+    color: rgba(245,237,224,.25);
+    flex-shrink: 0;
+    transition: color .2s, transform .2s;
+  }
+  .kv-pcard:hover .kv-pcard-arrow { color: rgba(245,237,224,.6); transform: translateX(3px); }
+
+  /* Featured card */
+  .village-card-featured {
+    border-radius: 18px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid rgba(245,237,224,.08);
+    transition: transform .3s cubic-bezier(.16,1,.3,1), box-shadow .3s;
+  }
+  .village-card-featured:hover { transform: translateY(-6px); box-shadow: 0 24px 48px rgba(0,0,0,.35); }
+
+  /* Sahil / Sık gezilen card */
+  .village-card-mid {
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid rgba(245,237,224,.07);
+    transition: transform .25s cubic-bezier(.16,1,.3,1), box-shadow .25s;
+  }
+  .village-card-mid:hover { transform: translateY(-5px); box-shadow: 0 18px 36px rgba(0,0,0,.3); }
+
+  /* Compact all-village card */
+  .village-card-compact {
+    border-radius: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+    border: 1.5px solid rgba(26,39,68,.08);
+    background: #fff;
+    transition: transform .22s, border-color .22s, box-shadow .22s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .village-card-compact:hover { transform: translateY(-3px); border-color: var(--terra); box-shadow: 0 8px 20px rgba(26,39,68,.1); }
+
+  /* ── CTA — Köy Rotası ── */
+  @keyframes kv-cta-orb-f  { 0%,100%{transform:translateY(0) scale(1);} 50%{transform:translateY(-20px) scale(1.06);} }
+  @keyframes kv-cta-line-in { from{transform:scaleX(0);} to{transform:scaleX(1);} }
+  @keyframes kv-cta-dot-in  { 0%{transform:scale(.6);opacity:0;} 100%{transform:scale(1);opacity:1;} }
+  @keyframes kv-cta-more-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(212,147,90,.55);} 50%{box-shadow:0 0 0 9px rgba(212,147,90,0);} }
+  @keyframes kv-cta-btn-glow { 0%,100%{box-shadow:0 8px 32px rgba(196,82,26,.35);} 50%{box-shadow:0 12px 48px rgba(196,82,26,.6);} }
+
+  .kv-cta-sec {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(150deg, #071410 0%, #0D1F16 45%, #081320 100%);
+    padding: 100px 24px 96px;
+  }
+  .kv-cta-sec::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(127,184,123,.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(127,184,123,.025) 1px, transparent 1px);
+    background-size: 52px 52px;
+    pointer-events: none;
+  }
+
+  .kv-cta-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+  }
+  .kv-cta-orb-1 { width:520px;height:520px;background:rgba(90,122,86,.22);top:-160px;right:-120px;animation:kv-cta-orb-f 18s ease-in-out infinite; }
+  .kv-cta-orb-2 { width:400px;height:400px;background:rgba(212,147,90,.16);bottom:-130px;left:-90px;animation:kv-cta-orb-f 14s ease-in-out infinite reverse 2s; }
+
+  .kv-cta-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+  }
+
+  /* Route stops row */
+  .kv-cta-route {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+    justify-content: center;
+  }
+  .kv-cta-stop {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .kv-cta-stop span {
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .05em;
+    color: rgba(245,237,224,.55);
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .kv-cta-dot {
+    width: 58px; height: 58px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.06);
+    border: 2px solid rgba(212,147,90,.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.55rem;
+    flex-shrink: 0;
+    animation: kv-cta-dot-in .5s cubic-bezier(.34,1.56,.64,1) both;
+    transition: transform .3s cubic-bezier(.16,1,.3,1), box-shadow .3s, border-color .3s;
+  }
+  .kv-cta-stop:hover .kv-cta-dot {
+    transform: scale(1.12);
+    border-color: rgba(212,147,90,.7);
+    box-shadow: 0 0 22px rgba(212,147,90,.3);
+  }
+  .kv-cta-dot--more {
+    background: rgba(212,147,90,.12);
+    border-color: rgba(212,147,90,.5);
+    border-style: dashed;
+    font-size: .9rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 800;
+    color: #D4935A;
+    animation: kv-cta-more-pulse 2.5s ease-in-out infinite !important;
+  }
+
+  /* Staggered dot pop-in */
+  .kv-cta-route > div:nth-child(1) .kv-cta-dot { animation-delay: .05s; }
+  .kv-cta-route > div:nth-child(3) .kv-cta-dot { animation-delay: .3s; }
+  .kv-cta-route > div:nth-child(5) .kv-cta-dot { animation-delay: .55s; }
+  .kv-cta-route > div:nth-child(7) .kv-cta-dot { animation-delay: .8s; }
+
+  /* Connecting line */
+  .kv-cta-line {
+    flex: 1;
+    height: 2px;
+    background: rgba(212,147,90,.1);
+    margin-top: 28px; /* align with center of 58px dot */
+    overflow: hidden;
+    border-radius: 2px;
+    min-width: 32px;
+  }
+  .kv-cta-line-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #C4521A, #D4935A, rgba(212,147,90,.35));
+    transform-origin: left;
+    transform: scaleX(0);
+    animation: kv-cta-line-in .7s cubic-bezier(.16,1,.3,1) forwards;
+  }
+  .kv-cta-route > div:nth-child(2) .kv-cta-line-fill { animation-delay: .2s; }
+  .kv-cta-route > div:nth-child(4) .kv-cta-line-fill { animation-delay: .45s; }
+  .kv-cta-route > div:nth-child(6) .kv-cta-line-fill { animation-delay: .7s; }
+
+  /* Text block */
+  .kv-cta-text {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .kv-cta-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(212,147,90,.1);
+    border: 1px solid rgba(212,147,90,.22);
+    border-radius: 999px;
+    padding: 5px 16px;
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #D4935A;
+    margin-bottom: 20px;
+  }
+  .kv-cta-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    letter-spacing: -.03em;
+    line-height: 1.1;
+    color: #F5EDE0;
+    margin-bottom: 14px;
+  }
+  .kv-cta-title em {
+    font-style: italic;
+    font-family: 'Lora', serif;
+    font-weight: 500;
+    background: linear-gradient(135deg, #D4935A, #F0B87A);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .kv-cta-sub {
+    font-size: .9rem;
+    color: rgba(245,237,224,.48);
+    line-height: 1.75;
+    max-width: 420px;
+    margin-bottom: 36px;
+  }
+  .kv-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #C4521A 0%, #D47C3A 100%);
+    color: #fff;
+    text-decoration: none;
+    padding: 15px 36px;
+    border-radius: 999px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: .92rem;
+    letter-spacing: .02em;
+    animation: kv-cta-btn-glow 3s ease-in-out infinite;
+    transition: transform .3s cubic-bezier(.16,1,.3,1), filter .3s;
+  }
+  .kv-cta-btn:hover {
+    transform: translateY(-4px) scale(1.03);
+    filter: brightness(1.1);
+  }
+  .kv-cta-btn svg { transition: transform .3s cubic-bezier(.16,1,.3,1); }
+  .kv-cta-btn:hover svg { transform: translateX(5px); }
+
+  @media(max-width:680px){
+    .kv-cta-route { overflow-x: auto; padding-bottom: 10px; justify-content: flex-start; min-width: 0; }
+    .kv-cta-dot { width: 46px; height: 46px; font-size: 1.2rem; }
+    .kv-cta-line { margin-top: 22px; min-width: 24px; }
+    .kv-cta-route > div:nth-child(1) .kv-cta-dot,
+    .kv-cta-route > div:nth-child(3) .kv-cta-dot,
+    .kv-cta-route > div:nth-child(5) .kv-cta-dot,
+    .kv-cta-route > div:nth-child(7) .kv-cta-dot { animation: none; opacity:1; transform:scale(1); }
+    .kv-cta-inner { gap: 40px; }
+  }
+</style>
+
+<script src="data.js"></script>
+<script src="shared.js"></script>
+<script>
+  renderNav({ heroMode: false });
+  renderFooter();
+
+  /* Hero stats */
+  (function() {
+    if (typeof DATA === 'undefined') return;
+    const v = DATA.villages || [];
+    const set = (id, val) => { const el = document.querySelector('#' + id + ' span'); if (el) el.textContent = val; };
+    set('kv-stat-toplam', (v.length - 1) + '+');
+    set('kv-stat-one',    v.filter(x => x.category === 'one-cikan').length);
+    set('kv-stat-sahil',  v.filter(x => x.category === 'sahil').length);
+  })();
+
+  const CAT_BADGE = {
+    'one-cikan': { label: '⭐ Öne Çıkan', bg: 'rgba(212,147,90,.2)', color: '#C4521A' },
+    'sahil':     { label: '🌊 Sahil',     bg: 'rgba(26,107,138,.18)', color: '#1A6B8A' },
+    'sik-gezilen':{ label: '📍 Sık Gezilen', bg: 'rgba(90,122,86,.18)', color: '#3A6A36' },
+    '':          { label: 'Köy',          bg: 'rgba(26,39,68,.07)', color: 'var(--text-soft)' }
+  };
+
+  function openVillage(id) {
+    const v = DATA.villages.find(x => x.id === id);
+    if (!v) return;
+    const badge = CAT_BADGE[v.category || ''];
+    document.getElementById('village-modal-body').innerHTML = `
+      <div style="background:${v.bg};padding:48px 32px 32px;text-align:center;border-radius:24px 24px 0 0;">
+        <div style="font-size:3.5rem;margin-bottom:12px;">${v.emoji}</div>
+        <span style="display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.15);color:rgba(255,255,255,.8);margin-bottom:10px;">${badge.label}</span>
+        <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.6rem;color:var(--cream);">${v.title}</h2>
+      </div>
+      <div style="padding:28px 32px 32px;">
+        <p style="color:var(--text-mid);font-size:.9rem;line-height:1.8;margin-bottom:18px;">${v.description || v.shortDesc}</p>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          ${(v.tags||[]).map(t=>`<span style="font-size:.65rem;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(26,39,68,.06);color:var(--text-mid);">${t}</span>`).join('')}
+        </div>
+      </div>
+    `;
+    document.getElementById('village-modal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('village-modal').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('village-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+
+  /* ── Render featured (öne çıkan) ── */
+  function renderFeatured() {
+    const villages = DATA.villages.filter(v => v.category === 'one-cikan');
+    document.getElementById('grid-one-cikan').innerHTML = villages.map((v, i) => `
+      <div class="kv-pcard fade-up" data-delay="${i * 0.06}" onclick="openVillage('${v.id}')">
+        <div class="kv-pcard-icon" style="background:${v.bg};">${v.emoji}</div>
+        <div class="kv-pcard-body">
+          <div class="kv-pcard-name">${v.title}</div>
+          <div class="kv-pcard-desc">${v.shortDesc}</div>
+        </div>
+        <span class="kv-pcard-arrow">→</span>
+      </div>`).join('');
+  }
+
+  /* ── Render sahil ── */
+  function renderSahil() {
+    const SAHIL_IDS = ['behram', 'sivrice', 'babakale', 'ahmetce', 'kucukcetmi', 'arıklı'];
+    const map = Object.fromEntries(DATA.villages.map(v => [v.id, v]));
+    const villages = SAHIL_IDS.map(id => map[id]).filter(Boolean);
+    const SAHIL_LABELS = { 'behram': 'Behramkale (Assos Antik Liman)' };
+    document.getElementById('grid-sahil').innerHTML = villages.map((v, i) => `
+      <div class="kv-pcard fade-up" data-delay="${i * 0.07}" onclick="openVillage('${v.id}')">
+        <div class="kv-pcard-icon" style="background:${v.bg};">${v.emoji}</div>
+        <div class="kv-pcard-body">
+          <div class="kv-pcard-name">${SAHIL_LABELS[v.id] || v.title}</div>
+          <div class="kv-pcard-desc">${v.shortDesc}</div>
+        </div>
+        <span class="kv-pcard-arrow">→</span>
+      </div>`).join('');
+  }
+
+
+  /* ── Render all villages (compact) ── */
+  let allVillagesSorted = [];
+
+  function renderAll(query = '') {
+    const q = query.toLowerCase().trim();
+    const filtered = q
+      ? allVillagesSorted.filter(v => v.title.toLowerCase().includes(q))
+      : allVillagesSorted;
+
+    const grid = document.getElementById('grid-all');
+    const noResult = document.getElementById('no-village');
+
+    if (filtered.length === 0) {
+      grid.innerHTML = '';
+      noResult.style.display = 'block';
+      return;
+    }
+    noResult.style.display = 'none';
+
+    grid.innerHTML = filtered.map((v, i) => `
+      <div class="village-card-compact fade-up" data-delay="${Math.min(i * 0.015, 0.5)}" onclick="openVillage('${v.id}')">
+        <span style="font-size:1.3rem;flex-shrink:0;">${v.emoji}</span>
+        <div style="min-width:0;flex:1;">
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.8rem;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${v.title}</div>
+        </div>
+      </div>`).join('');
+    scrollFadeIn();
+  }
+
+  function filterAllVillages(query) {
+    renderAll(query);
+  }
+
+  /* ── Init ── */
+  function init() {
+    allVillagesSorted = [...DATA.villages].sort((a, b) => a.title.localeCompare(b.title, 'tr'));
+    document.getElementById('village-count').textContent = DATA.villages.length;
+
+    renderFeatured();
+    renderSahil();
+    renderAll();
+    scrollFadeIn();
+
+    const paramId = getParam('id');
+    if (paramId) setTimeout(() => openVillage(paramId), 200);
+  }
+
+  init();
+</script>
+</body>
+</html>

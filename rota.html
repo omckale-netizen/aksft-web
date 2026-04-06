@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rota — Assos'u Keşfet</title>
+  <meta name="description" content="Assos rota detayları: duraklar, süreler ve ipuçları.">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<!-- ROUTE HERO -->
+<div id="route-hero"></div>
+
+<!-- ROUTE BODY -->
+<div id="route-body"></div>
+
+<div id="footer-placeholder"></div>
+
+<style>
+  /* ── Route Hero ── */
+  .rh{position:relative;overflow:hidden;padding:148px 24px 72px;text-align:center;background:#0D1829;}
+  .rh-bg{position:absolute;inset:0;}
+  .rh-glow{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;}
+  .rh-noise{position:absolute;inset:0;pointer-events:none;z-index:1;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+    background-repeat:repeat;}
+  .rh-content{position:relative;z-index:10;max-width:720px;margin:0 auto;}
+  .rh-back{display:inline-flex;align-items:center;gap:8px;font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,237,224,.35);text-decoration:none;margin-bottom:32px;padding:6px 14px;border-radius:999px;border:1px solid rgba(245,237,224,.1);transition:color .2s,border-color .2s;background:rgba(255,255,255,.03);}
+  .rh-back:hover{color:rgba(245,237,224,.7);border-color:rgba(245,237,224,.2);}
+  .rh-tag{display:inline-flex;align-items:center;gap:7px;padding:5px 14px;border-radius:999px;font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px;border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(12px);animation:rhFadeUp .8s .1s both;}
+  .rh-emoji{font-size:clamp(3rem,8vw,5rem);line-height:1;margin-bottom:20px;animation:rhFadeUp .8s .2s both;filter:drop-shadow(0 8px 24px rgba(0,0,0,.35));}
+  .rh-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(2.2rem,6vw,3.8rem);letter-spacing:-.04em;line-height:1.0;margin-bottom:18px;background:linear-gradient(175deg,#F5EDE0 35%,rgba(245,237,224,.55) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:rhFadeUp .8s .3s both;}
+  .rh-desc{font-family:'Lora',serif;font-style:italic;color:rgba(245,237,224,.45);font-size:1rem;line-height:1.75;max-width:520px;margin:0 auto 36px;animation:rhFadeUp .8s .42s both;}
+  .rh-meta{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px;animation:rhFadeUp .8s .54s both;}
+  .rh-chip{display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);backdrop-filter:blur(10px);}
+  .rh-chip-icon{font-size:.95rem;line-height:1;}
+  .rh-chip-label{font-size:.6rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(245,237,224,.28);line-height:1;margin-bottom:2px;}
+  .rh-chip-val{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.8rem;color:rgba(245,237,224,.85);line-height:1;}
+  .rh-bottom-fade{position:absolute;bottom:0;left:0;right:0;height:80px;pointer-events:none;z-index:6;background:linear-gradient(to top,#FAF7F2,transparent);}
+
+  /* ── Route Body ── */
+  .rb-wrap{max-width:860px;margin:0 auto;padding:0 24px 100px;}
+
+  /* Description */
+  .rb-desc-box{background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:24px;padding:36px 40px;margin-bottom:56px;box-shadow:0 4px 24px rgba(26,39,68,.04);}
+  .rb-desc-text{font-family:'Lora',serif;font-size:1.05rem;color:var(--text-mid);line-height:1.85;font-style:italic;}
+
+  /* Section header */
+  .rb-section-head{margin-bottom:28px;}
+  .rb-section-label{font-size:.68rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--terra);margin-bottom:8px;}
+  .rb-section-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.6rem;letter-spacing:-.025em;color:var(--navy);}
+
+  /* Stops */
+  .stops-wrap{position:relative;padding-left:44px;margin-bottom:60px;}
+  .stops-line{position:absolute;left:17px;top:18px;bottom:18px;width:2px;background:linear-gradient(180deg,var(--stop-color,var(--terra)) 0%,rgba(26,39,68,.06) 100%);border-radius:2px;}
+  .stop-item{position:relative;margin-bottom:20px;}
+  .stop-dot{position:absolute;left:-44px;top:18px;width:36px;height:36px;border-radius:50%;background:var(--stop-color,var(--terra));display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:.8rem;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.15),0 0 0 4px #FAF7F2;flex-shrink:0;z-index:1;}
+  .stop-card{background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:20px;overflow:hidden;box-shadow:0 2px 12px rgba(26,39,68,.04);transition:box-shadow .3s,transform .3s;}
+  .stop-card:hover{box-shadow:0 8px 32px rgba(26,39,68,.1);transform:translateX(4px);}
+  .stop-card-header{padding:20px 24px 14px;display:flex;align-items:center;gap:14px;}
+  .stop-emoji-wrap{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
+  .stop-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:1rem;color:var(--navy);margin-bottom:2px;}
+  .stop-duration{font-size:.72rem;font-weight:600;color:var(--text-soft);}
+  .stop-card-body{padding:0 24px 20px;}
+  .stop-desc{font-size:.875rem;color:var(--text-mid);line-height:1.75;margin-bottom:12px;}
+  .stop-tip{background:rgba(212,147,90,.08);border:1px solid rgba(212,147,90,.18);border-radius:12px;padding:10px 14px;font-size:.78rem;color:#7A4A10;line-height:1.6;}
+  .stop-tip::before{content:'💡 ';}
+
+  /* Tips */
+  .tips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-bottom:60px;}
+  .tip-item{background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:16px;padding:18px 20px;display:flex;gap:14px;align-items:flex-start;box-shadow:0 2px 8px rgba(26,39,68,.03);}
+  .tip-num{width:28px;height:28px;border-radius:50%;background:rgba(26,39,68,.06);display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:.7rem;color:var(--text-soft);flex-shrink:0;margin-top:1px;}
+  .tip-text{font-size:.83rem;color:var(--text-mid);line-height:1.65;}
+
+  /* Season badge */
+  .season-band{background:linear-gradient(135deg,#0D1829,#1A2744);border-radius:20px;padding:28px 32px;display:flex;align-items:center;gap:20px;margin-bottom:60px;}
+  .season-icon{font-size:2rem;flex-shrink:0;}
+  .season-label{font-size:.65rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(245,237,224,.3);margin-bottom:4px;}
+  .season-val{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:1rem;color:var(--cream);}
+
+  /* Back CTA */
+  .rb-cta{background:linear-gradient(135deg,var(--navy),#1A3355);border-radius:24px;padding:36px 40px;text-align:center;}
+  .rb-cta h3{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.3rem;color:var(--cream);letter-spacing:-.02em;margin-bottom:10px;}
+  .rb-cta p{font-size:.87rem;color:rgba(245,237,224,.45);margin-bottom:24px;line-height:1.6;}
+  .rb-cta-btns{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;}
+
+  /* Animations */
+  @keyframes rhFadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+  /* Responsive */
+  @media(max-width:640px){
+    .rb-desc-box{padding:24px 22px;}
+    .stops-wrap{padding-left:36px;}
+    .stops-line{left:13px;}
+    .stop-dot{left:-36px;width:28px;height:28px;font-size:.7rem;}
+    .stop-card-header{padding:16px 18px 10px;}
+    .stop-card-body{padding:0 18px 16px;}
+    .tips-grid{grid-template-columns:1fr;}
+    .rb-cta{padding:28px 24px;}
+    .season-band{padding:22px 24px;}
+    .rh-chip{padding:7px 12px;}
+    .rh-chip-val{font-size:.73rem;}
+  }
+</style>
+
+<script src="data.js"></script>
+<script src="shared.js"></script>
+<script>
+  renderNav({ heroMode: false });
+  renderFooter();
+
+  const STOP_COLORS = {
+    'bir-gunde-assos':    { stop:'#C4521A', stopBg:'rgba(196,82,26,.1)',  glow1:'rgba(196,82,26,.35)',  glow2:'rgba(212,100,40,.18)' },
+    'gun-batimi-rotasi':  { stop:'#D4935A', stopBg:'rgba(212,147,90,.12)',glow1:'rgba(212,147,90,.3)',  glow2:'rgba(180,100,30,.15)' },
+    'tarih-rotasi':       { stop:'#1A6B8A', stopBg:'rgba(26,107,138,.1)', glow1:'rgba(26,107,138,.3)', glow2:'rgba(15,60,90,.15)'   },
+    'koy-koy-assos':      { stop:'#5A7A56', stopBg:'rgba(90,122,86,.1)',  glow1:'rgba(90,122,86,.3)',  glow2:'rgba(50,80,46,.15)'   },
+    'deniz-koy-rotasi':   { stop:'#1A6B8A', stopBg:'rgba(26,107,138,.1)', glow1:'rgba(26,107,138,.35)',glow2:'rgba(10,50,80,.18)'   },
+    'kahve-molasi-rotasi':{ stop:'#D4935A', stopBg:'rgba(212,147,90,.12)',glow1:'rgba(212,147,90,.3)', glow2:'rgba(150,90,30,.15)'  },
+  };
+
+  const ZORLUK_ICON = { 'Kolay':'🟢', 'Çok Kolay':'🟢', 'Orta':'🟡', 'Zor':'🔴' };
+  const TEMPO_ICON  = { 'Sakin':'🌿', 'Aktif':'⚡', 'Keşif':'🔍', 'Dinlendirici':'🛋', 'Yavaş':'🐢' };
+
+  function buildHero(r) {
+    const pal = STOP_COLORS[r.id] || STOP_COLORS['bir-gunde-assos'];
+    document.getElementById('route-hero').innerHTML = `
+      <div class="rh">
+        <div class="rh-bg" style="background:linear-gradient(160deg,#0D1829 0%,#152040 50%,#0F1E35 100%);"></div>
+        <div class="rh-glow" style="width:600px;height:320px;top:-80px;left:-100px;background:${pal.glow1};opacity:.5;"></div>
+        <div class="rh-glow" style="width:450px;height:260px;bottom:-60px;right:-80px;background:${pal.glow2};opacity:.6;"></div>
+        <div class="rh-noise"></div>
+        <div class="rh-content">
+          <a href="rotalar.html" class="rh-back">← Tüm Rotalar</a>
+          <div class="rh-tag" style="background:${r.tagColor};color:${r.tagTextColor};">${r.tag}</div>
+          <div class="rh-emoji">${r.emoji}</div>
+          <h1 class="rh-title">${r.title}</h1>
+          <p class="rh-desc">${r.shortDesc}</p>
+          <div class="rh-meta">
+            <div class="rh-chip">
+              <span class="rh-chip-icon">⏱</span>
+              <div><div class="rh-chip-label">Süre</div><div class="rh-chip-val">${r.sure}</div></div>
+            </div>
+            <div class="rh-chip">
+              <span class="rh-chip-icon">📍</span>
+              <div><div class="rh-chip-label">Durak</div><div class="rh-chip-val">${r.durak} durak</div></div>
+            </div>
+            <div class="rh-chip">
+              <span class="rh-chip-icon">${ZORLUK_ICON[r.zorluk]||'⚪'}</span>
+              <div><div class="rh-chip-label">Zorluk</div><div class="rh-chip-val">${r.zorluk}</div></div>
+            </div>
+            <div class="rh-chip">
+              <span class="rh-chip-icon">${TEMPO_ICON[r.tempo]||'🚶'}</span>
+              <div><div class="rh-chip-label">Tempo</div><div class="rh-chip-val">${r.tempo}</div></div>
+            </div>
+            <div class="rh-chip">
+              <span class="rh-chip-icon">👥</span>
+              <div><div class="rh-chip-label">Kime Uygun</div><div class="rh-chip-val">${r.hedefKitle}</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="rh-bottom-fade"></div>
+      </div>
+    `;
+  }
+
+  function buildBody(r) {
+    const pal = STOP_COLORS[r.id] || STOP_COLORS['bir-gunde-assos'];
+
+    const stopsHTML = r.stops.map((s, i) => `
+      <div class="stop-item fade-up" data-delay="${i * 0.08}">
+        <div class="stop-dot" style="background:${pal.stop};">${s.no}</div>
+        <div class="stop-card">
+          <div class="stop-card-header">
+            <div class="stop-emoji-wrap" style="background:${pal.stopBg};">${s.emoji}</div>
+            <div>
+              <div class="stop-title">${s.title}</div>
+              <div class="stop-duration">⏱ ${s.duration}</div>
+            </div>
+          </div>
+          <div class="stop-card-body">
+            <p class="stop-desc">${s.desc}</p>
+            ${s.tip ? `<div class="stop-tip">${s.tip}</div>` : ''}
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    const tipsHTML = r.tips.map((t, i) => `
+      <div class="tip-item fade-up" data-delay="${i * 0.06}">
+        <div class="tip-num">${i + 1}</div>
+        <div class="tip-text">${t}</div>
+      </div>
+    `).join('');
+
+    const otherRoutes = DATA.routes.filter(x => x.id !== r.id).slice(0, 3);
+    const otherRoutesHTML = otherRoutes.map(x => `
+      <a href="rota.html?id=${x.id}" style="display:flex;align-items:center;gap:14px;padding:16px 20px;background:rgba(245,237,224,.04);border:1px solid rgba(245,237,224,.08);border-radius:16px;text-decoration:none;transition:background .2s,border-color .2s;" onmouseover="this.style.background='rgba(245,237,224,.08)';this.style.borderColor='rgba(245,237,224,.15)'" onmouseout="this.style.background='rgba(245,237,224,.04)';this.style.borderColor='rgba(245,237,224,.08)'">
+        <span style="font-size:1.6rem;">${x.emoji}</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.87rem;color:var(--cream);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${x.title}</div>
+          <div style="font-size:.72rem;color:rgba(245,237,224,.35);">⏱ ${x.sure} · ${x.durak} durak</div>
+        </div>
+        <span style="color:rgba(245,237,224,.3);font-size:.9rem;">→</span>
+      </a>
+    `).join('');
+
+    document.getElementById('route-body').innerHTML = `
+      <div style="background:var(--cream-light);padding-top:48px;">
+        <div class="rb-wrap">
+
+          <div class="rb-desc-box fade-up">
+            <p class="rb-desc-text">${r.description || r.shortDesc}</p>
+          </div>
+
+          <div class="season-band fade-up">
+            <div class="season-icon">🗓</div>
+            <div>
+              <div class="season-label">En İyi Mevsim</div>
+              <div class="season-val">${r.season}</div>
+            </div>
+          </div>
+
+          <div class="rb-section-head fade-up">
+            <div class="rb-section-label">Güzergah</div>
+            <div class="rb-section-title">${r.durak} Durak, Sırayla</div>
+          </div>
+          <div class="stops-wrap" style="--stop-color:${pal.stop};">
+            <div class="stops-line"></div>
+            ${stopsHTML}
+          </div>
+
+          <div class="rb-section-head fade-up">
+            <div class="rb-section-label">Bilmen Gerekenler</div>
+            <div class="rb-section-title">Pratik İpuçları</div>
+          </div>
+          <div class="tips-grid">
+            ${tipsHTML}
+          </div>
+
+          <div class="rb-cta fade-up">
+            <h3>Başka Rotalara Bak</h3>
+            <p>Assos'un farklı yüzlerini keşfetmek için diğer rotaları incele.</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:24px;">
+              ${otherRoutesHTML}
+            </div>
+            <div class="rb-cta-btns">
+              <a href="rotalar.html" class="btn-terra">Tüm Rotaları Gör</a>
+              <a href="index.html" class="btn-outline-cream">Ana Sayfaya Dön</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    `;
+
+    scrollFadeIn();
+  }
+
+  const id = getParam('id') || 'bir-gunde-assos';
+  const route = DATA.routes.find(r => r.id === id);
+
+  if (route) {
+    document.title = route.title + ' — Assos\'u Keşfet';
+    buildHero(route);
+    buildBody(route);
+  } else {
+    document.getElementById('route-hero').innerHTML = `
+      <div class="rh" style="min-height:50vh;">
+        <div class="rh-bg" style="background:#0D1829;"></div>
+        <div class="rh-content" style="padding-top:40px;">
+          <a href="rotalar.html" class="rh-back">← Tüm Rotalar</a>
+          <div style="font-size:3rem;margin:24px 0;">🗺</div>
+          <h1 class="rh-title" style="font-size:2rem;">Rota bulunamadı</h1>
+          <p class="rh-desc">Bu ID ile eşleşen bir rota yok.</p>
+        </div>
+      </div>`;
+  }
+</script>
+</body>
+</html>

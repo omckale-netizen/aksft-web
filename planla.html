@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assos'u Planla — Assos'u Keşfet</title>
+  <meta name="description" content="Assos gezini planla. Süre, ilgi alanı ve grup türüne göre kişiselleştirilmiş rota ve mekan önerileri.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ── PLANLA HERO ── */
+    @keyframes planHeroOrb { 0%,100%{transform:translateY(0) scale(1);} 50%{transform:translateY(-22px) scale(1.05);} }
+    @keyframes planFadeUp  { from{opacity:0;transform:translateY(24px);} to{opacity:1;transform:translateY(0);} }
+    @keyframes planPulse   { 0%,100%{box-shadow:0 0 0 0 rgba(196,82,26,.4);} 50%{box-shadow:0 0 0 8px rgba(196,82,26,0);} }
+
+    .pl-hero {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(155deg, #06101E 0%, #0C1A30 50%, #0A1520 100%);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Grid mesh */
+    .pl-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(245,237,224,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,237,224,.03) 1px, transparent 1px);
+      background-size: 64px 64px;
+      pointer-events: none;
+    }
+
+    .pl-hero-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(72px);
+      pointer-events: none;
+    }
+    .pl-hero-orb-1 { width:420px;height:420px;background:rgba(196,82,26,.18);top:-100px;left:-80px;animation:planHeroOrb 16s ease-in-out infinite; }
+    .pl-hero-orb-2 { width:340px;height:340px;background:rgba(26,107,138,.16);bottom:-80px;right:-60px;animation:planHeroOrb 13s ease-in-out infinite reverse 1s; }
+    .pl-hero-orb-3 { width:200px;height:200px;background:rgba(212,147,90,.14);top:30%;left:55%;animation:planHeroOrb 18s ease-in-out infinite 2s; }
+
+    .pl-hero-inner {
+      position: relative;
+      z-index: 2;
+      max-width: 860px;
+      width: 100%;
+      text-align: center;
+      padding: 120px 0 80px;
+    }
+
+    .pl-hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(196,82,26,.1);
+      border: 1px solid rgba(196,82,26,.25);
+      border-radius: 999px;
+      padding: 7px 18px;
+      margin-bottom: 28px;
+      animation: planFadeUp .7s both;
+    }
+    .pl-hero-badge-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--terra);
+      animation: planPulse 2.4s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    .pl-hero-badge span {
+      font-size: .68rem; font-weight: 700;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: var(--terra-muted);
+    }
+
+    .pl-hero-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2.6rem, 6vw, 4.2rem);
+      letter-spacing: -.03em;
+      line-height: 1.0;
+      color: #F5EDE0;
+      margin-bottom: 18px;
+      animation: planFadeUp .8s .1s both;
+    }
+    .pl-hero-title em {
+      font-style: italic;
+      font-family: 'Lora', serif;
+      font-weight: 500;
+      font-size: .9em;
+      background: linear-gradient(135deg, #D4935A, #E8A07A);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .pl-hero-sub {
+      font-size: .98rem;
+      color: rgba(245,237,224,.58);
+      line-height: 1.75;
+      max-width: 520px;
+      margin: 0 auto 40px;
+      animation: planFadeUp .8s .22s both;
+    }
+
+    /* Step chips */
+    .pl-hero-steps {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      animation: planFadeUp .8s .34s both;
+    }
+    .pl-hero-step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 12px;
+      padding: 10px 18px;
+      backdrop-filter: blur(8px);
+    }
+    .pl-hero-step-num {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: rgba(196,82,26,.2);
+      border: 1px solid rgba(196,82,26,.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .62rem; font-weight: 800;
+      color: var(--terra-muted);
+      flex-shrink: 0;
+    }
+    .pl-hero-step span {
+      font-size: .75rem;
+      font-weight: 600;
+      color: rgba(245,237,224,.55);
+      white-space: nowrap;
+    }
+    .pl-hero-step-arrow {
+      width: 32px; height: 1px;
+      background: rgba(255,255,255,.12);
+      flex-shrink: 0;
+    }
+
+    @media(max-width:600px) {
+      .pl-hero-inner { padding: 110px 0 60px; }
+      .pl-hero-steps { flex-wrap: wrap; gap: 8px; }
+      .pl-hero-step-arrow { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<!-- PLANLA HERO -->
+<div class="pl-hero">
+  <div class="pl-hero-orb pl-hero-orb-1"></div>
+  <div class="pl-hero-orb pl-hero-orb-2"></div>
+  <div class="pl-hero-orb pl-hero-orb-3"></div>
+  <div class="pl-hero-inner">
+    <div class="pl-hero-badge">
+      <span class="pl-hero-badge-dot"></span>
+      <span>Kişiselleştirilmiş Assos Planı</span>
+    </div>
+    <h1 class="pl-hero-title">Assos'u<br><em>senin için</em> planlayalım</h1>
+    <p class="pl-hero-sub">Kaç gün gittiğine, ne aradığına ve kiminle gittiğine göre sana özel bir rota ve mekan önerisi hazırlayalım.</p>
+    <div class="pl-hero-steps">
+      <div class="pl-hero-step">
+        <span class="pl-hero-step-num">1</span>
+        <span>Süre</span>
+      </div>
+      <div class="pl-hero-step-arrow"></div>
+      <div class="pl-hero-step">
+        <span class="pl-hero-step-num">2</span>
+        <span>İlgi Alanı</span>
+      </div>
+      <div class="pl-hero-step-arrow"></div>
+      <div class="pl-hero-step">
+        <span class="pl-hero-step-num">3</span>
+        <span>Grup</span>
+      </div>
+      <div class="pl-hero-step-arrow"></div>
+      <div class="pl-hero-step">
+        <span class="pl-hero-step-num">✓</span>
+        <span>Planın Hazır</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WIZARD -->
+<section id="wizard-section" style="padding:64px 24px 100px;background:var(--cream-light);">
+  <div style="max-width:900px;margin:0 auto;">
+
+    <!-- Progress bar -->
+    <div id="progress-bar" style="display:flex;align-items:center;gap:0;margin-bottom:56px;max-width:480px;margin-left:auto;margin-right:auto;">
+      <div class="prog-step active" data-step="1">
+        <div class="prog-dot">1</div>
+        <span class="prog-label">Süre</span>
+      </div>
+      <div class="prog-line"></div>
+      <div class="prog-step" data-step="2">
+        <div class="prog-dot">2</div>
+        <span class="prog-label">İlgiler</span>
+      </div>
+      <div class="prog-line"></div>
+      <div class="prog-step" data-step="3">
+        <div class="prog-dot">3</div>
+        <span class="prog-label">Grup</span>
+      </div>
+    </div>
+
+    <!-- STEP 1: Duration -->
+    <div id="step-1" class="wizard-step">
+      <div style="text-align:center;margin-bottom:40px;">
+        <p class="section-label" style="margin-bottom:8px;">Adım 1 / 3</p>
+        <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.6rem,4vw,2.4rem);letter-spacing:-.03em;color:var(--navy);margin-bottom:12px;">Ne kadar zamanın var?</h2>
+        <p style="font-size:.9rem;color:var(--text-soft);">Gezin için ayırdığın süreye göre en uygun planı hazırlayalım.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;">
+        <div class="pick-card" data-group="sure" data-val="1gun" onclick="pickCard(this)">
+          <div class="pick-icon">☀️</div>
+          <div class="pick-title">1 Gün</div>
+          <div class="pick-sub">Hızlı ve öz bir Assos</div>
+        </div>
+        <div class="pick-card" data-group="sure" data-val="2gun" onclick="pickCard(this)">
+          <div class="pick-icon">🌅</div>
+          <div class="pick-title">2 Gün</div>
+          <div class="pick-sub">Daha derin bir keşif</div>
+        </div>
+        <div class="pick-card" data-group="sure" data-val="hafta-sonu" onclick="pickCard(this)">
+          <div class="pick-icon">🏕</div>
+          <div class="pick-title">Hafta Sonu</div>
+          <div class="pick-sub">3 gün, tam keşif</div>
+        </div>
+        <div class="pick-card" data-group="sure" data-val="uzun" onclick="pickCard(this)">
+          <div class="pick-icon">🗺</div>
+          <div class="pick-title">Uzun Tatil</div>
+          <div class="pick-sub">4+ gün, hiçbir şey kaçmaz</div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:36px;">
+        <button class="btn-next" onclick="goStep(2)" id="next-1" disabled>Devam Et →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Interests -->
+    <div id="step-2" class="wizard-step" style="display:none;">
+      <div style="text-align:center;margin-bottom:40px;">
+        <p class="section-label" style="margin-bottom:8px;">Adım 2 / 3</p>
+        <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.6rem,4vw,2.4rem);letter-spacing:-.03em;color:var(--navy);margin-bottom:12px;">Ne arıyorsun?</h2>
+        <p style="font-size:.9rem;color:var(--text-soft);">Birden fazla seçebilirsin — plan buna göre şekillenecek.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;">
+        <div class="pick-card multi" data-group="ilgi" data-val="tarih" onclick="pickMulti(this)">
+          <div class="pick-icon">🏛</div>
+          <div class="pick-title">Tarih & Kültür</div>
+          <div class="pick-sub">Antik alanlar, tapınak</div>
+        </div>
+        <div class="pick-card multi" data-group="ilgi" data-val="deniz" onclick="pickMulti(this)">
+          <div class="pick-icon">🌊</div>
+          <div class="pick-title">Deniz & Koylar</div>
+          <div class="pick-sub">Yüzme, kristal su</div>
+        </div>
+        <div class="pick-card multi" data-group="ilgi" data-val="koy" onclick="pickMulti(this)">
+          <div class="pick-icon">🏘</div>
+          <div class="pick-title">Köy Gezisi</div>
+          <div class="pick-sub">Taş evler, yerel hayat</div>
+        </div>
+        <div class="pick-card multi" data-group="ilgi" data-val="yemek" onclick="pickMulti(this)">
+          <div class="pick-icon">🍽</div>
+          <div class="pick-title">Yeme & İçme</div>
+          <div class="pick-sub">Balık, kahvaltı, kafe</div>
+        </div>
+        <div class="pick-card multi" data-group="ilgi" data-val="fotograf" onclick="pickMulti(this)">
+          <div class="pick-icon">📷</div>
+          <div class="pick-title">Fotoğraf</div>
+          <div class="pick-sub">Gün batımı, manzara</div>
+        </div>
+        <div class="pick-card multi" data-group="ilgi" data-val="doga" onclick="pickMulti(this)">
+          <div class="pick-icon">🌿</div>
+          <div class="pick-title">Doğa & Yürüyüş</div>
+          <div class="pick-sub">Zeytinlikler, izler</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:center;gap:12px;margin-top:36px;">
+        <button class="btn-back" onclick="goStep(1)">← Geri</button>
+        <button class="btn-next" onclick="goStep(3)" id="next-2" disabled>Devam Et →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Group type -->
+    <div id="step-3" class="wizard-step" style="display:none;">
+      <div style="text-align:center;margin-bottom:40px;">
+        <p class="section-label" style="margin-bottom:8px;">Adım 3 / 3</p>
+        <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.6rem,4vw,2.4rem);letter-spacing:-.03em;color:var(--navy);margin-bottom:12px;">Kimlerle gidiyorsun?</h2>
+        <p style="font-size:.9rem;color:var(--text-soft);">Son bir dokunuş — planını kişiselleştirelim.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;">
+        <div class="pick-card" data-group="grup" data-val="yalniz" onclick="pickCard(this)">
+          <div class="pick-icon">🧳</div>
+          <div class="pick-title">Yalnız</div>
+          <div class="pick-sub">Kendi hızında keşif</div>
+        </div>
+        <div class="pick-card" data-group="grup" data-val="cift" onclick="pickCard(this)">
+          <div class="pick-icon">💑</div>
+          <div class="pick-title">Çift</div>
+          <div class="pick-sub">Romantik kaçamak</div>
+        </div>
+        <div class="pick-card" data-group="grup" data-val="aile" onclick="pickCard(this)">
+          <div class="pick-icon">👨‍👩‍👧</div>
+          <div class="pick-title">Aile</div>
+          <div class="pick-sub">Çocuk dostu rotalar</div>
+        </div>
+        <div class="pick-card" data-group="grup" data-val="arkadaslar" onclick="pickCard(this)">
+          <div class="pick-icon">🎉</div>
+          <div class="pick-title">Arkadaşlar</div>
+          <div class="pick-sub">Sosyal, enerjik plan</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:center;gap:12px;margin-top:36px;">
+        <button class="btn-back" onclick="goStep(2)">← Geri</button>
+        <button class="btn-next" onclick="buildPlan()" id="next-3" disabled>Planımı Oluştur ✨</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- RESULTS -->
+<div id="plan-result" style="display:none;">
+
+  <!-- Summary band -->
+  <div id="plan-summary" style="background:var(--navy-deep);padding:48px 24px;">
+    <div style="max-width:900px;margin:0 auto;">
+      <div id="plan-summary-content"></div>
+    </div>
+  </div>
+
+  <!-- Recommended routes -->
+  <section style="padding:64px 24px;background:var(--navy-deep);">
+    <div style="max-width:900px;margin:0 auto;">
+      <div style="margin-bottom:32px;">
+        <p class="section-label" style="color:var(--amber);">Önerilen Rotalar</p>
+        <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.6rem;color:var(--cream);letter-spacing:-.02em;margin-top:8px;">Sana göre rotalar</h3>
+      </div>
+      <div id="plan-routes" class="card-grid"></div>
+    </div>
+  </section>
+
+  <!-- Venues -->
+  <section style="padding:0 24px 64px;background:var(--navy-deep);">
+    <div style="max-width:900px;margin:0 auto;">
+      <div style="margin-bottom:32px;">
+        <p class="section-label" style="color:var(--amber);">Önerilen Mekanlar</p>
+        <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.6rem;color:var(--cream);letter-spacing:-.02em;margin-top:8px;">Yeme, içme ve konaklama</h3>
+      </div>
+      <div id="plan-venues" class="card-grid-sm"></div>
+    </div>
+  </section>
+
+  <!-- Practical info -->
+  <section style="padding:64px 24px;background:var(--cream-light);">
+    <div style="max-width:900px;margin:0 auto;">
+      <div style="margin-bottom:40px;">
+        <p class="section-label" style="margin-bottom:8px;">Pratik Bilgiler</p>
+        <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.6rem;color:var(--navy);letter-spacing:-.02em;margin-top:8px;">Gitmeden önce bunları bil</h3>
+      </div>
+      <div id="plan-practical"></div>
+    </div>
+  </section>
+
+  <!-- Checklist -->
+  <section style="padding:0 24px 80px;background:var(--cream-light);">
+    <div style="max-width:900px;margin:0 auto;">
+      <div style="margin-bottom:32px;">
+        <p class="section-label" style="margin-bottom:8px;">Hazırlık Listesi</p>
+        <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.6rem;color:var(--navy);letter-spacing:-.02em;margin-top:8px;">Bavuluna ne koy?</h3>
+      </div>
+      <div id="plan-checklist"></div>
+    </div>
+  </section>
+
+  <!-- Redo -->
+  <section style="padding:60px 24px 80px;background:var(--cream-mid);text-align:center;">
+    <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.4rem;color:var(--navy);margin-bottom:12px;">Planını değiştirmek ister misin?</h3>
+    <p style="font-size:.88rem;color:var(--text-soft);margin-bottom:28px;">Farklı seçimler yaparak yeni bir plan oluşturabilirsin.</p>
+    <button onclick="resetPlan()" class="btn-terra">Yeniden Planla</button>
+  </section>
+</div>
+
+<div id="footer-placeholder"></div>
+
+<style>
+  /* Progress */
+  #progress-bar{display:flex;align-items:center;gap:0;margin-bottom:56px;}
+  .prog-step{display:flex;flex-direction:column;align-items:center;gap:6px;flex:0 0 auto;}
+  .prog-dot{width:36px;height:36px;border-radius:50%;background:rgba(26,39,68,.08);border:2px solid rgba(26,39,68,.12);display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:.8rem;color:var(--text-soft);transition:all .3s;}
+  .prog-label{font-size:.65rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-soft);transition:color .3s;}
+  .prog-line{flex:1;height:2px;background:rgba(26,39,68,.1);margin:0 8px;margin-bottom:22px;transition:background .4s;}
+  .prog-step.active .prog-dot{background:var(--navy);border-color:var(--navy);color:#fff;}
+  .prog-step.active .prog-label{color:var(--navy);}
+  .prog-step.done .prog-dot{background:var(--terra);border-color:var(--terra);color:#fff;}
+  .prog-step.done .prog-label{color:var(--terra);}
+  .prog-line.done{background:var(--terra);}
+
+  /* Wizard steps */
+  .wizard-step{animation:stepIn .4s cubic-bezier(.16,1,.3,1) both;}
+  @keyframes stepIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+  /* Pick cards */
+  .pick-card{
+    background:#fff;border:2px solid rgba(26,39,68,.08);border-radius:20px;
+    padding:24px 20px;cursor:pointer;text-align:center;
+    transition:all .25s cubic-bezier(.16,1,.3,1);
+    user-select:none;
+  }
+  .pick-card:hover{border-color:rgba(26,39,68,.2);transform:translateY(-3px);box-shadow:0 12px 32px rgba(26,39,68,.08);}
+  .pick-card.selected{border-color:var(--terra);background:rgba(196,82,26,.04);box-shadow:0 0 0 4px rgba(196,82,26,.08);}
+  .pick-icon{font-size:2rem;margin-bottom:12px;line-height:1;}
+  .pick-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.95rem;color:var(--navy);margin-bottom:5px;}
+  .pick-sub{font-size:.75rem;color:var(--text-soft);line-height:1.4;}
+
+  /* Buttons */
+  .btn-next{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:12px 32px;border-radius:12px;
+    background:var(--navy);color:var(--cream);
+    font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.88rem;
+    border:none;cursor:pointer;transition:all .22s;
+  }
+  .btn-next:hover:not(:disabled){background:var(--terra);transform:translateY(-2px);box-shadow:0 8px 24px rgba(196,82,26,.25);}
+  .btn-next:disabled{opacity:.35;cursor:not-allowed;}
+  .btn-back{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:12px 24px;border-radius:12px;
+    background:transparent;color:var(--text-mid);
+    font-weight:600;font-size:.88rem;
+    border:1.5px solid rgba(26,39,68,.14);cursor:pointer;transition:all .2s;
+  }
+  .btn-back:hover{background:rgba(26,39,68,.04);}
+
+  /* Plan summary */
+  .plan-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:6px 14px;border-radius:999px;
+    background:rgba(245,237,224,.08);border:1px solid rgba(245,237,224,.14);
+    font-size:.75rem;font-weight:600;color:rgba(245,237,224,.7);
+    margin:4px;
+  }
+
+  /* Practical info cards */
+  .prac-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:40px;}
+  .prac-card{background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;padding:24px 20px;box-shadow:0 2px 12px rgba(26,39,68,.04);}
+  .prac-icon{font-size:1.8rem;margin-bottom:14px;}
+  .prac-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.92rem;color:var(--navy);margin-bottom:10px;}
+  .prac-item{font-size:.8rem;color:var(--text-mid);line-height:1.6;margin-bottom:5px;padding-left:14px;position:relative;}
+  .prac-item::before{content:'·';position:absolute;left:4px;color:var(--terra);}
+
+  /* Checklist */
+  .check-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+  .check-item{
+    display:flex;align-items:center;gap:12px;
+    padding:14px 18px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;
+    cursor:pointer;transition:all .2s;
+    box-shadow:0 2px 8px rgba(26,39,68,.03);
+  }
+  .check-item:hover{border-color:rgba(26,39,68,.15);}
+  .check-item.checked{background:rgba(90,122,86,.05);border-color:rgba(90,122,86,.2);}
+  .check-box{width:22px;height:22px;border-radius:6px;border:2px solid rgba(26,39,68,.15);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:.75rem;}
+  .check-item.checked .check-box{background:var(--sage);border-color:var(--sage);color:#fff;}
+  .check-label{font-size:.82rem;color:var(--text-mid);font-weight:500;}
+  .check-item.checked .check-label{color:var(--text-soft);text-decoration:line-through;}
+
+  @media(max-width:540px){
+    .prac-grid,.check-grid{grid-template-columns:1fr;}
+  }
+</style>
+
+<script src="data.js"></script>
+<script src="shared.js"></script>
+<script>
+  renderNav({ heroMode: false });
+  renderFooter();
+
+  /* ── State ── */
+  const sel = { sure: null, ilgi: new Set(), grup: null };
+
+  /* ── Step navigation ── */
+  function goStep(n) {
+    document.querySelectorAll('.wizard-step').forEach(s => s.style.display = 'none');
+    document.getElementById('step-' + n).style.display = '';
+    // Progress
+    document.querySelectorAll('.prog-step').forEach(s => {
+      const sn = +s.dataset.step;
+      s.classList.toggle('done', sn < n);
+      s.classList.toggle('active', sn === n);
+      s.classList.remove(sn > n ? 'done' : '');
+    });
+    document.querySelectorAll('.prog-line').forEach((l, i) => {
+      l.classList.toggle('done', i + 1 < n);
+    });
+    window.scrollTo({ top: document.getElementById('wizard-section').offsetTop - 80, behavior: 'smooth' });
+  }
+
+  /* ── Single pick ── */
+  function pickCard(el) {
+    const group = el.dataset.group;
+    document.querySelectorAll(`.pick-card[data-group="${group}"]`).forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    sel[group] = el.dataset.val;
+    const nextBtn = document.getElementById('next-' + (group === 'sure' ? 1 : group === 'grup' ? 3 : 2));
+    if (nextBtn) nextBtn.disabled = false;
+  }
+
+  /* ── Multi pick ── */
+  function pickMulti(el) {
+    el.classList.toggle('selected');
+    const val = el.dataset.val;
+    if (el.classList.contains('selected')) sel.ilgi.add(val);
+    else sel.ilgi.delete(val);
+    document.getElementById('next-2').disabled = sel.ilgi.size === 0;
+  }
+
+  /* ── Recommendation logic ── */
+  function scoreRoute(r) {
+    let s = 0;
+    const kw = (r.keywords || []).join(' ').toLowerCase();
+    if (sel.ilgi.has('tarih') && /antik|tarih|tapınak|arkeoloji/.test(kw)) s += 3;
+    if (sel.ilgi.has('deniz') && /deniz|koy|yüzme|plaj/.test(kw)) s += 3;
+    if (sel.ilgi.has('koy') && /köy|village|taş ev/.test(kw)) s += 3;
+    if (sel.ilgi.has('fotograf') && /gün batımı|manzara|fotoğraf|sunset/.test(kw)) s += 3;
+    if (sel.ilgi.has('yemek') && /kahve|kafe|balık|yemek|molası/.test(kw)) s += 3;
+    if (sel.ilgi.has('doga') && /doğa|yürüyüş|zeytinlik|orman/.test(kw)) s += 2;
+    // Group bonuses
+    if (sel.grup === 'cift' && /gün batımı|romantik|sunset/.test(kw)) s += 2;
+    if (sel.grup === 'aile' && r.zorluk === 'Kolay') s += 1;
+    if (sel.grup === 'yalniz' && /sakin|yavaş|huzur/.test(kw)) s += 1;
+    // Duration
+    if (sel.sure === '1gun' && (r.sure.includes('saat') || r.durak <= 3)) s += 1;
+    if (sel.sure === 'uzun') s += 0.5; // all routes welcome
+    return s;
+  }
+
+  function scoreVenue(v) {
+    let s = 0;
+    if (sel.ilgi.has('yemek') && (v.category === 'restoran' || v.category === 'kahvalti')) s += 3;
+    if (sel.ilgi.has('yemek') && v.category === 'kafe') s += 2;
+    if (sel.ilgi.has('fotograf') && v.category === 'kafe') s += 1;
+    if (sel.grup === 'cift' && /romantik|manzara|sessiz/.test((v.tags||[]).join(' ').toLowerCase())) s += 2;
+    if (sel.grup === 'aile') s += 0.5;
+    return s;
+  }
+
+  function getMaxRoutes() {
+    return { '1gun': 2, '2gun': 3, 'hafta-sonu': 4, 'uzun': 6 }[sel.sure] || 3;
+  }
+
+  /* ── Build plan ── */
+  function buildPlan() {
+    document.getElementById('wizard-section').style.display = 'none';
+    document.getElementById('plan-result').style.display = '';
+
+    // Routes
+    const scored = DATA.routes.map(r => ({ r, s: scoreRoute(r) })).sort((a, b) => b.s - a.s);
+    const routes = scored.slice(0, getMaxRoutes()).map(x => x.r);
+
+    // Venues
+    const vsco = DATA.venues.map(v => ({ v, s: scoreVenue(v) })).sort((a, b) => b.s - a.s);
+    const venues = vsco.slice(0, 6).map(x => x.v);
+
+    // Summary
+    const sureLabel = { '1gun':'1 Gün', '2gun':'2 Gün', 'hafta-sonu':'Hafta Sonu', 'uzun':'Uzun Tatil' }[sel.sure];
+    const ilgiLabels = { tarih:'🏛 Tarih', deniz:'🌊 Deniz', koy:'🏘 Köy', yemek:'🍽 Yemek', fotograf:'📷 Fotoğraf', doga:'🌿 Doğa' };
+    const grupLabel = { yalniz:'🧳 Yalnız', cift:'💑 Çift', aile:'👨‍👩‍👧 Aile', arkadaslar:'🎉 Arkadaşlar' }[sel.grup];
+
+    document.getElementById('plan-summary-content').innerHTML = `
+      <p style="font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(245,237,224,.3);margin-bottom:16px;">Planın hazır</p>
+      <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.6rem,4vw,2.4rem);color:var(--cream);letter-spacing:-.03em;margin-bottom:20px;">Sana özel ${sureLabel} planı ✨</h2>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">
+        <span class="plan-pill">⏱ ${sureLabel}</span>
+        ${[...sel.ilgi].map(i => `<span class="plan-pill">${ilgiLabels[i]||i}</span>`).join('')}
+        <span class="plan-pill">${grupLabel}</span>
+        <span class="plan-pill">📍 ${routes.length} rota · ${venues.length} mekan</span>
+      </div>
+    `;
+
+    // Render routes
+    document.getElementById('plan-routes').innerHTML = routes.map((r, i) => routeCardHTML(r, i * 0.07)).join('');
+
+    // Render venues
+    document.getElementById('plan-venues').innerHTML = venues.map((v, i) => `
+      <div class="venue-card fade-up" data-delay="${i * 0.06}" style="padding:20px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;">
+          <div style="width:44px;height:44px;border-radius:12px;background:rgba(196,82,26,.08);display:flex;align-items:center;justify-content:center;font-size:1.2rem;">${v.emoji}</div>
+          <span style="font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(26,39,68,.06);color:var(--text-mid);">${{kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama'}[v.category]||v.category}</span>
+        </div>
+        <h3 style="font-size:.9rem;margin-bottom:5px;">${v.title}</h3>
+        <p style="font-size:.78rem;margin-bottom:8px;">${v.shortDesc}</p>
+        <div style="font-size:.72rem;color:var(--text-soft);">📍 ${v.location}</div>
+      </div>`).join('');
+
+    // Practical info
+    renderPractical();
+    renderChecklist();
+    scrollFadeIn();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ── Practical info ── */
+  function renderPractical() {
+    const isLong = sel.sure === 'hafta-sonu' || sel.sure === 'uzun';
+    const hasSea = sel.ilgi.has('deniz');
+    const hasCar = true; // always useful
+
+    document.getElementById('plan-practical').innerHTML = `
+      <div class="prac-grid">
+        <div class="prac-card fade-up">
+          <div class="prac-icon">🚗</div>
+          <div class="prac-title">Ulaşım</div>
+          <div class="prac-item">İstanbul'dan ~4 saat araçla</div>
+          <div class="prac-item">Çanakkale'den ~1.5 saat</div>
+          <div class="prac-item">En yakın şehir: Ayvacık</div>
+          <div class="prac-item">Bölgede araç şart</div>
+        </div>
+        <div class="prac-card fade-up" data-delay=".06">
+          <div class="prac-icon">🏨</div>
+          <div class="prac-title">Konaklama</div>
+          ${isLong ? `
+          <div class="prac-item">Behramkale köy pansiyonları</div>
+          <div class="prac-item">Kayalar Köy Evi (tavsiye)</div>
+          <div class="prac-item">Assos Antik Otel (liman)</div>
+          <div class="prac-item">Yaz aylarında erken rezervasyon</div>
+          ` : `
+          <div class="prac-item">Gündüzlük gezi için konaklama gerekmez</div>
+          <div class="prac-item">Kalmak istersen liman civarı</div>
+          <div class="prac-item">Behramkale'de butik pansiyon var</div>
+          `}
+        </div>
+        <div class="prac-card fade-up" data-delay=".12">
+          <div class="prac-icon">💰</div>
+          <div class="prac-title">Bütçe Tahmini</div>
+          ${sel.sure === '1gun' ? `
+          <div class="prac-item">Yakıt: ~400–600 ₺</div>
+          <div class="prac-item">Yemek: ~300–600 ₺/kişi</div>
+          <div class="prac-item">Giriş (tapınak): ~100 ₺</div>
+          <div class="prac-item">Toplam: ~800–1300 ₺/kişi</div>
+          ` : sel.sure === '2gun' ? `
+          <div class="prac-item">Konaklama: ~800–1500 ₺/gece</div>
+          <div class="prac-item">Yemek: ~600 ₺/gün/kişi</div>
+          <div class="prac-item">Toplam: ~2000–3000 ₺/kişi</div>
+          ` : `
+          <div class="prac-item">Konaklama: ~800–1500 ₺/gece</div>
+          <div class="prac-item">Yemek: ~600 ₺/gün/kişi</div>
+          <div class="prac-item">Aktiviteler: ~500 ₺ tüm gezi</div>
+          <div class="prac-item">3 gün: ~5000–7000 ₺/kişi</div>
+          `}
+        </div>
+        <div class="prac-card fade-up" data-delay=".18">
+          <div class="prac-icon">📅</div>
+          <div class="prac-title">En İyi Zaman</div>
+          ${hasSea ? `
+          <div class="prac-item">Deniz için: Haziran–Eylül</div>
+          <div class="prac-item">Su sıcaklığı: 22–28°C</div>
+          <div class="prac-item">Kalabalık: Temmuz–Ağustos</div>
+          <div class="prac-item">Sakin: Haziran veya Eylül</div>
+          ` : `
+          <div class="prac-item">İdeal: Nisan–Haziran</div>
+          <div class="prac-item">Alternatif: Eylül–Kasım</div>
+          <div class="prac-item">Yazın çok sıcak olabilir</div>
+          <div class="prac-item">Kış ziyareti de mümkün</div>
+          `}
+        </div>
+        ${sel.grup === 'aile' ? `
+        <div class="prac-card fade-up" data-delay=".24">
+          <div class="prac-icon">👨‍👩‍👧</div>
+          <div class="prac-title">Aile İpuçları</div>
+          <div class="prac-item">Kadırga Koyu çocuklar için ideal</div>
+          <div class="prac-item">Tapınak ziyareti sabah erken</div>
+          <div class="prac-item">Gölge az — şapka şart</div>
+          <div class="prac-item">Atıştırmalık ve su bol götür</div>
+        </div>` : sel.grup === 'cift' ? `
+        <div class="prac-card fade-up" data-delay=".24">
+          <div class="prac-icon">💑</div>
+          <div class="prac-title">Çift Önerileri</div>
+          <div class="prac-item">Gün batımı tapınak tepesinde</div>
+          <div class="prac-item">Liman kenarında akşam yemeği</div>
+          <div class="prac-item">Adatepe sabah kahvaltısı</div>
+          <div class="prac-item">Sivrice koyunu kaçırma</div>
+        </div>` : ''}
+      </div>
+    `;
+  }
+
+  /* ── Checklist ── */
+  function renderChecklist() {
+    const hasSea = sel.ilgi.has('deniz');
+    const hasTrek = sel.ilgi.has('doga') || sel.ilgi.has('koy');
+    const isLong = sel.sure !== '1gun';
+
+    const items = [
+      '🧴 Güneş kremi (SPF 50+)',
+      '💧 Su şişesi (en az 1.5L)',
+      '🎒 Küçük sırt çantası',
+      hasSea && '👙 Mayo / Deniz şortu',
+      hasSea && '🥽 Şnorkel (opsiyonel)',
+      hasTrek && '👟 Yürüyüş ayakkabısı',
+      '🧢 Şapka (gölge az)',
+      '📸 Fotoğraf makinesi / Tripod',
+      '💵 Nakit (bazı mekanlar kart almaz)',
+      isLong && '🪥 Kişisel bakım malzemeleri',
+      isLong && '🌡 İlaç çantası',
+      '📱 Çevrimdışı harita (Maps.me)',
+      '🔋 Powerbank',
+      sel.ilgi.has('tarih') && '📚 Rehber kitap / Not defteri',
+      sel.grup === 'aile' && '🧸 Çocuk için atıştırmalık',
+      '🌙 İnce bir üst (akşam serinler)',
+    ].filter(Boolean);
+
+    document.getElementById('plan-checklist').innerHTML = `
+      <div class="check-grid">
+        ${items.map(item => `
+          <div class="check-item fade-up" onclick="toggleCheck(this)">
+            <div class="check-box"></div>
+            <span class="check-label">${item}</span>
+          </div>`).join('')}
+      </div>
+      <p style="margin-top:20px;font-size:.78rem;color:var(--text-soft);text-align:center;">Maddelere tıklayarak işaretleyebilirsin.</p>
+    `;
+  }
+
+  function toggleCheck(el) {
+    el.classList.toggle('checked');
+    el.querySelector('.check-box').textContent = el.classList.contains('checked') ? '✓' : '';
+  }
+
+  /* ── Reset ── */
+  function resetPlan() {
+    sel.sure = null; sel.ilgi.clear(); sel.grup = null;
+    document.querySelectorAll('.pick-card').forEach(c => c.classList.remove('selected'));
+    ['next-1','next-2','next-3'].forEach(id => document.getElementById(id).disabled = true);
+    document.getElementById('plan-result').style.display = 'none';
+    document.getElementById('wizard-section').style.display = '';
+    goStep(1);
+    window.scrollTo({ top: document.getElementById('wizard-section').offsetTop - 80, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
