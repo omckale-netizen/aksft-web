@@ -764,6 +764,24 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
         <div class="panel-card-head"><h3>Sayfa Goruntulenmeleri</h3></div>
         <div id="analytics-pages"></div>
       </div>
+
+      <!-- Dönem Karşılaştırma -->
+      <div class="panel-card" style="margin-top:20px">
+        <div class="panel-card-head"><h3>📊 Donem Karsilastirmasi</h3></div>
+        <div id="analytics-compare" style="padding:20px"></div>
+      </div>
+
+      <!-- Rota İstatistikleri -->
+      <div class="panel-card" style="margin-top:20px">
+        <div class="panel-card-head"><h3>🗺 Rota Istatistikleri</h3></div>
+        <div id="analytics-routes"></div>
+      </div>
+
+      <!-- Hava Durumu Korelasyonu -->
+      <div class="panel-card" style="margin-top:20px">
+        <div class="panel-card-head"><h3>🌤 Hava Durumu & Ziyaret Iliskisi</h3></div>
+        <div id="analytics-weather" style="padding:20px"></div>
+      </div>
     </div>
 
     <!-- ══════ SETTINGS ══════ -->
@@ -1400,6 +1418,137 @@ async function renderAnalytics() {
         '<div class="recent-item"><div class="recent-emoji">📄</div>' +
         '<div class="recent-info" style="flex:1"><div class="ri-title">' + p.page + '</div></div>' +
         '<div style="font-size:.85rem;font-weight:700;color:var(--navy)">' + p.views + '</div></div>').join('');
+
+    // ── Dönem Karşılaştırması ──
+    const compareEl = document.getElementById('analytics-compare');
+    if (compareEl && analyticsPeriod > 0) {
+      const now = new Date();
+      const currentStart = new Date(now); currentStart.setDate(now.getDate() - analyticsPeriod);
+      const prevStart = new Date(currentStart); prevStart.setDate(currentStart.getDate() - analyticsPeriod);
+
+      const currentEvents = events;
+      // Önceki dönem eventlerini çek
+      let prevQuery = db.collection('analytics_events')
+        .where('timestamp', '>=', prevStart.toISOString())
+        .where('timestamp', '<', currentStart.toISOString());
+      const prevSnap = await prevQuery.limit(5000).get();
+      const prevEvents = prevSnap.docs.map(d => d.data());
+
+      const cur = { views: 0, calls: 0, wa: 0, rez: 0 };
+      const prev = { views: 0, calls: 0, wa: 0, rez: 0 };
+      currentEvents.forEach(e => {
+        if (e.type === 'pageview') cur.views++;
+        if (e.action === 'call') cur.calls++;
+        if (e.action === 'whatsapp') cur.wa++;
+        if (e.action === 'reservation') cur.rez++;
+      });
+      prevEvents.forEach(e => {
+        if (e.type === 'pageview') prev.views++;
+        if (e.action === 'call') prev.calls++;
+        if (e.action === 'whatsapp') prev.wa++;
+        if (e.action === 'reservation') prev.rez++;
+      });
+
+      function cmpBadge(cur, prev) {
+        if (prev === 0 && cur === 0) return '<span style="color:var(--text-muted)">—</span>';
+        if (prev === 0) return '<span style="color:var(--green)">🆕 ' + cur + '</span>';
+        const diff = cur - prev;
+        const pct = Math.round((diff / prev) * 100);
+        if (diff > 0) return '<span style="color:var(--green)">↑ %' + pct + ' (+' + diff + ')</span>';
+        if (diff < 0) return '<span style="color:var(--red)">↓ %' + Math.abs(pct) + ' (' + diff + ')</span>';
+        return '<span style="color:var(--text-muted)">→ Ayni</span>';
+      }
+
+      compareEl.innerHTML =
+        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:center">' +
+          '<div><div style="font-size:.7rem;color:var(--text-muted);margin-bottom:6px">Goruntuleme</div>' +
+            '<div style="font-size:1.3rem;font-weight:800;color:var(--navy)">' + cur.views + '</div>' +
+            '<div style="font-size:.72rem;margin-top:4px">' + cmpBadge(cur.views, prev.views) + '</div>' +
+            '<div style="font-size:.62rem;color:var(--text-muted);margin-top:2px">Onceki: ' + prev.views + '</div></div>' +
+          '<div><div style="font-size:.7rem;color:var(--text-muted);margin-bottom:6px">Arama</div>' +
+            '<div style="font-size:1.3rem;font-weight:800;color:#1A6B8A">' + cur.calls + '</div>' +
+            '<div style="font-size:.72rem;margin-top:4px">' + cmpBadge(cur.calls, prev.calls) + '</div>' +
+            '<div style="font-size:.62rem;color:var(--text-muted);margin-top:2px">Onceki: ' + prev.calls + '</div></div>' +
+          '<div><div style="font-size:.7rem;color:var(--text-muted);margin-bottom:6px">WhatsApp</div>' +
+            '<div style="font-size:1.3rem;font-weight:800;color:#25D366">' + cur.wa + '</div>' +
+            '<div style="font-size:.72rem;margin-top:4px">' + cmpBadge(cur.wa, prev.wa) + '</div>' +
+            '<div style="font-size:.62rem;color:var(--text-muted);margin-top:2px">Onceki: ' + prev.wa + '</div></div>' +
+          '<div><div style="font-size:.7rem;color:var(--text-muted);margin-bottom:6px">Rezervasyon</div>' +
+            '<div style="font-size:1.3rem;font-weight:800;color:var(--terra)">' + cur.rez + '</div>' +
+            '<div style="font-size:.72rem;margin-top:4px">' + cmpBadge(cur.rez, prev.rez) + '</div>' +
+            '<div style="font-size:.62rem;color:var(--text-muted);margin-top:2px">Onceki: ' + prev.rez + '</div></div>' +
+        '</div>';
+    } else if (compareEl) {
+      compareEl.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:.85rem">Karsilastirma icin bir donem secin (Tum Zamanlar haricinde).</div>';
+    }
+
+    // ── Rota İstatistikleri ──
+    const routeViews = {};
+    events.forEach(ev => {
+      if (ev.type === 'pageview' && ev.target?.startsWith('route_')) {
+        const rid = ev.target.replace('route_', '');
+        routeViews[rid] = (routeViews[rid] || 0) + 1;
+      }
+    });
+    const routeList = Object.entries(routeViews).map(([id, views]) => {
+      const route = draftData.routes.find(r => r.id === id);
+      return { id, title: route ? route.title : id, emoji: route ? route.emoji : '🗺', views, durak: route ? (route.stops||[]).length : 0, zorluk: route ? route.zorluk : '-' };
+    }).sort((a, b) => b.views - a.views);
+
+    document.getElementById('analytics-routes').innerHTML = routeList.length === 0
+      ? '<div style="padding:24px;text-align:center;color:var(--text-muted)">Henuz rota goruntulemesi yok.</div>'
+      : routeList.map(r =>
+        '<div class="recent-item">' +
+          '<div class="recent-emoji">' + r.emoji + '</div>' +
+          '<div class="recent-info" style="flex:1">' +
+            '<div class="ri-title">' + r.title + '</div>' +
+            '<div class="ri-meta">' + r.durak + ' durak · ' + r.zorluk + '</div>' +
+          '</div>' +
+          '<div style="font-size:.85rem;font-weight:700;color:var(--navy)">' + r.views + ' <span style="font-weight:400;font-size:.7rem;color:var(--text-muted)">goruntuleme</span></div>' +
+        '</div>').join('');
+
+    // ── Hava Durumu Korelasyonu ──
+    const weatherCounts = {};
+    events.forEach(ev => {
+      if (ev.weather) {
+        if (!weatherCounts[ev.weather]) weatherCounts[ev.weather] = { total: 0, views: 0, actions: 0, temps: [] };
+        weatherCounts[ev.weather].total++;
+        if (ev.type === 'pageview') weatherCounts[ev.weather].views++;
+        if (ev.type === 'action') weatherCounts[ev.weather].actions++;
+        if (ev.temp != null) weatherCounts[ev.weather].temps.push(ev.temp);
+      }
+    });
+
+    const weatherEmojis = { acik:'☀️', az_bulutlu:'🌤', parcali_bulutlu:'⛅', bulutlu:'☁️', sisli:'🌫', hafif_yagmur:'🌦', yagmurlu:'🌧', yogun_yagmur:'🌧', saganak:'⛈', firtina:'⛈', kar:'🌨', bilinmiyor:'🌡' };
+    const weatherLabels = { acik:'Acik', az_bulutlu:'Az Bulutlu', parcali_bulutlu:'Parcali Bulutlu', bulutlu:'Bulutlu', sisli:'Sisli', hafif_yagmur:'Hafif Yagmur', yagmurlu:'Yagmurlu', yogun_yagmur:'Yogun Yagmur', saganak:'Saganak', firtina:'Firtina', kar:'Kar', bilinmiyor:'Bilinmiyor' };
+    const weatherList = Object.entries(weatherCounts).sort((a, b) => b[1].total - a[1].total);
+    const maxWeather = weatherList.length > 0 ? weatherList[0][1].total : 1;
+
+    const weatherEl = document.getElementById('analytics-weather');
+    if (weatherList.length === 0) {
+      weatherEl.innerHTML = '<div style="text-align:center;color:var(--text-muted)">Henuz hava durumu verisi yok. Veriler biriktikce burada gorunecek.</div>';
+    } else {
+      weatherEl.innerHTML = weatherList.map(([key, val]) => {
+        const avgTemp = val.temps.length > 0 ? Math.round(val.temps.reduce((a,b) => a+b, 0) / val.temps.length) : '—';
+        const pct = Math.round(val.total / maxWeather * 100);
+        return '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">' +
+          '<span style="font-size:1.3rem;width:32px;text-align:center">' + (weatherEmojis[key]||'🌡') + '</span>' +
+          '<div style="flex:1">' +
+            '<div style="display:flex;justify-content:space-between;margin-bottom:4px">' +
+              '<span style="font-size:.82rem;font-weight:600;color:var(--navy)">' + (weatherLabels[key]||key) + '</span>' +
+              '<span style="font-size:.72rem;color:var(--text-muted)">' + avgTemp + '°C ort. · ' + val.total + ' etkinlik</span>' +
+            '</div>' +
+            '<div style="height:8px;border-radius:4px;background:rgba(0,0,0,.04);overflow:hidden">' +
+              '<div style="height:100%;width:' + pct + '%;border-radius:4px;background:linear-gradient(90deg,var(--terra),#D4935A);transition:width .4s"></div>' +
+            '</div>' +
+            '<div style="display:flex;justify-content:space-between;margin-top:3px;font-size:.65rem;color:var(--text-muted)">' +
+              '<span>' + val.views + ' goruntuleme</span>' +
+              '<span>' + val.actions + ' aksiyon</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
 
   } catch(err) {
     console.error('Analytics error:', err);

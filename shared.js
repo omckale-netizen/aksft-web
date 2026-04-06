@@ -2103,17 +2103,35 @@ function renderVenuePage(venueId) {
     }
     const adb = firebase.firestore();
 
-    // Log event with timestamp
+    // Hava durumu cache
+    let _weatherCache = null;
+    function getWeather() {
+      if (_weatherCache) return Promise.resolve(_weatherCache);
+      return fetch('https://api.open-meteo.com/v1/forecast?latitude=39.49&longitude=26.34&current=temperature_2m,weather_code')
+        .then(r => r.json())
+        .then(d => {
+          if (!d.current) return null;
+          const wmo = {0:'acik',1:'az_bulutlu',2:'parcali_bulutlu',3:'bulutlu',45:'sisli',48:'sisli',51:'hafif_yagmur',53:'yagmurlu',55:'yogun_yagmur',61:'yagmurlu',63:'yagmurlu',65:'siddetli_yagmur',71:'kar',80:'saganak',81:'saganak',95:'firtina'};
+          _weatherCache = { temp: Math.round(d.current.temperature_2m), code: d.current.weather_code, label: wmo[d.current.weather_code] || 'bilinmiyor' };
+          return _weatherCache;
+        }).catch(() => null);
+    }
+
+    // Log event with timestamp + weather
     function logEvent(type, target, action) {
       const now = new Date();
-      adb.collection('analytics_events').add({
+      const ev = {
         type: type,
         target: target,
         action: action || 'view',
         timestamp: now.toISOString(),
         date: now.toISOString().split('T')[0],
         hour: now.getHours()
-      }).catch(() => {});
+      };
+      getWeather().then(w => {
+        if (w) { ev.weather = w.label; ev.temp = w.temp; }
+        adb.collection('analytics_events').add(ev).catch(() => {});
+      });
     }
 
     // Track page view (counter + event log)
