@@ -1053,7 +1053,6 @@ window.DATA = {
     },
     {
       "id": "sunaba-kasri-otel",
-      "website": "https://sunabakasriotel.com/",
       "title": "Sunaba Kasrı Otel",
       "emoji": "🏨",
       "category": "konaklama",
@@ -1074,17 +1073,20 @@ window.DATA = {
         "sunaba",
         "kasrı",
         "otel",
-        "konaklama",
-        "butik",
-        "büyükhusun",
-        "havuz",
-        "manzara",
-        "taş ev"
+        "manzaralı",
+        "havuzlu",
+        "butik otel",
+        "doğa",
+        "konaklama"
       ],
       "hours": "Check-in 14:00",
-      "images": [],
+      "images": [
+        "images/mekanlar/sunaba-kasri-otel/1.jpg"
+      ],
       "phone": "0530 946 71 38",
       "address": "Büyükhusun Köyü No:281, Ayvacık / Çanakkale",
+      "website": "https://sunabakasriotel.com/",
+      "featured": false,
       "weeklyHours": [
         {
           "days": "Resepsiyon (Her Gün)",
