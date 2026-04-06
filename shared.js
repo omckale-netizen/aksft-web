@@ -434,6 +434,7 @@ function renderNav(opts = {}) {
             <div class="sd-sync-row">
               <input type="text" id="sd-sync-input" class="sd-sync-inp" placeholder="Kodu yapistirin..." maxlength="8">
               <button class="sd-sync-load" onclick="loadFavCode()">Yukle</button>
+              <button onclick="refreshFavCode()" style="padding:5px 10px;border:1px solid rgba(26,39,68,.12);border-radius:6px;background:#fff;font-size:.78rem;cursor:pointer;color:var(--navy);font-family:inherit;transition:all .15s;" title="Listeyi guncelle">🔄</button>
             </div>
             <div id="sd-sync-status" style="font-size:.72rem;margin-top:6px;min-height:16px;"></div>
           </div>
@@ -672,6 +673,27 @@ function renderNav(opts = {}) {
       }
     } catch(err) {
       if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Yukleme hatasi: ' + err.message + '</span>';
+    }
+  };
+
+  // Mevcut kodu Firebase'den yeniden çek
+  window.refreshFavCode = async function() {
+    const statusEl = document.getElementById('sd-sync-status');
+    const code = getFavCode();
+    if (typeof firebase === 'undefined' || !firebase.firestore) return;
+    if (statusEl) statusEl.innerHTML = '<span style="color:var(--text-muted)">Guncelleniyor...</span>';
+    try {
+      const doc = await firebase.firestore().collection('favorites').doc(code).get();
+      if (doc.exists && doc.data().venues) {
+        localStorage.setItem(SD_KEY, JSON.stringify(doc.data().venues));
+        renderSaveDrawer();
+        window.updateSaveNavCount();
+        if (statusEl) statusEl.innerHTML = '<span style="color:#38A169">✓ Liste guncellendi! ' + doc.data().venues.length + ' mekan.</span>';
+      } else {
+        if (statusEl) statusEl.innerHTML = '<span style="color:var(--text-muted)">Liste zaten guncel.</span>';
+      }
+    } catch(err) {
+      if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Guncelleme hatasi.</span>';
     }
   };
 
