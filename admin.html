@@ -828,6 +828,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
         <div class="panel-card-head"><h3>🌤 Hava Durumu & Ziyaret Iliskisi</h3></div>
         <div id="analytics-weather" style="padding:20px"></div>
       </div>
+
+      <!-- Favori Kodları -->
+      <div class="panel-card" style="margin-top:20px">
+        <div class="panel-card-head"><h3>🔗 Favori Kodlari & Kullanim</h3></div>
+        <div id="analytics-favcodes" style="padding:20px"></div>
+      </div>
     </div>
 
     <!-- ══════ SETTINGS ══════ -->
@@ -1708,6 +1714,58 @@ async function renderAnalytics() {
           '</div>' +
         '</div>';
       }).join('');
+    }
+
+    // ── Favori Kodları İstatistiği ──
+    const favEl = document.getElementById('analytics-favcodes');
+    if (favEl) {
+      try {
+        const favSnap = await db.collection('favorites').get();
+        const favDocs = favSnap.docs.map(d => ({ code: d.id, ...d.data() }));
+        const totalCodes = favDocs.length;
+        const totalFavVenues = favDocs.reduce((s, d) => s + (d.venues?.length || 0), 0);
+        const activeCodes = favDocs.filter(d => d.venues?.length > 0).length;
+        const avgPerCode = totalCodes > 0 ? (totalFavVenues / totalCodes).toFixed(1) : 0;
+
+        // En popüler kaydedilen mekanlar
+        const venueCounts = {};
+        favDocs.forEach(d => {
+          (d.venues || []).forEach(vid => { venueCounts[vid] = (venueCounts[vid] || 0) + 1; });
+        });
+        const topSaved = Object.entries(venueCounts)
+          .map(([id, count]) => {
+            const venue = draftData.venues.find(v => v.id === id);
+            return { id, title: venue ? venue.title : id, emoji: venue ? venue.emoji : '📍', count };
+          })
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 5);
+
+        favEl.innerHTML =
+          '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;text-align:center">' +
+            '<div><div style="font-size:.65rem;color:var(--text-muted);margin-bottom:4px">Toplam Kod</div><div style="font-size:1.4rem;font-weight:800;color:var(--navy)">' + totalCodes + '</div></div>' +
+            '<div><div style="font-size:.65rem;color:var(--text-muted);margin-bottom:4px">Aktif Kod</div><div style="font-size:1.4rem;font-weight:800;color:var(--green)">' + activeCodes + '</div></div>' +
+            '<div><div style="font-size:.65rem;color:var(--text-muted);margin-bottom:4px">Toplam Favori</div><div style="font-size:1.4rem;font-weight:800;color:var(--terra)">' + totalFavVenues + '</div></div>' +
+            '<div><div style="font-size:.65rem;color:var(--text-muted);margin-bottom:4px">Ort. Mekan/Kod</div><div style="font-size:1.4rem;font-weight:800;color:#1A6B8A">' + avgPerCode + '</div></div>' +
+          '</div>' +
+          (topSaved.length > 0 ? '<div style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px">En Cok Kaydedilen Mekanlar</div>' +
+            topSaved.map(v =>
+              '<div class="recent-item">' +
+                '<div class="recent-emoji">' + v.emoji + '</div>' +
+                '<div class="recent-info" style="flex:1"><div class="ri-title">' + v.title + '</div></div>' +
+                '<div style="font-size:.85rem;font-weight:700;color:var(--navy)">' + v.count + ' <span style="font-weight:400;font-size:.7rem;color:var(--text-muted)">kez</span></div>' +
+              '</div>').join('') : '') +
+          (totalCodes > 0 ? '<div style="margin-top:16px;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px">Son Olusturulan Kodlar</div>' +
+            favDocs.sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || '')).slice(0, 8).map(d =>
+              '<div class="recent-item">' +
+                '<div class="recent-emoji">🔗</div>' +
+                '<div class="recent-info" style="flex:1">' +
+                  '<div class="ri-title" style="font-family:monospace;letter-spacing:.15em">' + d.code + '</div>' +
+                  '<div class="ri-meta">' + (d.venues?.length || 0) + ' mekan' + (d.updatedAt ? ' · ' + new Date(d.updatedAt).toLocaleDateString('tr-TR') : '') + '</div>' +
+                '</div>' +
+              '</div>').join('') : '');
+      } catch(e) {
+        favEl.innerHTML = '<div style="color:var(--text-muted);text-align:center">Favori verileri yuklenemedi.</div>';
+      }
     }
 
   } catch(err) {
