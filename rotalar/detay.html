@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rota — Assos'u Keşfet</title>
+  <meta name="description" content="Assos ve Ayvacık rota detayı.">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+<div id="nav-placeholder"></div>
+<div id="route-hero"></div>
+<div id="route-body"></div>
+<div id="footer-placeholder"></div>
+<script src="../firebase-loader.js"></script>
+<script src="../data.js"></script>
+<script src="../shared.js"></script>
+<script>
+function pageInit() {
+  renderNav({ heroMode: false, basePath: '../' });
+  renderFooter({ basePath: '../' });
+
+  const params = new URLSearchParams(window.location.search);
+  let routeId = params.get('id');
+  if (!routeId) routeId = window.location.hash.replace('#', '');
+  if (!routeId) {
+    document.getElementById('route-hero').innerHTML = '';
+    document.getElementById('route-body').innerHTML = '<div style="padding:120px 24px;text-align:center;"><h2 style="font-family:Plus Jakarta Sans,sans-serif;color:#1A2744;margin-bottom:12px;">Rota bulunamadı</h2><p style="color:#718096;margin-bottom:24px;">Lütfen geçerli bir rota seçin.</p><a href="../rotalar.html" style="color:#C4521A;font-weight:600;">← Rotalara Dön</a></div>';
+    return;
+  }
+
+  renderRoutePage(routeId);
+
+  const route = (window.DATA?.routes || []).find(r => r.id === routeId);
+  if (route) {
+    document.title = route.title + ' — Assos\'u Keşfet';
+    const descMeta = document.querySelector('meta[name="description"]');
+    if (descMeta) descMeta.content = route.shortDesc || '';
+  }
+}
+document.addEventListener('dataReady', pageInit);
+</script>
+</body>
+</html>
