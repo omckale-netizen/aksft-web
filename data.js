@@ -1125,7 +1125,9 @@ window.DATA = {
         "kafe"
       ],
       "hours": "",
-      "images": [],
+      "images": [
+        "images/mekanlar/kafe-meraa/1.jpg"
+      ],
       "phone": "0542 724 35 26",
       "address": "küme evleri no:1, 17860 Cemaller/Ayvacık/",
       "website": "",
