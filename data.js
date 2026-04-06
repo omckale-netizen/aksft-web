@@ -878,9 +878,7 @@ window.DATA = {
         "konaklama"
       ],
       "hours": "Check-in 14:00",
-      "images": [
-        "images/mekanlar/kayalar-koy-evi/1.jpg"
-      ],
+      "images": [],
       "phone": "0532 644 83 20",
       "address": "Kayalar Köyü No:3, Ayvacık / Çanakkale",
       "website": "",
