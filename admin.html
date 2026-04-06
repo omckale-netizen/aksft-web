@@ -665,23 +665,24 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
     <!-- ══════ VILLAGES ══════ -->
     <div class="admin-page" id="page-villages">
       <h2>Koyler & Yerler</h2>
-      <p class="page-sub">Koyleri ve ozel yerleri goruntuleyin, gorsel ekleyin.</p>
+      <p class="page-sub">Koyleri ve yerleri yonetin.</p>
       <div class="tabs">
         <button class="tab active" onclick="switchVillageTab('villages')">Koyler</button>
         <button class="tab" onclick="switchVillageTab('places')">Yerler</button>
       </div>
       <div class="panel-card">
+        <div class="panel-card-head">
+          <div class="search-bar" style="flex:1;min-width:160px">
+            <span>&#128269;</span>
+            <input type="text" id="vp-search" placeholder="Ara..." oninput="renderVPTable()">
+          </div>
+          <button class="btn btn-primary" onclick="openVPModal()" style="white-space:nowrap" id="vp-add-btn">+ Yeni Koy Ekle</button>
+        </div>
         <div class="panel-table-wrap">
           <table class="panel-table">
-            <thead>
-              <tr>
-                <th></th>
-                <th>Baslik</th>
-                <th>Kategori</th>
-                <th>Gorsel</th>
-                <th>Islemler</th>
-              </tr>
-            </thead>
+            <thead><tr>
+              <th></th><th>Baslik</th><th id="vp-th-cat">Kategori</th><th id="vp-th-img">Gorsel</th><th>Islemler</th>
+            </tr></thead>
             <tbody id="vp-tbody"></tbody>
           </table>
         </div>
@@ -717,6 +718,66 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
             <button class="btn btn-danger" onclick="removePlaceImage()" id="place-img-remove-btn" style="display:none">Gorseli Kaldir</button>
             <button class="btn btn-primary" onclick="savePlaceImage()">Kaydet</button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VILLAGE/PLACE MODAL -->
+    <div class="modal-overlay" id="vp-modal">
+      <div class="modal" style="max-width:600px">
+        <div class="modal-head">
+          <h3 id="vp-modal-title">Yeni Ekle</h3>
+          <button class="modal-close" onclick="closeVPModal()">&times;</button>
+        </div>
+        <div class="modal-body" style="max-height:75vh;overflow-y:auto">
+          <form id="vp-form" onsubmit="saveVP(event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label>ID</label>
+                <input type="text" id="vpf-id" readonly placeholder="Otomatik">
+              </div>
+              <div class="form-group">
+                <label>Emoji</label>
+                <input type="text" id="vpf-emoji" placeholder="🏛">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Baslik</label>
+              <input type="text" id="vpf-title" required placeholder="Baslik" oninput="autoVPId()">
+            </div>
+            <!-- Category — only for places -->
+            <div class="form-group" id="vpf-cat-group">
+              <label>Kategori</label>
+              <select id="vpf-category">
+                <option value="">Secin</option>
+                <option value="tarihi">Tarihi Alan</option>
+                <option value="koy">Koy</option>
+                <option value="koyu">Köy</option>
+                <option value="iskele">İskele</option>
+              </select>
+            </div>
+            <!-- Location — only for places -->
+            <div class="form-group" id="vpf-loc-group">
+              <label>Konum</label>
+              <input type="text" id="vpf-location" placeholder="Konum">
+            </div>
+            <div class="form-group">
+              <label>Kisa Aciklama</label>
+              <textarea id="vpf-shortDesc" rows="2" placeholder="Kisa tanitim"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Detayli Aciklama</label>
+              <textarea id="vpf-description" rows="3" placeholder="Detayli bilgi"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Etiketler (virgul ile)</label>
+              <input type="text" id="vpf-tags" placeholder="Antik, Manzara, Doğa">
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:24px">
+              <button type="button" class="btn btn-secondary" onclick="closeVPModal()">Iptal</button>
+              <button type="submit" class="btn btn-primary">Kaydet</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -1313,7 +1374,7 @@ function showPage(page) {
   if (page === 'dashboard') renderDashboard();
   if (page === 'venues') renderVenueTable();
   if (page === 'routes') renderRoutesTable();
-  if (page === 'villages') renderVPTable();
+  if (page === 'villages') { switchVillageTab(currentVPTab); }
   if (page === 'export') renderExport();
   if (page === 'bot') { /* static form, no render needed */ }
   if (page === 'analytics') renderAnalytics();
@@ -2366,26 +2427,168 @@ function confirmDeleteRoute(id) {
    VILLAGES & PLACES TABLE
 ══════════════════════════════════════════════════ */
 let currentVPTab = 'villages';
+let editingVPId = null;
 
 function switchVillageTab(tab) {
   currentVPTab = tab;
   document.querySelectorAll('#page-villages .tab').forEach(t => t.classList.remove('active'));
   document.querySelector(`#page-villages .tab[onclick*="${tab}"]`).classList.add('active');
+  const isPlaces = tab === 'places';
+  document.getElementById('vp-th-cat').style.display = isPlaces ? '' : 'none';
+  document.getElementById('vp-th-img').style.display = isPlaces ? '' : 'none';
+  document.getElementById('vp-add-btn').textContent = isPlaces ? '+ Yeni Yer Ekle' : '+ Yeni Koy Ekle';
   renderVPTable();
 }
 
 function renderVPTable() {
   const isPlaces = currentVPTab === 'places';
-  const items = isPlaces ? (draftData.places || []) : (draftData.villages || []);
+  const q = (document.getElementById('vp-search')?.value || '').toLowerCase();
+  let items = isPlaces ? (draftData.places || []) : (draftData.villages || []);
+  if (q) items = items.filter(x => x.title.toLowerCase().includes(q) || (x.shortDesc||'').toLowerCase().includes(q));
+
   document.getElementById('vp-tbody').innerHTML = items.length === 0
     ? '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted)">Veri yok.</td></tr>'
-    : items.map((x, i) => `<tr>
-        <td class="emoji-col">${x.emoji || ''}</td>
-        <td><strong>${x.title}</strong></td>
-        <td><span class="badge badge-cat">${x.category || '-'}</span></td>
-        <td>${x.image ? '<span class="badge badge-open" style="font-size:.65rem">Var</span>' : '<span class="badge" style="color:var(--text-muted);font-size:.65rem">Yok</span>'}</td>
-        <td><button class="btn-icon" title="Gorsel Duzenle" onclick="openPlaceImgModal('${x.id}','${isPlaces ? 'places' : 'villages'}')">&#128247;</button></td>
-      </tr>`).join('');
+    : items.map(x => '<tr>' +
+        '<td class="emoji-col">' + (x.emoji || '') + '</td>' +
+        '<td><strong>' + x.title + '</strong></td>' +
+        '<td style="' + (isPlaces ? '' : 'display:none') + '"><span class="badge badge-cat">' + (x.category || '-') + '</span></td>' +
+        '<td style="' + (isPlaces ? '' : 'display:none') + '">' + (x.image ? '<span class="badge badge-open" style="font-size:.65rem">Var</span>' : '<span class="badge" style="color:var(--text-muted);font-size:.65rem">Yok</span>') + '</td>' +
+        '<td>' +
+          (isPlaces ? '<button class="btn-icon" title="Gorsel" onclick="openPlaceImgModal(\'' + x.id + '\',\'' + (isPlaces ? 'places' : 'villages') + '\')">&#128247;</button>' : '') +
+          '<button class="btn-icon" title="Duzenle" onclick="openVPModal(\'' + x.id + '\')" style="margin-left:4px">&#9998;</button>' +
+          '<button class="btn-icon" title="Sil" onclick="confirmDeleteVP(\'' + x.id + '\')" style="margin-left:4px;color:var(--red)">&#128465;</button>' +
+        '</td>' +
+      '</tr>').join('');
+}
+
+function autoVPId() {
+  if (!editingVPId) {
+    document.getElementById('vpf-id').value = generateId(document.getElementById('vpf-title').value);
+  }
+}
+
+function openVPModal(id) {
+  editingVPId = id || null;
+  const isPlaces = currentVPTab === 'places';
+  const form = document.getElementById('vp-form');
+  form.reset();
+
+  document.getElementById('vpf-cat-group').style.display = isPlaces ? '' : 'none';
+  document.getElementById('vpf-loc-group').style.display = isPlaces ? '' : 'none';
+
+  if (id) {
+    const arr = isPlaces ? draftData.places : draftData.villages;
+    const item = arr.find(x => x.id === id);
+    if (!item) return;
+    document.getElementById('vp-modal-title').textContent = isPlaces ? 'Yer Duzenle' : 'Koy Duzenle';
+    document.getElementById('vpf-id').value = item.id;
+    document.getElementById('vpf-title').value = item.title || '';
+    document.getElementById('vpf-emoji').value = item.emoji || '';
+    document.getElementById('vpf-shortDesc').value = item.shortDesc || '';
+    document.getElementById('vpf-description').value = item.description || '';
+    document.getElementById('vpf-tags').value = (item.tags || []).join(', ');
+    if (isPlaces) {
+      document.getElementById('vpf-category').value = item.category || '';
+      document.getElementById('vpf-location').value = item.location || '';
+    }
+  } else {
+    document.getElementById('vp-modal-title').textContent = isPlaces ? 'Yeni Yer Ekle' : 'Yeni Koy Ekle';
+    document.getElementById('vpf-id').value = '';
+  }
+
+  document.getElementById('vp-modal').classList.add('show');
+}
+
+function closeVPModal() {
+  document.getElementById('vp-modal').classList.remove('show');
+  editingVPId = null;
+}
+
+async function saveVP(e) {
+  e.preventDefault();
+  const isPlaces = currentVPTab === 'places';
+  const id = document.getElementById('vpf-id').value || generateId(document.getElementById('vpf-title').value);
+  const tagsStr = document.getElementById('vpf-tags').value;
+  const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [];
+
+  const item = {
+    id: id,
+    title: document.getElementById('vpf-title').value.trim(),
+    emoji: document.getElementById('vpf-emoji').value.trim() || '📍',
+    shortDesc: document.getElementById('vpf-shortDesc').value.trim(),
+    description: document.getElementById('vpf-description').value.trim(),
+    tags: tags,
+    keywords: [...document.getElementById('vpf-title').value.toLowerCase().split(/\s+/), ...tags.map(t => t.toLowerCase())].filter(Boolean)
+  };
+
+  if (isPlaces) {
+    const category = document.getElementById('vpf-category').value;
+    const PLACE_CAT = {
+      tarihi: { bgGradient:'linear-gradient(135deg,#2A3F6A,#1A2744)', badgeBg:'rgba(26,39,68,0.7)', badgeColor:'#F5EDE0', badgeText:'Antik Alan' },
+      koy: { bgGradient:'linear-gradient(135deg,#1A5060,#0D3040)', badgeBg:'rgba(26,107,138,0.75)', badgeColor:'#fff', badgeText:'Koy' },
+      koyu: { bgGradient:'linear-gradient(135deg,#3A2A1A,#5A3C20)', badgeBg:'rgba(196,82,26,0.75)', badgeColor:'#fff', badgeText:'Köy' },
+      iskele: { bgGradient:'linear-gradient(135deg,#1A3050,#0D2040)', badgeBg:'rgba(26,39,68,0.75)', badgeColor:'#F5EDE0', badgeText:'İskele' },
+    };
+    const catDef = PLACE_CAT[category] || PLACE_CAT.tarihi;
+    Object.assign(item, {
+      category: category,
+      bgGradient: catDef.bgGradient,
+      badgeBg: catDef.badgeBg,
+      badgeColor: catDef.badgeColor,
+      badgeText: catDef.badgeText,
+      location: document.getElementById('vpf-location').value.trim(),
+      image: '',
+      imagePos: 50
+    });
+  } else {
+    Object.assign(item, {
+      category: 'one-cikan',
+      bg: 'linear-gradient(160deg,#1A2744,#243255)',
+      image: ''
+    });
+  }
+
+  const collection = isPlaces ? 'places' : 'villages';
+  const arr = isPlaces ? draftData.places : draftData.villages;
+  const isEdit = !!editingVPId;
+
+  if (isEdit) {
+    const idx = arr.findIndex(x => x.id === editingVPId);
+    if (idx >= 0) {
+      arr[idx] = { ...arr[idx], ...item };
+      await db.collection(collection).doc(item.id).set(arr[idx]);
+    }
+  } else {
+    if (arr.some(x => x.id === item.id)) {
+      showToast('Bu ID zaten var.', 'error');
+      return;
+    }
+    arr.push(item);
+    await db.collection(collection).doc(item.id).set(item);
+  }
+
+  closeVPModal();
+  renderVPTable();
+  showToast('"' + item.title + '" ' + (isEdit ? 'guncellendi.' : 'eklendi.'), 'success');
+}
+
+async function confirmDeleteVP(id) {
+  const isPlaces = currentVPTab === 'places';
+  const arr = isPlaces ? draftData.places : draftData.villages;
+  const item = arr.find(x => x.id === id);
+  if (!item) return;
+  const collection = isPlaces ? 'places' : 'villages';
+  showConfirm(
+    (isPlaces ? 'Yer' : 'Koy') + ' Silinecek',
+    '"' + item.title + '" silinecek. Emin misiniz?',
+    async () => {
+      if (isPlaces) draftData.places = draftData.places.filter(x => x.id !== id);
+      else draftData.villages = draftData.villages.filter(x => x.id !== id);
+      await db.collection(collection).doc(id).delete();
+      renderVPTable();
+      showToast('"' + item.title + '" silindi.', 'success');
+    }
+  );
 }
 
 /* ══════════════════════════════════════════════════
@@ -2686,12 +2889,16 @@ document.getElementById('route-modal').addEventListener('click', function(e) {
 document.getElementById('confirm-overlay').addEventListener('click', function(e) {
   if (e.target === this) closeConfirm();
 });
+document.getElementById('vp-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeVPModal();
+});
 
 /* ESC key */
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
     if (document.getElementById('confirm-overlay').classList.contains('show')) closeConfirm();
     else if (document.getElementById('route-modal').classList.contains('show')) closeRouteModal();
+    else if (document.getElementById('vp-modal').classList.contains('show')) closeVPModal();
     else if (document.getElementById('place-img-modal').classList.contains('show')) closePlaceImgModal();
     else if (document.getElementById('venue-modal').classList.contains('show')) closeVenueModal();
   }
