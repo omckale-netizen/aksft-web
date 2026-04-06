@@ -237,6 +237,15 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 .crop-container:hover .crop-hint,.crop-container:active .crop-hint{opacity:1}
 .crop-safe-zone{position:absolute;inset:0;border:2px dashed rgba(255,255,255,.35);border-radius:var(--radius-sm);pointer-events:none}
 .btn-sm{padding:6px 12px;font-size:.75rem}
+
+/* ── STOP ROWS ── */
+.stop-row{background:rgba(0,0,0,.02);border:1px solid rgba(0,0,0,.06);border-radius:var(--radius-sm);padding:14px;margin-bottom:8px;position:relative}
+.stop-row-head{display:flex;gap:8px;margin-bottom:8px;align-items:center}
+.stop-row-head input{flex:1}
+.stop-row-body textarea{width:100%;margin-top:6px}
+.stop-row-remove{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:50%;background:rgba(229,62,62,.1);border:none;color:var(--red);cursor:pointer;font-size:.8rem;display:flex;align-items:center;justify-content:center}
+.stop-row-remove:hover{background:var(--red);color:#fff}
+.stop-row-num{width:28px;height:28px;border-radius:50%;background:var(--terra);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -600,9 +609,16 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 
     <!-- ══════ ROUTES ══════ -->
     <div class="admin-page" id="page-routes">
-      <h2>Rotalar</h2>
-      <p class="page-sub">Tum rotalari goruntuleyin. (Salt okunur)</p>
+      <h2>Rota Yonetimi</h2>
+      <p class="page-sub">Rotalari goruntuleyin, duzenleyin veya yeni rota ekleyin.</p>
       <div class="panel-card">
+        <div class="panel-card-head">
+          <div class="search-bar" style="flex:1;min-width:160px">
+            <span>&#128269;</span>
+            <input type="text" id="route-search" placeholder="Rota ara..." oninput="renderRoutesTable()">
+          </div>
+          <button class="btn btn-primary" onclick="openRouteModal()" style="white-space:nowrap">+ Yeni Rota Ekle</button>
+        </div>
         <div class="panel-table-wrap">
           <table class="panel-table">
             <thead>
@@ -612,6 +628,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
                 <th>Sure</th>
                 <th>Zorluk</th>
                 <th>Durak</th>
+                <th>Islemler</th>
               </tr>
             </thead>
             <tbody id="routes-tbody"></tbody>
@@ -904,6 +921,95 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 
         <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:24px">
           <button type="button" class="btn btn-secondary" onclick="closeVenueModal()">Iptal</button>
+          <button type="submit" class="btn btn-primary">Kaydet</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ROUTE MODAL -->
+<div class="modal-overlay" id="route-modal">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-head">
+      <h3 id="route-modal-title">Yeni Rota Ekle</h3>
+      <button class="modal-close" onclick="closeRouteModal()">&times;</button>
+    </div>
+    <div class="modal-body" style="max-height:75vh;overflow-y:auto">
+      <form id="route-form" onsubmit="saveRoute(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label>ID</label>
+            <input type="text" id="rf-id" readonly placeholder="Otomatik">
+          </div>
+          <div class="form-group">
+            <label>Emoji</label>
+            <input type="text" id="rf-emoji" placeholder="🏛">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Rota Adi</label>
+          <input type="text" id="rf-title" required placeholder="Rota adi" oninput="autoRouteId()">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Sure</label>
+            <input type="text" id="rf-sure" placeholder="6-8 saat">
+          </div>
+          <div class="form-group">
+            <label>Zorluk</label>
+            <select id="rf-zorluk">
+              <option value="Çok Kolay">Çok Kolay</option>
+              <option value="Kolay" selected>Kolay</option>
+              <option value="Orta">Orta</option>
+              <option value="Zor">Zor</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tempo</label>
+            <input type="text" id="rf-tempo" placeholder="Aktif, Dinlendirici...">
+          </div>
+          <div class="form-group">
+            <label>Hedef Kitle</label>
+            <input type="text" id="rf-hedef" placeholder="Tüm ziyaretçiler için">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Etiket</label>
+            <input type="text" id="rf-tag" placeholder="⭐ Popüler">
+          </div>
+          <div class="form-group">
+            <label>Sezon</label>
+            <input type="text" id="rf-season" placeholder="Tüm mevsimler">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Kisa Aciklama</label>
+          <textarea id="rf-shortDesc" rows="2" placeholder="Kisa tanitim"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Detayli Aciklama</label>
+          <textarea id="rf-description" rows="3" placeholder="Detayli bilgi"></textarea>
+        </div>
+
+        <!-- DURAKLAR -->
+        <div class="form-group">
+          <label>Duraklar</label>
+          <div id="rf-stops"></div>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="addStopRow()" style="margin-top:8px">+ Durak Ekle</button>
+        </div>
+
+        <!-- İPUÇLARI -->
+        <div class="form-group">
+          <label>Ipuclari (her satira bir ipucu)</label>
+          <textarea id="rf-tips" rows="3" placeholder="Her satira bir ipucu yazin"></textarea>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:24px">
+          <button type="button" class="btn btn-secondary" onclick="closeRouteModal()">Iptal</button>
           <button type="submit" class="btn btn-primary">Kaydet</button>
         </div>
       </form>
@@ -1528,19 +1634,181 @@ function confirmDeleteVenue(id) {
 }
 
 /* ══════════════════════════════════════════════════
-   ROUTES TABLE
+   ROUTES TABLE & CRUD
 ══════════════════════════════════════════════════ */
 function renderRoutesTable() {
-  const routes = draftData.routes || [];
+  const q = (document.getElementById('route-search')?.value || '').toLowerCase();
+  const routes = q
+    ? (draftData.routes || []).filter(r => r.title.toLowerCase().includes(q) || (r.zorluk||'').toLowerCase().includes(q))
+    : (draftData.routes || []);
   document.getElementById('routes-tbody').innerHTML = routes.length === 0
-    ? '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted)">Rota yok.</td></tr>'
+    ? '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">Rota yok.</td></tr>'
     : routes.map(r => `<tr>
         <td class="emoji-col">${r.emoji || ''}</td>
         <td><strong>${r.title}</strong></td>
         <td>${r.sure || '-'}</td>
         <td>${r.zorluk || '-'}</td>
         <td>${r.durak || (r.stops||[]).length}</td>
+        <td>
+          <a class="btn-icon" href="rotalar/rota-detay.html?id=${r.id}" target="_blank" title="Rotayi Gor" style="text-decoration:none">&#128065;</a>
+          <button class="btn-icon" title="Duzenle" onclick="openRouteModal('${r.id}')" style="margin-left:4px">&#9998;</button>
+          <button class="btn-icon" title="Sil" onclick="confirmDeleteRoute('${r.id}')" style="margin-left:4px;color:var(--red)">&#128465;</button>
+        </td>
       </tr>`).join('');
+}
+
+let editingRouteId = null;
+
+function autoRouteId() {
+  if (!editingRouteId) {
+    document.getElementById('rf-id').value = generateId(document.getElementById('rf-title').value);
+  }
+}
+
+function addStopRow(data) {
+  const container = document.getElementById('rf-stops');
+  const num = container.children.length + 1;
+  const div = document.createElement('div');
+  div.className = 'stop-row';
+  div.innerHTML = `
+    <button type="button" class="stop-row-remove" onclick="this.parentElement.remove();renumberStops()">\u00d7</button>
+    <div class="stop-row-head">
+      <span class="stop-row-num">${num}</span>
+      <input type="text" class="sr-emoji" value="${(data?.emoji)||''}" placeholder="\ud83c\udfdb" style="max-width:50px">
+      <input type="text" class="sr-title" value="${(data?.title)||''}" placeholder="Durak adi" required>
+      <input type="text" class="sr-duration" value="${(data?.duration)||''}" placeholder="~1 saat" style="max-width:100px">
+    </div>
+    <textarea class="sr-desc" rows="2" placeholder="Durak aciklamasi">${(data?.desc)||''}</textarea>
+    <textarea class="sr-tip" rows="1" placeholder="Ipucu (opsiyonel)" style="margin-top:4px">${(data?.tip)||''}</textarea>
+  `;
+  container.appendChild(div);
+}
+
+function renumberStops() {
+  document.querySelectorAll('#rf-stops .stop-row').forEach((row, i) => {
+    row.querySelector('.stop-row-num').textContent = i + 1;
+  });
+}
+
+function openRouteModal(id) {
+  editingRouteId = id || null;
+  const form = document.getElementById('route-form');
+  form.reset();
+  document.getElementById('rf-stops').innerHTML = '';
+
+  if (id) {
+    const r = draftData.routes.find(x => x.id === id);
+    if (!r) return;
+    document.getElementById('route-modal-title').textContent = 'Rota Duzenle';
+    document.getElementById('rf-id').value = r.id;
+    document.getElementById('rf-title').value = r.title || '';
+    document.getElementById('rf-emoji').value = r.emoji || '';
+    document.getElementById('rf-sure').value = r.sure || '';
+    document.getElementById('rf-zorluk').value = r.zorluk || 'Kolay';
+    document.getElementById('rf-tempo').value = r.tempo || '';
+    document.getElementById('rf-hedef').value = r.hedefKitle || '';
+    document.getElementById('rf-tag').value = r.tag || '';
+    document.getElementById('rf-season').value = r.season || '';
+    document.getElementById('rf-shortDesc').value = r.shortDesc || '';
+    document.getElementById('rf-description').value = r.description || '';
+    document.getElementById('rf-tips').value = (r.tips || []).join('\n');
+    (r.stops || []).forEach(s => addStopRow(s));
+  } else {
+    document.getElementById('route-modal-title').textContent = 'Yeni Rota Ekle';
+    document.getElementById('rf-id').value = '';
+    addStopRow();
+  }
+
+  document.getElementById('route-modal').classList.add('show');
+}
+
+function closeRouteModal() {
+  document.getElementById('route-modal').classList.remove('show');
+  editingRouteId = null;
+}
+
+async function saveRoute(e) {
+  e.preventDefault();
+  const id = document.getElementById('rf-id').value || generateId(document.getElementById('rf-title').value);
+
+  // Gather stops
+  const stopRows = document.querySelectorAll('#rf-stops .stop-row');
+  const stops = [];
+  stopRows.forEach((row, i) => {
+    const title = row.querySelector('.sr-title').value.trim();
+    if (title) {
+      stops.push({
+        no: i + 1,
+        title: title,
+        emoji: row.querySelector('.sr-emoji').value.trim() || '\ud83d\udccd',
+        duration: row.querySelector('.sr-duration').value.trim(),
+        desc: row.querySelector('.sr-desc').value.trim(),
+        tip: row.querySelector('.sr-tip').value.trim()
+      });
+    }
+  });
+
+  const tipsText = document.getElementById('rf-tips').value.trim();
+  const tips = tipsText ? tipsText.split('\n').map(t => t.trim()).filter(Boolean) : [];
+
+  const route = {
+    id: id,
+    title: document.getElementById('rf-title').value.trim(),
+    emoji: document.getElementById('rf-emoji').value.trim() || '\ud83d\uddfa',
+    tag: document.getElementById('rf-tag').value.trim(),
+    tagColor: 'rgba(196,82,26,0.3)',
+    tagTextColor: '#E8A07A',
+    headerBg: 'linear-gradient(135deg,rgba(196,82,26,0.35) 0%,rgba(212,100,40,0.15) 100%)',
+    glowColor: '#C4521A',
+    sure: document.getElementById('rf-sure').value.trim(),
+    durak: stops.length,
+    zorluk: document.getElementById('rf-zorluk').value,
+    tempo: document.getElementById('rf-tempo').value.trim(),
+    hedefKitle: document.getElementById('rf-hedef').value.trim(),
+    shortDesc: document.getElementById('rf-shortDesc').value.trim(),
+    description: document.getElementById('rf-description').value.trim(),
+    stops: stops,
+    tips: tips,
+    relatedVenues: [],
+    season: document.getElementById('rf-season').value.trim(),
+    keywords: []
+  };
+  route.keywords = [...route.title.toLowerCase().split(/\s+/), route.zorluk.toLowerCase()].filter(Boolean);
+
+  const isEdit = !!editingRouteId;
+  if (isEdit) {
+    const idx = draftData.routes.findIndex(r => r.id === editingRouteId);
+    if (idx >= 0) {
+      draftData.routes[idx] = { ...draftData.routes[idx], ...route };
+      await db.collection('routes').doc(route.id).set(draftData.routes[idx]);
+    }
+  } else {
+    if (draftData.routes.some(r => r.id === route.id)) {
+      showToast('Bu ID ile baska bir rota zaten var.', 'error');
+      return;
+    }
+    draftData.routes.push(route);
+    await db.collection('routes').doc(route.id).set(route);
+  }
+
+  closeRouteModal();
+  renderRoutesTable();
+  showToast('"' + route.title + '" ' + (isEdit ? 'guncellendi.' : 'eklendi.'), 'success');
+}
+
+function confirmDeleteRoute(id) {
+  const r = draftData.routes.find(x => x.id === id);
+  if (!r) return;
+  showConfirm(
+    'Rota Silinecek',
+    '"' + r.title + '" rotasini silmek istediginize emin misiniz?',
+    async () => {
+      draftData.routes = draftData.routes.filter(x => x.id !== id);
+      await db.collection('routes').doc(id).delete();
+      renderRoutesTable();
+      showToast('"' + r.title + '" silindi.', 'success');
+    }
+  );
 }
 
 /* ══════════════════════════════════════════════════
@@ -1861,6 +2129,9 @@ document.getElementById('venue-modal').addEventListener('click', function(e) {
 document.getElementById('place-img-modal').addEventListener('click', function(e) {
   if (e.target === this) closePlaceImgModal();
 });
+document.getElementById('route-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeRouteModal();
+});
 document.getElementById('confirm-overlay').addEventListener('click', function(e) {
   if (e.target === this) closeConfirm();
 });
@@ -1869,6 +2140,7 @@ document.getElementById('confirm-overlay').addEventListener('click', function(e)
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
     if (document.getElementById('confirm-overlay').classList.contains('show')) closeConfirm();
+    else if (document.getElementById('route-modal').classList.contains('show')) closeRouteModal();
     else if (document.getElementById('place-img-modal').classList.contains('show')) closePlaceImgModal();
     else if (document.getElementById('venue-modal').classList.contains('show')) closeVenueModal();
   }
