@@ -25,17 +25,26 @@ html{font-size:15px}
 body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh}
 
 /* ── AUTH GATE ── */
-#auth-gate{position:fixed;inset:0;z-index:9999;background:var(--navy);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px}
+#auth-gate{position:fixed;inset:0;z-index:9999;background:linear-gradient(150deg,#06101E 0%,#0C1A30 55%,#091420 100%);display:flex;align-items:center;justify-content:center;flex-direction:column}
 #auth-gate.hidden{display:none}
-.auth-box{background:var(--navy-light);border-radius:var(--radius);padding:48px 40px;text-align:center;max-width:380px;width:90%}
-.auth-box h1{color:#fff;font-size:1.5rem;margin-bottom:6px}
-.auth-box p{color:var(--text-muted);font-size:.85rem;margin-bottom:28px}
-.auth-box input{width:100%;padding:12px 16px;border:2px solid rgba(255,255,255,.1);border-radius:var(--radius-sm);background:rgba(255,255,255,.05);color:#fff;font-size:1rem;font-family:inherit;outline:none;transition:border .2s}
-.auth-box input:focus{border-color:var(--terra)}
-.auth-box input::placeholder{color:var(--text-muted)}
-.auth-box button{margin-top:16px;width:100%;padding:12px;border:none;border-radius:var(--radius-sm);background:var(--terra);color:#fff;font-size:1rem;font-weight:600;font-family:inherit;cursor:pointer;transition:background .2s}
-.auth-box button:hover{background:var(--terra-light)}
-.auth-err{color:var(--red);font-size:.82rem;margin-top:12px;min-height:20px}
+#auth-gate::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(245,237,224,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(245,237,224,.02) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+.auth-orb{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none}
+.auth-orb-1{width:400px;height:400px;background:rgba(196,82,26,.12);top:-100px;left:-80px}
+.auth-orb-2{width:300px;height:300px;background:rgba(26,107,138,.1);bottom:-80px;right:-60px}
+.auth-box{position:relative;z-index:1;background:rgba(255,255,255,.04);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:48px 40px;text-align:center;max-width:400px;width:90%;box-shadow:0 24px 64px rgba(0,0,0,.3)}
+.auth-logo{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--terra),#D4682E);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:1.4rem;color:#fff;font-weight:800;box-shadow:0 8px 24px rgba(196,82,26,.3)}
+.auth-box h1{color:#F5EDE0;font-size:1.4rem;font-weight:800;margin-bottom:4px;letter-spacing:-.02em}
+.auth-box .auth-sub{color:rgba(245,237,224,.35);font-size:.82rem;margin-bottom:32px}
+.auth-field{position:relative;margin-bottom:14px;text-align:left}
+.auth-field label{display:block;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(245,237,224,.35);margin-bottom:6px}
+.auth-field input{width:100%;padding:12px 16px 12px 42px;border:1.5px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.04);color:#F5EDE0;font-size:.92rem;font-family:inherit;outline:none;transition:border .2s,background .2s}
+.auth-field input:focus{border-color:var(--terra);background:rgba(255,255,255,.07)}
+.auth-field input::placeholder{color:rgba(245,237,224,.2)}
+.auth-field-icon{position:absolute;left:14px;bottom:13px;color:rgba(245,237,224,.3);font-size:.9rem}
+.auth-btn{margin-top:20px;width:100%;padding:13px;border:none;border-radius:12px;background:var(--terra);color:#fff;font-size:.95rem;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(196,82,26,.3)}
+.auth-btn:hover{background:var(--terra-light);transform:translateY(-1px);box-shadow:0 8px 24px rgba(196,82,26,.4)}
+.auth-err{color:#F87171;font-size:.78rem;margin-top:14px;min-height:18px}
+.auth-footer{margin-top:24px;font-size:.68rem;color:rgba(245,237,224,.2)}
 
 /* ── LAYOUT ── */
 .admin-wrap{display:flex;min-height:100vh}
@@ -231,12 +240,25 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 
 <!-- AUTH GATE -->
 <div id="auth-gate">
+  <div class="auth-orb auth-orb-1"></div>
+  <div class="auth-orb auth-orb-2"></div>
   <div class="auth-box">
+    <div class="auth-logo">A</div>
     <h1>Assos'u Kesfet</h1>
-    <p>Yonetim paneline erisim icin sifrenizi girin.</p>
-    <input type="password" id="auth-pw" placeholder="Sifre" onkeydown="if(event.key==='Enter')checkAuth()">
-    <button onclick="checkAuth()">Giris</button>
+    <p class="auth-sub">Yonetim paneline giris yapin</p>
+    <div class="auth-field">
+      <label>E-posta</label>
+      <span class="auth-field-icon">✉</span>
+      <input type="email" id="auth-email" placeholder="E-posta adresiniz" onkeydown="if(event.key==='Enter')document.getElementById('auth-pw').focus()">
+    </div>
+    <div class="auth-field">
+      <label>Sifre</label>
+      <span class="auth-field-icon">🔒</span>
+      <input type="password" id="auth-pw" placeholder="Sifreniz" onkeydown="if(event.key==='Enter')checkAuth()">
+    </div>
+    <button class="auth-btn" onclick="checkAuth()">Giris Yap</button>
     <div class="auth-err" id="auth-err"></div>
+    <div class="auth-footer">Assos'u Kesfet &middot; Yonetim Paneli</div>
   </div>
 </div>
 
@@ -910,6 +932,7 @@ const ORIGINAL_DATA = JSON.parse(JSON.stringify(window.DATA));
 let draftData = JSON.parse(JSON.stringify(window.DATA));
 /* Şifre hash olarak saklanır — kaynak kodda açık şifre yok */
 let PW_HASH = 'ce35f32ce1444d606709acc3ec7a3341137922f08d45f2433ba99ad07cf27e90';
+const EMAIL_HASH = 'a6f69b7c705aa7c6abade5fd3f7af0856e5e00272560c0b90e055944e0ec453d';
 async function sha256(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
@@ -1039,18 +1062,31 @@ function uploadImageToServer(blob, path) {
    AUTH
 ══════════════════════════════════════════════════ */
 async function checkAuth() {
+  const email = (document.getElementById('auth-email').value || '').trim().toLowerCase();
   const pw = document.getElementById('auth-pw').value;
-  const hash = await sha256(pw);
-  if (hash === PW_HASH) {
-    API_KEY = pw;
-    localStorage.setItem('_ak', pw);
-    localStorage.setItem('admin_auth', 'true');
-    document.getElementById('auth-gate').classList.add('hidden');
-    document.getElementById('admin-wrap').style.display = 'flex';
-    initApp();
-  } else {
-    document.getElementById('auth-err').textContent = 'Yanlis sifre. Tekrar deneyin.';
+  const errEl = document.getElementById('auth-err');
+
+  if (!email) { errEl.textContent = 'E-posta adresinizi girin.'; return; }
+  if (!pw) { errEl.textContent = 'Sifrenizi girin.'; return; }
+
+  const emailHash = await sha256(email);
+  const pwHash = await sha256(pw);
+
+  if (emailHash !== EMAIL_HASH) {
+    errEl.textContent = 'E-posta adresi hatali.';
+    return;
   }
+  if (pwHash !== PW_HASH) {
+    errEl.textContent = 'Sifre hatali.';
+    return;
+  }
+
+  API_KEY = pw;
+  localStorage.setItem('_ak', pw);
+  localStorage.setItem('admin_auth', 'true');
+  document.getElementById('auth-gate').classList.add('hidden');
+  document.getElementById('admin-wrap').style.display = 'flex';
+  initApp();
 }
 
 function logout() {
