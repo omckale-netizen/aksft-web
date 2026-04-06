@@ -688,8 +688,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
             <input type="text" id="f-id" readonly placeholder="Otomatik olusturulur">
           </div>
           <div class="form-group">
-            <label>Emoji</label>
-            <input type="text" id="f-emoji" placeholder="&#9749;">
+            <label>Emoji <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(kategoriye gore otomatik)</span></label>
+            <input type="text" id="f-emoji" placeholder="Otomatik secilir" readonly style="cursor:default">
           </div>
         </div>
         <div class="form-group">
@@ -699,19 +699,91 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
         <div class="form-row">
           <div class="form-group">
             <label>Kategori</label>
-            <select id="f-category" required>
+            <select id="f-category" required onchange="autoCatEmoji()">
               <option value="">Secin</option>
-              <option value="kafe">Kafe</option>
-              <option value="restoran">Restoran</option>
-              <option value="kahvalti">Kahvalti</option>
-              <option value="konaklama">Konaklama</option>
-              <option value="beach">Beach</option>
-              <option value="iskele">Iskele</option>
+              <option value="kafe">☕ Kafe</option>
+              <option value="restoran">🍽 Restoran</option>
+              <option value="kahvalti">🥚 Kahvalti</option>
+              <option value="konaklama">🏨 Konaklama</option>
+              <option value="beach">🏖 Beach</option>
+              <option value="iskele">⚓ Iskele</option>
             </select>
           </div>
           <div class="form-group">
             <label>Konum</label>
-            <input type="text" id="f-location" placeholder="orn: Behramkale Koyu">
+            <input type="text" id="f-location" list="konum-list" placeholder="Konum secin veya yazin">
+            <datalist id="konum-list">
+              <option value="Behramkale Köyü">
+              <option value="Adatepe Köyü">
+              <option value="Babakale">
+              <option value="Kayalar Köyü">
+              <option value="Büyükhusun Köyü">
+              <option value="Küçükhusun Köyü">
+              <option value="Gülpınar">
+              <option value="Erecek Köyü">
+              <option value="Ahmetçe Köyü">
+              <option value="Tuzla Köyü">
+              <option value="Güzelköy">
+              <option value="Babadere Köyü">
+              <option value="Kösedere Köyü">
+              <option value="Sazlı Köyü">
+              <option value="Ahmetler Köyü">
+              <option value="Nusratlı Köyü">
+              <option value="Pınardere Köyü">
+              <option value="Keçikaya Köyü">
+              <option value="Bademli Köyü">
+              <option value="Kızılkeçili Köyü">
+              <option value="Çamkalabak Köyü">
+              <option value="Arıklı Köyü">
+              <option value="Yukarıköy">
+              <option value="Çırpılar Köyü">
+              <option value="Köylüce Köyü">
+              <option value="Tuztaşı Köyü">
+              <option value="Yeşilyurt Köyü">
+              <option value="Kozlu Köyü">
+              <option value="Balıklı Köyü">
+              <option value="Çamlıca Köyü">
+              <option value="Dalyan Köyü">
+              <option value="Şapköy">
+              <option value="Tabaklar Köyü">
+              <option value="Nebiler Köyü">
+              <option value="Yeniköy">
+              <option value="Taşağıl Köyü">
+              <option value="Çiftlik Köyü">
+              <option value="Korubaşı Köyü">
+              <option value="Kıyıköy">
+              <option value="Sarıkız Köyü">
+              <option value="Tokatlı Köyü">
+              <option value="Yenice Köyü">
+              <option value="Çamyayla Köyü">
+              <option value="Kavakköy">
+              <option value="Karanlık Köyü">
+              <option value="İnciralan Köyü">
+              <option value="Koyunevi Köyü">
+              <option value="Muratlar Köyü">
+              <option value="Yaylacık Köyü">
+              <option value="Çınarlı Köyü">
+              <option value="Ortaoba Köyü">
+              <option value="Aliçetin Köyü">
+              <option value="Bektaş Köyü">
+              <option value="Çaltı Köyü">
+              <option value="Danişment Köyü">
+              <option value="Helvacılar Köyü">
+              <option value="Kadıköy">
+              <option value="Kestanelik Köyü">
+              <option value="Koyunköy">
+              <option value="Mıhlı Köyü">
+              <option value="Paşaköy">
+              <option value="Sevketiye Köyü">
+              <option value="Taşboğaz Köyü">
+              <option value="Tongurlu Köyü">
+              <option value="Yenimahalle Köyü">
+              <option value="Assos Antik Liman">
+              <option value="Kadırga Koyu">
+              <option value="Sivrice Koyu">
+              <option value="Ayvacık Merkez">
+              <option value="Küçükkuyu">
+            </datalist>
           </div>
         </div>
         <div class="form-group">
@@ -1230,6 +1302,15 @@ function commitVenuePage(id, title, shortDesc) {
     .catch(err => showToast('Sayfa olusturma hatasi: ' + err.message, 'error'));
 }
 
+const CAT_EMOJIS = { kafe:'☕', restoran:'🍽', kahvalti:'🥚', konaklama:'🏨', beach:'🏖', iskele:'⚓' };
+
+function autoCatEmoji() {
+  const cat = document.getElementById('f-category').value;
+  if (cat && CAT_EMOJIS[cat]) {
+    document.getElementById('f-emoji').value = CAT_EMOJIS[cat];
+  }
+}
+
 function autoId() {
   if (!editingVenueId) {
     document.getElementById('f-id').value = generateId(document.getElementById('f-title').value);
@@ -1250,6 +1331,7 @@ function openVenueModal(id) {
     document.getElementById('f-id').value = v.id;
     document.getElementById('f-title').value = v.title || '';
     document.getElementById('f-emoji').value = v.emoji || '';
+    document.getElementById('f-emoji').readOnly = false;
     document.getElementById('f-category').value = v.category || '';
     document.getElementById('f-shortDesc').value = v.shortDesc || '';
     document.getElementById('f-description').value = v.description || '';
@@ -1264,6 +1346,7 @@ function openVenueModal(id) {
   } else {
     document.getElementById('modal-title').textContent = 'Yeni Mekan Ekle';
     document.getElementById('f-id').value = '';
+    document.getElementById('f-emoji').readOnly = true;
     addWhRow('', '');
   }
 
