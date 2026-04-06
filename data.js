@@ -1118,10 +1118,19 @@ window.DATA = {
       "shortDesc": "Assos’un Cemaller Köyü’nde saklı bir durak: Kafe Mera.Taş duvarların içinde, sıcak bir ışık, sakin bir ortam ve gerçekten keyifli kahveler…Şehrin gürültüsünden uzak,kahvenin tadını gerçekten hissettiğiniz o nadir yerlerden biri.",
       "description": "",
       "location": "Cemaller Köyü",
-      "tags": [],
+      "tags": [
+        "sakin",
+        "huzurlu",
+        "doğa",
+        "köy"
+      ],
       "keywords": [
         "kafe",
         "mera",
+        "sakin",
+        "huzurlu",
+        "doğa",
+        "köy",
         "kafe"
       ],
       "hours": "",
@@ -1129,7 +1138,7 @@ window.DATA = {
         "images/mekanlar/kafe-meraa/1.jpg"
       ],
       "phone": "0542 724 35 26",
-      "address": "küme evleri no:1, 17860 Cemaller/Ayvacık/",
+      "address": "Küme evleri no:1, 17860 Cemaller/Ayvacık/",
       "website": "",
       "featured": true,
       "weeklyHours": [
