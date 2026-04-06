@@ -587,20 +587,24 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 
     <!-- ══════ EXPORT ══════ -->
     <div class="admin-page" id="page-export">
-      <h2>Disa Aktar</h2>
-      <p class="page-sub">Yaptaginiz degisiklikleri data.js dosyasi olarak indirin.</p>
+      <h2>Yayinla & Disa Aktar</h2>
+      <p class="page-sub">Degisiklikleriniz otomatik olarak sunucuya kaydedilir.</p>
       <div class="export-section">
+        <div class="export-info" style="background:rgba(56,161,105,.06);border:1.5px solid rgba(56,161,105,.15);border-radius:var(--radius);padding:20px">
+          <h4 style="color:var(--green)">✓ Otomatik Kayit Aktif</h4>
+          <p>Mekan ekleme, duzenleme, silme ve gorsel yukleme islemleriniz aninda sunucuya kaydedilir. Ek bir islem yapmaniza gerek yok.</p>
+        </div>
         <div class="export-info">
           <h4>Degisiklik Ozeti</h4>
           <p id="export-summary">Henuz degisiklik yok.</p>
         </div>
         <div class="export-info">
-          <h4>Nasil Calisir?</h4>
-          <p>Yaptaginiz tum degisiklikler tarayicinin yerel deposunda (localStorage) taslak olarak saklanir. "data.js Indir" butonuna bastiginizda, guncellenm is veri dosyasi bilgisayariniza indirilir. Bu dosyayi sunucunuzdaki mevcut data.js ile degistirmeniz yeterlidir.</p>
+          <h4>Manuel Islemler</h4>
+          <p>Yedek almak veya sorun durumunda kullanmak icin asagidaki butonlari kullanabilirsiniz.</p>
         </div>
         <div class="export-btns">
-          <button class="btn btn-primary" onclick="exportDataJS()">&#128229; data.js Indir</button>
-          <button class="btn btn-primary" onclick="exportImages()" style="margin-left:10px">&#128247; Görselleri İndir</button>
+          <button class="btn btn-primary" onclick="forceSaveToServer()">🔄 Sunucuya Tekrar Kaydet</button>
+          <button class="btn btn-secondary" onclick="exportDataJS()">&#128229; data.js Indir (Yedek)</button>
           <button class="btn btn-danger" onclick="confirmReset()">&#128465; Degisiklikleri Sifirla</button>
         </div>
       </div>
@@ -736,10 +740,41 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
    DATA MANAGEMENT
 ══════════════════════════════════════════════════ */
 const ORIGINAL_DATA = JSON.parse(JSON.stringify(window.DATA));
-let draftData = JSON.parse(localStorage.getItem('admin_draft_data') || 'null') || JSON.parse(JSON.stringify(window.DATA));
+let draftData = JSON.parse(JSON.stringify(window.DATA));
+const API_KEY = 'assos2026';
 
 function saveDraft() {
-  localStorage.setItem('admin_draft_data', JSON.stringify(draftData));
+  // Sunucuya kaydet
+  fetch('api/save.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key: API_KEY, data: draftData })
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (res.error) { showToast('Kayit hatasi: ' + res.error, 'error'); }
+  })
+  .catch(err => {
+    // Fallback: localStorage'a kaydet
+    localStorage.setItem('admin_draft_data', JSON.stringify(draftData));
+    console.warn('Sunucu baglantisi yok, yerel kayit yapildi.', err);
+  });
+}
+
+function uploadImageToServer(blob, path) {
+  return new Promise((resolve, reject) => {
+    const form = new FormData();
+    form.append('image', blob, path.split('/').pop());
+    form.append('path', path);
+    form.append('key', API_KEY);
+    fetch('api/upload.php', { method: 'POST', body: form })
+      .then(r => r.json())
+      .then(res => {
+        if (res.error) reject(res.error);
+        else resolve(res);
+      })
+      .catch(reject);
+  });
 }
 
 /* ══════════════════════════════════════════════════
@@ -1046,14 +1081,11 @@ function saveVenue(e) {
   const newImgPaths = pendingImages.map((img, i) => `images/mekanlar/${venueId}/${existingImgs.length + i + 1}.jpg`);
   const allImages = [...existingImgs, ...newImgPaths];
 
-  // Store pending images for download
+  // Görselleri sunucuya yükle
   if (pendingImages.length > 0) {
-    if (!window._pendingImageExports) window._pendingImageExports = [];
     pendingImages.forEach((img, i) => {
-      window._pendingImageExports.push({
-        path: `images/mekanlar/${venueId}/${existingImgs.length + i + 1}.jpg`,
-        blob: img.blob
-      });
+      const path = `images/mekanlar/${venueId}/${existingImgs.length + i + 1}.jpg`;
+      uploadImageToServer(img.blob, path).catch(err => console.warn('Gorsel yukleme hatasi:', err));
     });
   }
   pendingImages = [];
@@ -1318,8 +1350,7 @@ function savePlaceImage() {
     const folder = editingPlaceType === 'villages' ? 'koyler' : 'yerler';
     const imgPath = 'images/' + folder + '/' + editingPlaceId + '.jpg';
     p.image = imgPath;
-    if (!window._pendingImageExports) window._pendingImageExports = [];
-    window._pendingImageExports.push({ path: imgPath, blob: pendingPlaceImage.blob });
+    uploadImageToServer(pendingPlaceImage.blob, imgPath).catch(err => console.warn('Gorsel yukleme hatasi:', err));
   }
 
   p.imagePos = Math.round(cropPosY);
@@ -1380,6 +1411,20 @@ function renderExport() {
   document.getElementById('export-summary').innerHTML = summary;
 }
 
+function forceSaveToServer() {
+  fetch('api/save.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key: API_KEY, data: draftData })
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (res.success) showToast('Sunucuya basariyla kaydedildi.', 'success');
+    else showToast('Hata: ' + (res.error || 'Bilinmeyen'), 'error');
+  })
+  .catch(err => showToast('Sunucu baglantisi kurulamadi.', 'error'));
+}
+
 function exportDataJS() {
   const content = 'window.DATA = ' + JSON.stringify(draftData, null, 2) + ';\n';
   const blob = new Blob([content], { type: 'text/javascript' });
@@ -1390,7 +1435,7 @@ function exportDataJS() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(a.href);
-  showToast('data.js dosyasi indirildi.', 'success');
+  showToast('data.js yedek olarak indirildi.', 'success');
 }
 
 function confirmReset() {
@@ -1848,8 +1893,7 @@ function pbotAddPlace() {
   if (pbotPendingImage) {
     const imgPath = 'images/yerler/' + id + '.jpg';
     place.image = imgPath;
-    if (!window._pendingImageExports) window._pendingImageExports = [];
-    window._pendingImageExports.push({ path: imgPath, blob: pbotPendingImage.blob });
+    uploadImageToServer(pbotPendingImage.blob, imgPath).catch(err => console.warn('Gorsel yukleme hatasi:', err));
   }
 
   draftData.places.push(place);
