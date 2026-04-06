@@ -1222,7 +1222,7 @@ function renderRoutePage(routeId) {
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
           Rotalar
         </a>
-        <button class="rp-share-hero" onclick="rpShare('${routeId}','${encodeURIComponent(r.title)}','${encodeURIComponent(r.shortDesc)}')">
+        <button class="rp-share-hero" id="rp-share-btn">
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
           Paylaş
         </button>
@@ -1286,6 +1286,14 @@ function renderRoutePage(routeId) {
         </div>
       </div>
     </div>`;
+
+  // Paylaş butonu event listener
+  const shareBtn = document.getElementById('rp-share-btn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', function() {
+      rpShare(routeId, encodeURIComponent(r.title), encodeURIComponent(r.shortDesc));
+    });
+  }
 
   scrollFadeIn();
 }
