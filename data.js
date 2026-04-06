@@ -1138,7 +1138,7 @@ window.DATA = {
       "phone": "0542 724 35 26",
       "address": "Küme evleri no:1, 17860 Cemaller/Ayvacık/Çanakkale",
       "website": "",
-      "featured": true,
+      "featured": false,
       "weeklyHours": [
         {
           "days": "Perşembe - Pazar",
