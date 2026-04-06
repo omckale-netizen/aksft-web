@@ -424,14 +424,13 @@ function renderNav(opts = {}) {
               <span style="font-size:1.1rem;">🔗</span>
               <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);">Kesif Listenizi Paylasin</span>
             </div>
-            <div class="sd-sync-hint" style="margin-bottom:12px;">Bu kod sizin Assos rotaniz! Arkadaslariniza gonderin, ayni listeyi gorsunler. Baska bir cihazdan da erisebilirsiniz.</div>
+            <div class="sd-sync-hint" style="margin-bottom:12px;">Bu kod sizin Assos rotaniz! Arkadaslariniza gonderin, ayni listeyi gorsunler. Baska cihaziniza aktarmak icin de kullanabilirsiniz.</div>
             <div class="sd-sync-row" style="margin-bottom:10px;">
               <span class="sd-sync-label">Kodunuz</span>
               <span class="sd-sync-code" id="sd-sync-code" onclick="navigator.clipboard.writeText(this.textContent).then(()=>{this.dataset.tip='Kopyalandi!';setTimeout(()=>this.dataset.tip='',1500)})">—</span>
               <button onclick="navigator.clipboard.writeText(document.getElementById('sd-sync-code').textContent).then(()=>{this.textContent='Kopyalandi!';setTimeout(()=>this.textContent='Kopyala',1500)})" style="padding:5px 10px;border:1px solid rgba(26,39,68,.12);border-radius:6px;background:#fff;font-size:.68rem;font-weight:600;cursor:pointer;color:var(--navy);font-family:inherit;transition:all .15s;">Kopyala</button>
             </div>
             <div style="height:1px;background:rgba(26,39,68,.06);margin:10px 0;"></div>
-            <div class="sd-sync-hint" style="margin-bottom:6px;">Baskasinin listesini yukleme</div>
             <div class="sd-sync-row">
               <input type="text" id="sd-sync-input" class="sd-sync-inp" placeholder="Kodu yapistirin..." maxlength="8">
               <button class="sd-sync-load" onclick="loadFavCode()">Yukle</button>
