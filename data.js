@@ -508,8 +508,8 @@ window.DATA = {
         "tarih",
         "ege"
       ],
-      "image": "",
-      "imagePos": 50
+      "image": "images/yerler/assos-antik-liman.jpg",
+      "imagePos": 44
     },
     {
       "id": "kadirga-koyu",
