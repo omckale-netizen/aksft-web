@@ -1377,33 +1377,81 @@ function renderVenuePage(venueId) {
     'sivrice-beach':        ['🥾 Yürüyüş patikası bitişiğinde','💧 Soğuk içecek ve su temini','🌊 Kristal berrak koy manzarası','🌿 Tamamen doğal ve minimal'],
     'sunaba-kasri-otel':   ['🏨 Taş mimarili butik otel','🏊 Yetişkin ve çocuk havuzları','🌅 Ege Denizi ve Midilli manzarası','🍳 Serpme köy kahvaltısı dahil'],
   };
-  /* ── Tag → emoji eşleştirme ── */
-  const TAG_EMOJI = {
-    'manzaralı':'🌅','manzara':'🌅','deniz kenarı':'🌊','deniz':'🌊','köy içinde':'🏘','köy':'🏘',
-    'gün batımı':'🌅','sakin':'🤫','sessiz':'🤫','huzur':'🤫','iskele':'⚓','liman':'⚓',
-    'taş ev':'🪨','organik':'🌿','doğa':'🌿','doğal':'🌿','plaj':'🏖','sahil':'🏖',
-    'fotoğraf':'📸','kahve':'☕','çay':'☕','kahvaltı':'🍳','serpme':'🍳',
-    'balık':'🐟','deniz ürünleri':'🐟','taze':'🐟','zeytinyağlı':'🫒','zeytin':'🫒','ege mutfağı':'🫒',
-    'tarihi':'🏛','antik':'🏛','tapınak':'🏛','kale':'🏰',
-    'havuzlu':'🏊','havuz':'🏊','butik':'🏨','butik otel':'🏨','konaklama':'🏨',
-    'yürüyüş':'🥾','patika':'🥾','kamp':'⛺','wifi':'📶',
-    'romantik':'💕','aile':'👨‍👩‍👧‍👦','çocuk':'👶','evcil hayvan':'🐾',
-    'müzik':'🎵','canlı müzik':'🎵','bar':'🍸','kokteyl':'🍸',
-    'yerel':'🤝','otantik':'🤝','köy kahvaltısı':'🍳','peynir':'🧀','reçel':'🍯',
-    'teras':'☀️','bahçe':'🌳','manzaralı teras':'🌅',
-    'otopark':'🅿️','ücretsiz':'✓','klima':'❄️','internet':'📶',
-    'koy':'🌊','berrak':'💎','kristal':'💎','gizli':'🤫',
-    'popüler':'⭐','öne çıkan':'⭐','önerilen':'⭐',
+  /* ── Tag → cümle üreteci ── */
+  const TAG_SENTENCES = {
+    'manzaralı':     ['🌅 Eşsiz manzarası ile nefes kesici bir deneyim sunar','🌅 Manzara eşliğinde unutulmaz anlar yaşarsınız'],
+    'manzara':       ['🌅 Gözlerinizi alamayacağınız bir panorama','🌅 Her açıdan kartpostal gibi bir manzara'],
+    'deniz kenarı':  ['🌊 Denizin hemen yanı başında huzurlu bir ortam','🌊 Dalgaların sesi eşliğinde keyifli vakit geçirin'],
+    'deniz':         ['🌊 Ege\'nin masmavi sularına nazır konumda','🌊 Deniz manzarası eşliğinde ferahlayın'],
+    'köy içinde':    ['🏘 Köyün kalbinde, otantik taş sokakların arasında','🏘 Gerçek köy yaşamını yakından hissedin'],
+    'köy':           ['🏘 Yerel köy atmosferini doyasıya yaşayın','🏘 Taş döşeli sokaklarda zaman yolculuğu'],
+    'gün batımı':    ['🌅 Ege\'ye batan güneşi izlemek için ideal nokta','🌅 Günü muhteşem bir gün batımıyla uğurlayın'],
+    'sakin':         ['🤫 Kalabalıktan uzak, huzur dolu bir atmosfer','🤫 Sessizliğin ve dinginliğin tadını çıkarın'],
+    'sessiz':        ['🤫 Şehrin gürültüsünden uzakta, tam bir huzur','🤫 Kuş sesleri dışında hiçbir şey duymayın'],
+    'huzur':         ['🤫 İç huzurunuzu bulacağınız nadir yerlerden','🤫 Stresten arınmak için biçilmiş kaftan'],
+    'iskele':        ['⚓ Ahşap iskele üzerinde denize karşı oturun','⚓ Balıkçı teknelerini seyrederek keyif yapın'],
+    'liman':         ['⚓ Tarihi limanın büyüleyici atmosferini yaşayın','⚓ Antik çağlardan kalma rıhtımda vakit geçirin'],
+    'taş ev':        ['🪨 Restore edilmiş otantik taş mimaride konaklayın','🪨 Tarihi taş yapının sıcaklığını hissedin'],
+    'organik':       ['🌿 Tamamen organik ve doğal ürünlerle hazırlanmış','🌿 Sağlıklı ve doğal lezzetlerin adresi'],
+    'doğa':          ['🌿 Doğayla iç içe, yeşillikler arasında huzur bulun','🌿 Doğanın kucağında unutulmaz bir deneyim'],
+    'doğal':         ['🌿 Doğallığını korumuş eşsiz bir atmosfer','🌿 Yapay olmayan, gerçek bir Ege deneyimi'],
+    'plaj':          ['🏖 Güneş, kum ve denizin tadını çıkarın','🏖 Yaz günlerinin en güzel adresi'],
+    'sahil':         ['🏖 Sahil boyunca uzanan muhteşem bir konum','🏖 Kumsalın keyfini doyasıya yaşayın'],
+    'fotoğraf':      ['📸 Fotoğraf tutkunları için kaçırılmaz kareler','📸 Her köşesi Instagram\'lık bir mekan'],
+    'kahve':         ['☕ Özenle hazırlanan kahvenin tadını çıkarın','☕ Ege esintisinde mükemmel bir kahve molası'],
+    'çay':           ['☕ Doğal bitki çaylarıyla ferahlayın','☕ Yerel otlardan demlenen çaylar sizi bekliyor'],
+    'kahvaltı':      ['🍳 Sabahın en güzel hali, köy kahvaltısıyla başlar','🍳 Unutulmaz bir Ege kahvaltısı deneyimi'],
+    'serpme':        ['🍳 Zengin serpme kahvaltı ile güne enerji dolu başlayın','🍳 Yerel lezzetlerle dolu serpme kahvaltı'],
+    'balık':         ['🐟 Günlük taze avlanmış balığın en lezzetli hali','🐟 Denizden sofraya taze balık keyfi'],
+    'deniz ürünleri':['🐟 Ege\'nin en taze deniz ürünleri burada','🐟 Balık ve deniz mahsullerinin en iyisi'],
+    'taze':          ['🐟 Her gün taze ürünlerle hazırlanan lezzetler','🌿 Tazeliğin ve doğallığın buluşma noktası'],
+    'zeytinyağlı':   ['🫒 Ege zeytinyağıyla hazırlanan geleneksel tatlar','🫒 Zeytinyağlı mutfağın en özel adresi'],
+    'zeytin':        ['🫒 Yerel zeytinliklerin aromasını hissedin','🫒 Bölgenin meşhur zeytinlerini tadın'],
+    'ege mutfağı':   ['🫒 Ege mutfağının en otantik lezzetleri burada','🫒 Yerel malzemelerle hazırlanan Ege yemekleri'],
+    'tarihi':        ['🏛 Binlerce yıllık tarihin izlerini keşfedin','🏛 Antik çağların büyüleyici atmosferi'],
+    'antik':         ['🏛 Antik kalıntılar arasında zamanda yolculuk yapın','🏛 Tarihe dokunabileceğiniz nadir yerlerden'],
+    'havuzlu':       ['🏊 Havuz keyfiyle serinleyin ve rahatlayın','🏊 Yetişkin ve çocuk havuzlarında eğlenceli vakit'],
+    'havuz':         ['🏊 Manzaralı havuzda serinlemenin tadını çıkarın','🏊 Sıcak günlerde havuz keyfi sizi bekliyor'],
+    'butik':         ['🏨 Butik ve özel bir konaklama deneyimi','🏨 Her detayı düşünülmüş, kişiye özel hizmet'],
+    'butik otel':    ['🏨 Taş mimaride butik otel konforunu yaşayın','🏨 Küçük ama özenli, sıcak bir konaklama'],
+    'yürüyüş':      ['🥾 Doğa yürüyüşü için mükemmel bir başlangıç noktası','🥾 Patikalar boyunca keşfetmenin keyfini çıkarın'],
+    'romantik':      ['💕 Çiftler için romantik ve özel bir atmosfer','💕 Sevdiklerinizle unutulmaz anlar biriktirin'],
+    'aile':          ['👨‍👩‍👧‍👦 Ailece keyifli vakit geçireceğiniz bir mekan','👨‍👩‍👧‍👦 Çocuklar ve yetişkinler için ideal ortam'],
+    'yerel':         ['🤝 Yerel halkın uğrak noktası, samimi atmosfer','🤝 Gerçek yerel kültürü deneyimleyin'],
+    'otantik':       ['🤝 Otantik dokusu korunmuş, gerçek bir Ege mekanı','🤝 Zamanın değiştiremediği otantik bir atmosfer'],
+    'teras':         ['☀️ Açık terasında güneşin ve manzaranın tadını çıkarın','☀️ Teras keyfi eşliğinde Ege\'yi seyredin'],
+    'bahçe':         ['🌳 Yeşillikler içinde huzurlu bir bahçe ortamı','🌳 Bahçede doğayla iç içe keyifli anlar'],
+    'koy':           ['🌊 Berrak sularıyla büyüleyen saklı bir koy','🌊 Ege\'nin en temiz sularında yüzme keyfi'],
+    'berrak':        ['💎 Kristal berraklığındaki sularda yüzün','💎 Dipten görebileceğiniz tertemiz deniz'],
+    'gizli':         ['🤫 Çoğu kişinin bilmediği saklı bir cennet','🤫 Keşfedilmeyi bekleyen gizli bir hazine'],
+    'popüler':       ['⭐ Bölgenin en çok tercih edilen adreslerinden','⭐ Ziyaretçilerin vazgeçilmez favorisi'],
+    'canlı müzik':   ['🎵 Canlı müzik eşliğinde keyifli bir akşam','🎵 Müziğin ritmiyle akan hoş bir atmosfer'],
+    'bar':           ['🍸 Akşam keyfini özel kokteyller ile taçlandırın','🍸 Günbatımı eşliğinde bir kadeh kaldırın'],
+    'peynir':        ['🧀 Yerel çiftlik peynirlerinin eşsiz lezzeti','🧀 Bölgenin en iyi peynirlerini tadın'],
   };
-  function tagToEmoji(tag) {
-    const lower = tag.toLowerCase().trim();
-    if (TAG_EMOJI[lower]) return TAG_EMOJI[lower];
-    for (const [key, emoji] of Object.entries(TAG_EMOJI)) {
-      if (lower.includes(key) || key.includes(lower)) return emoji;
+  function generateHighlights(tags) {
+    if (!tags || tags.length === 0) return [];
+    const used = new Set();
+    const result = [];
+    for (const tag of tags) {
+      if (result.length >= 4) break;
+      const lower = tag.toLowerCase().trim();
+      let sentences = TAG_SENTENCES[lower];
+      if (!sentences) {
+        for (const [key, val] of Object.entries(TAG_SENTENCES)) {
+          if (lower.includes(key) || key.includes(lower)) { sentences = val; break; }
+        }
+      }
+      if (sentences) {
+        const pick = sentences[result.length % sentences.length];
+        if (!used.has(pick)) { result.push(pick); used.add(pick); }
+      } else {
+        result.push('✦ ' + tag.charAt(0).toUpperCase() + tag.slice(1));
+      }
     }
-    return '✦';
+    return result;
   }
-  const highlights = HIGHLIGHTS[v.id] || (v.tags||[]).map(t => tagToEmoji(t) + ' ' + t);
+  const highlights = HIGHLIGHTS[v.id] || generateHighlights(v.tags);
 
   /* ── Related data ── */
   const similar      = DATA.venues.filter(x => x.id !== v.id && x.category === v.category).slice(0,6);
