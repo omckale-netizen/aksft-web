@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Assos'u Planla — Assos'u Keşfet</title>
   <meta name="description" content="Assos gezini planla. Süre, ilgi alanı ve grup türüne göre kişiselleştirilmiş rota ve mekan önerileri.">
-  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     /* ── PLANLA HERO ── */
     @keyframes planHeroOrb { 0%,100%{transform:translateY(0) scale(1);} 50%{transform:translateY(-22px) scale(1.05);} }
@@ -758,7 +757,7 @@ function pageInit() {
   window.buildPlan = buildPlan;
   window.resetPlan = resetPlan;
 }
-document.addEventListener('dataReady', pageInit);
+pageInit();
 </script>
 </body>
 </html>

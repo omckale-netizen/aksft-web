@@ -221,7 +221,7 @@ function pageInit() {
   renderFooter();
   scrollFadeIn();
 }
-document.addEventListener('dataReady', pageInit);
+pageInit();
 
 async function submitContact(e) {
   e.preventDefault();

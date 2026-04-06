@@ -2,6 +2,8 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Assos'u Keşfet — Assos'un İlk ve Tek Keşif Platformu</title>
   <meta name="description" content="Assos ve Ayvacık bölgesinde gezilecek yerler, rotalar, köyler ve mekanlar. Assos'un ilk ve tek keşif platformu. Çanakkale / Ayvacık.">
@@ -16,9 +18,8 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Lora:ital,wght@1,400;1,500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 
-  <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
     :root {
@@ -1936,7 +1937,7 @@ function pageInit() {
   window.filterVenues = filterVenues;
   window.toggleGuide = toggleGuide;
 }
-document.addEventListener('dataReady', pageInit);
+pageInit();
 </script>
 
 </body>
