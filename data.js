@@ -508,7 +508,8 @@ window.DATA = {
         "tarih",
         "ege"
       ],
-      "image": ""
+      "image": "images/yerler/assos-antik-liman.jpg",
+      "imagePos": 44
     },
     {
       "id": "kadirga-koyu",
@@ -869,19 +870,20 @@ window.DATA = {
         "sakin"
       ],
       "keywords": [
-        "konaklama",
-        "taş ev",
+        "kayalar",
         "köy",
-        "butik",
+        "evi",
+        "köy içinde",
+        "taş ev",
         "sakin",
-        "doğa",
-        "bahçe",
-        "kayalar"
+        "konaklama"
       ],
       "hours": "Check-in 14:00",
       "images": [],
       "phone": "0532 644 83 20",
       "address": "Kayalar Köyü No:3, Ayvacık / Çanakkale",
+      "website": "",
+      "featured": false,
       "weeklyHours": [
         {
           "days": "Resepsiyon (Her Gün)",
