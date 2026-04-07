@@ -370,9 +370,11 @@ function doSearch() {
   const msgEl = document.getElementById('search-msg');
 
   if (!q) {
-    // Boş arama — tümünü göster
     markers.forEach(({marker}) => marker.setOpacity(1));
-    msgEl.classList.remove('show');
+    msgEl.innerHTML = 'Lütfen bir mekan veya yer adı yazın';
+    msgEl.className = 'map-search-msg show not-found';
+    clearTimeout(msgEl._timer);
+    msgEl._timer = setTimeout(() => msgEl.classList.remove('show'), 2500);
     return;
   }
 
