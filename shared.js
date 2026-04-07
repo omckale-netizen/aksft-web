@@ -7,7 +7,7 @@
 function escAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 /* ── Site logo (Firebase'den veya lokal fallback) ── */
-var SITE_LOGO = 'logo/logo.png';
+var SITE_LOGO = '';
 (function loadSiteLogo() {
   if (typeof firebase !== 'undefined' && firebase.firestore) {
     firebase.firestore().collection('settings').doc('site').get().then(function(doc) {
