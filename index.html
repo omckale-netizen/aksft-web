@@ -776,6 +776,43 @@
       color: rgba(245,237,224,.2);
       font-weight: 500;
     }
+    .hero-mini-stats {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin-top: 32px;
+    }
+    .hero-mini-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 24px;
+    }
+    .hero-mini-num {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: 1.3rem;
+      color: rgba(245,237,224,.7);
+      line-height: 1;
+    }
+    .hero-mini-label {
+      font-size: .6rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(245,237,224,.2);
+      margin-top: 4px;
+    }
+    .hero-mini-sep {
+      width: 1px;
+      height: 28px;
+      background: rgba(245,237,224,.08);
+    }
+    @media(max-width:640px) {
+      .hero-mini-stat { padding: 0 16px; }
+      .hero-mini-num { font-size: 1.1rem; }
+    }
 
 
     /* Bottom glass nav tiles */
@@ -927,6 +964,29 @@
             <button class="hero-search-btn" aria-label="Arama yap" onclick="heroSearchSubmit()">Keşfet</button>
           </div>
           <p class="hero-search-hint">Rotalar, mekanlar, köyler ve tarihi alanlar arasında arayın</p>
+        </div>
+
+        <!-- Mini stats -->
+        <div class="hero-mini-stats">
+          <div class="hero-mini-stat">
+            <span class="hero-mini-num" id="hstat-routes">—</span>
+            <span class="hero-mini-label">Rota</span>
+          </div>
+          <div class="hero-mini-sep"></div>
+          <div class="hero-mini-stat">
+            <span class="hero-mini-num" id="hstat-venues">—</span>
+            <span class="hero-mini-label">Mekan</span>
+          </div>
+          <div class="hero-mini-sep"></div>
+          <div class="hero-mini-stat">
+            <span class="hero-mini-num" id="hstat-places">—</span>
+            <span class="hero-mini-label">Yer</span>
+          </div>
+          <div class="hero-mini-sep"></div>
+          <div class="hero-mini-stat">
+            <span class="hero-mini-num" id="hstat-villages">—</span>
+            <span class="hero-mini-label">Köy</span>
+          </div>
         </div>
 
       </div>
@@ -1655,7 +1715,7 @@
 
 <script src="firebase-loader.js"></script>
 <script src="data.js"></script>
-<script src="shared.js?v=18"></script>
+<script src="shared.js?v=19"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: true });
@@ -1915,6 +1975,15 @@ function pageInit() {
     if (rotalar && DATA.routes)  rotalar.textContent  = DATA.routes.length + '+';
     if (mekanlar && DATA.venues) mekanlar.textContent = DATA.venues.length + '+';
     if (yerler && DATA.places)   yerler.textContent   = DATA.places.length + '+';
+    // Mini hero stats
+    const hr = document.getElementById('hstat-routes');
+    const hv = document.getElementById('hstat-venues');
+    const hp = document.getElementById('hstat-places');
+    const hvl = document.getElementById('hstat-villages');
+    if (hr && DATA.routes) hr.textContent = DATA.routes.length;
+    if (hv && DATA.venues) hv.textContent = DATA.venues.filter(v => v.active !== false).length;
+    if (hp && DATA.places) hp.textContent = DATA.places.length;
+    if (hvl && DATA.villages) hvl.textContent = DATA.villages.length;
   })();
 
   /* ── HP VENUE GRIDS ── */
