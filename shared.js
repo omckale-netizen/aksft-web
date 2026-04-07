@@ -682,6 +682,9 @@ function renderNav(opts = {}) {
     }
     localStorage.removeItem(SD_KEY);
     localStorage.removeItem(SD_PLACE_KEY);
+    // Kendi orijinal koduna geri dön (başkasının kodu kaldırılır)
+    localStorage.removeItem(FAV_CODE_KEY);
+    localStorage.removeItem('assos_last_loaded_code');
     window._sdFilter = 'all';
     renderSaveDrawer();
     window.updateSaveNavCount();
