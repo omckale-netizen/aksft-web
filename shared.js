@@ -662,15 +662,21 @@ function renderNav(opts = {}) {
           <span style="font-size:.6rem;font-weight:700;padding:1px 7px;border-radius:999px;background:${m.catBg};color:${m.catC};">${items.length}</span>
           <div style="flex:1;height:1px;background:rgba(26,39,68,.08);"></div>
         </div>`;
-      const cards = items.map(v => `
+      const cards = items.map(v => {
+        const hasPhoto = v.images && v.images.length > 0;
+        const imgStyle = hasPhoto
+          ? 'background:url(' + v.images[0] + ') center/cover no-repeat;'
+          : 'background:' + m.g + ';';
+        return `
         <a class="sd-venue" href="${getMekanPath(v.id)}">
-          <div class="sd-venue-img" style="background:${m.g};">${v.emoji}</div>
+          <div class="sd-venue-img" style="${imgStyle}">${hasPhoto ? '' : v.emoji}</div>
           <div class="sd-venue-info">
             <div class="sd-venue-name">${v.title}</div>
             <div class="sd-venue-loc">📍 ${v.location}</div>
           </div>
           <button class="sd-venue-remove" onclick="removeSave('${escAttr(v.id)}',event)" aria-label="Kaldır">✕</button>
-        </a>`).join('');
+        </a>`;
+      }).join('');
       return header + cards;
     }).join('');
 
