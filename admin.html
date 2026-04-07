@@ -3219,22 +3219,23 @@ async function saveVP(e) {
       iskele: { bgGradient:'linear-gradient(135deg,#1A3050,#0D2040)', badgeBg:'rgba(26,39,68,0.75)', badgeColor:'#F5EDE0', badgeText:'İskele' },
     };
     const catDef = PLACE_CAT[category] || PLACE_CAT.tarihi;
-    Object.assign(item, {
+    const placePatch = {
       category: category,
       bgGradient: catDef.bgGradient,
       badgeBg: catDef.badgeBg,
       badgeColor: catDef.badgeColor,
       badgeText: catDef.badgeText,
       location: document.getElementById('vpf-location').value.trim(),
-      image: '',
-      imagePos: 50
-    });
+    };
+    if (!editingVPId) { placePatch.image = ''; placePatch.imagePos = 50; }
+    Object.assign(item, placePatch);
   } else {
-    Object.assign(item, {
+    const villagePatch = {
       category: 'one-cikan',
       bg: 'linear-gradient(160deg,#1A2744,#243255)',
-      image: ''
-    });
+    };
+    if (!editingVPId) { villagePatch.image = ''; }
+    Object.assign(item, villagePatch);
   }
 
   const collection = isPlaces ? 'places' : 'villages';
