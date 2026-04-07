@@ -529,6 +529,7 @@ function renderNav(opts = {}) {
               <button onclick="refreshFavCode()" style="padding:5px 10px;border:1px solid rgba(26,39,68,.12);border-radius:6px;background:#fff;font-size:.78rem;cursor:pointer;color:var(--navy);font-family:inherit;transition:all .15s;" title="Listeyi guncelle">🔄</button>
             </div>
             <div id="sd-sync-status" style="font-size:.72rem;margin-top:6px;min-height:16px;"></div>
+            <div id="sd-last-code" style="font-size:.65rem;color:rgba(26,39,68,.3);margin-top:4px;"></div>
           </div>
           <div style="margin-top:12px;">
             <button class="sd-clear-btn" onclick="clearAllSaves()">Tumunu Temizle</button>
@@ -589,10 +590,12 @@ function renderNav(opts = {}) {
     } catch {}
   };
 
+  const MAX_PLACE_SAVES = 10;
   window.togglePlaceSave = function (id, e) {
     if (e) { e.preventDefault(); e.stopPropagation(); }
     try {
       const saved = new Set(JSON.parse(localStorage.getItem(SD_PLACE_KEY) || '[]'));
+      if (!saved.has(id) && saved.size >= MAX_PLACE_SAVES) { alert('En fazla ' + MAX_PLACE_SAVES + ' yer kaydedebilirsiniz.'); return; }
       if (saved.has(id)) saved.delete(id); else saved.add(id);
       localStorage.setItem(SD_PLACE_KEY, JSON.stringify([...saved]));
       // Buton güncelle
@@ -613,10 +616,12 @@ function renderNav(opts = {}) {
     try { return new Set(JSON.parse(localStorage.getItem(SD_KEY) || '[]')).has(id); } catch { return false; }
   };
 
+  const MAX_VENUE_SAVES = 20;
   window.toggleVenueSave = function (id, e) {
     if (e) { e.preventDefault(); e.stopPropagation(); }
     try {
       const saved = new Set(JSON.parse(localStorage.getItem(SD_KEY) || '[]'));
+      if (!saved.has(id) && saved.size >= MAX_VENUE_SAVES) { alert('En fazla ' + MAX_VENUE_SAVES + ' mekan kaydedebilirsiniz.'); return; }
       if (saved.has(id)) saved.delete(id); else saved.add(id);
       localStorage.setItem(SD_KEY, JSON.stringify([...saved]));
       document.querySelectorAll('.venue-save-btn[data-id="' + id + '"]').forEach(function(btn) {
@@ -735,6 +740,11 @@ function renderNav(opts = {}) {
     // Kodu her zaman göster
     const codeEl = document.getElementById('sd-sync-code');
     if (codeEl) codeEl.textContent = getFavCode();
+    // Son yüklenen kodu göster
+    const lastCode = localStorage.getItem('assos_last_loaded_code');
+    const lastCodeEl = document.getElementById('sd-last-code');
+    if (lastCodeEl && lastCode && lastCode !== getFavCode()) lastCodeEl.textContent = 'Son yuklenen kod: ' + lastCode;
+    else if (lastCodeEl) lastCodeEl.textContent = '';
 
     if (totalCount === 0) {
       body.innerHTML = `
@@ -881,6 +891,10 @@ function renderNav(opts = {}) {
     if (!code || code.length < 4) { if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Gecerli bir kod girin.</span>'; return; }
     if (code === getFavCode()) { if (statusEl) statusEl.innerHTML = '<span style="color:#718096">Bu zaten sizin kodunuz.</span>'; return; }
     if (typeof firebase === 'undefined' || !firebase.firestore) { if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Baglanti hatasi.</span>'; return; }
+    // Mevcut liste varsa onay iste
+    let hasExisting = false;
+    try { hasExisting = JSON.parse(localStorage.getItem(SD_KEY) || '[]').length > 0 || JSON.parse(localStorage.getItem(SD_PLACE_KEY) || '[]').length > 0; } catch {}
+    if (hasExisting && !confirm('Mevcut favori listeniz silinecek ve yeni liste yuklenecek. Devam etmek istiyor musunuz?')) { if (statusEl) statusEl.innerHTML = ''; return; }
     if (statusEl) statusEl.innerHTML = '<span style="color:var(--text-muted)">Yukleniyor...</span>';
     try {
       const doc = await firebase.firestore().collection('favorites').doc(code).get();
@@ -893,6 +907,8 @@ function renderNav(opts = {}) {
       localStorage.setItem(SD_KEY, JSON.stringify(data.venues || []));
       localStorage.setItem(SD_PLACE_KEY, JSON.stringify(data.places || []));
       localStorage.setItem(FAV_CODE_KEY, code);
+      localStorage.setItem('assos_last_loaded_code', code);
+      window._sdFilter = 'all';
       renderSaveDrawer();
       window.updateSaveNavCount();
       if (input) input.value = '';
@@ -2549,6 +2565,7 @@ function renderVenuePage(venueId) {
 
   window.vpToggleSave = function () {
     const saved = getSaved();
+    if (!saved.has(v.id) && saved.size >= 20) { alert('En fazla 20 mekan kaydedebilirsiniz.'); return; }
     if (saved.has(v.id)) saved.delete(v.id); else saved.add(v.id);
     localStorage.setItem(SAVE_KEY, JSON.stringify([...saved]));
     const isSavedNow = saved.has(v.id);
