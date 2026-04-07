@@ -5,3 +5,10 @@ node_modules/
 migrate-to-firebase.html
 sync-to-firebase.html
 sync-from-firebase.html
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
