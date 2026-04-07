@@ -12,8 +12,6 @@
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-storage-compat.js" crossorigin="anonymous" integrity="sha384-5RO7AQJ51T1u3BV84KGn4xVulsFE2gbaUebkDJe5jPVSm0+NN34/wzUp/vZugodK"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-check-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -1515,14 +1513,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
             </datalist>
           </div>
         </div>
-        <!-- Koordinat Secici -->
         <div class="form-group">
-          <label>Harita Konumu <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(haritaya tiklayarak secin)</span></label>
-          <div class="form-row" style="margin-bottom:8px">
-            <input type="text" id="f-lat" placeholder="Enlem (lat)" style="flex:1" oninput="updateMiniMapMarker()">
-            <input type="text" id="f-lng" placeholder="Boylam (lng)" style="flex:1" oninput="updateMiniMapMarker()">
-          </div>
-          <div id="f-minimap" style="height:200px;border-radius:var(--radius-sm);border:1px solid rgba(0,0,0,.1);overflow:hidden"></div>
+          <label>Koordinat <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(Google Maps'ten kopyala: 39.4907, 26.3380)</span></label>
+          <input type="text" id="f-coords" placeholder="39.4907, 26.3380" oninput="parseCoords(this.value)">
+          <input type="hidden" id="f-lat">
+          <input type="hidden" id="f-lng">
         </div>
         <div class="form-group">
           <label>Kisa Aciklama</label>
@@ -3571,60 +3566,33 @@ function openVenueModal(id) {
     const v = draftData.venues.find(x => x.id === id);
     document.getElementById('f-lat').value = v?.lat || '';
     document.getElementById('f-lng').value = v?.lng || '';
+    const coordsDisplay = (v?.lat && v?.lng) ? v.lat + ', ' + v.lng : '';
+    document.getElementById('f-coords').value = coordsDisplay;
   } else {
     document.getElementById('f-lat').value = '';
     document.getElementById('f-lng').value = '';
+    document.getElementById('f-coords').value = '';
   }
 
   renderImagePreviews();
   document.getElementById('venue-modal').classList.add('show');
-
-  // Minimap baslat (modal acildiktan sonra)
-  setTimeout(() => initMiniMap(), 200);
 }
 
-/* ── MiniMap for coordinate picking ── */
-let miniMap = null, miniMarker = null;
-
-function initMiniMap() {
-  const container = document.getElementById('f-minimap');
-  if (!container) return;
-
-  // Destroy previous map instance
-  if (miniMap) { miniMap.remove(); miniMap = null; miniMarker = null; }
-
-  const lat = parseFloat(document.getElementById('f-lat').value) || 39.49;
-  const lng = parseFloat(document.getElementById('f-lng').value) || 26.34;
-  const hasCoords = document.getElementById('f-lat').value && document.getElementById('f-lng').value;
-
-  miniMap = L.map(container, { center: [lat, lng], zoom: hasCoords ? 16 : 13, attributionControl: false });
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(miniMap);
-
-  if (hasCoords) {
-    miniMarker = L.marker([lat, lng]).addTo(miniMap);
+/* ── Koordinat parse ── */
+function parseCoords(val) {
+  if (!val) return;
+  const parts = val.split(',').map(s => s.trim());
+  if (parts.length === 2) {
+    const lat = parseFloat(parts[0]);
+    const lng = parseFloat(parts[1]);
+    if (!isNaN(lat) && !isNaN(lng)) {
+      document.getElementById('f-lat').value = lat;
+      document.getElementById('f-lng').value = lng;
+    }
   }
-
-  miniMap.on('click', function(e) {
-    const { lat, lng } = e.latlng;
-    document.getElementById('f-lat').value = lat.toFixed(6);
-    document.getElementById('f-lng').value = lng.toFixed(6);
-    if (miniMarker) miniMap.removeLayer(miniMarker);
-    miniMarker = L.marker([lat, lng]).addTo(miniMap);
-  });
-}
-
-function updateMiniMapMarker() {
-  if (!miniMap) return;
-  const lat = parseFloat(document.getElementById('f-lat').value);
-  const lng = parseFloat(document.getElementById('f-lng').value);
-  if (!lat || !lng) return;
-  if (miniMarker) miniMap.removeLayer(miniMarker);
-  miniMarker = L.marker([lat, lng]).addTo(miniMap);
-  miniMap.setView([lat, lng], 16);
 }
 
 function closeVenueModal() {
-  if (miniMap) { miniMap.remove(); miniMap = null; miniMarker = null; }
   document.getElementById('venue-modal').classList.remove('show');
   editingVenueId = null;
   pendingImages = [];
