@@ -93,6 +93,11 @@
     .map-search-msg.show{display:block}
     .map-search-msg.found{background:rgba(56,161,105,.1);color:#276749;border:1px solid rgba(56,161,105,.15)}
     .map-search-msg.not-found{background:rgba(229,62,62,.08);color:#C53030;border:1px solid rgba(229,62,62,.12)}
+    .search-results{list-style:none;padding:0;margin:6px 0 0;text-align:left}
+    .search-result-item{padding:6px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:.74rem;cursor:pointer;display:flex;align-items:center;gap:6px;transition:opacity .15s}
+    .search-result-item:last-child{border-bottom:none}
+    .search-result-item:hover{opacity:.7}
+    .search-result-item span{font-size:.85rem}
     @keyframes msgFade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 
     /* ── POPUP CARD ── */
@@ -380,20 +385,26 @@ function doSearch() {
   });
 
   if (matched.length > 0) {
-    // İlk eşleşene zoom yap
     const first = matched[0];
     map.flyTo([first.item.lat, first.item.lng], 15, {duration: 0.8});
-    // Mesaj göster
-    msgEl.textContent = matched.length + ' sonuç bulundu';
+
+    if (matched.length === 1) {
+      msgEl.innerHTML = '<strong>' + matched[0].item.emoji + ' ' + matched[0].item.title + '</strong> bulundu';
+    } else {
+      let list = matched.slice(0, 5).map(m =>
+        '<li class="search-result-item" onclick="map.flyTo(['+m.item.lat+','+m.item.lng+'],16,{duration:0.6})"><span>'+m.item.emoji+'</span> '+m.item.title+'</li>'
+      ).join('');
+      if (matched.length > 5) list += '<li class="search-result-item" style="color:var(--text-muted);cursor:default">ve ' + (matched.length - 5) + ' sonuç daha...</li>';
+      msgEl.innerHTML = '<strong>' + matched.length + ' sonuç bulundu</strong><ul class="search-results">' + list + '</ul>';
+    }
     msgEl.className = 'map-search-msg show found';
   } else {
-    msgEl.textContent = 'Haritamızda bu isimde bir konum bulunamadı';
+    msgEl.innerHTML = 'Haritamızda bu isimde bir konum bulunamadı';
     msgEl.className = 'map-search-msg show not-found';
   }
 
-  // Mesajı 3sn sonra kaldır
   clearTimeout(msgEl._timer);
-  msgEl._timer = setTimeout(() => msgEl.classList.remove('show'), 3500);
+  msgEl._timer = setTimeout(() => msgEl.classList.remove('show'), matched.length > 1 ? 6000 : 3500);
 }
 
 function updateCounts() {
