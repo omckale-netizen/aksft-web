@@ -29,7 +29,7 @@ export async function onRequestPost(context) {
   CHAT_ID = String(CHAT_ID || '').trim();
 
   if (!TOKEN || !CHAT_ID) {
-    return new Response(JSON.stringify({ error: 'Telegram config missing', tokenType: typeof env.TELEGRAM_BOT_TOKEN, tokenVal: TOKEN ? 'has value' : 'empty' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ error: 'Telegram config missing', tokenOk: !!TOKEN, chatOk: !!CHAT_ID, chatType: typeof env.TELEGRAM_CHAT_ID, chatRaw: String(env.TELEGRAM_CHAT_ID).substring(0,5) }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 
   let text = '';
