@@ -465,7 +465,9 @@ function renderNav(opts = {}) {
         margin-bottom:10px;
       }
       .sd-venue:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(26,39,68,.13); }
-      .sd-venue-img { width:52px; height:52px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0; filter:drop-shadow(0 2px 6px rgba(0,0,0,.25)); }
+      .sd-venue-img { width:52px; height:52px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0; filter:drop-shadow(0 2px 6px rgba(0,0,0,.25)); position:relative; overflow:hidden; background:linear-gradient(135deg,#e8e4de,#f0ece6); }
+      .sd-venue-img img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity .4s ease; }
+      .sd-venue-img img.sd-loaded { opacity:1; }
       .sd-venue-info { flex:1; min-width:0; }
       .sd-venue-cat { font-size:.57rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase; padding:2px 7px; border-radius:999px; margin-bottom:4px; display:inline-block; }
       .sd-venue-name { font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:.86rem; color:#1A2744; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -791,8 +793,8 @@ function renderNav(opts = {}) {
             const header = '<div style="display:flex;align-items:center;gap:7px;padding:8px 2px 6px;"><span style="font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:' + m.catC + ';">' + m.catL + '</span><span style="font-size:.55rem;font-weight:700;padding:1px 6px;border-radius:999px;background:' + m.catBg + ';color:' + m.catC + ';">' + items.length + '</span></div>';
             const cards = items.map(v => {
               const hasPhoto = v.images && v.images.length > 0;
-              const imgStyle = hasPhoto ? 'background:url(' + v.images[0] + ') center/cover no-repeat;' : 'background:' + m.g + ';';
-              return '<a class="sd-venue" href="' + getMekanPath(v.id) + '"><div class="sd-venue-img" style="' + imgStyle + '">' + (hasPhoto ? '' : v.emoji) + '</div><div class="sd-venue-info"><div class="sd-venue-name">' + v.title + '</div><div class="sd-venue-loc">📍 ' + v.location + '</div></div><button class="sd-venue-remove" onclick="removeSave(\'' + escAttr(v.id) + '\',event)" aria-label="Kaldır">✕</button></a>';
+              const imgContent = hasPhoto ? '<img src="' + v.images[0] + '" onload="this.classList.add(\'sd-loaded\')">' : v.emoji;
+              return '<a class="sd-venue" href="' + getMekanPath(v.id) + '"><div class="sd-venue-img" style="background:' + m.g + ';">' + imgContent + '</div><div class="sd-venue-info"><div class="sd-venue-name">' + v.title + '</div><div class="sd-venue-loc">📍 ' + v.location + '</div></div><button class="sd-venue-remove" onclick="removeSave(\'' + escAttr(v.id) + '\',event)" aria-label="Kaldır">✕</button></a>';
             }).join('');
             return header + cards;
           }).join('');
@@ -807,8 +809,8 @@ function renderNav(opts = {}) {
       html += '<div style="display:flex;align-items:center;gap:7px;padding:16px 2px 8px;"><span style="font-size:.7rem;font-weight:800;color:var(--navy);">📍 Yerler</span><span style="font-size:.6rem;font-weight:700;padding:1px 7px;border-radius:999px;background:rgba(26,39,68,.08);color:var(--navy);">' + savedPlaces.size + '</span><div style="flex:1;height:1px;background:rgba(26,39,68,.08);"></div></div>';
       html += places.map(p => {
         const hasPhoto = p.image && p.image.length > 0;
-        const imgStyle = hasPhoto ? 'background:url(' + p.image + ') center/cover no-repeat;' : 'background:linear-gradient(135deg,#2A3F6A,#1A2744);';
-        return '<a class="sd-venue" href="' + getYerPath(p.id) + '"><div class="sd-venue-img" style="' + imgStyle + '">' + (hasPhoto ? '' : p.emoji) + '</div><div class="sd-venue-info"><div class="sd-venue-name">' + p.title + '</div><div class="sd-venue-loc">📍 ' + (p.location || '') + '</div></div><button class="sd-venue-remove" onclick="removePlaceSave(\'' + escAttr(p.id) + '\',event)" aria-label="Kaldır">✕</button></a>';
+        const imgContent = hasPhoto ? '<img src="' + p.image + '" onload="this.classList.add(\'sd-loaded\')">' : p.emoji;
+        return '<a class="sd-venue" href="' + getYerPath(p.id) + '"><div class="sd-venue-img" style="background:linear-gradient(135deg,#2A3F6A,#1A2744);">' + imgContent + '</div><div class="sd-venue-info"><div class="sd-venue-name">' + p.title + '</div><div class="sd-venue-loc">📍 ' + (p.location || '') + '</div></div><button class="sd-venue-remove" onclick="removePlaceSave(\'' + escAttr(p.id) + '\',event)" aria-label="Kaldır">✕</button></a>';
       }).join('');
     }
 
