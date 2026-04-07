@@ -2311,6 +2311,7 @@ function openVenueModal(id) {
 function closeVenueModal() {
   document.getElementById('venue-modal').classList.remove('show');
   editingVenueId = null;
+  pendingImages = [];
 }
 
 function addWhRow(days, hours) {
@@ -2337,6 +2338,9 @@ const CAT_DEFAULTS = {
 
 async function saveVenue(e) {
   e.preventDefault();
+  const submitBtn = document.querySelector('#venue-form button[type="submit"]');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Kaydediliyor...'; }
+  try {
   const id = document.getElementById('f-id').value || generateId(document.getElementById('f-title').value);
   const category = document.getElementById('f-category').value;
   const catDef = CAT_DEFAULTS[category] || {};
@@ -2358,6 +2362,7 @@ async function saveVenue(e) {
 
   // Upload new images to Firebase Storage and get download URLs
   const uploadedUrls = [];
+  let uploadFailed = false;
   if (pendingImages.length > 0) {
     for (let i = 0; i < pendingImages.length; i++) {
       const img = pendingImages[i];
@@ -2367,9 +2372,11 @@ async function saveVenue(e) {
         uploadedUrls.push(url);
       } catch(err) {
         console.warn('Gorsel yukleme hatasi:', err);
+        uploadFailed = true;
       }
     }
   }
+  if (uploadFailed) showToast('Bazi gorseller yuklenemedi. Mekani kaydedip sonra tekrar deneyin.', 'error');
   const allImages = [...existingImgs, ...uploadedUrls];
   pendingImages = [];
 
@@ -2423,6 +2430,9 @@ async function saveVenue(e) {
   closeVenueModal();
   renderVenueTable();
   showToast('"' + venue.title + '" ' + (isEdit ? 'guncellendi.' : 'eklendi.'), 'success');
+  } finally {
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Kaydet'; }
+  }
 }
 
 /* ══════════════════════════════════════════════════
@@ -3400,6 +3410,9 @@ function botClearForm() {
 }
 
 async function botSubmitForApproval() {
+  const btn = document.querySelector('[onclick="botSubmitForApproval()"]');
+  if (btn) { btn.disabled = true; btn.textContent = 'Kaydediliyor...'; }
+  try {
   const title = document.getElementById('bot-name').value.trim();
   const location = document.getElementById('bot-location').value.trim();
   const category = document.getElementById('bot-r-category').value;
@@ -3448,17 +3461,23 @@ async function botSubmitForApproval() {
 
   showToast('Kaydediliyor...', 'success');
 
-  try {
     // Gorselleri yukle ve download URL'lerini sakla
+    let uploadFailed = false;
     if (botPendingImages.length > 0) {
       const imgUrls = [];
       for (let i = 0; i < botPendingImages.length; i++) {
         const path = 'images/mekanlar/' + id + '/' + (i+1) + '.' + (botPendingImages[i].ext || 'webp');
-        const url = await uploadImageToServer(botPendingImages[i].blob, path);
-        imgUrls.push(url);
+        try {
+          const url = await uploadImageToServer(botPendingImages[i].blob, path);
+          imgUrls.push(url);
+        } catch(err) {
+          console.warn('Gorsel yukleme hatasi:', err);
+          uploadFailed = true;
+        }
       }
       venue.images = imgUrls;
     }
+    if (uploadFailed) showToast('Bazi gorseller yuklenemedi. Mekani kaydedip sonra tekrar deneyin.', 'error');
 
     // pending_venues koleksiyonuna kaydet
     await db.collection('pending_venues').doc(id).set(venue);
@@ -3467,6 +3486,8 @@ async function botSubmitForApproval() {
     renderPendingVenues();
   } catch(err) {
     showToast('Hata: ' + err.message, 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '📋 Onaya Gonder'; }
   }
 }
 
@@ -3631,6 +3652,9 @@ function pbotClearForm() {
 }
 
 async function pbotSubmitForApproval() {
+  const btn = document.querySelector('[onclick="pbotSubmitForApproval()"]');
+  if (btn) { btn.disabled = true; btn.textContent = 'Kaydediliyor...'; }
+  try {
   const title = document.getElementById('pbot-name').value.trim();
   const location = document.getElementById('pbot-location').value.trim();
   const category = document.getElementById('pbot-r-category').value;
@@ -3664,7 +3688,6 @@ async function pbotSubmitForApproval() {
 
   showToast('Kaydediliyor...', 'success');
 
-  try {
     if (pbotPendingImage) {
       const imgPath = 'images/yerler/' + id + '.' + (pbotPendingImage.ext || 'webp');
       const url = await uploadImageToServer(pbotPendingImage.blob, imgPath);
@@ -3676,6 +3699,8 @@ async function pbotSubmitForApproval() {
     renderPendingPlaces();
   } catch(err) {
     showToast('Hata: ' + err.message, 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '📋 Onaya Gonder'; }
   }
 }
 

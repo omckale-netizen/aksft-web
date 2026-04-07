@@ -1004,7 +1004,12 @@ function initSearch(inputId, opts = {}) {
     });
   }
 
-  input.addEventListener('input', e => { activeIdx = -1; renderDropdown(e.target.value.trim()); });
+  let searchTimer = null;
+  input.addEventListener('input', e => {
+    activeIdx = -1;
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => renderDropdown(e.target.value.trim()), 150);
+  });
   input.addEventListener('keydown', e => {
     const items = dropdown.querySelectorAll('.search-result-item');
     if (e.key === 'Escape') { dropdown.classList.remove('open'); activeIdx = -1; }
@@ -1630,6 +1635,7 @@ function renderVenuePage(venueId) {
   const todayHours = (() => {
     if (!v.weeklyHours || v.weeklyHours.length === 0) return v.hours || '—';
     for (const entry of v.weeklyHours) {
+      if (!entry.days) continue;
       const d = entry.days.toLowerCase();
       if (d.includes('her gün') || d.includes('resepsiyon')) return entry.hours;
       if (d.includes('pazartesi') && d.includes('perşembe') && ['Pazartesi','Salı','Çarşamba','Perşembe'].includes(todayName)) return entry.hours;
@@ -1925,8 +1931,8 @@ function renderVenuePage(venueId) {
               </div>
             </div>
             <div class="vp-hero-card-body">
-            ${(v.weeklyHours || []).map(entry => {
-              const isClosed = entry.hours.toLowerCase() === 'kapalı';
+            ${(v.weeklyHours || []).filter(entry => entry.days).map(entry => {
+              const isClosed = (entry.hours || '').toLowerCase() === 'kapalı';
               const isActive = entry.days.toLowerCase().includes(todayName.toLowerCase())
                 || entry.days.toLowerCase().includes('her gün')
                 || entry.days.toLowerCase().includes('resepsiyon')
@@ -1960,10 +1966,10 @@ function renderVenuePage(venueId) {
     if (rows.length === 0) {
       return v.hours ? `<div class="vp-hours-row"><span class="vp-hours-day">Her Gün</span><span class="vp-hours-val">${v.hours}</span></div>` : '';
     }
-    return rows.map(entry =>
+    return rows.filter(entry => entry.days).map(entry =>
       `<div class="vp-hours-row">
         <span class="vp-hours-day">${entry.days}</span>
-        <span class="vp-hours-val ${entry.hours === 'Kapalı' ? 'vp-hours-closed' : ''}">${entry.hours}</span>
+        <span class="vp-hours-val ${(entry.hours || '') === 'Kapalı' ? 'vp-hours-closed' : ''}">${entry.hours || ''}</span>
       </div>`
     ).join('');
   })();

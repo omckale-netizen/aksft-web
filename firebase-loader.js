@@ -32,23 +32,24 @@
       window._firebaseReady = true;
 
       // Fetch data in background
-      Promise.all([
+      Promise.allSettled([
         db.collection('venues').get(),
         db.collection('places').get(),
         db.collection('villages').get(),
         db.collection('routes').get()
       ]).then(function(results) {
-        var venues = results[0].docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
-        var places = results[1].docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
-        var villages = results[2].docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
-        var routes = results[3].docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
+        var venues = results[0].status === 'fulfilled' ? results[0].value.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); }) : [];
+        var places = results[1].status === 'fulfilled' ? results[1].value.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); }) : [];
+        var villages = results[2].status === 'fulfilled' ? results[2].value.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); }) : [];
+        var routes = results[3].status === 'fulfilled' ? results[3].value.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); }) : [];
+
+        var failed = results.filter(function(r) { return r.status === 'rejected'; });
+        if (failed.length > 0) console.warn('Firebase: ' + failed.length + ' koleksiyon yuklenemedi');
 
         window.DATA = { routes: routes, places: places, venues: venues, villages: villages };
         console.log('Firebase: Data updated (' + venues.length + ' venues)');
         // Dispatch event for any components that want to re-render
         document.dispatchEvent(new Event('firebaseDataUpdated'));
-      }).catch(function(err) {
-        console.warn('Firebase: Background fetch failed:', err);
       });
     } catch(err) {
       console.warn('Firebase: Init failed:', err);
