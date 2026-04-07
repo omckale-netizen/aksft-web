@@ -253,13 +253,27 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 .btn-sm{padding:6px 12px;font-size:.75rem}
 .ana-filter.active{background:var(--navy) !important;color:#fff !important;border-color:var(--navy) !important}
 .msg-tab.active{background:var(--navy) !important;color:#fff !important;border-color:var(--navy) !important}
-.msg-item{display:flex;gap:14px;padding:16px 20px;border-bottom:1px solid rgba(0,0,0,.04);cursor:pointer;transition:background .15s}
+.msg-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:0 0 16px}
+.msg-search{flex:1;min-width:180px;padding:8px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.82rem;font-family:inherit;background:var(--cream);color:var(--navy);outline:none;transition:border .2s}
+.msg-search:focus{border-color:var(--terra)}
+.msg-cat-filter{padding:8px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.82rem;font-family:inherit;background:var(--cream);color:var(--navy);outline:none;cursor:pointer}
+.msg-item{display:flex;gap:14px;padding:16px 20px;border-bottom:1px solid rgba(0,0,0,.04);cursor:pointer;transition:background .15s;position:relative}
 .msg-item:hover{background:rgba(0,0,0,.02)}
 .msg-item:last-child{border-bottom:none}
 .msg-item.unread{background:rgba(196,82,26,.03);border-left:3px solid var(--terra)}
+.msg-item.trashed{opacity:.55}
 .msg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:6px}
 .msg-dot.unread{background:var(--terra)}
 .msg-dot.read{background:transparent}
+.msg-cat-badge{display:inline-block;font-size:.65rem;padding:2px 8px;border-radius:20px;font-weight:600;margin-top:4px}
+.msg-cat-Genel{background:rgba(26,39,68,.08);color:var(--navy)}
+.msg-cat-Oneri{background:rgba(76,175,80,.12);color:#2E7D32}
+.msg-cat-Sikayet{background:rgba(244,67,54,.1);color:#C62828}
+.msg-cat-Isbirligi{background:rgba(33,150,243,.1);color:#1565C0}
+.msg-cat-Mekan{background:rgba(196,82,26,.1);color:var(--terra)}
+.msg-cat-Hata{background:rgba(255,152,0,.12);color:#E65100}
+.msg-trash-banner{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:rgba(244,67,54,.06);border-radius:8px;margin-bottom:12px;font-size:.82rem;color:#C62828}
+.msg-trash-banner button{font-size:.78rem}
 .msg-info{flex:1;min-width:0}
 .msg-name{font-weight:700;font-size:.88rem;color:var(--navy)}
 .msg-subject{font-size:.75rem;color:var(--terra);font-weight:600;margin-top:2px}
@@ -892,11 +906,24 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
       <p class="page-sub">Iletisim formundan gelen mesajlar.</p>
       <div class="panel-card">
         <div class="panel-card-head">
-          <div style="display:flex;gap:8px;align-items:center">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
             <button class="btn btn-sm btn-secondary msg-tab active" onclick="setMsgFilter('all',this)">Tumu</button>
             <button class="btn btn-sm btn-secondary msg-tab" onclick="setMsgFilter('unread',this)">Okunmamis</button>
             <button class="btn btn-sm btn-secondary msg-tab" onclick="setMsgFilter('read',this)">Okunmus</button>
+            <button class="btn btn-sm btn-secondary msg-tab" onclick="setMsgFilter('trash',this)">🗑 Cop Kutusu</button>
           </div>
+        </div>
+        <div class="msg-toolbar" style="padding:12px 20px 0">
+          <input type="text" class="msg-search" id="msg-search" placeholder="Mesajlarda ara..." oninput="renderMessageList()">
+          <select class="msg-cat-filter" id="msg-cat-filter" onchange="renderMessageList()">
+            <option value="">Tum Kategoriler</option>
+            <option value="Genel">Genel</option>
+            <option value="Öneri">Oneri</option>
+            <option value="Şikayet">Sikayet</option>
+            <option value="İşbirliği">Isbirligi</option>
+            <option value="Mekan Ekleme Talebi">Mekan Ekleme</option>
+            <option value="Hata Bildirimi">Hata Bildirimi</option>
+          </select>
         </div>
         <div id="messages-list"></div>
       </div>
@@ -1515,9 +1542,10 @@ function setMsgFilter(f, btn) {
 
 async function renderMessages() {
   try {
-    const snap = await db.collection('messages').orderBy('timestamp', 'desc').limit(100).get();
+    const snap = await db.collection('messages').orderBy('timestamp', 'desc').limit(200).get();
     allMessages = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
     updateMsgBadge();
+    autoCleanTrash();
     renderMessageList();
   } catch(err) {
     const msgErr = document.createElement('div'); msgErr.style.cssText = 'padding:24px;color:var(--red)'; msgErr.textContent = 'Mesajlar yuklenemedi: ' + err.message; document.getElementById('messages-list').innerHTML = ''; document.getElementById('messages-list').appendChild(msgErr);
@@ -1525,7 +1553,7 @@ async function renderMessages() {
 }
 
 function updateMsgBadge() {
-  const unread = allMessages.filter(m => !m.read).length;
+  const unread = allMessages.filter(m => !m.read && !m.trashed).length;
   const badge = document.getElementById('msg-badge');
   if (badge) {
     badge.textContent = unread;
@@ -1533,27 +1561,90 @@ function updateMsgBadge() {
   }
 }
 
-function renderMessageList() {
-  let msgs = allMessages;
-  if (msgFilter === 'unread') msgs = msgs.filter(m => !m.read);
-  if (msgFilter === 'read') msgs = msgs.filter(m => m.read);
+// 7 günü geçen çöp mesajlarını otomatik sil
+async function autoCleanTrash() {
+  const now = Date.now();
+  const sevenDays = 7 * 24 * 60 * 60 * 1000;
+  const expired = allMessages.filter(m => m.trashed && m.trashedAt && (now - new Date(m.trashedAt).getTime()) > sevenDays);
+  for (const m of expired) {
+    await db.collection('messages').doc(m._id).delete().catch(() => {});
+  }
+  if (expired.length > 0) {
+    allMessages = allMessages.filter(m => !expired.find(e => e._id === m._id));
+  }
+}
 
-  document.getElementById('messages-list').innerHTML = msgs.length === 0
-    ? '<div style="padding:32px;text-align:center;color:var(--text-muted)">' + (msgFilter === 'unread' ? 'Okunmamis mesaj yok.' : 'Henuz mesaj yok.') + '</div>'
-    : msgs.map(m => {
-      const date = m.timestamp ? new Date(m.timestamp) : null;
-      const dateStr = date ? date.toLocaleDateString('tr-TR', { day:'2-digit', month:'short', year:'numeric' }) : '';
-      const timeStr = date ? date.toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' }) : '';
-      return '<div class="msg-item ' + (m.read ? '' : 'unread') + '" onclick="openMessage(\'' + m._id + '\')">' +
-        '<div class="msg-dot ' + (m.read ? 'read' : 'unread') + '"></div>' +
-        '<div class="msg-info">' +
-          '<div class="msg-name">' + (m.name || 'Isimsiz') + '</div>' +
-          '<div class="msg-subject">' + (m.subject || 'Genel') + '</div>' +
-          '<div class="msg-preview">' + (m.message || '').substring(0, 80) + '</div>' +
-        '</div>' +
-        '<div class="msg-date">' + dateStr + '<br>' + timeStr + '</div>' +
-      '</div>';
-    }).join('');
+function getMsgCatClass(subject) {
+  if (!subject) return 'msg-cat-Genel';
+  if (subject.includes('neri')) return 'msg-cat-Oneri';
+  if (subject.includes('ikayet')) return 'msg-cat-Sikayet';
+  if (subject.includes('birligi') || subject.includes('birliği')) return 'msg-cat-Isbirligi';
+  if (subject.includes('Mekan')) return 'msg-cat-Mekan';
+  if (subject.includes('Hata')) return 'msg-cat-Hata';
+  return 'msg-cat-Genel';
+}
+
+function renderMessageList() {
+  const searchQ = (document.getElementById('msg-search')?.value || '').toLowerCase().trim();
+  const catFilter = document.getElementById('msg-cat-filter')?.value || '';
+
+  let msgs = allMessages;
+
+  // Çöp kutusu / normal filtre
+  if (msgFilter === 'trash') {
+    msgs = msgs.filter(m => m.trashed);
+  } else {
+    msgs = msgs.filter(m => !m.trashed);
+    if (msgFilter === 'unread') msgs = msgs.filter(m => !m.read);
+    if (msgFilter === 'read') msgs = msgs.filter(m => m.read);
+  }
+
+  // Kategori filtresi
+  if (catFilter) msgs = msgs.filter(m => (m.subject || 'Genel') === catFilter);
+
+  // Arama filtresi
+  if (searchQ) {
+    msgs = msgs.filter(m =>
+      (m.name || '').toLowerCase().includes(searchQ) ||
+      (m.email || '').toLowerCase().includes(searchQ) ||
+      (m.phone || '').toLowerCase().includes(searchQ) ||
+      (m.subject || '').toLowerCase().includes(searchQ) ||
+      (m.message || '').toLowerCase().includes(searchQ)
+    );
+  }
+
+  const listEl = document.getElementById('messages-list');
+
+  // Çöp kutusu banner
+  let trashBanner = '';
+  if (msgFilter === 'trash') {
+    const trashCount = allMessages.filter(m => m.trashed).length;
+    trashBanner = trashCount > 0
+      ? '<div class="msg-trash-banner"><span>🗑 ' + trashCount + ' mesaj cop kutusunda (7 gun sonra otomatik silinir)</span><button class="btn btn-danger btn-sm" onclick="emptyTrash()">Cop Kutusunu Bosalt</button></div>'
+      : '';
+  }
+
+  if (msgs.length === 0) {
+    const emptyMsg = msgFilter === 'trash' ? 'Cop kutusu bos.' : msgFilter === 'unread' ? 'Okunmamis mesaj yok.' : searchQ ? 'Aramayla eslesen mesaj yok.' : 'Henuz mesaj yok.';
+    listEl.innerHTML = trashBanner + '<div style="padding:32px;text-align:center;color:var(--text-muted)">' + emptyMsg + '</div>';
+    return;
+  }
+
+  listEl.innerHTML = trashBanner + msgs.map(m => {
+    const date = m.timestamp ? new Date(m.timestamp) : null;
+    const dateStr = date ? date.toLocaleDateString('tr-TR', { day:'2-digit', month:'short', year:'numeric' }) : '';
+    const timeStr = date ? date.toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' }) : '';
+    const catClass = getMsgCatClass(m.subject);
+    return '<div class="msg-item ' + (m.read ? '' : 'unread') + (m.trashed ? ' trashed' : '') + '" onclick="openMessage(\'' + m._id + '\')">' +
+      '<div class="msg-dot ' + (m.read ? 'read' : 'unread') + '"></div>' +
+      '<div class="msg-info">' +
+        '<div class="msg-name">' + (m.name || 'Isimsiz') + '</div>' +
+        '<span class="msg-cat-badge ' + catClass + '">' + (m.subject || 'Genel') + '</span>' +
+        '<div class="msg-preview">' + (m.message || '').substring(0, 80) + '</div>' +
+      '</div>' +
+      '<div class="msg-date">' + dateStr + '<br>' + timeStr + '</div>' +
+    '</div>';
+  }).join('');
 }
 
 async function openMessage(docId) {
@@ -1568,6 +1659,7 @@ async function openMessage(docId) {
     renderMessageList();
   }
 
+  const isTrashed = m.trashed;
   document.getElementById('msg-modal-title').textContent = m.subject || 'Mesaj';
   document.getElementById('msg-modal-body').innerHTML =
     '<div class="msg-detail-row"><span class="msg-detail-label">Gonderen:</span><span class="msg-detail-val">' + (m.name || '-') + '</span></div>' +
@@ -1575,11 +1667,16 @@ async function openMessage(docId) {
     (m.phone ? '<div class="msg-detail-row"><span class="msg-detail-label">Telefon:</span><span class="msg-detail-val"><a href="tel:' + m.phone + '" style="color:var(--terra)">' + m.phone + '</a></span></div>' : '') +
     '<div class="msg-detail-row"><span class="msg-detail-label">Konu:</span><span class="msg-detail-val">' + (m.subject || 'Genel') + '</span></div>' +
     '<div class="msg-detail-row"><span class="msg-detail-label">Tarih:</span><span class="msg-detail-val">' + (m.timestamp ? new Date(m.timestamp).toLocaleString('tr-TR') : '-') + '</span></div>' +
+    (isTrashed && m.trashedAt ? '<div class="msg-detail-row"><span class="msg-detail-label">Silinme:</span><span class="msg-detail-val" style="color:#C62828">' + new Date(m.trashedAt).toLocaleString('tr-TR') + ' (7 gun icinde kalici silinir)</span></div>' : '') +
     '<hr style="border:none;border-top:1px solid rgba(0,0,0,.06);margin:16px 0">' +
     '<div style="font-size:.88rem;color:var(--text);line-height:1.8;white-space:pre-wrap">' + (m.message || '') + '</div>' +
-    '<div style="display:flex;gap:8px;margin-top:20px">' +
-      '<a href="mailto:' + (m.email || '') + '?subject=Re: ' + encodeURIComponent(m.subject || 'Mesajiniz') + '" class="btn btn-primary btn-sm">Yanit Gonder</a>' +
-      '<button class="btn btn-danger btn-sm" onclick="deleteMessage(\'' + docId + '\')">Sil</button>' +
+    '<div style="display:flex;gap:8px;margin-top:20px;flex-wrap:wrap">' +
+      (isTrashed
+        ? '<button class="btn btn-primary btn-sm" onclick="restoreMessage(\'' + docId + '\')">Geri Yukle</button>' +
+          '<button class="btn btn-danger btn-sm" onclick="permanentDeleteMessage(\'' + docId + '\')">Kalici Sil</button>'
+        : '<a href="mailto:' + (m.email || '') + '?subject=Re: ' + encodeURIComponent(m.subject || 'Mesajiniz') + '" class="btn btn-primary btn-sm">Yanit Gonder</a>' +
+          '<button class="btn btn-danger btn-sm" onclick="trashMessage(\'' + docId + '\')">Sil</button>'
+      ) +
     '</div>';
   document.getElementById('msg-modal').classList.add('show');
 }
@@ -1588,14 +1685,59 @@ function closeMsgModal() {
   document.getElementById('msg-modal').classList.remove('show');
 }
 
-async function deleteMessage(docId) {
+// Çöp kutusuna gönder (soft delete)
+async function trashMessage(docId) {
+  const m = allMessages.find(x => x._id === docId);
+  if (!m) return;
+  m.trashed = true;
+  m.trashedAt = new Date().toISOString();
+  await db.collection('messages').doc(docId).update({ trashed: true, trashedAt: m.trashedAt });
+  closeMsgModal();
+  renderMessageList();
+  updateMsgBadge();
+  showToast('Mesaj cop kutusuna tasindi.', 'success');
+}
+
+// Geri yükle
+async function restoreMessage(docId) {
+  const m = allMessages.find(x => x._id === docId);
+  if (!m) return;
+  m.trashed = false;
+  delete m.trashedAt;
+  await db.collection('messages').doc(docId).update({ trashed: false, trashedAt: firebase.firestore.FieldValue.delete() });
+  closeMsgModal();
+  renderMessageList();
+  updateMsgBadge();
+  showToast('Mesaj geri yuklendi.', 'success');
+}
+
+// Kalıcı sil
+async function permanentDeleteMessage(docId) {
+  if (!confirm('Bu mesaj kalici olarak silinecek. Emin misiniz?')) return;
   await db.collection('messages').doc(docId).delete();
   allMessages = allMessages.filter(m => m._id !== docId);
   closeMsgModal();
   renderMessageList();
   updateMsgBadge();
-  showToast('Mesaj silindi.', 'success');
+  showToast('Mesaj kalici olarak silindi.', 'success');
 }
+
+// Çöp kutusunu boşalt
+async function emptyTrash() {
+  const trashed = allMessages.filter(m => m.trashed);
+  if (trashed.length === 0) return;
+  if (!confirm(trashed.length + ' mesaj kalici olarak silinecek. Emin misiniz?')) return;
+  for (const m of trashed) {
+    await db.collection('messages').doc(m._id).delete().catch(() => {});
+  }
+  allMessages = allMessages.filter(m => !m.trashed);
+  renderMessageList();
+  updateMsgBadge();
+  showToast('Cop kutusu bosaltildi.', 'success');
+}
+
+// Eski deleteMessage fonksiyonu (geriye uyumluluk)
+async function deleteMessage(docId) { await trashMessage(docId); }
 
 // Mesaj modalı kapatma
 document.getElementById('msg-modal')?.addEventListener('click', function(e) { if (e.target === this) closeMsgModal(); });
