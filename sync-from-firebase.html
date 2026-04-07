@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Firebase → data.js</title></head>
+<body style="font-family:sans-serif;padding:40px;background:#1A2744;color:#F5EDE0;">
+<h2>Firebase → data.js Sync</h2>
+<p>Firebase'deki guncel verileri data.js dosyasi olarak indirir.</p>
+<button onclick="doExport()" id="btn" style="padding:12px 24px;background:#C4521A;color:#fff;border:none;border-radius:8px;font-size:1rem;cursor:pointer;">data.js Indir</button>
+<pre id="log" style="margin-top:20px;background:rgba(0,0,0,.3);padding:20px;border-radius:8px;max-height:300px;overflow:auto;"></pre>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js';
+import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js';
+import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js';
+const app = initializeApp({apiKey:"AIzaSyCXqgczplchzjClAZt-Wl2eqgqmUMhLVJs",authDomain:"assosu-kesfet.firebaseapp.com",projectId:"assosu-kesfet",storageBucket:"assosu-kesfet.firebasestorage.app",messagingSenderId:"225032191860",appId:"1:225032191860:web:61ac6ba36764b530be3621"});
+const db = getFirestore(app);
+const auth = getAuth(app);
+const log = document.getElementById('log');
+
+window.doExport = async function() {
+  document.getElementById('btn').disabled = true;
+  log.textContent = 'Giris yapiliyor...\n';
+  await signInWithEmailAndPassword(auth, 'info@onyedimedya.com', 'assos2026');
+  log.textContent += 'Firebase\'den veri cekiliyor...\n';
+
+  const cols = ['venues','places','villages','routes'];
+  const data = {};
+  for (const col of cols) {
+    const snap = await getDocs(collection(db, col));
+    data[col] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    log.textContent += '  ' + col + ': ' + data[col].length + ' kayit\n';
+  }
+
+  const content = 'window.DATA = ' + JSON.stringify(data, null, 2) + ';\n';
+  const blob = new Blob([content], { type: 'text/javascript' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'data.js';
+  a.click();
+  URL.revokeObjectURL(a.href);
+
+  log.textContent += '\n✅ data.js indirildi! Mevcut data.js ile degistirin.\n';
+  log.textContent += 'Boyut: ' + (blob.size / 1024).toFixed(1) + ' KB';
+  document.getElementById('btn').disabled = false;
+};
+</script>
+</body></html>
