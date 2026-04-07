@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Harita — Assos'u Kesfet</title>
+  <title>Harita — Assos'u Keşfet</title>
   <meta name="description" content="Assos ve Ayvacik'taki mekanlar, gezilecek yerler interaktif haritada.">
-  <meta property="og:title" content="Harita — Assos'u Kesfet">
+  <meta property="og:title" content="Harita — Assos'u Keşfet">
   <meta property="og:description" content="Assos ve Ayvacik'taki mekanlar, gezilecek yerler interaktif haritada.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://assosukesfet.com/harita">
   <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/assosu-kesfet.firebasestorage.app/o/site%2Fog-image.jpg?alt=media&token=70d62a44-9142-43d8-aee4-de790f5c7dcd">
   <meta property="og:locale" content="tr_TR">
-  <meta property="og:site_name" content="Assos'u Kesfet">
+  <meta property="og:site_name" content="Assos'u Keşfet">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Harita — Assos'u Kesfet">
+  <meta name="twitter:title" content="Harita — Assos'u Keşfet">
   <meta name="twitter:description" content="Assos ve Ayvacik'taki mekanlar, gezilecek yerler interaktif haritada.">
   <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/assosu-kesfet.firebasestorage.app/o/site%2Fog-image.jpg?alt=media&token=70d62a44-9142-43d8-aee4-de790f5c7dcd">
   <link rel="canonical" href="https://assosukesfet.com/harita">
@@ -165,9 +165,9 @@
   <div class="mh-orb mh-orb-3"></div>
   <div class="mh-content">
     <div class="mh-badge"><span class="mh-badge-dot"></span> Interaktif Harita</div>
-    <h1 class="mh-h1">Assos'u <em>Haritada</em> Kesfet</h1>
+    <h1 class="mh-h1">Assos'u <em>Haritada</em> Keşfet</h1>
     <div class="mh-divider"></div>
-    <p class="mh-sub">Mekanlar, tarihi alanlar, koylar ve iskeleler — hepsini tek haritada gor, yol tarifini al.</p>
+    <p class="mh-sub">Mekanlar, tarihi alanlar, koylar ve iskeleler — hepsini tek haritada gör, yol tarifini al.</p>
     <div class="mh-stats">
       <div class="mh-stat"><div class="mh-stat-num" id="hero-venue-count">—</div><div class="mh-stat-label">Mekan</div></div>
       <div class="mh-stat"><div class="mh-stat-num" id="hero-place-count">—</div><div class="mh-stat-label">Yer</div></div>
@@ -181,7 +181,7 @@
 <div class="map-section">
   <div class="map-filters" id="map-filters">
     <button class="map-filter-btn active" data-filter="all" onclick="filterMap('all')">
-      🗺 Tumu <span class="mf-count" id="count-all"></span>
+      🗺 Tümü <span class="mf-count" id="count-all"></span>
     </button>
     <button class="map-filter-btn" data-filter="venue" onclick="filterMap('venue')">
       🏪 Mekanlar <span class="mf-count" id="count-venue"></span>
@@ -228,24 +228,24 @@
 <section class="map-bottom">
   <div class="map-bottom-inner">
     <div class="mb-heading">
-      <h2>Haritayi Nasil Kullanabilirsin?</h2>
-      <p>Assos'u kesfetmenin en kolay yolu</p>
+      <h2>Haritayı Nasıl Kullanabilirsin?</h2>
+      <p>Assos'u keşfetmenin en kolay yolu</p>
     </div>
     <div class="mb-cards">
       <div class="mb-card">
         <div class="mb-card-icon" style="background:rgba(196,82,26,.08)">📍</div>
-        <h3>Pine Tikla</h3>
-        <p>Haritadaki herhangi bir pine tiklayarak mekan veya yer hakkinda detayli bilgi al.</p>
+        <h3>Pine Tıkla</h3>
+        <p>Haritadaki herhangi bir pine tıklayarak mekan veya yer hakkında detaylı bilgi al.</p>
       </div>
       <div class="mb-card">
         <div class="mb-card-icon" style="background:rgba(26,107,138,.08)">🧭</div>
         <h3>Yol Tarifi Al</h3>
-        <p>Google Maps veya Apple Harita ile sectigin konuma aninda yol tarifi al.</p>
+        <p>Google Maps veya Apple Harita ile seçtiğin konuma anında yol tarifi al.</p>
       </div>
       <div class="mb-card">
         <div class="mb-card-icon" style="background:rgba(90,122,86,.08)">🔍</div>
         <h3>Ara & Filtrele</h3>
-        <p>Arama cubugu ile mekan bul veya filtrelerle sadece istedigin kategoriyi gor.</p>
+        <p>Arama çubuğu ile mekan bul veya filtrelerle sadece istediğin kategoriyi gör.</p>
       </div>
     </div>
     <div class="mb-cta">
@@ -411,7 +411,7 @@ function openPanel(item) {
   // Buttons
   const gUrl = 'https://www.google.com/maps/dir/?api=1&destination='+item.lat+','+item.lng;
   const aUrl = 'https://maps.apple.com/?daddr='+item.lat+','+item.lng;
-  const detailLabel = item.type === 'venue' ? '🏪 Mekani Incele' : '📍 Detayi Gor';
+  const detailLabel = item.type === 'venue' ? '🏪 Mekanı İncele' : '📍 Detayı Gör';
 
   document.getElementById('popup-btns').innerHTML =
     '<a class="mp-btn mp-btn-primary" href="'+item.link+'">'+detailLabel+'</a>' +
