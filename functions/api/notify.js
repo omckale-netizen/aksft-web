@@ -14,11 +14,11 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ error: 'Missing type or data' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
   }
 
-  const TOKEN = env.TELEGRAM_BOT_TOKEN;
-  const CHAT_ID = env.TELEGRAM_CHAT_ID;
+  const TOKEN = String(env.TELEGRAM_BOT_TOKEN || '').trim();
+  const CHAT_ID = String(env.TELEGRAM_CHAT_ID || '').trim();
 
   if (!TOKEN || !CHAT_ID) {
-    return new Response(JSON.stringify({ error: 'Telegram config missing', debug: Object.keys(env).join(',') || 'empty' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ error: 'Telegram config missing' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 
   let text = '';
