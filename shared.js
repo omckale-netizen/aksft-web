@@ -732,6 +732,10 @@ function renderNav(opts = {}) {
 
     if (footer) footer.style.display = 'block';
 
+    // Kodu her zaman göster
+    const codeEl = document.getElementById('sd-sync-code');
+    if (codeEl) codeEl.textContent = getFavCode();
+
     if (totalCount === 0) {
       body.innerHTML = `
         <div class="sd-empty">
@@ -875,6 +879,7 @@ function renderNav(opts = {}) {
     const code = (input?.value || '').trim().toUpperCase();
     if (statusEl) statusEl.innerHTML = '';
     if (!code || code.length < 4) { if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Gecerli bir kod girin.</span>'; return; }
+    if (code === getFavCode()) { if (statusEl) statusEl.innerHTML = '<span style="color:#718096">Bu zaten sizin kodunuz.</span>'; return; }
     if (typeof firebase === 'undefined' || !firebase.firestore) { if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Baglanti hatasi.</span>'; return; }
     if (statusEl) statusEl.innerHTML = '<span style="color:var(--text-muted)">Yukleniyor...</span>';
     try {
