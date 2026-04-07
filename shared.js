@@ -1727,14 +1727,13 @@ function rpShare(id, encodedTitle, encodedDesc) {
   const base = window.location.origin;
   const shareUrl = base + '/rotalar/rota-detay.html?id=' + id;
   const title = decodeURIComponent(encodedTitle) + ' — Assos\'u Keşfet';
-  const text  = decodeURIComponent(encodedDesc);
+  const text  = decodeURIComponent(encodedDesc) + '\n' + shareUrl;
+  navigator.clipboard.writeText(shareUrl).then(() => {
+    const t = document.getElementById('rp-toast');
+    if (t) { t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
+  }).catch(() => {});
   if (navigator.share) {
-    navigator.share({ title: title, text: text + '\n' + shareUrl }).catch(() => {});
-  } else {
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      const t = document.getElementById('rp-toast');
-      if (t) { t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
-    }).catch(() => { prompt('Bu linki kopyala:', shareUrl); });
+    navigator.share({ title: title, text: text, url: shareUrl }).catch(() => {});
   }
 }
 

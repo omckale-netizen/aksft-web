@@ -780,18 +780,23 @@ function pageInit() {
   /* ── Share route ── */
   function shareRoute() {
     const id = new URLSearchParams(window.location.search).get('id');
-    if (!id) { showToast(); return; }
+    if (!id) return;
     const route = DATA.routes.find(r => r.id === id);
     const shareUrl = window.location.origin + '/rotalar/rota-detay.html?id=' + id;
     const title = (route?.title || 'Rota') + ' — Assos\'u Keşfet';
-    const text = route?.shortDesc || 'Assos\'ta keşfedilecek bir rota.';
-    if (navigator.share) {
-      navigator.share({ title: title, text: text + '\n' + shareUrl }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(shareUrl).then(() => showToast()).catch(() => {
+    const text = (route?.shortDesc || 'Assos\'ta keşfedilecek bir rota.') + '\n' + shareUrl;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      if (navigator.share) {
+        navigator.share({ title: title, text: text, url: shareUrl }).catch(() => {});
+      }
+      showToast();
+    }).catch(() => {
+      if (navigator.share) {
+        navigator.share({ title: title, text: text, url: shareUrl }).catch(() => {});
+      } else {
         prompt('Bu linki kopyala:', shareUrl);
-      });
-    }
+      }
+    });
   }
 
   /* ── Toast ── */
