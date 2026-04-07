@@ -665,8 +665,17 @@ function renderNav(opts = {}) {
   };
 
   window.clearAllSaves = function () {
+    let hasVenues = false, hasPlaces = false;
+    try { hasVenues = JSON.parse(localStorage.getItem(SD_KEY) || '[]').length > 0; } catch {}
+    try { hasPlaces = JSON.parse(localStorage.getItem(SD_PLACE_KEY) || '[]').length > 0; } catch {}
+    const msg = document.getElementById('sd-clear-msg');
+    if (!hasVenues && !hasPlaces) {
+      if (msg) { msg.innerHTML = '<span style="color:#718096">Temizlenecek favori yok.</span>'; setTimeout(function() { msg.innerHTML = ''; }, 2500); }
+      return;
+    }
     localStorage.removeItem(SD_KEY);
     localStorage.removeItem(SD_PLACE_KEY);
+    window._sdFilter = 'all';
     renderSaveDrawer();
     window.updateSaveNavCount();
     document.querySelectorAll('.save-btn, .place-save-btn, .venue-save-btn').forEach(btn => {
@@ -678,7 +687,6 @@ function renderNav(opts = {}) {
       if (label) label.textContent = 'Kaydet';
       if (!icon && !btn.querySelector('span')) btn.textContent = '♡';
     });
-    const msg = document.getElementById('sd-clear-msg');
     if (msg) { msg.innerHTML = '<span style="color:#38A169">✓ Tum favoriler temizlendi</span>'; setTimeout(function() { msg.innerHTML = ''; }, 3000); }
   };
 
