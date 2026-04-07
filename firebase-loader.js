@@ -25,7 +25,13 @@
     s2.src = 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js';
     s2.crossOrigin = 'anonymous';
     s2.integrity = 'sha384-OWv+RYFfLxKnRm2S6RYMcxn1Un3vxC0dbSWy7XC9DKsJGGHMWBCbDV27k62l/2XK';
-    s2.onload = initFirebase;
+    s2.onload = function() {
+      var s3 = document.createElement('script');
+      s3.src = 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app-check-compat.js';
+      s3.onload = initFirebase;
+      s3.onerror = initFirebase; // App Check yuklenemezse de devam et
+      document.head.appendChild(s3);
+    };
     s2.onerror = fallback;
     document.head.appendChild(s2);
   };
@@ -73,6 +79,12 @@
           appId: "1:225032191860:web:61ac6ba36764b530be3621"
         });
       }
+
+      // App Check aktif et
+      try {
+        var appCheck = firebase.appCheck();
+        appCheck.activate('6LdfCqwsAAAAAGECNBwhjW0fCC3lIsvCwZZxrurI', true);
+      } catch(e) { console.warn('App Check: aktif edilemedi', e); }
 
       var db = firebase.firestore();
       window._db = db;

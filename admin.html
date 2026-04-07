@@ -10,6 +10,7 @@
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js" crossorigin="anonymous" integrity="sha384-OWv+RYFfLxKnRm2S6RYMcxn1Un3vxC0dbSWy7XC9DKsJGGHMWBCbDV27k62l/2XK"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js" crossorigin="anonymous" integrity="sha384-XkNx6yfzInowq3eeLw+tOjPN3eJZ5kjET5iIbCABcI8RkLWOr6XAtva7++KOxiqp"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-storage-compat.js" crossorigin="anonymous" integrity="sha384-5RO7AQJ51T1u3BV84KGn4xVulsFE2gbaUebkDJe5jPVSm0+NN34/wzUp/vZugodK"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-check-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -1679,6 +1680,9 @@ firebase.initializeApp({
   messagingSenderId: "225032191860",
   appId: "1:225032191860:web:61ac6ba36764b530be3621"
 });
+
+const appCheck = firebase.appCheck();
+appCheck.activate('6LdfCqwsAAAAAGECNBwhjW0fCC3lIsvCwZZxrurI', true);
 
 const db = firebase.firestore();
 const fbAuth = firebase.auth();
