@@ -1764,9 +1764,15 @@ function pageInit() {
     const daySeed = Math.floor(Date.now() / 86400000);
     function placeHash(str) { let h = daySeed; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) & 0xFFFFFF; return h; }
     const places = [...allPlaces].sort((a, b) => placeHash(a.id) - placeHash(b.id)).slice(0, 8);
+    // Gerçek kategoriyi belirle (badgeText varsa ona göre)
+    function resolveCat(p) {
+      if (p.badgeText === 'Müze' || p.badgeText === 'Muze') return 'muze';
+      return p.category;
+    }
+
     // Dinamik filtre butonları
     const CAT_LABELS = { tarihi:'🏛 Tarihi', koy:'🌿 Koy', koyu:'🏘 Köy', iskele:'⚓ İskele', muze:'📜 Müze' };
-    const activeCats = [...new Set(places.map(p => p.category))].filter(c => CAT_LABELS[c]);
+    const activeCats = [...new Set(places.map(p => resolveCat(p)))].filter(c => CAT_LABELS[c]);
     const filterBar = document.getElementById('places-filter-bar');
     if (filterBar && activeCats.length > 0) {
       filterBar.innerHTML = '<button class="filter-btn active" onclick="filterPlaces(this,\'all\')">Tümü</button>' +
@@ -1774,13 +1780,13 @@ function pageInit() {
     }
 
     grid.innerHTML = places.map(function(p, i) {
-      const catKey = (p.badgeText === 'Müze' || p.badgeText === 'Muze') ? 'muze' : p.category;
+      const catKey = resolveCat(p);
       const cat = CAT_MAP[catKey] || CAT_MAP.tarihi;
       const bg = p.bgGradient || 'linear-gradient(135deg,' + cat.bg[0] + ',' + cat.bg[1] + ')';
       const imgHtml = p.image
         ? '<img src="' + p.image + '" alt="' + p.title + '" loading="lazy" onload="this.classList.add(\'loaded\')" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center ' + (p.imagePos != null ? p.imagePos : 50) + '%">'
         : '<span>' + p.emoji + '</span>';
-      return '<div class="place-card fade-up" data-cat="' + p.category + '" tabindex="0" role="article" style="animation-delay:' + (i * 0.06) + 's;">' +
+      return '<div class="place-card fade-up" data-cat="' + catKey + '" tabindex="0" role="article" style="animation-delay:' + (i * 0.06) + 's;">' +
         '<div class="place-img-placeholder" style="background:' + bg + ';position:relative;overflow:hidden;">' + imgHtml + '</div>' +
         '<span class="place-cat-badge" style="background:' + cat.badge + ';color:' + cat.badgeColor + ';backdrop-filter:blur(8px);">' + (p.badgeText || cat.label) + '</span>' +
         '<div style="padding:20px 22px 22px;">' +
