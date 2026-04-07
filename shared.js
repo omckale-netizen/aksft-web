@@ -6,14 +6,18 @@
 /* ── HTML attribute escape (XSS koruması) ── */
 function escAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-/* ── Site logo (Firebase'den) ── */
-var SITE_LOGO = '';
+/* ── Site logo (cache + Firebase) ── */
+var SITE_LOGO = localStorage.getItem('site_logo_url') || '';
 function _fetchSiteLogo() {
   if (typeof firebase === 'undefined' || !firebase.firestore) return;
   firebase.firestore().collection('settings').doc('site').get().then(function(doc) {
     if (doc.exists && doc.data().logoUrl) {
-      SITE_LOGO = doc.data().logoUrl;
-      document.querySelectorAll('.site-logo-img').forEach(function(img) { img.src = SITE_LOGO; });
+      var url = doc.data().logoUrl;
+      if (url !== SITE_LOGO) {
+        SITE_LOGO = url;
+        localStorage.setItem('site_logo_url', url);
+        document.querySelectorAll('.site-logo-img').forEach(function(img) { img.src = SITE_LOGO; });
+      }
     }
   }).catch(function() {});
 }
