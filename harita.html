@@ -59,53 +59,47 @@
     .map-search input::placeholder{color:var(--text-muted)}
     .map-search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:.85rem;pointer-events:none}
 
-    /* ── PANEL ── */
-    .map-panel{position:absolute;bottom:0;left:0;right:0;z-index:1000;transform:translateY(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);pointer-events:none}
-    .map-panel.open{transform:translateY(0);pointer-events:all}
-    .mp-inner{background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.12);overflow:hidden}
-    .mp-handle{width:36px;height:4px;background:rgba(0,0,0,.12);border-radius:2px;margin:12px auto 0}
-    .mp-close{position:absolute;top:12px;right:16px;width:32px;height:32px;border:none;border-radius:50%;background:rgba(0,0,0,.06);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:var(--text-mid);transition:background .2s;z-index:2}
-    .mp-close:hover{background:rgba(0,0,0,.12)}
+    /* ── POPUP CARD ── */
+    .popup-overlay{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:20px;animation:popFadeIn .25s}
+    .popup-overlay.open{display:flex}
+    @keyframes popFadeIn{from{opacity:0}to{opacity:1}}
+    .popup-card{background:#fff;border-radius:20px;width:100%;max-width:400px;box-shadow:0 24px 64px rgba(0,0,0,.2);overflow:hidden;animation:popSlideUp .3s cubic-bezier(.4,0,.2,1);position:relative;max-height:90vh;overflow-y:auto}
+    @keyframes popSlideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+    .popup-close{position:absolute;top:12px;right:12px;width:34px;height:34px;border:none;border-radius:50%;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;color:#fff;transition:background .2s;z-index:3}
+    .popup-close:hover{background:rgba(0,0,0,.55)}
 
-    /* Panel — Image header */
-    .mp-img-wrap{position:relative;height:140px;overflow:hidden;background:linear-gradient(135deg,var(--navy),#243255)}
-    .mp-img{width:100%;height:100%;object-fit:cover;display:none}
-    .mp-img.loaded{display:block}
-    .mp-img-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:3rem}
-    .mp-img-gradient{position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(transparent,rgba(0,0,0,.4))}
-    .mp-img-badge{position:absolute;top:12px;left:12px;padding:4px 12px;border-radius:20px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;backdrop-filter:blur(8px)}
+    .popup-img{position:relative;height:180px;overflow:hidden;background:linear-gradient(135deg,var(--navy),#243255)}
+    .popup-img img{width:100%;height:100%;object-fit:cover}
+    .popup-img-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:3.5rem}
+    .popup-img-grad{position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(transparent,rgba(0,0,0,.5))}
+    .popup-badge{position:absolute;top:12px;left:12px;padding:5px 14px;border-radius:20px;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 
-    /* Panel — Body */
-    .mp-body{padding:18px 20px 22px}
-    .mp-title-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
-    .mp-emoji-box{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;margin-top:2px}
-    .mp-title{font-size:1.1rem;font-weight:800;color:var(--navy);line-height:1.25;margin-bottom:2px}
-    .mp-location{font-size:.75rem;color:var(--text-muted);display:flex;align-items:center;gap:4px}
-    .mp-desc{font-size:.82rem;color:var(--text-mid);line-height:1.6;margin-bottom:14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-    .mp-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
-    .mp-tag{padding:4px 10px;border-radius:8px;font-size:.68rem;font-weight:600;background:rgba(0,0,0,.04);color:var(--text-mid)}
-    .mp-meta-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;font-size:.78rem;color:var(--text-muted)}
-    .mp-meta-item{display:flex;align-items:center;gap:5px}
+    .popup-body{padding:20px 22px 24px}
+    .popup-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+    .popup-emoji{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.35rem;flex-shrink:0}
+    .popup-title{font-size:1.1rem;font-weight:800;color:var(--navy);line-height:1.25;margin-bottom:3px}
+    .popup-loc{font-size:.75rem;color:var(--text-muted);display:flex;align-items:center;gap:4px}
+    .popup-desc{font-size:.82rem;color:var(--text-mid);line-height:1.65;margin-bottom:16px}
+    .popup-meta{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px;font-size:.78rem;color:var(--text-muted)}
+    .popup-meta-item{display:flex;align-items:center;gap:5px}
+    .popup-sep{height:1px;background:rgba(0,0,0,.06);margin-bottom:16px}
+    .popup-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+    .popup-nav-row{display:flex;gap:8px}
 
-    /* Panel — Actions */
-    .mp-actions{display:flex;gap:8px;flex-wrap:wrap}
-    .mp-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:10px;font-size:.8rem;font-weight:700;text-decoration:none;border:none;cursor:pointer;font-family:inherit;transition:all .2s}
+    .mp-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:10px;font-size:.8rem;font-weight:700;text-decoration:none;border:none;cursor:pointer;font-family:inherit;transition:all .2s;flex:1;justify-content:center}
     .mp-btn:hover{transform:translateY(-1px)}
     .mp-btn-primary{background:var(--terra);color:#fff;box-shadow:0 2px 10px rgba(196,82,26,.25)}
     .mp-btn-primary:hover{background:var(--terra-light)}
-    .mp-btn-outline{background:transparent;color:var(--text-dark);border:1.5px solid rgba(0,0,0,.12)}
-    .mp-btn-outline:hover{border-color:rgba(0,0,0,.25);background:rgba(0,0,0,.02)}
     .mp-btn-google{background:#4285F4;color:#fff}
     .mp-btn-google:hover{background:#3275E4}
     .mp-btn-apple{background:#1D1D1F;color:#fff}
     .mp-btn-apple:hover{background:#333}
-
-    .mp-nav-label{font-size:.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;margin-top:4px}
+    .popup-nav-label{font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
 
     /* ── STATS ── */
     .map-stats{position:absolute;bottom:20px;right:16px;z-index:1000;background:rgba(26,39,68,.88);backdrop-filter:blur(12px);color:#fff;padding:10px 16px;border-radius:12px;font-size:.72rem;font-weight:600;display:flex;gap:14px;box-shadow:0 4px 16px rgba(0,0,0,.2)}
     .map-stats span{opacity:.6}
-    .map-panel.open ~ .map-stats{display:none}
+    .popup-overlay.open ~ .map-section .map-stats{display:none}
 
     /* ── MARKERS ── */
     .marker-pin{width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.25);border:2.5px solid #fff;transition:transform .15s}
@@ -166,33 +160,35 @@
   </div>
   <div id="map"></div>
 
-  <!-- Panel -->
-  <div class="map-panel" id="map-panel">
-    <div class="mp-inner">
-      <div class="mp-handle"></div>
-      <button class="mp-close" onclick="closePanel()">✕</button>
-      <div class="mp-img-wrap" id="mp-img-wrap">
-        <img class="mp-img" id="mp-img">
-        <div class="mp-img-empty" id="mp-img-empty"></div>
-        <div class="mp-img-gradient"></div>
-        <div class="mp-img-badge" id="mp-img-badge"></div>
-      </div>
-      <div class="mp-body">
-        <div class="mp-title-row">
-          <div class="mp-emoji-box" id="mp-emoji"></div>
-          <div>
-            <div class="mp-title" id="mp-title"></div>
-            <div class="mp-location" id="mp-location"></div>
-          </div>
+  <div class="map-stats" id="map-stats"></div>
+</div>
+
+<!-- Popup Overlay -->
+<div class="popup-overlay" id="popup-overlay" onclick="if(event.target===this)closePanel()">
+  <div class="popup-card" id="popup-card">
+    <button class="popup-close" onclick="closePanel()">✕</button>
+    <div class="popup-img" id="popup-img-wrap">
+      <img id="popup-img" style="display:none">
+      <div class="popup-img-empty" id="popup-img-empty"></div>
+      <div class="popup-img-grad"></div>
+      <div class="popup-badge" id="popup-badge"></div>
+    </div>
+    <div class="popup-body">
+      <div class="popup-head">
+        <div class="popup-emoji" id="popup-emoji"></div>
+        <div>
+          <div class="popup-title" id="popup-title"></div>
+          <div class="popup-loc" id="popup-loc"></div>
         </div>
-        <p class="mp-desc" id="mp-desc"></p>
-        <div class="mp-meta-row" id="mp-meta"></div>
-        <div class="mp-actions" id="mp-actions"></div>
       </div>
+      <p class="popup-desc" id="popup-desc"></p>
+      <div class="popup-meta" id="popup-meta"></div>
+      <div class="popup-sep"></div>
+      <div class="popup-actions" id="popup-actions"></div>
+      <div class="popup-nav-label">Yol Tarifi Al</div>
+      <div class="popup-nav-row" id="popup-nav"></div>
     </div>
   </div>
-
-  <div class="map-stats" id="map-stats"></div>
 </div>
 
 <div id="footer-placeholder"></div>
@@ -305,64 +301,64 @@ function updateCounts() {
 
 function openPanel(item) {
   const cfg = CAT_CONFIG[item.type];
-  const panel = document.getElementById('map-panel');
+  const overlay = document.getElementById('popup-overlay');
 
   // Image
-  const imgEl = document.getElementById('mp-img');
-  const imgEmpty = document.getElementById('mp-img-empty');
+  const imgEl = document.getElementById('popup-img');
+  const imgEmpty = document.getElementById('popup-img-empty');
   const firstImg = item.images && item.images[0];
   if (firstImg) {
     imgEl.src = firstImg;
-    imgEl.classList.add('loaded');
+    imgEl.style.display = 'block';
     imgEmpty.style.display = 'none';
   } else {
-    imgEl.classList.remove('loaded');
+    imgEl.style.display = 'none';
     imgEl.src = '';
     imgEmpty.style.display = 'flex';
     imgEmpty.textContent = item.emoji;
   }
 
   // Badge
-  const badge = document.getElementById('mp-img-badge');
+  const badge = document.getElementById('popup-badge');
   badge.textContent = item.category;
   badge.style.background = cfg.bg;
   badge.style.color = cfg.color;
 
   // Info
-  document.getElementById('mp-emoji').textContent = item.emoji;
-  document.getElementById('mp-emoji').style.background = cfg.bg;
-  document.getElementById('mp-title').textContent = item.title;
-  document.getElementById('mp-location').innerHTML = item.location ? '📍 ' + item.location : '';
-  document.getElementById('mp-desc').textContent = item.shortDesc || '';
+  document.getElementById('popup-emoji').textContent = item.emoji;
+  document.getElementById('popup-emoji').style.background = cfg.bg;
+  document.getElementById('popup-title').textContent = item.title;
+  document.getElementById('popup-loc').innerHTML = item.location ? '📍 ' + item.location : '';
+  document.getElementById('popup-desc').textContent = item.shortDesc || '';
 
   // Meta
   let meta = '';
-  if (item.hours) meta += '<div class="mp-meta-item">🕐 '+item.hours+'</div>';
-  if (item.phone) meta += '<div class="mp-meta-item">📞 '+item.phone+'</div>';
-  document.getElementById('mp-meta').innerHTML = meta;
+  if (item.hours) meta += '<div class="popup-meta-item">🕐 '+item.hours+'</div>';
+  if (item.phone) meta += '<div class="popup-meta-item">📞 '+item.phone+'</div>';
+  document.getElementById('popup-meta').innerHTML = meta;
 
   // Actions
-  const gUrl = 'https://www.google.com/maps/dir/?api=1&destination='+item.lat+','+item.lng;
-  const aUrl = 'https://maps.apple.com/?daddr='+item.lat+','+item.lng;
-
   let actions = '';
   if (item.type === 'venue') {
     actions += '<a class="mp-btn mp-btn-primary" href="'+item.link+'">🏪 Mekani Incele</a>';
   } else {
     actions += '<a class="mp-btn mp-btn-primary" href="'+item.link+'">📍 Detayi Gor</a>';
   }
-  actions += '<div style="width:100%"><div class="mp-nav-label">Yol Tarifi Al</div><div style="display:flex;gap:8px">';
-  actions += '<a class="mp-btn mp-btn-google" href="'+gUrl+'" target="_blank" rel="noopener">Google Maps</a>';
-  actions += '<a class="mp-btn mp-btn-apple" href="'+aUrl+'" target="_blank" rel="noopener"> Apple Harita</a>';
-  actions += '</div></div>';
-  document.getElementById('mp-actions').innerHTML = actions;
+  document.getElementById('popup-actions').innerHTML = actions;
 
-  panel.classList.add('open');
+  // Navigation
+  const gUrl = 'https://www.google.com/maps/dir/?api=1&destination='+item.lat+','+item.lng;
+  const aUrl = 'https://maps.apple.com/?daddr='+item.lat+','+item.lng;
+  document.getElementById('popup-nav').innerHTML =
+    '<a class="mp-btn mp-btn-google" href="'+gUrl+'" target="_blank" rel="noopener">Google Maps</a>' +
+    '<a class="mp-btn mp-btn-apple" href="'+aUrl+'" target="_blank" rel="noopener"> Apple Harita</a>';
+
+  overlay.classList.add('open');
   map.panTo([item.lat, item.lng], {animate:true, duration:0.4});
 }
 
 function closePanel() {
-  document.getElementById('map-panel').classList.remove('open');
+  document.getElementById('popup-overlay').classList.remove('open');
 }
 
 document.addEventListener('dataReady', pageInit);
