@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sayfa Bulunamadı — Assos'u Keşfet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Lora:ital,wght@1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{--navy:#1A2744;--terra:#C4521A;--cream:#FAF7F2;}
+
+    body{
+      min-height:100vh;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      background:linear-gradient(155deg,#06101E 0%,#0C1A30 50%,#0A1520 100%);
+      font-family:'Plus Jakarta Sans',sans-serif;
+      color:#F5EDE0;
+      overflow:hidden;
+      position:relative;
+    }
+
+    /* Grid mesh */
+    body::before{
+      content:'';position:absolute;inset:0;pointer-events:none;
+      background-image:linear-gradient(rgba(245,237,224,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(245,237,224,.02) 1px,transparent 1px);
+      background-size:60px 60px;
+    }
+
+    /* Orbs */
+    .orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;}
+    .orb-1{width:400px;height:400px;background:rgba(196,82,26,.1);top:-120px;left:-100px;animation:orbFloat 16s ease-in-out infinite;}
+    .orb-2{width:300px;height:300px;background:rgba(26,107,138,.08);bottom:-80px;right:-60px;animation:orbFloat 13s ease-in-out infinite reverse;}
+    @keyframes orbFloat{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-20px) scale(1.05);}}
+
+    .content{position:relative;z-index:1;text-align:center;padding:24px;max-width:520px;}
+
+    /* 404 büyük sayı */
+    .big-404{
+      font-size:clamp(8rem,20vw,12rem);
+      font-weight:800;
+      letter-spacing:-.06em;
+      line-height:.85;
+      background:linear-gradient(175deg,rgba(245,237,224,.12) 0%,rgba(245,237,224,.03) 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      margin-bottom:16px;
+      user-select:none;
+    }
+
+    .title{
+      font-weight:800;font-size:clamp(1.4rem,3vw,2rem);
+      letter-spacing:-.02em;margin-bottom:12px;
+    }
+
+    .subtitle{
+      font-family:'Lora',serif;font-style:italic;
+      font-size:.95rem;color:rgba(245,237,224,.4);
+      line-height:1.7;margin-bottom:36px;
+    }
+
+    .links{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:32px;}
+
+    .link-btn{
+      display:inline-flex;align-items:center;gap:7px;
+      padding:11px 22px;border-radius:12px;
+      font-size:.82rem;font-weight:700;font-family:inherit;
+      text-decoration:none;transition:all .2s;white-space:nowrap;
+    }
+    .link-primary{background:var(--terra);color:#fff;}
+    .link-primary:hover{background:#D4682E;transform:translateY(-2px);box-shadow:0 8px 24px rgba(196,82,26,.3);}
+    .link-secondary{background:rgba(255,255,255,.08);color:rgba(245,237,224,.7);border:1px solid rgba(255,255,255,.1);}
+    .link-secondary:hover{background:rgba(255,255,255,.14);color:#F5EDE0;}
+
+    .search-wrap{
+      max-width:400px;margin:0 auto;
+      display:flex;align-items:center;gap:10px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:14px;padding:5px 5px 5px 16px;
+      backdrop-filter:blur(12px);
+    }
+    .search-wrap input{
+      flex:1;min-width:0;background:transparent;border:none;outline:none;
+      color:#F5EDE0;font-family:inherit;font-size:.88rem;
+    }
+    .search-wrap input::placeholder{color:rgba(245,237,224,.25);}
+    .search-wrap button{
+      padding:9px 18px;border:none;border-radius:10px;
+      background:var(--navy);color:#F5EDE0;
+      font-family:inherit;font-size:.78rem;font-weight:700;
+      cursor:pointer;transition:background .2s;white-space:nowrap;
+    }
+    .search-wrap button:hover{background:#2A3A5A;}
+
+    .footer-note{
+      margin-top:48px;font-size:.68rem;color:rgba(245,237,224,.15);
+    }
+  </style>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="content">
+    <div class="big-404">404</div>
+    <h1 class="title">Sayfa Bulunamadı</h1>
+    <p class="subtitle">Aradığınız sayfa taşınmış, kaldırılmış veya hiç var olmamış olabilir.<br>Assos'ta kaybolmak güzel ama burada değil.</p>
+
+    <div class="links">
+      <a href="/" class="link-btn link-primary">🏠 Ana Sayfa</a>
+      <a href="/mekanlar.html" class="link-btn link-secondary">🏪 Mekanlar</a>
+      <a href="/rotalar.html" class="link-btn link-secondary">🗺 Rotalar</a>
+      <a href="/yerler.html" class="link-btn link-secondary">📍 Yerler</a>
+    </div>
+
+    <div class="search-wrap">
+      <svg width="14" height="14" fill="none" stroke="rgba(245,237,224,.3)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="s404" placeholder="Ne ariyordunuz?" onkeydown="if(event.key==='Enter')go404()">
+      <button onclick="go404()">Ara</button>
+    </div>
+
+    <div class="footer-note">Assos'u Keşfet · assosukesfet.com</div>
+  </div>
+
+  <script>
+    function go404() {
+      const q = document.getElementById('s404').value.trim();
+      if (q) window.location.href = '/?q=' + encodeURIComponent(q);
+    }
+  </script>
+</body>
+</html>
