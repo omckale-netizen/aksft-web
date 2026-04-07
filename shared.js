@@ -525,9 +525,9 @@ function renderNav(opts = {}) {
             </div>
             <div id="sd-sync-status" style="font-size:.72rem;margin-top:6px;min-height:16px;"></div>
           </div>
-          <div style="display:flex;gap:8px;margin-top:12px;">
-            <button class="sd-clear-btn" onclick="clearAllSaves()" style="flex:1">Tumunu Temizle</button>
-            <a class="sd-go-btn" id="sd-go-link" href="mekanlar.html" style="flex:1;text-align:center">Mekanlar →</a>
+          <div style="margin-top:12px;">
+            <button class="sd-clear-btn" onclick="clearAllSaves()">Tumunu Temizle</button>
+            <div id="sd-clear-msg" style="font-size:.72rem;text-align:center;margin-top:6px;min-height:16px;"></div>
           </div>
         </div>
       </div>
@@ -661,15 +661,17 @@ function renderNav(opts = {}) {
     localStorage.removeItem(SD_PLACE_KEY);
     renderSaveDrawer();
     window.updateSaveNavCount();
-    document.querySelectorAll('.save-btn, .place-save-btn').forEach(btn => {
+    document.querySelectorAll('.save-btn, .place-save-btn, .venue-save-btn').forEach(btn => {
       btn.classList.remove('saved');
-      if (btn.classList.contains('place-save-btn')) { btn.textContent = '♡'; return; }
+      if (btn.classList.contains('place-save-btn') || btn.classList.contains('venue-save-btn')) { btn.textContent = '♡'; return; }
       const icon = btn.querySelector('.act-icon, #vp-save-icon');
       const label = btn.querySelector('.act-label, #vp-save-label');
       if (icon)  icon.textContent  = '♡';
       if (label) label.textContent = 'Kaydet';
       if (!icon && !btn.querySelector('span')) btn.textContent = '♡';
     });
+    const msg = document.getElementById('sd-clear-msg');
+    if (msg) { msg.innerHTML = '<span style="color:#38A169">✓ Tum favoriler temizlendi</span>'; setTimeout(function() { msg.innerHTML = ''; }, 3000); }
   };
 
   function getYerPath(id) {
