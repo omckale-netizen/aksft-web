@@ -1181,6 +1181,32 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
           <button class="btn btn-primary" onclick="changePassword()">Sifreyi Degistir</button>
         </div>
       </div>
+
+      <div class="panel-card" style="max-width:600px;margin-top:20px">
+        <div class="panel-card-head"><h3>📂 Mekan Kategorileri</h3></div>
+        <div style="padding:20px">
+          <div id="cat-list" style="margin-bottom:16px"></div>
+          <div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap;border-top:1px solid rgba(0,0,0,.06);padding-top:16px">
+            <div style="flex:1;min-width:120px">
+              <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Yeni Kategori</label>
+              <input type="text" id="cat-new-id" placeholder="ID (orn: bar)" style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.8rem;font-family:inherit;width:100%">
+            </div>
+            <div style="flex:1;min-width:120px">
+              <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Gorunen Ad</label>
+              <input type="text" id="cat-new-label" placeholder="Bar" style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.8rem;font-family:inherit;width:100%">
+            </div>
+            <div style="min-width:60px">
+              <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Emoji</label>
+              <input type="text" id="cat-new-emoji" placeholder="🍸" style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.8rem;font-family:inherit;width:100%;max-width:60px">
+            </div>
+            <div style="min-width:80px">
+              <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Renk</label>
+              <input type="color" id="cat-new-color" value="#C4521A" style="width:100%;height:34px;border:1px solid rgba(0,0,0,.1);border-radius:8px;cursor:pointer;padding:2px">
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="addCategory()" style="height:34px">Ekle</button>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -1630,6 +1656,126 @@ async function changePassword() {
   }
 }
 
+// ── Kategori Yönetimi ──
+let venueCategories = [];
+const DEFAULT_CATS = [
+  { id:'kafe', label:'Kafe', emoji:'☕', color:'#C4521A' },
+  { id:'restoran', label:'Restoran', emoji:'🍽', color:'#1A6B8A' },
+  { id:'kahvalti', label:'Kahvalti', emoji:'🥚', color:'#8A5520' },
+  { id:'konaklama', label:'Konaklama', emoji:'🏨', color:'#5A7A56' },
+  { id:'beach', label:'Beach', emoji:'🏖', color:'#1A9A8A' },
+  { id:'iskele', label:'Iskele', emoji:'⚓', color:'#3A5A8A' }
+];
+
+async function loadCategories() {
+  try {
+    const doc = await db.collection('settings').doc('venue_categories').get();
+    if (doc.exists && doc.data().list) {
+      venueCategories = doc.data().list;
+    } else {
+      venueCategories = DEFAULT_CATS;
+      await db.collection('settings').doc('venue_categories').set({ list: venueCategories }, { merge: true });
+    }
+  } catch(e) { venueCategories = DEFAULT_CATS; }
+  renderCatList();
+  updateCatSelects();
+}
+
+function renderCatList() {
+  const el = document.getElementById('cat-list');
+  if (!el) return;
+  if (venueCategories.length === 0) { el.innerHTML = '<div style="color:var(--text-muted);font-size:.82rem">Kategori yok.</div>'; return; }
+  el.innerHTML = '<div style="display:grid;gap:6px">' + venueCategories.map((c, i) =>
+    '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(0,0,0,.02);border-radius:8px">' +
+      '<span style="font-size:1.1rem">' + c.emoji + '</span>' +
+      '<span style="flex:1;font-size:.82rem;font-weight:600;color:var(--navy)">' + c.label + '</span>' +
+      '<span style="font-size:.68rem;color:var(--text-muted)">' + c.id + '</span>' +
+      '<span style="width:16px;height:16px;border-radius:4px;background:' + c.color + ';flex-shrink:0"></span>' +
+      '<button class="btn-icon" onclick="editCategory(' + i + ')" title="Duzenle" style="font-size:.8rem">✏</button>' +
+      '<button class="btn-icon" onclick="deleteCategory(' + i + ')" title="Sil" style="color:var(--red);font-size:.8rem">✕</button>' +
+    '</div>'
+  ).join('') + '</div>';
+}
+
+function updateCatSelects() {
+  // Mekan formu select
+  const fCat = document.getElementById('f-category');
+  if (fCat) {
+    const cur = fCat.value;
+    fCat.innerHTML = '<option value="">Secin</option>' + venueCategories.map(c =>
+      '<option value="' + c.id + '">' + c.emoji + ' ' + c.label + '</option>'
+    ).join('');
+    fCat.value = cur;
+  }
+  // Mekan listesi filtre
+  const vFilter = document.getElementById('venue-cat-filter');
+  if (vFilter) {
+    const cur = vFilter.value;
+    vFilter.innerHTML = '<option value="all">Tum Kategoriler</option>' + venueCategories.map(c =>
+      '<option value="' + c.id + '">' + c.emoji + ' ' + c.label + '</option>'
+    ).join('');
+    vFilter.value = cur;
+  }
+  // Bot kategori select
+  const botCat = document.getElementById('bot-r-category');
+  if (botCat) {
+    const cur = botCat.value;
+    botCat.innerHTML = '<option value="">Secin</option>' + venueCategories.map(c =>
+      '<option value="' + c.id + '">' + c.emoji + ' ' + c.label + '</option>'
+    ).join('');
+    botCat.value = cur;
+  }
+  // CAT_DEFAULTS ve CAT_EMOJIS güncelle
+  venueCategories.forEach(c => {
+    CAT_DEFAULTS[c.id] = { iconBg:'rgba(0,0,0,.06)', tagBg: c.color + '1a', tagColor: c.color, tagText: c.label };
+    CAT_EMOJIS[c.id] = c.emoji;
+  });
+}
+
+async function addCategory() {
+  const id = document.getElementById('cat-new-id').value.trim().toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+  const label = document.getElementById('cat-new-label').value.trim();
+  const emoji = document.getElementById('cat-new-emoji').value.trim() || '📌';
+  const color = document.getElementById('cat-new-color').value || '#C4521A';
+  if (!id || !label) { showToast('ID ve ad gerekli.', 'error'); return; }
+  if (venueCategories.some(c => c.id === id)) { showToast('Bu ID zaten var.', 'error'); return; }
+  venueCategories.push({ id, label, emoji, color });
+  await db.collection('settings').doc('venue_categories').set({ list: venueCategories }, { merge: true });
+  document.getElementById('cat-new-id').value = '';
+  document.getElementById('cat-new-label').value = '';
+  document.getElementById('cat-new-emoji').value = '';
+  renderCatList();
+  updateCatSelects();
+  showToast('"' + label + '" kategorisi eklendi.', 'success');
+}
+
+function editCategory(idx) {
+  const c = venueCategories[idx];
+  if (!c) return;
+  const newLabel = prompt('Kategori adi:', c.label);
+  if (!newLabel) return;
+  const newEmoji = prompt('Emoji:', c.emoji);
+  c.label = newLabel;
+  c.emoji = newEmoji || c.emoji;
+  db.collection('settings').doc('venue_categories').set({ list: venueCategories }, { merge: true });
+  renderCatList();
+  updateCatSelects();
+  showToast('Kategori guncellendi.', 'success');
+}
+
+async function deleteCategory(idx) {
+  const c = venueCategories[idx];
+  if (!c) return;
+  const inUse = (draftData.venues || []).filter(v => v.category === c.id).length;
+  if (inUse > 0) { showToast('"' + c.label + '" kategorisi ' + inUse + ' mekanda kullaniliyor. Once mekanlarin kategorisini degistirin.', 'error'); return; }
+  if (!confirm('"' + c.label + '" kategorisini silmek istediginize emin misiniz?')) return;
+  venueCategories.splice(idx, 1);
+  await db.collection('settings').doc('venue_categories').set({ list: venueCategories }, { merge: true });
+  renderCatList();
+  updateCatSelects();
+  showToast('Kategori silindi.', 'success');
+}
+
 // Logo yükleme
 async function uploadLogo(file) {
   if (!file) return;
@@ -1814,7 +1960,8 @@ function toggleSidebar() {
 function initApp() {
   // Hash'ten son kaldığı sekmeyi aç
   const hash = window.location.hash.replace('#', '');
-  const validPages = ['dashboard','venues','bot','placebot','routes','villages','export','settings','analytics','messages'];
+  loadCategories();
+  const validPages = ['dashboard','venues','bot','placebot','routes','villages','export','settings','analytics','messages','gallery'];
   if (hash && validPages.includes(hash)) {
     showPage(hash);
   } else {
