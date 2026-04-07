@@ -28,7 +28,7 @@ function _fetchSiteLogo() {
       if (url !== SITE_LOGO) {
         SITE_LOGO = url;
         localStorage.setItem('site_logo_url', url);
-        document.querySelectorAll('.site-logo-img').forEach(function(img) { img.src = SITE_LOGO; });
+        document.querySelectorAll('.site-logo-img').forEach(function(img) { img.src = SITE_LOGO; img.onload = function() { img.classList.add('logo-loaded'); }; });
       }
     }
   }).catch(function() {});
@@ -58,7 +58,8 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     #main-nav.solid{background:rgba(250,247,242,.97);backdrop-filter:blur(20px);box-shadow:0 1px 0 rgba(26,39,68,.08);}
     .nav-inner{max-width:1280px;margin:0 auto;padding:0 28px;height:68px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
     .nav-logo{display:flex;align-items:center;flex-shrink:0;text-decoration:none;min-width:120px;}
-    .nav-logo img{height:30px;width:auto;max-width:none;transition:opacity .2s;}
+    .nav-logo img{height:30px;width:auto;max-width:none;opacity:0;transition:opacity .5s ease;}
+    .nav-logo img.logo-loaded{opacity:1;}
     .nav-logo:hover img{opacity:.8;}
     #main-nav.hero-mode .nav-logo img{filter:none;}
     .nav-links{display:flex;align-items:center;gap:4px;}
@@ -83,7 +84,8 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     #mobile-menu{position:fixed;inset:0;background:var(--navy-deep);z-index:200;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .5s cubic-bezier(.16,1,.3,1);overflow:hidden;}
     #mobile-menu.open{transform:translateX(0);}
     .mm-header{display:flex;align-items:center;justify-content:space-between;padding:20px 28px;border-bottom:1px solid rgba(245,237,224,.06);}
-    .mm-header a{min-width:110px;display:inline-block;} .mm-header img{height:28px;width:auto;max-width:none;opacity:.7;}
+    .mm-header a{min-width:110px;display:inline-block;} .mm-header img{height:28px;width:auto;max-width:none;opacity:0;transition:opacity .5s ease;}
+    .mm-header img.logo-loaded{opacity:.7;}
     #close-menu-btn{background:rgba(245,237,224,.08);border:1.5px solid rgba(245,237,224,.14);border-radius:10px;padding:8px 13px;color:var(--cream);font-size:1rem;cursor:pointer;transition:background .2s;line-height:1;}
     #close-menu-btn:hover{background:rgba(245,237,224,.15);}
     .mm-links{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 28px;gap:2px;}
@@ -302,7 +304,7 @@ function renderNav(opts = {}) {
   const navHTML = `
     <div id="mobile-menu" role="dialog" aria-label="Navigasyon menüsü" aria-hidden="true">
       <div class="mm-header">
-        <a href="${basePath}index.html"><img class="site-logo-img" ${SITE_LOGO ? 'src="' + SITE_LOGO + '"' : ''} data-logo="1" alt="Assos'u Keşfet"></a>
+        <a href="${basePath}index.html"><img class="site-logo-img" ${SITE_LOGO ? 'src="' + SITE_LOGO + '" onload="this.classList.add(\'logo-loaded\')"' : ''} data-logo="1" alt="Assos'u Keşfet"></a>
         <button id="close-menu-btn" aria-label="Kapat">✕</button>
       </div>
       <div class="mm-links">
@@ -320,7 +322,7 @@ function renderNav(opts = {}) {
     <nav id="main-nav" class="${heroMode ? 'hero-mode' : 'solid'}" aria-label="Ana navigasyon">
       <div class="nav-inner">
         <a href="${basePath}index.html" class="nav-logo" aria-label="Ana Sayfa">
-          <img class="site-logo-img" ${SITE_LOGO ? 'src="' + SITE_LOGO + '"' : ''} data-logo="1" alt="Assos'u Keşfet">
+          <img class="site-logo-img" ${SITE_LOGO ? 'src="' + SITE_LOGO + '" onload="this.classList.add(\'logo-loaded\')"' : ''} data-logo="1" alt="Assos'u Keşfet">
         </a>
         <div class="nav-links">
           ${links.map(l => `<a href="${basePath}${l.href}" class="nav-link${isActive(l.href) ? ' active' : ''}">${l.label}</a>`).join('')}
@@ -796,7 +798,7 @@ function renderFooter(opts = {}) {
         <div class="footer-glass">
           <div class="footer-grid">
             <div class="footer-brand">
-              <img class="site-logo-img" ${SITE_LOGO ? 'src="' + SITE_LOGO + '"' : ''} data-logo="1" alt="Assos'u Keşfet" style="height:44px;width:auto;">
+              <img class="site-logo-img" ${SITE_LOGO ? 'src="' + SITE_LOGO + '" onload="this.classList.add(\'logo-loaded\')"' : ''} data-logo="1" alt="Assos'u Keşfet" style="height:44px;width:auto;">
               <p class="footer-brand-desc">Assos bölgesinde gezilecek yerler, köyler, mekanlar ve tarihi duraklar için kapsamlı bir dijital keşif platformu.</p>
             </div>
             <div>
