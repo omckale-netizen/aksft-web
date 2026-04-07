@@ -780,8 +780,7 @@ function pageInit() {
   /* ── Share route ── */
   function shareRoute() {
     const id = new URLSearchParams(window.location.search).get('id');
-    const url = window.location.origin + window.location.pathname + '?id=' + id;
-    const overlay = document.getElementById('route-overlay');
+    const url = window.location.origin + '/rotalar/rota-detay.html?id=' + id;
     const route = DATA.routes.find(r => r.id === id);
     const shareData = {
       title: (route?.title || 'Rota') + ' — Assos\'u Keşfet',
@@ -792,7 +791,6 @@ function pageInit() {
       navigator.share(shareData).catch(() => {});
     } else {
       navigator.clipboard.writeText(url).then(() => showToast()).catch(() => {
-        /* fallback: prompt */
         prompt('Bu linki kopyala:', url);
       });
     }
