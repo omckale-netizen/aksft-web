@@ -1422,7 +1422,7 @@ async function checkAuth() {
     await loadDataFromFirestore();
     initApp();
     // Telegram bildirim
-    fetch('https://api.telegram.org/bot8663187115:AAFDnQIOsEbBaDUXu_gUGhCHjSH2QuNfa58/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:564543310,text:'🔐 Admin panele giris yapildi\n📅 '+new Date().toLocaleString('tr-TR')+'\n👤 '+email})}).catch(()=>{});
+    fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'login',data:{date:new Date().toLocaleString('tr-TR'),email:email}})}).catch(()=>{});
   } catch(err) {
     if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
       errEl.textContent = 'E-posta veya sifre hatali.';
