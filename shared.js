@@ -206,6 +206,8 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     .place-card .place-img{aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative;overflow:hidden;background:linear-gradient(90deg,#e8e4de 25%,#f0ece6 50%,#e8e4de 75%);background-size:800px 100%;animation:imgShimmer 1.5s infinite linear;}
     .place-card .place-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s ease;}
     .place-card .place-img img.loaded{opacity:1;}
+    .place-save-btn.saved,.venue-save-btn.saved{background:rgba(196,82,26,.85) !important;color:#fff !important;}
+    .place-save-btn:hover,.venue-save-btn:hover{transform:scale(1.12);}
     .place-card .place-img .place-emoji-fallback{position:relative;z-index:1;}
     .place-card .place-cat-badge{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px;}
     .place-card h3{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:1rem;color:var(--navy);margin-bottom:6px;}
@@ -599,6 +601,25 @@ function renderNav(opts = {}) {
 
   window.isPlaceSaved = function (id) {
     try { return new Set(JSON.parse(localStorage.getItem(SD_PLACE_KEY) || '[]')).has(id); } catch { return false; }
+  };
+
+  window.isVenueSaved = function (id) {
+    try { return new Set(JSON.parse(localStorage.getItem(SD_KEY) || '[]')).has(id); } catch { return false; }
+  };
+
+  window.toggleVenueSave = function (id, e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    try {
+      const saved = new Set(JSON.parse(localStorage.getItem(SD_KEY) || '[]'));
+      if (saved.has(id)) saved.delete(id); else saved.add(id);
+      localStorage.setItem(SD_KEY, JSON.stringify([...saved]));
+      document.querySelectorAll('.venue-save-btn[data-id="' + id + '"]').forEach(function(btn) {
+        btn.classList.toggle('saved', saved.has(id));
+        btn.textContent = saved.has(id) ? '♥' : '♡';
+      });
+    } catch {}
+    window.updateSaveNavCount();
+    if (window.syncFavToFirebase) window.syncFavToFirebase();
   };
 
   window.openSaveDrawer = function () {

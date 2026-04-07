@@ -1715,7 +1715,7 @@
 
 <script src="firebase-loader.js"></script>
 <script src="data.js"></script>
-<script src="shared.js?v=19"></script>
+<script src="shared.js?v=20"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: true });
@@ -1837,6 +1837,7 @@ function pageInit() {
         '<div class="hp-place-img" style="background:' + bg + ';">' + imgHtml +
           '<span class="hp-place-badge" style="background:' + cat.badge + ';color:' + cat.badgeColor + ';">' + (p.badgeText || cat.label) + '</span>' +
           (p.location ? '<span class="hp-place-loc">📍 ' + p.location + '</span>' : '') +
+          '<button class="place-save-btn' + (window.isPlaceSaved && isPlaceSaved(p.id) ? ' saved' : '') + '" data-id="' + p.id + '" onclick="event.preventDefault();event.stopPropagation();togglePlaceSave(\'' + p.id + '\')" style="position:absolute;top:10px;right:10px;z-index:2;width:30px;height:30px;border-radius:50%;border:none;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);color:#fff;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;">' + (window.isPlaceSaved && isPlaceSaved(p.id) ? '♥' : '♡') + '</button>' +
         '</div>' +
         '<div class="hp-place-body">' +
           '<h3 class="hp-place-title">' + p.title + '</h3>' +
@@ -2011,6 +2012,7 @@ function pageInit() {
         '<div class="hp-vc-img' + (hasImg ? ' has-photo' : '') + '" style="background:' + g + ';">' +
           (hasImg ? '<img src="' + v.images[0] + '" alt="' + v.title + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s ease;" onload="this.style.opacity=1;this.parentElement.style.animation=\'none\'">' : '<span style="font-size:2rem;line-height:1;">' + v.emoji + '</span>') +
           featBadge +
+          '<button class="venue-save-btn' + (window.isVenueSaved && isVenueSaved(v.id) ? ' saved' : '') + '" data-id="' + v.id + '" onclick="event.preventDefault();event.stopPropagation();toggleVenueSave(\'' + v.id + '\')" style="position:absolute;top:8px;right:8px;z-index:2;width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);color:#fff;font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;">' + (window.isVenueSaved && isVenueSaved(v.id) ? '♥' : '♡') + '</button>' +
         '</div>' +
         '<div class="hp-vc-body">' +
           '<span class="hp-vc-cat" style="background:' + v.tagBg + ';color:' + v.tagColor + ';">' + v.tagText + '</span>' +
