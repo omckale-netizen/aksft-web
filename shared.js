@@ -362,6 +362,7 @@ function renderNav(opts = {}) {
     { href: 'yerler.html',   label: 'Yerler' },
     { href: 'mekanlar.html', label: 'Mekanlar' },
     { href: 'koyler.html',   label: 'Köyler' },
+    { href: 'harita.html',   label: 'Harita' },
     { href: 'rehber.html',   label: 'Rehber' },
   ];
 
