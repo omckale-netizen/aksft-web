@@ -2086,7 +2086,7 @@ function renderVenuePage(venueId) {
           if (imgs.length === 0) return '';
           const count = Math.min(imgs.length, 6);
           const tiles = imgs.slice(0, count).map(src =>
-            '<div class="vp-gimg"><img src="' + base + src + '" alt="' + v.title + '" loading="lazy"><div class="vp-gimg-overlay"></div></div>'
+            '<div class="vp-gimg"><img src="' + (src.startsWith('http') ? src : base + src) + '" alt="' + v.title + '" loading="lazy"><div class="vp-gimg-overlay"></div></div>'
           ).join('');
           return '<div class="vp-section fade-up">' +
             '<div class="vp-eyebrow">Atmosfer</div>' +

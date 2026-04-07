@@ -3449,15 +3449,15 @@ async function botSubmitForApproval() {
   showToast('Kaydediliyor...', 'success');
 
   try {
-    // Gorselleri yukle
+    // Gorselleri yukle ve download URL'lerini sakla
     if (botPendingImages.length > 0) {
-      const imgPaths = [];
+      const imgUrls = [];
       for (let i = 0; i < botPendingImages.length; i++) {
         const path = 'images/mekanlar/' + id + '/' + (i+1) + '.' + (botPendingImages[i].ext || 'webp');
-        await uploadImageToServer(botPendingImages[i].blob, path);
-        imgPaths.push(path);
+        const url = await uploadImageToServer(botPendingImages[i].blob, path);
+        imgUrls.push(url);
       }
-      venue.images = imgPaths;
+      venue.images = imgUrls;
     }
 
     // pending_venues koleksiyonuna kaydet
@@ -3667,8 +3667,8 @@ async function pbotSubmitForApproval() {
   try {
     if (pbotPendingImage) {
       const imgPath = 'images/yerler/' + id + '.' + (pbotPendingImage.ext || 'webp');
-      await uploadImageToServer(pbotPendingImage.blob, imgPath);
-      place.image = imgPath;
+      const url = await uploadImageToServer(pbotPendingImage.blob, imgPath);
+      place.image = url;
     }
     await db.collection('pending_places').doc(id).set(place);
     showToast('"' + title + '" onay icin gonderildi!', 'success');
