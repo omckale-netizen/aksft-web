@@ -40,14 +40,23 @@
     }
   }, 6000);
 
+  // LocalStorage cache — aninda yukleme
+  var DATA_CACHE_KEY = 'assos_data_cache';
+  var cached = null;
+  try { cached = JSON.parse(localStorage.getItem(DATA_CACHE_KEY)); } catch(e) {}
+  if (cached && cached.venues && cached.venues.length > 0) {
+    window.DATA = cached;
+    hideLoader();
+    document.dispatchEvent(new Event('dataReady'));
+    window._cacheUsed = true;
+  }
+
   function fallback() {
     clearTimeout(timeout);
     if (window._firebaseReady) return;
-    // data.js zaten yüklendiyse window.DATA var
     if (window.DATA) {
       window._firebaseReady = false;
-      hideLoader();
-      document.dispatchEvent(new Event('dataReady'));
+      if (!window._cacheUsed) { hideLoader(); document.dispatchEvent(new Event('dataReady')); }
     }
   }
 
@@ -87,10 +96,18 @@
         window.DATA = { routes: routes, places: places, venues: venues, villages: villages };
         window._firebaseReady = true;
 
+        // Cache guncelle
+        try { localStorage.setItem(DATA_CACHE_KEY, JSON.stringify(window.DATA)); } catch(e) {}
+
         console.log('Firebase: Data loaded (' + venues.length + ' venues, ' + places.length + ' places, ' + villages.length + ' villages, ' + routes.length + ' routes)');
 
         hideLoader();
-        document.dispatchEvent(new Event('dataReady'));
+        if (window._cacheUsed) {
+          // Cache'den yuklendi, Firebase'den guncelle
+          document.dispatchEvent(new Event('dataReady'));
+        } else {
+          document.dispatchEvent(new Event('dataReady'));
+        }
       });
     } catch(err) {
       console.warn('Firebase: Init failed:', err);

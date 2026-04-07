@@ -6,6 +6,18 @@
 /* ── HTML attribute escape (XSS koruması) ── */
 function escAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+/* ── Preconnect (erken baglanti) ── */
+(function() {
+  var hosts = ['https://firestore.googleapis.com','https://www.gstatic.com','https://fonts.googleapis.com','https://fonts.gstatic.com','https://firebasestorage.googleapis.com'];
+  hosts.forEach(function(h) {
+    var l = document.createElement('link');
+    l.rel = 'preconnect';
+    l.href = h;
+    l.crossOrigin = '';
+    document.head.insertBefore(l, document.head.firstChild);
+  });
+})();
+
 /* ── Site logo (cache + Firebase) ── */
 var SITE_LOGO = localStorage.getItem('site_logo_url') || '';
 function _fetchSiteLogo() {
