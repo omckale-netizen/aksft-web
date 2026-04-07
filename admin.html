@@ -153,6 +153,16 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 .wh-checkin-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .wh-checkin-row label{font-size:.78rem;font-weight:600;color:var(--navy);min-width:70px}
 .wh-checkin-row input[type="time"]{padding:5px 8px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.78rem;font-family:inherit;width:110px}
+.wh-copy-btn{font-size:.65rem;padding:3px 8px;border:1px solid rgba(0,0,0,.1);border-radius:6px;background:rgba(196,82,26,.05);color:var(--terra);cursor:pointer;font-family:inherit;font-weight:600;transition:all .15s;white-space:nowrap}
+.wh-copy-btn:hover{background:rgba(196,82,26,.12)}
+/* Tag chips */
+.tag-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.tag-chip{font-size:.72rem;padding:5px 12px;border-radius:999px;border:1px solid rgba(0,0,0,.1);background:#fff;color:var(--navy);cursor:pointer;transition:all .15s;font-family:inherit;font-weight:500}
+.tag-chip:hover{border-color:var(--terra);color:var(--terra);background:rgba(196,82,26,.04)}
+.tag-chip.selected{background:var(--terra);color:#fff;border-color:var(--terra)}
+.tag-selected-list{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.tag-selected{font-size:.68rem;padding:3px 10px;border-radius:999px;background:rgba(26,39,68,.06);color:var(--navy);font-weight:600;display:inline-flex;align-items:center;gap:4px}
+.tag-selected .tag-remove{cursor:pointer;font-size:.8rem;color:var(--red);margin-left:2px}
 
 /* ── TABS ── */
 .tabs{display:flex;gap:4px;margin-bottom:20px}
@@ -1370,8 +1380,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
           </label>
         </div>
         <div class="form-group">
-          <label>Etiketler (virgul ile ayirin)</label>
-          <input type="text" id="f-tags" placeholder="manzarali, deniz kenari, sakin">
+          <label>Etiketler</label>
+          <div class="tag-chips" id="f-tag-chips"></div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input type="text" id="f-tags-custom" placeholder="Ozel etiket yaz..." style="flex:1;padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomTag()}">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="addCustomTag()" style="font-size:.72rem;white-space:nowrap">+ Ekle</button>
+          </div>
+          <div class="tag-selected-list" id="f-tag-selected"></div>
+          <input type="hidden" id="f-tags">
         </div>
         <div class="form-group" id="f-hours-group">
           <label>Calisma Saatleri</label>
@@ -3078,6 +3094,63 @@ function generateId(title) {
 
 const CAT_EMOJIS = { kafe:'☕', restoran:'🍽', kahvalti:'🥚', konaklama:'🏨', beach:'🏖', iskele:'⚓' };
 
+/* ── Tag chips sistemi ── */
+const PRESET_TAGS = [
+  'manzaralı','deniz kenarı','sakin','gün batımı','doğa','organik',
+  'balık','taze','zeytinyağlı','ege mutfağı','kahvaltı','serpme',
+  'romantik','aile','tarihi','antik','köy','otantik','yerel',
+  'plaj','sahil','koy','berrak','iskele','liman',
+  'teras','bahçe','havuzlu','butik','taş ev',
+  'fotoğraf','popüler','canlı müzik','bar','kahve','çay','peynir',
+  'gizli','huzur','sessiz','yürüyüş'
+];
+let selectedTags = [];
+
+function renderTagChips() {
+  const chips = document.getElementById('f-tag-chips');
+  if (!chips) return;
+  chips.innerHTML = PRESET_TAGS.map(t =>
+    '<button type="button" class="tag-chip' + (selectedTags.includes(t) ? ' selected' : '') + '" onclick="toggleTag(\'' + t.replace(/'/g,"\\'") + '\')">' + t + '</button>'
+  ).join('');
+  renderSelectedTags();
+}
+
+function renderSelectedTags() {
+  const el = document.getElementById('f-tag-selected');
+  if (!el) return;
+  el.innerHTML = selectedTags.map(t =>
+    '<span class="tag-selected">' + t + '<span class="tag-remove" onclick="removeTag(\'' + t.replace(/'/g,"\\'") + '\')">✕</span></span>'
+  ).join('');
+  document.getElementById('f-tags').value = selectedTags.join(', ');
+}
+
+function toggleTag(tag) {
+  if (selectedTags.includes(tag)) selectedTags = selectedTags.filter(t => t !== tag);
+  else selectedTags.push(tag);
+  renderTagChips();
+}
+
+function removeTag(tag) {
+  selectedTags = selectedTags.filter(t => t !== tag);
+  renderTagChips();
+}
+
+function addCustomTag() {
+  const input = document.getElementById('f-tags-custom');
+  const tag = input.value.trim();
+  if (!tag) return;
+  if (!selectedTags.includes(tag)) {
+    selectedTags.push(tag);
+    renderTagChips();
+  }
+  input.value = '';
+}
+
+function setTagsFromString(str) {
+  selectedTags = str ? str.split(',').map(t => t.trim()).filter(Boolean) : [];
+  renderTagChips();
+}
+
 function autoCatEmoji() {
   const cat = document.getElementById('f-category').value;
   const catData = venueCategories.find(c => c.id === cat);
@@ -3117,7 +3190,7 @@ function openVenueModal(id) {
     document.getElementById('f-website').value = v.website || '';
     document.getElementById('f-instagram').value = v.instagram || '';
     document.getElementById('f-featured').checked = !!v.featured;
-    document.getElementById('f-tags').value = (v.tags || []).join(', ');
+    setTagsFromString((v.tags || []).join(', '));
     // Saat girişlerini yükle
     renderWhGrid(v.dayHours || null);
     if (v.category === 'konaklama') {
@@ -3133,6 +3206,7 @@ function openVenueModal(id) {
     document.getElementById('f-id').value = '';
     document.getElementById('f-emoji').readOnly = true;
     renderWhGrid(null);
+    setTagsFromString('');
   }
   updateHoursVisibility();
 
@@ -3163,8 +3237,37 @@ function renderWhGrid(dayHours) {
         '<input type="time" class="wh-close" value="' + close + '" ' + (isClosed ? 'disabled' : '') + '>' +
       '</div>' +
       '<label class="wh-day-closed"><input type="checkbox" class="wh-closed-cb" ' + (isClosed ? 'checked' : '') + ' onchange="toggleWhDay(this)"> Kapali</label>' +
+      '<button type="button" class="wh-copy-btn" onclick="copyWhDay(' + i + ')" title="Bu saati diger gunlere kopyala">Kopyala ↓</button>' +
     '</div>';
   }).join('');
+}
+
+function copyWhDay(fromIdx) {
+  const rows = document.querySelectorAll('#wh-grid .wh-day-row');
+  const fromRow = rows[fromIdx];
+  if (!fromRow) return;
+  const fromOpen = fromRow.querySelector('.wh-open').value;
+  const fromClose = fromRow.querySelector('.wh-close').value;
+  const fromClosed = fromRow.querySelector('.wh-closed-cb').checked;
+
+  // Hangi günlere kopyalanacağını sor
+  const options = fromIdx < 5 ? 'Hafta icine (Pzt-Cum)' : 'Hafta sonuna (Cmt-Paz)';
+  const all = confirm(options + ' mi kopyalansın?\n\nOK = ' + options + '\nIptal = Tum gunlere');
+
+  rows.forEach((row, i) => {
+    if (i === fromIdx) return;
+    if (all) {
+      // Sadece aynı grup (hafta içi veya hafta sonu)
+      if (fromIdx < 5 && i >= 5) return;
+      if (fromIdx >= 5 && i < 5) return;
+    }
+    row.querySelector('.wh-open').value = fromOpen;
+    row.querySelector('.wh-close').value = fromClose;
+    row.querySelector('.wh-open').disabled = fromClosed;
+    row.querySelector('.wh-close').disabled = fromClosed;
+    row.querySelector('.wh-closed-cb').checked = fromClosed;
+  });
+  showToast('Saatler kopyalandi.', 'success');
 }
 
 function toggleWhDay(cb) {
