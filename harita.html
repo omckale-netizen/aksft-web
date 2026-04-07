@@ -220,8 +220,8 @@ function pageInit() {
     renderFooter({});
     initMapOnly();
   }
-  // Her dataReady'de pinleri guncelle (cache veya firebase)
-  if (window._firebaseReady) firebaseLoaded = true;
+  // Sadece Firebase'den gelen taze veriyi kullan, cache'i atla
+  if (!window._firebaseReady) return;
   buildItems(); renderMarkers(); updateCounts();
 }
 
