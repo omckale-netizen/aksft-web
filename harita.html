@@ -386,10 +386,6 @@ function doSearch() {
     // Mesaj göster
     msgEl.textContent = matched.length + ' sonuç bulundu';
     msgEl.className = 'map-search-msg show found';
-    // Tek sonuç varsa popup aç
-    if (matched.length === 1) {
-      setTimeout(() => openPanel(first.item), 500);
-    }
   } else {
     msgEl.textContent = 'Haritamızda bu isimde bir konum bulunamadı';
     msgEl.className = 'map-search-msg show not-found';
