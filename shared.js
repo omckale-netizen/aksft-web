@@ -1940,6 +1940,17 @@ function renderVenuePage(venueId) {
       .vp-scroll-top.show{opacity:1;visibility:visible;transform:translateY(0);}
       .vp-scroll-top:hover{background:#C4521A;}
 
+      /* ── Instagram card ── */
+      .vp-ig-card{background:linear-gradient(135deg,#fafafa,#fff);border-radius:18px;padding:22px 26px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 2px 12px rgba(26,39,68,.06);border:1px solid rgba(26,39,68,.06);}
+      .vp-ig-left{display:flex;align-items:center;gap:14px;}
+      .vp-ig-icon{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#FFDC80,#F56040,#833AB4);display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:10px;}
+      .vp-ig-icon svg{width:28px;height:28px;}
+      .vp-ig-handle{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.92rem;color:#1A2744;}
+      .vp-ig-sub{font-size:.72rem;color:#A0AEC0;margin-top:2px;}
+      .vp-ig-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 22px;border-radius:12px;background:linear-gradient(135deg,#F56040,#833AB4);color:#fff;font-size:.82rem;font-weight:700;text-decoration:none;white-space:nowrap;transition:all .2s;flex-shrink:0;font-family:inherit;}
+      .vp-ig-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(131,58,180,.25);}
+      @media(max-width:480px){.vp-ig-card{flex-direction:column;align-items:flex-start;gap:14px;}.vp-ig-btn{width:100%;justify-content:center;}}
+
       /* ── Gallery cursor ── */
       .vp-gimg{cursor:pointer;}
 
@@ -2202,6 +2213,26 @@ function renderVenuePage(venueId) {
             </div>
           </div>` : ''}
         </div>
+
+        <!-- Instagram -->
+        ${(() => {
+          if (!v.instagram) return '';
+          const igHandle = v.instagram.replace(/^@/,'').replace(/^https?:\/\/(www\.)?instagram\.com\//,'').replace(/\/$/,'');
+          const igUrl = 'https://www.instagram.com/' + igHandle + '/';
+          return '<div class="vp-section fade-up">' +
+            '<div class="vp-eyebrow">Sosyal Medya</div>' +
+            '<div class="vp-ig-card">' +
+              '<div class="vp-ig-left">' +
+                '<div class="vp-ig-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" fill="url(#ig-grad)"/><defs><linearGradient id="ig-grad" x1="0" y1="24" x2="24" y2="0"><stop stop-color="#FFDC80"/><stop offset=".5" stop-color="#F56040"/><stop offset="1" stop-color="#833AB4"/></linearGradient></defs></svg></div>' +
+                '<div>' +
+                  '<div class="vp-ig-handle">@' + igHandle + '</div>' +
+                  '<div class="vp-ig-sub">Instagram\'da takip edin</div>' +
+                '</div>' +
+              '</div>' +
+              '<a href="' + igUrl + '" target="_blank" rel="noopener" class="vp-ig-btn">Takip Et</a>' +
+            '</div>' +
+          '</div>';
+        })()}
 
         <!-- Gallery -->
         ${(() => {

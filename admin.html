@@ -1321,6 +1321,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
           <input type="text" id="f-website" placeholder="https://...">
         </div>
         <div class="form-group">
+          <label>Instagram</label>
+          <input type="text" id="f-instagram" placeholder="@mekanadi veya https://instagram.com/mekanadi">
+        </div>
+        <div class="form-group">
           <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
             <input type="checkbox" id="f-featured" style="width:18px;height:18px;accent-color:var(--terra);cursor:pointer">
             <span>⭐ Öne Çıkan Mekan</span>
@@ -2907,6 +2911,7 @@ function openVenueModal(id) {
     document.getElementById('f-address').value = v.address || '';
     document.getElementById('f-phone').value = v.phone || '';
     document.getElementById('f-website').value = v.website || '';
+    document.getElementById('f-instagram').value = v.instagram || '';
     document.getElementById('f-featured').checked = !!v.featured;
     document.getElementById('f-tags').value = (v.tags || []).join(', ');
     // Saat girişlerini yükle
@@ -3086,6 +3091,7 @@ async function saveVenue(e) {
     phone: document.getElementById('f-phone').value.trim(),
     address: document.getElementById('f-address').value.trim(),
     website: document.getElementById('f-website').value.trim(),
+    instagram: document.getElementById('f-instagram').value.trim(),
     featured: document.getElementById('f-featured').checked,
     weeklyHours: weeklyHours,
     dayHours: dayHours,
