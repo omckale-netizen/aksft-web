@@ -170,7 +170,52 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 .tab.active{background:var(--navy);color:#fff;font-weight:600}
 .tab:hover:not(.active){background:var(--cream-dark)}
 
-/* ── EXPORT ── */
+/* ── EXPORT / BACKUP ── */
+.backup-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
+@media(max-width:900px){.backup-grid{grid-template-columns:1fr}}
+.backup-stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+@media(max-width:700px){.backup-stat-row{grid-template-columns:1fr 1fr}}
+.backup-stat{background:#fff;border:1px solid var(--cream-dark);border-radius:var(--radius);padding:18px 20px;text-align:center}
+.backup-stat .bs-icon{font-size:1.5rem;margin-bottom:6px}
+.backup-stat .bs-num{font-size:1.8rem;font-weight:800;color:var(--navy);line-height:1}
+.backup-stat .bs-label{font-size:.72rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+.backup-card{background:#fff;border:1px solid var(--cream-dark);border-radius:var(--radius);overflow:hidden}
+.backup-card-head{padding:16px 20px;border-bottom:1px solid rgba(0,0,0,.04);display:flex;align-items:center;gap:10px}
+.backup-card-head h4{font-size:.92rem;font-weight:700;color:var(--navy);flex:1}
+.backup-card-head .bc-badge{font-size:.65rem;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.05em}
+.backup-card-body{padding:20px}
+.backup-card-body p{font-size:.82rem;color:var(--text-light);line-height:1.6;margin-bottom:14px}
+.backup-card-body p:last-child{margin-bottom:0}
+.backup-btns{display:flex;gap:10px;flex-wrap:wrap}
+.backup-sync-bar{background:rgba(56,161,105,.06);border:1.5px solid rgba(56,161,105,.15);border-radius:var(--radius);padding:16px 20px;margin-bottom:24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.backup-sync-bar.warn{background:rgba(221,107,32,.06);border-color:rgba(221,107,32,.2)}
+.backup-sync-dot{width:10px;height:10px;border-radius:50%;background:var(--green);flex-shrink:0;animation:sync-pulse 2s infinite}
+.backup-sync-bar.warn .backup-sync-dot{background:#DD6B20;animation:none}
+@keyframes sync-pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.backup-sync-info{flex:1;min-width:180px}
+.backup-sync-info strong{font-size:.88rem;color:var(--navy);display:block}
+.backup-sync-info span{font-size:.75rem;color:var(--text-muted)}
+.backup-changes-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.backup-changes-table th{text-align:left;padding:8px 12px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);border-bottom:1px solid var(--cream-dark)}
+.backup-changes-table td{padding:10px 12px;border-bottom:1px solid rgba(0,0,0,.03)}
+.backup-changes-table tr:last-child td{border-bottom:none}
+.backup-changes-table .ct-collection{font-weight:600;color:var(--navy);display:flex;align-items:center;gap:6px}
+.ct-badge{display:inline-block;min-width:22px;text-align:center;padding:2px 8px;border-radius:12px;font-size:.7rem;font-weight:700;line-height:1.4}
+.ct-badge.added{background:rgba(56,161,105,.1);color:#276749}
+.ct-badge.modified{background:rgba(49,130,206,.1);color:#2A69AC}
+.ct-badge.removed{background:rgba(229,62,62,.1);color:#C53030}
+.ct-badge.none{background:rgba(0,0,0,.04);color:var(--text-muted)}
+.backup-log{max-height:200px;overflow-y:auto;font-size:.78rem}
+.backup-log-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.03)}
+.backup-log-item:last-child{border-bottom:none}
+.backup-log-item .bl-time{color:var(--text-muted);font-size:.72rem;flex-shrink:0;width:90px}
+.backup-log-item .bl-icon{flex-shrink:0;font-size:.9rem}
+.backup-log-item .bl-msg{flex:1;color:var(--text)}
+.backup-import-zone{border:2px dashed rgba(0,0,0,.1);border-radius:var(--radius);padding:28px 16px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(0,0,0,.01)}
+.backup-import-zone:hover{border-color:var(--terra);background:rgba(196,82,26,.02)}
+.backup-import-zone .biz-icon{font-size:1.6rem;margin-bottom:6px}
+.backup-import-zone .biz-text{font-size:.82rem;font-weight:600;color:var(--navy)}
+.backup-import-zone .biz-sub{font-size:.72rem;color:var(--text-muted);margin-top:4px}
 .export-section{max-width:640px}
 .export-info{background:#fff;border:1px solid var(--cream-dark);border-radius:var(--radius);padding:20px 24px;margin-bottom:20px}
 .export-info h4{font-size:.95rem;font-weight:700;color:var(--navy);margin-bottom:8px}
@@ -1015,28 +1060,116 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
       </div>
     </div>
 
-    <!-- ══════ EXPORT ══════ -->
+    <!-- ══════ EXPORT / BACKUP ══════ -->
     <div class="admin-page" id="page-export">
-      <h2>Yayinla & Disa Aktar</h2>
-      <p class="page-sub">Degisiklikleriniz otomatik olarak sunucuya kaydedilir.</p>
-      <div class="export-section">
-        <div class="export-info" style="background:rgba(56,161,105,.06);border:1.5px solid rgba(56,161,105,.15);border-radius:var(--radius);padding:20px">
-          <h4 style="color:var(--green)">✓ Firebase Entegrasyonu Aktif</h4>
-          <p>Degisiklikler Firebase Firestore'a anlik olarak kaydedilir. Gorsel dosyalar Firebase Storage'a yuklenir.</p>
+      <h2>Yedekleme & Geri Yukleme</h2>
+      <p class="page-sub">Verilerinizi yedekleyin, disa aktarin veya geri yukleyin.</p>
+
+      <!-- Sync Status Bar -->
+      <div class="backup-sync-bar" id="backup-sync-bar">
+        <div class="backup-sync-dot"></div>
+        <div class="backup-sync-info">
+          <strong id="backup-sync-title">Firebase Baglantisi Aktif</strong>
+          <span id="backup-sync-time">Son senkronizasyon kontrol ediliyor...</span>
         </div>
-        <div class="export-info">
-          <h4>Degisiklik Ozeti</h4>
-          <p id="export-summary">Henuz degisiklik yok.</p>
+        <button class="btn btn-primary" style="font-size:.78rem;padding:8px 18px" onclick="forceSaveAll()">🔄 Simdi Senkronize Et</button>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="backup-stat-row" id="backup-stats"></div>
+
+      <!-- Main Grid -->
+      <div class="backup-grid">
+
+        <!-- Left Column -->
+        <div>
+          <!-- Changes Summary -->
+          <div class="backup-card" style="margin-bottom:20px">
+            <div class="backup-card-head">
+              <h4>📋 Degisiklik Ozeti</h4>
+              <span class="bc-badge" id="backup-changes-badge" style="background:rgba(56,161,105,.1);color:#276749">Guncel</span>
+            </div>
+            <div class="backup-card-body" style="padding:0">
+              <table class="backup-changes-table" id="backup-changes-table">
+                <thead>
+                  <tr><th>Koleksiyon</th><th>Eklenen</th><th>Duzenlenen</th><th>Silinen</th></tr>
+                </thead>
+                <tbody id="backup-changes-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Export Options -->
+          <div class="backup-card" style="margin-bottom:20px">
+            <div class="backup-card-head">
+              <h4>📦 Disa Aktar</h4>
+            </div>
+            <div class="backup-card-body">
+              <p>Verilerinizi farkli formatlarda indirin. Yedek dosyalari guvenli bir yerde saklayin.</p>
+              <div class="backup-btns">
+                <button class="btn btn-primary" onclick="exportFullBackup()" style="font-size:.8rem">📥 Tam Yedek (JSON)</button>
+                <button class="btn btn-secondary" onclick="exportDataJS()" style="font-size:.8rem">📄 data.js Indir</button>
+                <button class="btn btn-secondary" onclick="exportImages()" style="font-size:.8rem">🖼 Gorselleri Indir</button>
+              </div>
+              <div style="margin-top:14px;border-top:1px solid rgba(0,0,0,.04);padding-top:14px">
+                <p style="font-size:.75rem;font-weight:600;color:var(--navy);margin-bottom:10px">Tek Koleksiyon Indir:</p>
+                <div class="backup-btns">
+                  <button class="btn" style="font-size:.75rem;padding:6px 14px;background:var(--cream-dark);color:var(--text)" onclick="exportCollection('venues')">🏪 Mekanlar</button>
+                  <button class="btn" style="font-size:.75rem;padding:6px 14px;background:var(--cream-dark);color:var(--text)" onclick="exportCollection('routes')">🗺 Rotalar</button>
+                  <button class="btn" style="font-size:.75rem;padding:6px 14px;background:var(--cream-dark);color:var(--text)" onclick="exportCollection('villages')">🏘 Koyler</button>
+                  <button class="btn" style="font-size:.75rem;padding:6px 14px;background:var(--cream-dark);color:var(--text)" onclick="exportCollection('places')">📍 Yerler</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="export-info">
-          <h4>Manuel Islemler</h4>
-          <p>Yedek almak veya sorun durumunda kullanmak icin asagidaki butonlari kullanabilirsiniz.</p>
+
+        <!-- Right Column -->
+        <div>
+          <!-- Import / Restore -->
+          <div class="backup-card" style="margin-bottom:20px">
+            <div class="backup-card-head">
+              <h4>📂 Geri Yukle</h4>
+            </div>
+            <div class="backup-card-body">
+              <p>Daha once indirdiginiz bir yedek dosyasini yukleyerek verileri geri getirebilirsiniz.</p>
+              <div class="backup-import-zone" id="backup-import-zone" onclick="document.getElementById('backup-file-input').click()">
+                <div class="biz-icon">📁</div>
+                <div class="biz-text">Yedek dosyasini surukle veya tikla</div>
+                <div class="biz-sub">JSON veya data.js formatinda yedek dosyasi</div>
+              </div>
+              <input type="file" id="backup-file-input" accept=".json,.js" style="display:none" onchange="handleBackupImport(this.files[0])">
+              <div id="backup-import-preview" style="margin-top:12px"></div>
+            </div>
+          </div>
+
+          <!-- Backup Log -->
+          <div class="backup-card" style="margin-bottom:20px">
+            <div class="backup-card-head">
+              <h4>🕐 Yedekleme Gecmisi</h4>
+              <button class="btn" style="font-size:.68rem;padding:4px 10px;background:var(--cream-dark);color:var(--text-muted)" onclick="clearBackupLog()">Temizle</button>
+            </div>
+            <div class="backup-card-body">
+              <div class="backup-log" id="backup-log">
+                <div style="text-align:center;color:var(--text-muted);font-size:.78rem;padding:16px 0">Henuz islem yapilmadi.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Danger Zone -->
+          <div class="backup-card" style="border-color:rgba(229,62,62,.2)">
+            <div class="backup-card-head" style="background:rgba(229,62,62,.03)">
+              <h4 style="color:var(--red)">⚠️ Tehlikeli Islemler</h4>
+            </div>
+            <div class="backup-card-body">
+              <p>Bu islemler geri alinamaz. Lutfen dikkatli olun.</p>
+              <div class="backup-btns">
+                <button class="btn btn-danger" onclick="confirmReset()" style="font-size:.8rem">🗑 Degisiklikleri Sifirla</button>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="export-btns" style="flex-wrap:wrap">
-          <button class="btn btn-primary" onclick="forceSaveAll()">&#128260; Firestore'a Kaydet</button>
-          <button class="btn btn-secondary" onclick="exportDataJS()">&#128229; data.js Indir (Yedek)</button>
-          <button class="btn btn-danger" onclick="confirmReset()">&#128465; Degisiklikleri Sifirla</button>
-        </div>
+
       </div>
     </div>
 
@@ -2024,6 +2157,7 @@ function initApp() {
     renderDashboard();
   }
   setupDragDrop();
+  setupBackupDragDrop();
 }
 
 /* ══════════════════════════════════════════════════
@@ -4049,42 +4183,144 @@ function removePlaceImage() {
 /* ══════════════════════════════════════════════════
    EXPORT
 ══════════════════════════════════════════════════ */
+/* ── Backup page helpers ── */
+let lastSyncTime = null;
+
+function getCollectionDiff(collectionName) {
+  const orig = ORIGINAL_DATA[collectionName] || [];
+  const draft = draftData[collectionName] || [];
+  const added = draft.filter(d => !orig.find(o => o.id === d.id)).length;
+  const removed = orig.filter(o => !draft.find(d => d.id === o.id)).length;
+  const modified = draft.filter(d => {
+    const o = orig.find(x => x.id === d.id);
+    return o && JSON.stringify(o) !== JSON.stringify(d);
+  }).length;
+  return { added, modified, removed, total: draft.length };
+}
+
 function renderExport() {
-  const origStr = JSON.stringify(ORIGINAL_DATA);
-  const draftStr = JSON.stringify(draftData);
-  const hasChanges = origStr !== draftStr;
+  // Stats row
+  const collections = [
+    { key: 'venues', icon: '🏪', label: 'Mekan' },
+    { key: 'routes', icon: '🗺', label: 'Rota' },
+    { key: 'villages', icon: '🏘', label: 'Koy' },
+    { key: 'places', icon: '📍', label: 'Yer' }
+  ];
+  const statsEl = document.getElementById('backup-stats');
+  statsEl.innerHTML = collections.map(c => `
+    <div class="backup-stat">
+      <div class="bs-icon">${c.icon}</div>
+      <div class="bs-num">${(draftData[c.key] || []).length}</div>
+      <div class="bs-label">${c.label}</div>
+    </div>
+  `).join('');
 
-  let summary = '';
-  if (!hasChanges) {
-    summary = 'Orijinal verilerle karsilastirildiginda herhangi bir degisiklik bulunamadi.';
+  // Changes table
+  const tbody = document.getElementById('backup-changes-body');
+  let totalChanges = 0;
+  tbody.innerHTML = collections.map(c => {
+    const diff = getCollectionDiff(c.key);
+    totalChanges += diff.added + diff.modified + diff.removed;
+    return `<tr>
+      <td class="ct-collection">${c.icon} ${c.label}lar</td>
+      <td><span class="ct-badge ${diff.added > 0 ? 'added' : 'none'}">+${diff.added}</span></td>
+      <td><span class="ct-badge ${diff.modified > 0 ? 'modified' : 'none'}">${diff.modified}</span></td>
+      <td><span class="ct-badge ${diff.removed > 0 ? 'removed' : 'none'}">-${diff.removed}</span></td>
+    </tr>`;
+  }).join('');
+
+  // Changes badge
+  const badge = document.getElementById('backup-changes-badge');
+  if (totalChanges > 0) {
+    badge.textContent = totalChanges + ' degisiklik';
+    badge.style.background = 'rgba(221,107,32,.1)';
+    badge.style.color = '#C05621';
   } else {
-    const ov = ORIGINAL_DATA.venues.length;
-    const dv = draftData.venues.length;
-    const added = dv - ov;
-    const modified = draftData.venues.filter(v => {
-      const orig = ORIGINAL_DATA.venues.find(o => o.id === v.id);
-      return orig && JSON.stringify(orig) !== JSON.stringify(v);
-    }).length;
-    const removed = ORIGINAL_DATA.venues.filter(o => !draftData.venues.find(v => v.id === o.id)).length;
-
-    const parts = [];
-    if (added > 0) parts.push(`<strong>${added}</strong> yeni mekan eklendi`);
-    if (modified > 0) parts.push(`<strong>${modified}</strong> mekan duzenlendi`);
-    if (removed > 0) parts.push(`<strong>${removed}</strong> mekan silindi`);
-    summary = parts.length > 0 ? parts.join(', ') + '.' : 'Mekan disi alanlarda degisiklik yapildi.';
+    badge.textContent = 'Guncel';
+    badge.style.background = 'rgba(56,161,105,.1)';
+    badge.style.color = '#276749';
   }
 
-  document.getElementById('export-summary').innerHTML = summary;
+  // Sync bar
+  const syncBar = document.getElementById('backup-sync-bar');
+  const syncTitle = document.getElementById('backup-sync-title');
+  const syncTime = document.getElementById('backup-sync-time');
+  if (lastSyncTime) {
+    syncBar.classList.remove('warn');
+    syncTitle.textContent = 'Firebase Baglantisi Aktif';
+    syncTime.textContent = 'Son senkronizasyon: ' + formatSyncTime(lastSyncTime);
+  } else {
+    syncBar.classList.remove('warn');
+    syncTitle.textContent = 'Firebase Baglantisi Aktif';
+    syncTime.textContent = 'Veriler yuklendi — otomatik kayit aktif';
+  }
+
+  // Render backup log
+  renderBackupLog();
+}
+
+function formatSyncTime(date) {
+  const now = new Date();
+  const diff = Math.floor((now - date) / 1000);
+  if (diff < 10) return 'az once';
+  if (diff < 60) return diff + ' saniye once';
+  if (diff < 3600) return Math.floor(diff / 60) + ' dakika once';
+  return date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) + ' — ' +
+         date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+}
+
+function addBackupLog(icon, msg) {
+  const logs = JSON.parse(localStorage.getItem('backupLogs') || '[]');
+  logs.unshift({ time: new Date().toISOString(), icon, msg });
+  if (logs.length > 30) logs.length = 30;
+  localStorage.setItem('backupLogs', JSON.stringify(logs));
+  renderBackupLog();
+}
+
+function renderBackupLog() {
+  const logs = JSON.parse(localStorage.getItem('backupLogs') || '[]');
+  const el = document.getElementById('backup-log');
+  if (!logs.length) {
+    el.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:.78rem;padding:16px 0">Henuz islem yapilmadi.</div>';
+    return;
+  }
+  el.innerHTML = logs.map(l => {
+    const d = new Date(l.time);
+    const timeStr = d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) + ' ' +
+                    d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+    return `<div class="backup-log-item">
+      <span class="bl-time">${timeStr}</span>
+      <span class="bl-icon">${l.icon}</span>
+      <span class="bl-msg">${l.msg}</span>
+    </div>`;
+  }).join('');
+}
+
+function clearBackupLog() {
+  localStorage.removeItem('backupLogs');
+  renderBackupLog();
+  showToast('Yedekleme gecmisi temizlendi.', 'success');
 }
 
 async function forceSaveAll() {
   showToast('Kaydediliyor...', 'success');
   try {
-    for (const v of draftData.venues) await saveVenueToFirestore(v);
-    for (const p of draftData.places) await savePlaceToFirestore(p);
-    for (const v of draftData.villages) await saveVillageToFirestore(v);
+    const promises = [];
+    for (const v of draftData.venues) promises.push(saveVenueToFirestore(v));
+    for (const p of draftData.places) promises.push(savePlaceToFirestore(p));
+    for (const v of draftData.villages) promises.push(saveVillageToFirestore(v));
+    for (const r of draftData.routes) {
+      const data = { ...r }; delete data.id;
+      promises.push(db.collection('routes').doc(r.id).set(data, { merge: true }));
+    }
+    await Promise.all(promises);
+    lastSyncTime = new Date();
+    ORIGINAL_DATA = JSON.parse(JSON.stringify(draftData));
+    addBackupLog('🔄', 'Tum veriler Firestore\'a senkronize edildi');
+    renderExport();
     showToast('Tum veriler Firestore\'a kaydedildi!', 'success');
   } catch(err) {
+    addBackupLog('❌', 'Senkronizasyon hatasi: ' + err.message);
     showToast('Hata: ' + err.message, 'error');
   }
 }
@@ -4092,14 +4328,131 @@ async function forceSaveAll() {
 function exportDataJS() {
   const content = 'window.DATA = ' + JSON.stringify(draftData, null, 2) + ';\n';
   const blob = new Blob([content], { type: 'text/javascript' });
+  downloadBlob(blob, 'data.js');
+  addBackupLog('📄', 'data.js yedegi indirildi');
+  showToast('data.js yedek olarak indirildi.', 'success');
+}
+
+function exportFullBackup() {
+  const backup = {
+    _meta: {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      source: 'assosu-kesfet-admin'
+    },
+    venues: draftData.venues,
+    places: draftData.places,
+    villages: draftData.villages,
+    routes: draftData.routes
+  };
+  const content = JSON.stringify(backup, null, 2);
+  const blob = new Blob([content], { type: 'application/json' });
+  const dateStr = new Date().toISOString().slice(0, 10);
+  downloadBlob(blob, `assosu-kesfet-yedek-${dateStr}.json`);
+  addBackupLog('📥', 'Tam yedek indirildi (JSON)');
+  showToast('Tam yedek dosyasi indirildi.', 'success');
+}
+
+function exportCollection(name) {
+  const labels = { venues: 'Mekanlar', routes: 'Rotalar', villages: 'Koyler', places: 'Yerler' };
+  const data = draftData[name] || [];
+  if (!data.length) { showToast('Bu koleksiyonda veri yok.', 'error'); return; }
+  const backup = {
+    _meta: { version: 1, exportedAt: new Date().toISOString(), collection: name },
+    [name]: data
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const dateStr = new Date().toISOString().slice(0, 10);
+  downloadBlob(blob, `${name}-${dateStr}.json`);
+  addBackupLog('📦', `${labels[name]} koleksiyonu indirildi (${data.length} kayit)`);
+  showToast(`${labels[name]} indirildi.`, 'success');
+}
+
+function downloadBlob(blob, filename) {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'data.js';
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(a.href);
-  showToast('data.js yedek olarak indirildi.', 'success');
+}
+
+function handleBackupImport(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    let parsed;
+    try {
+      let text = e.target.result;
+      // data.js format: remove "window.DATA = " prefix and trailing ";"
+      if (file.name.endsWith('.js')) {
+        text = text.replace(/^window\.DATA\s*=\s*/, '').replace(/;\s*$/, '');
+      }
+      parsed = JSON.parse(text);
+    } catch(err) {
+      showToast('Dosya okunamadi: Gecersiz format.', 'error');
+      return;
+    }
+
+    // Detect format
+    const data = parsed._meta ? parsed : { venues: parsed.venues, places: parsed.places, villages: parsed.villages, routes: parsed.routes };
+    const counts = [];
+    if (data.venues?.length) counts.push(data.venues.length + ' mekan');
+    if (data.routes?.length) counts.push(data.routes.length + ' rota');
+    if (data.villages?.length) counts.push(data.villages.length + ' koy');
+    if (data.places?.length) counts.push(data.places.length + ' yer');
+
+    if (!counts.length) {
+      showToast('Dosyada gecerli veri bulunamadi.', 'error');
+      return;
+    }
+
+    const preview = document.getElementById('backup-import-preview');
+    const meta = parsed._meta ? `<div style="font-size:.72rem;color:var(--text-muted);margin-bottom:8px">Yedek tarihi: ${new Date(parsed._meta.exportedAt).toLocaleString('tr-TR')}</div>` : '';
+    preview.innerHTML = `
+      <div style="background:rgba(49,130,206,.05);border:1px solid rgba(49,130,206,.15);border-radius:var(--radius-sm);padding:14px 16px">
+        ${meta}
+        <div style="font-size:.82rem;font-weight:600;color:var(--navy);margin-bottom:10px">📋 Icerik: ${counts.join(', ')}</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary" style="font-size:.78rem;padding:8px 16px" onclick="confirmBackupRestore()">✅ Geri Yukle</button>
+          <button class="btn btn-secondary" style="font-size:.78rem;padding:8px 16px" onclick="cancelBackupImport()">Iptal</button>
+        </div>
+      </div>
+    `;
+    window._pendingBackupData = data;
+  };
+  reader.readAsText(file);
+}
+
+function confirmBackupRestore() {
+  const data = window._pendingBackupData;
+  if (!data) return;
+  showConfirm(
+    'Veriyi Geri Yukle',
+    'Mevcut veriler yedek dosyasindaki verilerle degistirilecek. Bu islem geri alinamaz. Devam etmek istiyor musunuz?',
+    async () => {
+      try {
+        if (data.venues) draftData.venues = data.venues;
+        if (data.places) draftData.places = data.places;
+        if (data.villages) draftData.villages = data.villages;
+        if (data.routes) draftData.routes = data.routes;
+        await forceSaveAll();
+        addBackupLog('📂', 'Yedek dosyasindan geri yukleme yapildi');
+        cancelBackupImport();
+        renderExport();
+        showToast('Veriler basariyla geri yuklendi!', 'success');
+      } catch(err) {
+        showToast('Geri yukleme hatasi: ' + err.message, 'error');
+      }
+    }
+  );
+}
+
+function cancelBackupImport() {
+  document.getElementById('backup-import-preview').innerHTML = '';
+  document.getElementById('backup-file-input').value = '';
+  window._pendingBackupData = null;
 }
 
 function confirmReset() {
@@ -4108,6 +4461,7 @@ function confirmReset() {
     'Tum taslak degisiklikler silinecek ve orijinal verilere donulecek. Emin misiniz?',
     () => {
       draftData = JSON.parse(JSON.stringify(ORIGINAL_DATA));
+      addBackupLog('🗑', 'Tum degisiklikler sifirlandi');
       renderExport();
       renderDashboard();
       showToast('Tum degisiklikler sifirlandi.', 'success');
@@ -4381,25 +4735,56 @@ function setupDragDrop() {
   area.addEventListener('drop', ev => { handleImageUpload(ev.dataTransfer.files); });
 }
 
+function setupBackupDragDrop() {
+  const zone = document.getElementById('backup-import-zone');
+  if (!zone) return;
+  ['dragenter','dragover'].forEach(e => zone.addEventListener(e, ev => { ev.preventDefault(); zone.style.borderColor = 'var(--terra)'; zone.style.background = 'rgba(196,82,26,.04)'; }));
+  ['dragleave','drop'].forEach(e => zone.addEventListener(e, ev => { ev.preventDefault(); zone.style.borderColor = ''; zone.style.background = ''; }));
+  zone.addEventListener('drop', ev => { if (ev.dataTransfer.files.length) handleBackupImport(ev.dataTransfer.files[0]); });
+}
+
 /* ══════════════════════════════════════════════════
    IMAGE EXPORT (ZIP)
 ══════════════════════════════════════════════════ */
 async function exportImages() {
-  const exports = window._pendingImageExports || [];
-  if (exports.length === 0) {
-    showToast('İndirilecek yeni görsel yok.', 'error');
+  // Collect all image URLs from venues
+  const allImages = [];
+  (draftData.venues || []).forEach(v => {
+    if (v.images && v.images.length) {
+      v.images.forEach((url, i) => {
+        allImages.push({ url, path: `${v.id || v.title}/gorsel-${i + 1}.jpg` });
+      });
+    }
+  });
+  // Also check pending exports
+  const pending = window._pendingImageExports || [];
+  if (allImages.length === 0 && pending.length === 0) {
+    showToast('Indirilecek gorsel bulunamadi.', 'error');
     return;
   }
-  const zip = new JSZip();
-  exports.forEach(item => { zip.file(item.path, item.blob); });
-  const blob = await zip.generateAsync({ type: 'blob' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'mekan-gorselleri.zip';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  showToast(exports.length + ' görsel indirildi.', 'success');
+  showToast('Gorseller hazirlaniyor...', 'success');
+  try {
+    const zip = new JSZip();
+    // Add pending image exports first
+    pending.forEach(item => { zip.file(item.path, item.blob); });
+    // Download and add venue images
+    for (const img of allImages) {
+      try {
+        const resp = await fetch(img.url);
+        if (resp.ok) {
+          const blob = await resp.blob();
+          zip.file(img.path, blob);
+        }
+      } catch(e) { /* skip failed downloads */ }
+    }
+    const blob = await zip.generateAsync({ type: 'blob' });
+    downloadBlob(blob, 'mekan-gorselleri.zip');
+    const total = pending.length + allImages.length;
+    addBackupLog('🖼', total + ' gorsel ZIP olarak indirildi');
+    showToast(total + ' gorsel indirildi.', 'success');
+  } catch(err) {
+    showToast('Gorsel indirme hatasi: ' + err.message, 'error');
+  }
 }
 
 /* ══════════════════════════════════════════════════
