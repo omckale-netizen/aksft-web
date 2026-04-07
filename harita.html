@@ -199,14 +199,20 @@ const VENUE_CATS = {
   konaklama: 'Konaklama', beach: 'Beach', iskele: 'Iskele'
 };
 
-let map, markers = [], allItems = [], activeFilter = 'all', mapReady = false;
+let map, markers = [], allItems = [], activeFilter = 'all', mapInited = false;
 
 function pageInit() {
-  if (mapReady) return; // prevent double init
-  mapReady = true;
-  renderNav({ heroMode: false });
-  renderFooter({});
-  initMap();
+  if (!mapInited) {
+    mapInited = true;
+    renderNav({ heroMode: false });
+    renderFooter({});
+    initMap();
+  } else {
+    // Firebase'den yeni veri geldi — pin'leri guncelle
+    buildItems();
+    renderMarkers();
+    updateCounts();
+  }
 }
 
 function initMap() {
