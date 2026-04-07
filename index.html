@@ -1763,7 +1763,11 @@ function pageInit() {
     };
     const grid = document.getElementById('places-grid');
     if (!grid || typeof DATA === 'undefined') return;
-    const places = DATA.places || [];
+    const allPlaces = DATA.places || [];
+    // Gün bazlı sıralama (her gün farklı sıra)
+    const daySeed = Math.floor(Date.now() / 86400000);
+    function placeHash(str) { let h = daySeed; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) & 0xFFFFFF; return h; }
+    const places = [...allPlaces].sort((a, b) => placeHash(a.id) - placeHash(b.id)).slice(0, 8);
     grid.innerHTML = places.map(function(p, i) {
       const cat = CAT_MAP[p.category] || CAT_MAP.tarihi;
       const bg = p.bgGradient || 'linear-gradient(135deg,' + cat.bg[0] + ',' + cat.bg[1] + ')';
