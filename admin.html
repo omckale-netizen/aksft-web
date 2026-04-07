@@ -1343,6 +1343,39 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
         </div>
       </div>
 
+      <div class="panel-card" style="max-width:480px;margin-bottom:20px">
+        <div class="panel-card-head"><h3>🌐 Sosyal Medya Gorseli (OG Image)</h3></div>
+        <div style="padding:20px">
+          <div id="og-preview" style="margin-bottom:16px;border-radius:10px;overflow:hidden;background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.08)">
+            <img id="og-preview-img" src="" alt="OG Image" style="width:100%;display:none;border-radius:10px">
+            <div id="og-preview-empty" style="padding:40px 20px;text-align:center">
+              <div style="font-size:2rem;margin-bottom:8px">🖼</div>
+              <div style="font-size:.82rem;color:var(--text-muted)">Henuz gorsel yuklenmemis</div>
+            </div>
+          </div>
+          <div style="background:rgba(49,130,206,.05);border:1px solid rgba(49,130,206,.12);border-radius:8px;padding:12px 14px;margin-bottom:14px">
+            <div style="font-size:.75rem;font-weight:600;color:var(--navy);margin-bottom:4px">Onerilen Olculer</div>
+            <div style="font-size:.72rem;color:var(--text-light);line-height:1.5">
+              <strong>1200 x 630 piksel</strong> (zorunlu minimum)<br>
+              JPG veya PNG · Maks 5MB<br>
+              Bu gorsel WhatsApp, Instagram, Twitter, Facebook ve Google'da site linki paylasildiginda gosterilir.
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn-primary btn-sm" onclick="document.getElementById('og-file-input').click()">Gorsel Yukle</button>
+            <span id="og-upload-status" style="font-size:.72rem;color:var(--text-muted)"></span>
+          </div>
+          <input type="file" id="og-file-input" accept="image/jpeg,image/png" style="display:none" onchange="uploadOgImage(this.files[0])">
+          <div id="og-url-box" style="display:none;margin-top:12px">
+            <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">OG Image URL</label>
+            <div style="display:flex;gap:6px">
+              <input type="text" id="og-url-display" readonly style="flex:1;padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.72rem;background:rgba(0,0,0,.02);color:var(--text)">
+              <button class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText(document.getElementById('og-url-display').value);showToast('URL kopyalandi','success')">Kopyala</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="panel-card" style="max-width:480px">
         <div class="panel-card-head"><h3>🔒 Sifre Degistir</h3></div>
         <div style="padding:20px">
@@ -2136,8 +2169,52 @@ async function loadLogoPreview() {
     if (doc.exists) {
       if (doc.data().logoUrl) showLogoPreview(doc.data().logoUrl);
       if (doc.data().faviconUrl) showFavPreview(doc.data().faviconUrl);
+      if (doc.data().ogImageUrl) showOgPreview(doc.data().ogImageUrl);
     }
   } catch(e) {}
+}
+
+// OG Image yükleme
+async function uploadOgImage(file) {
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { showToast('Sadece gorsel dosya yukleyebilirsiniz.', 'error'); return; }
+  if (file.size > 5 * 1024 * 1024) { showToast('Dosya cok buyuk. Maks 5MB.', 'error'); return; }
+
+  const statusEl = document.getElementById('og-upload-status');
+  statusEl.textContent = 'Yukleniyor...';
+
+  try {
+    const ext = file.type === 'image/png' ? 'png' : 'jpg';
+    const ref = firebase.storage().ref('site/og-image.' + ext);
+    await ref.put(file, { contentType: file.type });
+    const url = await ref.getDownloadURL();
+    await db.collection('settings').doc('site').set({ ogImageUrl: url, ogImageUpdatedAt: new Date().toISOString() }, { merge: true });
+    statusEl.textContent = 'Yuklendi!';
+    showOgPreview(url);
+    showToast('Sosyal medya gorseli guncellendi!', 'success');
+  } catch(err) {
+    console.error('OG image upload error:', err);
+    statusEl.textContent = 'Hata!';
+    showToast('Gorsel yuklenemedi: ' + err.message, 'error');
+  }
+}
+
+function showOgPreview(url) {
+  const img = document.getElementById('og-preview-img');
+  const empty = document.getElementById('og-preview-empty');
+  const urlBox = document.getElementById('og-url-box');
+  const urlInput = document.getElementById('og-url-display');
+  if (url) {
+    img.src = url;
+    img.style.display = '';
+    empty.style.display = 'none';
+    urlBox.style.display = '';
+    urlInput.value = url;
+  } else {
+    img.style.display = 'none';
+    empty.style.display = '';
+    urlBox.style.display = 'none';
+  }
 }
 
 // Favicon yükleme

@@ -42,10 +42,25 @@ function escAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/'/g,'&#39;
         var d = doc.data();
         if (d.faviconUrl) { localStorage.setItem('site_favicon_url', d.faviconUrl); setFavicons(d.faviconUrl, d.faviconUrl180); }
         if (d.faviconUrl180) localStorage.setItem('site_favicon_180', d.faviconUrl180);
+        if (d.ogImageUrl) { localStorage.setItem('site_og_image', d.ogImageUrl); _updateOgImage(d.ogImageUrl); }
       }
     }).catch(function() {});
   });
 })();
+
+/* ── OG Image (cache + Firebase) ── */
+(function() {
+  var cached = localStorage.getItem('site_og_image');
+  if (cached) _updateOgImage(cached);
+})();
+function _updateOgImage(url) {
+  if (!url) return;
+  var tags = [
+    document.querySelector('meta[property="og:image"]'),
+    document.querySelector('meta[name="twitter:image"]')
+  ];
+  tags.forEach(function(tag) { if (tag) tag.content = url; });
+}
 
 /* ── Site logo (cache + Firebase) ── */
 var SITE_LOGO = localStorage.getItem('site_logo_url') || '';

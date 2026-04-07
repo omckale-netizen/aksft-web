@@ -15,11 +15,11 @@ service firebase.storage {
         && request.resource.contentType.matches('image/.*'); // Sadece gorsel
     }
 
-    // Site ayarlari (logo, favicon)
+    // Site ayarlari (logo, favicon, og-image)
     match /site/{allPaths=**} {
       allow read: if true;
       allow write: if isAdmin()
-        && request.resource.size < 2 * 1024 * 1024          // Maks 2MB
+        && request.resource.size < 5 * 1024 * 1024          // Maks 5MB
         && request.resource.contentType.matches('image/.*');
     }
 
