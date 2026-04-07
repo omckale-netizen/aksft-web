@@ -1749,7 +1749,7 @@ function pageInit() {
   }
 
   /* ── RENDER PLACES ── */
-  (function() {
+  window.renderHomePlaces = function() {
     const CAT_MAP = {
       tarihi: { badge:'rgba(26,39,68,0.7)',  badgeColor:'var(--cream)', label:'Antik Alan', bg:['#2A3F6A','#1A2744'] },
       koy:    { badge:'rgba(26,107,138,0.75)', badgeColor:'#fff',        label:'Koy',        bg:['#1A5060','#0D3040'] },
@@ -1764,9 +1764,10 @@ function pageInit() {
     const daySeed = Math.floor(Date.now() / 86400000);
     function placeHash(str) { let h = daySeed; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) & 0xFFFFFF; return h; }
     const places = [...allPlaces].sort((a, b) => placeHash(a.id) - placeHash(b.id)).slice(0, 8);
-    // Gerçek kategoriyi belirle (badgeText varsa ona göre)
+    // Gerçek kategoriyi belirle
     function resolveCat(p) {
-      if (p.badgeText === 'Müze' || p.badgeText === 'Muze') return 'muze';
+      if (p.category === 'muze') return 'muze';
+      if (p.badgeText && (p.badgeText.toLowerCase().indexOf('ze') > -1 || p.badgeText.toLowerCase().indexOf('muze') > -1)) return 'muze';
       return p.category;
     }
 
@@ -1799,7 +1800,11 @@ function pageInit() {
       '</div>';
     }).join('');
     scrollFadeIn();
-  })();
+  };
+  renderHomePlaces();
+
+  // Firebase güncel veri gelince yeniden render
+  document.addEventListener('dataReady', function() { if (window.renderHomePlaces) renderHomePlaces(); });
 
   /* ── PLACE FILTER ── */
   function filterPlaces(btn, cat) {

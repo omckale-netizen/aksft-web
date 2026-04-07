@@ -719,7 +719,7 @@ window.DATA = {
       "id": "adatepe-zeytinyagi-muzesi",
       "title": "Adatepe Zeytinyağı Müzesi",
       "emoji": "🫒",
-      "category": "tarihi",
+      "category": "muze",
       "bgGradient": "linear-gradient(135deg,#3A4A20,#2A3818)",
       "badgeBg": "rgba(90,122,86,0.75)",
       "badgeColor": "#fff",
