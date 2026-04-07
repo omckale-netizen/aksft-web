@@ -731,8 +731,9 @@ function pageInit() {
           <div class="prac-icon">🚗</div>
           <div class="prac-title">Ulaşım</div>
           <div class="prac-item">İstanbul'dan ~5 saat (Çanakkale üzerinden)</div>
-          <div class="prac-item">İzmir'den ~3 saat (Edremit-Ayvacık)</div>
+          <div class="prac-item">İzmir'den ~3 saat (Edremit–Ayvacık)</div>
           <div class="prac-item">Çanakkale'den ~1.5 saat</div>
+          <div class="prac-item">Bağlı olduğu ilçe: Ayvacık / Çanakkale</div>
           <div class="prac-item">Bölgede araç kiralamak şart</div>
           <div class="prac-item">Toplu taşıma: Ayvacık'a otobüs, sonra minibüs</div>
         </div>
@@ -749,26 +750,6 @@ function pageInit() {
           <div class="prac-item">1 günlük gezi için konaklama gerekmez</div>
           <div class="prac-item">Kalmak isterseniz: Behramkale veya liman civarı</div>
           <div class="prac-item">En az 2 gece kalmanızı öneririz</div>
-          `}
-        </div>
-        <div class="prac-card fade-up" data-delay=".12">
-          <div class="prac-icon">💰</div>
-          <div class="prac-title">Bütçe Tahmini</div>
-          ${sel.sure === '1gun' ? `
-          <div class="prac-item">Yakıt: ~500–800 ₺</div>
-          <div class="prac-item">Yemek: ~400–700 ₺/kişi</div>
-          <div class="prac-item">Antik kent girişi: ~200 ₺ (Müzekart geçerli)</div>
-          <div class="prac-item">Toplam: ~1100–1700 ₺/kişi</div>
-          ` : sel.sure === '2gun' ? `
-          <div class="prac-item">Konaklama: ~1500–3000 ₺/gece</div>
-          <div class="prac-item">Yemek: ~700 ₺/gün/kişi</div>
-          <div class="prac-item">Aktiviteler: ~400 ₺</div>
-          <div class="prac-item">Toplam: ~3500–5000 ₺/kişi</div>
-          ` : `
-          <div class="prac-item">Konaklama: ~1500–3000 ₺/gece</div>
-          <div class="prac-item">Yemek: ~700 ₺/gün/kişi</div>
-          <div class="prac-item">Aktiviteler + giriş: ~600 ₺</div>
-          <div class="prac-item">3 gün toplam: ~7000–12000 ₺/kişi</div>
           `}
         </div>
         <div class="prac-card fade-up" data-delay=".18">
@@ -892,16 +873,24 @@ function pageInit() {
       '🌙 İnce bir üst (akşam serinler)',
     ].filter(Boolean);
 
-    document.getElementById('plan-checklist').innerHTML = `
-      <div class="check-grid">
+    const checkEl = document.getElementById('plan-checklist');
+    checkEl.innerHTML = `
+      <div class="check-grid" id="check-grid">
         ${items.map(item => `
-          <div class="check-item fade-up" onclick="toggleCheck(this)">
+          <div class="check-item fade-up">
             <div class="check-box"></div>
             <span class="check-label">${item}</span>
           </div>`).join('')}
       </div>
       <p style="margin-top:20px;font-size:.78rem;color:var(--text-soft);text-align:center;">Maddelere tıklayarak işaretleyebilirsin.</p>
     `;
+    // Event delegation for checklist
+    document.getElementById('check-grid').addEventListener('click', function(e) {
+      const item = e.target.closest('.check-item');
+      if (!item) return;
+      item.classList.toggle('checked');
+      item.querySelector('.check-box').textContent = item.classList.contains('checked') ? '✓' : '';
+    });
   }
 
   function toggleCheck(el) {
