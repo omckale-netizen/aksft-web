@@ -1127,6 +1127,34 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
         </div>
       </div>
 
+      <div class="panel-card" style="max-width:480px;margin-bottom:20px">
+        <div class="panel-card-head"><h3>⭐ Favicon</h3></div>
+        <div style="padding:20px">
+          <div style="display:flex;gap:16px;align-items:center;margin-bottom:16px">
+            <div id="fav-preview" style="width:48px;height:48px;border-radius:8px;background:rgba(0,0,0,.04);display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(0,0,0,.08)">
+              <img id="fav-preview-img" src="" alt="Favicon" style="width:32px;height:32px;display:none">
+              <span id="fav-preview-empty" style="font-size:1.2rem;color:var(--text-muted)">⭐</span>
+            </div>
+            <div>
+              <div style="font-size:.82rem;font-weight:600;color:var(--navy)">Site Faviconu</div>
+              <div style="font-size:.68rem;color:var(--text-muted)">PNG, 32x32 veya 512x512 piksel onerili</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn-primary btn-sm" onclick="document.getElementById('fav-file-input').click()">Favicon Yukle</button>
+            <span id="fav-upload-status" style="font-size:.72rem;color:var(--text-muted)"></span>
+          </div>
+          <input type="file" id="fav-file-input" accept="image/png,image/x-icon,image/svg+xml" style="display:none" onchange="uploadFavicon(this.files[0])">
+          <div id="fav-url-box" style="display:none;margin-top:12px">
+            <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Favicon URL</label>
+            <div style="display:flex;gap:6px">
+              <input type="text" id="fav-url-display" readonly style="flex:1;padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.72rem;background:rgba(0,0,0,.02);color:var(--text)">
+              <button class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText(document.getElementById('fav-url-display').value);showToast('URL kopyalandi','success')">Kopyala</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="panel-card" style="max-width:480px">
         <div class="panel-card-head"><h3>🔒 Sifre Degistir</h3></div>
         <div style="padding:20px">
@@ -1617,8 +1645,89 @@ function showLogoPreview(url) {
 async function loadLogoPreview() {
   try {
     const doc = await db.collection('settings').doc('site').get();
-    if (doc.exists && doc.data().logoUrl) showLogoPreview(doc.data().logoUrl);
+    if (doc.exists) {
+      if (doc.data().logoUrl) showLogoPreview(doc.data().logoUrl);
+      if (doc.data().faviconUrl) showFavPreview(doc.data().faviconUrl);
+    }
   } catch(e) {}
+}
+
+// Favicon yükleme
+async function uploadFavicon(file) {
+  if (!file) return;
+  const statusEl = document.getElementById('fav-upload-status');
+  statusEl.textContent = 'Yukleniyor...';
+
+  try {
+    // Canvas ile 32x32 ve 180x180 boyutlarında favicon oluştur
+    const dataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    // 32x32 favicon
+    const img32 = await createFaviconSize(dataUrl, 32);
+    const ref32 = firebase.storage().ref('site/favicon-32.png');
+    await ref32.put(img32, { contentType: 'image/png' });
+    const url32 = await ref32.getDownloadURL();
+
+    // 180x180 apple-touch-icon
+    const img180 = await createFaviconSize(dataUrl, 180);
+    const ref180 = firebase.storage().ref('site/favicon-180.png');
+    await ref180.put(img180, { contentType: 'image/png' });
+    const url180 = await ref180.getDownloadURL();
+
+    // 512x512 (PWA icon)
+    const img512 = await createFaviconSize(dataUrl, 512);
+    const ref512 = firebase.storage().ref('site/favicon-512.png');
+    await ref512.put(img512, { contentType: 'image/png' });
+    const url512 = await ref512.getDownloadURL();
+
+    await db.collection('settings').doc('site').set({
+      faviconUrl: url32,
+      faviconUrl180: url180,
+      faviconUrl512: url512,
+      faviconUpdatedAt: new Date().toISOString()
+    }, { merge: true });
+
+    statusEl.textContent = 'Yuklendi!';
+    showFavPreview(url32);
+    showToast('Favicon guncellendi.', 'success');
+  } catch(err) {
+    console.error('Favicon upload error:', err);
+    statusEl.textContent = 'Hata!';
+    showToast('Favicon yuklenemedi: ' + err.message, 'error');
+  }
+}
+
+function createFaviconSize(dataUrl, size) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, size, size);
+      canvas.toBlob(resolve, 'image/png');
+    };
+    img.src = dataUrl;
+  });
+}
+
+function showFavPreview(url) {
+  const img = document.getElementById('fav-preview-img');
+  const empty = document.getElementById('fav-preview-empty');
+  const urlBox = document.getElementById('fav-url-box');
+  const urlInput = document.getElementById('fav-url-display');
+  if (url) {
+    img.src = url; img.style.display = ''; empty.style.display = 'none';
+    urlBox.style.display = ''; urlInput.value = url;
+  } else {
+    img.style.display = 'none'; empty.style.display = ''; urlBox.style.display = 'none';
+  }
 }
 
 // Auto-login if session exists

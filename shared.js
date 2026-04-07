@@ -18,6 +18,35 @@ function escAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/'/g,'&#39;
   });
 })();
 
+/* ── Favicon (cache + Firebase) ── */
+(function() {
+  var fav32 = localStorage.getItem('site_favicon_url') || '';
+  var fav180 = localStorage.getItem('site_favicon_180') || '';
+  function setFavicons(url32, url180) {
+    if (url32) {
+      var existing = document.querySelector('link[rel="icon"]');
+      if (existing) existing.href = url32;
+      else { var l = document.createElement('link'); l.rel = 'icon'; l.type = 'image/png'; l.sizes = '32x32'; l.href = url32; document.head.appendChild(l); }
+    }
+    if (url180) {
+      var existing2 = document.querySelector('link[rel="apple-touch-icon"]');
+      if (existing2) existing2.href = url180;
+      else { var l2 = document.createElement('link'); l2.rel = 'apple-touch-icon'; l2.sizes = '180x180'; l2.href = url180; document.head.appendChild(l2); }
+    }
+  }
+  if (fav32) setFavicons(fav32, fav180);
+  document.addEventListener('dataReady', function() {
+    if (typeof firebase === 'undefined' || !firebase.firestore) return;
+    firebase.firestore().collection('settings').doc('site').get().then(function(doc) {
+      if (doc.exists) {
+        var d = doc.data();
+        if (d.faviconUrl) { localStorage.setItem('site_favicon_url', d.faviconUrl); setFavicons(d.faviconUrl, d.faviconUrl180); }
+        if (d.faviconUrl180) localStorage.setItem('site_favicon_180', d.faviconUrl180);
+      }
+    }).catch(function() {});
+  });
+})();
+
 /* ── Site logo (cache + Firebase) ── */
 var SITE_LOGO = localStorage.getItem('site_logo_url') || '';
 // Cache'deki logo varsa preload et (tarayıcı cache'ine alır, render anında anında görünür)
