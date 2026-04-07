@@ -941,6 +941,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
               <label>Konum</label>
               <input type="text" id="vpf-location" placeholder="Konum">
             </div>
+            <div class="form-group" id="vpf-coords-group">
+              <label>Koordinat <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(Google Maps'ten kopyala: 39.4907, 26.3380)</span></label>
+              <input type="text" id="vpf-coords" placeholder="39.4907, 26.3380" oninput="parseVPCoords(this.value)">
+              <input type="hidden" id="vpf-lat">
+              <input type="hidden" id="vpf-lng">
+            </div>
             <div class="form-group">
               <label>Kisa Aciklama</label>
               <textarea id="vpf-shortDesc" rows="2" placeholder="Kisa tanitim"></textarea>
@@ -3592,6 +3598,19 @@ function parseCoords(val) {
   }
 }
 
+function parseVPCoords(val) {
+  if (!val) return;
+  const parts = val.split(',').map(s => s.trim());
+  if (parts.length === 2) {
+    const lat = parseFloat(parts[0]);
+    const lng = parseFloat(parts[1]);
+    if (!isNaN(lat) && !isNaN(lng)) {
+      document.getElementById('vpf-lat').value = lat;
+      document.getElementById('vpf-lng').value = lng;
+    }
+  }
+}
+
 function closeVenueModal() {
   document.getElementById('venue-modal').classList.remove('show');
   editingVenueId = null;
@@ -4066,6 +4085,7 @@ function openVPModal(id) {
 
   document.getElementById('vpf-cat-group').style.display = isPlaces ? '' : 'none';
   document.getElementById('vpf-loc-group').style.display = isPlaces ? '' : 'none';
+  document.getElementById('vpf-coords-group').style.display = isPlaces ? '' : 'none';
 
   if (id) {
     const arr = isPlaces ? draftData.places : draftData.villages;
@@ -4081,12 +4101,18 @@ function openVPModal(id) {
     if (isPlaces) {
       document.getElementById('vpf-category').value = item.category || '';
       document.getElementById('vpf-location').value = item.location || '';
+      document.getElementById('vpf-lat').value = item.lat || '';
+      document.getElementById('vpf-lng').value = item.lng || '';
+      document.getElementById('vpf-coords').value = (item.lat && item.lng) ? item.lat + ', ' + item.lng : '';
     }
     // Fotoğraf preview
     vpShowImgPreview(item.image || '');
   } else {
     document.getElementById('vp-modal-title').textContent = isPlaces ? 'Yeni Yer Ekle' : 'Yeni Koy Ekle';
     document.getElementById('vpf-id').value = '';
+    document.getElementById('vpf-lat').value = '';
+    document.getElementById('vpf-lng').value = '';
+    document.getElementById('vpf-coords').value = '';
     vpShowImgPreview('');
   }
   vpPendingImg = null;
@@ -4164,6 +4190,8 @@ async function saveVP(e) {
       badgeColor: catDef.badgeColor,
       badgeText: catDef.badgeText,
       location: document.getElementById('vpf-location').value.trim(),
+      lat: parseFloat(document.getElementById('vpf-lat').value) || null,
+      lng: parseFloat(document.getElementById('vpf-lng').value) || null,
     };
     if (!editingVPId) { placePatch.image = ''; placePatch.imagePos = 50; }
     Object.assign(item, placePatch);
