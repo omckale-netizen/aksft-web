@@ -37,8 +37,7 @@ function pageInit() {
     if (descMeta) descMeta.content = route.shortDesc || '';
   }
 }
-pageInit();
-document.addEventListener('firebaseDataUpdated', pageInit);
+document.addEventListener('dataReady', pageInit);
 </script>
 </body>
 </html>

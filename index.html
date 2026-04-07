@@ -1966,9 +1966,8 @@ function pageInit() {
   window.filterVenues = filterVenues;
   window.toggleGuide = toggleGuide;
 }
-pageInit();
+document.addEventListener('dataReady', pageInit);
 // Firebase verisi geldiğinde mekan/yer kartlarını güncelle
-document.addEventListener('firebaseDataUpdated', pageInit);
 </script>
 
 </body>

@@ -40,9 +40,8 @@ function pageInit() {
     if (descMeta) descMeta.content = venue.shortDesc || '';
   }
 }
-pageInit();
+document.addEventListener('dataReady', pageInit);
 // Firebase verisi geldiğinde yeniden render et (güncel görseller için)
-document.addEventListener('firebaseDataUpdated', pageInit);
 </script>
 </body>
 </html>

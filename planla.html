@@ -917,7 +917,7 @@ function pageInit() {
   window.toggleCheck = toggleCheck;
   window.resetPlan = resetPlan;
 }
-pageInit();
+document.addEventListener('dataReady', pageInit);
 </script>
 </body>
 </html>

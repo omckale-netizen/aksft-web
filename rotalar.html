@@ -819,7 +819,7 @@ function pageInit() {
   window.closeRoute = closeRoute;
   window.shareRoute = shareRoute;
 }
-pageInit();
+document.addEventListener('dataReady', pageInit);
 </script>
 </body>
 </html>

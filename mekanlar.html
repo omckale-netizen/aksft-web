@@ -941,11 +941,7 @@ function pageInit() {
   window.renderFeatured = renderFeatured;
   window.renderGrid = renderGrid;
 }
-pageInit();
-document.addEventListener('firebaseDataUpdated', function() {
-  if (window.renderFeatured) window.renderFeatured();
-  if (window.renderGrid) window.renderGrid();
-});
+document.addEventListener('dataReady', pageInit);
 </script>
 </body>
 </html>

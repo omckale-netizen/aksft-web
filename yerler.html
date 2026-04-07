@@ -368,10 +368,7 @@ function pageInit() {
 
   renderGrid();
 }
-pageInit();
-document.addEventListener('firebaseDataUpdated', function() {
-  if (window.renderPlacesGrid) window.renderPlacesGrid();
-});
+document.addEventListener('dataReady', pageInit);
 </script>
 </body>
 </html>
