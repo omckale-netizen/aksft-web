@@ -1662,29 +1662,43 @@ function renderVenuePage(venueId) {
     'bar':           ['🍸 Akşam keyfini özel kokteyller ile taçlandırın','🍸 Günbatımı eşliğinde bir kadeh kaldırın'],
     'peynir':        ['🧀 Yerel çiftlik peynirlerinin eşsiz lezzeti','🧀 Bölgenin en iyi peynirlerini tadın'],
   };
-  function generateHighlights(tags) {
-    if (!tags || tags.length === 0) return [];
+  function generateHighlights(tags, description) {
     const used = new Set();
     const result = [];
-    for (const tag of tags) {
-      if (result.length >= 4) break;
-      const lower = tag.toLowerCase().trim();
-      let sentences = TAG_SENTENCES[lower];
-      if (!sentences) {
-        for (const [key, val] of Object.entries(TAG_SENTENCES)) {
-          if (lower.includes(key) || key.includes(lower)) { sentences = val; break; }
+
+    // 1. Önce etiketlerden
+    if (tags && tags.length > 0) {
+      for (const tag of tags) {
+        if (result.length >= 4) break;
+        const lower = tag.toLowerCase().trim();
+        let sentences = TAG_SENTENCES[lower];
+        if (!sentences) {
+          for (const [key, val] of Object.entries(TAG_SENTENCES)) {
+            if (lower.includes(key) || key.includes(lower)) { sentences = val; break; }
+          }
+        }
+        if (sentences) {
+          const pick = sentences[result.length % sentences.length];
+          if (!used.has(pick)) { result.push(pick); used.add(pick); }
         }
       }
-      if (sentences) {
-        const pick = sentences[result.length % sentences.length];
-        if (!used.has(pick)) { result.push(pick); used.add(pick); }
-      } else {
-        result.push('✦ ' + tag.charAt(0).toUpperCase() + tag.slice(1));
+    }
+
+    // 2. Etiketlerden 4 çıkmadıysa, hakkında metninden anahtar kelime tara
+    if (result.length < 4 && description) {
+      const desc = description.toLowerCase();
+      for (const [key, val] of Object.entries(TAG_SENTENCES)) {
+        if (result.length >= 4) break;
+        if (desc.includes(key)) {
+          const pick = val[result.length % val.length];
+          if (!used.has(pick)) { result.push(pick); used.add(pick); }
+        }
       }
     }
+
     return result;
   }
-  const highlights = generateHighlights(v.tags);
+  const highlights = generateHighlights(v.tags, v.description || v.shortDesc);
 
   /* ── Related data ── */
   const similar      = DATA.venues.filter(x => x.id !== v.id && x.category === v.category).slice(0,6);
