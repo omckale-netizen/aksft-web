@@ -245,6 +245,7 @@
       <button class="filter-btn" onclick="filterPlaces(this,'koy')">🌊 Koy</button>
       <button class="filter-btn" onclick="filterPlaces(this,'koyu')">🏘 Köy</button>
       <button class="filter-btn" onclick="filterPlaces(this,'iskele')">⚓ İskele</button>
+      <button class="filter-btn" onclick="filterPlaces(this,'muze')">📜 Müze</button>
     </div>
 
     <div id="places-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;"></div>
@@ -285,6 +286,7 @@ function pageInit() {
     koy:    { bg: ['#1A5060','#0D3040'], badge: 'rgba(26,107,138,.75)', label: 'Koy' },
     koyu:   { bg: ['#3A2A1A','#5A3C20'], badge: 'rgba(196,82,26,.75)', label: 'Köy' },
     iskele: { bg: ['#1A3050','#0D2040'], badge: 'rgba(26,39,68,.75)', label: 'İskele' },
+    muze:   { bg: ['#3A4A20','#2A3818'], badge: 'rgba(90,122,86,.75)', label: 'Müze' },
   };
 
   let activeFilter = 'all';
@@ -360,11 +362,14 @@ function pageInit() {
   window.filterPlaces = filterPlaces;
   window.openPlace = openPlace;
   window.closeModal = closeModal;
+  window.renderPlacesGrid = renderGrid;
 
   renderGrid();
 }
 pageInit();
-document.addEventListener('firebaseDataUpdated', pageInit);
+document.addEventListener('firebaseDataUpdated', function() {
+  if (window.renderPlacesGrid) window.renderPlacesGrid();
+});
 </script>
 </body>
 </html>

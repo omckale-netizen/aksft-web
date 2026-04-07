@@ -656,6 +656,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
                 <option value="koy">🌊 Koy</option>
                 <option value="koyu">🏘 Koy</option>
                 <option value="iskele">⚓ Iskele</option>
+                <option value="muze">📜 Muze</option>
               </select>
             </div>
             <div class="form-group">
@@ -831,6 +832,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
                 <option value="koy">Koy</option>
                 <option value="koyu">Köy</option>
                 <option value="iskele">İskele</option>
+                <option value="muze">Müze</option>
               </select>
             </div>
             <!-- Location — only for places -->
@@ -3696,12 +3698,13 @@ let pbotStartPos = 50;
 /* ══════════════════════════════════════════════════
    PLACE BOT (improved with approval)
 ══════════════════════════════════════════════════ */
-const PBOT_CAT_EMOJIS = { tarihi:'🏛', koy:'🌊', koyu:'🏘', iskele:'⚓' };
+const PBOT_CAT_EMOJIS = { tarihi:'🏛', koy:'🌊', koyu:'🏘', iskele:'⚓', muze:'📜' };
 const PLACE_CAT_DEFAULTS = {
   tarihi: { bgGradient:'linear-gradient(135deg,#2A3F6A,#1A2744)', badgeBg:'rgba(26,39,68,0.7)', badgeColor:'#F5EDE0', badgeText:'Antik Alan' },
   koy:    { bgGradient:'linear-gradient(135deg,#1A5060,#0D3040)', badgeBg:'rgba(26,107,138,0.75)', badgeColor:'#fff', badgeText:'Koy' },
   koyu:   { bgGradient:'linear-gradient(135deg,#3A2A1A,#5A3C20)', badgeBg:'rgba(196,82,26,0.75)', badgeColor:'#fff', badgeText:'Köy' },
   iskele: { bgGradient:'linear-gradient(135deg,#1A3050,#0D2040)', badgeBg:'rgba(26,39,68,0.75)', badgeColor:'#F5EDE0', badgeText:'İskele' },
+  muze:   { bgGradient:'linear-gradient(135deg,#3A4A20,#2A3818)', badgeBg:'rgba(90,122,86,0.75)', badgeColor:'#fff', badgeText:'Müze' },
 };
 
 function pbotAutoCatEmoji() {
