@@ -722,70 +722,60 @@
       max-width: 420px;
       margin: 0 auto 36px;
     }
-    .hero-search-area { max-width: 560px; width: 100%; margin: 0 auto; position: relative; z-index: 100; }
+    .hero-search-area { max-width: 520px; width: 100%; margin: 0 auto; position: relative; z-index: 100; }
     .hero-search-wrap {
       width: 100%;
-      background: rgba(255,255,255,.08);
-      backdrop-filter: blur(28px);
-      -webkit-backdrop-filter: blur(28px);
-      border: 1.5px solid rgba(255,255,255,.12);
-      border-radius: 16px;
-      padding: 6px 6px 6px 20px;
+      background: rgba(255,255,255,.06);
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 999px;
+      padding: 5px 5px 5px 22px;
       display: flex;
       align-items: center;
-      gap: 12px;
-      box-shadow: 0 12px 48px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.1);
-      transition: border-color .3s, box-shadow .3s;
+      gap: 10px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.2);
+      transition: border-color .3s, box-shadow .3s, background .3s;
     }
     .hero-search-wrap:focus-within {
-      border-color: rgba(212,147,90,.5);
-      box-shadow: 0 12px 48px rgba(0,0,0,.25), 0 0 0 4px rgba(212,147,90,.12), inset 0 1px 0 rgba(255,255,255,.1);
+      background: rgba(255,255,255,.1);
+      border-color: rgba(212,147,90,.4);
+      box-shadow: 0 8px 32px rgba(0,0,0,.2), 0 0 0 3px rgba(212,147,90,.1);
     }
-    .hero-search-wrap svg.hs-icon { flex-shrink: 0; opacity: .4; transition: opacity .2s; }
-    .hero-search-wrap:focus-within svg.hs-icon { opacity: .7; }
+    .hero-search-wrap svg.hs-icon { flex-shrink: 0; opacity: .3; transition: opacity .2s; }
+    .hero-search-wrap:focus-within svg.hs-icon { opacity: .6; }
     .hero-search-wrap input {
       flex: 1; min-width: 0;
       background: transparent; border: none; outline: none;
       color: var(--cream);
       font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: .92rem;
+      font-size: .88rem;
       font-weight: 500;
       caret-color: var(--amber);
     }
-    .hero-search-wrap input::placeholder { color: rgba(245,237,224,.28); }
+    .hero-search-wrap input::placeholder { color: rgba(245,237,224,.25); }
     .hero-search-btn {
       flex-shrink: 0;
       background: var(--terra);
       color: #fff;
       border: none;
-      border-radius: 11px;
-      padding: 11px 24px;
+      border-radius: 999px;
+      padding: 10px 22px;
       font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: .82rem;
+      font-size: .8rem;
       font-weight: 700;
       cursor: pointer;
       transition: background .2s, transform .2s, box-shadow .2s;
       white-space: nowrap;
     }
-    .hero-search-btn:hover { background: var(--terra-light); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(196,82,26,.35); }
-    .hero-search-shortcuts {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 6px;
-      margin-top: 14px;
+    .hero-search-btn:hover { background: var(--terra-light); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(196,82,26,.3); }
+    .hero-search-hint {
+      text-align: center;
+      margin-top: 12px;
+      font-size: .68rem;
+      color: rgba(245,237,224,.2);
+      font-weight: 500;
     }
-    .hero-shortcut {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 5px 12px; border-radius: 999px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.08);
-      color: rgba(245,237,224,.45);
-      font-size: .7rem; font-weight: 600;
-      cursor: pointer; transition: all .2s;
-      text-decoration: none; white-space: nowrap;
-    }
-    .hero-shortcut:hover { background: rgba(255,255,255,.12); color: rgba(245,237,224,.8); border-color: rgba(255,255,255,.18); }
 
 
     /* Bottom glass nav tiles */
@@ -933,16 +923,10 @@
         <div class="hero-search-area" data-search-wrapper>
           <div class="hero-search-wrap">
             <svg class="hs-icon" width="16" height="16" fill="none" stroke="rgba(245,237,224,.5)" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input type="text" id="hero-search-input" placeholder="Nereyi keşfetmek istersin?" aria-label="Keşif arama" autocomplete="off">
-            <button class="hero-search-btn" aria-label="Arama yap" onclick="heroSearchSubmit()">Keşfet →</button>
+            <input type="text" id="hero-search-input" placeholder="Mekan, yer veya rota ara..." aria-label="Keşif arama" autocomplete="off">
+            <button class="hero-search-btn" aria-label="Arama yap" onclick="heroSearchSubmit()">Keşfet</button>
           </div>
-          <div class="hero-search-shortcuts">
-            <a class="hero-shortcut" onclick="heroQuickSearch('Athena Tapınağı')">🏛 Athena Tapınağı</a>
-            <a class="hero-shortcut" onclick="heroQuickSearch('Kadırga')">🌊 Kadırga Koyu</a>
-            <a class="hero-shortcut" onclick="heroQuickSearch('kahvaltı')">🥚 Kahvaltı</a>
-            <a class="hero-shortcut" onclick="heroQuickSearch('gün batımı')">🌅 Gün Batımı</a>
-            <a class="hero-shortcut" onclick="heroQuickSearch('Babakale')">⚓ Babakale</a>
-          </div>
+          <p class="hero-search-hint">Rotalar, mekanlar, köyler ve tarihi alanlar arasında arayın</p>
         </div>
 
       </div>
@@ -1671,7 +1655,7 @@
 
 <script src="firebase-loader.js"></script>
 <script src="data.js"></script>
-<script src="shared.js?v=15"></script>
+<script src="shared.js?v=16"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: true });
