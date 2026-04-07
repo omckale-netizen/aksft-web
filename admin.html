@@ -66,6 +66,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 .admin-nav-item:hover{background:rgba(255,255,255,.07);color:#fff}
 .admin-nav-item.active{background:var(--terra);color:#fff;font-weight:600}
 .admin-nav-item .nav-icon{font-size:1.1rem;width:24px;text-align:center;flex-shrink:0}
+.nav-group-label{font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:18px 14px 6px;margin-top:4px}
 .admin-nav-sep{height:1px;background:rgba(255,255,255,.08);margin:12px 14px}
 .admin-nav-bottom{padding:12px;border-top:1px solid rgba(255,255,255,.08)}
 
@@ -315,39 +316,47 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
   <nav class="admin-sidebar" id="admin-sidebar">
     <div class="admin-logo">Assos'u Kesfet<br><small>Yonetim Paneli</small></div>
     <div class="admin-nav">
+
       <a class="admin-nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
-        <span class="nav-icon">&#128202;</span> Genel Bakis
+        <span class="nav-icon">📊</span> Genel Bakis
       </a>
+
+      <div class="nav-group-label">Icerik Yonetimi</div>
       <a class="admin-nav-item" data-page="venues" onclick="showPage('venues')">
-        <span class="nav-icon">&#127978;</span> Mekanlar
+        <span class="nav-icon">🏪</span> Mekanlar
       </a>
+      <a class="admin-nav-item" data-page="routes" onclick="showPage('routes')">
+        <span class="nav-icon">🗺</span> Rotalar
+      </a>
+      <a class="admin-nav-item" data-page="villages" onclick="showPage('villages')">
+        <span class="nav-icon">🏘</span> Koyler & Yerler
+      </a>
+
+      <div class="nav-group-label">Botlar</div>
       <a class="admin-nav-item" data-page="bot" onclick="showPage('bot')">
-        <span class="nav-icon">&#129302;</span> Mekan Botu
+        <span class="nav-icon">🤖</span> Mekan Botu
       </a>
       <a class="admin-nav-item" data-page="placebot" onclick="showPage('placebot')">
         <span class="nav-icon">📍</span> Yer Botu
       </a>
-      <a class="admin-nav-item" data-page="routes" onclick="showPage('routes')">
-        <span class="nav-icon">&#128506;</span> Rotalar
-      </a>
-      <a class="admin-nav-item" data-page="villages" onclick="showPage('villages')">
-        <span class="nav-icon">&#127960;</span> Koyler & Yerler
-      </a>
-      <a class="admin-nav-item" data-page="export" onclick="showPage('export')">
-        <span class="nav-icon">&#128230;</span> Disa Aktar
-      </a>
-      <a class="admin-nav-item" data-page="settings" onclick="showPage('settings')">
-        <span class="nav-icon">⚙️</span> Ayarlar
-      </a>
+
+      <div class="nav-group-label">Iletisim & Analiz</div>
       <a class="admin-nav-item" data-page="messages" onclick="showPage('messages')">
         <span class="nav-icon">✉️</span> Mesajlar <span id="msg-badge" style="background:var(--red);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;display:none"></span>
       </a>
       <a class="admin-nav-item" data-page="analytics" onclick="showPage('analytics')">
-        <span class="nav-icon">📊</span> Istatistikler
+        <span class="nav-icon">📈</span> Istatistikler
       </a>
+
       <div class="admin-nav-sep"></div>
+      <a class="admin-nav-item" data-page="export" onclick="showPage('export')">
+        <span class="nav-icon">📦</span> Yedekleme
+      </a>
+      <a class="admin-nav-item" data-page="settings" onclick="showPage('settings')">
+        <span class="nav-icon">⚙️</span> Ayarlar
+      </a>
       <a class="admin-nav-item" onclick="logout()">
-        <span class="nav-icon">&#128682;</span> Cikis
+        <span class="nav-icon">🚪</span> Cikis
       </a>
     </div>
   </nav>
