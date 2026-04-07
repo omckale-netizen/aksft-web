@@ -628,10 +628,12 @@ function renderNav(opts = {}) {
 
   window.clearAllSaves = function () {
     localStorage.removeItem(SD_KEY);
+    localStorage.removeItem(SD_PLACE_KEY);
     renderSaveDrawer();
     window.updateSaveNavCount();
-    document.querySelectorAll('.save-btn').forEach(btn => {
+    document.querySelectorAll('.save-btn, .place-save-btn').forEach(btn => {
       btn.classList.remove('saved');
+      if (btn.classList.contains('place-save-btn')) { btn.textContent = '♡'; return; }
       const icon = btn.querySelector('.act-icon, #vp-save-icon');
       const label = btn.querySelector('.act-label, #vp-save-label');
       if (icon)  icon.textContent  = '♡';
