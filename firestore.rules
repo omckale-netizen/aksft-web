@@ -1,0 +1,69 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Yardimci: Admin mi kontrol et
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'info@onyedimedya.com';
+    }
+
+    // Herkes okuyabilir, sadece admin yazabilir
+    match /venues/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /places/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /villages/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /routes/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Iletisim mesajlari: herkes yazabilir, sadece admin okuyabilir/silebilir
+    match /messages/{docId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Analitik: herkes yazabilir (anonim kullanici izleme), sadece admin okuyabilir
+    match /analytics/{docId} {
+      allow create, update: if true;
+      allow read, delete: if isAdmin();
+    }
+
+    match /analytics_events/{docId} {
+      allow create: if true;
+      allow read, delete: if isAdmin();
+    }
+
+    // Favoriler: herkes okuyabilir/yazabilir (paylasim kodu ile senkron)
+    match /favorites/{docId} {
+      allow read, write: if true;
+    }
+
+    // Bot onay bekleyenler: herkes yazabilir, sadece admin yonetebilir
+    match /pending_venues/{docId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /pending_places/{docId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Diger tum koleksiyonlar: varsayilan olarak engelle
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

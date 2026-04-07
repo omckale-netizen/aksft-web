@@ -18,9 +18,13 @@
   // Firebase SDK yükle
   var s1 = document.createElement('script');
   s1.src = 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js';
+  s1.crossOrigin = 'anonymous';
+  s1.integrity = 'sha384-4DnN3LMk363cZnO0ZZ+46dvN6+1On5ODUbq/68J4ZeSDAghncVXodw2jecSmTyAe';
   s1.onload = function() {
     var s2 = document.createElement('script');
     s2.src = 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js';
+    s2.crossOrigin = 'anonymous';
+    s2.integrity = 'sha384-OWv+RYFfLxKnRm2S6RYMcxn1Un3vxC0dbSWy7XC9DKsJGGHMWBCbDV27k62l/2XK';
     s2.onload = initFirebase;
     s2.onerror = fallback;
     document.head.appendChild(s2);

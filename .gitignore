@@ -2,3 +2,6 @@
 .claude/
 temporary screenshots/
 node_modules/
+migrate-to-firebase.html
+sync-to-firebase.html
+sync-from-firebase.html

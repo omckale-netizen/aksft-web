@@ -6,10 +6,10 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Assos'u Kesfet - Yonetim Paneli</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js" crossorigin="anonymous" integrity="sha384-4DnN3LMk363cZnO0ZZ+46dvN6+1On5ODUbq/68J4ZeSDAghncVXodw2jecSmTyAe"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js" crossorigin="anonymous" integrity="sha384-OWv+RYFfLxKnRm2S6RYMcxn1Un3vxC0dbSWy7XC9DKsJGGHMWBCbDV27k62l/2XK"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js" crossorigin="anonymous" integrity="sha384-XkNx6yfzInowq3eeLw+tOjPN3eJZ5kjET5iIbCABcI8RkLWOr6XAtva7++KOxiqp"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-storage-compat.js" crossorigin="anonymous" integrity="sha384-5RO7AQJ51T1u3BV84KGn4xVulsFE2gbaUebkDJe5jPVSm0+NN34/wzUp/vZugodK"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -1394,6 +1394,8 @@ async function checkAuth() {
     document.getElementById('admin-wrap').style.display = 'flex';
     await loadDataFromFirestore();
     initApp();
+    // Telegram bildirim
+    fetch('https://api.telegram.org/bot8663187115:AAFDnQIOsEbBaDUXu_gUGhCHjSH2QuNfa58/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:564543310,text:'🔐 Admin panele giris yapildi\n📅 '+new Date().toLocaleString('tr-TR')+'\n👤 '+email})}).catch(()=>{});
   } catch(err) {
     if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
       errEl.textContent = 'E-posta veya sifre hatali.';
@@ -1518,7 +1520,7 @@ async function renderMessages() {
     updateMsgBadge();
     renderMessageList();
   } catch(err) {
-    document.getElementById('messages-list').innerHTML = '<div style="padding:24px;color:var(--red)">Mesajlar yuklenemedi: ' + err.message + '</div>';
+    const msgErr = document.createElement('div'); msgErr.style.cssText = 'padding:24px;color:var(--red)'; msgErr.textContent = 'Mesajlar yuklenemedi: ' + err.message; document.getElementById('messages-list').innerHTML = ''; document.getElementById('messages-list').appendChild(msgErr);
   }
 }
 
@@ -1928,7 +1930,7 @@ async function renderAnalytics() {
 
   } catch(err) {
     console.error('Analytics error:', err);
-    document.getElementById('analytics-stats').innerHTML = '<div style="padding:24px;color:var(--red)">Istatistik yuklenemedi: ' + err.message + '</div>';
+    const anaErr = document.createElement('div'); anaErr.style.cssText = 'padding:24px;color:var(--red)'; anaErr.textContent = 'Istatistik yuklenemedi: ' + err.message; document.getElementById('analytics-stats').innerHTML = ''; document.getElementById('analytics-stats').appendChild(anaErr);
   }
 }
 

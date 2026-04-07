@@ -3,6 +3,9 @@
    Nav, Footer, Search, Utilities
 ═══════════════════════════════════════════ */
 
+/* ── HTML attribute escape (XSS koruması) ── */
+function escAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
 /* ── Inject shared CSS ── */
 (function injectStyles() {
   const style = document.createElement('style');
@@ -592,7 +595,7 @@ function renderNav(opts = {}) {
             <div class="sd-venue-name">${v.title}</div>
             <div class="sd-venue-loc">📍 ${v.location}</div>
           </div>
-          <button class="sd-venue-remove" onclick="removeSave('${v.id}',event)" aria-label="Kaldır">✕</button>
+          <button class="sd-venue-remove" onclick="removeSave('${escAttr(v.id)}',event)" aria-label="Kaldır">✕</button>
         </a>`).join('');
       return header + cards;
     }).join('');
@@ -672,7 +675,7 @@ function renderNav(opts = {}) {
         if (statusEl) statusEl.innerHTML = '<span style="color:#38A169">✓ ' + data.venues.length + ' mekan basariyla yuklendi!</span>';
       }
     } catch(err) {
-      if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Yukleme hatasi: ' + err.message + '</span>';
+      if (statusEl) { statusEl.innerHTML = '<span style="color:#E53E3E">Yukleme hatasi: </span>'; statusEl.querySelector('span').appendChild(document.createTextNode(err.message)); }
     }
   };
 
@@ -2035,7 +2038,7 @@ function renderVenuePage(venueId) {
                 <div class="vp-contact-label">Telefon</div>
                 <div class="vp-contact-val">${v.phone || '—'}</div>
               </div>
-              ${v.phone ? `<a href="tel:${v.phone.replace(/\s/g,'')}" class="vp-contact-btn-outline" onclick="event.preventDefault();if(window.trackAction)trackAction('${v.id}','call');setTimeout(()=>{window.location.href=this.href},300)">Ara</a>` : ''}
+              ${v.phone ? `<a href="tel:${v.phone.replace(/\s/g,'')}" class="vp-contact-btn-outline" onclick="event.preventDefault();if(window.trackAction)trackAction('${escAttr(v.id)}','call');setTimeout(()=>{window.location.href=this.href},300)">Ara</a>` : ''}
             </div>
             ${v.category !== 'konaklama' ? `
             <div class="vp-contact-card vp-contact-wa">
@@ -2044,7 +2047,7 @@ function renderVenuePage(venueId) {
                 <div class="vp-contact-label">WhatsApp</div>
                 <div class="vp-contact-val">Mesaj Gönder</div>
               </div>
-              <a href="${waContactUrl}" target="_blank" rel="noopener" class="vp-wa-btn" onclick="if(window.trackAction)trackAction('${v.id}','whatsapp');">WhatsApp ile Yaz</a>
+              <a href="${waContactUrl}" target="_blank" rel="noopener" class="vp-wa-btn" onclick="if(window.trackAction)trackAction('${escAttr(v.id)}','whatsapp');">WhatsApp ile Yaz</a>
             </div>` : ''}
           </div>
           ${v.category === 'konaklama' ? `
@@ -2270,32 +2273,40 @@ function renderVenuePage(venueId) {
         }).catch(() => null);
     }
 
-    // Log event with timestamp + weather
+    // Log event with timestamp + weather (non-blocking)
     function logEvent(type, target, action) {
-      const now = new Date();
-      const ev = {
-        type: type,
-        target: target,
-        action: action || 'view',
-        timestamp: now.toISOString(),
-        date: now.toISOString().split('T')[0],
-        hour: now.getHours()
+      const run = function() {
+        const now = new Date();
+        const ev = {
+          type: type,
+          target: target,
+          action: action || 'view',
+          timestamp: now.toISOString(),
+          date: now.toISOString().split('T')[0],
+          hour: now.getHours()
+        };
+        getWeather().then(w => {
+          if (w) { ev.weather = w.label; ev.temp = w.temp; }
+          adb.collection('analytics_events').add(ev).catch(() => {});
+        });
       };
-      getWeather().then(w => {
-        if (w) { ev.weather = w.label; ev.temp = w.temp; }
-        adb.collection('analytics_events').add(ev).catch(() => {});
-      });
+      if (window.requestIdleCallback) requestIdleCallback(run, { timeout: 3000 });
+      else setTimeout(run, 100);
     }
 
-    // Track page view (counter + event log)
+    // Track page view (counter + event log, non-blocking)
     window.trackPageView = function(pageId) {
       if (!pageId) return;
-      adb.collection('analytics').doc(pageId).set({
-        views: firebase.firestore.FieldValue.increment(1),
-        lastViewed: new Date().toISOString(),
-        id: pageId
-      }, { merge: true }).catch(() => {});
-      logEvent('pageview', pageId);
+      const run = function() {
+        adb.collection('analytics').doc(pageId).set({
+          views: firebase.firestore.FieldValue.increment(1),
+          lastViewed: new Date().toISOString(),
+          id: pageId
+        }, { merge: true }).catch(() => {});
+        logEvent('pageview', pageId);
+      };
+      if (window.requestIdleCallback) requestIdleCallback(run, { timeout: 3000 });
+      else setTimeout(run, 100);
     };
 
     // Track action (counter + event log)

@@ -256,6 +256,8 @@ async function submitContact(e) {
     }
     const db = await waitForFirebase();
     await db.collection('messages').add(msg);
+    // Telegram bildirim
+    fetch('https://api.telegram.org/bot8663187115:AAFDnQIOsEbBaDUXu_gUGhCHjSH2QuNfa58/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:564543310,text:'📩 Yeni iletisim mesaji!\n👤 '+msg.name+'\n📧 '+msg.email+'\n📋 '+msg.subject+'\n💬 '+msg.message.substring(0,200)})}).catch(()=>{});
     status.innerHTML = '<span style="color:#38A169">✓ Mesajiniz basariyla gonderildi! En kisa surede donus yapacagiz.</span>';
     document.getElementById('contact-form').reset();
   } catch(err) {
