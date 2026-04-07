@@ -512,7 +512,7 @@ window.DATA = {
         "tarihi",
         "arkeoloji"
       ],
-      "image": "images/yerler/athena-tapinagi.jpg"
+      "image": ""
     },
     {
       "id": "assos-antik-liman",
@@ -540,7 +540,7 @@ window.DATA = {
         "tarih",
         "ege"
       ],
-      "image": "images/yerler/assos-antik-liman.jpg",
+      "image": "",
       "imagePos": 44
     },
     {
@@ -1164,8 +1164,6 @@ window.DATA = {
       ],
       "hours": "Check-in 14:00",
       "images": [
-        "images/mekanlar/sunaba-kasri-otel/1.jpg",
-        "images/mekanlar/sunaba-kasri-otel/2.jpg"
       ],
       "phone": "0530 946 71 38",
       "address": "Büyükhusun Köyü No:281, Ayvacık / Çanakkale",
@@ -1215,7 +1213,6 @@ window.DATA = {
       ],
       "hours": "",
       "images": [
-        "images/mekanlar/kafe-meraa/1.jpg"
       ],
       "phone": "0542 724 35 26",
       "address": "Küme evleri no:1, 17860 Cemaller/Ayvacık/",
