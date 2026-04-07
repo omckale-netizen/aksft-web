@@ -1935,11 +1935,6 @@ function renderVenuePage(venueId) {
       .vp-sticky-map:hover{background:rgba(26,39,68,.12);}
       @media(max-width:480px){.vp-sticky-name{max-width:120px;}.vp-sticky-btn{padding:8px 12px;font-size:.72rem;}}
 
-      /* ── Scroll to top ── */
-      .vp-scroll-top{position:fixed;bottom:80px;right:24px;z-index:99;width:42px;height:42px;border-radius:50%;background:rgba(26,39,68,.8);color:#fff;border:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transform:translateY(10px);transition:all .3s ease;box-shadow:0 4px 14px rgba(26,39,68,.2);}
-      .vp-scroll-top.show{opacity:1;visibility:visible;transform:translateY(0);}
-      .vp-scroll-top:hover{background:#C4521A;}
-
       /* ── Instagram card ── */
       .vp-ig-card{background:linear-gradient(135deg,#fafafa,#fff);border-radius:18px;padding:22px 26px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 2px 12px rgba(26,39,68,.06);border:1px solid rgba(26,39,68,.06);}
       .vp-ig-left{display:flex;align-items:center;gap:14px;}
@@ -2327,8 +2322,6 @@ function renderVenuePage(venueId) {
       </div>
     </div>
 
-    <!-- Scroll to top -->
-    <button class="vp-scroll-top" id="vp-scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
   `;
 
   /* ── Global event handlers ── */
@@ -2363,16 +2356,12 @@ function renderVenuePage(venueId) {
     if (e.key === 'ArrowLeft') vpLbNav(-1);
   });
 
-  /* ── Sticky bar + Scroll to top ── */
+  /* ── Sticky bar ── */
   (function() {
     const sticky = document.getElementById('vp-sticky');
-    const scrollTop = document.getElementById('vp-scroll-top');
-    let lastY = 0;
     window.addEventListener('scroll', function() {
-      const y = window.scrollY;
-      if (y > 500) { sticky.classList.add('show'); scrollTop.classList.add('show'); }
-      else { sticky.classList.remove('show'); scrollTop.classList.remove('show'); }
-      lastY = y;
+      if (window.scrollY > 500) sticky.classList.add('show');
+      else sticky.classList.remove('show');
     }, { passive: true });
   })();
 
