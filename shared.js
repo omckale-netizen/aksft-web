@@ -1725,16 +1725,16 @@ function renderRoutePage(routeId) {
 /* ── Share helper (used by renderRoutePage) ── */
 function rpShare(id, encodedTitle, encodedDesc) {
   const base = window.location.origin;
-  const url = base + '/rotalar/rota-detay.html?id=' + id;
+  const shareUrl = base + '/rotalar/rota-detay.html?id=' + id;
   const title = decodeURIComponent(encodedTitle) + ' — Assos\'u Keşfet';
   const text  = decodeURIComponent(encodedDesc);
   if (navigator.share) {
-    navigator.share({ title, text, url }).catch(() => {});
+    navigator.share({ title: title, text: text + '\n' + shareUrl }).catch(() => {});
   } else {
-    navigator.clipboard.writeText(url).then(() => {
+    navigator.clipboard.writeText(shareUrl).then(() => {
       const t = document.getElementById('rp-toast');
       if (t) { t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
-    }).catch(() => { prompt('Bu linki kopyala:', url); });
+    }).catch(() => { prompt('Bu linki kopyala:', shareUrl); });
   }
 }
 

@@ -780,18 +780,16 @@ function pageInit() {
   /* ── Share route ── */
   function shareRoute() {
     const id = new URLSearchParams(window.location.search).get('id');
-    const url = window.location.origin + '/rotalar/rota-detay.html?id=' + id;
+    if (!id) { showToast(); return; }
     const route = DATA.routes.find(r => r.id === id);
-    const shareData = {
-      title: (route?.title || 'Rota') + ' — Assos\'u Keşfet',
-      text: route?.shortDesc || 'Assos\'ta keşfedilecek bir rota.',
-      url: url,
-    };
+    const shareUrl = window.location.origin + '/rotalar/rota-detay.html?id=' + id;
+    const title = (route?.title || 'Rota') + ' — Assos\'u Keşfet';
+    const text = route?.shortDesc || 'Assos\'ta keşfedilecek bir rota.';
     if (navigator.share) {
-      navigator.share(shareData).catch(() => {});
+      navigator.share({ title: title, text: text + '\n' + shareUrl }).catch(() => {});
     } else {
-      navigator.clipboard.writeText(url).then(() => showToast()).catch(() => {
-        prompt('Bu linki kopyala:', url);
+      navigator.clipboard.writeText(shareUrl).then(() => showToast()).catch(() => {
+        prompt('Bu linki kopyala:', shareUrl);
       });
     }
   }
