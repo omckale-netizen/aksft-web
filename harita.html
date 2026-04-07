@@ -19,10 +19,10 @@
   <meta name="twitter:description" content="Assos ve Ayvacık'taki mekanlar, gezilecek yerler, köyler ve rotalar interaktif haritada.">
   <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/assosu-kesfet.firebasestorage.app/o/site%2Fog-image.jpg?alt=media&token=70d62a44-9142-43d8-aee4-de790f5c7dcd">
   <link rel="canonical" href="https://assosukesfet.com/harita">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;1,400;1,500&display=swap');
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
       --navy:#1A2744;--navy-deep:#0D1829;--navy-mid:#243255;
@@ -270,9 +270,11 @@ const VENUE_CATS = {
   konaklama: 'Konaklama', beach: 'Beach', iskele: 'Iskele'
 };
 
-let map, markers = [], allItems = [], activeFilter = 'all';
+let map, markers = [], allItems = [], activeFilter = 'all', mapReady = false;
 
 function pageInit() {
+  if (mapReady) return; // prevent double init
+  mapReady = true;
   renderNav({ heroMode: false });
   renderFooter({});
   initMap();
@@ -304,6 +306,9 @@ function initMap() {
   buildItems();
   renderMarkers();
   updateCounts();
+
+  // Close panel on map click
+  map.on('click', function() { closePanel(); });
 }
 
 function buildItems() {
@@ -449,14 +454,11 @@ function closePanel() {
   document.getElementById('map-panel').classList.remove('open');
 }
 
-// Close panel on map click
-document.getElementById('map').addEventListener('click', function(e) {
-  if (e.target === this || e.target.classList.contains('leaflet-container')) {
-    closePanel();
-  }
-});
-
+// dataReady may fire before this script runs (cache), so check both
 document.addEventListener('dataReady', pageInit);
+if (window.DATA && window.DATA.venues && window.DATA.venues.length > 0) {
+  pageInit();
+}
 </script>
 </body>
 </html>
