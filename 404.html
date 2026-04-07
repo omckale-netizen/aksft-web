@@ -3,98 +3,86 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sayfa Bulunamadı — Assos'u Keşfet</title>
+  <title>Kayboldum! — Assos'u Keşfet</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Lora:ital,wght@1,400;1,500&display=swap" rel="stylesheet">
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    :root{--navy:#1A2744;--terra:#C4521A;--cream:#FAF7F2;}
-
     body{
-      min-height:100vh;
-      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
       background:linear-gradient(155deg,#06101E 0%,#0C1A30 50%,#0A1520 100%);
-      font-family:'Plus Jakarta Sans',sans-serif;
-      color:#F5EDE0;
-      overflow:hidden;
-      position:relative;
+      font-family:'Plus Jakarta Sans',sans-serif;color:#F5EDE0;overflow:hidden;position:relative;
     }
+    body::before{content:'';position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(245,237,224,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(245,237,224,.02) 1px,transparent 1px);background-size:60px 60px;}
 
-    /* Grid mesh */
-    body::before{
-      content:'';position:absolute;inset:0;pointer-events:none;
-      background-image:linear-gradient(rgba(245,237,224,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(245,237,224,.02) 1px,transparent 1px);
-      background-size:60px 60px;
-    }
-
-    /* Orbs */
     .orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;}
-    .orb-1{width:400px;height:400px;background:rgba(196,82,26,.1);top:-120px;left:-100px;animation:orbFloat 16s ease-in-out infinite;}
-    .orb-2{width:300px;height:300px;background:rgba(26,107,138,.08);bottom:-80px;right:-60px;animation:orbFloat 13s ease-in-out infinite reverse;}
-    @keyframes orbFloat{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-20px) scale(1.05);}}
+    .orb-1{width:400px;height:400px;background:rgba(196,82,26,.1);top:-120px;left:-100px;animation:orbF 16s ease-in-out infinite;}
+    .orb-2{width:300px;height:300px;background:rgba(26,107,138,.08);bottom:-80px;right:-60px;animation:orbF 13s ease-in-out infinite reverse;}
+    @keyframes orbF{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-20px) scale(1.05);}}
 
-    .content{position:relative;z-index:1;text-align:center;padding:24px;max-width:520px;}
+    .content{position:relative;z-index:1;text-align:center;padding:24px;max-width:560px;}
 
-    /* 404 büyük sayı */
-    .big-404{
-      font-size:clamp(8rem,20vw,12rem);
-      font-weight:800;
-      letter-spacing:-.06em;
-      line-height:.85;
-      background:linear-gradient(175deg,rgba(245,237,224,.12) 0%,rgba(245,237,224,.03) 100%);
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-      margin-bottom:16px;
-      user-select:none;
+    /* Emoji sahnesi */
+    .scene{position:relative;height:160px;margin-bottom:20px;display:flex;align-items:center;justify-content:center;}
+    .lost-emoji{font-size:5rem;animation:lostBounce 3s ease-in-out infinite;position:relative;}
+    @keyframes lostBounce{0%,100%{transform:translateY(0) rotate(0deg);}25%{transform:translateY(-12px) rotate(-5deg);}50%{transform:translateY(0) rotate(0deg);}75%{transform:translateY(-8px) rotate(5deg);}}
+    .thought{
+      position:absolute;top:-10px;right:-60px;
+      background:rgba(255,255,255,.08);backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,.12);border-radius:16px 16px 16px 4px;
+      padding:8px 14px;font-size:.72rem;color:rgba(245,237,224,.5);white-space:nowrap;
+      animation:thoughtFade 4s ease-in-out infinite;
     }
+    @keyframes thoughtFade{0%,100%{opacity:0;transform:translateY(4px);}20%,80%{opacity:1;transform:translateY(0);}}
+    .map-pin{position:absolute;bottom:10px;left:calc(50% - 80px);font-size:1.5rem;animation:pinDrop 2s ease-in-out infinite;animation-delay:.5s;}
+    .map-pin2{position:absolute;bottom:15px;right:calc(50% - 90px);font-size:1.2rem;animation:pinDrop 2.5s ease-in-out infinite;animation-delay:1s;}
+    @keyframes pinDrop{0%,100%{transform:translateY(0);opacity:.3;}50%{transform:translateY(-6px);opacity:.6;}}
 
-    .title{
-      font-weight:800;font-size:clamp(1.4rem,3vw,2rem);
-      letter-spacing:-.02em;margin-bottom:12px;
+    /* 404 */
+    .code-404{font-size:.7rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(245,237,224,.2);margin-bottom:12px;}
+
+    .title{font-weight:800;font-size:clamp(1.5rem,4vw,2.2rem);letter-spacing:-.02em;margin-bottom:8px;line-height:1.2;}
+    .title em{font-family:'Lora',serif;font-weight:500;font-style:italic;background:linear-gradient(135deg,#D4935A,#E8A07A);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+    .subtitle{font-size:.88rem;color:rgba(245,237,224,.35);line-height:1.8;margin-bottom:12px;}
+    .joke{font-family:'Lora',serif;font-style:italic;font-size:.82rem;color:rgba(245,237,224,.25);margin-bottom:36px;}
+
+    /* Öneriler */
+    .suggest-label{font-size:.6rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(245,237,224,.2);margin-bottom:14px;}
+
+    .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:28px;}
+    .card{
+      background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;
+      padding:18px 12px;text-decoration:none;text-align:center;
+      transition:all .22s;cursor:pointer;
     }
+    .card:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16);transform:translateY(-3px);}
+    .card-icon{font-size:1.4rem;margin-bottom:8px;}
+    .card-text{font-size:.72rem;font-weight:700;color:rgba(245,237,224,.6);}
 
-    .subtitle{
-      font-family:'Lora',serif;font-style:italic;
-      font-size:.95rem;color:rgba(245,237,224,.4);
-      line-height:1.7;margin-bottom:36px;
-    }
-
-    .links{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:32px;}
-
-    .link-btn{
-      display:inline-flex;align-items:center;gap:7px;
-      padding:11px 22px;border-radius:12px;
-      font-size:.82rem;font-weight:700;font-family:inherit;
-      text-decoration:none;transition:all .2s;white-space:nowrap;
-    }
-    .link-primary{background:var(--terra);color:#fff;}
-    .link-primary:hover{background:#D4682E;transform:translateY(-2px);box-shadow:0 8px 24px rgba(196,82,26,.3);}
-    .link-secondary{background:rgba(255,255,255,.08);color:rgba(245,237,224,.7);border:1px solid rgba(255,255,255,.1);}
-    .link-secondary:hover{background:rgba(255,255,255,.14);color:#F5EDE0;}
-
+    /* Arama */
     .search-wrap{
-      max-width:400px;margin:0 auto;
-      display:flex;align-items:center;gap:10px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.1);
-      border-radius:14px;padding:5px 5px 5px 16px;
-      backdrop-filter:blur(12px);
+      max-width:380px;margin:0 auto;display:flex;align-items:center;gap:10px;
+      background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+      border-radius:14px;padding:5px 5px 5px 16px;backdrop-filter:blur(12px);
     }
-    .search-wrap input{
-      flex:1;min-width:0;background:transparent;border:none;outline:none;
-      color:#F5EDE0;font-family:inherit;font-size:.88rem;
-    }
-    .search-wrap input::placeholder{color:rgba(245,237,224,.25);}
-    .search-wrap button{
-      padding:9px 18px;border:none;border-radius:10px;
-      background:var(--navy);color:#F5EDE0;
-      font-family:inherit;font-size:.78rem;font-weight:700;
-      cursor:pointer;transition:background .2s;white-space:nowrap;
-    }
-    .search-wrap button:hover{background:#2A3A5A;}
+    .search-wrap input{flex:1;min-width:0;background:transparent;border:none;outline:none;color:#F5EDE0;font-family:inherit;font-size:.85rem;}
+    .search-wrap input::placeholder{color:rgba(245,237,224,.2);}
+    .search-wrap button{padding:9px 18px;border:none;border-radius:10px;background:#C4521A;color:#fff;font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;}
+    .search-wrap button:hover{background:#D4682E;transform:translateY(-1px);}
 
-    .footer-note{
-      margin-top:48px;font-size:.68rem;color:rgba(245,237,224,.15);
+    .home-link{
+      display:inline-flex;align-items:center;gap:6px;margin-top:24px;
+      font-size:.78rem;font-weight:600;color:rgba(245,237,224,.3);text-decoration:none;transition:color .2s;
+    }
+    .home-link:hover{color:rgba(245,237,224,.7);}
+
+    .footer-note{margin-top:40px;font-size:.62rem;color:rgba(245,237,224,.1);}
+
+    @media(max-width:540px){
+      .cards{grid-template-columns:repeat(2,1fr);}
+      .thought{right:-40px;font-size:.65rem;}
     }
   </style>
 </head>
@@ -103,24 +91,49 @@
   <div class="orb orb-2"></div>
 
   <div class="content">
-    <div class="big-404">404</div>
-    <h1 class="title">Sayfa Bulunamadı</h1>
-    <p class="subtitle">Aradığınız sayfa taşınmış, kaldırılmış veya hiç var olmamış olabilir.<br>Assos'ta kaybolmak güzel ama burada değil.</p>
 
-    <div class="links">
-      <a href="/" class="link-btn link-primary">🏠 Ana Sayfa</a>
-      <a href="/mekanlar.html" class="link-btn link-secondary">🏪 Mekanlar</a>
-      <a href="/rotalar.html" class="link-btn link-secondary">🗺 Rotalar</a>
-      <a href="/yerler.html" class="link-btn link-secondary">📍 Yerler</a>
+    <div class="scene">
+      <span class="map-pin">📍</span>
+      <span class="lost-emoji">🧭</span>
+      <div class="thought">Burası neresi?</div>
+      <span class="map-pin2">📌</span>
+    </div>
+
+    <div class="code-404">Hata 404</div>
+    <h1 class="title">Haritada bu yol<br><em>görünmüyor</em></h1>
+    <p class="subtitle">Assos'un taş sokaklarında kaybolmak güzeldir ama<br>burada kaybolmana gerek yok.</p>
+    <p class="joke">— Belki de Athena Tapınağı'nda gün batımını izlemelisin? Orası kesin var.</p>
+
+    <div class="suggest-label">Belki bunlari ariyordundur</div>
+
+    <div class="cards">
+      <a href="/" class="card">
+        <div class="card-icon">🏠</div>
+        <div class="card-text">Ana Sayfa</div>
+      </a>
+      <a href="/mekanlar.html" class="card">
+        <div class="card-icon">☕</div>
+        <div class="card-text">Mekanlar</div>
+      </a>
+      <a href="/rotalar.html" class="card">
+        <div class="card-icon">🗺</div>
+        <div class="card-text">Rotalar</div>
+      </a>
+      <a href="/planla.html" class="card">
+        <div class="card-icon">✨</div>
+        <div class="card-text">Planla</div>
+      </a>
     </div>
 
     <div class="search-wrap">
       <svg width="14" height="14" fill="none" stroke="rgba(245,237,224,.3)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="text" id="s404" placeholder="Ne ariyordunuz?" onkeydown="if(event.key==='Enter')go404()">
-      <button onclick="go404()">Ara</button>
+      <input type="text" id="s404" placeholder="Ne ariyordun?" onkeydown="if(event.key==='Enter')go404()">
+      <button onclick="go404()">Kesfet</button>
     </div>
 
-    <div class="footer-note">Assos'u Keşfet · assosukesfet.com</div>
+    <a href="/" class="home-link">← Ana sayfaya don, kaybolma</a>
+
+    <div class="footer-note">Assos'u Kesfet · Kaybolsan bile yanindayiz</div>
   </div>
 
   <script>
@@ -128,6 +141,13 @@
       const q = document.getElementById('s404').value.trim();
       if (q) window.location.href = '/?q=' + encodeURIComponent(q);
     }
+
+    // Rastgele düşünce balonu
+    const thoughts = ['Burasi neresi?', 'Harita yanlis mi?', 'GPS cekmiyor...', 'Midilli\'ye mi geldim?', 'Assos nerede kaldi?', 'Yol mu bu?', 'Pusula kiridi...'];
+    const bubble = document.querySelector('.thought');
+    setInterval(() => {
+      bubble.textContent = thoughts[Math.floor(Math.random() * thoughts.length)];
+    }, 4000);
   </script>
 </body>
 </html>
