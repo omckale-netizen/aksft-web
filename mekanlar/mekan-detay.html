@@ -41,6 +41,8 @@ function pageInit() {
   }
 }
 pageInit();
+// Firebase verisi geldiğinde yeniden render et (güncel görseller için)
+document.addEventListener('firebaseDataUpdated', pageInit);
 </script>
 </body>
 </html>

@@ -1938,6 +1938,8 @@ function pageInit() {
   window.toggleGuide = toggleGuide;
 }
 pageInit();
+// Firebase verisi geldiğinde mekan/yer kartlarını güncelle
+document.addEventListener('firebaseDataUpdated', pageInit);
 </script>
 
 </body>

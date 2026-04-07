@@ -938,6 +938,11 @@ function pageInit() {
   window.toggleSavedView = toggleSavedView;
 }
 pageInit();
+document.addEventListener('firebaseDataUpdated', function() {
+  // Firebase'den güncel veri gelince listeyi yeniden render et
+  renderFeatured();
+  renderGrid();
+});
 </script>
 </body>
 </html>
