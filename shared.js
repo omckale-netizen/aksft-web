@@ -2002,20 +2002,23 @@ function renderVenuePage(venueId) {
         <div class="vp-hero-right">
           <div class="vp-hero-card">
             <div class="vp-hero-card-header">
-              <div class="vp-hc-icon">🕐</div>
+              <div class="vp-hc-icon">${v.category === 'konaklama' ? '🏨' : '🕐'}</div>
               <div>
-                <div class="vp-hc-title">Çalışma Saatleri</div>
-                <div class="vp-hc-subtitle">Bugün: ${todayName} · Saat: ${new Date().getHours().toString().padStart(2,'0')}:${new Date().getMinutes().toString().padStart(2,'0')}</div>
+                <div class="vp-hc-title">${v.category === 'konaklama' ? 'Giriş / Çıkış' : 'Çalışma Saatleri'}</div>
+                <div class="vp-hc-subtitle">${v.category === 'konaklama' ? 'Resepsiyon 24 saat' : 'Bugün: ' + todayName + ' · Saat: ' + new Date().getHours().toString().padStart(2,'0') + ':' + new Date().getMinutes().toString().padStart(2,'0')}</div>
               </div>
             </div>
             <div class="vp-hero-card-body">
-            ${(v.weeklyHours || []).filter(entry => entry.days).map(entry => {
-              const isClosed = (entry.hours || '').toLowerCase() === 'kapalı';
+            ${v.category === 'konaklama' ?
+              '<div class="vp-hero-card-row"><span class="vp-hero-card-label">🔑 Check-in</span><span class="vp-hero-card-val">' + (v.checkin || '14:00') + '</span></div>' +
+              '<div class="vp-hero-card-row"><span class="vp-hero-card-label">🚪 Check-out</span><span class="vp-hero-card-val">' + (v.checkout || '11:00') + '</span></div>'
+            :
+            (v.weeklyHours || []).filter(entry => entry.days).map(entry => {
+              const isClosed = (entry.hours || '').toLowerCase().includes('kapal');
               const isActive = entry.days.toLowerCase().includes(todayName.toLowerCase())
                 || entry.days.toLowerCase().includes('her gün')
-                || entry.days.toLowerCase().includes('resepsiyon')
-                || (entry.days.toLowerCase().includes('pazartesi') && entry.days.toLowerCase().includes('perşembe') && ['Pazartesi','Salı','Çarşamba','Perşembe'].includes(todayName))
-                || (entry.days.toLowerCase().includes('cuma') && entry.days.toLowerCase().includes('pazar') && ['Cuma','Cumartesi','Pazar'].includes(todayName));
+                || (entry.days.toLowerCase().includes('pazartesi') && entry.days.toLowerCase().includes('cuma') && ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma'].includes(todayName))
+                || (entry.days.toLowerCase().includes('cumartesi') && entry.days.toLowerCase().includes('pazar') && ['Cumartesi','Pazar'].includes(todayName));
               const statusCls = isActive ? (isNowOpen ? ' vp-hca-open' : ' vp-hca-closed') : '';
               return '<div class="vp-hero-card-row' + (isActive ? ' vp-hero-card-active' + statusCls : '') + '">' +
                   '<span class="vp-hero-card-label">' + (isActive ? '<span class="vp-hero-card-dot"></span>' : '') + entry.days + '</span>' +
@@ -2023,7 +2026,7 @@ function renderVenuePage(venueId) {
                 '</div>';
             }).join('')}
             </div>
-            <div class="vp-hero-card-footer"><span>Saatler mevsime göre değişebilir</span></div>
+            <div class="vp-hero-card-footer"><span>${v.category === 'konaklama' ? 'Erken giriş/geç çıkış için iletişime geçin' : 'Saatler mevsime göre değişebilir'}</span></div>
           </div>
         </div>
       </div>

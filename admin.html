@@ -140,12 +140,19 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 .form-group textarea{resize:vertical;min-height:80px}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 
-/* Weekly Hours Rows */
-.wh-rows{display:flex;flex-direction:column;gap:8px}
-.wh-row{display:flex;gap:8px;align-items:center}
-.wh-row input{flex:1}
-.wh-row .btn-icon{flex-shrink:0}
-.wh-add{margin-top:6px}
+/* Weekly Hours */
+.wh-grid{display:grid;gap:6px}
+.wh-day-row{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid rgba(0,0,0,.04)}
+.wh-day-row:last-child{border-bottom:none}
+.wh-day-label{min-width:90px;font-size:.78rem;font-weight:600;color:var(--navy)}
+.wh-day-inputs{display:flex;gap:6px;align-items:center;flex:1}
+.wh-day-inputs input[type="time"]{padding:5px 8px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.78rem;font-family:inherit;width:100px}
+.wh-day-inputs span{font-size:.72rem;color:var(--text-muted)}
+.wh-day-closed{display:flex;align-items:center;gap:4px;font-size:.7rem;color:var(--text-muted)}
+.wh-day-closed input[type="checkbox"]{margin:0}
+.wh-checkin-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.wh-checkin-row label{font-size:.78rem;font-weight:600;color:var(--navy);min-width:70px}
+.wh-checkin-row input[type="time"]{padding:5px 8px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.78rem;font-family:inherit;width:110px}
 
 /* ── TABS ── */
 .tabs{display:flex;gap:4px;margin-bottom:20px}
@@ -1205,7 +1212,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
         <div class="form-row">
           <div class="form-group">
             <label>Kategori</label>
-            <select id="f-category" required onchange="autoCatEmoji()">
+            <select id="f-category" required onchange="autoCatEmoji();updateHoursVisibility()">
               <option value="">Secin</option>
               <option value="kafe">☕ Kafe</option>
               <option value="restoran">🍽 Restoran</option>
@@ -1324,15 +1331,21 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
           <label>Etiketler (virgul ile ayirin)</label>
           <input type="text" id="f-tags" placeholder="manzarali, deniz kenari, sakin">
         </div>
-        <div class="form-group">
-          <label>Calisma Saatleri (genel)</label>
-          <input type="text" id="f-hours" placeholder="08:00-22:00">
-        </div>
-
-        <div class="form-group">
-          <label>Haftalik Calisma Saatleri</label>
-          <div class="wh-rows" id="wh-rows"></div>
-          <button type="button" class="btn btn-secondary btn-sm wh-add" onclick="addWhRow()">+ Satir Ekle</button>
+        <div class="form-group" id="f-hours-group">
+          <label>Calisma Saatleri</label>
+          <div id="f-hours-normal">
+            <div class="wh-grid" id="wh-grid"></div>
+          </div>
+          <div id="f-hours-konaklama" style="display:none">
+            <div class="wh-checkin-row" style="margin-bottom:10px">
+              <label>Check-in</label>
+              <input type="time" id="f-checkin" value="14:00">
+            </div>
+            <div class="wh-checkin-row">
+              <label>Check-out</label>
+              <input type="time" id="f-checkout" value="11:00">
+            </div>
+          </div>
         </div>
 
         <div class="form-group">
@@ -2878,7 +2891,6 @@ function openVenueModal(id) {
   pendingImages = [];
   const form = document.getElementById('venue-form');
   form.reset();
-  document.getElementById('wh-rows').innerHTML = '';
 
   if (id) {
     const v = draftData.venues.find(x => x.id === id);
@@ -2897,14 +2909,23 @@ function openVenueModal(id) {
     document.getElementById('f-website').value = v.website || '';
     document.getElementById('f-featured').checked = !!v.featured;
     document.getElementById('f-tags').value = (v.tags || []).join(', ');
-    document.getElementById('f-hours').value = v.hours || '';
-    (v.weeklyHours || []).forEach(wh => addWhRow(wh.days, wh.hours));
+    // Saat girişlerini yükle
+    renderWhGrid(v.dayHours || null);
+    if (v.category === 'konaklama') {
+      document.getElementById('f-checkin').value = v.checkin || '14:00';
+      document.getElementById('f-checkout').value = v.checkout || '11:00';
+    }
+    // Eski weeklyHours -> dayHours migration
+    if (!v.dayHours && v.weeklyHours) {
+      renderWhGrid(null);
+    }
   } else {
     document.getElementById('modal-title').textContent = 'Yeni Mekan Ekle';
     document.getElementById('f-id').value = '';
     document.getElementById('f-emoji').readOnly = true;
-    addWhRow('', '');
+    renderWhGrid(null);
   }
+  updateHoursVisibility();
 
   renderImagePreviews();
   document.getElementById('venue-modal').classList.add('show');
@@ -2916,16 +2937,53 @@ function closeVenueModal() {
   pendingImages = [];
 }
 
-function addWhRow(days, hours) {
-  const container = document.getElementById('wh-rows');
-  const row = document.createElement('div');
-  row.className = 'wh-row';
-  row.innerHTML = `
-    <input type="text" class="wh-days" value="${days || ''}" placeholder="Pazartesi - Cuma">
-    <input type="text" class="wh-hours" value="${hours || ''}" placeholder="08:00 - 22:00">
-    <button type="button" class="btn-icon" onclick="this.parentElement.remove()" style="color:var(--red)" title="Kaldir">&times;</button>
-  `;
-  container.appendChild(row);
+const WH_DAYS = ['Pazartesi','Sali','Carsamba','Persembe','Cuma','Cumartesi','Pazar'];
+
+function renderWhGrid(dayHours) {
+  const grid = document.getElementById('wh-grid');
+  grid.innerHTML = WH_DAYS.map((day, i) => {
+    const dh = dayHours ? dayHours[i] : null;
+    const isClosed = dh ? dh.closed : false;
+    const open = dh ? dh.open : '';
+    const close = dh ? dh.close : '';
+    return '<div class="wh-day-row">' +
+      '<span class="wh-day-label">' + day + '</span>' +
+      '<div class="wh-day-inputs">' +
+        '<input type="time" class="wh-open" value="' + open + '" ' + (isClosed ? 'disabled' : '') + '>' +
+        '<span>—</span>' +
+        '<input type="time" class="wh-close" value="' + close + '" ' + (isClosed ? 'disabled' : '') + '>' +
+      '</div>' +
+      '<label class="wh-day-closed"><input type="checkbox" class="wh-closed-cb" ' + (isClosed ? 'checked' : '') + ' onchange="toggleWhDay(this)"> Kapali</label>' +
+    '</div>';
+  }).join('');
+}
+
+function toggleWhDay(cb) {
+  const row = cb.closest('.wh-day-row');
+  const inputs = row.querySelectorAll('input[type=time]');
+  inputs.forEach(inp => { inp.disabled = cb.checked; if (cb.checked) inp.value = ''; });
+}
+
+function getWhData() {
+  const rows = document.querySelectorAll('#wh-grid .wh-day-row');
+  return WH_DAYS.map((day, i) => {
+    const row = rows[i];
+    if (!row) return { day: day, closed: true, open: '', close: '' };
+    const closed = row.querySelector('.wh-closed-cb').checked;
+    return {
+      day: day,
+      closed: closed,
+      open: closed ? '' : (row.querySelector('.wh-open').value || ''),
+      close: closed ? '' : (row.querySelector('.wh-close').value || '')
+    };
+  });
+}
+
+function updateHoursVisibility() {
+  const cat = document.getElementById('f-category').value;
+  const isKonaklama = cat === 'konaklama';
+  document.getElementById('f-hours-normal').style.display = isKonaklama ? 'none' : '';
+  document.getElementById('f-hours-konaklama').style.display = isKonaklama ? '' : 'none';
 }
 
 /* Category style defaults */
@@ -2947,14 +3005,41 @@ async function saveVenue(e) {
   const category = document.getElementById('f-category').value;
   const catDef = CAT_DEFAULTS[category] || {};
 
-  // Gather weekly hours
-  const whRows = document.querySelectorAll('#wh-rows .wh-row');
+  // Gather hours data
+  const dayHours = category === 'konaklama' ? null : getWhData();
+  const checkin = category === 'konaklama' ? document.getElementById('f-checkin').value : '';
+  const checkout = category === 'konaklama' ? document.getElementById('f-checkout').value : '';
+
+  // weeklyHours oluştur (geriye uyumlu + detay sayfası)
   const weeklyHours = [];
-  whRows.forEach(row => {
-    const d = row.querySelector('.wh-days').value.trim();
-    const h = row.querySelector('.wh-hours').value.trim();
-    if (d || h) weeklyHours.push({ days: d, hours: h });
-  });
+  if (category === 'konaklama') {
+    weeklyHours.push({ days: 'Check-in', hours: checkin || '14:00' });
+    weeklyHours.push({ days: 'Check-out', hours: checkout || '11:00' });
+  } else if (dayHours) {
+    // Hafta içi grubu
+    const weekdayHours = dayHours.filter((d,i) => i < 5 && !d.closed);
+    const weekendHours = dayHours.filter((d,i) => i >= 5 && !d.closed);
+    const closedDays = dayHours.filter(d => d.closed);
+    if (weekdayHours.length > 0) {
+      const sameHours = weekdayHours.every(d => d.open === weekdayHours[0].open && d.close === weekdayHours[0].close);
+      if (sameHours && weekdayHours.length === 5) {
+        weeklyHours.push({ days: 'Pazartesi - Cuma', hours: weekdayHours[0].open + ' - ' + weekdayHours[0].close });
+      } else {
+        weekdayHours.forEach(d => weeklyHours.push({ days: d.day, hours: d.open + ' - ' + d.close }));
+      }
+    }
+    if (weekendHours.length > 0) {
+      const sameWe = weekendHours.every(d => d.open === weekendHours[0].open && d.close === weekendHours[0].close);
+      if (sameWe && weekendHours.length === 2) {
+        weeklyHours.push({ days: 'Cumartesi - Pazar', hours: weekendHours[0].open + ' - ' + weekendHours[0].close });
+      } else {
+        weekendHours.forEach(d => weeklyHours.push({ days: d.day, hours: d.open + ' - ' + d.close }));
+      }
+    }
+    if (closedDays.length > 0) {
+      closedDays.forEach(d => weeklyHours.push({ days: d.day, hours: 'Kapali' }));
+    }
+  }
 
   const tagsStr = document.getElementById('f-tags').value;
 
@@ -2996,13 +3081,16 @@ async function saveVenue(e) {
     location: document.getElementById('f-location').value.trim(),
     tags: tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [],
     keywords: [],
-    hours: document.getElementById('f-hours').value.trim(),
+    hours: category === 'konaklama' ? 'Check-in ' + (checkin || '14:00') : (dayHours ? (dayHours.find(d=>!d.closed)||{}).open + ' - ' + (dayHours.find(d=>!d.closed)||{}).close : ''),
     images: allImages,
     phone: document.getElementById('f-phone').value.trim(),
     address: document.getElementById('f-address').value.trim(),
     website: document.getElementById('f-website').value.trim(),
     featured: document.getElementById('f-featured').checked,
-    weeklyHours: weeklyHours
+    weeklyHours: weeklyHours,
+    dayHours: dayHours,
+    checkin: checkin,
+    checkout: checkout
   };
 
   // Generate keywords from title + tags
