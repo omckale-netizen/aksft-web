@@ -192,7 +192,7 @@ window.DATA = {
           "title": "Apollon Smintheion",
           "emoji": "🏺",
           "duration": "~1 saat",
-          "desc": "Güllüdere yakınlarında, Troya dönemiyle ilişkilendirilen Apollon Smintheion tapınağı. Bölgenin en az ziyaret edilen ama en etkileyici arkeolojik alanlarından biri. Araçla yaklaşık 30 dk.",
+          "desc": "Gülpınar yakınlarında, Troya dönemiyle ilişkilendirilen Apollon Smintheion tapınağı. Bölgenin en az ziyaret edilen ama en etkileyici arkeolojik alanlarından biri. Araçla yaklaşık 30 dk.",
           "tip": "Zaman zaman kapalı olabilir; ziyaret öncesi kontrol et. Kalabalıktan uzak, sakin bir deneyim."
         },
         {
@@ -609,9 +609,9 @@ window.DATA = {
       "badgeBg": "rgba(196,82,26,0.75)",
       "badgeColor": "#fff",
       "badgeText": "Antik Alan",
-      "shortDesc": "Güllüdere yakınlarında Roma dönemine ait Apollon tapınağı. Daha az bilinen ama hayranlık uyandıran bir alan.",
-      "description": "Apollon Smintheion, Troya savaşını anlatan İlyada'nın ilk bölümünde adı geçen, Güllüdere (antik Khrysé) yakınlarındaki önemli bir tapınaktır. MS 2. yüzyılda inşa edilen yapı, Apollon'un fare tanrısı kimliğine adanmıştır. Assos'a göre daha az ziyaret edilen bu alan, yetkin bir arkeoloji korumasıyla özgünlüğünü koruyan nadide bir yerdir.",
-      "location": "Güllüdere (Gülpınar), Ayvacık",
+      "shortDesc": "Gülpınar yakınlarında Roma dönemine ait Apollon tapınağı. Daha az bilinen ama hayranlık uyandıran bir alan.",
+      "description": "Apollon Smintheion, Troya savaşını anlatan İlyada'nın ilk bölümünde adı geçen, Gülpınar (antik Khrysé) yakınlarındaki önemli bir tapınaktır. MS 2. yüzyılda inşa edilen yapı, Apollon'un fare tanrısı kimliğine adanmıştır. Assos'a göre daha az ziyaret edilen bu alan, yetkin bir arkeoloji korumasıyla özgünlüğünü koruyan nadide bir yerdir.",
+      "location": "Gülpınar, Ayvacık",
       "tags": [
         "Roma",
         "Gizli Hazine",
