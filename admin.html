@@ -1527,7 +1527,20 @@ async function saveVenueToFirestore(venue) {
 }
 
 async function deleteVenueFromFirestore(id) {
+  // Mekanın görsellerini Storage'dan sil
+  const v = draftData.venues?.find(x => x.id === id);
+  if (v && v.images && v.images.length > 0) {
+    for (const imgUrl of v.images) {
+      try {
+        const ref = firebase.storage().refFromURL(imgUrl);
+        await ref.delete();
+      } catch(e) { /* görsel zaten silinmiş olabilir */ }
+    }
+  }
+  // Firestore'dan sil
   await db.collection('venues').doc(id).delete();
+  // Analytics verisini de temizle
+  try { await db.collection('analytics').doc('venue_' + id).delete(); } catch(e) {}
 }
 
 async function savePlaceToFirestore(place) {
@@ -3539,6 +3552,10 @@ async function confirmDeleteVP(id) {
     (isPlaces ? 'Yer' : 'Koy') + ' Silinecek',
     '"' + item.title + '" silinecek. Emin misiniz?',
     async () => {
+      // Görseli Storage'dan sil
+      if (item.image) {
+        try { const ref = firebase.storage().refFromURL(item.image); await ref.delete(); } catch(e) {}
+      }
       if (isPlaces) draftData.places = draftData.places.filter(x => x.id !== id);
       else draftData.villages = draftData.villages.filter(x => x.id !== id);
       await db.collection(collection).doc(id).delete();
