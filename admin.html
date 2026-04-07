@@ -1163,12 +1163,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
         </div>
 
         <div class="form-group">
-          <label>Görseller</label>
+          <label>Görseller <span style="font-weight:400;color:var(--text-muted);font-size:.72rem" id="img-upload-info"></span></label>
           <div class="img-upload-area" id="img-upload-area">
             <div class="img-upload-drop" id="img-drop" onclick="document.getElementById('img-file-input').click()">
-              <span style="font-size:2rem">&#128247;</span>
-              <p>Görselleri sürükleyip bırakın veya tıklayarak seçin</p>
-              <p style="font-size:.72rem;color:var(--text-muted)">JPG, PNG · Otomatik sıkıştırılır · Maks 6 görsel</p>
+              <span style="font-size:2rem">📷</span>
+              <p>Gorsel yuklemek icin tiklayin veya surukleyin</p>
+              <p style="font-size:.7rem;color:var(--text-muted)">JPG, PNG, WebP · Maks 5MB/gorsel · Maks 6 adet</p>
+              <p style="font-size:.65rem;color:var(--text-muted)">Otomatik WebP sikistirma · Maks 1200px</p>
             </div>
             <input type="file" id="img-file-input" multiple accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleImageUpload(this.files)">
             <div class="img-preview-grid" id="img-preview-grid"></div>
@@ -3117,14 +3118,38 @@ document.addEventListener('keydown', function(e) {
 ══════════════════════════════════════════════════ */
 let pendingImages = []; // { blob, name, dataUrl }
 
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_IMAGES = 6;
+
 function handleImageUpload(files) {
   Array.from(files).forEach(file => {
-    if (pendingImages.length >= 6) return;
-    compressImage(file, (blob, dataUrl, ext) => {
-      pendingImages.push({ blob, name: file.name, dataUrl, ext: ext || 'jpg' });
+    if (pendingImages.length >= MAX_IMAGES) {
+      showToast('Maksimum ' + MAX_IMAGES + ' gorsel yuklenebilir.', 'error');
+      return;
+    }
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      showToast('"' + file.name + '" desteklenmiyor. JPG, PNG veya WebP kullanin.', 'error');
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      showToast('"' + file.name + '" cok buyuk (' + (file.size / 1024 / 1024).toFixed(1) + 'MB). Maks 5MB.', 'error');
+      return;
+    }
+    compressImage(file, (blob, dataUrl, ext, dimensions) => {
+      pendingImages.push({ blob, name: file.name, dataUrl, ext: ext || 'webp', origSize: file.size, compSize: blob.size, dimensions });
       renderImagePreviews();
+      updateImgInfo();
     });
   });
+}
+
+function updateImgInfo() {
+  const el = document.getElementById('img-upload-info');
+  if (!el) return;
+  const existing = editingVenueId ? (draftData.venues.find(v => v.id === editingVenueId)?.images || []) : [];
+  const total = existing.length + pendingImages.length;
+  el.textContent = '(' + total + '/' + MAX_IMAGES + ')';
 }
 
 function compressImage(file, callback) {
@@ -3146,7 +3171,7 @@ function compressImage(file, callback) {
       const format = useWebP ? 'image/webp' : 'image/jpeg';
       const quality = useWebP ? 0.82 : 0.8;
       canvas.toBlob(blob => {
-        callback(blob, canvas.toDataURL(format, quality), useWebP ? 'webp' : 'jpg');
+        callback(blob, canvas.toDataURL(format, quality), useWebP ? 'webp' : 'jpg', { w: Math.round(w), h: Math.round(h), origW: img.width, origH: img.height });
       }, format, quality);
     };
     img.src = e.target.result;
@@ -3158,22 +3183,30 @@ function renderImagePreviews() {
   const grid = document.getElementById('img-preview-grid');
   const existingImgs = editingVenueId ? (draftData.venues.find(v => v.id === editingVenueId)?.images || []) : [];
 
-  grid.innerHTML = existingImgs.map((path, i) => `
-    <div class="img-preview-item">
-      <img src="${path}" onerror="this.style.display='none'">
-      <button class="img-preview-remove" onclick="removeExistingImage(${i})">×</button>
-      <div class="img-preview-name">${path.split('/').pop()}</div>
-    </div>
-  `).join('') + pendingImages.map((img, i) => `
-    <div class="img-preview-item">
-      <img src="${img.dataUrl}">
-      <button class="img-preview-remove" onclick="removePendingImage(${i})">×</button>
-      <div class="img-preview-name">Yeni · ${Math.round(img.blob.size/1024)}KB</div>
-    </div>
-  `).join('');
+  grid.innerHTML = existingImgs.map((path, i) => {
+    const fname = path.includes('/') ? path.split('/').pop() : (path.length > 30 ? '...'+path.slice(-20) : path);
+    return '<div class="img-preview-item">' +
+      '<img src="' + path + '" onerror="this.parentElement.style.opacity=0.4">' +
+      '<button class="img-preview-remove" onclick="removeExistingImage(' + i + ')">×</button>' +
+      '<div class="img-preview-name">✓ ' + fname + '</div>' +
+    '</div>';
+  }).join('') + pendingImages.map((img, i) => {
+    const sizeKB = Math.round(img.compSize / 1024);
+    const savings = img.origSize ? Math.round((1 - img.compSize / img.origSize) * 100) : 0;
+    const dim = img.dimensions ? img.dimensions.w + '×' + img.dimensions.h : '';
+    return '<div class="img-preview-item">' +
+      '<img src="' + img.dataUrl + '">' +
+      '<button class="img-preview-remove" onclick="removePendingImage(' + i + ')">×</button>' +
+      '<div class="img-preview-name" style="font-size:.55rem;line-height:1.3">' +
+        sizeKB + 'KB' + (savings > 0 ? ' (-%' + savings + ')' : '') +
+        (dim ? '<br>' + dim : '') +
+      '</div>' +
+    '</div>';
+  }).join('');
 
   const total = existingImgs.length + pendingImages.length;
-  document.getElementById('img-drop').style.display = total >= 6 ? 'none' : '';
+  document.getElementById('img-drop').style.display = total >= MAX_IMAGES ? 'none' : '';
+  updateImgInfo();
 }
 
 function removePendingImage(i) {
