@@ -1095,12 +1095,8 @@
         <div class="section-rule" style="margin-bottom:16px;"></div>
         <h2 class="section-title" style="font-size:clamp(2rem,5vw,3rem);">Assos'un<br>öne çıkan noktaları</h2>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;" role="group" aria-label="Kategori filtreleri">
+      <div id="places-filter-bar" style="display:flex;flex-wrap:wrap;gap:8px;" role="group" aria-label="Kategori filtreleri">
         <button class="filter-btn active" onclick="filterPlaces(this,'all')">Tümü</button>
-        <button class="filter-btn" onclick="filterPlaces(this,'tarihi')">🏛 Tarihi</button>
-        <button class="filter-btn" onclick="filterPlaces(this,'koy')">🌿 Koy</button>
-        <button class="filter-btn" onclick="filterPlaces(this,'koyu')">🏘 Köy</button>
-        <button class="filter-btn" onclick="filterPlaces(this,'iskele')">⚓ İskele</button>
       </div>
     </div>
 
@@ -1768,6 +1764,15 @@ function pageInit() {
     const daySeed = Math.floor(Date.now() / 86400000);
     function placeHash(str) { let h = daySeed; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) & 0xFFFFFF; return h; }
     const places = [...allPlaces].sort((a, b) => placeHash(a.id) - placeHash(b.id)).slice(0, 8);
+    // Dinamik filtre butonları
+    const CAT_LABELS = { tarihi:'🏛 Tarihi', koy:'🌿 Koy', koyu:'🏘 Köy', iskele:'⚓ İskele', muze:'📜 Müze' };
+    const activeCats = [...new Set(places.map(p => p.category))].filter(c => CAT_LABELS[c]);
+    const filterBar = document.getElementById('places-filter-bar');
+    if (filterBar && activeCats.length > 0) {
+      filterBar.innerHTML = '<button class="filter-btn active" onclick="filterPlaces(this,\'all\')">Tümü</button>' +
+        activeCats.map(c => '<button class="filter-btn" onclick="filterPlaces(this,\'' + c + '\')">' + CAT_LABELS[c] + '</button>').join('');
+    }
+
     grid.innerHTML = places.map(function(p, i) {
       const catKey = (p.badgeText === 'Müze' || p.badgeText === 'Muze') ? 'muze' : p.category;
       const cat = CAT_MAP[catKey] || CAT_MAP.tarihi;
