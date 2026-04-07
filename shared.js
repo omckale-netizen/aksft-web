@@ -679,6 +679,8 @@ function renderNav(opts = {}) {
     count.textContent = totalCount;
     if (goLink) goLink.href = getMekanListPath();
 
+    if (footer) footer.style.display = 'block';
+
     if (totalCount === 0) {
       body.innerHTML = `
         <div class="sd-empty">
@@ -686,7 +688,6 @@ function renderNav(opts = {}) {
           <p class="sd-empty-text">Henüz kaydettiğin mekan veya yer yok.<br>Beğendiğin yerleri ♡ ile işaretle.</p>
           <a class="sd-empty-link" href="${getMekanListPath()}">Mekanları Keşfet →</a>
         </div>`;
-      if (footer) footer.style.display = 'none';
       return;
     }
 
