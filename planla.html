@@ -285,6 +285,11 @@
           <div class="pick-title">Doğa & Yürüyüş</div>
           <div class="pick-sub">Zeytinlikler, izler</div>
         </div>
+        <div class="pick-card multi" data-group="ilgi" data-val="muze" onclick="pickMulti(this)">
+          <div class="pick-icon">🫒</div>
+          <div class="pick-title">Müze & Zeytin</div>
+          <div class="pick-sub">Zeytinyağı müzesi, kültür</div>
+        </div>
       </div>
       <div style="display:flex;justify-content:center;gap:12px;margin-top:36px;">
         <button class="btn-back" onclick="goStep(1)">← Geri</button>
@@ -537,6 +542,7 @@ function pageInit() {
     if (sel.ilgi.has('fotograf') && /gün batımı|manzara|fotoğraf|sunset/.test(kw)) s += 3;
     if (sel.ilgi.has('yemek') && /kahve|kafe|balık|yemek|molası/.test(kw)) s += 3;
     if (sel.ilgi.has('doga') && /doğa|yürüyüş|zeytinlik|orman/.test(kw)) s += 2;
+    if (sel.ilgi.has('muze') && /müze|zeytin|adatepe|kültür/.test(kw)) s += 3;
     // Group bonuses
     if (sel.grup === 'cift' && /gün batımı|romantik|sunset/.test(kw)) s += 2;
     if (sel.grup === 'aile' && r.zorluk === 'Kolay') s += 1;
@@ -576,7 +582,7 @@ function pageInit() {
 
     // Summary
     const sureLabel = { '1gun':'1 Gün', '2gun':'2 Gün', 'hafta-sonu':'Hafta Sonu', 'uzun':'Uzun Tatil' }[sel.sure];
-    const ilgiLabels = { tarih:'🏛 Tarih', deniz:'🌊 Deniz', koy:'🏘 Köy', yemek:'🍽 Yemek', fotograf:'📷 Fotoğraf', doga:'🌿 Doğa' };
+    const ilgiLabels = { tarih:'🏛 Tarih', deniz:'🌊 Deniz', koy:'🏘 Köy', yemek:'🍽 Yemek', fotograf:'📷 Fotoğraf', doga:'🌿 Doğa', muze:'🫒 Müze' };
     const grupLabel = { yalniz:'🧳 Yalnız', cift:'💑 Çift', aile:'👨‍👩‍👧 Aile', arkadaslar:'🎉 Arkadaşlar' }[sel.grup];
 
     document.getElementById('plan-summary-content').innerHTML = `
@@ -592,6 +598,106 @@ function pageInit() {
 
     // Render routes
     document.getElementById('plan-routes').innerHTML = routes.map((r, i) => routeCardHTML(r, i * 0.07)).join('');
+
+    // Day-by-day program
+    const hasSea = sel.ilgi.has('deniz');
+    const hasHistory = sel.ilgi.has('tarih');
+    const hasMuseum = sel.ilgi.has('muze');
+    const dayProgram = [];
+    if (sel.sure === '1gun') {
+      dayProgram.push({
+        title: 'Gün Programı',
+        items: [
+          { time: '08:30', text: 'Athena Tapınağı (açılışta git, kalabalıksız)' },
+          { time: '10:00', text: 'Behramkale köy sokakları + kahve molası' },
+          { time: '11:30', text: 'Antik Liman\'a iniş + öğle yemeği' },
+          { time: '14:00', text: hasHistory ? 'Nekropol + Surlar gezisi' : 'Kadırga Koyu\'nda deniz' },
+          { time: '16:30', text: hasSea ? 'Sivrice veya Sokakağzı Koyu' : 'Adatepe köy gezisi' },
+          { time: '18:30', text: 'Gün batımı için tapınak tepesine dönüş' },
+          { time: '20:00', text: 'Behramkale\'de akşam yemeği' },
+        ]
+      });
+    } else if (sel.sure === '2gun') {
+      dayProgram.push({
+        title: '1. Gün — Tarih & Keşif',
+        items: [
+          { time: '09:00', text: 'Athena Tapınağı + Surlar + Hüdavendigâr Camii' },
+          { time: '11:00', text: 'Behramkale köy gezisi' },
+          { time: '12:30', text: 'Antik Liman\'da öğle yemeği' },
+          { time: '14:30', text: hasMuseum ? 'Adatepe + Zeytinyağı Müzesi' : 'Adatepe köy gezisi' },
+          { time: '17:00', text: 'Konaklama check-in' },
+          { time: '18:30', text: 'Gün batımı tepede' },
+        ]
+      });
+      dayProgram.push({
+        title: '2. Gün — Koylar & Köyler',
+        items: [
+          { time: '09:00', text: 'Serpme köy kahvaltısı' },
+          { time: '10:30', text: 'Kadırga Koyu\'nda deniz' },
+          { time: '13:00', text: hasSea ? 'Sivrice veya Sokakağzı Koyu' : 'Babakale gezisi' },
+          { time: '15:30', text: 'Babakale — en batı noktası' },
+          { time: '17:00', text: 'Kayalar veya Büyükhusun köyü' },
+          { time: '19:00', text: 'Dönüş yolu + veda' },
+        ]
+      });
+    } else {
+      dayProgram.push({
+        title: '1. Gün — Tarih',
+        items: [
+          { time: '09:00', text: 'Athena Tapınağı + Antik Kent + Surlar' },
+          { time: '11:30', text: 'Behramkale sokakları + kahve' },
+          { time: '13:00', text: 'Antik Liman\'da balık yemeği' },
+          { time: '15:00', text: 'Apollon Smintheion (Gülpınar)' },
+          { time: '18:00', text: 'Gün batımı tepede' },
+        ]
+      });
+      dayProgram.push({
+        title: '2. Gün — Deniz & Koylar',
+        items: [
+          { time: '08:30', text: 'Kadırga Koyu (erken, boş)' },
+          { time: '11:00', text: 'Sivrice Koyu (yürüyüşle)' },
+          { time: '14:00', text: 'Sokakağzı veya Yeşil Liman' },
+          { time: '16:00', text: 'Ahmetçe İskelesi\'nde çay' },
+          { time: '18:00', text: 'Konaklama + akşam yemeği' },
+        ]
+      });
+      dayProgram.push({
+        title: '3. Gün — Köyler & Kültür',
+        items: [
+          { time: '09:00', text: 'Adatepe + Zeytinyağı Müzesi' },
+          { time: '11:00', text: 'Kayalar köyü' },
+          { time: '12:30', text: 'Büyükhusun + panorama' },
+          { time: '14:00', text: 'Babakale — en batı noktası + öğle' },
+          { time: '16:00', text: 'Küçükhusun + son molalar' },
+          { time: '18:00', text: 'Dönüş' },
+        ]
+      });
+    }
+
+    // Day program section
+    const dayHTML = dayProgram.map(day => `
+      <div class="panel-card fade-up" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:24px;margin-bottom:16px;">
+        <h4 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:1rem;color:var(--cream);margin-bottom:16px;">${day.title}</h4>
+        ${day.items.map(item => `
+          <div style="display:flex;gap:14px;margin-bottom:10px;align-items:flex-start;">
+            <span style="font-size:.72rem;font-weight:700;color:var(--amber);white-space:nowrap;min-width:42px;padding-top:2px;">${item.time}</span>
+            <span style="font-size:.84rem;color:rgba(245,237,224,.7);line-height:1.5;">${item.text}</span>
+          </div>
+        `).join('')}
+      </div>
+    `).join('');
+
+    // Insert day program after routes
+    const routesSection = document.getElementById('plan-routes').closest('section');
+    let daySection = document.getElementById('plan-day-program');
+    if (!daySection) {
+      daySection = document.createElement('section');
+      daySection.id = 'plan-day-program';
+      daySection.style.cssText = 'padding:0 24px 64px;background:var(--navy-deep);';
+      daySection.innerHTML = '<div style="max-width:900px;margin:0 auto;"><div style="margin-bottom:32px;"><p class="section-label" style="color:var(--amber);">Gün Programı</p><h3 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;font-size:1.6rem;color:var(--cream);letter-spacing:-.02em;margin-top:8px;">Saat saat planın</h3></div><div id="day-program-content"></div></div>';
+      routesSection.after(daySection);
+    }
+    document.getElementById('day-program-content').innerHTML = dayHTML;
 
     // Render venues
     document.getElementById('plan-venues').innerHTML = venues.map((v, i) => `
@@ -616,49 +722,53 @@ function pageInit() {
   function renderPractical() {
     const isLong = sel.sure === 'hafta-sonu' || sel.sure === 'uzun';
     const hasSea = sel.ilgi.has('deniz');
-    const hasCar = true; // always useful
+    const hasHistory = sel.ilgi.has('tarih');
+    const hasMuseum = sel.ilgi.has('muze');
 
     document.getElementById('plan-practical').innerHTML = `
       <div class="prac-grid">
         <div class="prac-card fade-up">
           <div class="prac-icon">🚗</div>
           <div class="prac-title">Ulaşım</div>
-          <div class="prac-item">İstanbul'dan ~4 saat araçla</div>
+          <div class="prac-item">İstanbul'dan ~5 saat (Çanakkale üzerinden)</div>
+          <div class="prac-item">İzmir'den ~3 saat (Edremit-Ayvacık)</div>
           <div class="prac-item">Çanakkale'den ~1.5 saat</div>
-          <div class="prac-item">En yakın şehir: Ayvacık</div>
-          <div class="prac-item">Bölgede araç şart</div>
+          <div class="prac-item">Bölgede araç kiralamak şart</div>
+          <div class="prac-item">Toplu taşıma: Ayvacık'a otobüs, sonra minibüs</div>
         </div>
         <div class="prac-card fade-up" data-delay=".06">
           <div class="prac-icon">🏨</div>
           <div class="prac-title">Konaklama</div>
           ${isLong ? `
-          <div class="prac-item">Behramkale köy pansiyonları</div>
-          <div class="prac-item">Kayalar Köy Evi (tavsiye)</div>
-          <div class="prac-item">Assos Antik Otel (liman)</div>
-          <div class="prac-item">Yaz aylarında erken rezervasyon</div>
+          <div class="prac-item">Behramkale: Taş pansiyonlar, butik oteller</div>
+          <div class="prac-item">Kadırga Koyu: Sahile yakın tesisler</div>
+          <div class="prac-item">Sokakağzı/Sivrice: Sakin alternatifler</div>
+          <div class="prac-item">Büyükhusun: Sunaba Kasrı Otel (tavsiye)</div>
+          <div class="prac-item">Yaz aylarında 1-2 hafta önceden rezervasyon</div>
           ` : `
-          <div class="prac-item">Gündüzlük gezi için konaklama gerekmez</div>
-          <div class="prac-item">Kalmak istersen liman civarı</div>
-          <div class="prac-item">Behramkale'de butik pansiyon var</div>
+          <div class="prac-item">1 günlük gezi için konaklama gerekmez</div>
+          <div class="prac-item">Kalmak isterseniz: Behramkale veya liman civarı</div>
+          <div class="prac-item">En az 2 gece kalmanızı öneririz</div>
           `}
         </div>
         <div class="prac-card fade-up" data-delay=".12">
           <div class="prac-icon">💰</div>
           <div class="prac-title">Bütçe Tahmini</div>
           ${sel.sure === '1gun' ? `
-          <div class="prac-item">Yakıt: ~400–600 ₺</div>
-          <div class="prac-item">Yemek: ~300–600 ₺/kişi</div>
-          <div class="prac-item">Giriş (tapınak): ~100 ₺</div>
-          <div class="prac-item">Toplam: ~800–1300 ₺/kişi</div>
+          <div class="prac-item">Yakıt: ~500–800 ₺</div>
+          <div class="prac-item">Yemek: ~400–700 ₺/kişi</div>
+          <div class="prac-item">Antik kent girişi: ~200 ₺ (Müzekart geçerli)</div>
+          <div class="prac-item">Toplam: ~1100–1700 ₺/kişi</div>
           ` : sel.sure === '2gun' ? `
-          <div class="prac-item">Konaklama: ~800–1500 ₺/gece</div>
-          <div class="prac-item">Yemek: ~600 ₺/gün/kişi</div>
-          <div class="prac-item">Toplam: ~2000–3000 ₺/kişi</div>
+          <div class="prac-item">Konaklama: ~1500–3000 ₺/gece</div>
+          <div class="prac-item">Yemek: ~700 ₺/gün/kişi</div>
+          <div class="prac-item">Aktiviteler: ~400 ₺</div>
+          <div class="prac-item">Toplam: ~3500–5000 ₺/kişi</div>
           ` : `
-          <div class="prac-item">Konaklama: ~800–1500 ₺/gece</div>
-          <div class="prac-item">Yemek: ~600 ₺/gün/kişi</div>
-          <div class="prac-item">Aktiviteler: ~500 ₺ tüm gezi</div>
-          <div class="prac-item">3 gün: ~5000–7000 ₺/kişi</div>
+          <div class="prac-item">Konaklama: ~1500–3000 ₺/gece</div>
+          <div class="prac-item">Yemek: ~700 ₺/gün/kişi</div>
+          <div class="prac-item">Aktiviteler + giriş: ~600 ₺</div>
+          <div class="prac-item">3 gün toplam: ~7000–12000 ₺/kişi</div>
           `}
         </div>
         <div class="prac-card fade-up" data-delay=".18">
@@ -667,32 +777,88 @@ function pageInit() {
           ${hasSea ? `
           <div class="prac-item">Deniz için: Haziran–Eylül</div>
           <div class="prac-item">Su sıcaklığı: 22–28°C</div>
-          <div class="prac-item">Kalabalık: Temmuz–Ağustos</div>
-          <div class="prac-item">Sakin: Haziran veya Eylül</div>
+          <div class="prac-item">En sakin: Haziran başı veya Eylül</div>
+          <div class="prac-item">Kalabalık pik: Temmuz–Ağustos</div>
           ` : `
-          <div class="prac-item">İdeal: Nisan–Haziran</div>
-          <div class="prac-item">Alternatif: Eylül–Kasım</div>
-          <div class="prac-item">Yazın çok sıcak olabilir</div>
-          <div class="prac-item">Kış ziyareti de mümkün</div>
+          <div class="prac-item">En ideal: Nisan–Mayıs</div>
+          <div class="prac-item">Alternatif: Eylül–Ekim</div>
+          <div class="prac-item">Kış: Sessiz ama bazı mekanlar kapalı</div>
+          <div class="prac-item">Yaz: Sıcak, gün ortası gölge az</div>
           `}
         </div>
-        ${sel.grup === 'aile' ? `
+        ${hasHistory ? `
         <div class="prac-card fade-up" data-delay=".24">
+          <div class="prac-icon">🏛</div>
+          <div class="prac-title">Antik Kent Bilgisi</div>
+          <div class="prac-item">Yaz: 08:30 – 20:00 / Kış: 08:30 – 17:30</div>
+          <div class="prac-item">Müzekart geçerlidir</div>
+          <div class="prac-item">2 giriş kapısı: Köy tarafı + Batı kapısı</div>
+          <div class="prac-item">Athena Tapınağı, Surlar (3.2 km), Tiyatro, Agora</div>
+          <div class="prac-item">Hüdavendigâr Camii (14. yy Osmanlı)</div>
+        </div>` : ''}
+        ${hasSea ? `
+        <div class="prac-card fade-up" data-delay=".24">
+          <div class="prac-icon">🌊</div>
+          <div class="prac-title">Koy Rehberi</div>
+          <div class="prac-item">Kadırga: En popüler, erişimi kolay</div>
+          <div class="prac-item">Sivrice: Yürüyüşle ulaşılır, sakin</div>
+          <div class="prac-item">Sokakağzı: Berrak su, az kalabalık</div>
+          <div class="prac-item">Yeşil Liman: Yeni keşfedilen, doğal</div>
+          <div class="prac-item">Sabah 8-9'da gidin, öğle kalabalıklaşır</div>
+        </div>` : ''}
+        ${hasMuseum ? `
+        <div class="prac-card fade-up" data-delay=".24">
+          <div class="prac-icon">🫒</div>
+          <div class="prac-title">Müze & Kültür</div>
+          <div class="prac-item">Adatepe Zeytinyağı Müzesi (ücretsiz)</div>
+          <div class="prac-item">Apollon Smintheion (Gülpınar)</div>
+          <div class="prac-item">Yerel zeytin ve zeytinyağı ürünleri</div>
+          <div class="prac-item">Geleneksel taş mimari ve köy dokusu</div>
+        </div>` : ''}
+        ${sel.grup === 'aile' ? `
+        <div class="prac-card fade-up" data-delay=".30">
           <div class="prac-icon">👨‍👩‍👧</div>
           <div class="prac-title">Aile İpuçları</div>
-          <div class="prac-item">Kadırga Koyu çocuklar için ideal</div>
-          <div class="prac-item">Tapınak ziyareti sabah erken</div>
-          <div class="prac-item">Gölge az — şapka şart</div>
-          <div class="prac-item">Atıştırmalık ve su bol götür</div>
+          <div class="prac-item">Kadırga Koyu çocuklar için en uygun</div>
+          <div class="prac-item">Tapınak ziyareti sabah erken (sıcak olmadan)</div>
+          <div class="prac-item">Gölge az — şapka ve güneş kremi şart</div>
+          <div class="prac-item">Atıştırmalık ve su bol götürün</div>
+          <div class="prac-item">Nakit bulundurun (küçük mekanlar kart almaz)</div>
         </div>` : sel.grup === 'cift' ? `
-        <div class="prac-card fade-up" data-delay=".24">
+        <div class="prac-card fade-up" data-delay=".30">
           <div class="prac-icon">💑</div>
           <div class="prac-title">Çift Önerileri</div>
-          <div class="prac-item">Gün batımı tapınak tepesinde</div>
-          <div class="prac-item">Liman kenarında akşam yemeği</div>
-          <div class="prac-item">Adatepe sabah kahvaltısı</div>
-          <div class="prac-item">Sivrice koyunu kaçırma</div>
+          <div class="prac-item">Gün batımı: Athena Tapınağı tepesinde</div>
+          <div class="prac-item">Akşam yemeği: Antik Liman restoranları</div>
+          <div class="prac-item">Sabah kahvaltısı: Adatepe köy kahvaltısı</div>
+          <div class="prac-item">Sakin koy: Sivrice (el değmemiş)</div>
+          <div class="prac-item">Konaklama: Kayalar veya Büyükhusun</div>
+        </div>` : sel.grup === 'arkadaslar' ? `
+        <div class="prac-card fade-up" data-delay=".30">
+          <div class="prac-icon">🎉</div>
+          <div class="prac-title">Arkadaş Grubu</div>
+          <div class="prac-item">Kadırga + Sivrice koyları gün boyu</div>
+          <div class="prac-item">Akşam Behramkale meydanında buluşma</div>
+          <div class="prac-item">Köy köy Assos rotası tam size göre</div>
+          <div class="prac-item">Babakale'de en batı noktası selfie'si</div>
+        </div>` : sel.grup === 'yalniz' ? `
+        <div class="prac-card fade-up" data-delay=".30">
+          <div class="prac-icon">🧳</div>
+          <div class="prac-title">Solo Gezgin</div>
+          <div class="prac-item">Kendi hızınızda keşfedin</div>
+          <div class="prac-item">Sabah erken tapınak: neredeyse yalnız kalırsınız</div>
+          <div class="prac-item">Köy kafelerinde yerel halkla sohbet</div>
+          <div class="prac-item">Sivrice Koyu: Sessizlik ve huzur</div>
         </div>` : ''}
+        <div class="prac-card fade-up" data-delay=".36">
+          <div class="prac-icon">⚠️</div>
+          <div class="prac-title">Dikkat Edilmesi Gerekenler</div>
+          <div class="prac-item">GSM sinyali bazı köylerde zayıf</div>
+          <div class="prac-item">Midilli baz istasyonu: roaming riski!</div>
+          <div class="prac-item">Bölgede büyük market yok, Ayvacık'tan alın</div>
+          <div class="prac-item">Taş yollar: rahat ayakkabı şart</div>
+          <div class="prac-item">Yazın sivrisinek olabilir (akşam saatleri)</div>
+        </div>
       </div>
     `;
   }
@@ -716,9 +882,13 @@ function pageInit() {
       isLong && '🪥 Kişisel bakım malzemeleri',
       isLong && '🌡 İlaç çantası',
       '📱 Çevrimdışı harita (Maps.me)',
+      sel.ilgi.has('tarih') && '🎫 Müzekart (antik kent girişi)',
+      sel.ilgi.has('muze') && '📝 Not defteri (müze ziyareti)',
       '🔋 Powerbank',
       sel.ilgi.has('tarih') && '📚 Rehber kitap / Not defteri',
       sel.grup === 'aile' && '🧸 Çocuk için atıştırmalık',
+      sel.grup === 'arkadaslar' && '🎲 Kart oyunu (akşam için)',
+      '🪪 Kimlik/ehliyet (araç kullanıyorsanız)',
       '🌙 İnce bir üst (akşam serinler)',
     ].filter(Boolean);
 
@@ -755,6 +925,7 @@ function pageInit() {
   window.pickCard = pickCard;
   window.pickMulti = pickMulti;
   window.buildPlan = buildPlan;
+  window.toggleCheck = toggleCheck;
   window.resetPlan = resetPlan;
 }
 pageInit();
