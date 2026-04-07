@@ -2214,6 +2214,21 @@ function renderVenuePage(venueId) {
           </div>` : ''}
         </div>
 
+        <!-- Gallery -->
+        ${(() => {
+          const imgs = v.images || [];
+          if (imgs.length === 0) return '';
+          const count = Math.min(imgs.length, 6);
+          const tiles = imgs.slice(0, count).map(src =>
+            '<div class="vp-gimg"><img src="' + (src.startsWith('http') ? src : base + src) + '" alt="' + v.title + '" loading="lazy" onload="this.classList.add(\'loaded\')"><div class="vp-gimg-overlay"></div></div>'
+          ).join('');
+          return '<div class="vp-section fade-up">' +
+            '<div class="vp-eyebrow">Atmosfer</div>' +
+            '<h2 class="vp-stitle">Mekandan Kareler</h2>' +
+            '<div class="vp-gallery" data-count="' + count + '">' + tiles + '</div>' +
+          '</div>';
+        })()}
+
         <!-- Instagram -->
         ${(() => {
           if (!v.instagram) return '';
@@ -2231,21 +2246,6 @@ function renderVenuePage(venueId) {
               '</div>' +
               '<a href="' + igUrl + '" target="_blank" rel="noopener" class="vp-ig-btn">Takip Et</a>' +
             '</div>' +
-          '</div>';
-        })()}
-
-        <!-- Gallery -->
-        ${(() => {
-          const imgs = v.images || [];
-          if (imgs.length === 0) return '';
-          const count = Math.min(imgs.length, 6);
-          const tiles = imgs.slice(0, count).map(src =>
-            '<div class="vp-gimg"><img src="' + (src.startsWith('http') ? src : base + src) + '" alt="' + v.title + '" loading="lazy" onload="this.classList.add(\'loaded\')"><div class="vp-gimg-overlay"></div></div>'
-          ).join('');
-          return '<div class="vp-section fade-up">' +
-            '<div class="vp-eyebrow">Atmosfer</div>' +
-            '<h2 class="vp-stitle">Mekandan Kareler</h2>' +
-            '<div class="vp-gallery" data-count="' + count + '">' + tiles + '</div>' +
           '</div>';
         })()}
 
