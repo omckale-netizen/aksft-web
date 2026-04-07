@@ -1737,6 +1737,12 @@ function renderVenuePage(venueId) {
     return v.weeklyHours[0].hours;
   })();
   const isNowOpen = (() => {
+    // Konaklama: 08:00-00:00 arası açık (gece 12'den sonra yeni müşteri yok)
+    if (v.category === 'konaklama') {
+      const now = new Date();
+      const hour = now.getHours();
+      return hour >= 8 && hour < 24;
+    }
     if (!todayHours || todayHours === '—' || todayHours.toLowerCase() === 'kapalı') return false;
     const match = todayHours.match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
     if (!match) return null;
