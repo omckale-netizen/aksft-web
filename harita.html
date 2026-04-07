@@ -187,8 +187,6 @@ const FALLBACK_COORDS = {
   'kadirga-plaj-kafe':     [39.4785, 26.3515],
   'ahmetce-iskele-kafe':   [39.4968, 26.2965],
   'sivrice-koy-duragi':    [39.4738, 26.3175],
-  'sunaba-kasri-otel':     [39.5280, 26.3450],
-  'kafe-mera':             [39.5350, 26.3600],
 };
 
 const CAT_CONFIG = {
@@ -244,7 +242,9 @@ function initMap() {
 
 function getCoords(item) {
   // Oncelik: Firebase'deki lat/lng alanlari
-  if (item.lat && item.lng) return [item.lat, item.lng];
+  const lat = parseFloat(item.lat);
+  const lng = parseFloat(item.lng);
+  if (lat && lng && !isNaN(lat) && !isNaN(lng)) return [lat, lng];
   // Fallback: hardcoded koordinatlar
   const fb = FALLBACK_COORDS[item.id];
   if (fb) return fb;
