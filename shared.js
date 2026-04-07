@@ -597,6 +597,7 @@ function renderNav(opts = {}) {
       });
     } catch {}
     window.updateSaveNavCount();
+    if (window.syncFavToFirebase) setTimeout(window.syncFavToFirebase, 300);
   };
 
   window.isPlaceSaved = function (id) {
@@ -691,6 +692,7 @@ function renderNav(opts = {}) {
       btn.classList.remove('saved');
       btn.textContent = '♡';
     });
+    if (window.syncFavToFirebase) setTimeout(window.syncFavToFirebase, 300);
   };
 
   function renderSaveDrawer() {
@@ -786,7 +788,7 @@ function renderNav(opts = {}) {
     return code;
   }
 
-  // Favorileri Firebase'e kaydet
+  // Favorileri Firebase'e kaydet (mekanlar + yerler)
   window.syncFavToFirebase = function() {
     function doSync() {
       if (typeof firebase === 'undefined' || !firebase.firestore) {
@@ -794,22 +796,23 @@ function renderNav(opts = {}) {
         return;
       }
       const code = getFavCode();
-      let saved;
-      try { saved = JSON.parse(localStorage.getItem(SD_KEY) || '[]'); } catch { saved = []; }
+      let venues, places;
+      try { venues = JSON.parse(localStorage.getItem(SD_KEY) || '[]'); } catch { venues = []; }
+      try { places = JSON.parse(localStorage.getItem(SD_PLACE_KEY) || '[]'); } catch { places = []; }
       firebase.firestore().collection('favorites').doc(code).set({
-        venues: saved,
+        venues: venues,
+        places: places,
         updatedAt: new Date().toISOString()
       }, { merge: true }).then(() => {
-        console.log('Favoriler senkronlandi:', code, saved.length, 'mekan');
+        console.log('Favoriler senkronlandi:', code, venues.length, 'mekan,', places.length, 'yer');
       }).catch(err => console.warn('Favori sync hatasi:', err));
     }
     doSync();
-    // Kodu göster
     const codeEl = document.getElementById('sd-sync-code');
-    if (codeEl) codeEl.textContent = code;
+    if (codeEl) codeEl.textContent = getFavCode();
   };
 
-  // Kod ile favorileri yükle
+  // Kod ile favorileri yükle (mevcut liste sıfırlanır, kodun listesi gelir)
   window.loadFavCode = async function() {
     const input = document.getElementById('sd-sync-input');
     const statusEl = document.getElementById('sd-sync-status');
@@ -822,16 +825,24 @@ function renderNav(opts = {}) {
       const doc = await firebase.firestore().collection('favorites').doc(code).get();
       if (!doc.exists) { if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Bu kodla eslesen liste bulunamadi.</span>'; return; }
       const data = doc.data();
-      if (data.venues && Array.isArray(data.venues)) {
-        localStorage.setItem(SD_KEY, JSON.stringify(data.venues));
-        localStorage.setItem(FAV_CODE_KEY, code);
-        renderSaveDrawer();
-        window.updateSaveNavCount();
-        if (input) input.value = '';
-        const codeEl = document.getElementById('sd-sync-code');
-        if (codeEl) codeEl.textContent = code;
-        if (statusEl) statusEl.innerHTML = '<span style="color:#38A169">✓ ' + data.venues.length + ' mekan basariyla yuklendi!</span>';
-      }
+      const venueCount = (data.venues && Array.isArray(data.venues)) ? data.venues.length : 0;
+      const placeCount = (data.places && Array.isArray(data.places)) ? data.places.length : 0;
+      if (venueCount === 0 && placeCount === 0) { if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Bu liste bos.</span>'; return; }
+      // Mevcut listeyi sıfırla, kodun listesini yükle
+      localStorage.setItem(SD_KEY, JSON.stringify(data.venues || []));
+      localStorage.setItem(SD_PLACE_KEY, JSON.stringify(data.places || []));
+      localStorage.setItem(FAV_CODE_KEY, code);
+      renderSaveDrawer();
+      window.updateSaveNavCount();
+      if (input) input.value = '';
+      const codeEl = document.getElementById('sd-sync-code');
+      if (codeEl) codeEl.textContent = code;
+      let msg = '✓ ';
+      if (venueCount > 0) msg += venueCount + ' mekan';
+      if (venueCount > 0 && placeCount > 0) msg += ' ve ';
+      if (placeCount > 0) msg += placeCount + ' yer';
+      msg += ' basariyla yuklendi!';
+      if (statusEl) statusEl.innerHTML = '<span style="color:#38A169">' + msg + '</span>';
     } catch(err) {
       if (statusEl) { statusEl.innerHTML = '<span style="color:#E53E3E">Yukleme hatasi: </span>'; statusEl.querySelector('span').appendChild(document.createTextNode(err.message)); }
     }
@@ -845,11 +856,14 @@ function renderNav(opts = {}) {
     if (statusEl) statusEl.innerHTML = '<span style="color:var(--text-muted)">Guncelleniyor...</span>';
     try {
       const doc = await firebase.firestore().collection('favorites').doc(code).get();
-      if (doc.exists && doc.data().venues) {
-        localStorage.setItem(SD_KEY, JSON.stringify(doc.data().venues));
+      if (doc.exists) {
+        const data = doc.data();
+        localStorage.setItem(SD_KEY, JSON.stringify(data.venues || []));
+        localStorage.setItem(SD_PLACE_KEY, JSON.stringify(data.places || []));
         renderSaveDrawer();
         window.updateSaveNavCount();
-        if (statusEl) statusEl.innerHTML = '<span style="color:#38A169">✓ Liste guncellendi! ' + doc.data().venues.length + ' mekan.</span>';
+        const total = (data.venues || []).length + (data.places || []).length;
+        if (statusEl) statusEl.innerHTML = '<span style="color:#38A169">✓ Liste guncellendi! ' + total + ' kayit.</span>';
       } else {
         if (statusEl) statusEl.innerHTML = '<span style="color:var(--text-muted)">Liste zaten guncel.</span>';
       }
