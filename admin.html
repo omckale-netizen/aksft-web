@@ -366,8 +366,20 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 
     <!-- ══════ DASHBOARD ══════ -->
     <div class="admin-page active" id="page-dashboard">
-      <h2>Genel Bakis</h2>
-      <p class="page-sub">Sitenin genel durumuna hizli bir bakis.</p>
+      <!-- Hoşgeldin bar -->
+      <div id="dash-welcome" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:28px;">
+        <div>
+          <h2 style="margin:0;font-size:1.5rem;" id="dash-greeting">Hos Geldiniz</h2>
+          <p class="page-sub" style="margin:0;margin-top:4px;" id="dash-date"></p>
+        </div>
+        <div style="text-align:right;">
+          <div id="dash-clock" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.8rem;color:var(--navy);letter-spacing:-.02em;line-height:1;"></div>
+          <div id="dash-day" style="font-size:.72rem;color:var(--text-muted);margin-top:2px;"></div>
+        </div>
+      </div>
+
+      <!-- Bildirimler -->
+      <div id="dash-alerts" style="margin-bottom:20px;"></div>
 
       <!-- Stats -->
       <div class="stats-grid" id="stats-grid"></div>
@@ -413,10 +425,22 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
         </div>
       </div>
 
-      <!-- Görselsiz Mekanlar -->
+      <!-- Alt satır: Görselsiz + Son Mesajlar -->
+      <div class="dash-row">
+        <div class="panel-card dash-half">
+          <div class="panel-card-head"><h3>📷 Gorselsiz Mekanlar</h3></div>
+          <div id="dash-no-images"></div>
+        </div>
+        <div class="panel-card dash-half">
+          <div class="panel-card-head" style="justify-content:space-between"><h3>✉️ Son Mesajlar</h3><a onclick="showPage('messages')" style="font-size:.72rem;color:var(--terra);cursor:pointer;font-weight:600">Tumunu Gor →</a></div>
+          <div id="dash-messages"></div>
+        </div>
+      </div>
+
+      <!-- Onay Bekleyenler -->
       <div class="panel-card">
-        <div class="panel-card-head"><h3>&#128247; Gorselsiz Mekanlar</h3></div>
-        <div id="dash-no-images"></div>
+        <div class="panel-card-head"><h3>⏳ Onay Bekleyenler</h3></div>
+        <div id="dash-pending"></div>
       </div>
     </div>
 
@@ -953,7 +977,18 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
     <!-- ══════ SETTINGS ══════ -->
     <div class="admin-page" id="page-settings">
       <h2>Ayarlar</h2>
-      <p class="page-sub">Panel sifrenizi degistirin.</p>
+      <p class="page-sub">Profil ve guvenlik ayarlari.</p>
+
+      <div class="panel-card" style="max-width:480px;margin-bottom:20px">
+        <div class="panel-card-head"><h3>👤 Profil</h3></div>
+        <div style="padding:20px">
+          <div class="form-group">
+            <label>Adiniz (Hos geldiniz mesaji icin)</label>
+            <input type="text" id="settings-name" placeholder="Adinizi girin" value="" oninput="localStorage.setItem('admin_name',this.value)">
+          </div>
+          <div style="font-size:.72rem;color:var(--text-muted)">Bu isim sadece panel icerisinde "Hos geldiniz" mesajinda kullanilir.</div>
+        </div>
+      </div>
 
       <div class="panel-card" style="max-width:480px">
         <div class="panel-card-head"><h3>🔒 Sifre Degistir</h3></div>
@@ -1943,7 +1978,34 @@ function getVenueStatus(v) {
 /* ══════════════════════════════════════════════════
    DASHBOARD
 ══════════════════════════════════════════════════ */
+function updateDashClock() {
+  const now = new Date();
+  const h = now.getHours().toString().padStart(2,'0');
+  const m = now.getMinutes().toString().padStart(2,'0');
+  const el = document.getElementById('dash-clock');
+  if (el) el.textContent = h + ':' + m;
+  const dayEl = document.getElementById('dash-day');
+  if (dayEl) dayEl.textContent = now.toLocaleDateString('tr-TR', { weekday:'long' });
+}
+setInterval(updateDashClock, 10000);
+
 function renderDashboard() {
+  // Hoşgeldin
+  const adminName = localStorage.getItem('admin_name') || '';
+  const greetEl = document.getElementById('dash-greeting');
+  if (greetEl) {
+    const hour = new Date().getHours();
+    const greet = hour < 12 ? 'Gunaydin' : hour < 18 ? 'Iyi gunler' : 'Iyi aksamlar';
+    greetEl.textContent = adminName ? greet + ', ' + adminName + ' 👋' : greet + ' 👋';
+  }
+  const dateEl = document.getElementById('dash-date');
+  if (dateEl) dateEl.textContent = new Date().toLocaleDateString('tr-TR', { day:'numeric', month:'long', year:'numeric' });
+  updateDashClock();
+
+  // Settings name input sync
+  const nameInput = document.getElementById('settings-name');
+  if (nameInput && !nameInput.value && adminName) nameInput.value = adminName;
+
   const v = draftData.venues || [];
   const r = draftData.routes || [];
   const vi = draftData.villages || [];
@@ -2029,6 +2091,66 @@ function renderDashboard() {
             <div class="ri-meta" style="color:var(--red)">Gorsel eklenmemis</div>
           </div>
         </div>`).join('');
+  }
+
+  // Son Mesajlar
+  (async function() {
+    const msgEl = document.getElementById('dash-messages');
+    if (!msgEl) return;
+    try {
+      const snap = await db.collection('messages').orderBy('timestamp','desc').limit(5).get();
+      const msgs = snap.docs.map(d => d.data());
+      msgEl.innerHTML = msgs.length === 0
+        ? '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:.85rem">Henuz mesaj yok.</div>'
+        : msgs.map(m =>
+          '<div class="recent-item" style="cursor:pointer" onclick="showPage(\'messages\')">' +
+            '<div class="recent-emoji">' + (m.read ? '✉️' : '🔴') + '</div>' +
+            '<div class="recent-info"><div class="ri-title">' + (m.name || 'Isimsiz') + '</div>' +
+            '<div class="ri-meta">' + (m.subject || 'Genel') + ' · ' + (m.message || '').substring(0,40) + '...</div></div>' +
+          '</div>').join('');
+    } catch(e) { msgEl.innerHTML = '<div style="padding:16px;color:var(--text-muted);font-size:.82rem">Mesajlar yuklenemedi.</div>'; }
+  })();
+
+  // Onay Bekleyenler
+  (async function() {
+    const pendEl = document.getElementById('dash-pending');
+    if (!pendEl) return;
+    try {
+      const [venueSnap, placeSnap] = await Promise.all([
+        db.collection('pending_venues').get(),
+        db.collection('pending_places').get()
+      ]);
+      const items = [
+        ...venueSnap.docs.map(d => ({ ...d.data(), _type:'mekan' })),
+        ...placeSnap.docs.map(d => ({ ...d.data(), _type:'yer' }))
+      ].sort((a,b) => (b.submittedAt||'').localeCompare(a.submittedAt||''));
+
+      pendEl.innerHTML = items.length === 0
+        ? '<div style="padding:24px;text-align:center;color:var(--green);font-size:.85rem">✓ Onay bekleyen icerik yok.</div>'
+        : items.map(x =>
+          '<div class="recent-item" style="cursor:pointer" onclick="showPage(\'' + (x._type==='mekan'?'bot':'placebot') + '\')">' +
+            '<div class="recent-emoji">' + (x.emoji || '📍') + '</div>' +
+            '<div class="recent-info"><div class="ri-title">' + x.title + '</div>' +
+            '<div class="ri-meta"><span style="background:rgba(212,147,90,.1);color:#D4935A;padding:1px 6px;border-radius:999px;font-size:.6rem;font-weight:700">⏳ ' + x._type.toUpperCase() + '</span> · ' + (x.location || '-') + '</div></div>' +
+          '</div>').join('');
+    } catch(e) { pendEl.innerHTML = '<div style="padding:16px;color:var(--text-muted);font-size:.82rem">Yuklenemedi.</div>'; }
+  })();
+
+  // Bildirimler (alerts)
+  const alerts = [];
+  const noImgCount = v.filter(x => !x.images || x.images.length === 0).length;
+  if (noImgCount > 0) alerts.push({ icon:'📷', text:noImgCount + ' mekanin gorseli eksik', action:'venues', color:'#D4935A' });
+  const inactiveCount = v.filter(x => x.active === false).length;
+  if (inactiveCount > 0) alerts.push({ icon:'⏸', text:inactiveCount + ' mekan pasif durumda', action:'venues', color:'#718096' });
+
+  const alertEl = document.getElementById('dash-alerts');
+  if (alertEl) {
+    alertEl.innerHTML = alerts.map(a =>
+      '<div onclick="showPage(\'' + a.action + '\')" style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(212,147,90,.06);border:1px solid rgba(212,147,90,.12);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background=\'rgba(212,147,90,.1)\'" onmouseout="this.style.background=\'rgba(212,147,90,.06)\'">' +
+        '<span style="font-size:1rem">' + a.icon + '</span>' +
+        '<span style="font-size:.82rem;color:' + a.color + ';font-weight:600">' + a.text + '</span>' +
+        '<span style="margin-left:auto;font-size:.7rem;color:var(--text-muted)">→</span>' +
+      '</div>').join('');
   }
 }
 
