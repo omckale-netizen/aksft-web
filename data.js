@@ -22,8 +22,8 @@ window.DATA = {
           "title": "Athena Tapınağı",
           "emoji": "🏛",
           "duration": "~1 saat",
-          "desc": "Sabahın erken saatlerinde, henüz turist kalabalığı gelmeden tapınağa çık. Ege'ye bakan panoramik manzara ve antik sütunlar sabah ışığında bambaşka görünür.",
-          "tip": "Saat 08:00–09:00 arası gelirsen neredeyse yalnız kalırsın. Gün batımı için de geri döneceğin için fotoğrafları sabaha bırakabilirsin."
+          "desc": "Sabahın erken saatlerinde, henüz turist kalabalığı gelmeden tapınağa çık. Ege'ye bakan panoramik manzara ve antik sütunlar sabah ışığında bambaşka görünür. Giriş saatleri: Yaz 08:30-20:00, Kış 08:30-17:30.",
+          "tip": "Saat 08:00–09:00 arası gelirsen neredeyse yalnız kalırsın. Gün batımı için de geri döneceğin için fotoğrafları sabaha bırakabilirsin. Giriş ücretlidir, müzekart geçerlidir."
         },
         {
           "no": 2,
@@ -155,8 +155,8 @@ window.DATA = {
       "tagTextColor": "#2490B8",
       "headerBg": "linear-gradient(135deg,rgba(26,107,138,0.3) 0%,rgba(15,60,90,0.12) 100%)",
       "glowColor": "#1A6B8A",
-      "sure": "3–4 saat",
-      "durak": 4,
+      "sure": "5–6 saat",
+      "durak": 6,
       "zorluk": "Orta",
       "tempo": "Yavaş",
       "hedefKitle": "Tarih meraklıları",
@@ -168,7 +168,7 @@ window.DATA = {
           "title": "Athena Tapınağı",
           "emoji": "🏛",
           "duration": "~1.5 saat",
-          "desc": "MÖ 530 yılında inşa edilen Dor düzeni tapınak, Aristoteles'in de yaşadığı antik Assos kentinin tepesinde yer alır. Kalıntı sütunlar, antik tiyatro ve agora kalıntılarını gez.",
+          "desc": "MÖ 530 yılında inşa edilen Dor düzeni tapınak, Aristoteles'in de yaşadığı antik Assos kentinin tepesinde yer alır. Kalıntı sütunlar, antik tiyatro ve agora kalıntılarını gez. Yaz dönemi (Nisan-Ekim) 08:30-20:00, kış dönemi 08:30-17:30 arası ziyaret edilebilir.",
           "tip": "Müze görevlileri veya yerel rehberler tapınağın tarihi hakkında bilgi verebilir; sormaktan çekinme."
         },
         {
@@ -194,6 +194,22 @@ window.DATA = {
           "duration": "~1 saat",
           "desc": "Güllüdere yakınlarında, Troya dönemiyle ilişkilendirilen Apollon Smintheion tapınağı. Bölgenin en az ziyaret edilen ama en etkileyici arkeolojik alanlarından biri. Araçla yaklaşık 30 dk.",
           "tip": "Zaman zaman kapalı olabilir; ziyaret öncesi kontrol et. Kalabalıktan uzak, sakin bir deneyim."
+        },
+        {
+          "no": 5,
+          "title": "Hüdavendigâr Camii",
+          "emoji": "🕌",
+          "duration": "~30 dakika",
+          "desc": "Akropolün kuzey köşesinde, I. Murat (Hüdavendigâr) tarafından 14. yüzyılda yaptırılan tek kubbeli Osmanlı camii. Antik taşlardan devşirme malzeme ile inşa edilmiş, Osmanlı ve antik dönemin iç içe geçtiği nadir yapılardan.",
+          "tip": "Athena Tapınağı ziyaretinin hemen ardından, aynı tepede gezebilirsiniz."
+        },
+        {
+          "no": 6,
+          "title": "Osmanlı Köprüsü",
+          "emoji": "🌉",
+          "duration": "~20 dakika",
+          "desc": "Behramkale sınırlarında hâlâ kullanılmakta olan tarihi Osmanlı köprüsü. Taş işçiliği ve konumu ile bölgenin Osmanlı dönemindeki önemine tanıklık eder.",
+          "tip": "Araçla geçerken durup fotoğraf çekmeye değer. Köprünün altından dere akar."
         }
       ],
       "tips": [
@@ -250,8 +266,8 @@ window.DATA = {
           "title": "Adatepe",
           "emoji": "🌿",
           "duration": "~45 dakika",
-          "desc": "Zeytinlikler içinde, eşsiz doğal dokusuyla Adatepe. Geleneksel Ege mimarisinin en güzel örneklerinden biri. Köyü yürüyerek gez.",
-          "tip": "Adatepe'de zeytinyağı ürünleri satan küçük dükkanlar var; kaliteli yerel ürün."
+          "desc": "Zeytinlikler içinde, eşsiz doğal dokusuyla Adatepe. Geleneksel Ege mimarisinin en güzel örneklerinden biri. Köyü yürüyerek gez. Adatepe Zeytinyağı Müzesi'ni de mutlaka ziyaret edin — geleneksel zeytinyağı üretimi hakkında eşsiz bir deneyim sunar.",
+          "tip": "Adatepe'de zeytinyağı ürünleri satan küçük dükkanlar var. Müze girişi ücretsizdir."
         },
         {
           "no": 3,
@@ -320,8 +336,8 @@ window.DATA = {
       "tagTextColor": "#2490B8",
       "headerBg": "linear-gradient(135deg,rgba(26,107,138,0.35) 0%,rgba(10,50,80,0.15) 100%)",
       "glowColor": "#1A6B8A",
-      "sure": "Yarım gün",
-      "durak": 3,
+      "sure": "Tam gün",
+      "durak": 5,
       "zorluk": "Kolay",
       "tempo": "Dinlendirici",
       "hedefKitle": "Yaz gezginleri",
@@ -351,6 +367,22 @@ window.DATA = {
           "duration": "~45 dakika",
           "desc": "Günü Ahmetçe'nin küçük ve büyüleyici iskelesinde kapat. Balık tutanlar, sabah kahvecileri ve yerel halk burada buluşur. Sakin ve otantik.",
           "tip": "İskele kenarında küçük bir kafe var. Akşam üzeri en güzel halini alır."
+        },
+        {
+          "no": 4,
+          "title": "Sokakağzı Koyu",
+          "emoji": "🌊",
+          "duration": "~1.5 saat",
+          "desc": "Sivrice ile birlikte bölgenin en popüler koylarından. Babakale yönünde, sakin ve berrak suları ile dinlenmek için ideal.",
+          "tip": "Yaz aylarında erken saatlerde gidin. Küçük bir kafe bulunabilir."
+        },
+        {
+          "no": 5,
+          "title": "Yeşil Liman",
+          "emoji": "🏖",
+          "duration": "~1 saat",
+          "desc": "Assos'dan Babakale yönüne giderken karşılaşılan, son yıllarda turizmde gelişme gösteren sakin bir koy. Yukarı köylerin sahil yerleşimi.",
+          "tip": "Henüz çok turistik değil, sakin bir deneyim arayanlar için biçilmiş kaftan."
         }
       ],
       "tips": [
@@ -681,6 +713,54 @@ window.DATA = {
         "deniz",
         "sakin"
       ],
+      "image": ""
+    },
+    {
+      "id": "adatepe-zeytinyagi-muzesi",
+      "title": "Adatepe Zeytinyağı Müzesi",
+      "emoji": "🫒",
+      "category": "tarihi",
+      "bgGradient": "linear-gradient(135deg,#3A4A20,#2A3818)",
+      "badgeBg": "rgba(90,122,86,0.75)",
+      "badgeColor": "#fff",
+      "badgeText": "Müze",
+      "shortDesc": "Geleneksel zeytinyağı üretim sürecini anlatan küçük ama etkileyici bir müze. Adatepe köyünde.",
+      "description": "Adatepe Zeytinyağı Müzesi, köyün merkezinde yer alan ve geleneksel zeytinyağı üretim sürecini ziyaretçilere sunan küçük ama özgün bir müzedir. Taş yapı içinde eski pres ve üretim aletleri sergilenmekte, zeytinyağının bölge kültüründeki yeri anlatılmaktadır.",
+      "location": "Adatepe Köyü, Ayvacık",
+      "tags": ["Müze", "Zeytin", "Kültür"],
+      "keywords": ["adatepe", "zeytinyağı", "müze", "zeytin", "kültür", "üretim"],
+      "image": ""
+    },
+    {
+      "id": "sokakagzi-koyu",
+      "title": "Sokakağzı Koyu",
+      "emoji": "🌊",
+      "category": "koy",
+      "bgGradient": "linear-gradient(135deg,#1A4858,#0D2C3A)",
+      "badgeBg": "rgba(26,107,138,0.75)",
+      "badgeColor": "#fff",
+      "badgeText": "Koy",
+      "shortDesc": "Assos'un en popüler koylarından biri. Sivrice ile birlikte Babakale yönünün gözde durağı.",
+      "description": "Sokakağzı Koyu, Assos'dan Babakale yönüne giderken ulaşılan, son yıllarda popülerliği artan sakin bir koydur. Berrak suları ve doğal yapısıyla yüzme ve güneşlenme için idealdir.",
+      "location": "Sokakağzı, Ayvacık",
+      "tags": ["Koy", "Yüzme", "Sakin"],
+      "keywords": ["sokakağzı", "koy", "deniz", "yüzme", "sakin"],
+      "image": ""
+    },
+    {
+      "id": "yesil-liman",
+      "title": "Yeşil Liman",
+      "emoji": "🏖",
+      "category": "koy",
+      "bgGradient": "linear-gradient(135deg,#1A3A28,#0D2A1C)",
+      "badgeBg": "rgba(90,122,86,0.75)",
+      "badgeColor": "#fff",
+      "badgeText": "Koy",
+      "shortDesc": "Assos'dan Babakale yönünde, son yıllarda gelişen sakin bir koy ve sahil yerleşimi.",
+      "description": "Yeşil Liman, Assos'dan Babakale yönüne doğru giderken karşılaşılan, yukarı köylerin sahil yerleşimi olan küçük bir koydur. Son yıllarda turizmde gelişme göstermekle birlikte hâlâ sakin yapısını korumaktadır.",
+      "location": "Yeşil Liman, Ayvacık",
+      "tags": ["Koy", "Sakin", "Doğa"],
+      "keywords": ["yeşil liman", "koy", "sahil", "sakin", "doğa"],
       "image": ""
     }
   ],
