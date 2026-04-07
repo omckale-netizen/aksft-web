@@ -235,7 +235,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 .img-cover-badge{position:absolute;top:4px;left:4px;font-size:.5rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:999px;z-index:3;pointer-events:none;}
 .img-cover-badge.is-cover{background:rgba(196,82,26,.9);color:#fff;}
 .img-cover-badge.not-cover{background:rgba(0,0,0,.4);color:rgba(255,255,255,.6);}
-.img-set-cover{position:absolute;bottom:0;left:0;right:0;text-align:center;padding:3px 0;background:rgba(0,0,0,.5);color:#fff;font-size:.58rem;font-weight:600;cursor:pointer;opacity:0;transition:opacity .15s;z-index:3;}
+.img-set-cover{position:absolute;bottom:0;left:0;right:0;text-align:center;padding:5px 0;background:rgba(196,82,26,.85);color:#fff;font-size:.6rem;font-weight:700;cursor:pointer;opacity:0;transition:opacity .15s;z-index:4;user-select:none;}
 .img-preview-item:hover .img-set-cover{opacity:1;}
 .img-preview-remove{position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:50%;background:rgba(229,62,62,.85);color:#fff;border:none;cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center;z-index:5;transition:all .15s;line-height:1}
 .img-preview-remove:hover{background:var(--red);transform:scale(1.15)}
@@ -3202,7 +3202,7 @@ function renderImagePreviews() {
   grid.innerHTML = all.map((item, globalIdx) => {
     const isCover = globalIdx === 0;
     const coverBadge = '<div class="img-cover-badge ' + (isCover ? 'is-cover' : 'not-cover') + '">' + (isCover ? '★ Kapak' : (globalIdx+1)) + '</div>';
-    const setCoverBtn = !isCover ? '<div class="img-set-cover" onclick="event.stopPropagation();setAsCover(' + globalIdx + ')">★ Kapak Yap</div>' : '';
+    const setCoverBtn = !isCover ? '<div class="img-set-cover" draggable="false" onmousedown="event.stopPropagation()" onclick="event.stopPropagation();event.preventDefault();setAsCover(' + globalIdx + ')">★ Kapak Yap</div>' : '';
 
     if (item.type === 'existing') {
       return '<div class="img-preview-item" draggable="true" data-idx="' + globalIdx + '" ondragstart="imgDragStart(event)" ondragover="imgDragOver(event)" ondrop="imgDrop(event)" ondragend="imgDragEnd(event)" ondragleave="imgDragLeave(event)">' +
@@ -3229,16 +3229,18 @@ function renderImagePreviews() {
 
 // Kapak fotoğrafı seç (ilk sıraya taşı)
 function setAsCover(globalIdx) {
-  const existing = editingVenueId ? (draftData.venues.find(v => v.id === editingVenueId)?.images || []) : [];
+  const venue = editingVenueId ? draftData.venues.find(v => v.id === editingVenueId) : null;
+  const existing = venue ? (venue.images || []) : [];
   const exCount = existing.length;
 
   if (globalIdx < exCount) {
     // Mevcut görseli başa al
     const item = existing.splice(globalIdx, 1)[0];
     existing.unshift(item);
-    if (editingVenueId) {
-      const v = draftData.venues.find(x => x.id === editingVenueId);
-      if (v) v.images = existing;
+    if (venue) {
+      venue.images = [...existing];
+      // Firestore'a anında kaydet
+      saveVenueToFirestore(venue);
     }
   } else {
     // Pending görseli başa al
