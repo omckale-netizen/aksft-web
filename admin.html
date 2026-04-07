@@ -1867,21 +1867,23 @@ function galRenderPending() {
 }
 
 async function galUploadAll() {
-  if (galPending.length === 0) return;
+  if (galPending.length === 0) { showToast('Once gorsel secin.', 'error'); return; }
   const btn = document.getElementById('gal-upload-btn');
   btn.disabled = true;
-  btn.textContent = 'Yukleniyor...';
+  const total = galPending.length;
   const cat = getGalCategory();
   const storage = firebase.storage();
   let uploaded = 0;
 
-  for (const p of galPending) {
+  for (let i = 0; i < galPending.length; i++) {
+    const p = galPending[i];
+    btn.textContent = (i + 1) + '/' + total + ' yukleniyor...';
     const ts = Date.now() + '_' + Math.random().toString(36).substr(2, 6);
     const path = 'gallery/' + cat + '/' + ts + '.' + p.ext;
     try {
       const ref = storage.ref(path);
-      await ref.put(p.blob);
-      const url = await ref.getDownloadURL();
+      const snap = await ref.put(p.blob, { contentType: 'image/' + p.ext });
+      const url = await snap.ref.getDownloadURL();
       await db.collection('gallery').add({
         url: url,
         path: path,
@@ -1894,7 +1896,8 @@ async function galUploadAll() {
       });
       uploaded++;
     } catch(err) {
-      showToast('Yuklenemedi: ' + p.name, 'error');
+      console.error('Gallery upload error:', err);
+      showToast('Yuklenemedi: ' + p.name + ' — ' + err.message, 'error');
     }
   }
 
@@ -1902,7 +1905,7 @@ async function galUploadAll() {
   galRenderPending();
   btn.disabled = false;
   btn.style.display = 'none';
-  showToast(uploaded + ' gorsel yuklendi.', 'success');
+  showToast(uploaded + '/' + total + ' gorsel yuklendi.', uploaded > 0 ? 'success' : 'error');
   document.getElementById('gal-custom-cat').value = '';
   galLoadItems();
 }
