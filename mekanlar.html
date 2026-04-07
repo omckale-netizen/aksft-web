@@ -938,12 +938,13 @@ function pageInit() {
   window.setStatus = setStatus;
   window.toggleSave = toggleSave;
   window.toggleSavedView = toggleSavedView;
+  window.renderFeatured = renderFeatured;
+  window.renderGrid = renderGrid;
 }
 pageInit();
 document.addEventListener('firebaseDataUpdated', function() {
-  // Firebase'den güncel veri gelince listeyi yeniden render et
-  renderFeatured();
-  renderGrid();
+  if (window.renderFeatured) window.renderFeatured();
+  if (window.renderGrid) window.renderGrid();
 });
 </script>
 </body>
