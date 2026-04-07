@@ -81,11 +81,19 @@
     .map-filter-btn .mf-count{font-size:.65rem;opacity:.6;margin-left:2px}
 
     /* ── SEARCH ── */
-    .map-search{position:absolute;top:16px;right:16px;z-index:10;width:220px}
-    .map-search input{width:100%;padding:10px 14px 10px 36px;border:1px solid rgba(0,0,0,.08);border-radius:12px;background:rgba(255,255,255,.94);backdrop-filter:blur(16px);font-family:inherit;font-size:.82rem;color:var(--text-dark);box-shadow:0 4px 16px rgba(0,0,0,.08);outline:none;transition:border-color .2s}
-    .map-search input:focus{border-color:var(--terra)}
+    .map-search{position:absolute;top:16px;right:16px;z-index:10;width:260px}
+    .map-search-wrap{display:flex;gap:0;background:rgba(255,255,255,.94);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.08);border:1px solid rgba(0,0,0,.08);overflow:hidden;transition:border-color .2s}
+    .map-search-wrap:focus-within{border-color:var(--terra)}
+    .map-search input{flex:1;padding:10px 12px 10px 36px;border:none;background:transparent;font-family:inherit;font-size:.82rem;color:var(--text-dark);outline:none;min-width:0}
     .map-search input::placeholder{color:var(--text-muted)}
     .map-search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:.85rem;pointer-events:none}
+    .map-search-btn{padding:0 14px;border:none;border-left:1px solid rgba(0,0,0,.06);background:var(--terra);color:#fff;font-family:inherit;font-size:.75rem;font-weight:700;cursor:pointer;transition:background .15s;white-space:nowrap}
+    .map-search-btn:hover{background:var(--terra-light)}
+    .map-search-msg{position:absolute;top:calc(100% + 6px);left:0;right:0;padding:8px 14px;border-radius:10px;font-size:.76rem;font-weight:600;text-align:center;display:none;animation:msgFade .25s}
+    .map-search-msg.show{display:block}
+    .map-search-msg.found{background:rgba(56,161,105,.1);color:#276749;border:1px solid rgba(56,161,105,.15)}
+    .map-search-msg.not-found{background:rgba(229,62,62,.08);color:#C53030;border:1px solid rgba(229,62,62,.12)}
+    @keyframes msgFade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 
     /* ── POPUP CARD ── */
     .popup-overlay{position:fixed;inset:0;z-index:2000;background:rgba(13,24,41,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:20px;opacity:0;transition:opacity .2s}
@@ -145,7 +153,7 @@
       .mh-scroll{margin-top:28px}
       .map-section{height:65vh;min-height:420px}
       .map-filters{top:12px;left:12px;right:12px;transform:none;max-width:none}
-      .map-search{top:66px;right:12px;left:12px;width:auto}
+      .map-search{top:62px;right:12px;left:12px;width:auto}
       .map-filter-btn{padding:7px 12px;font-size:.72rem}
       .mp-img-wrap{height:120px}
       .mp-body{padding:14px 16px 20px}
@@ -191,8 +199,12 @@
     </button>
   </div>
   <div class="map-search">
-    <span class="map-search-icon">🔍</span>
-    <input type="text" id="map-search-input" placeholder="Mekan veya yer ara..." oninput="searchMap(this.value)">
+    <div class="map-search-wrap">
+      <span class="map-search-icon">🔍</span>
+      <input type="text" id="map-search-input" placeholder="Mekan veya yer ara..." onkeydown="if(event.key==='Enter')doSearch()">
+      <button class="map-search-btn" onclick="doSearch()">Ara</button>
+    </div>
+    <div class="map-search-msg" id="search-msg"></div>
   </div>
   <div id="map"></div>
 
@@ -348,12 +360,44 @@ function filterMap(type) {
   renderMarkers(); closePanel();
 }
 
-function searchMap(q) {
-  q = q.toLowerCase().trim();
-  markers.forEach(({marker,item}) => {
-    const match = !q || item.title.toLowerCase().includes(q) || (item.location||'').toLowerCase().includes(q);
-    marker.setOpacity(match ? 1 : 0.15);
+function doSearch() {
+  const q = (document.getElementById('map-search-input').value || '').toLowerCase().trim();
+  const msgEl = document.getElementById('search-msg');
+
+  if (!q) {
+    // Boş arama — tümünü göster
+    markers.forEach(({marker}) => marker.setOpacity(1));
+    msgEl.classList.remove('show');
+    return;
+  }
+
+  // Eşleşen pinleri bul
+  const matched = [];
+  markers.forEach(({marker, item}) => {
+    const isMatch = item.title.toLowerCase().includes(q) || (item.location||'').toLowerCase().includes(q) || (item.category||'').toLowerCase().includes(q);
+    marker.setOpacity(isMatch ? 1 : 0.15);
+    if (isMatch) matched.push({marker, item});
   });
+
+  if (matched.length > 0) {
+    // İlk eşleşene zoom yap
+    const first = matched[0];
+    map.flyTo([first.item.lat, first.item.lng], 15, {duration: 0.8});
+    // Mesaj göster
+    msgEl.textContent = matched.length + ' sonuç bulundu';
+    msgEl.className = 'map-search-msg show found';
+    // Tek sonuç varsa popup aç
+    if (matched.length === 1) {
+      setTimeout(() => openPanel(first.item), 500);
+    }
+  } else {
+    msgEl.textContent = 'Haritamızda bu isimde bir konum bulunamadı';
+    msgEl.className = 'map-search-msg show not-found';
+  }
+
+  // Mesajı 3sn sonra kaldır
+  clearTimeout(msgEl._timer);
+  msgEl._timer = setTimeout(() => msgEl.classList.remove('show'), 3500);
 }
 
 function updateCounts() {
