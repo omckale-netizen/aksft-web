@@ -1907,6 +1907,42 @@ function renderVenuePage(venueId) {
       .vp-map-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:13px;background:#1A2744;color:#fff;font-size:.82rem;font-weight:700;text-decoration:none;transition:background .22s;white-space:nowrap;font-family:inherit;}
       .vp-map-btn:hover{background:#2A3A5A;}
 
+      /* ── Lightbox ── */
+      .vp-lightbox{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:all .3s ease;cursor:zoom-out;}
+      .vp-lightbox.open{opacity:1;visibility:visible;}
+      .vp-lightbox img{max-width:92vw;max-height:88vh;object-fit:contain;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.5);transform:scale(.92);transition:transform .3s ease;}
+      .vp-lightbox.open img{transform:scale(1);}
+      .vp-lb-close{position:absolute;top:20px;right:24px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;backdrop-filter:blur(10px);}
+      .vp-lb-close:hover{background:rgba(255,255,255,.25);}
+      .vp-lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.1);border:none;color:#fff;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;backdrop-filter:blur(10px);}
+      .vp-lb-nav:hover{background:rgba(255,255,255,.22);}
+      .vp-lb-prev{left:16px;}
+      .vp-lb-next{right:16px;}
+      .vp-lb-counter{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.5);font-size:.78rem;font-weight:600;}
+
+      /* ── Sticky Action Bar ── */
+      .vp-sticky{position:fixed;bottom:-70px;left:0;right:0;z-index:100;background:rgba(255,255,255,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 -4px 20px rgba(26,39,68,.1);transition:bottom .35s cubic-bezier(.16,1,.3,1);border-top:1px solid rgba(26,39,68,.06);}
+      .vp-sticky.show{bottom:0;}
+      .vp-sticky-inner{max-width:1100px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+      .vp-sticky-info{display:flex;align-items:center;gap:10px;min-width:0;}
+      .vp-sticky-emoji{font-size:1.2rem;flex-shrink:0;}
+      .vp-sticky-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.85rem;color:#1A2744;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+      .vp-sticky-acts{display:flex;gap:8px;flex-shrink:0;}
+      .vp-sticky-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:10px;font-size:.78rem;font-weight:700;text-decoration:none;white-space:nowrap;transition:all .2s;border:none;cursor:pointer;font-family:inherit;}
+      .vp-sticky-call{background:#1A2744;color:#fff;}
+      .vp-sticky-call:hover{background:#2A3A5A;}
+      .vp-sticky-map{background:rgba(26,39,68,.06);color:#1A2744;}
+      .vp-sticky-map:hover{background:rgba(26,39,68,.12);}
+      @media(max-width:480px){.vp-sticky-name{max-width:120px;}.vp-sticky-btn{padding:8px 12px;font-size:.72rem;}}
+
+      /* ── Scroll to top ── */
+      .vp-scroll-top{position:fixed;bottom:80px;right:24px;z-index:99;width:42px;height:42px;border-radius:50%;background:rgba(26,39,68,.8);color:#fff;border:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transform:translateY(10px);transition:all .3s ease;box-shadow:0 4px 14px rgba(26,39,68,.2);}
+      .vp-scroll-top.show{opacity:1;visibility:visible;transform:translateY(0);}
+      .vp-scroll-top:hover{background:#C4521A;}
+
+      /* ── Gallery cursor ── */
+      .vp-gimg{cursor:pointer;}
+
       /* ── Reservation form ── */
       .vp-rezv-box{background:#fff;border-radius:20px;padding:28px 32px;box-shadow:0 4px 20px rgba(26,39,68,.06);}
       .vp-rezv-form{display:flex;flex-direction:column;gap:16px;}
@@ -2236,9 +2272,79 @@ function renderVenuePage(venueId) {
 
       </div>
     </div>
+
+    <!-- Lightbox -->
+    <div class="vp-lightbox" id="vp-lightbox" onclick="vpCloseLightbox()">
+      <button class="vp-lb-close" onclick="vpCloseLightbox()">✕</button>
+      <button class="vp-lb-nav vp-lb-prev" onclick="event.stopPropagation();vpLbNav(-1)">‹</button>
+      <img id="vp-lb-img" src="" alt="" onclick="event.stopPropagation()">
+      <button class="vp-lb-nav vp-lb-next" onclick="event.stopPropagation();vpLbNav(1)">›</button>
+      <div class="vp-lb-counter" id="vp-lb-counter"></div>
+    </div>
+
+    <!-- Sticky action bar -->
+    <div class="vp-sticky" id="vp-sticky">
+      <div class="vp-sticky-inner">
+        <div class="vp-sticky-info">
+          <span class="vp-sticky-emoji">${v.emoji}</span>
+          <span class="vp-sticky-name">${v.title}</span>
+        </div>
+        <div class="vp-sticky-acts">
+          ${v.phone ? '<a href="tel:' + v.phone.replace(/\\s/g,'') + '" class="vp-sticky-btn vp-sticky-call">📞 Ara</a>' : ''}
+          <a href="${mapsUrl}" target="_blank" rel="noopener" class="vp-sticky-btn vp-sticky-map">🗺 Yol Tarifi</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll to top -->
+    <button class="vp-scroll-top" id="vp-scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
   `;
 
   /* ── Global event handlers ── */
+  /* ── Lightbox ── */
+  const lbImgs = (v.images || []).map(src => src.startsWith('http') ? src : base + src);
+  let lbIdx = 0;
+  window.vpOpenLightbox = function(idx) {
+    lbIdx = idx;
+    const lb = document.getElementById('vp-lightbox');
+    document.getElementById('vp-lb-img').src = lbImgs[lbIdx];
+    document.getElementById('vp-lb-counter').textContent = (lbIdx + 1) + ' / ' + lbImgs.length;
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+  window.vpCloseLightbox = function() {
+    document.getElementById('vp-lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  };
+  window.vpLbNav = function(dir) {
+    lbIdx = (lbIdx + dir + lbImgs.length) % lbImgs.length;
+    document.getElementById('vp-lb-img').src = lbImgs[lbIdx];
+    document.getElementById('vp-lb-counter').textContent = (lbIdx + 1) + ' / ' + lbImgs.length;
+  };
+  // Galeri görsellerine tıklama
+  document.querySelectorAll('.vp-gimg').forEach(function(el, i) {
+    el.addEventListener('click', function() { vpOpenLightbox(i); });
+  });
+  // ESC ile kapat
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') vpCloseLightbox();
+    if (e.key === 'ArrowRight') vpLbNav(1);
+    if (e.key === 'ArrowLeft') vpLbNav(-1);
+  });
+
+  /* ── Sticky bar + Scroll to top ── */
+  (function() {
+    const sticky = document.getElementById('vp-sticky');
+    const scrollTop = document.getElementById('vp-scroll-top');
+    let lastY = 0;
+    window.addEventListener('scroll', function() {
+      const y = window.scrollY;
+      if (y > 500) { sticky.classList.add('show'); scrollTop.classList.add('show'); }
+      else { sticky.classList.remove('show'); scrollTop.classList.remove('show'); }
+      lastY = y;
+    }, { passive: true });
+  })();
+
   window.vpToggleSave = function () {
     const saved = getSaved();
     if (saved.has(v.id)) saved.delete(v.id); else saved.add(v.id);
