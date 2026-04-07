@@ -20,6 +20,14 @@ function escAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/'/g,'&#39;
 
 /* ── Site logo (cache + Firebase) ── */
 var SITE_LOGO = localStorage.getItem('site_logo_url') || '';
+// Cache'deki logo varsa preload et (tarayıcı cache'ine alır, render anında anında görünür)
+if (SITE_LOGO) {
+  var _preloadLink = document.createElement('link');
+  _preloadLink.rel = 'preload';
+  _preloadLink.as = 'image';
+  _preloadLink.href = SITE_LOGO;
+  document.head.appendChild(_preloadLink);
+}
 function _fetchSiteLogo() {
   if (typeof firebase === 'undefined' || !firebase.firestore) return;
   firebase.firestore().collection('settings').doc('site').get().then(function(doc) {
@@ -28,8 +36,12 @@ function _fetchSiteLogo() {
       if (url !== SITE_LOGO) {
         SITE_LOGO = url;
         localStorage.setItem('site_logo_url', url);
-        document.querySelectorAll('.site-logo-img').forEach(function(img) { img.src = SITE_LOGO; img.onload = function() { img.classList.add('logo-loaded'); }; });
       }
+      document.querySelectorAll('.site-logo-img').forEach(function(img) {
+        if (!img.src || img.src !== url) img.src = url;
+        img.onload = function() { img.classList.add('logo-loaded'); };
+        if (img.complete && img.naturalWidth > 0) img.classList.add('logo-loaded');
+      });
     }
   }).catch(function() {});
 }
@@ -304,7 +316,7 @@ function renderNav(opts = {}) {
   const navHTML = `
     <div id="mobile-menu" role="dialog" aria-label="Navigasyon menüsü" aria-hidden="true">
       <div class="mm-header">
-        <a href="${basePath}index.html"><img class="site-logo-img" ${SITE_LOGO ? 'src="' + SITE_LOGO + '" onload="this.classList.add(\'logo-loaded\')"' : ''} data-logo="1" alt="Assos'u Keşfet"></a>
+        <a href="${basePath}index.html"><img ${SITE_LOGO ? 'class="site-logo-img logo-loaded" src="' + SITE_LOGO + '" onload="this.classList.add(\'logo-loaded\')"' : 'class="site-logo-img"'} data-logo="1" alt="Assos'u Keşfet"></a>
         <button id="close-menu-btn" aria-label="Kapat">✕</button>
       </div>
       <div class="mm-links">
@@ -322,7 +334,7 @@ function renderNav(opts = {}) {
     <nav id="main-nav" class="${heroMode ? 'hero-mode' : 'solid'}" aria-label="Ana navigasyon">
       <div class="nav-inner">
         <a href="${basePath}index.html" class="nav-logo" aria-label="Ana Sayfa">
-          <img class="site-logo-img" ${SITE_LOGO ? 'src="' + SITE_LOGO + '" onload="this.classList.add(\'logo-loaded\')"' : ''} data-logo="1" alt="Assos'u Keşfet">
+          <img ${SITE_LOGO ? 'class="site-logo-img logo-loaded" src="' + SITE_LOGO + '" onload="this.classList.add(\'logo-loaded\')"' : 'class="site-logo-img"'} data-logo="1" alt="Assos'u Keşfet">
         </a>
         <div class="nav-links">
           ${links.map(l => `<a href="${basePath}${l.href}" class="nav-link${isActive(l.href) ? ' active' : ''}">${l.label}</a>`).join('')}
@@ -798,7 +810,7 @@ function renderFooter(opts = {}) {
         <div class="footer-glass">
           <div class="footer-grid">
             <div class="footer-brand">
-              <img class="site-logo-img" ${SITE_LOGO ? 'src="' + SITE_LOGO + '" onload="this.classList.add(\'logo-loaded\')"' : ''} data-logo="1" alt="Assos'u Keşfet" style="height:44px;width:auto;">
+              <img ${SITE_LOGO ? 'class="site-logo-img logo-loaded" src="' + SITE_LOGO + '" onload="this.classList.add(\'logo-loaded\')"' : 'class="site-logo-img"'} data-logo="1" alt="Assos'u Keşfet" style="height:44px;width:auto;">
               <p class="footer-brand-desc">Assos bölgesinde gezilecek yerler, köyler, mekanlar ve tarihi duraklar için kapsamlı bir dijital keşif platformu.</p>
             </div>
             <div>
