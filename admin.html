@@ -371,6 +371,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
       <a class="admin-nav-item" data-page="venues" onclick="showPage('venues')">
         <span class="nav-icon">🏪</span> Mekanlar
       </a>
+      <a class="admin-nav-item" data-page="categories" onclick="showPage('categories')" style="padding-left:36px;font-size:.78rem">
+        <span class="nav-icon">📂</span> Kategoriler
+      </a>
       <a class="admin-nav-item" data-page="routes" onclick="showPage('routes')">
         <span class="nav-icon">🗺</span> Rotalar
       </a>
@@ -915,6 +918,40 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
       </div>
     </div>
 
+    <!-- ══════ CATEGORIES ══════ -->
+    <div class="admin-page" id="page-categories">
+      <h2>Mekan Kategorileri</h2>
+      <p class="page-sub">Mekan turlerini yonetin. Yeni kategori ekleyin, mevcut kategorileri duzenleyin veya silin.</p>
+      <div class="panel-card" style="max-width:700px">
+        <div class="panel-card-head"><h3>Mevcut Kategoriler</h3></div>
+        <div style="padding:20px">
+          <div id="cat-list" style="margin-bottom:20px"></div>
+          <div style="border-top:1px solid rgba(0,0,0,.06);padding-top:18px">
+            <h4 style="font-size:.85rem;color:var(--navy);margin-bottom:12px">Yeni Kategori Ekle</h4>
+            <div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap">
+              <div style="flex:1;min-width:120px">
+                <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">ID (benzersiz)</label>
+                <input type="text" id="cat-new-id" placeholder="orn: bar" style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.8rem;font-family:inherit;width:100%">
+              </div>
+              <div style="flex:1;min-width:120px">
+                <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Gorunen Ad</label>
+                <input type="text" id="cat-new-label" placeholder="Bar" style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.8rem;font-family:inherit;width:100%">
+              </div>
+              <div style="min-width:60px">
+                <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Emoji</label>
+                <input type="text" id="cat-new-emoji" placeholder="🍸" style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.8rem;font-family:inherit;width:100%;max-width:60px">
+              </div>
+              <div style="min-width:80px">
+                <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Renk</label>
+                <input type="color" id="cat-new-color" value="#C4521A" style="width:100%;height:34px;border:1px solid rgba(0,0,0,.1);border-radius:8px;cursor:pointer;padding:2px">
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="addCategory()" style="height:34px">Ekle</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ══════ GALLERY ══════ -->
     <div class="admin-page" id="page-gallery">
       <h2>Galeri</h2>
@@ -1182,31 +1219,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
         </div>
       </div>
 
-      <div class="panel-card" style="max-width:600px;margin-top:20px">
-        <div class="panel-card-head"><h3>📂 Mekan Kategorileri</h3></div>
-        <div style="padding:20px">
-          <div id="cat-list" style="margin-bottom:16px"></div>
-          <div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap;border-top:1px solid rgba(0,0,0,.06);padding-top:16px">
-            <div style="flex:1;min-width:120px">
-              <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Yeni Kategori</label>
-              <input type="text" id="cat-new-id" placeholder="ID (orn: bar)" style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.8rem;font-family:inherit;width:100%">
-            </div>
-            <div style="flex:1;min-width:120px">
-              <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Gorunen Ad</label>
-              <input type="text" id="cat-new-label" placeholder="Bar" style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.8rem;font-family:inherit;width:100%">
-            </div>
-            <div style="min-width:60px">
-              <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Emoji</label>
-              <input type="text" id="cat-new-emoji" placeholder="🍸" style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.8rem;font-family:inherit;width:100%;max-width:60px">
-            </div>
-            <div style="min-width:80px">
-              <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Renk</label>
-              <input type="color" id="cat-new-color" value="#C4521A" style="width:100%;height:34px;border:1px solid rgba(0,0,0,.1);border-radius:8px;cursor:pointer;padding:2px">
-            </div>
-            <button class="btn btn-primary btn-sm" onclick="addCategory()" style="height:34px">Ekle</button>
-          </div>
-        </div>
-      </div>
     </div>
 
   </div>
@@ -2372,6 +2384,7 @@ const _origShowPage = showPage;
 showPage = function(page) {
   _origShowPage(page);
   if (page === 'gallery' && galItems.length === 0) galLoadItems();
+  if (page === 'categories') renderCatList();
   if (page === 'settings') loadLogoPreview();
 };
 
@@ -3039,7 +3052,10 @@ const CAT_EMOJIS = { kafe:'☕', restoran:'🍽', kahvalti:'🥚', konaklama:'�
 
 function autoCatEmoji() {
   const cat = document.getElementById('f-category').value;
-  if (cat && CAT_EMOJIS[cat]) {
+  const catData = venueCategories.find(c => c.id === cat);
+  if (catData) {
+    document.getElementById('f-emoji').value = catData.emoji;
+  } else if (cat && CAT_EMOJIS[cat]) {
     document.getElementById('f-emoji').value = CAT_EMOJIS[cat];
   }
 }
