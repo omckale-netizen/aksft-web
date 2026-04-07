@@ -26,19 +26,47 @@
     html,body{height:100%;font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream-light);color:var(--text-dark)}
 
     /* ── HERO ── */
-    .map-hero{position:relative;overflow:hidden;padding:120px 24px 48px;text-align:center;background:linear-gradient(160deg,#06101E 0%,#0C1A30 55%,#0A1520 100%)}
+    .map-hero{position:relative;overflow:hidden;padding:130px 24px 56px;text-align:center;background:linear-gradient(160deg,#06101E 0%,#0C1A30 55%,#0A1520 100%)}
     .map-hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(245,237,224,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(245,237,224,.02) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
-    .mh-orb{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none}
-    .mh-orb-1{width:400px;height:400px;background:rgba(196,82,26,.1);top:-120px;right:-80px;animation:mhFloat 8s ease-in-out infinite}
-    .mh-orb-2{width:300px;height:300px;background:rgba(26,107,138,.08);bottom:-80px;left:-60px;animation:mhFloat 10s ease-in-out infinite reverse}
+    .mh-orb{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none}
+    .mh-orb-1{width:450px;height:450px;background:rgba(196,82,26,.1);top:-140px;right:-100px;animation:mhFloat 8s ease-in-out infinite}
+    .mh-orb-2{width:350px;height:350px;background:rgba(26,107,138,.08);bottom:-100px;left:-80px;animation:mhFloat 10s ease-in-out infinite reverse}
+    .mh-orb-3{width:200px;height:200px;background:rgba(212,147,90,.06);top:50%;left:50%;transform:translate(-50%,-50%);animation:mhFloat 12s ease-in-out infinite}
     @keyframes mhFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-20px) scale(1.05)}}
-    .mh-content{position:relative;z-index:2;max-width:640px;margin:0 auto}
-    .mh-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);font-size:.7rem;font-weight:700;color:rgba(245,237,224,.5);text-transform:uppercase;letter-spacing:.12em;margin-bottom:20px}
+    .mh-content{position:relative;z-index:2;max-width:700px;margin:0 auto}
+    .mh-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 18px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);font-size:.68rem;font-weight:700;color:rgba(245,237,224,.5);text-transform:uppercase;letter-spacing:.14em;margin-bottom:22px;animation:mhFadeUp .6s ease both}
     .mh-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--terra);animation:mhPulse 2s infinite}
     @keyframes mhPulse{0%,100%{opacity:1}50%{opacity:.3}}
-    .mh-h1{font-size:clamp(1.8rem,5vw,2.8rem);font-weight:800;color:#F5EDE0;line-height:1.15;margin-bottom:12px;letter-spacing:-.02em}
+    @keyframes mhFadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .mh-h1{font-size:clamp(2rem,5.5vw,3rem);font-weight:800;color:#F5EDE0;line-height:1.12;margin-bottom:14px;letter-spacing:-.03em;animation:mhFadeUp .6s .1s ease both}
     .mh-h1 em{font-family:'Lora',serif;font-style:italic;font-weight:500;color:var(--terra-light)}
-    .mh-sub{font-size:.92rem;color:rgba(245,237,224,.4);max-width:460px;margin:0 auto;line-height:1.6}
+    .mh-divider{width:48px;height:3px;background:linear-gradient(90deg,var(--terra),var(--aegean));border-radius:2px;margin:0 auto 16px;animation:mhFadeUp .6s .2s ease both}
+    .mh-sub{font-size:.9rem;color:rgba(245,237,224,.4);max-width:440px;margin:0 auto 32px;line-height:1.65;animation:mhFadeUp .6s .25s ease both}
+    .mh-stats{display:flex;justify-content:center;gap:32px;animation:mhFadeUp .6s .35s ease both}
+    .mh-stat{text-align:center}
+    .mh-stat-num{font-size:1.6rem;font-weight:800;color:var(--terra-light);line-height:1}
+    .mh-stat-label{font-size:.65rem;font-weight:600;color:rgba(245,237,224,.3);text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
+    .mh-scroll{margin-top:36px;animation:mhFadeUp .6s .5s ease both}
+    .mh-scroll-icon{width:28px;height:42px;border:2px solid rgba(245,237,224,.2);border-radius:14px;margin:0 auto;position:relative}
+    .mh-scroll-dot{width:4px;height:8px;background:rgba(245,237,224,.4);border-radius:2px;position:absolute;top:8px;left:50%;transform:translateX(-50%);animation:mhScrollDot 1.8s ease-in-out infinite}
+    @keyframes mhScrollDot{0%,100%{opacity:1;transform:translateX(-50%) translateY(0)}50%{opacity:.3;transform:translateX(-50%) translateY(12px)}}
+
+    /* ── BOTTOM SECTION ── */
+    .map-bottom{padding:60px 24px 70px;background:var(--cream-light)}
+    .map-bottom-inner{max-width:900px;margin:0 auto}
+    .mb-heading{text-align:center;margin-bottom:40px}
+    .mb-heading h2{font-size:1.5rem;font-weight:800;color:var(--navy);margin-bottom:6px}
+    .mb-heading p{font-size:.88rem;color:var(--text-muted)}
+    .mb-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    @media(max-width:700px){.mb-cards{grid-template-columns:1fr}}
+    .mb-card{background:#fff;border:1px solid rgba(0,0,0,.05);border-radius:16px;padding:28px 22px;text-align:center;transition:all .2s}
+    .mb-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.06)}
+    .mb-card-icon{width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin:0 auto 14px}
+    .mb-card h3{font-size:.92rem;font-weight:700;color:var(--navy);margin-bottom:6px}
+    .mb-card p{font-size:.78rem;color:var(--text-muted);line-height:1.55}
+    .mb-cta{text-align:center;margin-top:40px}
+    .mb-cta a{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;border-radius:12px;background:var(--navy);color:#F5EDE0;text-decoration:none;font-size:.88rem;font-weight:700;transition:all .2s;box-shadow:0 4px 16px rgba(26,39,68,.2)}
+    .mb-cta a:hover{background:#243255;transform:translateY(-2px);box-shadow:0 8px 24px rgba(26,39,68,.25)}
 
     /* ── MAP SECTION ── */
     .map-section{position:relative;height:70vh;min-height:500px}
@@ -111,7 +139,10 @@
     .leaflet-control-zoom a:hover{background:#fff !important}
 
     @media(max-width:768px){
-      .map-hero{padding:100px 20px 36px}
+      .map-hero{padding:100px 20px 40px}
+      .mh-stats{gap:20px}
+      .mh-stat-num{font-size:1.3rem}
+      .mh-scroll{margin-top:28px}
       .map-section{height:65vh;min-height:420px}
       .map-filters{top:12px;left:12px;right:12px;transform:none;max-width:none}
       .map-search{top:66px;right:12px;left:12px;width:auto}
@@ -131,10 +162,18 @@
 <section class="map-hero">
   <div class="mh-orb mh-orb-1"></div>
   <div class="mh-orb mh-orb-2"></div>
+  <div class="mh-orb mh-orb-3"></div>
   <div class="mh-content">
     <div class="mh-badge"><span class="mh-badge-dot"></span> Interaktif Harita</div>
     <h1 class="mh-h1">Assos'u <em>Haritada</em> Kesfet</h1>
+    <div class="mh-divider"></div>
     <p class="mh-sub">Mekanlar, tarihi alanlar, koylar ve iskeleler — hepsini tek haritada gor, yol tarifini al.</p>
+    <div class="mh-stats">
+      <div class="mh-stat"><div class="mh-stat-num" id="hero-venue-count">—</div><div class="mh-stat-label">Mekan</div></div>
+      <div class="mh-stat"><div class="mh-stat-num" id="hero-place-count">—</div><div class="mh-stat-label">Yer</div></div>
+      <div class="mh-stat"><div class="mh-stat-num" id="hero-total-count">—</div><div class="mh-stat-label">Toplam Pin</div></div>
+    </div>
+    <div class="mh-scroll"><div class="mh-scroll-icon"><div class="mh-scroll-dot"></div></div></div>
   </div>
 </section>
 
@@ -184,6 +223,36 @@
     </div>
   </div>
 </div>
+
+<!-- BOTTOM SECTION -->
+<section class="map-bottom">
+  <div class="map-bottom-inner">
+    <div class="mb-heading">
+      <h2>Haritayi Nasil Kullanabilirsin?</h2>
+      <p>Assos'u kesfetmenin en kolay yolu</p>
+    </div>
+    <div class="mb-cards">
+      <div class="mb-card">
+        <div class="mb-card-icon" style="background:rgba(196,82,26,.08)">📍</div>
+        <h3>Pine Tikla</h3>
+        <p>Haritadaki herhangi bir pine tiklayarak mekan veya yer hakkinda detayli bilgi al.</p>
+      </div>
+      <div class="mb-card">
+        <div class="mb-card-icon" style="background:rgba(26,107,138,.08)">🧭</div>
+        <h3>Yol Tarifi Al</h3>
+        <p>Google Maps veya Apple Harita ile sectigin konuma aninda yol tarifi al.</p>
+      </div>
+      <div class="mb-card">
+        <div class="mb-card-icon" style="background:rgba(90,122,86,.08)">🔍</div>
+        <h3>Ara & Filtrele</h3>
+        <p>Arama cubugu ile mekan bul veya filtrelerle sadece istedigin kategoriyi gor.</p>
+      </div>
+    </div>
+    <div class="mb-cta">
+      <a href="planla.html">🗓 Gezini Planla →</a>
+    </div>
+  </div>
+</section>
 
 <div id="footer-placeholder"></div>
 
@@ -288,9 +357,15 @@ function searchMap(q) {
 }
 
 function updateCounts() {
+  const venues = allItems.filter(i=>i.type==='venue').length;
+  const places = allItems.filter(i=>i.type==='place').length;
   document.getElementById('count-all').textContent = '('+allItems.length+')';
-  document.getElementById('count-venue').textContent = '('+allItems.filter(i=>i.type==='venue').length+')';
-  document.getElementById('count-place').textContent = '('+allItems.filter(i=>i.type==='place').length+')';
+  document.getElementById('count-venue').textContent = '('+venues+')';
+  document.getElementById('count-place').textContent = '('+places+')';
+  // Hero stats
+  document.getElementById('hero-venue-count').textContent = venues;
+  document.getElementById('hero-place-count').textContent = places;
+  document.getElementById('hero-total-count').textContent = allItems.length;
 }
 
 function openPanel(item) {
