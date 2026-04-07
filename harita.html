@@ -211,25 +211,25 @@ const CAT_CONFIG = {
 };
 const VENUE_CATS = { kafe:'Kafe', restoran:'Restoran', kahvalti:'Kahvalti', konaklama:'Konaklama', beach:'Beach', iskele:'Iskele' };
 
-let map, markers=[], allItems=[], activeFilter='all', mapInited=false;
+let map, markers=[], allItems=[], activeFilter='all', mapInited=false, firebaseLoaded=false;
 
 function pageInit() {
   if (!mapInited) {
     mapInited = true;
     renderNav({ heroMode: false });
     renderFooter({});
-    initMap();
-  } else {
-    buildItems(); renderMarkers(); updateCounts();
+    initMapOnly();
   }
+  // Her dataReady'de pinleri guncelle (cache veya firebase)
+  if (window._firebaseReady) firebaseLoaded = true;
+  buildItems(); renderMarkers(); updateCounts();
 }
 
-function initMap() {
+function initMapOnly() {
   map = L.map('map', { center:[39.52,26.32], zoom:12, zoomControl:false, attributionControl:false });
   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(map);
   L.control.zoom({position:'bottomleft'}).addTo(map);
   L.control.attribution({position:'bottomleft',prefix:false}).addAttribution('&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>').addTo(map);
-  buildItems(); renderMarkers(); updateCounts();
   map.on('click', closePanel);
 }
 
