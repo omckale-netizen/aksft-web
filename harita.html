@@ -119,9 +119,6 @@
     <button class="map-filter-btn" data-filter="place" onclick="filterMap('place')">
       <span class="mf-emoji">📍</span> Yerler <span class="mf-count" id="count-place"></span>
     </button>
-    <button class="map-filter-btn" data-filter="village" onclick="filterMap('village')">
-      <span class="mf-emoji">🏘</span> Koyler <span class="mf-count" id="count-village"></span>
-    </button>
   </div>
 
   <!-- Search -->
@@ -166,8 +163,9 @@
 /* ══════════════════════════════════════════════════
    COORDINATE DATABASE — Assos & Ayvacik
 ══════════════════════════════════════════════════ */
-const COORDS = {
-  // ── Gezilecek Yerler ──
+// Fallback koordinatlar — admin panelden guncellenmemis olanlar icin
+const FALLBACK_COORDS = {
+  // Gezilecek Yerler
   'athena-tapinagi':       [39.4907, 26.3380],
   'assos-antik-liman':     [39.4862, 26.3365],
   'kadirga-koyu':          [39.4780, 26.3520],
@@ -179,13 +177,7 @@ const COORDS = {
   'adatepe-zeytinyagi-muzesi': [39.5190, 26.3700],
   'sokakagzi-koyu':        [39.4990, 26.2690],
   'yesil-liman':           [39.5020, 26.2480],
-  'dilara-huzur-plaji':    [39.4800, 26.3600],
-  'antik-kilise':          [39.4885, 26.3370],
-  'aristoteles-heykeli':   [39.4895, 26.3360],
-  'assos-oren-yeri':       [39.4900, 26.3375],
-  'midilli-adasi':         [39.3000, 26.3000],
-  'muhratini-yeri':        [39.4870, 26.3340],
-  // ── Mekanlar ──
+  // Mekanlar
   'behram-kafe':           [39.4892, 26.3352],
   'korfez-balik':          [39.4865, 26.3368],
   'assos-tas-kahvalti':    [39.4888, 26.3345],
@@ -197,72 +189,11 @@ const COORDS = {
   'sivrice-koy-duragi':    [39.4738, 26.3175],
   'sunaba-kasri-otel':     [39.5280, 26.3450],
   'kafe-mera':             [39.5350, 26.3600],
-  'bohemian-cafe':         [39.4893, 26.3355],
-  'cleanthes-cafe':        [39.4887, 26.3348],
-  'club-beyaz':            [39.4870, 26.3360],
-  'assos-dondurma':        [39.4890, 26.3346],
-  'karadut-tas-otel':      [39.4886, 26.3342],
-  'dilara-huzur-motel':    [39.4795, 26.3595],
-  'etem-ile-asli':         [39.4863, 26.3358],
-  'assos-palamud':         [39.4858, 26.3355],
-  'tapink-kafe':           [39.4903, 26.3376],
-  // ── Koyler ──
-  'behram':                [39.4890, 26.3350],
-  'adatepe':               [39.5180, 26.3680],
-  'babakale':              [39.4830, 26.0630],
-  'kayalar':               [39.5050, 26.3150],
-  'buyukhusun':            [39.5280, 26.3450],
-  'kucukhusun':            [39.5200, 26.3380],
-  'yesilyurt':             [39.5350, 26.3750],
-  'bademli':               [39.5430, 26.2980],
-  'gulpinar':              [39.5520, 26.2300],
-  'ayvacik':               [39.6050, 26.4010],
-  'cemaller':              [39.5350, 26.3600],
-  'kozlu':                 [39.5800, 26.3900],
-  'koyunevi':              [39.5600, 26.3500],
-  'sapanca':               [39.5700, 26.3700],
-  'naldoken':              [39.5900, 26.3800],
-  'pasakoy':               [39.5500, 26.3300],
-  'sogutlu':               [39.5650, 26.3600],
-  'kuruoba':               [39.5750, 26.3400],
-  'kestanelik':            [39.5400, 26.3200],
-  'baharlar':              [39.5480, 26.3100],
-  'balcedere':             [39.5550, 26.3000],
-  'akcin':                 [39.5300, 26.2900],
-  'balaban':               [39.5450, 26.2800],
-  'bektas':                [39.5380, 26.2700],
-  'bilaller':              [39.5200, 26.2600],
-  'budaklar':              [39.5100, 26.2500],
-  'cakmaklar':             [39.5600, 26.2400],
-  'calti':                 [39.5700, 26.2500],
-  'camkalabak':            [39.5800, 26.2600],
-  'cinarpinar':            [39.5900, 26.2700],
-  'dibekli':               [39.5400, 26.2400],
-  'huseyin-faki':          [39.5500, 26.2500],
-  'ilyasfaki':             [39.5600, 26.2600],
-  'kirca':                 [39.5700, 26.2800],
-  'kisacik':               [39.5800, 26.2900],
-  'korubasi':              [39.5900, 26.3000],
-  'kulfal':                [39.6000, 26.3100],
-  'misvak':                [39.6000, 26.3200],
-  'suleymankoy':           [39.6100, 26.3300],
-  'sapkoy':                [39.6050, 26.3400],
-  'tabaklar':              [39.5950, 26.3500],
-  'tamis':                 [39.5850, 26.3200],
-  'tartasik':              [39.5750, 26.3100],
-  'tasagil':               [39.5650, 26.3000],
-  'tasbogaz':              [39.5550, 26.2900],
-  'tuztasi':               [39.5450, 26.2700],
-  'uzunalan':              [39.5350, 26.2600],
-  'yenicam':               [39.5250, 26.2500],
-  'yukarikoy':             [39.5150, 26.2800],
-  'sokakagzi':             [39.4990, 26.2690]
 };
 
 const CAT_CONFIG = {
   venue:   { color: '#C4521A', bg: 'rgba(196,82,26,.12)', label: 'Mekan', pin: 'venue' },
-  place:   { color: '#1A6B8A', bg: 'rgba(26,107,138,.12)', label: 'Yer',   pin: 'place' },
-  village: { color: '#5A7A56', bg: 'rgba(90,122,86,.12)',  label: 'Koy',   pin: 'village' }
+  place:   { color: '#1A6B8A', bg: 'rgba(26,107,138,.12)', label: 'Yer',   pin: 'place' }
 };
 
 const VENUE_CATS = {
@@ -311,13 +242,22 @@ function initMap() {
   map.on('click', function() { closePanel(); });
 }
 
+function getCoords(item) {
+  // Oncelik: Firebase'deki lat/lng alanlari
+  if (item.lat && item.lng) return [item.lat, item.lng];
+  // Fallback: hardcoded koordinatlar
+  const fb = FALLBACK_COORDS[item.id];
+  if (fb) return fb;
+  return null;
+}
+
 function buildItems() {
   allItems = [];
   const D = window.DATA || {};
 
-  // Venues
+  // Venues — Firebase'den gelen guncel liste
   (D.venues || []).forEach(v => {
-    const c = COORDS[v.id];
+    const c = getCoords(v);
     if (!c) return;
     allItems.push({
       id: v.id, type: 'venue', lat: c[0], lng: c[1],
@@ -329,9 +269,9 @@ function buildItems() {
     });
   });
 
-  // Places
+  // Places — Firebase'den gelen guncel liste
   (D.places || []).forEach(p => {
-    const c = COORDS[p.id];
+    const c = getCoords(p);
     if (!c) return;
     allItems.push({
       id: p.id, type: 'place', lat: c[0], lng: c[1],
@@ -341,28 +281,12 @@ function buildItems() {
       link: 'yerler.html#' + p.id
     });
   });
-
-  // Villages
-  (D.villages || []).forEach(v => {
-    const c = COORDS[v.id];
-    if (!c) return;
-    allItems.push({
-      id: v.id, type: 'village', lat: c[0], lng: c[1],
-      title: v.title, emoji: v.emoji, shortDesc: v.shortDesc,
-      category: 'Koy',
-      location: v.title,
-      link: 'koyler.html#' + v.id
-    });
-  });
 }
 
-function createMarkerIcon(type) {
-  const cls = type;
+function createMarkerIcon(type, emoji) {
   return L.divIcon({
     className: '',
-    html: '<div class="marker-pin ' + cls + '"><span>' +
-      (type === 'venue' ? '🏪' : type === 'place' ? '📍' : '🏘') +
-      '</span></div>',
+    html: '<div class="marker-pin ' + type + '"><span>' + (emoji || (type === 'venue' ? '🏪' : '📍')) + '</span></div>',
     iconSize: [36, 42],
     iconAnchor: [18, 42],
     popupAnchor: [0, -42]
@@ -379,7 +303,7 @@ function renderMarkers() {
     : allItems.filter(i => i.type === activeFilter);
 
   filtered.forEach(item => {
-    const icon = createMarkerIcon(item.type);
+    const icon = createMarkerIcon(item.type, item.emoji);
     const marker = L.marker([item.lat, item.lng], { icon }).addTo(map);
     marker.on('click', () => openPanel(item));
     markers.push({ marker, item });
@@ -417,7 +341,6 @@ function updateCounts() {
   document.getElementById('count-all').textContent = '(' + allItems.length + ')';
   document.getElementById('count-venue').textContent = '(' + allItems.filter(i => i.type === 'venue').length + ')';
   document.getElementById('count-place').textContent = '(' + allItems.filter(i => i.type === 'place').length + ')';
-  document.getElementById('count-village').textContent = '(' + allItems.filter(i => i.type === 'village').length + ')';
 }
 
 function openPanel(item) {
