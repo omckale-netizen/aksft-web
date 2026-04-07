@@ -14,22 +14,11 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ error: 'Missing type or data' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
   }
 
-  let TOKEN, CHAT_ID;
-  try {
-    TOKEN = await env.TELEGRAM_BOT_TOKEN;
-  } catch(e) {
-    TOKEN = String(env.TELEGRAM_BOT_TOKEN || '');
-  }
-  try {
-    CHAT_ID = await env.TELEGRAM_CHAT_ID;
-  } catch(e) {
-    CHAT_ID = String(env.TELEGRAM_CHAT_ID || '');
-  }
-  TOKEN = String(TOKEN || '').trim();
-  CHAT_ID = String(CHAT_ID || '').trim();
+  const TOKEN = String(env.TELEGRAM_BOT_TOKEN || '').trim();
+  const CHAT_ID = String(env.TELEGRAM_CHAT_ID || '').trim() || '564543310';
 
-  if (!TOKEN || !CHAT_ID) {
-    return new Response(JSON.stringify({ error: 'Telegram config missing', tokenOk: !!TOKEN, chatOk: !!CHAT_ID, chatType: typeof env.TELEGRAM_CHAT_ID, chatRaw: String(env.TELEGRAM_CHAT_ID).substring(0,5) }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+  if (!TOKEN) {
+    return new Response(JSON.stringify({ error: 'Telegram token missing' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 
   let text = '';
