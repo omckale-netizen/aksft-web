@@ -269,11 +269,13 @@
   .place-img-box.has-img{background:linear-gradient(90deg,#e8e4de 25%,#f0ece6 50%,#e8e4de 75%);background-size:800px 100%;animation:imgShimmer 1.5s infinite linear;}
   .place-img-box img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s ease;}
   .place-img-box img.loaded{opacity:1;}
+  .place-save-btn.saved{background:rgba(196,82,26,.85) !important;color:#fff !important;}
+  .place-save-btn:hover{transform:scale(1.1);}
 </style>
 
 <script src="firebase-loader.js"></script>
 <script src="data.js"></script>
-<script src="shared.js?v=13"></script>
+<script src="shared.js?v=14"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
@@ -319,6 +321,7 @@ function pageInit() {
         <div class="place-img-box${p.image ? ' has-img' : ''}" style="background-color:${p.image ? '' : 'transparent'};${p.image ? '' : 'background:linear-gradient(135deg,'+cat.bg[0]+','+cat.bg[1]+');'}">
           ${p.image ? '<img src="' + p.image + '" alt="' + p.title + '" style="object-position:center ' + (p.imagePos != null ? p.imagePos : 50) + '%" onload="this.classList.add(\'loaded\')">' : p.emoji}
           <span style="position:absolute;top:12px;left:12px;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:${cat.badge};color:#fff;backdrop-filter:blur(8px);z-index:1;">${cat.label}</span>
+          <button class="place-save-btn${window.isPlaceSaved && isPlaceSaved(p.id) ? ' saved' : ''}" data-id="${p.id}" onclick="event.stopPropagation();togglePlaceSave('${p.id}')" style="position:absolute;top:10px;right:10px;z-index:2;width:32px;height:32px;border-radius:50%;border:none;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);color:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;">${window.isPlaceSaved && isPlaceSaved(p.id) ? '♥' : '♡'}</button>
         </div>
         <div style="padding:18px 20px 20px;">
           <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:1rem;color:var(--navy);margin-bottom:6px;">${p.title}</h3>
