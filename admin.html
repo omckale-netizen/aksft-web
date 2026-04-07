@@ -1093,6 +1093,28 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
         </div>
       </div>
 
+      <div class="panel-card" style="max-width:480px;margin-bottom:20px">
+        <div class="panel-card-head"><h3>🖼 Site Logosu</h3></div>
+        <div style="padding:20px">
+          <div id="logo-preview" style="margin-bottom:16px;text-align:center;padding:20px;background:var(--navy);border-radius:10px">
+            <img id="logo-preview-img" src="" alt="Logo" style="max-height:50px;width:auto;display:none">
+            <div id="logo-preview-empty" style="color:rgba(255,255,255,.4);font-size:.82rem">Logo yuklenmemis</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn-primary btn-sm" onclick="document.getElementById('logo-file-input').click()">Logo Yukle (PNG)</button>
+            <span id="logo-upload-status" style="font-size:.72rem;color:var(--text-muted)"></span>
+          </div>
+          <input type="file" id="logo-file-input" accept="image/png" style="display:none" onchange="uploadLogo(this.files[0])">
+          <div id="logo-url-box" style="display:none;margin-top:12px">
+            <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Logo URL</label>
+            <div style="display:flex;gap:6px">
+              <input type="text" id="logo-url-display" readonly style="flex:1;padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.72rem;background:rgba(0,0,0,.02);color:var(--text)">
+              <button class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText(document.getElementById('logo-url-display').value);showToast('URL kopyalandi','success')">Kopyala</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="panel-card" style="max-width:480px">
         <div class="panel-card-head"><h3>🔒 Sifre Degistir</h3></div>
         <div style="padding:20px">
@@ -1536,6 +1558,55 @@ async function changePassword() {
     if (err.code === 'auth/wrong-password') errEl.textContent = 'Mevcut sifre yanlis.';
     else errEl.textContent = 'Hata: ' + err.message;
   }
+}
+
+// Logo yükleme
+async function uploadLogo(file) {
+  if (!file) return;
+  if (file.type !== 'image/png') { showToast('Sadece PNG dosya yukleyebilirsiniz.', 'error'); return; }
+  if (file.size > 5 * 1024 * 1024) { showToast('Dosya cok buyuk. Maks 5MB.', 'error'); return; }
+
+  const statusEl = document.getElementById('logo-upload-status');
+  statusEl.textContent = 'Yukleniyor...';
+
+  try {
+    const ref = firebase.storage().ref('site/logo.png');
+    await ref.put(file, { contentType: 'image/png' });
+    const url = await ref.getDownloadURL();
+    await db.collection('settings').doc('site').set({ logoUrl: url, logoUpdatedAt: new Date().toISOString() }, { merge: true });
+    statusEl.textContent = 'Yuklendi!';
+    showLogoPreview(url);
+    showToast('Logo guncellendi. Siteye yansimasi icin sayfa yenilenmelidir.', 'success');
+  } catch(err) {
+    console.error('Logo upload error:', err);
+    statusEl.textContent = 'Hata!';
+    showToast('Logo yuklenemedi: ' + err.message, 'error');
+  }
+}
+
+function showLogoPreview(url) {
+  const img = document.getElementById('logo-preview-img');
+  const empty = document.getElementById('logo-preview-empty');
+  const urlBox = document.getElementById('logo-url-box');
+  const urlInput = document.getElementById('logo-url-display');
+  if (url) {
+    img.src = url;
+    img.style.display = '';
+    empty.style.display = 'none';
+    urlBox.style.display = '';
+    urlInput.value = url;
+  } else {
+    img.style.display = 'none';
+    empty.style.display = '';
+    urlBox.style.display = 'none';
+  }
+}
+
+async function loadLogoPreview() {
+  try {
+    const doc = await db.collection('settings').doc('site').get();
+    if (doc.exists && doc.data().logoUrl) showLogoPreview(doc.data().logoUrl);
+  } catch(e) {}
 }
 
 // Auto-login if session exists
@@ -2003,6 +2074,7 @@ const _origShowPage = showPage;
 showPage = function(page) {
   _origShowPage(page);
   if (page === 'gallery' && galItems.length === 0) galLoadItems();
+  if (page === 'settings') loadLogoPreview();
 };
 
 /* ══════════════════════════════════════════════════
