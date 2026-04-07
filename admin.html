@@ -274,6 +274,23 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 .msg-cat-Hata{background:rgba(255,152,0,.12);color:#E65100}
 .msg-trash-banner{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:rgba(244,67,54,.06);border-radius:8px;margin-bottom:12px;font-size:.82rem;color:#C62828}
 .msg-trash-banner button{font-size:.78rem}
+.gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
+.gal-card{position:relative;border-radius:10px;overflow:hidden;background:#f5f0ea;border:1px solid rgba(0,0,0,.06);transition:transform .15s,box-shadow .15s}
+.gal-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.08)}
+.gal-card img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.gal-card-info{padding:8px 10px}
+.gal-card-name{font-size:.72rem;font-weight:600;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gal-card-meta{font-size:.62rem;color:var(--text-muted);margin-top:2px;display:flex;justify-content:space-between}
+.gal-card-cat{display:inline-block;font-size:.58rem;padding:1px 6px;border-radius:20px;background:rgba(196,82,26,.08);color:var(--terra);font-weight:600;margin-top:4px}
+.gal-card-actions{position:absolute;top:6px;right:6px;display:flex;gap:4px;opacity:0;transition:opacity .15s}
+.gal-card:hover .gal-card-actions{opacity:1}
+.gal-card-btn{width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,.92);cursor:pointer;font-size:.72rem;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.12);transition:background .15s}
+.gal-card-btn:hover{background:#fff}
+.gal-upload-thumb{position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;border:1px solid rgba(0,0,0,.08)}
+.gal-upload-thumb img{width:100%;height:100%;object-fit:cover}
+.gal-upload-thumb .remove{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;border:none;cursor:pointer;font-size:.6rem;display:flex;align-items:center;justify-content:center}
+.gal-empty{text-align:center;padding:48px 20px;color:var(--text-muted);font-size:.85rem}
+.gal-url-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 20px;border-radius:10px;font-size:.8rem;font-weight:600;z-index:9999;animation:galToastIn .3s ease}
 .msg-info{flex:1;min-width:0}
 .msg-name{font-weight:700;font-size:.88rem;color:var(--navy)}
 .msg-subject{font-size:.75rem;color:var(--terra);font-weight:600;margin-top:2px}
@@ -368,6 +385,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
       </a>
       <a class="admin-nav-item" data-page="analytics" onclick="showPage('analytics')">
         <span class="nav-icon">📈</span> Istatistikler
+      </a>
+
+      <a class="admin-nav-item" data-page="gallery" onclick="showPage('gallery')">
+        <span class="nav-icon">🖼</span> Galeri
       </a>
 
       <div class="admin-nav-sep"></div>
@@ -872,6 +893,59 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
             </div>
           </form>
         </div>
+      </div>
+    </div>
+
+    <!-- ══════ GALLERY ══════ -->
+    <div class="admin-page" id="page-gallery">
+      <h2>Galeri</h2>
+      <p class="page-sub">Gorselleri yukle, kategorize et ve URL'lerini kopyala.</p>
+
+      <!-- Upload area -->
+      <div class="panel-card">
+        <div class="panel-card-head"><h3>Gorsel Yukle</h3></div>
+        <div style="padding:20px">
+          <div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:16px">
+            <div style="flex:1;min-width:180px">
+              <label style="font-size:.75rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Kategori / Klasor</label>
+              <div style="display:flex;gap:8px">
+                <select id="gal-category" style="flex:1;padding:8px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.82rem;font-family:inherit;background:var(--cream)">
+                  <option value="genel">Genel</option>
+                  <option value="mekanlar">Mekanlar</option>
+                  <option value="yerler">Yerler</option>
+                  <option value="koyler">Koyler</option>
+                  <option value="rotalar">Rotalar</option>
+                  <option value="blog">Blog</option>
+                  <option value="sosyal-medya">Sosyal Medya</option>
+                  <option value="diger">Diger</option>
+                </select>
+                <input type="text" id="gal-custom-cat" placeholder="Yeni klasor..." style="width:120px;padding:8px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.82rem;font-family:inherit">
+              </div>
+            </div>
+          </div>
+          <div id="gal-dropzone" style="border:2px dashed rgba(0,0,0,.12);border-radius:12px;padding:40px 20px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(196,82,26,.02)" onclick="document.getElementById('gal-file-input').click()">
+            <div style="font-size:2rem;margin-bottom:8px">📁</div>
+            <div style="font-size:.85rem;color:var(--navy);font-weight:600">Gorselleri surukle veya tikla</div>
+            <div style="font-size:.72rem;color:var(--text-muted);margin-top:4px">JPG, PNG, WebP · Maks 5MB · Otomatik WebP sikistirma</div>
+          </div>
+          <input type="file" id="gal-file-input" multiple accept="image/jpeg,image/png,image/webp" style="display:none" onchange="galHandleFiles(this.files)">
+          <div id="gal-upload-preview" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px"></div>
+          <button id="gal-upload-btn" class="btn btn-primary" style="margin-top:16px;display:none" onclick="galUploadAll()">Yukle</button>
+        </div>
+      </div>
+
+      <!-- Gallery grid -->
+      <div class="panel-card" style="margin-top:20px">
+        <div class="panel-card-head" style="flex-wrap:wrap;gap:10px">
+          <h3>Yuklenen Gorseller</h3>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <input type="text" id="gal-search" placeholder="Ara..." oninput="galRender()" style="padding:6px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit;width:140px">
+            <select id="gal-filter-cat" onchange="galRender()" style="padding:6px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit">
+              <option value="">Tum Klasorler</option>
+            </select>
+          </div>
+        </div>
+        <div id="gal-grid" style="padding:20px"></div>
       </div>
     </div>
 
@@ -1750,6 +1824,183 @@ document.getElementById('msg-modal')?.addEventListener('click', function(e) { if
     if (badge && snap.size > 0) { badge.textContent = snap.size; badge.style.display = ''; }
   } catch(e) {}
 })();
+
+/* ══════════════════════════════════════════════════
+   GALLERY
+══════════════════════════════════════════════════ */
+let galItems = [];
+let galPending = [];
+
+function getGalCategory() {
+  const custom = document.getElementById('gal-custom-cat')?.value.trim();
+  if (custom) return custom.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  return document.getElementById('gal-category')?.value || 'genel';
+}
+
+function galHandleFiles(files) {
+  Array.from(files).forEach(file => {
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      showToast(file.name + ' desteklenmiyor.', 'error'); return;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      showToast(file.name + ' cok buyuk. Maks 5MB.', 'error'); return;
+    }
+    compressImage(file, (blob, dataUrl, ext) => {
+      galPending.push({ blob, dataUrl, ext: ext || 'webp', name: file.name, origSize: file.size, compSize: blob.size });
+      galRenderPending();
+    });
+  });
+}
+
+function galRenderPending() {
+  const el = document.getElementById('gal-upload-preview');
+  const btn = document.getElementById('gal-upload-btn');
+  if (galPending.length === 0) { el.innerHTML = ''; btn.style.display = 'none'; return; }
+  btn.style.display = '';
+  btn.textContent = galPending.length + ' Gorsel Yukle';
+  el.innerHTML = galPending.map((p, i) =>
+    '<div class="gal-upload-thumb">' +
+      '<img src="' + p.dataUrl + '">' +
+      '<button class="remove" onclick="galPending.splice(' + i + ',1);galRenderPending()">✕</button>' +
+    '</div>'
+  ).join('');
+}
+
+async function galUploadAll() {
+  if (galPending.length === 0) return;
+  const btn = document.getElementById('gal-upload-btn');
+  btn.disabled = true;
+  btn.textContent = 'Yukleniyor...';
+  const cat = getGalCategory();
+  const storage = firebase.storage();
+  let uploaded = 0;
+
+  for (const p of galPending) {
+    const ts = Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+    const path = 'gallery/' + cat + '/' + ts + '.' + p.ext;
+    try {
+      const ref = storage.ref(path);
+      await ref.put(p.blob);
+      const url = await ref.getDownloadURL();
+      await db.collection('gallery').add({
+        url: url,
+        path: path,
+        category: cat,
+        name: p.name,
+        size: p.compSize,
+        origSize: p.origSize,
+        ext: p.ext,
+        uploadedAt: new Date().toISOString()
+      });
+      uploaded++;
+    } catch(err) {
+      showToast('Yuklenemedi: ' + p.name, 'error');
+    }
+  }
+
+  galPending = [];
+  galRenderPending();
+  btn.disabled = false;
+  btn.style.display = 'none';
+  showToast(uploaded + ' gorsel yuklendi.', 'success');
+  document.getElementById('gal-custom-cat').value = '';
+  galLoadItems();
+}
+
+async function galLoadItems() {
+  try {
+    const snap = await db.collection('gallery').orderBy('uploadedAt', 'desc').limit(200).get();
+    galItems = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
+    galUpdateFilterOptions();
+    galRender();
+  } catch(err) {
+    document.getElementById('gal-grid').innerHTML = '<div class="gal-empty">Galeri yuklenemedi.</div>';
+  }
+}
+
+function galUpdateFilterOptions() {
+  const cats = [...new Set(galItems.map(g => g.category))].sort();
+  const sel = document.getElementById('gal-filter-cat');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Tum Klasorler</option>' + cats.map(c => '<option value="' + c + '">' + c + '</option>').join('');
+  sel.value = cur;
+}
+
+function galRender() {
+  const search = (document.getElementById('gal-search')?.value || '').toLowerCase().trim();
+  const catF = document.getElementById('gal-filter-cat')?.value || '';
+  let items = galItems;
+  if (catF) items = items.filter(g => g.category === catF);
+  if (search) items = items.filter(g => (g.name || '').toLowerCase().includes(search) || (g.category || '').toLowerCase().includes(search));
+
+  if (items.length === 0) {
+    document.getElementById('gal-grid').innerHTML = '<div class="gal-empty">' + (galItems.length === 0 ? '🖼 Henuz gorsel yuklenmemis.' : 'Aramayla eslesen gorsel yok.') + '</div>';
+    return;
+  }
+
+  document.getElementById('gal-grid').innerHTML = '<div class="gal-grid">' + items.map(g => {
+    const date = g.uploadedAt ? new Date(g.uploadedAt).toLocaleDateString('tr-TR', { day:'2-digit', month:'short' }) : '';
+    const sizeKB = g.size ? Math.round(g.size / 1024) + 'KB' : '';
+    return '<div class="gal-card">' +
+      '<div class="gal-card-actions">' +
+        '<button class="gal-card-btn" onclick="galCopyUrl(\'' + g._id + '\')" title="URL Kopyala">📋</button>' +
+        '<button class="gal-card-btn" onclick="galDelete(\'' + g._id + '\')" title="Sil">🗑</button>' +
+      '</div>' +
+      '<img src="' + g.url + '" loading="lazy" alt="' + (g.name || '') + '">' +
+      '<div class="gal-card-info">' +
+        '<div class="gal-card-name">' + (g.name || 'Gorsel') + '</div>' +
+        '<div class="gal-card-meta"><span>' + date + '</span><span>' + sizeKB + '</span></div>' +
+        '<span class="gal-card-cat">' + (g.category || 'genel') + '</span>' +
+      '</div>' +
+    '</div>';
+  }).join('') + '</div>';
+}
+
+function galCopyUrl(id) {
+  const g = galItems.find(x => x._id === id);
+  if (!g) return;
+  navigator.clipboard.writeText(g.url).then(() => {
+    const toast = document.createElement('div');
+    toast.className = 'gal-url-toast';
+    toast.textContent = '✓ URL kopyalandi!';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2000);
+  }).catch(() => {
+    prompt('URL:', g.url);
+  });
+}
+
+async function galDelete(id) {
+  const g = galItems.find(x => x._id === id);
+  if (!g) return;
+  if (!confirm('Bu gorseli silmek istediginize emin misiniz?')) return;
+  try {
+    if (g.path) await firebase.storage().ref(g.path).delete().catch(() => {});
+    await db.collection('gallery').doc(id).delete();
+    galItems = galItems.filter(x => x._id !== id);
+    galUpdateFilterOptions();
+    galRender();
+    showToast('Gorsel silindi.', 'success');
+  } catch(err) {
+    showToast('Silme hatasi.', 'error');
+  }
+}
+
+// Drag & drop for gallery dropzone
+(function() {
+  const dz = document.getElementById('gal-dropzone');
+  if (!dz) return;
+  ['dragenter','dragover'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); dz.style.borderColor = 'var(--terra)'; dz.style.background = 'rgba(196,82,26,.06)'; }));
+  ['dragleave','drop'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); dz.style.borderColor = 'rgba(0,0,0,.12)'; dz.style.background = 'rgba(196,82,26,.02)'; }));
+  dz.addEventListener('drop', ev => { if (ev.dataTransfer.files.length) galHandleFiles(ev.dataTransfer.files); });
+})();
+
+// showPage hook: galeri açılınca yükle
+const _origShowPage = showPage;
+showPage = function(page) {
+  _origShowPage(page);
+  if (page === 'gallery' && galItems.length === 0) galLoadItems();
+};
 
 /* ══════════════════════════════════════════════════
    ANALYTICS

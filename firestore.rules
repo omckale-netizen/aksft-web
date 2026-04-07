@@ -61,6 +61,11 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // Galeri: sadece admin
+    match /gallery/{docId} {
+      allow read, write: if isAdmin();
+    }
+
     // Diger tum koleksiyonlar: varsayilan olarak engelle
     match /{document=**} {
       allow read, write: if false;
