@@ -5,6 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mekan — Assos'u Keşfet</title>
   <meta name="description" content="Assos ve Ayvacık'ta mekan detayı.">
+  <meta property="og:title" content="Mekan — Assos'u Keşfet">
+  <meta property="og:description" content="Assos ve Ayvacık'ta mekan detayı.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://assosukesfet.com/mekanlar/mekan-detay.html">
+  <meta property="og:image" content="https://assosukesfet.com/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="tr_TR">
+  <meta property="og:site_name" content="Assos'u Keşfet">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Mekan — Assos'u Keşfet">
+  <meta name="twitter:description" content="Assos ve Ayvacık'ta mekan detayı.">
+  <meta name="twitter:image" content="https://assosukesfet.com/og-image.jpg">
 </head>
 <body>
 <div id="nav-placeholder"></div>
@@ -38,6 +51,23 @@ function pageInit() {
     document.title = venue.title + ' — Assos\'u Keşfet';
     const descMeta = document.querySelector('meta[name="description"]');
     if (descMeta) descMeta.content = venue.shortDesc || '';
+    // OG taglarini guncelle
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    const ogDesc = document.querySelector('meta[property="og:description"]');
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    const ogImg = document.querySelector('meta[property="og:image"]');
+    const twTitle = document.querySelector('meta[name="twitter:title"]');
+    const twDesc = document.querySelector('meta[name="twitter:description"]');
+    const twImg = document.querySelector('meta[name="twitter:image"]');
+    if (ogTitle) ogTitle.content = venue.title + ' — Assos\'u Keşfet';
+    if (ogDesc) ogDesc.content = venue.shortDesc || '';
+    if (ogUrl) ogUrl.content = 'https://assosukesfet.com/mekanlar/mekan-detay.html?id=' + venueId;
+    if (venue.images && venue.images[0]) {
+      if (ogImg) ogImg.content = venue.images[0];
+      if (twImg) twImg.content = venue.images[0];
+    }
+    if (twTitle) twTitle.content = venue.title + ' — Assos\'u Keşfet';
+    if (twDesc) twDesc.content = venue.shortDesc || '';
   }
 }
 document.addEventListener('dataReady', pageInit);

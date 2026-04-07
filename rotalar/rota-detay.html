@@ -5,6 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rota — Assos'u Keşfet</title>
   <meta name="description" content="Assos ve Ayvacık rota detayı.">
+  <meta property="og:title" content="Rota — Assos'u Keşfet">
+  <meta property="og:description" content="Assos ve Ayvacık rota detayı.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://assosukesfet.com/rotalar/rota-detay.html">
+  <meta property="og:image" content="https://assosukesfet.com/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="tr_TR">
+  <meta property="og:site_name" content="Assos'u Keşfet">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Rota — Assos'u Keşfet">
+  <meta name="twitter:description" content="Assos ve Ayvacık rota detayı.">
+  <meta name="twitter:image" content="https://assosukesfet.com/og-image.jpg">
 </head>
 <body>
 <div id="nav-placeholder"></div>
@@ -35,6 +48,17 @@ function pageInit() {
     document.title = route.title + ' — Assos\'u Keşfet';
     const descMeta = document.querySelector('meta[name="description"]');
     if (descMeta) descMeta.content = route.shortDesc || '';
+    // OG taglarini guncelle
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    const ogDesc = document.querySelector('meta[property="og:description"]');
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    const twTitle = document.querySelector('meta[name="twitter:title"]');
+    const twDesc = document.querySelector('meta[name="twitter:description"]');
+    if (ogTitle) ogTitle.content = route.title + ' — Assos\'u Keşfet';
+    if (ogDesc) ogDesc.content = route.shortDesc || '';
+    if (ogUrl) ogUrl.content = 'https://assosukesfet.com/rotalar/rota-detay.html?id=' + routeId;
+    if (twTitle) twTitle.content = route.title + ' — Assos\'u Keşfet';
+    if (twDesc) twDesc.content = route.shortDesc || '';
   }
 }
 document.addEventListener('dataReady', pageInit);
