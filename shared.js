@@ -486,6 +486,9 @@ function renderNav(opts = {}) {
       .sd-sync-load:hover{background:#2A3A5A;}
       .sd-clear-btn { width:100%; padding:10px; border-radius:12px; border:1.5px solid rgba(26,39,68,.1); background:transparent; color:#718096; font-size:.78rem; font-weight:600; cursor:pointer; transition:all .2s; font-family:inherit; }
       .sd-clear-btn:hover { border-color:rgba(196,82,26,.3); color:#C4521A; background:rgba(196,82,26,.04); }
+      .sd-filter-btn{font-size:.65rem;padding:4px 10px;border-radius:999px;border:1px solid rgba(26,39,68,.1);background:transparent;color:#718096;cursor:pointer;font-family:inherit;font-weight:600;transition:all .15s;white-space:nowrap;}
+      .sd-filter-btn:hover{border-color:var(--terra);color:var(--terra);}
+      .sd-filter-btn.active{background:var(--navy);color:var(--cream);border-color:var(--navy);}
       .sd-go-btn { display:flex; align-items:center; justify-content:center; gap:6px; width:100%; padding:11px; border-radius:12px; background:#1A2744; color:#fff; font-size:.8rem; font-weight:700; text-decoration:none; margin-top:8px; transition:background .2s; }
       .sd-go-btn:hover { background:#2A3A5A; }
     `;
@@ -656,6 +659,11 @@ function renderNav(opts = {}) {
     });
   };
 
+  window.sdFilterBy = function(filter) {
+    window._sdFilter = filter;
+    renderSaveDrawer();
+  };
+
   window.clearAllSaves = function () {
     localStorage.removeItem(SD_KEY);
     localStorage.removeItem(SD_PLACE_KEY);
@@ -724,34 +732,70 @@ function renderNav(opts = {}) {
       return;
     }
 
-    let html = '';
+    // Tüm kaydedilenleri hazırla
+    const allVenues = (typeof DATA !== 'undefined' ? DATA.venues : []).filter(v => savedVenues.has(v.id));
+    const allPlaces = (typeof DATA !== 'undefined' ? DATA.places : []).filter(p => savedPlaces.has(p.id));
+
+    // Filtre butonları oluştur
+    const filterCats = new Set();
+    filterCats.add('all');
+    if (allVenues.length > 0) filterCats.add('mekanlar');
+    if (allPlaces.length > 0) filterCats.add('yerler');
+    allVenues.forEach(v => {
+      const m = SD_VMETA[v.id] || { cat: v.category || 'diger', catL: v.tagText || v.category || 'Diğer' };
+      filterCats.add('cat_' + m.cat);
+    });
+
+    const sdFilter = window._sdFilter || 'all';
+    const CAT_LABELS_SD = {};
+    allVenues.forEach(v => {
+      const m = SD_VMETA[v.id] || { cat: v.category || 'diger', catL: v.tagText || v.category || 'Diğer' };
+      if (!CAT_LABELS_SD[m.cat]) CAT_LABELS_SD[m.cat] = m.catL;
+    });
+
+    let html = '<div style="display:flex;flex-wrap:wrap;gap:5px;padding:0 0 12px;border-bottom:1px solid rgba(26,39,68,.06);margin-bottom:8px;">';
+    html += '<button class="sd-filter-btn' + (sdFilter === 'all' ? ' active' : '') + '" onclick="sdFilterBy(\'all\')">Tümü</button>';
+    if (allVenues.length > 0) html += '<button class="sd-filter-btn' + (sdFilter === 'mekanlar' ? ' active' : '') + '" onclick="sdFilterBy(\'mekanlar\')">🏪 Mekanlar</button>';
+    if (allPlaces.length > 0) html += '<button class="sd-filter-btn' + (sdFilter === 'yerler' ? ' active' : '') + '" onclick="sdFilterBy(\'yerler\')">📍 Yerler</button>';
+    Object.keys(CAT_LABELS_SD).forEach(cat => {
+      html += '<button class="sd-filter-btn' + (sdFilter === 'cat_' + cat ? ' active' : '') + '" onclick="sdFilterBy(\'cat_' + cat + '\')">' + CAT_LABELS_SD[cat] + '</button>';
+    });
+    html += '</div>';
 
     // Mekanlar
-    if (savedVenues.size > 0) {
-      const venues = (typeof DATA !== 'undefined' ? DATA.venues : []).filter(v => savedVenues.has(v.id));
-      const groups = {};
-      venues.forEach(v => {
-        const m = SD_VMETA[v.id] || { g:'linear-gradient(160deg,#1A2744,#2A3A5A)', cat:v.category||'diger', catBg:'rgba(26,39,68,.08)', catC:'#4A5568', catL:v.tagText||v.category||'Diğer' };
-        if (!groups[m.cat]) groups[m.cat] = { m, items:[] };
-        groups[m.cat].items.push(v);
-      });
-      const cats = Object.keys(groups).sort((a,b) => groups[b].items.length - groups[a].items.length);
-      html += '<div style="display:flex;align-items:center;gap:7px;padding:4px 2px 8px;"><span style="font-size:.7rem;font-weight:800;color:var(--navy);">🏪 Mekanlar</span><span style="font-size:.6rem;font-weight:700;padding:1px 7px;border-radius:999px;background:rgba(196,82,26,.1);color:#C4521A;">' + savedVenues.size + '</span><div style="flex:1;height:1px;background:rgba(26,39,68,.08);"></div></div>';
-      html += cats.map(cat => {
-        const { m, items } = groups[cat];
-        const header = '<div style="display:flex;align-items:center;gap:7px;padding:8px 2px 6px;"><span style="font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:' + m.catC + ';">' + m.catL + '</span><span style="font-size:.55rem;font-weight:700;padding:1px 6px;border-radius:999px;background:' + m.catBg + ';color:' + m.catC + ';">' + items.length + '</span></div>';
-        const cards = items.map(v => {
-          const hasPhoto = v.images && v.images.length > 0;
-          const imgStyle = hasPhoto ? 'background:url(' + v.images[0] + ') center/cover no-repeat;' : 'background:' + m.g + ';';
-          return '<a class="sd-venue" href="' + getMekanPath(v.id) + '"><div class="sd-venue-img" style="' + imgStyle + '">' + (hasPhoto ? '' : v.emoji) + '</div><div class="sd-venue-info"><div class="sd-venue-name">' + v.title + '</div><div class="sd-venue-loc">📍 ' + v.location + '</div></div><button class="sd-venue-remove" onclick="removeSave(\'' + escAttr(v.id) + '\',event)" aria-label="Kaldır">✕</button></a>';
-        }).join('');
-        return header + cards;
-      }).join('');
+    const showVenues = sdFilter === 'all' || sdFilter === 'mekanlar' || sdFilter.startsWith('cat_');
+    const venueFilter = sdFilter.startsWith('cat_') ? sdFilter.replace('cat_', '') : null;
+
+    if (showVenues && allVenues.length > 0) {
+      const venues = venueFilter ? allVenues.filter(v => (v.category || '') === venueFilter) : allVenues;
+      if (venues.length > 0) {
+        const groups = {};
+        venues.forEach(v => {
+          const m = SD_VMETA[v.id] || { g:'linear-gradient(160deg,#1A2744,#2A3A5A)', cat:v.category||'diger', catBg:'rgba(26,39,68,.08)', catC:'#4A5568', catL:v.tagText||v.category||'Diğer' };
+          if (!groups[m.cat]) groups[m.cat] = { m, items:[] };
+          groups[m.cat].items.push(v);
+        });
+        const cats = Object.keys(groups).sort((a,b) => groups[b].items.length - groups[a].items.length);
+        if (sdFilter !== 'yerler') {
+          html += '<div style="display:flex;align-items:center;gap:7px;padding:4px 2px 8px;"><span style="font-size:.7rem;font-weight:800;color:var(--navy);">🏪 Mekanlar</span><span style="font-size:.6rem;font-weight:700;padding:1px 7px;border-radius:999px;background:rgba(196,82,26,.1);color:#C4521A;">' + venues.length + '</span><div style="flex:1;height:1px;background:rgba(26,39,68,.08);"></div></div>';
+          html += cats.map(cat => {
+            const { m, items } = groups[cat];
+            const header = '<div style="display:flex;align-items:center;gap:7px;padding:8px 2px 6px;"><span style="font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:' + m.catC + ';">' + m.catL + '</span><span style="font-size:.55rem;font-weight:700;padding:1px 6px;border-radius:999px;background:' + m.catBg + ';color:' + m.catC + ';">' + items.length + '</span></div>';
+            const cards = items.map(v => {
+              const hasPhoto = v.images && v.images.length > 0;
+              const imgStyle = hasPhoto ? 'background:url(' + v.images[0] + ') center/cover no-repeat;' : 'background:' + m.g + ';';
+              return '<a class="sd-venue" href="' + getMekanPath(v.id) + '"><div class="sd-venue-img" style="' + imgStyle + '">' + (hasPhoto ? '' : v.emoji) + '</div><div class="sd-venue-info"><div class="sd-venue-name">' + v.title + '</div><div class="sd-venue-loc">📍 ' + v.location + '</div></div><button class="sd-venue-remove" onclick="removeSave(\'' + escAttr(v.id) + '\',event)" aria-label="Kaldır">✕</button></a>';
+            }).join('');
+            return header + cards;
+          }).join('');
+        }
+      }
     }
 
     // Yerler
-    if (savedPlaces.size > 0) {
-      const places = (typeof DATA !== 'undefined' ? DATA.places : []).filter(p => savedPlaces.has(p.id));
+    const showPlaces = sdFilter === 'all' || sdFilter === 'yerler';
+    if (showPlaces && allPlaces.length > 0) {
+      const places = allPlaces;
       html += '<div style="display:flex;align-items:center;gap:7px;padding:16px 2px 8px;"><span style="font-size:.7rem;font-weight:800;color:var(--navy);">📍 Yerler</span><span style="font-size:.6rem;font-weight:700;padding:1px 7px;border-radius:999px;background:rgba(26,39,68,.08);color:var(--navy);">' + savedPlaces.size + '</span><div style="flex:1;height:1px;background:rgba(26,39,68,.08);"></div></div>';
       html += places.map(p => {
         const hasPhoto = p.image && p.image.length > 0;
