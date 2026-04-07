@@ -1779,10 +1779,25 @@ async function saveCategoryEdit(idx) {
   const el = document.querySelectorAll('#cat-list .cat-edit-row')[idx];
   if (!el) return;
   const c = venueCategories[idx];
+  const oldEmoji = c.emoji;
   c.emoji = el.querySelector('.cat-edit-emoji').value.trim() || c.emoji;
   c.label = el.querySelector('.cat-edit-label').value.trim() || c.label;
   c.color = el.querySelector('.cat-edit-color').value || c.color;
   await db.collection('settings').doc('venue_categories').set({ list: venueCategories }, { merge: true });
+
+  // Bu kategorideki tüm mekanların emoji ve tag bilgilerini güncelle
+  const catVenues = (draftData.venues || []).filter(v => v.category === c.id);
+  if (catVenues.length > 0) {
+    for (const v of catVenues) {
+      v.emoji = c.emoji;
+      v.tagText = c.label;
+      v.tagColor = c.color;
+      v.tagBg = c.color + '1a';
+      await db.collection('venues').doc(v.id).set({ emoji: c.emoji, tagText: c.label, tagColor: c.color, tagBg: c.color + '1a' }, { merge: true });
+    }
+    showToast(catVenues.length + ' mekan guncellendi.', 'success');
+  }
+
   renderCatList();
   updateCatSelects();
   showToast('Kategori guncellendi.', 'success');
