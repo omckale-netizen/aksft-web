@@ -3428,12 +3428,6 @@ function pbotSearchImages() {
   window.open('https://www.google.com/search?tbm=isch&q=' + encodeURIComponent(name + ' ' + loc), '_blank');
 }
 
-let pbotPendingImage = null;
-let pbotCropY = 50;
-let pbotDragging = false;
-let pbotStartY = 0;
-let pbotStartPos = 50;
-
 function pbotHandleImage(file) {
   if (!file) return;
   compressImage(file, function(blob, dataUrl, ext) {
