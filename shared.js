@@ -1724,16 +1724,16 @@ function renderRoutePage(routeId) {
 
 /* ── Share helper (used by renderRoutePage) ── */
 function rpShare(id, encodedTitle, encodedDesc) {
-  const base = window.location.origin;
-  const shareUrl = base + '/rotalar/rota-detay.html?id=' + id;
+  const shareUrl = 'https://assosukesfet.com/rotalar/rota-detay.html?id=' + id;
   const title = decodeURIComponent(encodedTitle) + ' — Assos\'u Keşfet';
-  const text  = decodeURIComponent(encodedDesc) + '\n' + shareUrl;
-  navigator.clipboard.writeText(shareUrl).then(() => {
-    const t = document.getElementById('rp-toast');
-    if (t) { t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
-  }).catch(() => {});
+  const shareText = title + '\n' + decodeURIComponent(encodedDesc) + '\n\n' + shareUrl;
   if (navigator.share) {
-    navigator.share({ title: title, text: text, url: shareUrl }).catch(() => {});
+    navigator.share({ text: shareText }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      const t = document.getElementById('rp-toast');
+      if (t) { t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
+    }).catch(() => { prompt('Bu linki kopyala:', shareUrl); });
   }
 }
 
