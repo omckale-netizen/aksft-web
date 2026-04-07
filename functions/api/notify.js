@@ -1,5 +1,6 @@
 export async function onRequestPost(context) {
-  const { request, env } = context;
+  const request = context.request;
+  const env = context.env || {};
 
   let body;
   try {
@@ -17,7 +18,7 @@ export async function onRequestPost(context) {
   const CHAT_ID = env.TELEGRAM_CHAT_ID;
 
   if (!TOKEN || !CHAT_ID) {
-    return new Response(JSON.stringify({ error: 'Telegram config missing' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ error: 'Telegram config missing', debug: Object.keys(env).join(',') || 'empty' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 
   let text = '';
