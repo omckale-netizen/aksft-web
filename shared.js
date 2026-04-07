@@ -151,8 +151,10 @@ document.addEventListener('dataReady', _fetchSiteLogo);
 
     .place-card{background:#fff;border-radius:18px;overflow:hidden;border:1px solid rgba(26,39,68,.06);cursor:pointer;transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s cubic-bezier(.16,1,.3,1);text-decoration:none;display:block;}
     .place-card:hover{transform:translateY(-5px);box-shadow:0 20px 50px rgba(26,39,68,.1);}
-    .place-card .place-img{aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative;overflow:hidden;}
-    .place-card .place-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+    @keyframes imgShimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+    .place-card .place-img{aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative;overflow:hidden;background:linear-gradient(90deg,#e8e4de 25%,#f0ece6 50%,#e8e4de 75%);background-size:800px 100%;animation:imgShimmer 1.5s infinite linear;}
+    .place-card .place-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s ease;}
+    .place-card .place-img img.loaded{opacity:1;}
     .place-card .place-img .place-emoji-fallback{position:relative;z-index:1;}
     .place-card .place-cat-badge{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px;}
     .place-card h3{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:1rem;color:var(--navy);margin-bottom:6px;}
@@ -1140,7 +1142,7 @@ function placeCardHTML(p, delay = 0) {
   return `
     <a class="place-card fade-up" href="yerler.html?id=${p.id}" data-delay="${delay}" aria-label="${p.title}">
       <div class="place-img" style="background:linear-gradient(135deg,${c1},${c2});">
-        ${p.image ? '<img src="' + p.image + '" alt="' + p.title + '" loading="lazy" style="object-position:center ' + (p.imagePos != null ? p.imagePos : 50) + '%">' : '<span class="place-emoji-fallback">' + p.emoji + '</span>'}
+        ${p.image ? '<img src="' + p.image + '" alt="' + p.title + '" loading="lazy" onload="this.classList.add(\'loaded\')" style="object-position:center ' + (p.imagePos != null ? p.imagePos : 50) + '%">' : '<span class="place-emoji-fallback">' + p.emoji + '</span>'}
       </div>
       <span class="place-cat-badge" style="position:absolute;top:12px;left:12px;background:${catColors[p.category] || catColors.tarihi};color:#fff;backdrop-filter:blur(8px);">${catLabels[p.category] || p.category}</span>
       <div style="padding:18px 20px 20px;">
@@ -1833,7 +1835,8 @@ function renderVenuePage(venueId) {
       .vp-gallery[data-count="5"] .vp-gimg:first-child{grid-row:1/3;}
       .vp-gallery[data-count="6"]{grid-template-columns:1fr 1fr 1fr;grid-template-rows:200px 200px;}
       .vp-gimg{position:relative;overflow:hidden;border-radius:4px;background:#1A2744;}
-      .vp-gimg img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s cubic-bezier(.16,1,.3,1);}
+      .vp-gimg img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .4s ease,transform .4s cubic-bezier(.16,1,.3,1);}
+      .vp-gimg img.loaded{opacity:1;}
       .vp-gimg:hover img{transform:scale(1.05);}
       .vp-gimg-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.3) 0%,transparent 50%);pointer-events:none;}
       .vp-gimg-empty{display:flex;align-items:center;justify-content:center;font-size:2.5rem;opacity:.25;}
@@ -2124,7 +2127,7 @@ function renderVenuePage(venueId) {
           if (imgs.length === 0) return '';
           const count = Math.min(imgs.length, 6);
           const tiles = imgs.slice(0, count).map(src =>
-            '<div class="vp-gimg"><img src="' + (src.startsWith('http') ? src : base + src) + '" alt="' + v.title + '" loading="lazy"><div class="vp-gimg-overlay"></div></div>'
+            '<div class="vp-gimg"><img src="' + (src.startsWith('http') ? src : base + src) + '" alt="' + v.title + '" loading="lazy" onload="this.classList.add(\'loaded\')"><div class="vp-gimg-overlay"></div></div>'
           ).join('');
           return '<div class="vp-section fade-up">' +
             '<div class="vp-eyebrow">Atmosfer</div>' +
