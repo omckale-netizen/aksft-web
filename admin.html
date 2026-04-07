@@ -1762,8 +1762,86 @@ async function uploadImageToServer(blob, path) {
 }
 
 /* ══════════════════════════════════════════════════
-   AUTH — Firebase Auth
+   AUTH — Firebase Auth + Brute Force + Session Timeout
 ══════════════════════════════════════════════════ */
+const LOGIN_MAX_ATTEMPTS = 5;
+const LOGIN_LOCKOUT_MS = 5 * 60 * 1000; // 5 dakika
+const SESSION_TIMEOUT_MS = 4 * 60 * 60 * 1000; // 4 saat
+let sessionTimer = null;
+
+function getLoginAttempts() {
+  try {
+    const data = JSON.parse(localStorage.getItem('loginAttempts') || '{}');
+    if (data.lockedUntil && Date.now() < data.lockedUntil) return data;
+    if (data.lockedUntil && Date.now() >= data.lockedUntil) { localStorage.removeItem('loginAttempts'); return { count: 0 }; }
+    return data;
+  } catch(e) { return { count: 0 }; }
+}
+
+function recordFailedLogin() {
+  const data = getLoginAttempts();
+  data.count = (data.count || 0) + 1;
+  if (data.count >= LOGIN_MAX_ATTEMPTS) {
+    data.lockedUntil = Date.now() + LOGIN_LOCKOUT_MS;
+  }
+  localStorage.setItem('loginAttempts', JSON.stringify(data));
+  return data;
+}
+
+function clearLoginAttempts() {
+  localStorage.removeItem('loginAttempts');
+}
+
+function startSessionTimer() {
+  clearTimeout(sessionTimer);
+  // Son aktivite zamanini kaydet
+  localStorage.setItem('lastActivity', Date.now().toString());
+  sessionTimer = setTimeout(() => {
+    showToast('Oturum suresi doldu. Tekrar giris yapin.', 'error');
+    setTimeout(() => logout(), 1500);
+  }, SESSION_TIMEOUT_MS);
+}
+
+function resetSessionTimer() {
+  localStorage.setItem('lastActivity', Date.now().toString());
+  clearTimeout(sessionTimer);
+  sessionTimer = setTimeout(() => {
+    showToast('Oturum suresi doldu. Tekrar giris yapin.', 'error');
+    setTimeout(() => logout(), 1500);
+  }, SESSION_TIMEOUT_MS);
+}
+
+// Kullanici aktif oldugunda zamanlayiciyi sifirla
+['click','keydown','scroll','mousemove'].forEach(evt => {
+  document.addEventListener(evt, () => {
+    if (fbAuth.currentUser) resetSessionTimer();
+  }, { passive: true });
+});
+
+function getDeviceInfo() {
+  const ua = navigator.userAgent;
+  let browser = 'Bilinmeyen';
+  if (ua.includes('Firefox')) browser = 'Firefox';
+  else if (ua.includes('Edg')) browser = 'Edge';
+  else if (ua.includes('Chrome')) browser = 'Chrome';
+  else if (ua.includes('Safari')) browser = 'Safari';
+  let os = 'Bilinmeyen';
+  if (ua.includes('Windows')) os = 'Windows';
+  else if (ua.includes('Mac')) os = 'macOS';
+  else if (ua.includes('iPhone')) os = 'iPhone';
+  else if (ua.includes('Android')) os = 'Android';
+  else if (ua.includes('Linux')) os = 'Linux';
+  return { browser, os, platform: os + ' / ' + browser };
+}
+
+async function getClientIP() {
+  try {
+    const resp = await fetch('https://api.ipify.org?format=json');
+    const data = await resp.json();
+    return data.ip || 'Bilinmeyen';
+  } catch(e) { return 'Alinamadi'; }
+}
+
 async function checkAuth() {
   const email = (document.getElementById('auth-email').value || '').trim();
   const pw = document.getElementById('auth-pw').value;
@@ -1772,17 +1850,56 @@ async function checkAuth() {
   if (!email) { errEl.textContent = 'E-posta adresinizi girin.'; return; }
   if (!pw) { errEl.textContent = 'Sifrenizi girin.'; return; }
 
+  // Brute force kontrolu
+  const attempts = getLoginAttempts();
+  if (attempts.lockedUntil && Date.now() < attempts.lockedUntil) {
+    const remaining = Math.ceil((attempts.lockedUntil - Date.now()) / 1000);
+    errEl.textContent = `Cok fazla basarisiz deneme. ${remaining} saniye bekleyin.`;
+    return;
+  }
+
   try {
     await fbAuth.signInWithEmailAndPassword(email, pw);
+    clearLoginAttempts();
     document.getElementById('auth-gate').classList.add('hidden');
     document.getElementById('admin-wrap').style.display = 'flex';
     await loadDataFromFirestore();
     initApp();
-    // Telegram bildirim
-    fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'login',data:{date:new Date().toLocaleString('tr-TR'),email:email}})}).catch(()=>{});
+    startSessionTimer();
+    // Telegram bildirim — IP ve cihaz bilgisi ile
+    const device = getDeviceInfo();
+    const ip = await getClientIP();
+    fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      type:'login',
+      data:{
+        date: new Date().toLocaleString('tr-TR'),
+        email: email,
+        ip: ip,
+        device: device.platform
+      }
+    })}).catch(()=>{});
   } catch(err) {
+    const updated = recordFailedLogin();
     if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-      errEl.textContent = 'E-posta veya sifre hatali.';
+      const left = LOGIN_MAX_ATTEMPTS - updated.count;
+      if (left > 0) {
+        errEl.textContent = `E-posta veya sifre hatali. ${left} deneme hakkiniz kaldi.`;
+      } else {
+        errEl.textContent = `Hesap 5 dakika kitlendi. Lutfen bekleyin.`;
+        // Basarisiz giris bildirimi gonder
+        const device = getDeviceInfo();
+        const ip = await getClientIP();
+        fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+          type:'login_blocked',
+          data:{
+            date: new Date().toLocaleString('tr-TR'),
+            email: email,
+            ip: ip,
+            device: device.platform,
+            attempts: updated.count
+          }
+        })}).catch(()=>{});
+      }
     } else {
       errEl.textContent = 'Giris hatasi: ' + err.message;
     }
@@ -1790,6 +1907,8 @@ async function checkAuth() {
 }
 
 function logout() {
+  clearTimeout(sessionTimer);
+  localStorage.removeItem('lastActivity');
   fbAuth.signOut();
   location.reload();
 }
@@ -2099,15 +2218,26 @@ function showFavPreview(url) {
   }
 }
 
-// Auto-login if session exists
+// Auto-login if session exists (+ oturum zamanlayici kontrolu)
 fbAuth.onAuthStateChanged(async (user) => {
   if (user) {
+    // Oturum suresi kontrolu
+    const lastActivity = parseInt(localStorage.getItem('lastActivity') || '0');
+    if (lastActivity > 0 && (Date.now() - lastActivity) > SESSION_TIMEOUT_MS) {
+      // Oturum suresi dolmus — cikis yap
+      localStorage.removeItem('lastActivity');
+      fbAuth.signOut();
+      document.getElementById('admin-loading').classList.add('hidden');
+      document.getElementById('auth-gate').classList.add('show');
+      return;
+    }
     document.getElementById('auth-gate').classList.add('hidden');
     document.getElementById('auth-gate').classList.remove('show');
     document.getElementById('admin-wrap').style.display = 'flex';
     await loadDataFromFirestore();
     document.getElementById('admin-loading').classList.add('hidden');
     initApp();
+    startSessionTimer();
   } else {
     document.getElementById('admin-loading').classList.add('hidden');
     document.getElementById('auth-gate').classList.add('show');

@@ -24,6 +24,12 @@ export async function onRequestPost(context) {
   let text = '';
   if (type === 'login') {
     text = '\u{1F510} Admin panele giris yapildi\n\u{1F4C5} ' + (data.date || '') + '\n\u{1F464} ' + (data.email || '');
+    if (data.ip) text += '\n\u{1F310} IP: ' + data.ip;
+    if (data.device) text += '\n\u{1F4F1} Cihaz: ' + data.device;
+  } else if (type === 'login_blocked') {
+    text = '\u{1F6A8} UYARI: Basarisiz giris denemeleri!\n\u{1F4C5} ' + (data.date || '') + '\n\u{1F464} ' + (data.email || '') + '\n\u{1F6AB} ' + (data.attempts || '?') + ' basarisiz deneme — hesap kitlendi';
+    if (data.ip) text += '\n\u{1F310} IP: ' + data.ip;
+    if (data.device) text += '\n\u{1F4F1} Cihaz: ' + data.device;
   } else if (type === 'message') {
     text = '\u{1F4E9} Yeni iletisim mesaji!\n\u{1F464} ' + (data.name || '') + '\n\u{1F4E7} ' + (data.email || '');
     if (data.phone) text += '\n\u{1F4DE} ' + data.phone;
