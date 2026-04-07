@@ -887,7 +887,7 @@ function initScrollToTop() {
   style.textContent = `
     #scroll-top-btn {
       position: fixed;
-      bottom: 28px;
+      bottom: 90px;
       right: 28px;
       z-index: 400;
       width: 44px;
@@ -1931,6 +1931,8 @@ function renderVenuePage(venueId) {
       .vp-sticky-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:10px;font-size:.78rem;font-weight:700;text-decoration:none;white-space:nowrap;transition:all .2s;border:none;cursor:pointer;font-family:inherit;}
       .vp-sticky-call{background:#1A2744;color:#fff;}
       .vp-sticky-call:hover{background:#2A3A5A;}
+      .vp-sticky-wa{background:#25D366;color:#fff;}
+      .vp-sticky-wa:hover{background:#1CB85A;}
       .vp-sticky-map{background:rgba(26,39,68,.06);color:#1A2744;}
       .vp-sticky-map:hover{background:rgba(26,39,68,.12);}
       @media(max-width:480px){.vp-sticky-name{max-width:120px;}.vp-sticky-btn{padding:8px 12px;font-size:.72rem;}}
@@ -2317,6 +2319,7 @@ function renderVenuePage(venueId) {
         </div>
         <div class="vp-sticky-acts">
           ${v.phone ? '<a href="tel:' + v.phone.replace(/\\s/g,'') + '" class="vp-sticky-btn vp-sticky-call">📞 Ara</a>' : ''}
+          ${v.phone && v.category !== 'konaklama' ? '<a href="' + waContactUrl + '" target="_blank" rel="noopener" class="vp-sticky-btn vp-sticky-wa">💬 WhatsApp</a>' : ''}
           <a href="${mapsUrl}" target="_blank" rel="noopener" class="vp-sticky-btn vp-sticky-map">🗺 Yol Tarifi</a>
         </div>
       </div>
