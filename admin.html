@@ -480,12 +480,21 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
             </div>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn btn-secondary btn-sm" onclick="botSearchGoogle()">&#128269; Google'da Ara</button>
-            <button class="btn btn-secondary btn-sm" onclick="botSearchMaps()">&#128205; Google Maps</button>
-            <button class="btn btn-secondary btn-sm" onclick="botSearchInsta()">&#128247; Instagram</button>
-            <button class="btn btn-secondary btn-sm" onclick="botSearchImages()">&#128444; Google Gorseller</button>
+            <button class="btn btn-primary btn-sm" onclick="botAutoFill()">⚡ Otomatik Doldur</button>
+            <button class="btn btn-secondary btn-sm" onclick="botSearchGoogle()">🔍 Google</button>
+            <button class="btn btn-secondary btn-sm" onclick="botSearchMaps()">📍 Maps</button>
+            <button class="btn btn-secondary btn-sm" onclick="botSearchInsta()">📷 Instagram</button>
+            <button class="btn btn-secondary btn-sm" onclick="botSearchImages()">🖼 Gorseller</button>
           </div>
           <div style="font-size:.7rem;color:var(--text-muted);margin-top:8px">ID: <strong id="bot-id-preview">—</strong></div>
+
+          <!-- Hızlı Yapıştır -->
+          <div style="margin-top:12px;background:rgba(26,39,68,.03);border:1px solid rgba(26,39,68,.07);border-radius:10px;padding:12px;">
+            <div style="font-size:.72rem;font-weight:700;color:var(--navy);margin-bottom:6px;">📋 Hizli Yapistir</div>
+            <p style="font-size:.68rem;color:var(--text-muted);margin-bottom:8px;">Google'dan kopyaladiginiz mekan bilgilerini asagiya yapistirin, otomatik doldurulacak.</p>
+            <textarea id="bot-paste-area" rows="4" placeholder="Google'dan kopyaladiginiz metni buraya yapistirin..." style="width:100%;padding:10px;border:1.5px solid rgba(26,39,68,.1);border-radius:8px;font-size:.8rem;font-family:inherit;resize:vertical;outline:none;" onfocus="this.style.borderColor='var(--terra)'" onblur="this.style.borderColor='rgba(26,39,68,.1)'"></textarea>
+            <button class="btn btn-secondary btn-sm" onclick="botParsePaste()" style="margin-top:6px">Metni Analiz Et</button>
+          </div>
         </div>
       </div>
 
@@ -3062,6 +3071,113 @@ let botPendingImages = [];
 function botAutoCatEmoji() {
   const cat = document.getElementById('bot-r-category').value;
   if (cat && BOT_CAT_EMOJIS[cat]) document.getElementById('bot-r-emoji').value = BOT_CAT_EMOJIS[cat];
+}
+
+/* ── Otomatik Doldur — mekan adından akıllı tahmin ── */
+function botAutoFill() {
+  const name = document.getElementById('bot-name').value.trim();
+  const loc = document.getElementById('bot-location').value.trim();
+  if (!name) { showToast('Mekan adi girin.', 'error'); return; }
+
+  const lower = name.toLowerCase();
+
+  // Kategori tahmin
+  let cat = '';
+  if (lower.includes('otel') || lower.includes('pansiyon') || lower.includes('konak') || lower.includes('butik') || lower.includes('apart') || lower.includes('hostel')) cat = 'konaklama';
+  else if (lower.includes('kafe') || lower.includes('cafe') || lower.includes('kahve') || lower.includes('coffee')) cat = 'kafe';
+  else if (lower.includes('restoran') || lower.includes('balık') || lower.includes('lokanta') || lower.includes('mangal') || lower.includes('kebap')) cat = 'restoran';
+  else if (lower.includes('kahvaltı') || lower.includes('kahvalti') || lower.includes('serpme')) cat = 'kahvalti';
+  else if (lower.includes('beach') || lower.includes('plaj') || lower.includes('koy') || lower.includes('sahil')) cat = 'beach';
+  else if (lower.includes('iskele') || lower.includes('liman') || lower.includes('marina')) cat = 'iskele';
+
+  if (cat) {
+    document.getElementById('bot-r-category').value = cat;
+    document.getElementById('bot-r-emoji').value = BOT_CAT_EMOJIS[cat] || '';
+  }
+
+  // Adres otomatik
+  document.getElementById('bot-r-address').value = (loc || 'Ayvacık') + ', Ayvacık / Çanakkale';
+
+  // Açıklama şablonu
+  const catNames = { kafe:'kafe', restoran:'restoran', kahvalti:'kahvaltı mekanı', konaklama:'konaklama tesisi', beach:'plaj/beach', iskele:'iskele mekanı' };
+  document.getElementById('bot-r-shortDesc').value = loc
+    ? name + ', ' + loc + ' bölgesinde yer alan ' + (catNames[cat] || 'mekan') + '.'
+    : name + ', Assos bölgesinde yer alan ' + (catNames[cat] || 'mekan') + '.';
+
+  // Etiketler öner
+  const tagSuggestions = {
+    kafe: 'manzaralı, sakin, kahve',
+    restoran: 'deniz kenarı, taze balık, ege mutfağı',
+    kahvalti: 'köy içinde, organik, serpme',
+    konaklama: 'manzaralı, doğa, butik otel',
+    beach: 'deniz kenarı, plaj, sakin',
+    iskele: 'iskele, sakin, yerel'
+  };
+  document.getElementById('bot-r-tags').value = tagSuggestions[cat] || 'sakin, manzaralı';
+
+  // Çalışma saatleri şablonu
+  const whContainer = document.getElementById('bot-wh-rows');
+  if (whContainer.children.length <= 1) {
+    whContainer.innerHTML = '';
+    if (cat === 'konaklama') {
+      addBotWhRow('Resepsiyon (Her Gün)', '09:00 – 22:00');
+      addBotWhRow('Check-in / Check-out', '14:00 / 12:00');
+    } else {
+      addBotWhRow('Pazartesi – Perşembe', '08:00 – 22:00');
+      addBotWhRow('Cuma – Pazar', '08:00 – 23:00');
+    }
+  }
+
+  showToast('Form otomatik dolduruldu! Bilgileri kontrol edip düzenleyin.', 'success');
+  // Google aramasını da aç
+  window.open('https://www.google.com/search?q=' + encodeURIComponent(name + ' ' + loc + ' Ayvacık Çanakkale telefon adres çalışma saatleri'), '_blank');
+}
+
+/* ── Hızlı Yapıştır — Google'dan kopyalanan metni parse et ── */
+function botParsePaste() {
+  const text = document.getElementById('bot-paste-area').value.trim();
+  if (!text) { showToast('Metin yapistirin.', 'error'); return; }
+
+  // Telefon bul
+  const phoneMatch = text.match(/(?:0\d{3}[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}|0\d{10}|\+90\s?\d{3}\s?\d{3}\s?\d{2}\s?\d{2})/);
+  if (phoneMatch) {
+    document.getElementById('bot-r-phone').value = phoneMatch[0].trim();
+  }
+
+  // Website bul
+  const urlMatch = text.match(/(?:https?:\/\/)?(?:www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})(?:\/[^\s]*)?/);
+  if (urlMatch && !urlMatch[0].includes('google') && !urlMatch[0].includes('facebook') && !urlMatch[0].includes('instagram')) {
+    let url = urlMatch[0];
+    if (!url.startsWith('http')) url = 'https://' + url;
+    document.getElementById('bot-r-website').value = url;
+  }
+
+  // Adres bul (Ayvacık, Çanakkale içeren satır)
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  const addrLine = lines.find(l => l.includes('Ayvacık') || l.includes('Çanakkale') || l.includes('ayvacık') || l.includes('çanakkale'));
+  if (addrLine) {
+    document.getElementById('bot-r-address').value = addrLine;
+  }
+
+  // Çalışma saatleri bul (HH:MM formatı)
+  const hourLines = lines.filter(l => /\d{2}[:.]\d{2}\s*[-–]\s*\d{2}[:.]\d{2}/.test(l) || l.toLowerCase().includes('açık') || l.toLowerCase().includes('kapalı'));
+  if (hourLines.length > 0) {
+    document.getElementById('bot-wh-rows').innerHTML = '';
+    hourLines.forEach(l => {
+      const parts = l.split(/\s{2,}|:\s+/);
+      if (parts.length >= 2) addBotWhRow(parts[0], parts.slice(1).join(' '));
+      else addBotWhRow('', l);
+    });
+  }
+
+  // Açıklama olabilecek uzun metin
+  const descLines = lines.filter(l => l.length > 40 && !phoneMatch?.[0]?.includes(l) && !l.includes('google') && !/\d{2}[:.]\d{2}/.test(l));
+  if (descLines.length > 0 && !document.getElementById('bot-r-description').value) {
+    document.getElementById('bot-r-description').value = descLines.slice(0, 2).join('\n');
+  }
+
+  document.getElementById('bot-paste-area').value = '';
+  showToast('Metin analiz edildi! Bulunan bilgiler forma eklendi.', 'success');
 }
 
 function botSearchGoogle() {
