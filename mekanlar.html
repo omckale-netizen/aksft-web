@@ -583,11 +583,13 @@ function pageInit() {
     set('mkh-stat-kat',    cats);
   })();
 
-  /* Tüm mekanlar (data.js'deki tüm venues) */
-  const ALL_VENUES = DATA.venues.filter(v => v.active !== false).map(v => {
-    const meta = VMETA[v.id] || { popular:false, gradient:'linear-gradient(160deg,#1A2744,#2A3A5A)' };
-    return { ...v, ...meta, featured: !!v.featured };
-  });
+  /* Tüm mekanlar — her çağrıda güncel DATA'dan oku */
+  function getActiveVenues() {
+    return (DATA.venues || []).filter(v => v.active !== false).map(v => {
+      const meta = VMETA[v.id] || { popular:false, gradient:'linear-gradient(160deg,#1A2744,#2A3A5A)' };
+      return { ...v, ...meta, featured: !!v.featured };
+    });
+  }
 
   /* ══════════════════════════════════════════
      KATEGORİLER & RENKLER
@@ -738,7 +740,7 @@ function pageInit() {
   }
 
   function featuredNav(dir) {
-    const featured = ALL_VENUES.filter(v => v.featured);
+    const featured = getActiveVenues().filter(v => v.featured);
     fcVisible = getFcVisible();
     const maxIndex = Math.max(0, featured.length - fcVisible);
     fcIndex = Math.min(Math.max(fcIndex + dir, 0), maxIndex);
@@ -764,7 +766,7 @@ function pageInit() {
      RENDER: FEATURED
   ══════════════════════════════════════════ */
   function renderFeatured() {
-    const featured = ALL_VENUES.filter(v => v.featured);
+    const featured = getActiveVenues().filter(v => v.featured);
     const saved    = getSaved();
     document.getElementById('mk-ftrack').innerHTML = featured.map((v) => {
       const cs = CAT_STYLE[v.category] || { bg:'rgba(26,39,68,.08)', color:'#4A5568', label:v.category };
@@ -834,7 +836,7 @@ function pageInit() {
   ══════════════════════════════════════════ */
   function renderGrid() {
     const saved  = getSaved();
-    let venues   = ALL_VENUES;
+    let venues   = getActiveVenues();
 
     if (showingSaved) {
       venues = venues.filter(v => saved.has(v.id));
