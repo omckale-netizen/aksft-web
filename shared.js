@@ -6,29 +6,18 @@
 /* ── HTML attribute escape (XSS koruması) ── */
 function escAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-/* ── Site logo (Firebase'den veya lokal fallback) ── */
+/* ── Site logo (Firebase'den) ── */
 var SITE_LOGO = '';
-(function loadSiteLogo() {
-  if (typeof firebase !== 'undefined' && firebase.firestore) {
-    firebase.firestore().collection('settings').doc('site').get().then(function(doc) {
-      if (doc.exists && doc.data().logoUrl) {
-        SITE_LOGO = doc.data().logoUrl;
-        document.querySelectorAll('.site-logo-img').forEach(function(img) { img.src = SITE_LOGO; });
-      }
-    }).catch(function() {});
-  } else {
-    document.addEventListener('dataReady', function() {
-      if (typeof firebase !== 'undefined' && firebase.firestore) {
-        firebase.firestore().collection('settings').doc('site').get().then(function(doc) {
-          if (doc.exists && doc.data().logoUrl) {
-            SITE_LOGO = doc.data().logoUrl;
-            document.querySelectorAll('.site-logo-img').forEach(function(img) { img.src = SITE_LOGO; });
-          }
-        }).catch(function() {});
-      }
-    });
-  }
-})();
+function _fetchSiteLogo() {
+  if (typeof firebase === 'undefined' || !firebase.firestore) return;
+  firebase.firestore().collection('settings').doc('site').get().then(function(doc) {
+    if (doc.exists && doc.data().logoUrl) {
+      SITE_LOGO = doc.data().logoUrl;
+      document.querySelectorAll('.site-logo-img').forEach(function(img) { img.src = SITE_LOGO; });
+    }
+  }).catch(function() {});
+}
+document.addEventListener('dataReady', _fetchSiteLogo);
 
 /* ── Inject shared CSS ── */
 (function injectStyles() {
@@ -295,7 +284,7 @@ function renderNav(opts = {}) {
   const navHTML = `
     <div id="mobile-menu" role="dialog" aria-label="Navigasyon menüsü" aria-hidden="true">
       <div class="mm-header">
-        <a href="${basePath}index.html"><img class="site-logo-img" src="${SITE_LOGO.startsWith('http') ? SITE_LOGO : basePath + SITE_LOGO}" alt="Assos'u Keşfet"></a>
+        <a href="${basePath}index.html"><img class="site-logo-img" ${SITE_LOGO ? 'src="' + SITE_LOGO + '"' : ''} data-logo="1" alt="Assos'u Keşfet"></a>
         <button id="close-menu-btn" aria-label="Kapat">✕</button>
       </div>
       <div class="mm-links">
@@ -313,7 +302,7 @@ function renderNav(opts = {}) {
     <nav id="main-nav" class="${heroMode ? 'hero-mode' : 'solid'}" aria-label="Ana navigasyon">
       <div class="nav-inner">
         <a href="${basePath}index.html" class="nav-logo" aria-label="Ana Sayfa">
-          <img class="site-logo-img" src="${SITE_LOGO.startsWith('http') ? SITE_LOGO : basePath + SITE_LOGO}" alt="Assos'u Keşfet">
+          <img class="site-logo-img" ${SITE_LOGO ? 'src="' + SITE_LOGO + '"' : ''} data-logo="1" alt="Assos'u Keşfet">
         </a>
         <div class="nav-links">
           ${links.map(l => `<a href="${basePath}${l.href}" class="nav-link${isActive(l.href) ? ' active' : ''}">${l.label}</a>`).join('')}
@@ -789,7 +778,7 @@ function renderFooter(opts = {}) {
         <div class="footer-glass">
           <div class="footer-grid">
             <div class="footer-brand">
-              <img class="site-logo-img" src="${SITE_LOGO.startsWith('http') ? SITE_LOGO : basePath + SITE_LOGO}" alt="Assos'u Keşfet" style="height:44px;width:auto;">
+              <img class="site-logo-img" ${SITE_LOGO ? 'src="' + SITE_LOGO + '"' : ''} data-logo="1" alt="Assos'u Keşfet" style="height:44px;width:auto;">
               <p class="footer-brand-desc">Assos bölgesinde gezilecek yerler, köyler, mekanlar ve tarihi duraklar için kapsamlı bir dijital keşif platformu.</p>
             </div>
             <div>
