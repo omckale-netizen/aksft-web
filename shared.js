@@ -1427,7 +1427,7 @@ function renderRoutePage(routeId) {
   if (!r) { console.error('Route not found:', routeId); return; }
   const p = ROUTE_PAL[routeId] || ROUTE_PAL['bir-gunde-assos'];
 
-  document.title = r.title + ' — Assos\'u Keşfet';
+  document.title = r.title + ' — Assos Gezi Rotası | Assos\'u Keşfet';
 
   /* ── Inject page styles ── */
   if (!document.getElementById('rp-styles')) {

@@ -30,7 +30,7 @@
 <div id="footer-placeholder"></div>
 <script src="../firebase-loader.js"></script>
 <script src="../data.js"></script>
-<script src="../shared.min.js?v=45"></script>
+<script src="../shared.min.js?v=46"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false, basePath: '../' });
@@ -52,9 +52,14 @@ function pageInit() {
   // Sayfa başlığını güncelle
   const venue = (window.DATA?.venues || []).find(v => v.id === venueId);
   if (venue) {
-    document.title = venue.title + ' — Assos\'u Keşfet';
+    const catLabels = {kafe:'Assos Kafeler',restoran:'Assos Restoranlar',kahvalti:'Assos Kahvaltı',konaklama:'Assos Oteller',beach:'Assos Beach',iskele:'Assos İskeleler'};
+    const catLabel = catLabels[venue.category] || 'Assos Mekanlar';
+    const seoTitle = venue.title + ' — ' + catLabel + ' | Assos\'u Keşfet';
+    const seoDesc = venue.shortDesc ? venue.title + ': ' + venue.shortDesc + ' | ' + (venue.location || 'Assos') : venue.title + ' — ' + catLabel;
+
+    document.title = seoTitle;
     const descMeta = document.querySelector('meta[name="description"]');
-    if (descMeta) descMeta.content = venue.shortDesc || '';
+    if (descMeta) descMeta.content = seoDesc;
     // OG taglarini guncelle
     const ogTitle = document.querySelector('meta[property="og:title"]');
     const ogDesc = document.querySelector('meta[property="og:description"]');
@@ -63,15 +68,15 @@ function pageInit() {
     const twTitle = document.querySelector('meta[name="twitter:title"]');
     const twDesc = document.querySelector('meta[name="twitter:description"]');
     const twImg = document.querySelector('meta[name="twitter:image"]');
-    if (ogTitle) ogTitle.content = venue.title + ' — Assos\'u Keşfet';
-    if (ogDesc) ogDesc.content = venue.shortDesc || '';
+    if (ogTitle) ogTitle.content = seoTitle;
+    if (ogDesc) ogDesc.content = seoDesc;
     if (ogUrl) ogUrl.content = 'https://assosukesfet.com/mekanlar/mekan-detay.html?id=' + venueId;
     if (venue.images && venue.images[0]) {
       if (ogImg) ogImg.content = venue.images[0];
       if (twImg) twImg.content = venue.images[0];
     }
-    if (twTitle) twTitle.content = venue.title + ' — Assos\'u Keşfet';
-    if (twDesc) twDesc.content = venue.shortDesc || '';
+    if (twTitle) twTitle.content = seoTitle;
+    if (twDesc) twDesc.content = seoDesc;
   }
 }
 document.addEventListener('dataReady', pageInit);

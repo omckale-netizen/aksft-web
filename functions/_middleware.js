@@ -73,8 +73,13 @@ export async function onRequest(context) {
       const fields = await fetchFirestoreDoc('venues', id);
       if (!fields) return next();
 
-      const title = (fields.title?.stringValue || 'Mekan') + ' \u2014 Assos\'u Kesfet';
-      const desc = (fields.shortDesc?.stringValue || fields.description?.stringValue || '').replace(/<[^>]*>/g, '').substring(0, 200);
+      const catLabels = {kafe:'Assos Kafeler',restoran:'Assos Restoranlar',kahvalti:'Assos Kahvalti',konaklama:'Assos Oteller',beach:'Assos Beach',iskele:'Assos Iskeleler'};
+      const cat = fields.category?.stringValue || '';
+      const catLabel = catLabels[cat] || 'Assos Mekanlar';
+      const venueName = fields.title?.stringValue || 'Mekan';
+      const title = venueName + ' \u2014 ' + catLabel + ' | Assos\'u Kesfet';
+      const shortDesc = (fields.shortDesc?.stringValue || fields.description?.stringValue || '').replace(/<[^>]*>/g, '').substring(0, 200);
+      const desc = venueName + ': ' + shortDesc;
       let image = DEFAULT_OG_IMAGE;
       if (fields.images?.arrayValue?.values?.length > 0) {
         image = fields.images.arrayValue.values[0].stringValue || image;

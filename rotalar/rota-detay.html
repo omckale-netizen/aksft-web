@@ -30,7 +30,7 @@
 <div id="footer-placeholder"></div>
 <script src="../firebase-loader.js"></script>
 <script src="../data.js"></script>
-<script src="../shared.min.js?v=45"></script>
+<script src="../shared.min.js?v=46"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false, basePath: '../' });
@@ -49,19 +49,20 @@ function pageInit() {
 
   const route = (window.DATA?.routes || []).find(r => r.id === routeId);
   if (route) {
-    document.title = route.title + ' — Assos\'u Keşfet';
+    const seoTitle = route.title + ' — Assos Gezi Rotası | Assos\'u Keşfet';
+    const seoDesc = route.title + ': ' + (route.shortDesc || '') + ' | ' + (route.sure || '') + ', ' + (route.stops?.length || '') + ' durak';
+    document.title = seoTitle;
     const descMeta = document.querySelector('meta[name="description"]');
-    if (descMeta) descMeta.content = route.shortDesc || '';
-    // OG taglarini guncelle
+    if (descMeta) descMeta.content = seoDesc;
     const ogTitle = document.querySelector('meta[property="og:title"]');
     const ogDesc = document.querySelector('meta[property="og:description"]');
     const ogUrl = document.querySelector('meta[property="og:url"]');
     const twTitle = document.querySelector('meta[name="twitter:title"]');
     const twDesc = document.querySelector('meta[name="twitter:description"]');
-    if (ogTitle) ogTitle.content = route.title + ' — Assos\'u Keşfet';
-    if (ogDesc) ogDesc.content = route.shortDesc || '';
+    if (ogTitle) ogTitle.content = seoTitle;
+    if (ogDesc) ogDesc.content = seoDesc;
     if (ogUrl) ogUrl.content = 'https://assosukesfet.com/rotalar/rota-detay.html?id=' + routeId;
-    if (twTitle) twTitle.content = route.title + ' — Assos\'u Keşfet';
+    if (twTitle) twTitle.content = seoTitle;
     if (twDesc) twDesc.content = route.shortDesc || '';
   }
 }
