@@ -56,7 +56,7 @@
         <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.15rem;color:var(--navy);margin-bottom:4px;">Mesaj Gönderin</h3>
         <p style="font-size:.8rem;color:var(--text-mid);margin-bottom:28px;">Tüm alanları doldurarak bize ulaşabilirsiniz.</p>
 
-        <form id="contact-form" onsubmit="submitContact(event)">
+        <form id="contact-form" onsubmit="submitContact(event)" novalidate>
           <div class="ct-row">
             <div class="ct-field">
               <label>Ad Soyad *</label>
@@ -208,6 +208,20 @@ async function submitContact(e) {
   e.preventDefault();
   const btn = document.getElementById('ct-submit');
   const status = document.getElementById('ct-status');
+
+  // Zorunlu alan kontrolü
+  var name = document.getElementById('ct-name').value.trim();
+  var email = document.getElementById('ct-email').value.trim();
+  var phone = document.getElementById('ct-phone').value.trim();
+  var message = document.getElementById('ct-message').value.trim();
+  if (!name || !email || !phone || !message) {
+    status.innerHTML = '<span style="color:#E53E3E">Lütfen tüm zorunlu alanları doldurun.</span>';
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    status.innerHTML = '<span style="color:#E53E3E">Lütfen geçerli bir e-posta adresi girin.</span>';
+    return;
+  }
 
   // Açık rıza kontrolü
   var consentBox = document.getElementById('ct-consent');
