@@ -357,6 +357,17 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .msg-cat-Hata{background:rgba(255,152,0,.12);color:#E65100}
 .msg-trash-banner{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:rgba(244,67,54,.06);border-radius:8px;margin-bottom:12px;font-size:.82rem;color:#C62828}
 .msg-trash-banner button{font-size:.78rem}
+.msg-layout{display:grid;grid-template-columns:380px 1fr;gap:20px;align-items:start;min-height:calc(100vh - 200px)}
+.msg-item.msg-active{background:rgba(196,82,26,.06) !important;border-left:3px solid var(--terra)}
+.msg-consent-box{background:rgba(56,161,105,.04);border:1px solid rgba(56,161,105,.12);border-radius:10px;padding:14px 16px;font-size:.78rem}
+.msg-consent-box .consent-label{font-weight:700;color:var(--green);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.msg-consent-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.04);font-size:.75rem}
+.msg-consent-row:last-child{border-bottom:none}
+.msg-consent-row span:first-child{color:var(--text-muted);font-weight:600}
+.msg-consent-row span:last-child{color:var(--navy)}
+.msg-device-box{background:rgba(26,39,68,.03);border:1px solid rgba(26,39,68,.06);border-radius:10px;padding:14px 16px;margin-top:12px;font-size:.78rem}
+.msg-device-box .device-label{font-weight:700;color:var(--navy);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+@media(max-width:900px){.msg-layout{grid-template-columns:1fr !important}.msg-detail-panel{display:none}.msg-detail-panel.show{display:block;position:fixed;inset:0;z-index:200;background:var(--page-bg);overflow-y:auto}}
 .gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
 .gal-card{position:relative;border-radius:10px;overflow:hidden;background:#f5f0ea;border:1px solid rgba(0,0,0,.06);transition:transform .15s,box-shadow .15s}
 .gal-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.08)}
@@ -1212,40 +1223,63 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
     <!-- ══════ MESSAGES ══════ -->
     <div class="admin-page" id="page-messages">
       <h2>Mesajlar</h2>
-      <p class="page-sub">Iletisim formundan gelen mesajlar.</p>
-      <div class="panel-card">
-        <div class="panel-card-head">
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <button class="btn btn-sm btn-secondary msg-tab active" onclick="setMsgFilter('all',this)">Tumu</button>
-            <button class="btn btn-sm btn-secondary msg-tab" onclick="setMsgFilter('unread',this)">Okunmamis</button>
-            <button class="btn btn-sm btn-secondary msg-tab" onclick="setMsgFilter('read',this)">Okunmus</button>
-            <button class="btn btn-sm btn-secondary msg-tab" onclick="setMsgFilter('trash',this)">🗑 Cop Kutusu</button>
+      <p class="page-sub">İletişim formundan gelen mesajlar.</p>
+
+      <!-- Stats -->
+      <div class="stats-grid" id="msg-stats" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px"></div>
+
+      <div class="msg-layout">
+        <!-- Sol: Liste -->
+        <div class="msg-list-panel">
+          <div class="panel-card" style="height:100%;display:flex;flex-direction:column">
+            <div class="panel-card-head" style="flex-shrink:0">
+              <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;flex:1">
+                <button class="btn btn-sm btn-secondary msg-tab active" onclick="setMsgFilter('all',this)">Tümü</button>
+                <button class="btn btn-sm btn-secondary msg-tab" onclick="setMsgFilter('unread',this)">Okunmamış</button>
+                <button class="btn btn-sm btn-secondary msg-tab" onclick="setMsgFilter('read',this)">Okunmuş</button>
+                <button class="btn btn-sm btn-secondary msg-tab" onclick="setMsgFilter('trash',this)">🗑 Çöp</button>
+              </div>
+            </div>
+            <div style="padding:10px 14px 0;flex-shrink:0;display:flex;gap:8px">
+              <input type="text" class="msg-search" id="msg-search" placeholder="Mesajlarda ara..." oninput="renderMessageList()" style="flex:1">
+              <select class="msg-cat-filter" id="msg-cat-filter" onchange="renderMessageList()" style="width:130px">
+                <option value="">Tüm Konular</option>
+                <option value="Genel">Genel</option>
+                <option value="Öneri">Öneri</option>
+                <option value="Şikayet">Şikayet</option>
+                <option value="İşbirliği">İşbirliği</option>
+                <option value="Mekan Ekleme Talebi">Mekan Ekleme</option>
+                <option value="Hata Bildirimi">Hata Bildirimi</option>
+              </select>
+            </div>
+            <div id="messages-list" style="flex:1;overflow-y:auto;max-height:calc(100vh - 320px)"></div>
           </div>
         </div>
-        <div class="msg-toolbar" style="padding:12px 20px 0">
-          <input type="text" class="msg-search" id="msg-search" placeholder="Mesajlarda ara..." oninput="renderMessageList()">
-          <select class="msg-cat-filter" id="msg-cat-filter" onchange="renderMessageList()">
-            <option value="">Tum Kategoriler</option>
-            <option value="Genel">Genel</option>
-            <option value="Öneri">Oneri</option>
-            <option value="Şikayet">Sikayet</option>
-            <option value="İşbirliği">Isbirligi</option>
-            <option value="Mekan Ekleme Talebi">Mekan Ekleme</option>
-            <option value="Hata Bildirimi">Hata Bildirimi</option>
-          </select>
-        </div>
-        <div id="messages-list"></div>
-      </div>
-    </div>
 
-    <!-- Mesaj Detay Modal -->
-    <div class="modal-overlay" id="msg-modal">
-      <div class="modal" style="max-width:560px">
-        <div class="modal-head">
-          <h3 id="msg-modal-title">Mesaj</h3>
-          <button class="modal-close" onclick="closeMsgModal()">&times;</button>
+        <!-- Sağ: Detay -->
+        <div class="msg-detail-panel" id="msg-detail-panel">
+          <div class="panel-card" style="height:100%;display:flex;flex-direction:column">
+            <!-- Boş durum -->
+            <div id="msg-detail-empty" style="flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px">
+              <div>
+                <div style="font-size:2.5rem;margin-bottom:12px;opacity:.3">✉️</div>
+                <div style="font-size:.88rem;font-weight:600;color:var(--text-muted)">Mesaj seçin</div>
+                <div style="font-size:.75rem;color:var(--text-muted);margin-top:4px">Soldaki listeden bir mesaja tıklayın</div>
+              </div>
+            </div>
+            <!-- Dolu durum -->
+            <div id="msg-detail-content" style="display:none;flex:1;overflow-y:auto">
+              <!-- Header -->
+              <div id="msg-detail-header" style="padding:20px 24px;border-bottom:1px solid rgba(0,0,0,.06)"></div>
+              <!-- Body -->
+              <div id="msg-detail-body" style="padding:20px 24px"></div>
+              <!-- KVKK Rıza Bilgisi -->
+              <div id="msg-detail-consent" style="padding:0 24px 20px"></div>
+              <!-- Actions -->
+              <div id="msg-detail-actions" style="padding:14px 24px;border-top:1px solid rgba(0,0,0,.06);display:flex;gap:8px;flex-wrap:wrap"></div>
+            </div>
+          </div>
         </div>
-        <div class="modal-body" id="msg-modal-body"></div>
       </div>
     </div>
 
@@ -2782,8 +2816,21 @@ async function renderMessages() {
     updateMsgBadge();
     autoCleanTrash();
     renderMessageList();
+    // Mesaj stats
+    const statsEl = document.getElementById('msg-stats');
+    if (statsEl) {
+      const total = allMessages.filter(m => !m.trashed).length;
+      const unread = allMessages.filter(m => !m.read && !m.trashed).length;
+      const today = allMessages.filter(m => !m.trashed && m.date === new Date().toISOString().split('T')[0]).length;
+      const withConsent = allMessages.filter(m => m.consentGiven).length;
+      statsEl.innerHTML =
+        '<div class="stat-card"><div class="stat-label">Toplam</div><div class="stat-val">' + total + '</div></div>' +
+        '<div class="stat-card terra"><div class="stat-label">Okunmamış</div><div class="stat-val">' + unread + '</div></div>' +
+        '<div class="stat-card green"><div class="stat-label">Bugün</div><div class="stat-val">' + today + '</div></div>' +
+        '<div class="stat-card"><div class="stat-label">KVKK Onaylı</div><div class="stat-val">' + withConsent + '</div></div>';
+    }
   } catch(err) {
-    const msgErr = document.createElement('div'); msgErr.style.cssText = 'padding:24px;color:var(--red)'; msgErr.textContent = 'Mesajlar yuklenemedi: ' + err.message; document.getElementById('messages-list').innerHTML = ''; document.getElementById('messages-list').appendChild(msgErr);
+    document.getElementById('messages-list').innerHTML = '<div style="padding:24px;color:var(--red)">Mesajlar yüklenemedi: ' + err.message + '</div>';
   }
 }
 
@@ -2867,13 +2914,13 @@ function renderMessageList() {
 
   listEl.innerHTML = trashBanner + msgs.map(m => {
     const date = m.timestamp ? new Date(m.timestamp) : null;
-    const dateStr = date ? date.toLocaleDateString('tr-TR', { day:'2-digit', month:'short', year:'numeric' }) : '';
+    const dateStr = date ? date.toLocaleDateString('tr-TR', { day:'2-digit', month:'short' }) : '';
     const timeStr = date ? date.toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' }) : '';
     const catClass = getMsgCatClass(m.subject);
-    return '<div class="msg-item ' + (m.read ? '' : 'unread') + (m.trashed ? ' trashed' : '') + '" onclick="openMessage(\'' + m._id + '\')">' +
+    return '<div class="msg-item ' + (m.read ? '' : 'unread') + (m.trashed ? ' trashed' : '') + '" onclick="openMessage(\'' + m._id + '\')" data-id="' + m._id + '">' +
       '<div class="msg-dot ' + (m.read ? 'read' : 'unread') + '"></div>' +
       '<div class="msg-info">' +
-        '<div class="msg-name">' + (m.name || 'Isimsiz') + '</div>' +
+        '<div class="msg-name">' + (m.name || 'İsimsiz') + '</div>' +
         '<span class="msg-cat-badge ' + catClass + '">' + (m.subject || 'Genel') + '</span>' +
         '<div class="msg-preview">' + (m.message || '').substring(0, 80) + '</div>' +
       '</div>' +
@@ -2894,30 +2941,82 @@ async function openMessage(docId) {
     renderMessageList();
   }
 
+  // Aktif mesajı işaretle
+  document.querySelectorAll('.msg-item').forEach(el => el.classList.remove('msg-active'));
+  const activeEl = document.querySelector('.msg-item[data-id="' + docId + '"]');
+  if (activeEl) activeEl.classList.add('msg-active');
+
+  // Detay panelini göster
+  document.getElementById('msg-detail-empty').style.display = 'none';
+  document.getElementById('msg-detail-content').style.display = 'flex';
+  document.getElementById('msg-detail-content').style.flexDirection = 'column';
+  document.getElementById('msg-detail-panel').classList.add('show');
+
   const isTrashed = m.trashed;
-  document.getElementById('msg-modal-title').textContent = m.subject || 'Mesaj';
-  document.getElementById('msg-modal-body').innerHTML =
-    '<div class="msg-detail-row"><span class="msg-detail-label">Gonderen:</span><span class="msg-detail-val">' + (m.name || '-') + '</span></div>' +
-    '<div class="msg-detail-row"><span class="msg-detail-label">E-posta:</span><span class="msg-detail-val"><a href="mailto:' + (m.email || '') + '" style="color:var(--terra)">' + (m.email || '-') + '</a></span></div>' +
-    (m.phone ? '<div class="msg-detail-row"><span class="msg-detail-label">Telefon:</span><span class="msg-detail-val"><a href="tel:' + m.phone + '" style="color:var(--terra)">' + m.phone + '</a></span></div>' : '') +
-    '<div class="msg-detail-row"><span class="msg-detail-label">Konu:</span><span class="msg-detail-val">' + (m.subject || 'Genel') + '</span></div>' +
-    '<div class="msg-detail-row"><span class="msg-detail-label">Tarih:</span><span class="msg-detail-val">' + (m.timestamp ? new Date(m.timestamp).toLocaleString('tr-TR') : '-') + '</span></div>' +
-    (isTrashed && m.trashedAt ? '<div class="msg-detail-row"><span class="msg-detail-label">Silinme:</span><span class="msg-detail-val" style="color:#C62828">' + new Date(m.trashedAt).toLocaleString('tr-TR') + ' (7 gun icinde kalici silinir)</span></div>' : '') +
-    '<hr style="border:none;border-top:1px solid rgba(0,0,0,.06);margin:16px 0">' +
-    '<div style="font-size:.88rem;color:var(--text);line-height:1.8;white-space:pre-wrap">' + (m.message || '') + '</div>' +
-    '<div style="display:flex;gap:8px;margin-top:20px;flex-wrap:wrap">' +
-      (isTrashed
-        ? '<button class="btn btn-primary btn-sm" onclick="restoreMessage(\'' + docId + '\')">Geri Yukle</button>' +
-          '<button class="btn btn-danger btn-sm" onclick="permanentDeleteMessage(\'' + docId + '\')">Kalici Sil</button>'
-        : '<a href="mailto:' + (m.email || '') + '?subject=Re: ' + encodeURIComponent(m.subject || 'Mesajiniz') + '" class="btn btn-primary btn-sm">Yanit Gonder</a>' +
-          '<button class="btn btn-danger btn-sm" onclick="trashMessage(\'' + docId + '\')">Sil</button>'
-      ) +
+  const catClass = getMsgCatClass(m.subject);
+
+  // Header
+  document.getElementById('msg-detail-header').innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">' +
+      '<div>' +
+        '<div style="font-size:1.05rem;font-weight:800;color:var(--navy);margin-bottom:4px">' + (m.name || 'İsimsiz') + '</div>' +
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
+          '<span class="msg-cat-badge ' + catClass + '">' + (m.subject || 'Genel') + '</span>' +
+          '<span style="font-size:.72rem;color:var(--text-muted)">' + (m.timestamp ? new Date(m.timestamp).toLocaleString('tr-TR') : '') + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<button class="btn btn-sm btn-secondary" onclick="closeMsgDetail()" style="display:none" id="msg-close-mobile">← Geri</button>' +
     '</div>';
-  document.getElementById('msg-modal').classList.add('show');
+
+  // Body — kişi bilgileri + mesaj
+  document.getElementById('msg-detail-body').innerHTML =
+    '<div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:.82rem;margin-bottom:18px;padding:14px 16px;background:rgba(0,0,0,.02);border-radius:10px">' +
+      '<span style="color:var(--text-muted);font-weight:600">📧 E-posta</span><a href="mailto:' + (m.email || '') + '" style="color:var(--terra);font-weight:600;text-decoration:none">' + (m.email || '-') + '</a>' +
+      (m.phone ? '<span style="color:var(--text-muted);font-weight:600">📞 Telefon</span><a href="tel:' + m.phone.replace(/\s/g,'') + '" style="color:var(--terra);font-weight:600;text-decoration:none">' + m.phone + '</a>' : '') +
+    '</div>' +
+    '<div style="font-size:.88rem;color:var(--text);line-height:1.85;white-space:pre-wrap;padding:16px 18px;background:var(--cream);border-radius:12px;border:1px solid rgba(0,0,0,.04)">' + (m.message || '') + '</div>';
+
+  // KVKK Rıza + Cihaz bilgileri
+  var consentHtml = '';
+  if (m.consentGiven) {
+    consentHtml += '<div class="msg-consent-box">' +
+      '<div class="consent-label">✓ Gizlilik Politikası Onayı</div>' +
+      '<div class="msg-consent-row"><span>Onay Durumu</span><span style="color:var(--green);font-weight:700">Kabul Edildi</span></div>' +
+      '<div class="msg-consent-row"><span>Onay Metni</span><span>' + (m.consentText || '-') + '</span></div>' +
+      '<div class="msg-consent-row"><span>Onay Tarihi</span><span>' + (m.consentDate ? new Date(m.consentDate).toLocaleString('tr-TR') : '-') + '</span></div>' +
+    '</div>';
+  }
+  if (m.device || m.screenSize || m.language) {
+    consentHtml += '<div class="msg-device-box">' +
+      '<div class="device-label">📱 Cihaz Bilgileri</div>' +
+      (m.device ? '<div class="msg-consent-row"><span>Cihaz</span><span>' + m.device + '</span></div>' : '') +
+      (m.screenSize ? '<div class="msg-consent-row"><span>Ekran</span><span>' + m.screenSize + '</span></div>' : '') +
+      (m.language ? '<div class="msg-consent-row"><span>Dil</span><span>' + m.language + '</span></div>' : '') +
+    '</div>';
+  }
+  document.getElementById('msg-detail-consent').innerHTML = consentHtml;
+
+  // Actions
+  document.getElementById('msg-detail-actions').innerHTML =
+    (isTrashed
+      ? '<button class="btn btn-primary btn-sm" onclick="restoreMessage(\'' + docId + '\')">↩ Geri Yükle</button>' +
+        '<button class="btn btn-danger btn-sm" onclick="permanentDeleteMessage(\'' + docId + '\')">Kalıcı Sil</button>'
+      : '<a href="mailto:' + (m.email || '') + '?subject=Re: ' + encodeURIComponent(m.subject || 'Mesajınız') + '" class="btn btn-primary btn-sm">✉️ Yanıtla</a>' +
+        (m.phone ? '<a href="tel:' + m.phone.replace(/\s/g,'') + '" class="btn btn-secondary btn-sm">📞 Ara</a>' : '') +
+        '<button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="trashMessage(\'' + docId + '\')">🗑 Sil</button>'
+    );
+
+  // Mobilde geri butonunu göster
+  if (window.innerWidth <= 900) {
+    document.getElementById('msg-close-mobile').style.display = '';
+  }
 }
 
-function closeMsgModal() {
-  document.getElementById('msg-modal').classList.remove('show');
+function closeMsgDetail() {
+  document.getElementById('msg-detail-empty').style.display = '';
+  document.getElementById('msg-detail-content').style.display = 'none';
+  document.getElementById('msg-detail-panel').classList.remove('show');
+  document.querySelectorAll('.msg-item').forEach(el => el.classList.remove('msg-active'));
 }
 
 // Çöp kutusuna gönder (soft delete)
@@ -2927,10 +3026,10 @@ async function trashMessage(docId) {
   m.trashed = true;
   m.trashedAt = new Date().toISOString();
   await db.collection('messages').doc(docId).update({ trashed: true, trashedAt: m.trashedAt });
-  closeMsgModal();
+  closeMsgDetail();
   renderMessageList();
   updateMsgBadge();
-  showToast('Mesaj cop kutusuna tasindi.', 'success');
+  showToast('Mesaj çöp kutusuna taşındı.', 'success');
 }
 
 // Geri yükle
@@ -2940,21 +3039,21 @@ async function restoreMessage(docId) {
   m.trashed = false;
   delete m.trashedAt;
   await db.collection('messages').doc(docId).update({ trashed: false, trashedAt: firebase.firestore.FieldValue.delete() });
-  closeMsgModal();
+  closeMsgDetail();
   renderMessageList();
   updateMsgBadge();
-  showToast('Mesaj geri yuklendi.', 'success');
+  showToast('Mesaj geri yüklendi.', 'success');
 }
 
 // Kalıcı sil
 async function permanentDeleteMessage(docId) {
-  if (!confirm('Bu mesaj kalici olarak silinecek. Emin misiniz?')) return;
+  if (!confirm('Bu mesaj kalıcı olarak silinecek. Emin misiniz?')) return;
   await db.collection('messages').doc(docId).delete();
   allMessages = allMessages.filter(m => m._id !== docId);
-  closeMsgModal();
+  closeMsgDetail();
   renderMessageList();
   updateMsgBadge();
-  showToast('Mesaj kalici olarak silindi.', 'success');
+  showToast('Mesaj kalıcı olarak silindi.', 'success');
 }
 
 // Çöp kutusunu boşalt
@@ -2974,8 +3073,6 @@ async function emptyTrash() {
 // Eski deleteMessage fonksiyonu (geriye uyumluluk)
 async function deleteMessage(docId) { await trashMessage(docId); }
 
-// Mesaj modalı kapatma
-document.getElementById('msg-modal')?.addEventListener('click', function(e) { if (e.target === this) closeMsgModal(); });
 
 // Okunmamış sayısını başlangıçta kontrol et
 (async function() {
