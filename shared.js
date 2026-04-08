@@ -367,15 +367,14 @@ function renderNav(opts = {}) {
   ];
 
   const fullPath = window.location.pathname;
+  const pageName = currentPage.replace('.html', '');
   const isActive = (href) => {
-    if (href === currentPage) return true;
-    if (currentPage === '' && href === 'index.html') return true;
+    const hrefName = href.replace('.html', '');
+    if (hrefName === pageName) return true;
+    if ((pageName === '' || pageName === '/') && hrefName === 'index') return true;
     // Alt sayfa eşleştirme
-    if (href === 'mekanlar.html' && (currentPage === 'mekan-detay.html' || fullPath.includes('/mekanlar/'))) return true;
-    if (href === 'rotalar.html' && (currentPage === 'rota-detay.html' || fullPath.includes('/rotalar/'))) return true;
-    if (href === 'yerler.html' && fullPath.includes('/yerler/')) return true;
-    if (href === 'koyler.html' && fullPath.includes('/koyler/')) return true;
-    if (href === 'harita.html' && fullPath.includes('/harita')) return true;
+    if (hrefName === 'mekanlar' && (pageName === 'mekan-detay' || fullPath.includes('/mekanlar'))) return true;
+    if (hrefName === 'rotalar' && (pageName === 'rota-detay' || pageName === 'rota' || fullPath.includes('/rotalar'))) return true;
     return false;
   };
 
