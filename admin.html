@@ -2634,7 +2634,7 @@ function initApp() {
   // Hash'ten son kaldığı sekmeyi aç
   const hash = window.location.hash.replace('#', '');
   loadCategories();
-  const validPages = ['dashboard','venues','bot','placebot','routes','villages','export','settings','analytics','messages','gallery','notifications','activity','blog'];
+  const validPages = ['dashboard','venues','categories','bot','placebot','routes','villages','export','settings','security','analytics','messages','gallery','notifications','activity','blog'];
   if (hash && validPages.includes(hash)) {
     showPage(hash);
   } else {
