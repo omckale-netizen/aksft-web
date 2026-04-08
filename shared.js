@@ -2468,6 +2468,10 @@ function renderVenuePage(venueId) {
                 </div>
               </div>
               <div id="rezv-date-error" style="font-size:.75rem;color:#E53E3E;min-height:18px;margin-top:-4px"></div>
+              <div id="rezv-summary" style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(26,107,138,.06);border:1px solid rgba(26,107,138,.12);border-radius:10px;margin-bottom:10px;font-size:.78rem;color:#1A6B8A;font-weight:600">
+                <span style="font-size:1rem">🌙</span>
+                <span id="rezv-summary-text">1 gece · 2 gün</span>
+              </div>
               <div class="vp-rezv-field">
                 <label class="vp-rezv-label">Kişi Sayısı</label>
                 <select id="rezv-guests" class="vp-rezv-input">
@@ -2693,6 +2697,25 @@ function renderVenuePage(venueId) {
     if (wrap && dd && !wrap.contains(e.target)) dd.classList.remove('open');
   });
 
+  // Konaklama özeti güncelle
+  function vpUpdateSummary() {
+    var ci = document.getElementById('rezv-checkin');
+    var co = document.getElementById('rezv-checkout');
+    var sumEl = document.getElementById('rezv-summary');
+    var sumText = document.getElementById('rezv-summary-text');
+    if (!ci || !co || !sumEl || !sumText) return;
+    if (ci.value && co.value && co.value > ci.value) {
+      var d1 = new Date(ci.value);
+      var d2 = new Date(co.value);
+      var nights = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+      var days = nights + 1;
+      sumText.textContent = nights + ' gece · ' + days + ' gün';
+      sumEl.style.display = 'flex';
+    } else {
+      sumEl.style.display = 'none';
+    }
+  }
+
   // Giriş tarihi seçilince çıkış min tarihini güncelle
   window.vpUpdateCheckoutMin = function() {
     var ci = document.getElementById('rezv-checkin');
@@ -2709,6 +2732,7 @@ function renderVenuePage(venueId) {
         if (errEl) errEl.textContent = 'Çıkış tarihi giriş tarihinden en az 1 gün sonra olmalıdır.';
       }
     }
+    vpUpdateSummary();
   };
 
   // Çıkış tarihi seçilince kontrol et
@@ -2720,19 +2744,17 @@ function renderVenuePage(venueId) {
     if (!ci.value) {
       errEl.textContent = 'Önce giriş tarihini seçiniz.';
       co.value = '';
+      vpUpdateSummary();
       return;
     }
     if (co.value && co.value <= ci.value) {
       errEl.textContent = 'Çıkış tarihi giriş tarihinden en az 1 gün sonra olmalıdır.';
       co.value = '';
-      return;
-    }
-    if (co.value === ci.value) {
-      errEl.textContent = 'Giriş ve çıkış tarihi aynı gün olamaz.';
-      co.value = '';
+      vpUpdateSummary();
       return;
     }
     errEl.textContent = '';
+    vpUpdateSummary();
   };
 
   window.vpSendRezervasyon = function () {
