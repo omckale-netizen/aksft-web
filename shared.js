@@ -844,7 +844,7 @@ function renderNav(opts = {}) {
             const cards = items.map(v => {
               const hasPhoto = v.images && v.images.length > 0;
               const imgContent = hasPhoto ? '<img src="' + v.images[0] + '" onload="this.classList.add(\'sd-loaded\')">' : v.emoji;
-              var premTag = isPremiumActive(v) ? '<span style="font-size:.65rem;margin-left:4px;vertical-align:middle;">👑</span>' : '';
+              var premTag = isPremiumActive(v) ? '<span style="font-size:.48rem;font-weight:800;letter-spacing:.06em;margin-left:5px;padding:2px 7px;border-radius:4px;background:linear-gradient(135deg,#C9963A,#E8C46A);color:#5C3D0E;vertical-align:middle;text-transform:uppercase;">Premium</span>' : '';
               var premBorder = isPremiumActive(v) ? 'border:1.5px solid rgba(212,147,90,.25);' : '';
               return '<a class="sd-venue" href="' + getMekanPath(v.id) + '" style="' + premBorder + '"><div class="sd-venue-img" style="background:' + m.g + ';">' + imgContent + '</div><div class="sd-venue-info"><div class="sd-venue-name">' + v.title + premTag + '</div><div class="sd-venue-loc">📍 ' + v.location + '</div></div><button class="sd-venue-remove" onclick="removeSave(\'' + escAttr(v.id) + '\',event)" aria-label="Kaldır">✕</button></a>';
             }).join('');
