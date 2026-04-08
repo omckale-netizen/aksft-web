@@ -528,15 +528,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
     <!-- ══════ DASHBOARD ══════ -->
     <div class="admin-page active" id="page-dashboard">
       <!-- Hoşgeldin bar -->
-      <div id="dash-welcome" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:28px;">
-        <div>
-          <h2 style="margin:0;font-size:1.5rem;" id="dash-greeting">Hos Geldiniz</h2>
-          <p class="page-sub" style="margin:0;margin-top:4px;" id="dash-date"></p>
-        </div>
-        <div style="text-align:right;">
-          <div id="dash-clock" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.8rem;color:var(--navy);letter-spacing:-.02em;line-height:1;"></div>
-          <div id="dash-day" style="font-size:.72rem;color:var(--text-muted);margin-top:2px;"></div>
-        </div>
+      <div id="dash-welcome" style="margin-bottom:28px;">
+        <h2 style="margin:0;font-size:1.5rem;" id="dash-greeting">Hoş Geldiniz</h2>
+        <p class="page-sub" style="margin:0;margin-top:4px;" id="dash-date"></p>
       </div>
 
       <!-- Bildirimler + Onay Bekleyenler -->
@@ -3600,10 +3594,11 @@ function updateDashClock() {
   const now = getTRDate();
   const h = now.getHours().toString().padStart(2,'0');
   const m = now.getMinutes().toString().padStart(2,'0');
-  const el = document.getElementById('dash-clock');
-  if (el) el.textContent = h + ':' + m;
-  const dayEl = document.getElementById('dash-day');
-  if (dayEl) dayEl.textContent = now.toLocaleDateString('tr-TR', { weekday:'long' });
+  const dateEl = document.getElementById('dash-date');
+  if (dateEl) {
+    const dateStr = now.toLocaleDateString('tr-TR', { day:'numeric', month:'long', year:'numeric', weekday:'long' });
+    dateEl.textContent = dateStr + ' · Saat: ' + h + ':' + m;
+  }
 }
 setInterval(updateDashClock, 10000);
 
@@ -3613,11 +3608,9 @@ function renderDashboard() {
   const greetEl = document.getElementById('dash-greeting');
   if (greetEl) {
     const hour = getTRDate().getHours();
-    const greet = hour >= 6 && hour < 12 ? 'Gunaydin' : hour >= 12 && hour < 18 ? 'Iyi gunler' : 'Iyi aksamlar';
+    const greet = hour >= 6 && hour < 12 ? 'Günaydın' : hour >= 12 && hour < 18 ? 'İyi günler' : 'İyi akşamlar';
     greetEl.textContent = adminName ? greet + ', ' + adminName + ' 👋' : greet + ' 👋';
   }
-  const dateEl = document.getElementById('dash-date');
-  if (dateEl) dateEl.textContent = getTRDate().toLocaleDateString('tr-TR', { day:'numeric', month:'long', year:'numeric' });
   updateDashClock();
 
   // Settings name input sync
