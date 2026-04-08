@@ -198,7 +198,7 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     @media(max-width:768px){
       #site-footer .ft-top{flex-direction:row;gap:12px;}
       #site-footer .ft-logo-area{gap:8px;}
-      #site-footer .ft-tagline{display:none;}
+      #site-footer .ft-tagline{font-size:.6rem;}
       #site-footer .ft-bottom{flex-direction:column;text-align:center;gap:6px;}
       #site-footer .ft-legal{margin-top:0;}
     }
@@ -1084,7 +1084,7 @@ function renderFooter(opts = {}) {
         <div class="ft-top">
           <div class="ft-logo-area">
             <img ${SITE_LOGO ? 'class="site-logo-img" src="' + SITE_LOGO + '" onload="var s=this;setTimeout(function(){s.classList.add(\'logo-loaded\')},50)"' : 'class="site-logo-img"'} data-logo="1" alt="Assos'u Keşfet" width="120" height="40" loading="eager" decoding="async">
-            <p class="ft-tagline">Assos'un dijital keşif rehberi</p>
+            <p class="ft-tagline">Assos'un Dijital Keşif Rehberi</p>
           </div>
           <nav class="ft-links">
             <a href="${basePath}blog.html">Blog</a>
