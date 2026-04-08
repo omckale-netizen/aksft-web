@@ -136,18 +136,12 @@
     <priority>0.7</priority>
   </url>
 
-  <!-- Mekan Detay Sayfaları -->
-  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=behram-kafe</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=korfez-balik</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=assos-tas-kahvalti</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=gun-batimi-kafe</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=kayalar-koy-evi</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=antik-liman-restoran</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=kadirga-plaj</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=ahmetce-iskele-kafe</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=sivrice-beach</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <!-- Mekan Detay Sayfaları (5 aktif) -->
+  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=ahmetce-kadin-kooperatifi</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=kafe-mera</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=koyum-pide</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=pusula-co</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=sunaba-kasri-otel</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=kafe-meraa</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
 
   <!-- Gezilecek Yer Detay Sayfaları -->
   <url><loc>https://assosukesfet.com/yerler#athena-tapinagi</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
