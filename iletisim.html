@@ -115,9 +115,9 @@
             <label class="ct-checkbox-label" id="ct-consent-label">
               <input type="checkbox" id="ct-consent" required onchange="this.parentElement.classList.remove('ct-consent-error');document.getElementById('ct-consent-msg').style.display='none';">
               <span class="ct-checkmark"></span>
-              <span><a href="gizlilik.html" target="_blank">Gizlilik Politikası</a>'nı okudum, kabul ediyorum.</span>
+              <span><a href="gizlilik.html" target="_blank">Gizlilik Politikası</a> ve <a href="kullanim-kosullari.html" target="_blank">Kullanım Koşulları</a>'nı okudum, kabul ediyorum.</span>
             </label>
-            <div id="ct-consent-msg" class="ct-consent-warn" style="display:none;">Devam etmek için Gizlilik Politikası'nı kabul etmeniz gerekmektedir.</div>
+            <div id="ct-consent-msg" class="ct-consent-warn" style="display:none;">Devam etmek için Gizlilik Politikası ve Kullanım Koşulları'nı kabul etmeniz gerekmektedir.</div>
           </div>
           <button type="submit" id="ct-submit" class="ct-btn">
             <span>Mesaj Gönder</span>
@@ -417,7 +417,7 @@ async function submitContact(e) {
     date: new Date().toISOString().split('T')[0],
     read: false,
     consentGiven: true,
-    consentText: 'Gizlilik Politikasını okudum, kabul ediyorum.',
+    consentText: 'Gizlilik Politikası ve Kullanım Koşullarını okudum, kabul ediyorum.',
     consentDate: new Date().toISOString(),
     device: os + ' / ' + browser,
     userAgent: ua.substring(0, 200),
