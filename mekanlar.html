@@ -160,7 +160,7 @@ function pageInit() {
     if (typeof DATA === 'undefined') return;
     const venues   = DATA.venues || [];
     const cats     = new Set(venues.map(v => v.category)).size;
-    const featured = venues.filter(v => (VMETA[v.id] || {}).featured).length;
+    const featured = venues.filter(v => v.featured).length;
     const set = (id, val) => { const el = document.querySelector('#' + id + ' span'); if (el) el.textContent = val; };
     set('mkh-stat-toplam', venues.length + '+');
     set('mkh-stat-one',    featured + '+');
