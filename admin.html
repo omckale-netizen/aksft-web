@@ -415,11 +415,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
       <input type="email" id="auth-email" placeholder="E-posta adresiniz" onkeydown="if(event.key==='Enter')document.getElementById('auth-pw').focus()">
     </div>
     <div class="auth-field">
-      <label>Sifre</label>
+      <label>Şifre</label>
       <span class="auth-field-icon">🔒</span>
-      <input type="password" id="auth-pw" placeholder="Sifreniz" onkeydown="if(event.key==='Enter')checkAuth()">
+      <input type="password" id="auth-pw" placeholder="Şifreniz" onkeydown="if(event.key==='Enter')checkAuth()">
     </div>
-    <button class="auth-btn" onclick="checkAuth()">Giris Yap</button>
+    <button class="auth-btn" onclick="checkAuth()">Giriş Yap</button>
     <div class="auth-err" id="auth-err"></div>
     <div class="auth-footer">Assos'u Kesfet &middot; Yonetim Paneli</div>
   </div>
@@ -605,7 +605,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
         <div id="bulk-bar" style="display:none;padding:12px 20px;background:var(--navy);color:#fff;border-radius:var(--radius-sm);margin:0 16px 12px;display:none;align-items:center;gap:12px;flex-wrap:wrap;font-size:.82rem">
           <strong id="bulk-count">0 secili</strong>
           <select id="bulk-cat-select" style="padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-family:inherit;font-size:.78rem">
-            <option value="">Kategori Degistir</option>
+            <option value="">Kategori Değiştir</option>
             <option value="kafe">☕ Kafe</option>
             <option value="restoran">🍽 Restoran</option>
             <option value="kahvalti">🥚 Kahvalti</option>
@@ -632,7 +632,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
                 <th>⭐</th>
                 <th>Aktif</th>
                 <th>Durum</th>
-                <th>Islemler</th>
+                <th>İşlemler</th>
               </tr>
             </thead>
             <tbody id="venue-tbody"></tbody>
@@ -827,7 +827,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 
           <!-- Görsel -->
           <div class="form-group">
-            <label>Gorsel</label>
+            <label>Görsel</label>
             <div class="crop-container" id="pbot-crop-container" style="margin-bottom:8px">
               <div class="crop-empty" id="pbot-crop-empty" onclick="document.getElementById('pbot-img-file').click()">
                 <span style="font-size:1.5rem">📷</span>
@@ -875,11 +875,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
             <thead>
               <tr>
                 <th></th>
-                <th>Baslik</th>
+                <th>Başlık</th>
                 <th>Sure</th>
                 <th>Zorluk</th>
                 <th>Durak</th>
-                <th>Islemler</th>
+                <th>İşlemler</th>
               </tr>
             </thead>
             <tbody id="routes-tbody"></tbody>
@@ -907,7 +907,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
         <div class="panel-table-wrap">
           <table class="panel-table">
             <thead><tr>
-              <th></th><th>Baslik</th><th id="vp-th-cat">Kategori</th><th id="vp-th-img">Gorsel</th><th>Islemler</th>
+              <th></th><th>Başlık</th><th id="vp-th-cat">Kategori</th><th id="vp-th-img">Görsel</th><th>İşlemler</th>
             </tr></thead>
             <tbody id="vp-tbody"></tbody>
           </table>
@@ -919,7 +919,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
     <div class="modal-overlay" id="place-img-modal">
       <div class="modal" style="max-width:480px">
         <div class="modal-head">
-          <h3 id="place-modal-title">Gorsel Duzenle</h3>
+          <h3 id="place-modal-title">Görsel Düzenle</h3>
           <button class="modal-close" onclick="closePlaceImgModal()">&times;</button>
         </div>
         <div class="modal-body">
@@ -968,7 +968,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
               </div>
             </div>
             <div class="form-group">
-              <label>Baslik</label>
+              <label>Başlık</label>
               <input type="text" id="vpf-title" required placeholder="Baslik" oninput="autoVPId()">
             </div>
             <!-- Category — only for places -->
@@ -1140,13 +1140,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
           <!-- Changes Summary -->
           <div class="backup-card" style="margin-bottom:20px">
             <div class="backup-card-head">
-              <h4>📋 Degisiklik Ozeti</h4>
+              <h4>📋 Değişiklik Özeti</h4>
               <span class="bc-badge" id="backup-changes-badge" style="background:rgba(56,161,105,.1);color:#276749">Guncel</span>
             </div>
             <div class="backup-card-body" style="padding:0">
               <table class="backup-changes-table" id="backup-changes-table">
                 <thead>
-                  <tr><th>Koleksiyon</th><th>Eklenen</th><th>Duzenlenen</th><th>Silinen</th></tr>
+                  <tr><th>Koleksiyon</th><th>Eklenen</th><th>Düzenlenen</th><th>Silinen</th></tr>
                 </thead>
                 <tbody id="backup-changes-body"></tbody>
               </table>
@@ -1213,12 +1213,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
           <!-- Danger Zone -->
           <div class="backup-card" style="border-color:rgba(229,62,62,.2)">
             <div class="backup-card-head" style="background:rgba(229,62,62,.03)">
-              <h4 style="color:var(--red)">⚠️ Tehlikeli Islemler</h4>
+              <h4 style="color:var(--red)">⚠️ Tehlikeli İşlemler</h4>
             </div>
             <div class="backup-card-body">
               <p>Bu islemler geri alinamaz. Lutfen dikkatli olun.</p>
               <div class="backup-btns">
-                <button class="btn btn-danger" onclick="confirmReset()" style="font-size:.8rem">🗑 Degisiklikleri Sifirla</button>
+                <button class="btn btn-danger" onclick="confirmReset()" style="font-size:.8rem">🗑 Değişiklikleri Sıfırla</button>
               </div>
             </div>
           </div>
@@ -1402,7 +1402,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
       <p class="page-sub">Tum islemler ve degisiklikler burada kayit altinda.</p>
       <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
         <select id="activity-filter" onchange="renderActivityLog()" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:#fff;color:var(--text);cursor:pointer">
-          <option value="all">Tum Islemler</option>
+          <option value="all">Tüm İşlemler</option>
           <option value="giris">🔐 Giris</option>
           <option value="mekan">🏪 Mekan</option>
           <option value="yer">📍 Yer</option>
@@ -1433,19 +1433,19 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 
       <!-- Günlük grafik -->
       <div class="panel-card" style="margin-bottom:20px">
-        <div class="panel-card-head"><h3>Gunluk Goruntuleme</h3></div>
+        <div class="panel-card-head"><h3>Gunluk Görüntüleme</h3></div>
         <div id="analytics-chart" style="padding:16px 20px;display:flex;align-items:flex-end;gap:3px;height:160px;overflow-x:auto"></div>
       </div>
 
       <!-- Mekan Performans -->
       <div class="panel-card" style="margin-bottom:20px">
-        <div class="panel-card-head"><h3>🏪 Mekan Performansi</h3><span style="font-size:.68rem;color:var(--text-muted)">Goruntuleme + Aksiyon</span></div>
+        <div class="panel-card-head"><h3>🏪 Mekan Performansı</h3><span style="font-size:.68rem;color:var(--text-muted)">Görüntüleme + Aksiyon</span></div>
         <div id="analytics-venue-perf" style="padding:16px 20px"></div>
       </div>
 
       <!-- Dönüşüm Oranı -->
       <div class="panel-card" style="margin-bottom:20px">
-        <div class="panel-card-head"><h3>📈 Donusum Orani</h3><span style="font-size:.68rem;color:var(--text-muted)">Goruntuleme → Aksiyon</span></div>
+        <div class="panel-card-head"><h3>📈 Dönüşüm Oranı</h3><span style="font-size:.68rem;color:var(--text-muted)">Görüntüleme → Aksiyon</span></div>
         <div id="analytics-conversion" style="padding:16px 20px"></div>
       </div>
 
@@ -1455,7 +1455,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
           <div id="analytics-actions"></div>
         </div>
         <div class="panel-card dash-half">
-          <div class="panel-card-head"><h3>Sayfa Goruntulenmeleri</h3></div>
+          <div class="panel-card-head"><h3>Sayfa Görüntülenmeleri</h3></div>
           <div id="analytics-pages"></div>
         </div>
       </div>
@@ -1466,7 +1466,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
         <div class="panel-table-wrap">
           <table class="panel-table" id="analytics-clicks-table">
             <thead><tr>
-              <th></th><th>Mekan</th><th>👁 Goruntuleme</th><th>📞 Ara</th><th>💬 WhatsApp</th><th>🗺 Yol Tarifi</th><th>📋 Rez.</th><th>Toplam</th><th>% Donusum</th>
+              <th></th><th>Mekan</th><th>👁 Görüntüleme</th><th>📞 Ara</th><th>💬 WhatsApp</th><th>🗺 Yol Tarifi</th><th>📋 Rez.</th><th>Toplam</th><th>% Dönüşüm</th>
             </tr></thead>
             <tbody id="analytics-clicks-body"></tbody>
           </table>
@@ -1604,22 +1604,22 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
       </div>
 
       <div class="panel-card" style="max-width:480px">
-        <div class="panel-card-head"><h3>🔒 Sifre Degistir</h3></div>
+        <div class="panel-card-head"><h3>🔒 Şifre Değiştir</h3></div>
         <div style="padding:20px">
           <div class="form-group">
-            <label>Mevcut Sifre</label>
+            <label>Mevcut Şifre</label>
             <input type="password" id="pw-current" placeholder="Mevcut sifrenizi girin">
           </div>
           <div class="form-group">
-            <label>Yeni Sifre</label>
+            <label>Yeni Şifre</label>
             <input type="password" id="pw-new" placeholder="Yeni sifre">
           </div>
           <div class="form-group">
-            <label>Yeni Sifre (Tekrar)</label>
+            <label>Yeni Şifre (Tekrar)</label>
             <input type="password" id="pw-confirm" placeholder="Yeni sifreyi tekrar girin">
           </div>
           <div id="pw-error" style="color:var(--red);font-size:.82rem;min-height:20px;margin-bottom:12px"></div>
-          <button class="btn btn-primary" onclick="changePassword()">Sifreyi Degistir</button>
+          <button class="btn btn-primary" onclick="changePassword()">Şifreyi Değiştir</button>
         </div>
       </div>
 
@@ -2147,7 +2147,7 @@ async function checkAuth() {
   const errEl = document.getElementById('auth-err');
 
   if (!email) { errEl.textContent = 'E-posta adresinizi girin.'; return; }
-  if (!pw) { errEl.textContent = 'Sifrenizi girin.'; return; }
+  if (!pw) { errEl.textContent = 'Şifrenizi girin.'; return; }
 
   // Brute force kontrolu
   const attempts = getLoginAttempts();
@@ -2233,7 +2233,7 @@ async function changePassword() {
     document.getElementById('pw-current').value = '';
     document.getElementById('pw-new').value = '';
     document.getElementById('pw-confirm').value = '';
-    showToast('Sifre basariyla degistirildi!', 'success');
+    showToast('Şifre başarıyla değiştirildi!', 'success');
   } catch(err) {
     if (err.code === 'auth/wrong-password') errEl.textContent = 'Mevcut sifre yanlis.';
     else errEl.textContent = 'Hata: ' + err.message;
@@ -2275,7 +2275,7 @@ function renderCatList() {
       '<span style="flex:1;font-size:.82rem;font-weight:600;color:var(--navy)">' + c.label + '</span>' +
       '<span style="font-size:.68rem;color:var(--text-muted)">' + c.id + '</span>' +
       '<span style="width:16px;height:16px;border-radius:4px;background:' + c.color + ';flex-shrink:0"></span>' +
-      '<button class="btn-icon" onclick="editCategory(' + i + ')" title="Duzenle" style="font-size:.8rem">✏</button>' +
+      '<button class="btn-icon" onclick="editCategory(' + i + ')" title="Düzenle" style="font-size:.8rem">✏</button>' +
       '<button class="btn-icon" onclick="deleteCategory(' + i + ')" title="Sil" style="color:var(--red);font-size:.8rem">✕</button>' +
     '</div>'
   ).join('') + '</div>';
@@ -2955,7 +2955,7 @@ async function galUploadAll() {
       uploaded++;
     } catch(err) {
       console.error('Gallery upload error:', err);
-      showToast('Yuklenemedi: ' + p.name + ' — ' + err.message, 'error');
+      showToast('Yüklenemedi: ' + p.name + ' — ' + err.message, 'error');
     }
   }
 
@@ -3129,7 +3129,7 @@ async function renderAnalytics() {
 
     // Stats
     document.getElementById('analytics-stats').innerHTML =
-      '<div class="stat-card"><div class="stat-label">Goruntuleme</div><div class="stat-val">' + totalViews + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">Görüntüleme</div><div class="stat-val">' + totalViews + '</div></div>' +
       '<div class="stat-card"><div class="stat-label">Telefon Arama</div><div class="stat-val">' + totalCalls + '</div></div>' +
       '<div class="stat-card terra"><div class="stat-label">WhatsApp</div><div class="stat-val">' + totalWA + '</div></div>' +
       '<div class="stat-card green"><div class="stat-label">Rezervasyon</div><div class="stat-val">' + totalRez + '</div></div>';
@@ -3179,7 +3179,7 @@ async function renderAnalytics() {
               '<span style="font-size:.68rem;color:var(--text-muted);flex-shrink:0;margin-left:8px">' + v.views + ' goruntuleme</span>' +
             '</div>' +
             '<div style="display:flex;gap:3px;height:6px">' +
-              '<div style="width:' + viewPct + '%;background:var(--aegean);border-radius:3px;transition:width .5s" title="Goruntuleme: ' + v.views + '"></div>' +
+              '<div style="width:' + viewPct + '%;background:var(--aegean);border-radius:3px;transition:width .5s" title="Görüntüleme: ' + v.views + '"></div>' +
               (actPct > 0 ? '<div style="width:' + actPct + '%;background:var(--terra);border-radius:3px;transition:width .5s" title="Aksiyonlar: ' + v.totalActs + '"></div>' : '') +
             '</div>' +
             '<div style="display:flex;gap:10px;margin-top:4px;font-size:.65rem;color:var(--text-muted)">' +
@@ -3192,7 +3192,7 @@ async function renderAnalytics() {
         '</div>';
       }).join('') +
       '<div style="display:flex;gap:16px;margin-top:8px;font-size:.65rem;color:var(--text-muted);justify-content:flex-end">' +
-        '<span><span style="display:inline-block;width:10px;height:6px;background:var(--aegean);border-radius:3px;margin-right:4px"></span>Goruntuleme</span>' +
+        '<span><span style="display:inline-block;width:10px;height:6px;background:var(--aegean);border-radius:3px;margin-right:4px"></span>Görüntüleme</span>' +
         '<span><span style="display:inline-block;width:10px;height:6px;background:var(--terra);border-radius:3px;margin-right:4px"></span>Aksiyon</span>' +
       '</div>';
 
@@ -3318,7 +3318,7 @@ async function renderAnalytics() {
 
       compareEl.innerHTML =
         '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;text-align:center">' +
-          '<div><div style="font-size:.7rem;color:var(--text-muted);margin-bottom:6px">Goruntuleme</div>' +
+          '<div><div style="font-size:.7rem;color:var(--text-muted);margin-bottom:6px">Görüntüleme</div>' +
             '<div style="font-size:1.3rem;font-weight:800;color:var(--navy)">' + cur.views + '</div>' +
             '<div style="font-size:.72rem;margin-top:4px">' + cmpBadge(cur.views, prev.views) + '</div>' +
             '<div style="font-size:.62rem;color:var(--text-muted);margin-top:2px">Onceki: ' + prev.views + '</div></div>' +
@@ -3476,7 +3476,7 @@ async function renderAnalytics() {
                 '<div class="recent-info" style="flex:1"><div class="ri-title">' + v.title + '</div></div>' +
                 '<div style="font-size:.85rem;font-weight:700;color:var(--navy)">' + v.count + ' <span style="font-weight:400;font-size:.7rem;color:var(--text-muted)">kez</span></div>' +
               '</div>').join('') : '') +
-          (totalCodes > 0 ? '<div style="margin-top:16px;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px">Son Olusturulan Kodlar</div>' +
+          (totalCodes > 0 ? '<div style="margin-top:16px;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px">Son Oluşturulan Kodlar</div>' +
             favDocs.sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || '')).slice(0, 8).map(d =>
               '<div class="recent-item">' +
                 '<div class="recent-emoji">🔗</div>' +
@@ -3725,7 +3725,7 @@ function renderDashboard() {
             '<div class="recent-info"><div class="ri-title">' + x.title + '</div>' +
             '<div class="ri-meta"><span style="background:rgba(212,147,90,.1);color:#D4935A;padding:1px 6px;border-radius:999px;font-size:.6rem;font-weight:700">⏳ ' + x._type.toUpperCase() + '</span> · ' + (x.location || '-') + '</div></div>' +
           '</div>').join('');
-    } catch(e) { pendEl.innerHTML = '<div style="padding:16px;color:var(--text-muted);font-size:.82rem">Yuklenemedi.</div>'; }
+    } catch(e) { pendEl.innerHTML = '<div style="padding:16px;color:var(--text-muted);font-size:.82rem">Yüklenemedi.</div>'; }
   })();
 
   // Bildirimler (alerts)
@@ -3837,7 +3837,7 @@ function bulkChangeCategory() {
   const cat = document.getElementById('bulk-cat-select').value;
   if (!cat) { showToast('Kategori secin.', 'error'); return; }
   const catEmojis = {kafe:'☕',restoran:'🍽',kahvalti:'🥚',konaklama:'🏨',beach:'🏖',iskele:'⚓'};
-  showConfirm('Kategori Degistir', bulkSelected.length + ' mekanin kategorisi "' + cat + '" olarak degistirilecek. Devam?', async () => {
+  showConfirm('Kategori Değiştir', bulkSelected.length + ' mekanin kategorisi "' + cat + '" olarak degistirilecek. Devam?', async () => {
     for (const id of bulkSelected) {
       const v = draftData.venues.find(x => x.id === id);
       if (v) { v.category = cat; v.emoji = catEmojis[cat] || v.emoji; await saveVenueToFirestore(v); }
@@ -3973,7 +3973,7 @@ function renderVenueTable() {
         <td>${sBadge}</td>
         <td>
           <a class="btn-icon" href="mekanlar/mekan-detay.html?id=${v.id}" target="_blank" title="Mekani Gor" style="text-decoration:none">&#128065;</a>
-          <button class="btn-icon" title="Duzenle" onclick="openVenueModal('${v.id}')" style="margin-left:4px">&#9998;</button>
+          <button class="btn-icon" title="Düzenle" onclick="openVenueModal('${v.id}')" style="margin-left:4px">&#9998;</button>
           <button class="btn-icon" title="QR Kod" onclick="openQRModal('${v.id}')" style="margin-left:4px">📱</button>
           <button class="btn-icon" title="Sil" onclick="confirmDeleteVenue('${v.id}')" style="margin-left:4px;color:var(--red)">&#128465;</button>
         </td>
@@ -4437,7 +4437,7 @@ function renderRoutesTable() {
         <td>${r.durak || (r.stops||[]).length}</td>
         <td>
           <a class="btn-icon" href="rotalar/rota-detay.html?id=${r.id}" target="_blank" title="Rotayi Gor" style="text-decoration:none">&#128065;</a>
-          <button class="btn-icon" title="Duzenle" onclick="openRouteModal('${r.id}')" style="margin-left:4px">&#9998;</button>
+          <button class="btn-icon" title="Düzenle" onclick="openRouteModal('${r.id}')" style="margin-left:4px">&#9998;</button>
           <button class="btn-icon" title="Sil" onclick="confirmDeleteRoute('${r.id}')" style="margin-left:4px;color:var(--red)">&#128465;</button>
         </td>
       </tr>`).join('');
@@ -4630,7 +4630,7 @@ function renderVPTable() {
         '<td style="' + (isPlaces ? '' : 'display:none') + '">' + (x.image ? '<span class="badge badge-open" style="font-size:.65rem">Var</span>' : '<span class="badge" style="color:var(--text-muted);font-size:.65rem">Yok</span>') + '</td>' +
         '<td>' +
           (isPlaces ? '<button class="btn-icon" title="Gorsel" onclick="openPlaceImgModal(\'' + x.id + '\',\'' + (isPlaces ? 'places' : 'villages') + '\')">&#128247;</button>' : '') +
-          '<button class="btn-icon" title="Duzenle" onclick="openVPModal(\'' + x.id + '\')" style="margin-left:4px">&#9998;</button>' +
+          '<button class="btn-icon" title="Düzenle" onclick="openVPModal(\'' + x.id + '\')" style="margin-left:4px">&#9998;</button>' +
           '<button class="btn-icon" title="Sil" onclick="confirmDeleteVP(\'' + x.id + '\')" style="margin-left:4px;color:var(--red)">&#128465;</button>' +
         '</td>' +
       '</tr>').join('');
@@ -5296,7 +5296,7 @@ function cancelBackupImport() {
 
 function confirmReset() {
   showConfirm(
-    'Degisiklikleri Sifirla',
+    'Değişiklikleri Sıfırla',
     'Tum taslak degisiklikler silinecek ve orijinal verilere donulecek. Emin misiniz?',
     () => {
       draftData = JSON.parse(JSON.stringify(ORIGINAL_DATA));
@@ -5533,7 +5533,7 @@ async function renderNotifications() {
     renderNotifList();
 
   } catch(err) {
-    list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--red)">Yuklenemedi: ' + err.message + '</div>';
+    list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--red)">Yüklenemedi: ' + err.message + '</div>';
   }
 }
 
@@ -5961,7 +5961,7 @@ async function renderActivityLog() {
 
     list.innerHTML = html;
   } catch(err) {
-    list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--red)">Yuklenemedi: ' + err.message + '</div>';
+    list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--red)">Yüklenemedi: ' + err.message + '</div>';
   }
 }
 
