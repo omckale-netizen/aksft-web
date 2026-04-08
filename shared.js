@@ -192,8 +192,8 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     #site-footer .ft-col a{display:block;color:rgba(245,237,224,.45);text-decoration:none;font-size:.8rem;margin-bottom:8px;transition:color .15s;}
     #site-footer .ft-col a:hover{color:var(--cream);}
     #site-footer .ft-divider{height:1px;background:rgba(245,237,224,.06);margin-bottom:20px;}
-    #site-footer .ft-bottom{display:flex;align-items:center;justify-content:space-between;padding-bottom:24px;gap:16px;flex-wrap:wrap;}
-    #site-footer .ft-copy{font-size:.68rem;color:rgba(245,237,224,.18);}
+    #site-footer .ft-bottom{padding-bottom:24px;text-align:center;}
+    #site-footer .ft-copy{font-size:.68rem;color:rgba(245,237,224,.18);line-height:1.7;}
     @media(max-width:640px){
       #site-footer .ft-top{flex-direction:column;gap:28px;text-align:center;align-items:center;}
       #site-footer .ft-brand{max-width:100%;display:flex;flex-direction:column;align-items:center;}
@@ -1075,7 +1075,7 @@ function renderFooter(opts = {}) {
         </div>
         <div class="ft-divider"></div>
         <div class="ft-bottom">
-          <span class="ft-copy">© 2026 Assos'u Keşfet. Tüm hakları saklıdır. Bu sitedeki içerikler, görseller ve tasarımlar telif hakkı ile korunmaktadır. Kişisel paylaşımlarınızda kaynak belirterek kullanabilirsiniz. Ticari amaçlı kullanım için izin alınması gerekmektedir.</span>
+          <span class="ft-copy">© 2026 Assos'u Keşfet. Tüm hakları saklıdır.<br>Bu sitedeki tüm içerikler telif hakkı ile korunmaktadır.</span>
         </div>
       </div>
     </footer>
