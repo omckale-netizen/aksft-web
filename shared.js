@@ -550,25 +550,25 @@ function renderNav(opts = {}) {
           <div class="sd-sync" id="sd-sync">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
               <span style="font-size:1.1rem;">🔗</span>
-              <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);">Kesif Listenizi Paylasin</span>
+              <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);">Keşif Listenizi Paylaşın</span>
             </div>
             <div class="sd-sync-hint" style="margin-bottom:12px;">Bu kod sizin Assos rotaniz! Arkadaslariniza gonderin, ayni listeyi gorsunler. Baska cihaziniza aktarmak icin de kullanabilirsiniz.</div>
             <div class="sd-sync-row" style="margin-bottom:10px;">
               <span class="sd-sync-label">Kodunuz</span>
-              <span class="sd-sync-code" id="sd-sync-code" onclick="navigator.clipboard.writeText(this.textContent).then(()=>{this.dataset.tip='Kopyalandi!';setTimeout(()=>this.dataset.tip='',1500)})">—</span>
-              <button onclick="navigator.clipboard.writeText(document.getElementById('sd-sync-code').textContent).then(()=>{this.textContent='Kopyalandi!';setTimeout(()=>this.textContent='Kopyala',1500)})" style="padding:5px 10px;border:1px solid rgba(26,39,68,.12);border-radius:6px;background:#fff;font-size:.68rem;font-weight:600;cursor:pointer;color:var(--navy);font-family:inherit;transition:all .15s;">Kopyala</button>
+              <span class="sd-sync-code" id="sd-sync-code" onclick="navigator.clipboard.writeText(this.textContent).then(()=>{this.dataset.tip='Kopyalandı!';setTimeout(()=>this.dataset.tip='',1500)})">—</span>
+              <button onclick="navigator.clipboard.writeText(document.getElementById('sd-sync-code').textContent).then(()=>{this.textContent='Kopyalandı!';setTimeout(()=>this.textContent='Kopyala',1500)})" style="padding:5px 10px;border:1px solid rgba(26,39,68,.12);border-radius:6px;background:#fff;font-size:.68rem;font-weight:600;cursor:pointer;color:var(--navy);font-family:inherit;transition:all .15s;">Kopyala</button>
             </div>
             <div style="height:1px;background:rgba(26,39,68,.06);margin:10px 0;"></div>
             <div class="sd-sync-row">
-              <input type="text" id="sd-sync-input" class="sd-sync-inp" placeholder="Kodu yapistirin..." maxlength="8">
-              <button class="sd-sync-load" onclick="loadFavCode()">Yukle</button>
-              <button onclick="refreshFavCode()" style="padding:5px 10px;border:1px solid rgba(26,39,68,.12);border-radius:6px;background:#fff;font-size:.78rem;cursor:pointer;color:var(--navy);font-family:inherit;transition:all .15s;" title="Listeyi guncelle">🔄</button>
+              <input type="text" id="sd-sync-input" class="sd-sync-inp" placeholder="Kodu yapıştırın..." maxlength="8">
+              <button class="sd-sync-load" onclick="loadFavCode()">Yükle</button>
+              <button onclick="refreshFavCode()" style="padding:5px 10px;border:1px solid rgba(26,39,68,.12);border-radius:6px;background:#fff;font-size:.78rem;cursor:pointer;color:var(--navy);font-family:inherit;transition:all .15s;" title="Listeyi güncelle">🔄</button>
             </div>
             <div id="sd-sync-status" style="font-size:.72rem;margin-top:6px;min-height:16px;"></div>
             <div id="sd-last-code" style="font-size:.65rem;color:rgba(26,39,68,.3);margin-top:4px;"></div>
           </div>
           <div style="margin-top:12px;">
-            <button class="sd-clear-btn" onclick="clearAllSaves()">Tumunu Temizle</button>
+            <button class="sd-clear-btn" onclick="clearAllSaves()">Tümünü Temizle</button>
             <div id="sd-clear-msg" style="font-size:.72rem;text-align:center;margin-top:6px;min-height:16px;"></div>
           </div>
         </div>
@@ -733,7 +733,7 @@ function renderNav(opts = {}) {
       if (label) label.textContent = 'Kaydet';
       if (!icon && !btn.querySelector('span')) btn.textContent = '♡';
     });
-    if (msg) { msg.innerHTML = '<span style="color:#38A169">✓ Tum favoriler temizlendi</span>'; setTimeout(function() { msg.innerHTML = ''; }, 3000); }
+    if (msg) { msg.innerHTML = '<span style="color:#38A169">✓ Tüm favoriler temizlendi</span>'; setTimeout(function() { msg.innerHTML = ''; }, 3000); }
   };
 
   function getYerPath(id) {
@@ -782,7 +782,7 @@ function renderNav(opts = {}) {
     // Son yüklenen kodu göster
     const lastCode = localStorage.getItem('assos_last_loaded_code');
     const lastCodeEl = document.getElementById('sd-last-code');
-    if (lastCodeEl && lastCode && lastCode !== getFavCode()) lastCodeEl.textContent = 'Son yuklenen kod: ' + lastCode;
+    if (lastCodeEl && lastCode && lastCode !== getFavCode()) lastCodeEl.textContent = 'Son yüklenen kod:' + lastCode;
     else if (lastCodeEl) lastCodeEl.textContent = '';
 
     if (totalCount === 0) {
@@ -933,8 +933,8 @@ function renderNav(opts = {}) {
     // Mevcut liste varsa onay iste
     let hasExisting = false;
     try { hasExisting = JSON.parse(localStorage.getItem(SD_KEY) || '[]').length > 0 || JSON.parse(localStorage.getItem(SD_PLACE_KEY) || '[]').length > 0; } catch {}
-    if (hasExisting && !confirm('Mevcut favori listeniz silinecek ve yeni liste yuklenecek. Devam etmek istiyor musunuz?')) { if (statusEl) statusEl.innerHTML = ''; return; }
-    if (statusEl) statusEl.innerHTML = '<span style="color:var(--text-muted)">Yukleniyor...</span>';
+    if (hasExisting && !confirm('Mevcut favori listeniz silinecek ve yeni liste yüklenecek. Devam etmek istiyor musunuz?')) { if (statusEl) statusEl.innerHTML = ''; return; }
+    if (statusEl) statusEl.innerHTML = '<span style="color:var(--text-muted)">Yükleniyor...</span>';
     try {
       const doc = await firebase.firestore().collection('favorites').doc(code).get();
       if (!doc.exists) { if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Bu kodla eslesen liste bulunamadi.</span>'; return; }
@@ -957,10 +957,10 @@ function renderNav(opts = {}) {
       if (venueCount > 0) msg += venueCount + ' mekan';
       if (venueCount > 0 && placeCount > 0) msg += ' ve ';
       if (placeCount > 0) msg += placeCount + ' yer';
-      msg += ' basariyla yuklendi!';
+      msg += ' başarıyla yüklendi!';
       if (statusEl) statusEl.innerHTML = '<span style="color:#38A169">' + msg + '</span>';
     } catch(err) {
-      if (statusEl) { statusEl.innerHTML = '<span style="color:#E53E3E">Yukleme hatasi: </span>'; statusEl.querySelector('span').appendChild(document.createTextNode(err.message)); }
+      if (statusEl) { statusEl.innerHTML = '<span style="color:#E53E3E">Yükleme hatası:</span>'; statusEl.querySelector('span').appendChild(document.createTextNode(err.message)); }
     }
   };
 
@@ -979,7 +979,7 @@ function renderNav(opts = {}) {
         renderSaveDrawer();
         window.updateSaveNavCount();
         const total = (data.venues || []).length + (data.places || []).length;
-        if (statusEl) statusEl.innerHTML = '<span style="color:#38A169">✓ Liste guncellendi! ' + total + ' kayit.</span>';
+        if (statusEl) statusEl.innerHTML = '<span style="color:#38A169">✓ Liste güncellendi! ' + total + ' kayit.</span>';
       } else {
         if (statusEl) statusEl.innerHTML = '<span style="color:var(--text-muted)">Liste zaten guncel.</span>';
       }
@@ -2641,7 +2641,7 @@ function renderVenuePage(venueId) {
       '<a href="https://x.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url) + '" target="_blank" rel="noopener" class="vp-share-opt">' +
         '<span class="vp-share-opt-icon" style="background:#000"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span>' +
         '<span>X</span></a>' +
-      '<button class="vp-share-opt" onclick="navigator.clipboard.writeText(\'' + url.replace(/'/g, "\\'") + '\').then(()=>{this.querySelector(\'span:last-child\').textContent=\'Kopyalandi!\';setTimeout(()=>this.querySelector(\'span:last-child\').textContent=\'Kopyala\',1500)})">' +
+      '<button class="vp-share-opt" onclick="navigator.clipboard.writeText(\'' + url.replace(/'/g, "\\'") + '\').then(()=>{this.querySelector(\'span:last-child\').textContent=\'Kopyalandı!\';setTimeout(()=>this.querySelector(\'span:last-child\').textContent=\'Kopyala\',1500)})">' +
         '<span class="vp-share-opt-icon" style="background:rgba(255,255,255,.15)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></span>' +
         '<span>Kopyala</span></button>';
   })();
