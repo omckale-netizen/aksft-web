@@ -5118,15 +5118,17 @@ async function openQRModal(id) {
       }
     }
   }
-  // Logo ortada — beyaz alan birak, logo canvas'ta cizilecek
-  const logoSize = cellSize * 9;
-  const logoX = (size - logoSize) / 2;
-  svg += '<rect x="' + (logoX - 4) + '" y="' + (logoX - 4) + '" width="' + (logoSize + 8) + '" height="' + (logoSize + 8) + '" rx="10" fill="#fff"/>';
+  // Ortada "Assos'u Kesfet" yazisi
+  const boxW = cellSize * 12;
+  const boxH = cellSize * 6;
+  const boxX = (size - boxW) / 2;
+  const boxY = (size - boxH) / 2;
+  svg += '<rect x="' + (boxX - 4) + '" y="' + (boxY - 4) + '" width="' + (boxW + 8) + '" height="' + (boxH + 8) + '" rx="6" fill="#fff"/>';
+  svg += '<text x="' + (size/2) + '" y="' + (boxY + boxH * 0.42) + '" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="' + (cellSize * 2.2) + '" fill="#1A2744">ASSOS\'U</text>';
+  svg += '<text x="' + (size/2) + '" y="' + (boxY + boxH * 0.82) + '" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="' + (cellSize * 2.2) + '" fill="#C4521A">KEŞFET</text>';
   svg += '</svg>';
 
-  const logoBlobSrc = cachedLogoBlobUrl || siteLogoUrl || '';
-  const logoHtml = logoBlobSrc ? '<img src="' + logoBlobSrc + '" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:' + (logoSize * 1.1) + 'px;height:' + (logoSize * 1.1) + 'px;object-fit:contain;border-radius:6px">' : '';
-  canvas.innerHTML = '<div style="position:relative;display:inline-block">' + svg + logoHtml + '</div>';
+  canvas.innerHTML = svg;
   document.getElementById('qr-overlay').classList.add('show');
 }
 
@@ -5154,44 +5156,36 @@ function downloadQR() {
     ctx.fillRect(0, 0, qrCanvas.width, qrCanvas.height);
     ctx.drawImage(qrImg, 0, 0, qrCanvas.width, qrCanvas.height);
 
-    function finalize(qc) {
-      const fontSize = 14 * scale;
-      const padding = 10 * scale;
-      const finalCanvas = document.createElement('canvas');
-      finalCanvas.width = qc.width;
-      finalCanvas.height = qc.height + fontSize + padding * 2;
-      const fCtx = finalCanvas.getContext('2d');
-      fCtx.fillStyle = '#fff';
-      fCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-      fCtx.drawImage(qc, 0, 0);
-      fCtx.fillStyle = '#1A2744';
-      fCtx.font = 'bold ' + fontSize + 'px sans-serif';
-      fCtx.textAlign = 'center';
-      fCtx.fillText((v ? v.title : '') + ' — Assos\'u Kesfet', finalCanvas.width / 2, qc.height + fontSize + padding / 2);
-      const a = document.createElement('a');
-      a.href = finalCanvas.toDataURL('image/png');
-      a.download = 'qr-' + name + '.png';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      showToast('QR kod indirildi!', 'success');
-    }
+    // Alt yazı — mekan ismi + Assos'u Kesfet
+    const vTitle = v ? v.title : '';
+    const fontSize = 12 * scale;
+    const subFontSize = 9 * scale;
+    const padding = 8 * scale;
+    const totalTextH = fontSize + subFontSize + padding * 3;
+    const finalCanvas = document.createElement('canvas');
+    finalCanvas.width = qrCanvas.width;
+    finalCanvas.height = qrCanvas.height + totalTextH;
+    const fCtx = finalCanvas.getContext('2d');
+    fCtx.fillStyle = '#fff';
+    fCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+    fCtx.drawImage(qrCanvas, 0, 0);
+    // Mekan ismi
+    fCtx.fillStyle = '#1A2744';
+    fCtx.font = 'bold ' + fontSize + 'px sans-serif';
+    fCtx.textAlign = 'center';
+    fCtx.fillText(vTitle, finalCanvas.width / 2, qrCanvas.height + fontSize + padding);
+    // Alt satir
+    fCtx.fillStyle = '#C4521A';
+    fCtx.font = '600 ' + subFontSize + 'px sans-serif';
+    fCtx.fillText('assosukesfet.com', finalCanvas.width / 2, qrCanvas.height + fontSize + subFontSize + padding * 2.2);
 
-    // Logoyu canvas'a çiz
-    if (cachedLogoBlobUrl) {
-      const logoImg = new Image();
-      logoImg.onload = function() {
-        const lSize = qrCanvas.width * 0.22;
-        const lx = (qrCanvas.width - lSize) / 2;
-        const ly = (qrCanvas.height - lSize) / 2;
-        ctx.drawImage(logoImg, lx, ly, lSize, lSize);
-        finalize(qrCanvas);
-      };
-      logoImg.onerror = function() { finalize(qrCanvas); };
-      logoImg.src = cachedLogoBlobUrl;
-    } else {
-      finalize(qrCanvas);
-    }
+    const a = document.createElement('a');
+    a.href = finalCanvas.toDataURL('image/png');
+    a.download = 'qr-' + name + '.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('QR kod indirildi!', 'success');
   };
   qrImg.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
 }
