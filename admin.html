@@ -12,6 +12,7 @@
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-storage-compat.js" crossorigin="anonymous" integrity="sha384-5RO7AQJ51T1u3BV84KGn4xVulsFE2gbaUebkDJe5jPVSm0+NN34/wzUp/vZugodK"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-check-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -97,6 +98,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 .panel-table td{padding:12px 16px;border-bottom:1px solid rgba(0,0,0,.03);font-size:.88rem;vertical-align:middle}
 .panel-table tr:last-child td{border-bottom:none}
 .panel-table tr:hover td{background:rgba(250,247,242,.6)}
+.drag-handle{cursor:grab;color:var(--text-muted);font-size:1rem;user-select:none;padding:0 4px;opacity:.4;transition:opacity .15s}
+.drag-handle:hover{opacity:.8}
+.drag-handle:active{cursor:grabbing}
+.sortable-ghost{opacity:.3;background:var(--cream) !important}
+.sortable-chosen{background:rgba(196,82,26,.04) !important}
+.sort-mode-active{background:var(--terra) !important;color:#fff !important;border-color:var(--terra) !important}
 .panel-table .emoji-col{font-size:1.3rem;width:44px;text-align:center}
 
 /* ── STATUS BADGES ── */
@@ -572,6 +579,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
               <option value="inactive">⏸ Pasif</option>
             </select>
           </div>
+          <button class="btn btn-secondary btn-sm" id="venue-sort-toggle" onclick="toggleVenueSortMode()" style="white-space:nowrap">↕ Sirala</button>
           <button class="btn btn-primary" onclick="openVenueModal()" style="white-space:nowrap">+ Yeni Mekan Ekle</button>
         </div>
         <!-- Toplu islem bari -->
@@ -3497,12 +3505,68 @@ function bulkDelete() {
   });
 }
 
+/* ── Siralama Modu ── */
+let venueSortMode = false;
+let venueSortable = null;
+
+function toggleVenueSortMode() {
+  venueSortMode = !venueSortMode;
+  const btn = document.getElementById('venue-sort-toggle');
+  if (venueSortMode) {
+    btn.classList.add('sort-mode-active');
+    btn.textContent = '✓ Siralamayi Kaydet';
+    bulkDeselectAll();
+    renderVenueTable();
+    initVenueSortable();
+  } else {
+    btn.classList.remove('sort-mode-active');
+    btn.textContent = '↕ Sirala';
+    saveVenueOrder();
+    if (venueSortable) { venueSortable.destroy(); venueSortable = null; }
+    renderVenueTable();
+  }
+}
+
+function initVenueSortable() {
+  const tbody = document.getElementById('venue-tbody');
+  if (!tbody || typeof Sortable === 'undefined') return;
+  if (venueSortable) venueSortable.destroy();
+  venueSortable = Sortable.create(tbody, {
+    handle: '.drag-handle',
+    animation: 200,
+    ghostClass: 'sortable-ghost',
+    chosenClass: 'sortable-chosen',
+  });
+}
+
+async function saveVenueOrder() {
+  const rows = document.querySelectorAll('#venue-tbody tr[data-venue-id]');
+  const newOrder = [];
+  rows.forEach((row, i) => {
+    const id = row.dataset.venueId;
+    const v = draftData.venues.find(x => x.id === id);
+    if (v) { v.sortOrder = i; newOrder.push(v); }
+  });
+  // draftData sırasını güncelle
+  const sorted = [...draftData.venues].sort((a, b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999));
+  draftData.venues = sorted;
+  // Firebase'e kaydet
+  try {
+    for (const v of sorted) {
+      await saveVenueToFirestore(v);
+    }
+    showToast('Sıralama kaydedildi.', 'success');
+  } catch(e) {
+    showToast('Sıralama kaydedilemedi: ' + e.message, 'error');
+  }
+}
+
 function renderVenueTable() {
   const q = (document.getElementById('venue-search')?.value || '').toLowerCase();
   const catFilter = document.getElementById('venue-cat-filter')?.value || 'all';
   const activeFilter = document.getElementById('venue-active-filter')?.value || 'all';
   const catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvalti',konaklama:'Konaklama',beach:'Beach',iskele:'Iskele'};
-  let venues = draftData.venues || [];
+  let venues = [...(draftData.venues || [])].sort((a, b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999));
   if (q) venues = venues.filter(v => v.title.toLowerCase().includes(q) || (v.category||'').toLowerCase().includes(q) || (v.location||'').toLowerCase().includes(q));
   if (catFilter !== 'all') venues = venues.filter(v => v.category === catFilter);
   if (showFeaturedOnly) venues = venues.filter(v => v.featured);
@@ -3520,8 +3584,8 @@ function renderVenueTable() {
       const isActive = v.active !== false;
       const rowStyle = isActive ? '' : 'opacity:.5;';
       const checked = bulkSelected.includes(v.id) ? 'checked' : '';
-      return `<tr style="${rowStyle}">
-        <td><input type="checkbox" class="bulk-cb" data-id="${v.id}" ${checked} onchange="bulkToggleOne('${v.id}',this.checked)"></td>
+      return `<tr style="${rowStyle}" data-venue-id="${v.id}">
+        <td>${venueSortMode ? '<span class="drag-handle">☰</span>' : '<input type="checkbox" class="bulk-cb" data-id="' + v.id + '" ' + checked + ' onchange="bulkToggleOne(\'' + v.id + '\',this.checked)">'}</td>
         <td class="emoji-col">${v.emoji || ''}</td>
         <td><strong>${v.title}</strong>${!isActive ? ' <span style="font-size:.65rem;color:var(--red);font-weight:700">PASIF</span>' : ''}</td>
         <td><span class="badge badge-cat">${catLabels[v.category] || v.category || '-'}</span></td>

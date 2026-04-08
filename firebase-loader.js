@@ -105,6 +105,8 @@
         var failed = results.filter(function(r) { return r.status === 'rejected'; });
         if (failed.length > 0) console.warn('Firebase: ' + failed.length + ' koleksiyon yuklenemedi');
 
+        venues.sort(function(a, b) { return (a.sortOrder || 999) - (b.sortOrder || 999); });
+        places.sort(function(a, b) { return (a.sortOrder || 999) - (b.sortOrder || 999); });
         window.DATA = { routes: routes, places: places, venues: venues, villages: villages };
         window._firebaseReady = true;
 
