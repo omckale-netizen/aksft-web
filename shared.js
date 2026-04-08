@@ -1075,7 +1075,7 @@ function renderFooter(opts = {}) {
         </div>
         <div class="ft-divider"></div>
         <div class="ft-bottom">
-          <span class="ft-copy">© 2026 Assos'u Keşfet — Onyedi Medya. Bu sitedeki tüm içerikler, görseller, tasarımlar, metinler ve yazılım kodları 5846 sayılı Fikir ve Sanat Eserleri Kanunu kapsamında korunmaktadır. İzinsiz kopyalanması, çoğaltılması veya kullanılması hukuki işlem başlatılmasına sebep olur.</span>
+          <span class="ft-copy">© 2026 Assos'u Keşfet. Tüm hakları saklıdır. Bu sitedeki içerikler, görseller ve tasarımlar telif hakkı ile korunmaktadır. Kişisel paylaşımlarınızda kaynak belirterek kullanabilirsiniz. Ticari amaçlı kullanım için izin alınması gerekmektedir.</span>
         </div>
       </div>
     </footer>
