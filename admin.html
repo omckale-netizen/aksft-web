@@ -574,9 +574,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
             </select>
             <button class="btn btn-secondary btn-sm" id="venue-featured-filter" onclick="toggleFeaturedFilter()" style="white-space:nowrap">⭐ Öne Çıkanlar</button>
             <select id="venue-active-filter" onchange="renderVenueTable()" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:#fff;color:var(--text);cursor:pointer">
-              <option value="all" selected>Tümü</option>
-              <option value="active">✅ Aktif</option>
-              <option value="inactive">⏸ Pasif</option>
+              <option value="all" selected>Tüm Durumlar</option>
+              <option value="published">🟢 Yayında</option>
+              <option value="draft">📝 Taslak</option>
+              <option value="hidden">👁‍🗨 Gizli</option>
             </select>
           </div>
           <button class="btn btn-secondary btn-sm" id="venue-sort-toggle" onclick="toggleVenueSortMode()" style="white-space:nowrap">↕ Sirala</button>
@@ -595,8 +596,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
             <option value="iskele">⚓ Iskele</option>
           </select>
           <button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.2)" onclick="bulkChangeCategory()">Uygula</button>
-          <button class="btn btn-sm" style="background:rgba(56,161,105,.2);color:#6feca8;border:1px solid rgba(56,161,105,.3)" onclick="bulkSetActive(true)">✅ Aktif Yap</button>
-          <button class="btn btn-sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.15)" onclick="bulkSetActive(false)">⏸ Pasif Yap</button>
+          <button class="btn btn-sm" style="background:rgba(56,161,105,.2);color:#6feca8;border:1px solid rgba(56,161,105,.3)" onclick="bulkSetStatus('published')">🟢 Yayinla</button>
+          <button class="btn btn-sm" style="background:rgba(221,173,32,.15);color:#ECC94B;border:1px solid rgba(221,173,32,.25)" onclick="bulkSetStatus('draft')">📝 Taslak</button>
+          <button class="btn btn-sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.15)" onclick="bulkSetStatus('hidden')">👁‍🗨 Gizle</button>
           <button class="btn btn-sm" style="background:rgba(229,62,62,.2);color:#F87171;border:1px solid rgba(229,62,62,.3)" onclick="bulkDelete()">🗑 Sil</button>
           <button class="btn btn-sm" style="background:transparent;color:rgba(255,255,255,.5);border:none;margin-left:auto" onclick="bulkDeselectAll()">✕ Iptal</button>
         </div>
@@ -3237,7 +3239,7 @@ function renderDashboard() {
   const catColors = {kafe:'#C4521A',restoran:'#1A6B8A',kahvalti:'#D4935A',konaklama:'#5A7A56',beach:'#1A9A8A',iskele:'#3A5A8A'};
 
   /* Stats */
-  const activeCount = v.filter(x => x.active !== false).length;
+  const activeCount = v.filter(x => getVenueStatusKey(x) === 'published').length;
   const closedCount = v.length - openCount;
   const withImgCount = v.filter(x => x.images && x.images.length > 0).length;
 
@@ -3377,7 +3379,7 @@ function renderDashboard() {
   const alerts = [];
   const noImgCount = v.filter(x => !x.images || x.images.length === 0).length;
   if (noImgCount > 0) alerts.push({ icon:'📷', text:noImgCount + ' mekanin gorseli eksik', action:'venues', color:'#D4935A' });
-  const inactiveCount = v.filter(x => x.active === false).length;
+  const inactiveCount = v.filter(x => getVenueStatusKey(x) !== 'published').length;
   if (inactiveCount > 0) alerts.push({ icon:'⏸', text:inactiveCount + ' mekan pasif durumda', action:'venues', color:'#718096' });
 
   const alertEl = document.getElementById('dash-alerts');
@@ -3415,14 +3417,28 @@ function toggleFeatured(id, e) {
   showToast(v.featured ? '⭐ "' + v.title + '" one cikanlara eklendi.' : '"' + v.title + '" one cikanlardan kaldirildi.', 'success');
 }
 
-function toggleActive(id, e) {
-  e.stopPropagation();
+const VENUE_STATUS = {
+  published: { label:'Yayında', icon:'🟢', color:'#276749', bg:'rgba(56,161,105,.1)' },
+  draft:     { label:'Taslak',  icon:'📝', color:'#975A16', bg:'rgba(221,173,32,.1)' },
+  hidden:    { label:'Gizli',   icon:'👁‍🗨', color:'#9B2C2C', bg:'rgba(229,62,62,.08)' }
+};
+
+function getVenueStatusKey(v) {
+  if (v.status) return v.status;
+  // Eski sistemle uyum: active === false -> hidden
+  return v.active === false ? 'hidden' : 'published';
+}
+
+function changeVenueStatus(id, newStatus) {
   const v = draftData.venues.find(x => x.id === id);
   if (!v) return;
-  v.active = v.active === false ? true : false;
+  v.status = newStatus;
+  // Eski active alanini da guncelle (geriye uyumluluk)
+  v.active = newStatus === 'published';
   saveVenueToFirestore(v);
   renderVenueTable();
-  showToast(v.active !== false ? '✅ "' + v.title + '" aktif edildi.' : '⏸ "' + v.title + '" pasife alindi.', 'success');
+  const s = VENUE_STATUS[newStatus];
+  showToast(s.icon + ' "' + v.title + '" → ' + s.label, 'success');
 }
 
 /* ── Toplu Islem ── */
@@ -3479,16 +3495,17 @@ function bulkChangeCategory() {
   });
 }
 
-function bulkSetActive(active) {
-  const label = active ? 'aktif' : 'pasif';
-  showConfirm((active ? 'Aktif' : 'Pasif') + ' Yap', bulkSelected.length + ' mekan ' + label + ' yapilacak. Devam?', async () => {
+function bulkSetStatus(status) {
+  const s = VENUE_STATUS[status];
+  showConfirm('Durum Degistir', bulkSelected.length + ' mekan "' + s.label + '" yapilacak. Devam?', async () => {
     for (const id of bulkSelected) {
       const v = draftData.venues.find(x => x.id === id);
-      if (v) { v.active = active; await saveVenueToFirestore(v); }
+      if (v) { v.status = status; v.active = status === 'published'; await saveVenueToFirestore(v); }
     }
+    const count = bulkSelected.length;
     bulkDeselectAll();
     renderVenueTable();
-    showToast(bulkSelected.length + ' mekan ' + label + ' yapildi.', 'success');
+    showToast(s.icon + ' ' + count + ' mekan "' + s.label + '" yapildi.', 'success');
   });
 }
 
@@ -3570,8 +3587,9 @@ function renderVenueTable() {
   if (q) venues = venues.filter(v => v.title.toLowerCase().includes(q) || (v.category||'').toLowerCase().includes(q) || (v.location||'').toLowerCase().includes(q));
   if (catFilter !== 'all') venues = venues.filter(v => v.category === catFilter);
   if (showFeaturedOnly) venues = venues.filter(v => v.featured);
-  if (activeFilter === 'active') venues = venues.filter(v => v.active !== false);
-  if (activeFilter === 'inactive') venues = venues.filter(v => v.active === false);
+  if (activeFilter === 'published') venues = venues.filter(v => getVenueStatusKey(v) === 'published');
+  if (activeFilter === 'draft') venues = venues.filter(v => getVenueStatusKey(v) === 'draft');
+  if (activeFilter === 'hidden') venues = venues.filter(v => getVenueStatusKey(v) === 'hidden');
 
   document.getElementById('venue-tbody').innerHTML = venues.length === 0
     ? '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-muted)">Mekan bulunamadi.</td></tr>'
@@ -3581,17 +3599,24 @@ function renderVenueTable() {
                     : s === false ? '<span class="badge badge-closed">Kapali</span>'
                     : '<span class="badge" style="color:var(--text-muted)">-</span>';
       const starStyle = v.featured ? 'color:#D4935A;font-size:1.1rem;cursor:pointer' : 'color:var(--text-muted);font-size:1.1rem;cursor:pointer;opacity:.4';
-      const isActive = v.active !== false;
-      const rowStyle = isActive ? '' : 'opacity:.5;';
+      const statusKey = getVenueStatusKey(v);
+      const st = VENUE_STATUS[statusKey];
+      const isPublished = statusKey === 'published';
+      const rowStyle = isPublished ? '' : 'opacity:.6;';
       const checked = bulkSelected.includes(v.id) ? 'checked' : '';
+      const statusLabel = statusKey !== 'published' ? ' <span style="font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:6px;background:'+st.bg+';color:'+st.color+'">'+st.label.toUpperCase()+'</span>' : '';
       return `<tr style="${rowStyle}" data-venue-id="${v.id}">
         <td>${venueSortMode ? '<span class="drag-handle">☰</span>' : '<input type="checkbox" class="bulk-cb" data-id="' + v.id + '" ' + checked + ' onchange="bulkToggleOne(\'' + v.id + '\',this.checked)">'}</td>
         <td class="emoji-col">${v.emoji || ''}</td>
-        <td><strong>${v.title}</strong>${!isActive ? ' <span style="font-size:.65rem;color:var(--red);font-weight:700">PASIF</span>' : ''}</td>
+        <td><strong>${v.title}</strong>${statusLabel}</td>
         <td><span class="badge badge-cat">${catLabels[v.category] || v.category || '-'}</span></td>
         <td>${v.location || '-'}</td>
         <td><span style="${starStyle}" onclick="toggleFeatured('${v.id}',event)" title="${v.featured ? 'Öne çıkanlardan kaldır' : 'Öne çıkanlara ekle'}">${v.featured ? '★' : '☆'}</span></td>
-        <td><button class="btn-icon" onclick="toggleActive('${v.id}',event)" title="${isActive ? 'Pasife al' : 'Aktif et'}" style="font-size:1rem;${isActive ? 'color:var(--green)' : 'color:var(--text-muted)'}">${isActive ? '✅' : '⏸'}</button></td>
+        <td><select onchange="changeVenueStatus('${v.id}',this.value)" style="padding:4px 8px;border-radius:8px;border:1.5px solid rgba(0,0,0,.08);font-size:.72rem;font-family:inherit;background:${st.bg};color:${st.color};font-weight:600;cursor:pointer">
+          <option value="published" ${statusKey==='published'?'selected':''}>🟢 Yayında</option>
+          <option value="draft" ${statusKey==='draft'?'selected':''}>📝 Taslak</option>
+          <option value="hidden" ${statusKey==='hidden'?'selected':''}>👁‍🗨 Gizli</option>
+        </select></td>
         <td>${sBadge}</td>
         <td>
           <a class="btn-icon" href="mekanlar/mekan-detay.html?id=${v.id}" target="_blank" title="Mekani Gor" style="text-decoration:none">&#128065;</a>
