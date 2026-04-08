@@ -1078,7 +1078,7 @@ function renderFooter(opts = {}) {
         </div>
         <div class="ft-divider"></div>
         <div class="ft-bottom">
-          <span class="ft-copy">© 2026 Assos'u Keşfet. Tüm hakları saklıdır.<br>Bu sitedeki tüm içerikler telif hakkı ile korunmaktadır.</span>
+          <span class="ft-copy">© 2026 Assos'u Keşfet. Tüm hakları saklıdır.<br>Bu sitedeki tüm içerikler telif hakkı ile korunmaktadır.<br><a href="${basePath}gizlilik.html" style="color:rgba(245,237,224,.25);font-size:.6rem;">Gizlilik Politikası</a> · <a href="${basePath}kullanim-kosullari.html" style="color:rgba(245,237,224,.25);font-size:.6rem;">Kullanım Koşulları</a></span>
           <span class="ft-badge">🌿 Assos, Ayvacık, Çanakkale</span>
         </div>
       </div>
