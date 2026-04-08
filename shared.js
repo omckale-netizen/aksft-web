@@ -191,7 +191,7 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     #site-footer .ft-links a{color:rgba(245,237,224,.35);text-decoration:none;font-size:.72rem;font-weight:500;padding:5px 10px;border-radius:8px;transition:all .15s;}
     #site-footer .ft-links a:hover{color:#F5EDE0;background:rgba(245,237,224,.06);}
     #site-footer .ft-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:14px;gap:12px;flex-wrap:wrap;}
-    #site-footer .ft-copy{font-size:.62rem;color:rgba(245,237,224,.15);}
+    #site-footer .ft-copy{font-size:.72rem;color:rgba(245,237,224,.2);}
     #site-footer .ft-legal{font-size:.62rem;}
     #site-footer .ft-legal a{color:rgba(245,237,224,.2);text-decoration:none;transition:color .15s;}
     #site-footer .ft-legal a:hover{color:rgba(245,237,224,.5);}
