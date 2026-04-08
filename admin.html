@@ -574,10 +574,29 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
           </div>
           <button class="btn btn-primary" onclick="openVenueModal()" style="white-space:nowrap">+ Yeni Mekan Ekle</button>
         </div>
+        <!-- Toplu islem bari -->
+        <div id="bulk-bar" style="display:none;padding:12px 20px;background:var(--navy);color:#fff;border-radius:var(--radius-sm);margin:0 16px 12px;display:none;align-items:center;gap:12px;flex-wrap:wrap;font-size:.82rem">
+          <strong id="bulk-count">0 secili</strong>
+          <select id="bulk-cat-select" style="padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-family:inherit;font-size:.78rem">
+            <option value="">Kategori Degistir</option>
+            <option value="kafe">☕ Kafe</option>
+            <option value="restoran">🍽 Restoran</option>
+            <option value="kahvalti">🥚 Kahvalti</option>
+            <option value="konaklama">🏨 Konaklama</option>
+            <option value="beach">🏖 Beach</option>
+            <option value="iskele">⚓ Iskele</option>
+          </select>
+          <button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.2)" onclick="bulkChangeCategory()">Uygula</button>
+          <button class="btn btn-sm" style="background:rgba(56,161,105,.2);color:#6feca8;border:1px solid rgba(56,161,105,.3)" onclick="bulkSetActive(true)">✅ Aktif Yap</button>
+          <button class="btn btn-sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.15)" onclick="bulkSetActive(false)">⏸ Pasif Yap</button>
+          <button class="btn btn-sm" style="background:rgba(229,62,62,.2);color:#F87171;border:1px solid rgba(229,62,62,.3)" onclick="bulkDelete()">🗑 Sil</button>
+          <button class="btn btn-sm" style="background:transparent;color:rgba(255,255,255,.5);border:none;margin-left:auto" onclick="bulkDeselectAll()">✕ Iptal</button>
+        </div>
         <div class="panel-table-wrap">
           <table class="panel-table" id="venue-table">
             <thead>
               <tr>
+                <th style="width:32px"><input type="checkbox" id="bulk-select-all" onchange="bulkToggleAll(this.checked)" title="Tumunu sec"></th>
                 <th></th>
                 <th>Ad</th>
                 <th>Kategori</th>
@@ -3398,6 +3417,86 @@ function toggleActive(id, e) {
   showToast(v.active !== false ? '✅ "' + v.title + '" aktif edildi.' : '⏸ "' + v.title + '" pasife alindi.', 'success');
 }
 
+/* ── Toplu Islem ── */
+let bulkSelected = [];
+
+function bulkToggleOne(id, checked) {
+  if (checked) { if (!bulkSelected.includes(id)) bulkSelected.push(id); }
+  else { bulkSelected = bulkSelected.filter(x => x !== id); }
+  updateBulkBar();
+}
+
+function bulkToggleAll(checked) {
+  const cbs = document.querySelectorAll('.bulk-cb');
+  if (checked) {
+    bulkSelected = [];
+    cbs.forEach(cb => { bulkSelected.push(cb.dataset.id); cb.checked = true; });
+  } else {
+    bulkSelected = [];
+    cbs.forEach(cb => { cb.checked = false; });
+  }
+  updateBulkBar();
+}
+
+function bulkDeselectAll() {
+  bulkSelected = [];
+  document.querySelectorAll('.bulk-cb').forEach(cb => { cb.checked = false; });
+  const allCb = document.getElementById('bulk-select-all');
+  if (allCb) allCb.checked = false;
+  updateBulkBar();
+}
+
+function updateBulkBar() {
+  const bar = document.getElementById('bulk-bar');
+  if (bulkSelected.length > 0) {
+    bar.style.display = 'flex';
+    document.getElementById('bulk-count').textContent = bulkSelected.length + ' secili';
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function bulkChangeCategory() {
+  const cat = document.getElementById('bulk-cat-select').value;
+  if (!cat) { showToast('Kategori secin.', 'error'); return; }
+  const catEmojis = {kafe:'☕',restoran:'🍽',kahvalti:'🥚',konaklama:'🏨',beach:'🏖',iskele:'⚓'};
+  showConfirm('Kategori Degistir', bulkSelected.length + ' mekanin kategorisi "' + cat + '" olarak degistirilecek. Devam?', async () => {
+    for (const id of bulkSelected) {
+      const v = draftData.venues.find(x => x.id === id);
+      if (v) { v.category = cat; v.emoji = catEmojis[cat] || v.emoji; await saveVenueToFirestore(v); }
+    }
+    bulkDeselectAll();
+    renderVenueTable();
+    showToast(bulkSelected.length + ' mekan guncellendi.', 'success');
+  });
+}
+
+function bulkSetActive(active) {
+  const label = active ? 'aktif' : 'pasif';
+  showConfirm((active ? 'Aktif' : 'Pasif') + ' Yap', bulkSelected.length + ' mekan ' + label + ' yapilacak. Devam?', async () => {
+    for (const id of bulkSelected) {
+      const v = draftData.venues.find(x => x.id === id);
+      if (v) { v.active = active; await saveVenueToFirestore(v); }
+    }
+    bulkDeselectAll();
+    renderVenueTable();
+    showToast(bulkSelected.length + ' mekan ' + label + ' yapildi.', 'success');
+  });
+}
+
+function bulkDelete() {
+  showConfirm('Toplu Silme', bulkSelected.length + ' mekan kalici olarak silinecek. Bu islem geri alinamaz!', async () => {
+    for (const id of bulkSelected) {
+      await deleteVenueFromFirestore(id);
+      draftData.venues = draftData.venues.filter(v => v.id !== id);
+    }
+    const count = bulkSelected.length;
+    bulkDeselectAll();
+    renderVenueTable();
+    showToast(count + ' mekan silindi.', 'success');
+  });
+}
+
 function renderVenueTable() {
   const q = (document.getElementById('venue-search')?.value || '').toLowerCase();
   const catFilter = document.getElementById('venue-cat-filter')?.value || 'all';
@@ -3411,7 +3510,7 @@ function renderVenueTable() {
   if (activeFilter === 'inactive') venues = venues.filter(v => v.active === false);
 
   document.getElementById('venue-tbody').innerHTML = venues.length === 0
-    ? '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-muted)">Mekan bulunamadi.</td></tr>'
+    ? '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-muted)">Mekan bulunamadi.</td></tr>'
     : venues.map(v => {
       const s = getVenueStatus(v);
       const sBadge = s === true ? '<span class="badge badge-open">Acik</span>'
@@ -3420,7 +3519,9 @@ function renderVenueTable() {
       const starStyle = v.featured ? 'color:#D4935A;font-size:1.1rem;cursor:pointer' : 'color:var(--text-muted);font-size:1.1rem;cursor:pointer;opacity:.4';
       const isActive = v.active !== false;
       const rowStyle = isActive ? '' : 'opacity:.5;';
+      const checked = bulkSelected.includes(v.id) ? 'checked' : '';
       return `<tr style="${rowStyle}">
+        <td><input type="checkbox" class="bulk-cb" data-id="${v.id}" ${checked} onchange="bulkToggleOne('${v.id}',this.checked)"></td>
         <td class="emoji-col">${v.emoji || ''}</td>
         <td><strong>${v.title}</strong>${!isActive ? ' <span style="font-size:.65rem;color:var(--red);font-weight:700">PASIF</span>' : ''}</td>
         <td><span class="badge badge-cat">${catLabels[v.category] || v.category || '-'}</span></td>
@@ -3435,6 +3536,7 @@ function renderVenueTable() {
         </td>
       </tr>`;
     }).join('');
+  updateBulkBar();
 }
 
 /* ══════════════════════════════════════════════════
