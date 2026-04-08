@@ -2460,11 +2460,11 @@ function renderVenuePage(venueId) {
               <div class="vp-rezv-row">
                 <div class="vp-rezv-field">
                   <label class="vp-rezv-label">Giriş Tarihi</label>
-                  <input type="date" id="rezv-checkin" class="vp-rezv-input" min="${new Date().toISOString().split('T')[0]}" onchange="vpUpdateCheckoutMin()">
+                  <input type="date" id="rezv-checkin" class="vp-rezv-input" value="${new Date().toISOString().split('T')[0]}" min="${new Date().toISOString().split('T')[0]}" onchange="vpUpdateCheckoutMin()">
                 </div>
                 <div class="vp-rezv-field">
                   <label class="vp-rezv-label">Çıkış Tarihi</label>
-                  <input type="date" id="rezv-checkout" class="vp-rezv-input" onchange="vpValidateCheckout()">
+                  <input type="date" id="rezv-checkout" class="vp-rezv-input" value="${(()=>{var d=new Date();d.setDate(d.getDate()+1);return d.toISOString().split('T')[0]})()}" min="${(()=>{var d=new Date();d.setDate(d.getDate()+1);return d.toISOString().split('T')[0]})()}" onchange="vpValidateCheckout()">
                 </div>
               </div>
               <div id="rezv-date-error" style="font-size:.75rem;color:#E53E3E;min-height:18px;margin-top:-4px"></div>
