@@ -185,7 +185,8 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     #site-footer .ft-inner{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:48px 24px 0;}
     #site-footer .ft-glass{background:rgba(255,255,255,.03);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(245,237,224,.07);border-radius:20px;padding:36px 32px;margin-bottom:32px;}
     #site-footer .ft-brand{text-align:center;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid rgba(245,237,224,.06);}
-    #site-footer .ft-brand img{height:36px;width:auto;}
+    #site-footer .ft-brand img{height:36px;width:auto;opacity:0;transition:opacity .5s ease;}
+    #site-footer .ft-brand img.logo-loaded{opacity:1;}
     #site-footer .ft-brand p{font-size:.78rem;color:rgba(245,237,224,.3);line-height:1.65;margin-top:10px;max-width:320px;margin-left:auto;margin-right:auto;}
     #site-footer .ft-cols{display:flex;justify-content:center;gap:48px;flex-wrap:wrap;}
     #site-footer .ft-col-title{font-size:.58rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,237,224,.2);margin-bottom:12px;text-align:center;}
@@ -386,7 +387,7 @@ function renderNav(opts = {}) {
   const navHTML = `
     <div id="mobile-menu" role="dialog" aria-label="Navigasyon menüsü" aria-hidden="true">
       <div class="mm-header">
-        <a href="${basePath}index.html"><img ${SITE_LOGO ? 'class="site-logo-img logo-loaded" src="' + SITE_LOGO + '" onload="this.classList.add(\'logo-loaded\')"' : 'class="site-logo-img"'} data-logo="1" alt="Assos'u Keşfet" width="120" height="40" loading="eager" decoding="async"></a>
+        <a href="${basePath}index.html"><img ${SITE_LOGO ? 'class="site-logo-img" src="' + SITE_LOGO + '" onload="var s=this;setTimeout(function(){s.classList.add(\'logo-loaded\')},50)"' : 'class="site-logo-img"'} data-logo="1" alt="Assos'u Keşfet" width="120" height="40" loading="eager" decoding="async"></a>
         <button id="close-menu-btn" aria-label="Kapat">✕</button>
       </div>
       <div class="mm-links">
@@ -404,7 +405,7 @@ function renderNav(opts = {}) {
     <nav id="main-nav" class="${heroMode ? 'hero-mode' : 'solid'}" aria-label="Ana navigasyon">
       <div class="nav-inner">
         <a href="${basePath}index.html" class="nav-logo" aria-label="Ana Sayfa">
-          <img ${SITE_LOGO ? 'class="site-logo-img logo-loaded" src="' + SITE_LOGO + '" onload="this.classList.add(\'logo-loaded\')"' : 'class="site-logo-img"'} data-logo="1" alt="Assos'u Keşfet" width="120" height="40" loading="eager" decoding="async">
+          <img ${SITE_LOGO ? 'class="site-logo-img" src="' + SITE_LOGO + '" onload="var s=this;setTimeout(function(){s.classList.add(\'logo-loaded\')},50)"' : 'class="site-logo-img"'} data-logo="1" alt="Assos'u Keşfet" width="120" height="40" loading="eager" decoding="async">
         </a>
         <div class="nav-links">
           ${links.map(l => `<a href="${basePath}${l.href}" class="nav-link${isActive(l.href) ? ' active' : ''}">${l.label}</a>`).join('')}
@@ -1081,7 +1082,7 @@ function renderFooter(opts = {}) {
       <div class="ft-inner">
         <div class="ft-glass">
           <div class="ft-brand">
-            <img ${SITE_LOGO ? 'class="site-logo-img logo-loaded" src="' + SITE_LOGO + '" onload="this.classList.add(\'logo-loaded\')"' : 'class="site-logo-img"'} data-logo="1" alt="Assos'u Keşfet" width="120" height="40" loading="eager" decoding="async">
+            <img ${SITE_LOGO ? 'class="site-logo-img" src="' + SITE_LOGO + '" onload="var s=this;setTimeout(function(){s.classList.add(\'logo-loaded\')},50)"' : 'class="site-logo-img"'} data-logo="1" alt="Assos'u Keşfet" width="120" height="40" loading="eager" decoding="async">
             <p>Assos bölgesini keşfetmek için hazırlanmış dijital bir rehber.</p>
           </div>
           <div class="ft-cols">
