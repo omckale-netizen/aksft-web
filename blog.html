@@ -261,7 +261,26 @@ async function loadSinglePost(slug) {
       tagsEl.innerHTML = p.tags.map(function(t){return '<span class="post-tag">#'+t+'</span>';}).join('');
     }
 
-    var url = window.location.href;
+    var url = 'https://assosukesfet.com/blog?yazi=' + slug;
+    var shareTitle = p.title + ' — Assos\'u Keşfet';
+    var shareImg = p.coverImage || '';
+
+    // OG meta tag'larını yazıya özel güncelle
+    var ogTitle = document.querySelector('meta[property="og:title"]');
+    var ogDesc = document.querySelector('meta[property="og:description"]');
+    var ogUrl = document.querySelector('meta[property="og:url"]');
+    var ogImg = document.querySelector('meta[property="og:image"]');
+    var twTitle = document.querySelector('meta[name="twitter:title"]');
+    var twDesc = document.querySelector('meta[name="twitter:description"]');
+    var twImg = document.querySelector('meta[name="twitter:image"]');
+    if (ogTitle) ogTitle.content = shareTitle;
+    if (ogDesc) ogDesc.content = (p.excerpt || p.title || '').substring(0, 160);
+    if (ogUrl) ogUrl.content = url;
+    if (shareImg && ogImg) ogImg.content = shareImg;
+    if (twTitle) twTitle.content = shareTitle;
+    if (twDesc) twDesc.content = (p.excerpt || p.title || '').substring(0, 160);
+    if (shareImg && twImg) twImg.content = shareImg;
+
     document.getElementById('bp-share').innerHTML =
       '<div class="post-share-wrap">' +
         '<div class="post-share-title">Bu yazıyı paylaş</div>' +
