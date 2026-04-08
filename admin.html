@@ -5067,11 +5067,20 @@ function closeConfirm() {
 let currentQRVenueId = null;
 let cachedLogoUrl = null;
 
+let cachedLogoBlobUrl = null;
+
 async function ensureLogoUrl() {
-  if (cachedLogoUrl) return cachedLogoUrl;
+  if (cachedLogoBlobUrl) return cachedLogoBlobUrl;
   try {
     const doc = await db.collection('settings').doc('site').get();
-    if (doc.exists && doc.data().logoUrl) { cachedLogoUrl = doc.data().logoUrl; return cachedLogoUrl; }
+    if (doc.exists && doc.data().logoUrl) {
+      cachedLogoUrl = doc.data().logoUrl;
+      // Blob olarak indir — cross-origin sorununu coz
+      const resp = await fetch(cachedLogoUrl);
+      const blob = await resp.blob();
+      cachedLogoBlobUrl = URL.createObjectURL(blob);
+      return cachedLogoBlobUrl;
+    }
   } catch(e) {}
   return null;
 }
@@ -5115,7 +5124,8 @@ async function openQRModal(id) {
   svg += '<rect x="' + (logoX - 4) + '" y="' + (logoX - 4) + '" width="' + (logoSize + 8) + '" height="' + (logoSize + 8) + '" rx="10" fill="#fff"/>';
   svg += '</svg>';
 
-  const logoHtml = siteLogoUrl ? '<img src="' + siteLogoUrl + '" crossorigin="anonymous" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:' + (logoSize * 1.1) + 'px;height:' + (logoSize * 1.1) + 'px;object-fit:contain;border-radius:6px">' : '';
+  const logoBlobSrc = cachedLogoBlobUrl || siteLogoUrl || '';
+  const logoHtml = logoBlobSrc ? '<img src="' + logoBlobSrc + '" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:' + (logoSize * 1.1) + 'px;height:' + (logoSize * 1.1) + 'px;object-fit:contain;border-radius:6px">' : '';
   canvas.innerHTML = '<div style="position:relative;display:inline-block">' + svg + logoHtml + '</div>';
   document.getElementById('qr-overlay').classList.add('show');
 }
@@ -5168,9 +5178,8 @@ function downloadQR() {
     }
 
     // Logoyu canvas'a çiz
-    if (cachedLogoUrl) {
+    if (cachedLogoBlobUrl) {
       const logoImg = new Image();
-      logoImg.crossOrigin = 'anonymous';
       logoImg.onload = function() {
         const lSize = qrCanvas.width * 0.22;
         const lx = (qrCanvas.width - lSize) / 2;
@@ -5179,7 +5188,7 @@ function downloadQR() {
         finalize(qrCanvas);
       };
       logoImg.onerror = function() { finalize(qrCanvas); };
-      logoImg.src = cachedLogoUrl;
+      logoImg.src = cachedLogoBlobUrl;
     } else {
       finalize(qrCanvas);
     }
