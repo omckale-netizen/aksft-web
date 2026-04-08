@@ -2911,14 +2911,15 @@ async function renderAnalytics() {
       }).join('');
     }
 
-    // Mekan performans listesi
+    // Mekan performans listesi (sadece mevcut ve yayinda olanlar)
     const venueList = Object.entries(venueViews).map(([id, views]) => {
       const venue = draftData.venues.find(v => v.id === id);
+      if (!venue || getVenueStatusKey(venue) !== 'published') return null;
       const acts = venueActions[id] || { call: 0, whatsapp: 0, reservation: 0 };
       const totalActs = acts.call + acts.whatsapp + acts.reservation;
       const convRate = views > 0 ? Math.round((totalActs / views) * 100) : 0;
-      return { id, title: venue ? venue.title : id, emoji: venue ? venue.emoji : '📍', category: venue ? venue.category : '', views, totalActs, convRate, ...acts };
-    }).sort((a, b) => b.views - a.views);
+      return { id, title: venue.title, emoji: venue.emoji, category: venue.category, views, totalActs, convRate, ...acts };
+    }).filter(Boolean).sort((a, b) => b.views - a.views);
 
     const maxViews = venueList.length > 0 ? venueList[0].views : 1;
 
@@ -2975,11 +2976,12 @@ async function renderAnalytics() {
           '</div>';
         }).join('') + '</div>';
 
-    // Aksiyonlar
+    // Aksiyonlar (sadece mevcut ve yayinda olanlar)
     const actList = Object.entries(venueActions).map(([id, acts]) => {
       const venue = draftData.venues.find(v => v.id === id);
-      return { id, title: venue ? venue.title : id, emoji: venue ? venue.emoji : '📍', ...acts };
-    }).filter(v => v.call > 0 || v.whatsapp > 0 || v.reservation > 0)
+      if (!venue || getVenueStatusKey(venue) !== 'published') return null;
+      return { id, title: venue.title, emoji: venue.emoji, ...acts };
+    }).filter(v => v && (v.call > 0 || v.whatsapp > 0 || v.reservation > 0))
       .sort((a, b) => (b.call + b.whatsapp + b.reservation) - (a.call + a.whatsapp + a.reservation));
 
     document.getElementById('analytics-actions').innerHTML = actList.length === 0
