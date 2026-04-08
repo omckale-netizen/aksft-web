@@ -84,6 +84,19 @@ function pageInit() {
     if (twTitle) twTitle.content = seoTitle;
     if (twDesc) twDesc.content = seoDesc;
 
+    // Breadcrumb Schema
+    var bcSchema = document.createElement('script');
+    bcSchema.type = 'application/ld+json';
+    bcSchema.textContent = JSON.stringify({
+      '@context':'https://schema.org','@type':'BreadcrumbList',
+      'itemListElement':[
+        {'@type':'ListItem','position':1,'name':'Anasayfa','item':'https://assosukesfet.com'},
+        {'@type':'ListItem','position':2,'name':'Mekanlar','item':'https://assosukesfet.com/mekanlar'},
+        {'@type':'ListItem','position':3,'name':venue.title,'item':'https://assosukesfet.com/mekanlar/mekan-detay?id='+venueId}
+      ]
+    });
+    document.head.appendChild(bcSchema);
+
     // LocalBusiness Schema
     const schemaTypes = {kafe:'CafeOrCoffeeShop',restoran:'Restaurant',kahvalti:'Restaurant',konaklama:'Hotel',beach:'BarOrPub',iskele:'FoodEstablishment'};
     const schema = {

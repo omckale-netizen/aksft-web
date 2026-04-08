@@ -64,6 +64,19 @@ function pageInit() {
     if (ogUrl) ogUrl.content = 'https://assosukesfet.com/rotalar/rota-detay.html?id=' + routeId;
     if (twTitle) twTitle.content = seoTitle;
     if (twDesc) twDesc.content = route.shortDesc || '';
+
+    // Breadcrumb Schema
+    var bcSchema = document.createElement('script');
+    bcSchema.type = 'application/ld+json';
+    bcSchema.textContent = JSON.stringify({
+      '@context':'https://schema.org','@type':'BreadcrumbList',
+      'itemListElement':[
+        {'@type':'ListItem','position':1,'name':'Anasayfa','item':'https://assosukesfet.com'},
+        {'@type':'ListItem','position':2,'name':'Rotalar','item':'https://assosukesfet.com/rotalar'},
+        {'@type':'ListItem','position':3,'name':route.title,'item':'https://assosukesfet.com/rotalar/rota-detay?id='+routeId}
+      ]
+    });
+    document.head.appendChild(bcSchema);
   }
 }
 document.addEventListener('dataReady', pageInit);
