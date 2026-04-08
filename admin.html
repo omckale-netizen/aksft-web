@@ -105,6 +105,16 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 .sortable-ghost{opacity:.3;background:var(--cream) !important}
 .sortable-chosen{background:rgba(196,82,26,.04) !important}
 .sort-mode-active{background:var(--terra) !important;color:#fff !important;border-color:var(--terra) !important}
+.notif-item{display:flex;gap:14px;padding:16px 20px;border-bottom:1px solid rgba(0,0,0,.04);transition:background .15s;cursor:pointer}
+.notif-item:hover{background:rgba(0,0,0,.02)}
+.notif-item:last-child{border-bottom:none}
+.notif-item.unread{background:rgba(196,82,26,.03);border-left:3px solid var(--terra)}
+.notif-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.notif-body{flex:1;min-width:0}
+.notif-title{font-size:.85rem;font-weight:700;color:var(--navy);margin-bottom:2px}
+.notif-desc{font-size:.78rem;color:var(--text-light);line-height:1.5}
+.notif-time{font-size:.68rem;color:var(--text-muted);margin-top:4px}
+.notif-tab.active{background:var(--navy) !important;color:#fff !important}
 .panel-table .emoji-col{font-size:1.3rem;width:44px;text-align:center}
 
 /* ── STATUS BADGES ── */
@@ -454,6 +464,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
       </a>
 
       <div class="nav-group-label">Iletisim & Analiz</div>
+      <a class="admin-nav-item" data-page="notifications" onclick="showPage('notifications')">
+        <span class="nav-icon">🔔</span> Bildirimler <span id="notif-badge" style="background:var(--red);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;display:none"></span>
+      </a>
       <a class="admin-nav-item" data-page="messages" onclick="showPage('messages')">
         <span class="nav-icon">✉️</span> Mesajlar <span id="msg-badge" style="background:var(--red);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;display:none"></span>
       </a>
@@ -1251,6 +1264,22 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
     </div>
 
     <!-- ══════ ANALYTICS ══════ -->
+    <!-- ══════ NOTIFICATIONS ══════ -->
+    <div class="admin-page" id="page-notifications">
+      <h2>Bildirim Merkezi</h2>
+      <p class="page-sub">Mesajlar, bot onaylari ve sistem bildirimleri tek yerde.</p>
+      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+        <button class="btn btn-sm btn-secondary notif-tab active" onclick="filterNotifs('all',this)">Tumunu Gor</button>
+        <button class="btn btn-sm btn-secondary notif-tab" onclick="filterNotifs('message',this)">✉️ Mesajlar</button>
+        <button class="btn btn-sm btn-secondary notif-tab" onclick="filterNotifs('bot',this)">🤖 Bot Onaylari</button>
+        <button class="btn btn-sm btn-secondary notif-tab" onclick="filterNotifs('system',this)">⚙️ Sistem</button>
+        <button class="btn btn-sm" style="margin-left:auto;background:transparent;color:var(--text-muted);font-size:.75rem" onclick="markAllNotifsRead()">Tumunu okundu isaretle</button>
+      </div>
+      <div class="panel-card">
+        <div id="notif-list" style="max-height:70vh;overflow-y:auto"></div>
+      </div>
+    </div>
+
     <div class="admin-page" id="page-analytics">
       <h2>Istatistikler</h2>
       <p class="page-sub">Sayfa goruntulenmeleri ve kullanici aksiyonlari.</p>
@@ -2424,6 +2453,7 @@ function showPage(page) {
   if (page === 'placebot') { renderPendingPlaces(); }
   if (page === 'analytics') renderAnalytics();
   if (page === 'messages') renderMessages();
+  if (page === 'notifications') renderNotifications();
 }
 
 function toggleSidebar() {
@@ -2438,7 +2468,7 @@ function initApp() {
   // Hash'ten son kaldığı sekmeyi aç
   const hash = window.location.hash.replace('#', '');
   loadCategories();
-  const validPages = ['dashboard','venues','bot','placebot','routes','villages','export','settings','analytics','messages','gallery'];
+  const validPages = ['dashboard','venues','bot','placebot','routes','villages','export','settings','analytics','messages','gallery','notifications'];
   if (hash && validPages.includes(hash)) {
     showPage(hash);
   } else {
@@ -2446,6 +2476,7 @@ function initApp() {
   }
   setupDragDrop();
   setupBackupDragDrop();
+  initNotifBadge();
 }
 
 /* ══════════════════════════════════════════════════
@@ -5197,6 +5228,170 @@ function copyQRLink() {
   }).catch(() => {
     prompt('Bu linki kopyala:', url);
   });
+}
+
+/* ══════════════════════════════════════════════════
+   BILDIRIM MERKEZI
+══════════════════════════════════════════════════ */
+let allNotifs = [];
+let notifFilter = 'all';
+
+async function renderNotifications() {
+  const list = document.getElementById('notif-list');
+  if (!list) return;
+  list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted)">Yukleniyor...</div>';
+
+  try {
+    allNotifs = [];
+
+    // 1. Mesajlar
+    const msgSnap = await db.collection('messages').orderBy('timestamp', 'desc').limit(50).get();
+    msgSnap.docs.forEach(d => {
+      const m = d.data();
+      allNotifs.push({
+        id: d.id, type: 'message', read: !!m.read,
+        icon: '✉️', iconBg: 'rgba(26,107,138,.1)',
+        title: (m.name || 'Anonim') + ' mesaj gonderdi',
+        desc: (m.subject ? m.subject + ': ' : '') + (m.message || '').substring(0, 100),
+        time: m.timestamp || '',
+        action: function() { showPage('messages'); }
+      });
+    });
+
+    // 2. Mekan bot onaylari
+    const botSnap = await db.collection('pending_venues').orderBy('createdAt', 'desc').limit(30).get();
+    botSnap.docs.forEach(d => {
+      const b = d.data();
+      allNotifs.push({
+        id: 'bot_' + d.id, type: 'bot', read: false,
+        icon: '🤖', iconBg: 'rgba(196,82,26,.1)',
+        title: 'Yeni mekan onerisi: ' + (b.title || 'Isimsiz'),
+        desc: (b.location || '') + (b.category ? ' · ' + b.category : ''),
+        time: b.createdAt || '',
+        action: function() { showPage('bot'); }
+      });
+    });
+
+    // 3. Yer bot onaylari
+    const plBotSnap = await db.collection('pending_places').orderBy('createdAt', 'desc').limit(30).get();
+    plBotSnap.docs.forEach(d => {
+      const b = d.data();
+      allNotifs.push({
+        id: 'pbot_' + d.id, type: 'bot', read: false,
+        icon: '📍', iconBg: 'rgba(90,122,86,.1)',
+        title: 'Yeni yer onerisi: ' + (b.title || 'Isimsiz'),
+        desc: b.location || '',
+        time: b.createdAt || '',
+        action: function() { showPage('placebot'); }
+      });
+    });
+
+    // 4. Sistem — son giris bilgileri
+    const readNotifs = JSON.parse(localStorage.getItem('readNotifs') || '[]');
+    allNotifs.forEach(n => { if (readNotifs.includes(n.id)) n.read = true; });
+
+    // Zamana gore sirala
+    allNotifs.sort((a, b) => (b.time || '').localeCompare(a.time || ''));
+
+    // Badge guncelle
+    updateNotifBadge();
+    renderNotifList();
+
+  } catch(err) {
+    list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--red)">Yuklenemedi: ' + err.message + '</div>';
+  }
+}
+
+function renderNotifList() {
+  const list = document.getElementById('notif-list');
+  let filtered = allNotifs;
+  if (notifFilter !== 'all') filtered = allNotifs.filter(n => n.type === notifFilter);
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted);font-size:.88rem">Bildirim yok.</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(n => {
+    const timeStr = n.time ? formatNotifTime(n.time) : '';
+    return '<div class="notif-item ' + (n.read ? '' : 'unread') + '" onclick="openNotif(\'' + n.id + '\')" data-id="' + n.id + '">' +
+      '<div class="notif-icon" style="background:' + n.iconBg + '">' + n.icon + '</div>' +
+      '<div class="notif-body">' +
+        '<div class="notif-title">' + n.title + '</div>' +
+        '<div class="notif-desc">' + n.desc + '</div>' +
+        '<div class="notif-time">' + timeStr + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function formatNotifTime(t) {
+  try {
+    const d = new Date(t);
+    const now = new Date();
+    const diff = Math.floor((now - d) / 1000);
+    if (diff < 60) return 'Az once';
+    if (diff < 3600) return Math.floor(diff / 60) + ' dk once';
+    if (diff < 86400) return Math.floor(diff / 3600) + ' saat once';
+    if (diff < 604800) return Math.floor(diff / 86400) + ' gun once';
+    return d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch(e) { return ''; }
+}
+
+function openNotif(id) {
+  const n = allNotifs.find(x => x.id === id);
+  if (!n) return;
+  // Okundu isaretle
+  n.read = true;
+  const readNotifs = JSON.parse(localStorage.getItem('readNotifs') || '[]');
+  if (!readNotifs.includes(id)) { readNotifs.push(id); localStorage.setItem('readNotifs', JSON.stringify(readNotifs)); }
+  updateNotifBadge();
+  renderNotifList();
+  // Ilgili sayfaya git
+  if (n.action) n.action();
+}
+
+function filterNotifs(type, btn) {
+  notifFilter = type;
+  document.querySelectorAll('.notif-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderNotifList();
+}
+
+function markAllNotifsRead() {
+  const readNotifs = JSON.parse(localStorage.getItem('readNotifs') || '[]');
+  allNotifs.forEach(n => { n.read = true; if (!readNotifs.includes(n.id)) readNotifs.push(n.id); });
+  localStorage.setItem('readNotifs', JSON.stringify(readNotifs));
+  updateNotifBadge();
+  renderNotifList();
+  showToast('Tum bildirimler okundu olarak isaretlendi.', 'success');
+}
+
+function updateNotifBadge() {
+  const unread = allNotifs.filter(n => !n.read).length;
+  const badge = document.getElementById('notif-badge');
+  if (badge) {
+    badge.textContent = unread;
+    badge.style.display = unread > 0 ? '' : 'none';
+  }
+}
+
+// Sayfa yuklendiginde badge guncelle
+async function initNotifBadge() {
+  try {
+    const [msgSnap, botSnap, plSnap] = await Promise.all([
+      db.collection('messages').where('read', '==', false).get(),
+      db.collection('pending_venues').get(),
+      db.collection('pending_places').get()
+    ]);
+    const readNotifs = JSON.parse(localStorage.getItem('readNotifs') || '[]');
+    let unread = 0;
+    msgSnap.docs.forEach(d => { if (!readNotifs.includes(d.id)) unread++; });
+    botSnap.docs.forEach(d => { if (!readNotifs.includes('bot_' + d.id)) unread++; });
+    plSnap.docs.forEach(d => { if (!readNotifs.includes('pbot_' + d.id)) unread++; });
+    const badge = document.getElementById('notif-badge');
+    if (badge) { badge.textContent = unread; badge.style.display = unread > 0 ? '' : 'none'; }
+  } catch(e) {}
 }
 
 /* ══════════════════════════════════════════════════
