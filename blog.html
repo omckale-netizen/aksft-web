@@ -188,7 +188,7 @@ async function loadBlogPosts() {
       var p = doc.data();
       var readTime = ''; var date = '';
       var imgHtml = p.image
-        ? '<img src="' + p.image + '" alt="' + (p.title || '') + '" loading="lazy" onload="this.classList.add(\'loaded\')">'
+        ? '<img src="' + p.image + '" alt="' + (p.title || '') + '" loading="lazy" onload="var el=this;setTimeout(function(){el.classList.add(\'loaded\')},50)">'
         : '<div class="blog-emoji">' + (p.emoji || '📝') + '</div>';
 
       return '<a href="blog?yazi=' + doc.id + '" class="blog-card">' +
@@ -226,7 +226,7 @@ async function loadSinglePost(slug) {
       '<h1 class="bh-h1">' + (p.title||'') + '</h1>';
 
     if (p.image) {
-      document.getElementById('bp-img-wrap').innerHTML = '<img src="' + p.image + '" alt="' + (p.title||'') + '" onload="this.classList.add(\'loaded\')">';
+      document.getElementById('bp-img-wrap').innerHTML = '<img src="' + p.image + '" alt="' + (p.title||'') + '" onload="var el=this;setTimeout(function(){el.classList.add(\'loaded\')},50)">';
     }
 
     document.getElementById('bp-content').innerHTML = p.content || '';
@@ -266,7 +266,7 @@ async function loadSinglePost(slug) {
         relEl.innerHTML = '<div class="bp-related"><div class="bp-related-title">Bunları da okuyabilirsin</div><div class="bp-related-grid">' +
           related.map(function(d) {
             var r = d.data();
-            var imgHtml = r.image ? '<img src="'+r.image+'" alt="'+r.title+'" loading="lazy" onload="this.classList.add(\'loaded\')">' : '<div class="bp-rel-emoji">'+(r.emoji||'📝')+'</div>';
+            var imgHtml = r.image ? '<img src="'+r.image+'" alt="'+r.title+'" loading="lazy" onload="var el=this;setTimeout(function(){el.classList.add(\'loaded\')},50)">' : '<div class="bp-rel-emoji">'+(r.emoji||'📝')+'</div>';
             return '<a href="blog?yazi='+d.id+'" class="bp-related-card"><div class="bp-related-img">'+imgHtml+'</div><div class="bp-related-body"><div class="bp-related-cat">'+(r.category||'')+'</div><div class="bp-related-name">'+(r.title||'')+'</div></div></a>';
           }).join('') + '</div></div>';
       }
