@@ -180,26 +180,28 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     }
 
     /* FOOTER */
-    #site-footer{position:relative;overflow:hidden;background:linear-gradient(170deg,#0A1220 0%,#0D1829 50%,#0E1A2E 100%);}
-    #site-footer::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 20% 100%,rgba(196,82,26,.06) 0%,transparent 60%),radial-gradient(ellipse 40% 50% at 80% 0%,rgba(26,107,138,.05) 0%,transparent 60%);pointer-events:none;}
-    #site-footer .ft-inner{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:48px 24px 0;}
-    #site-footer .ft-glass{background:rgba(255,255,255,.03);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(245,237,224,.07);border-radius:20px;padding:36px 32px;margin-bottom:32px;}
-    #site-footer .ft-brand{text-align:center;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid rgba(245,237,224,.06);}
-    #site-footer .ft-brand img{height:36px;width:auto;opacity:0;transition:opacity .5s ease;}
-    #site-footer .ft-brand img.logo-loaded{opacity:1;}
-    #site-footer .ft-brand p{font-size:.78rem;color:rgba(245,237,224,.3);line-height:1.65;margin-top:10px;max-width:320px;margin-left:auto;margin-right:auto;}
-    #site-footer .ft-cols{display:flex;justify-content:center;gap:48px;flex-wrap:wrap;}
-    #site-footer .ft-col-title{font-size:.58rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,237,224,.2);margin-bottom:12px;text-align:center;}
-    #site-footer .ft-col a{display:flex;align-items:center;gap:6px;color:rgba(245,237,224,.4);text-decoration:none;font-size:.78rem;margin-bottom:8px;transition:all .15s;justify-content:center;}
-    #site-footer .ft-col a:hover{color:var(--cream);}
-    #site-footer .ft-col a span{font-size:.72rem;}
-    #site-footer .ft-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(245,237,224,.06),transparent);margin-bottom:18px;}
-    #site-footer .ft-bottom{display:flex;align-items:center;justify-content:space-between;padding-bottom:22px;gap:12px;flex-wrap:wrap;}
-    #site-footer .ft-copy{font-size:.64rem;color:rgba(245,237,224,.15);line-height:1.35;}
-    #site-footer .ft-badge{font-size:.58rem;color:rgba(245,237,224,.2);padding:4px 12px;border:1px solid rgba(245,237,224,.08);border-radius:999px;}
-    @media(max-width:640px){
-      #site-footer .ft-glass{padding:28px 20px;}
-      #site-footer .ft-cols{gap:28px;}
+    #site-footer{position:relative;overflow:hidden;background:#0D1829;}
+    #site-footer .ft-inner{max-width:1100px;margin:0 auto;padding:32px 24px 20px;}
+    #site-footer .ft-top{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-bottom:20px;border-bottom:1px solid rgba(245,237,224,.06);}
+    #site-footer .ft-logo-area{display:flex;align-items:center;gap:12px;flex-shrink:0;}
+    #site-footer .ft-logo-area img{height:28px;width:auto;opacity:0;transition:opacity .5s ease;}
+    #site-footer .ft-logo-area img.logo-loaded{opacity:1;}
+    #site-footer .ft-tagline{font-size:.7rem;color:rgba(245,237,224,.25);white-space:nowrap;}
+    #site-footer .ft-links{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;}
+    #site-footer .ft-links a{color:rgba(245,237,224,.35);text-decoration:none;font-size:.72rem;font-weight:500;padding:5px 10px;border-radius:8px;transition:all .15s;}
+    #site-footer .ft-links a:hover{color:#F5EDE0;background:rgba(245,237,224,.06);}
+    #site-footer .ft-social{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+    #site-footer .ft-social-link{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:rgba(245,237,224,.3);border:1px solid rgba(245,237,224,.08);transition:all .2s;}
+    #site-footer .ft-social-link:hover{color:#F5EDE0;border-color:rgba(245,237,224,.2);background:rgba(245,237,224,.06);}
+    #site-footer .ft-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:14px;gap:12px;flex-wrap:wrap;}
+    #site-footer .ft-copy{font-size:.62rem;color:rgba(245,237,224,.15);}
+    #site-footer .ft-copy a{color:rgba(245,237,224,.2);text-decoration:none;transition:color .15s;}
+    #site-footer .ft-copy a:hover{color:rgba(245,237,224,.5);}
+    #site-footer .ft-loc{font-size:.62rem;color:rgba(245,237,224,.15);}
+    @media(max-width:768px){
+      #site-footer .ft-top{flex-direction:column;text-align:center;gap:16px;}
+      #site-footer .ft-logo-area{flex-direction:column;gap:6px;}
+      #site-footer .ft-links{gap:4px;}
       #site-footer .ft-bottom{flex-direction:column;text-align:center;}
     }
 
@@ -1080,37 +1082,35 @@ function renderFooter(opts = {}) {
   const footerHTML = `
     <footer id="site-footer" role="contentinfo">
       <div class="ft-inner">
-        <div class="ft-glass">
-          <div class="ft-brand">
+        <!-- Üst: Logo + Linkler + Sosyal -->
+        <div class="ft-top">
+          <div class="ft-logo-area">
             <img ${SITE_LOGO ? 'class="site-logo-img" src="' + SITE_LOGO + '" onload="var s=this;setTimeout(function(){s.classList.add(\'logo-loaded\')},50)"' : 'class="site-logo-img"'} data-logo="1" alt="Assos'u Keşfet" width="120" height="40" loading="eager" decoding="async">
-            <p>Assos bölgesini keşfetmek için hazırlanmış dijital bir rehber.</p>
+            <p class="ft-tagline">Assos'un dijital keşif rehberi</p>
           </div>
-          <div class="ft-cols">
-            <div class="ft-col">
-              <p class="ft-col-title">Keşfet</p>
-              <a href="${basePath}rotalar.html"><span>🗺</span> Rotalar</a>
-              <a href="${basePath}yerler.html"><span>📍</span> Yerler</a>
-              <a href="${basePath}mekanlar.html"><span>🏪</span> Mekanlar</a>
-              <a href="${basePath}koyler.html"><span>🏘</span> Köyler</a>
-              <a href="${basePath}harita.html"><span>🧭</span> Harita</a>
-            </div>
-            <div class="ft-col">
-              <p class="ft-col-title">Rehber</p>
-              <a href="${basePath}rehber.html"><span>📖</span> Gezi Rehberi</a>
-              <a href="${basePath}blog.html"><span>✍️</span> Blog</a>
-              <a href="${basePath}planla.html"><span>🗓</span> Gezi Planla</a>
-            </div>
-            <div class="ft-col">
-              <p class="ft-col-title">Hakkımızda</p>
-              <a href="${basePath}hakkimizda.html"><span>💡</span> Biz Kimiz</a>
-              <a href="${basePath}iletisim.html"><span>✉️</span> İletişim</a>
-            </div>
+          <nav class="ft-links">
+            <a href="${basePath}mekanlar.html">Mekanlar</a>
+            <a href="${basePath}rotalar.html">Rotalar</a>
+            <a href="${basePath}yerler.html">Yerler</a>
+            <a href="${basePath}koyler.html">Köyler</a>
+            <a href="${basePath}harita.html">Harita</a>
+            <a href="${basePath}blog.html">Blog</a>
+            <a href="${basePath}rehber.html">Rehber</a>
+            <a href="${basePath}iletisim.html">İletişim</a>
+          </nav>
+          <div class="ft-social">
+            <a href="https://www.instagram.com/assosukesfet/" target="_blank" rel="noopener" aria-label="Instagram" class="ft-social-link">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+            </a>
+            <a href="mailto:assosukesfet@gmail.com" aria-label="E-posta" class="ft-social-link">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            </a>
           </div>
         </div>
-        <div class="ft-divider"></div>
+        <!-- Alt: Copyright -->
         <div class="ft-bottom">
-          <span class="ft-copy">© 2026 Assos'u Keşfet. Tüm hakları saklıdır.<br>Bu sitedeki tüm içerikler telif hakkı ile korunmaktadır.<br><a href="${basePath}gizlilik.html" style="color:rgba(245,237,224,.25);font-size:.6rem;">Gizlilik Politikası</a> · <a href="${basePath}kullanim-kosullari.html" style="color:rgba(245,237,224,.25);font-size:.6rem;">Kullanım Koşulları</a></span>
-          <span class="ft-badge">🌿 Assos, Ayvacık, Çanakkale</span>
+          <span class="ft-copy">© 2026 Assos'u Keşfet · Tüm hakları saklıdır · <a href="${basePath}gizlilik.html">Gizlilik</a> · <a href="${basePath}kullanim-kosullari.html">Kullanım Koşulları</a></span>
+          <span class="ft-loc">📍 Assos, Ayvacık, Çanakkale</span>
         </div>
       </div>
     </footer>
