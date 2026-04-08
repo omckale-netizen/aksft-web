@@ -349,6 +349,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .btn-sm{padding:6px 12px;font-size:.75rem}
 .ana-filter.active{background:var(--navy) !important;color:#fff !important;border-color:var(--navy) !important}
 .msg-tab.active{background:var(--navy) !important;color:#fff !important;border-color:var(--navy) !important}
+.msg-tab-count{font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:999px;background:rgba(0,0,0,.08);margin-left:3px}
+.msg-tab.active .msg-tab-count{background:rgba(255,255,255,.2)}
 .msg-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:0 0 16px}
 .msg-search{flex:1;min-width:180px;padding:8px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.82rem;font-family:inherit;background:var(--cream);color:var(--navy);outline:none;transition:border .2s}
 .msg-search:focus{border-color:var(--terra)}
@@ -1264,10 +1266,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <div class="panel-card" style="height:100%;display:flex;flex-direction:column">
             <div class="panel-card-head" style="flex-shrink:0">
               <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;flex:1">
-                <button class="btn btn-sm btn-secondary msg-tab active" onclick="setMsgFilter('all',this)">Tümü</button>
-                <button class="btn btn-sm btn-secondary msg-tab" onclick="setMsgFilter('unread',this)">Okunmamış</button>
-                <button class="btn btn-sm btn-secondary msg-tab" onclick="setMsgFilter('read',this)">Okunmuş</button>
-                <button class="btn btn-sm btn-secondary msg-tab" onclick="setMsgFilter('trash',this)">🗑 Çöp</button>
+                <button class="btn btn-sm btn-secondary msg-tab active" onclick="setMsgFilter('all',this)">Tümü <span class="msg-tab-count" id="msg-count-all"></span></button>
+                <button class="btn btn-sm btn-secondary msg-tab" onclick="setMsgFilter('unread',this)">Okunmamış <span class="msg-tab-count" id="msg-count-unread"></span></button>
+                <button class="btn btn-sm btn-secondary msg-tab" onclick="setMsgFilter('read',this)">Okunmuş <span class="msg-tab-count" id="msg-count-read"></span></button>
+                <button class="btn btn-sm btn-secondary msg-tab" onclick="setMsgFilter('trash',this)">🗑 Çöp <span class="msg-tab-count" id="msg-count-trash"></span></button>
               </div>
             </div>
             <div style="padding:10px 14px 0;flex-shrink:0;display:flex;gap:8px">
@@ -2868,7 +2870,20 @@ function getMsgCatClass(subject) {
   return 'msg-cat-Genel';
 }
 
+function updateMsgTabCounts() {
+  var all = allMessages.filter(m => !m.trashed).length;
+  var unread = allMessages.filter(m => !m.read && !m.trashed).length;
+  var read = allMessages.filter(m => m.read && !m.trashed).length;
+  var trash = allMessages.filter(m => m.trashed).length;
+  var el;
+  el = document.getElementById('msg-count-all'); if (el) el.textContent = all;
+  el = document.getElementById('msg-count-unread'); if (el) el.textContent = unread;
+  el = document.getElementById('msg-count-read'); if (el) el.textContent = read;
+  el = document.getElementById('msg-count-trash'); if (el) el.textContent = trash;
+}
+
 function renderMessageList() {
+  updateMsgTabCounts();
   const searchQ = (document.getElementById('msg-search')?.value || '').toLowerCase().trim();
   const catFilter = document.getElementById('msg-cat-filter')?.value || '';
 
