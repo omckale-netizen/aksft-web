@@ -2390,15 +2390,32 @@ async function deleteCategory(idx) {
 // Logo yükleme
 async function uploadLogo(file) {
   if (!file) return;
-  if (file.type !== 'image/png') { showToast('Sadece PNG dosya yukleyebilirsiniz.', 'error'); return; }
+  if (!file.type.startsWith('image/')) { showToast('Sadece gorsel dosya yukleyebilirsiniz.', 'error'); return; }
   if (file.size > 5 * 1024 * 1024) { showToast('Dosya cok buyuk. Maks 5MB.', 'error'); return; }
 
   const statusEl = document.getElementById('logo-upload-status');
-  statusEl.textContent = 'Yukleniyor...';
+  statusEl.textContent = 'Optimize ediliyor...';
 
   try {
-    const ref = firebase.storage().ref('site/logo.png');
-    await ref.put(file, { contentType: 'image/png' });
+    // Logo'yu 200px genislige kucult ve WebP yap
+    const optimizedBlob = await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = function() {
+        const maxW = 200;
+        let w = img.width, h = img.height;
+        if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(resolve, 'image/webp', 0.9);
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+
+    statusEl.textContent = 'Yukleniyor...';
+    const ref = firebase.storage().ref('site/logo.webp');
+    await ref.put(optimizedBlob, { contentType: 'image/webp' });
     const url = await ref.getDownloadURL();
     await db.collection('settings').doc('site').set({ logoUrl: url, logoUpdatedAt: new Date().toISOString() }, { merge: true });
     statusEl.textContent = 'Yuklendi!';
