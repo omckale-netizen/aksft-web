@@ -7460,7 +7460,15 @@ async function generateReport(type) {
 
   showToast('Rapor hazırlanıyor...', 'success');
 
-  var events = window._analyticsEvents || [];
+  // Veriyi her zaman Firestore'dan çek
+  var eventsQuery = db.collection('analytics_events').orderBy('timestamp', 'desc');
+  if (analyticsPeriod > 0) {
+    var cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - analyticsPeriod);
+    eventsQuery = eventsQuery.where('timestamp', '>=', cutoff.toISOString());
+  }
+  var eventsSnap = await eventsQuery.limit(5000).get();
+  var events = eventsSnap.docs.map(function(d) { return d.data(); });
   var catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskele'};
   var periodLabel = analyticsPeriod === 0 ? 'Tüm Zamanlar' : 'Son ' + analyticsPeriod + ' Gün';
   var reportDate = new Date().toLocaleDateString('tr-TR', { day:'numeric', month:'long', year:'numeric' });
