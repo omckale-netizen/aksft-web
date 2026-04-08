@@ -15,25 +15,30 @@
     if (el) { el.style.opacity = '0'; setTimeout(function() { el.remove(); }, 300); }
   }
 
-  // Firebase SDK yükle
+  // Firebase SDK yükle — app önce, sonra firestore + app-check paralel
   var s1 = document.createElement('script');
   s1.src = 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js';
   s1.crossOrigin = 'anonymous';
   s1.integrity = 'sha384-4DnN3LMk363cZnO0ZZ+46dvN6+1On5ODUbq/68J4ZeSDAghncVXodw2jecSmTyAe';
   s1.onload = function() {
+    // Firestore ve App Check paralel yükle
+    var loaded = 0;
+    function onSubLoad() { loaded++; if (loaded >= 2) initFirebase(); }
+
     var s2 = document.createElement('script');
     s2.src = 'https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js';
     s2.crossOrigin = 'anonymous';
     s2.integrity = 'sha384-OWv+RYFfLxKnRm2S6RYMcxn1Un3vxC0dbSWy7XC9DKsJGGHMWBCbDV27k62l/2XK';
-    s2.onload = function() {
-      var s3 = document.createElement('script');
-      s3.src = 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app-check-compat.js';
-      s3.onload = initFirebase;
-      s3.onerror = initFirebase; // App Check yuklenemezse de devam et
-      document.head.appendChild(s3);
-    };
+    s2.onload = onSubLoad;
     s2.onerror = fallback;
+
+    var s3 = document.createElement('script');
+    s3.src = 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app-check-compat.js';
+    s3.onload = onSubLoad;
+    s3.onerror = onSubLoad; // App Check yuklenemezse de devam et
+
     document.head.appendChild(s2);
+    document.head.appendChild(s3);
   };
   s1.onerror = fallback;
   document.head.appendChild(s1);
@@ -43,7 +48,7 @@
     if (!window._firebaseReady) {
       fallback();
     }
-  }, 6000);
+  }, 4000);
 
   // LocalStorage cache — aninda yukleme
   var DATA_CACHE_KEY = 'assos_data_cache';
