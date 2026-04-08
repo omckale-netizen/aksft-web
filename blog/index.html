@@ -62,14 +62,13 @@
       .post-body{padding:28px 20px 60px}
     }
   </style>
-
   <script type="application/ld+json" id="post-schema"></script>
 </head>
 <body>
 
 <div id="nav-placeholder"></div>
 
-<section class="post-hero" id="post-hero">
+<section class="post-hero">
   <div class="ph-content">
     <a href="../blog" class="ph-back">← Blog'a Dön</a>
     <div class="ph-cat" id="post-cat"></div>
@@ -103,47 +102,50 @@ function pageInit() {
 }
 
 async function loadPost() {
-  var slug = window.location.pathname.split('/').pop().replace('.html','');
-  if (!slug) { document.getElementById('post-content').innerHTML = '<div class="post-loading">Yazı bulunamadı.</div>'; return; }
+  // URL'den slug al: /blog/yazi-slug veya /blog/yazi-slug/
+  var pathParts = window.location.pathname.replace(/\/$/,'').split('/');
+  var slug = pathParts[pathParts.length - 1];
+
+  // Eğer slug "blog" ise veya boşsa ana blog sayfasına yönlendir
+  if (!slug || slug === 'blog') { window.location.href = '../blog'; return; }
 
   try {
     var doc = await firebase.firestore().collection('blog_posts').doc(slug).get();
-    if (!doc.exists) { document.getElementById('post-content').innerHTML = '<div class="post-loading">Yazı bulunamadı.</div>'; return; }
+    if (!doc.exists) {
+      document.getElementById('post-title').textContent = 'Yazı Bulunamadı';
+      document.getElementById('post-content').innerHTML = '<div class="post-loading">Bu yazı mevcut değil veya kaldırılmış.<br><br><a href="../blog" style="color:var(--terra);font-weight:700">← Blog\'a Dön</a></div>';
+      return;
+    }
 
     var p = doc.data();
     var date = p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('tr-TR', { day:'numeric', month:'long', year:'numeric' }) : '';
     var readTime = p.readTime || Math.ceil((p.content || '').split(' ').length / 200) + ' dk';
 
-    // Hero
     document.getElementById('post-cat').textContent = p.category || 'Genel';
     document.getElementById('post-title').textContent = p.title || '';
     document.getElementById('post-meta').innerHTML = '<span>📅 ' + date + '</span><span>⏱ ' + readTime + ' okuma</span>';
 
-    // Image
     if (p.image) {
       document.getElementById('post-img-wrap').style.display = '';
       document.getElementById('post-img').src = p.image;
       document.getElementById('post-img').alt = p.title || '';
     }
 
-    // Content
     document.getElementById('post-content').innerHTML = p.content || '';
 
-    // Tags
     if (p.tags && p.tags.length) {
       var tagsEl = document.getElementById('post-tags');
       tagsEl.style.display = '';
       tagsEl.innerHTML = p.tags.map(function(t) { return '<span class="post-tag">#' + t + '</span>'; }).join('');
     }
 
-    // Share
     var url = window.location.href;
     document.getElementById('post-share').innerHTML =
       '<a href="https://wa.me/?text=' + encodeURIComponent(p.title + ' ' + url) + '" target="_blank" title="WhatsApp">💬</a>' +
       '<a href="https://twitter.com/intent/tweet?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(p.title) + '" target="_blank" title="X">𝕏</a>' +
       '<a href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url) + '" target="_blank" title="Facebook">📘</a>';
 
-    // SEO — update meta
+    // SEO
     document.title = p.title + ' — Assos\'u Keşfet Blog';
     var descText = (p.excerpt || (p.content || '').replace(/<[^>]*>/g,'').substring(0,160));
     document.querySelector('meta[name="description"]').content = descText;
@@ -156,7 +158,6 @@ async function loadPost() {
     document.querySelector('meta[name="twitter:title"]').content = p.title + ' — Assos\'u Keşfet';
     document.querySelector('meta[name="twitter:description"]').content = descText;
 
-    // Schema.org
     document.getElementById('post-schema').textContent = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "BlogPosting",
