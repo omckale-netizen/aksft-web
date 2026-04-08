@@ -1294,6 +1294,19 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
         </div>
       </div>
 
+      <!-- Tıklama Raporu -->
+      <div class="panel-card" style="margin-top:20px">
+        <div class="panel-card-head"><h3>📱 Tiklama Raporu</h3><span style="font-size:.68rem;color:var(--text-muted)">Mekan bazli tum aksiyonlar</span></div>
+        <div class="panel-table-wrap">
+          <table class="panel-table" id="analytics-clicks-table">
+            <thead><tr>
+              <th></th><th>Mekan</th><th>👁 Goruntuleme</th><th>📞 Ara</th><th>💬 WhatsApp</th><th>🗺 Yol Tarifi</th><th>📋 Rez.</th><th>Toplam</th><th>% Donusum</th>
+            </tr></thead>
+            <tbody id="analytics-clicks-body"></tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- Dönem Karşılaştırma -->
       <div class="panel-card" style="margin-top:20px">
         <div class="panel-card-head" style="justify-content:space-between"><h3>📊 Donem Karsilastirmasi</h3><span id="analytics-compare-label" style="font-size:.72rem;color:var(--text-muted);font-weight:500"></span></div>
@@ -2879,10 +2892,11 @@ async function renderAnalytics() {
         }
       } else if (ev.type === 'action') {
         const vid = ev.target;
-        if (!venueActions[vid]) venueActions[vid] = { call: 0, whatsapp: 0, reservation: 0 };
+        if (!venueActions[vid]) venueActions[vid] = { call: 0, whatsapp: 0, reservation: 0, directions: 0 };
         if (ev.action === 'call') { venueActions[vid].call++; totalCalls++; }
         if (ev.action === 'whatsapp') { venueActions[vid].whatsapp++; totalWA++; }
         if (ev.action === 'reservation') { venueActions[vid].reservation++; totalRez++; }
+        if (ev.action === 'directions') { venueActions[vid].directions++; }
       }
     });
 
@@ -3003,6 +3017,33 @@ async function renderAnalytics() {
         '<div class="recent-item"><div class="recent-emoji">📄</div>' +
         '<div class="recent-info" style="flex:1"><div class="ri-title">' + p.page + '</div></div>' +
         '<div style="font-size:.85rem;font-weight:700;color:var(--navy)">' + p.views + '</div></div>').join('');
+
+    // Tıklama raporu tablosu
+    const clickData = venueList.map(v => {
+      const acts = venueActions[v.id] || { call:0, whatsapp:0, reservation:0, directions:0 };
+      const total = acts.call + acts.whatsapp + acts.reservation + acts.directions;
+      return { ...v, directions: acts.directions || 0, totalClicks: total };
+    }).filter(v => v.views > 0 || v.totalClicks > 0).sort((a, b) => b.totalClicks - a.totalClicks);
+
+    const clicksBody = document.getElementById('analytics-clicks-body');
+    if (clicksBody) {
+      clicksBody.innerHTML = clickData.length === 0
+        ? '<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--text-muted)">Henuz veri yok.</td></tr>'
+        : clickData.map(v => {
+          const convColor = v.convRate >= 20 ? 'var(--green)' : v.convRate >= 10 ? 'var(--terra)' : 'var(--text-muted)';
+          return '<tr>' +
+            '<td class="emoji-col">' + v.emoji + '</td>' +
+            '<td><strong>' + v.title + '</strong></td>' +
+            '<td>' + v.views + '</td>' +
+            '<td style="color:#1A6B8A;font-weight:' + (v.call > 0 ? '700' : '400') + '">' + v.call + '</td>' +
+            '<td style="color:#25D366;font-weight:' + (v.whatsapp > 0 ? '700' : '400') + '">' + v.whatsapp + '</td>' +
+            '<td style="color:#4285F4;font-weight:' + (v.directions > 0 ? '700' : '400') + '">' + v.directions + '</td>' +
+            '<td style="color:var(--terra);font-weight:' + (v.reservation > 0 ? '700' : '400') + '">' + v.reservation + '</td>' +
+            '<td><strong>' + v.totalClicks + '</strong></td>' +
+            '<td style="color:' + convColor + ';font-weight:700">%' + v.convRate + '</td>' +
+          '</tr>';
+        }).join('');
+    }
 
     // ── Dönem Karşılaştırması ──
     const compareEl = document.getElementById('analytics-compare');
