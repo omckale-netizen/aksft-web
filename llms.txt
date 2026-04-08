@@ -1,0 +1,123 @@
+# Assos'u Keşfet
+
+> Assos ve Ayvacık bölgesini keşfetmek için hazırlanmış Türkiye'nin ilk ve tek dijital gezi rehberi platformu.
+
+## Hakkında
+
+Assos'u Keşfet (assosukesfet.com), Çanakkale'nin Ayvacık ilçesine bağlı Assos (Behramkale) ve çevresindeki mekanları, gezilecek yerleri, gezi rotalarını, köyleri ve tarihi alanları keşfetmeniz için hazırlanmış kapsamlı bir dijital gezi rehberidir.
+
+Platform, bölgeye gelen yerli ve yabancı turistlere güncel mekan bilgileri, interaktif harita, gezi rotaları, blog içerikleri ve favori kaydetme gibi özellikler sunmaktadır.
+
+## Kapsanan Bölge
+
+- Assos (Behramkale), Ayvacık, Çanakkale, Türkiye
+- Ege Bölgesi kıyı şeridi
+- Biga Yarımadası güney kıyıları
+
+## İçerik Türleri
+
+### Mekanlar
+Platform aşağıdaki kategorilerde mekan bilgileri sunmaktadır:
+- Kafeler (çalışma saatleri, iletişim, konum, görseller)
+- Restoranlar (menü bilgileri, çalışma saatleri)
+- Kahvaltı mekanları
+- Konaklama yerleri (oteller, pansiyonlar, butik oteller — WhatsApp ile müsaitlik sorgulama)
+- Plajlar ve beach club'lar
+- İskeleler
+
+Her mekan için detaylı bilgi sayfası bulunmaktadır: çalışma saatleri, telefon numarası, WhatsApp iletişim, Google Maps / Apple Maps yol tarifi, fotoğraf galerisi ve Instagram bağlantısı.
+
+### Gezilecek Yerler
+- Athena Tapınağı (Antik Assos)
+- Kadırga Koyu
+- Sivrice Limanı
+- Antik Assos Nekropolü
+- Hüdavendigar Camii
+- Murad Hüdavendigar Köprüsü
+- Tarihi ve doğal alanlar
+
+### Gezi Rotaları
+Bölgeyi keşfetmek için hazırlanmış tematik rotalar:
+- 1 Günde Assos rotası
+- Tarihi rota
+- Doğa ve koy rotası
+- Köy keşif rotası
+- Her rota için süre, mesafe, zorluk seviyesi ve durak bilgileri
+
+### Köyler
+Assos ve Ayvacık çevresindeki otantik Ege köyleri:
+- Adatepe (taş evler, zeytinyağı)
+- Babakale (Türkiye'nin en batı noktası)
+- Behramkale (antik şehir)
+- Gülpınar (Apollo Smintheus Tapınağı)
+- Yeşilyurt, Koyunevi ve diğer köyler
+
+### Blog
+Assos ve çevresi hakkında detaylı gezi yazıları:
+- Gezi rehberleri
+- Mekan önerileri
+- Rota ipuçları
+- Tarih ve kültür yazıları
+- Doğa ve yeme-içme içerikleri
+
+## Platform Özellikleri
+
+- **İnteraktif Harita**: Leaflet.js tabanlı harita üzerinde tüm mekanlar ve gezilecek yerler pin olarak gösterilir. Filtre ve arama özelliği mevcuttur.
+- **Favori Kaydetme**: Kullanıcılar beğendikleri mekanları ve yerleri kaydedebilir, paylaşım kodu ile başkalarıyla paylaşabilir.
+- **WhatsApp Entegrasyonu**: Konaklama mekanlarında tarih seçerek doğrudan WhatsApp üzerinden müsaitlik sorgulama.
+- **Yol Tarifi**: Google Maps ve Apple Maps entegrasyonu ile tek tıkla yol tarifi.
+- **Hava Durumu**: Anasayfada güncel Assos hava durumu bilgisi.
+- **Blog**: SEO odaklı, bölge hakkında detaylı gezi yazıları.
+- **Mobil Uyumlu**: Tüm sayfalar mobil cihazlara tam uyumlu responsive tasarım.
+
+## Teknik Bilgiler
+
+- Web sitesi: https://assosukesfet.com
+- Dil: Türkçe (tr)
+- Platform: Statik web sitesi (HTML/CSS/JS)
+- Hosting: Cloudflare Pages
+- Veritabanı: Google Firebase Firestore
+- Harita: Leaflet.js + OpenStreetMap
+- Analitik: Microsoft Clarity
+
+## Sayfa Yapısı
+
+- `/` — Anasayfa (hero, rotalar, mekanlar, yerler, köyler, blog)
+- `/mekanlar` — Tüm mekanlar listesi (kategori ve durum filtresi)
+- `/mekanlar/mekan-detay?id={id}` — Mekan detay sayfası
+- `/rotalar` — Gezi rotaları listesi
+- `/rotalar/rota-detay?id={id}` — Rota detay sayfası
+- `/yerler` — Gezilecek yerler listesi
+- `/koyler` — Köyler listesi
+- `/harita` — İnteraktif harita
+- `/blog` — Blog yazıları listesi
+- `/blog?yazi={slug}` — Blog yazısı detayı
+- `/rehber` — Assos gezi rehberi (SSS, mevsim bilgileri)
+- `/planla` — Gezi planlama aracı
+- `/hakkimizda` — Hakkımızda sayfası
+- `/iletisim` — İletişim formu
+- `/gizlilik` — Gizlilik politikası
+- `/kullanim-kosullari` — Kullanım koşulları
+
+## İletişim
+
+- E-posta: assosukesfet@gmail.com
+- Instagram: @assosukesfet (https://www.instagram.com/assosukesfet/)
+- Konum: Ayvacık, Çanakkale, Türkiye
+
+## Sıkça Sorulan Sorular
+
+**Assos nerede?**
+Assos, Çanakkale'nin Ayvacık ilçesine bağlı, Ege Denizi kıyısında antik bir yerleşim yeridir. Behramkale olarak da bilinir.
+
+**Assos'a nasıl gidilir?**
+İstanbul'dan yaklaşık 5-6 saat, Çanakkale merkezden yaklaşık 1.5 saat mesafededir. Karayolu ile ulaşım sağlanmaktadır.
+
+**Assos'ta en iyi ziyaret zamanı ne zaman?**
+Mayıs-Ekim arası en ideal dönemdir. Yazın deniz ve plaj, ilkbahar ve sonbaharda doğa yürüyüşleri ve tarihi geziler için uygundur.
+
+**Assos'ta neler yapılabilir?**
+Athena Tapınağı ziyareti, antik liman gezisi, Kadırga Koyu'nda deniz, köy keşifleri, zeytinyağı tadımı, gün batımı izleme, doğa yürüyüşleri ve yerel lezzetlerin tadılması.
+
+**Assos'ta konaklama seçenekleri nelerdir?**
+Butik oteller, pansiyonlar, taş evler ve apart daireler mevcuttur. Platform üzerinden konaklama mekanlarını inceleyebilir ve WhatsApp ile müsaitlik sorgulayabilirsiniz.
