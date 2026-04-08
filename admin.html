@@ -403,32 +403,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
   <span style="font-size:.8rem;color:var(--text-muted)">Yukleniyor...</span>
 </div>
 
-<!-- AUTH GUARD: Giriş yapılmadıysa login sayfasına yönlendir -->
-<script>
-(function(){
-  // Firebase yüklenmeden önce hızlı kontrol
-  var s = document.createElement('script');
-  s.src = 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js';
-  s.onload = function(){
-    var s2 = document.createElement('script');
-    s2.src = 'https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js';
-    s2.onload = function(){
-      if (!firebase.apps.length) {
-        firebase.initializeApp({
-          apiKey: "AIzaSyCXqgczplchzjClAZt-Wl2eqgqmUMhLVJs",
-          authDomain: "assosu-kesfet.firebaseapp.com",
-          projectId: "assosu-kesfet"
-        });
-      }
-      firebase.auth().onAuthStateChanged(function(user){
-        if (!user) { window.location.replace('admin-login.html'); }
-      });
-    };
-    document.head.appendChild(s2);
-  };
-  document.head.appendChild(s);
-})();
-</script>
+<!-- AUTH GUARD: onAuthStateChanged zaten asagida, giris yoksa login'e yonlendirir -->
 
 <!-- HAMBURGER -->
 <button class="hamburger" id="hamburger" onclick="toggleSidebar()">&#9776;</button>
@@ -3067,13 +3042,14 @@ async function galDelete(id) {
   dz.addEventListener('drop', ev => { if (ev.dataTransfer.files.length) galHandleFiles(ev.dataTransfer.files); });
 })();
 
-// showPage hook: galeri açılınca yükle
+// showPage hook: sayfa açılınca ilgili yüklemeleri yap
 const _origShowPage = showPage;
 showPage = function(page) {
   _origShowPage(page);
   if (page === 'gallery' && galItems.length === 0) galLoadItems();
   if (page === 'categories') renderCatList();
   if (page === 'settings') loadLogoPreview();
+  if (page === 'security') runSecurityCheck();
 };
 
 /* ══════════════════════════════════════════════════
@@ -7098,14 +7074,6 @@ async function loadLoginLogs() {
   }
 }
 
-// Güvenlik sayfası açıldığında otomatik tara
-const _origShowPage = showPage;
-showPage = function(page) {
-  _origShowPage(page);
-  if (page === 'security') {
-    runSecurityCheck();
-  }
-};
 </script>
 </body>
 </html>
