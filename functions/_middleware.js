@@ -88,12 +88,23 @@ export async function onRequest(context) {
         image = fields.images.arrayValue.values[0].stringValue || image;
       }
 
-      return new Response(buildOgHtml({
+      const schemaTypes = {kafe:'CafeOrCoffeeShop',restoran:'Restaurant',kahvalti:'Restaurant',konaklama:'Hotel',beach:'BarOrPub',iskele:'FoodEstablishment'};
+      const phone = fields.phone?.stringValue || '';
+      const schema = JSON.stringify({
+        '@context':'https://schema.org','@type':schemaTypes[cat]||'LocalBusiness',
+        'name':venueName,'description':shortDesc,
+        'address':{'@type':'PostalAddress','addressLocality':loc,'addressRegion':'Canakkale','addressCountry':'TR'},
+        'telephone':phone,'image':image
+      });
+
+      const html = buildOgHtml({
         title,
         description: desc || 'Assos ve Ayvacik\'ta mekan detayi.',
         url: `https://assosukesfet.com/mekanlar/mekan-detay.html?id=${id}`,
         image
-      }), { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
+      }).replace('</head>', '<script type="application/ld+json">' + schema + '</script></head>');
+
+      return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
     } catch (e) { return next(); }
   }
 

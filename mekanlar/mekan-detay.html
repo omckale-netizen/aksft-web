@@ -83,6 +83,39 @@ function pageInit() {
     }
     if (twTitle) twTitle.content = seoTitle;
     if (twDesc) twDesc.content = seoDesc;
+
+    // LocalBusiness Schema
+    const schemaTypes = {kafe:'CafeOrCoffeeShop',restoran:'Restaurant',kahvalti:'Restaurant',konaklama:'Hotel',beach:'BarOrPub',iskele:'FoodEstablishment'};
+    const schema = {
+      '@context': 'https://schema.org',
+      '@type': schemaTypes[venue.category] || 'LocalBusiness',
+      'name': venue.title,
+      'description': venue.shortDesc || '',
+      'url': 'https://assosukesfet.com/mekanlar/mekan-detay?id=' + venueId,
+      'address': {
+        '@type': 'PostalAddress',
+        'addressLocality': venue.location || 'Assos',
+        'addressRegion': 'Çanakkale',
+        'addressCountry': 'TR'
+      }
+    };
+    if (venue.phone) schema.telephone = venue.phone;
+    if (venue.address) schema.address.streetAddress = venue.address;
+    if (venue.images && venue.images[0]) schema.image = venue.images[0];
+    if (venue.website) schema.url = venue.website;
+    if (venue.hours) schema.openingHours = venue.hours;
+    if (venue.weeklyHours && venue.weeklyHours.length > 0) {
+      schema.openingHoursSpecification = venue.weeklyHours.map(function(wh) {
+        return { '@type': 'OpeningHoursSpecification', 'dayOfWeek': wh.days, 'opens': (wh.hours||'').split(' - ')[0], 'closes': (wh.hours||'').split(' - ')[1] || '' };
+      });
+    }
+    if (venue.lat && venue.lng) {
+      schema.geo = { '@type': 'GeoCoordinates', 'latitude': venue.lat, 'longitude': venue.lng };
+    }
+    var schemaScript = document.createElement('script');
+    schemaScript.type = 'application/ld+json';
+    schemaScript.textContent = JSON.stringify(schema);
+    document.head.appendChild(schemaScript);
   }
 }
 document.addEventListener('dataReady', pageInit);
