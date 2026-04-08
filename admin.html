@@ -1188,6 +1188,48 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         </div>
       </div>
 
+      <!-- Otomatik Yedekleme -->
+      <div class="panel-card" style="margin-bottom:20px">
+        <div class="panel-card-head">
+          <h3>🔄 Otomatik Yedekleme</h3>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span id="auto-backup-status" style="font-size:.72rem;color:var(--text-muted)"></span>
+            <button class="btn btn-primary btn-sm" onclick="runAutoBackup(true)">Şimdi Yedekle</button>
+          </div>
+        </div>
+        <div style="padding:20px">
+          <!-- Durum kartları -->
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+            <div style="padding:12px 14px;background:rgba(0,0,0,.02);border-radius:10px;text-align:center">
+              <div style="font-size:.68rem;color:var(--text-muted);margin-bottom:4px">Durum</div>
+              <div id="ab-status-badge" style="font-size:.78rem;font-weight:700;color:var(--green)">✓ Aktif</div>
+            </div>
+            <div style="padding:12px 14px;background:rgba(0,0,0,.02);border-radius:10px;text-align:center">
+              <div style="font-size:.68rem;color:var(--text-muted);margin-bottom:4px">Son Yedek</div>
+              <div id="ab-last-date" style="font-size:.78rem;font-weight:700;color:var(--navy)">—</div>
+            </div>
+            <div style="padding:12px 14px;background:rgba(0,0,0,.02);border-radius:10px;text-align:center">
+              <div style="font-size:.68rem;color:var(--text-muted);margin-bottom:4px">Sıradaki</div>
+              <div id="ab-next-date" style="font-size:.78rem;font-weight:700;color:var(--navy)">—</div>
+            </div>
+          </div>
+          <div style="font-size:.75rem;color:var(--text-muted);line-height:1.6">
+            Haftalık otomatik yedekleme aktif. Admin panele her girişte kontrol edilir. 7 günden eski ise Firestore verisi otomatik olarak Firebase Storage'a yedeklenir ve Telegram'a bildirim gönderilir.
+          </div>
+        </div>
+      </div>
+
+      <!-- Yedek Listesi -->
+      <div class="panel-card" style="margin-bottom:20px">
+        <div class="panel-card-head">
+          <h3>📋 Yedekleme Geçmişi</h3>
+          <button class="btn btn-sm btn-secondary" onclick="loadBackupList()">Yenile</button>
+        </div>
+        <div id="ab-backup-list" style="max-height:300px;overflow-y:auto">
+          <div style="padding:24px;text-align:center;color:var(--text-muted);font-size:.82rem">Yükleniyor...</div>
+        </div>
+      </div>
+
       <!-- Sync Status Bar -->
       <div class="backup-sync-bar" id="backup-sync-bar">
         <div class="backup-sync-dot"></div>
@@ -2910,6 +2952,8 @@ function initApp() {
   try { initNotifBadge(); } catch(e) {}
   // Haftalık llms-full.txt otomatik güncelleme kontrolü
   checkAutoLlmsUpdate();
+  // Haftalık otomatik yedekleme kontrolü
+  checkAutoBackup();
 }
 
 /* ══════════════════════════════════════════════════
@@ -3393,6 +3437,7 @@ showPage = function(page) {
   if (page === 'categories') renderCatList();
   if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); }
   if (page === 'security') runSecurityCheck();
+  if (page === 'export') { loadBackupList(); updateAutoBackupUI(); }
 };
 
 /* ══════════════════════════════════════════════════
@@ -7557,6 +7602,185 @@ function generateLlmsFullTxt() {
 
   if (statusEl) statusEl.innerHTML = '<span style="color:var(--green)">✓ İndirildi! Projenin kök dizinine koyun ve deploy edin. (' + v.length + ' mekan, ' + r.length + ' rota, ' + vi.length + ' köy, ' + p.length + ' yer)</span>';
   showToast('llms-full.txt oluşturuldu ve indirildi.', 'success');
+}
+
+/* ══════════════════════════════════════════════════
+   OTOMATİK YEDEKLEME SİSTEMİ (haftalık)
+══════════════════════════════════════════════════ */
+var BACKUP_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000;
+
+function checkAutoBackup() {
+  var lastBackup = localStorage.getItem('auto_backup_last') || '';
+  updateAutoBackupUI();
+
+  if (!lastBackup) {
+    // İlk kez — yedekle
+    runAutoBackup(false);
+    return;
+  }
+
+  var elapsed = Date.now() - new Date(lastBackup).getTime();
+  if (elapsed >= BACKUP_INTERVAL_MS) {
+    runAutoBackup(false);
+  }
+}
+
+async function runAutoBackup(manual) {
+  var statusEl = document.getElementById('auto-backup-status');
+  if (statusEl) statusEl.textContent = 'Yedekleniyor...';
+
+  try {
+    // Tüm koleksiyonları topla
+    var collections = ['venues', 'places', 'villages', 'routes', 'blog_posts', 'settings', 'messages'];
+    var backupData = { _meta: { date: new Date().toISOString(), type: manual ? 'manual' : 'auto', version: '1.0' } };
+
+    for (var i = 0; i < collections.length; i++) {
+      var col = collections[i];
+      try {
+        var snap = await db.collection(col).get();
+        backupData[col] = {};
+        snap.docs.forEach(function(d) { backupData[col][d.id] = d.data(); });
+      } catch(e) { backupData[col] = {}; }
+    }
+
+    // JSON oluştur
+    var json = JSON.stringify(backupData, null, 0);
+    var blob = new Blob([json], { type: 'application/json' });
+    var now = new Date();
+    var dateStr = now.toISOString().split('T')[0];
+    var timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '');
+    var fileName = 'backup-' + dateStr + '-' + timeStr + '.json';
+
+    // Firebase Storage'a yükle
+    var ref = firebase.storage().ref('backups/' + fileName);
+    await ref.put(blob, { contentType: 'application/json' });
+    var downloadUrl = await ref.getDownloadURL();
+
+    // Firestore'a yedek kaydı ekle
+    await db.collection('settings').doc('backups').set({
+      lastBackup: now.toISOString(),
+      lastBackupFile: fileName,
+      lastBackupUrl: downloadUrl,
+      lastBackupSize: json.length,
+      lastBackupType: manual ? 'manual' : 'auto'
+    }, { merge: true });
+
+    // Yedek geçmişine ekle
+    await db.collection('activity_logs').add({
+      action: 'backup',
+      target: fileName,
+      details: (manual ? 'Manuel' : 'Otomatik') + ' yedekleme — ' + Object.keys(backupData).filter(function(k){return k!=='_meta';}).map(function(k){ return k + ': ' + Object.keys(backupData[k]).length; }).join(', '),
+      user: fbAuth.currentUser ? fbAuth.currentUser.email : 'sistem',
+      timestamp: now.toISOString(),
+      backupUrl: downloadUrl,
+      backupSize: json.length
+    });
+
+    // localStorage güncelle
+    localStorage.setItem('auto_backup_last', now.toISOString());
+
+    // Telegram bildirim
+    var sizeKB = Math.round(json.length / 1024);
+    fetch('/api/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'message',
+        data: {
+          name: 'Yedekleme Sistemi',
+          email: 'sistem@assosukesfet.com',
+          phone: '',
+          subject: (manual ? 'Manuel' : 'Otomatik') + ' Yedekleme',
+          message: '✅ Yedekleme tamamlandı\n📁 ' + fileName + '\n💾 ' + sizeKB + ' KB\n📅 ' + now.toLocaleString('tr-TR')
+        }
+      })
+    }).catch(function(){});
+
+    updateAutoBackupUI();
+    if (document.getElementById('ab-backup-list')) loadBackupList();
+    showToast((manual ? 'Manuel' : 'Otomatik') + ' yedekleme tamamlandı! (' + sizeKB + ' KB)', 'success');
+    if (statusEl) statusEl.innerHTML = '<span style="color:var(--green)">✓ Tamamlandı</span>';
+
+  } catch(err) {
+    showToast('Yedekleme hatası: ' + err.message, 'error');
+    if (statusEl) statusEl.innerHTML = '<span style="color:var(--red)">Hata!</span>';
+  }
+}
+
+function updateAutoBackupUI() {
+  var lastBackup = localStorage.getItem('auto_backup_last');
+  var lastEl = document.getElementById('ab-last-date');
+  var nextEl = document.getElementById('ab-next-date');
+  var badgeEl = document.getElementById('ab-status-badge');
+
+  if (lastEl) {
+    lastEl.textContent = lastBackup ? new Date(lastBackup).toLocaleString('tr-TR') : 'Henüz yok';
+  }
+  if (nextEl) {
+    if (lastBackup) {
+      var next = new Date(new Date(lastBackup).getTime() + BACKUP_INTERVAL_MS);
+      var daysLeft = Math.ceil((next - Date.now()) / (24*60*60*1000));
+      if (daysLeft <= 0) {
+        nextEl.innerHTML = '<span style="color:var(--terra)">Bugün</span>';
+      } else {
+        nextEl.textContent = daysLeft + ' gün sonra';
+      }
+    } else {
+      nextEl.textContent = 'İlk yedekleme bekleniyor';
+    }
+  }
+  if (badgeEl) {
+    if (lastBackup) {
+      var age = Date.now() - new Date(lastBackup).getTime();
+      if (age > BACKUP_INTERVAL_MS) {
+        badgeEl.innerHTML = '<span style="color:var(--terra)">⚠ Eski</span>';
+      } else {
+        badgeEl.innerHTML = '<span style="color:var(--green)">✓ Güncel</span>';
+      }
+    }
+  }
+}
+
+async function loadBackupList() {
+  var listEl = document.getElementById('ab-backup-list');
+  if (!listEl) return;
+  listEl.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:.82rem">Yükleniyor...</div>';
+
+  try {
+    var snap = await db.collection('activity_logs')
+      .orderBy('timestamp', 'desc')
+      .limit(100)
+      .get();
+
+    var backups = [];
+    snap.docs.forEach(function(d) {
+      var data = d.data();
+      if (data.action === 'backup') backups.push({ id: d.id, ...data });
+    });
+
+    if (backups.length === 0) {
+      listEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:.82rem">Henüz yedekleme yapılmamış.</div>';
+      return;
+    }
+
+    listEl.innerHTML = backups.map(function(b) {
+      var date = b.timestamp ? new Date(b.timestamp).toLocaleString('tr-TR') : '—';
+      var sizeKB = b.backupSize ? Math.round(b.backupSize / 1024) + ' KB' : '—';
+      var isManual = (b.details || '').includes('Manuel');
+      var typeLabel = isManual ? '<span style="color:var(--terra);font-weight:600">Manuel</span>' : '<span style="color:var(--green);font-weight:600">Otomatik</span>';
+
+      return '<div style="display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid rgba(0,0,0,.04)">' +
+        '<div style="width:36px;height:36px;border-radius:10px;background:' + (isManual ? 'rgba(196,82,26,.08)' : 'rgba(56,161,105,.08)') + ';display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">' + (isManual ? '📦' : '🔄') + '</div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:.82rem;font-weight:600;color:var(--navy)">' + (b.target || 'Yedek') + '</div>' +
+          '<div style="font-size:.72rem;color:var(--text-muted)">' + date + ' · ' + sizeKB + ' · ' + typeLabel + '</div>' +
+        '</div>' +
+        (b.backupUrl ? '<a href="' + b.backupUrl + '" target="_blank" class="btn btn-sm btn-secondary" style="flex-shrink:0;font-size:.7rem">⬇ İndir</a>' : '') +
+      '</div>';
+    }).join('');
+  } catch(err) {
+    listEl.innerHTML = '<div style="padding:16px;text-align:center;color:var(--red);font-size:.82rem">Yüklenemedi: ' + err.message + '</div>';
+  }
 }
 
 /* ══════════════════════════════════════════════════

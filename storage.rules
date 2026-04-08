@@ -15,11 +15,25 @@ service firebase.storage {
         && request.resource.contentType.matches('image/.*'); // Sadece gorsel
     }
 
-    // Site ayarlari (logo, favicon, og-image)
+    // Site ayarlari (logo, favicon, og-image, llms-full.txt)
     match /site/{allPaths=**} {
       allow read: if true;
       allow write: if isAdmin()
-        && request.resource.size < 5 * 1024 * 1024          // Maks 5MB
+        && request.resource.size < 5 * 1024 * 1024;
+    }
+
+    // Yedeklemeler (sadece admin)
+    match /backups/{allPaths=**} {
+      allow read: if isAdmin();
+      allow write: if isAdmin()
+        && request.resource.size < 20 * 1024 * 1024;
+    }
+
+    // Blog ve icerik gorselleri
+    match /images/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin()
+        && request.resource.size < 5 * 1024 * 1024
         && request.resource.contentType.matches('image/.*');
     }
 
