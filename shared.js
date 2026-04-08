@@ -2460,11 +2460,11 @@ function renderVenuePage(venueId) {
               <div class="vp-rezv-row">
                 <div class="vp-rezv-field">
                   <label class="vp-rezv-label">Giriş Tarihi</label>
-                  <input type="date" id="rezv-checkin" class="vp-rezv-input" onchange="vpUpdateCheckoutMin()">
+                  <input type="date" id="rezv-checkin" class="vp-rezv-input" min="${new Date().toISOString().split('T')[0]}" onchange="vpUpdateCheckoutMin()">
                 </div>
                 <div class="vp-rezv-field">
                   <label class="vp-rezv-label">Çıkış Tarihi</label>
-                  <input type="date" id="rezv-checkout" class="vp-rezv-input">
+                  <input type="date" id="rezv-checkout" class="vp-rezv-input" onchange="vpValidateCheckout()">
                 </div>
               </div>
               <div id="rezv-date-error" style="font-size:.75rem;color:#E53E3E;min-height:18px;margin-top:-4px"></div>
@@ -2698,27 +2698,42 @@ function renderVenuePage(venueId) {
     var ci = document.getElementById('rezv-checkin');
     var co = document.getElementById('rezv-checkout');
     var errEl = document.getElementById('rezv-date-error');
-    if (ci && co && ci.value) {
-      // Çıkış min = giriş + 1 gün
+    if (!ci || !co) return;
+    if (errEl) errEl.textContent = '';
+    if (ci.value) {
       var nextDay = new Date(ci.value);
       nextDay.setDate(nextDay.getDate() + 1);
       co.min = nextDay.toISOString().split('T')[0];
-      // Eğer çıkış tarihi geçersizse temizle
       if (co.value && co.value <= ci.value) {
         co.value = '';
-        if (errEl) errEl.textContent = 'Çıkış tarihi giriş tarihinden sonra olmalıdır.';
-      } else {
-        if (errEl) errEl.textContent = '';
+        if (errEl) errEl.textContent = 'Çıkış tarihi giriş tarihinden en az 1 gün sonra olmalıdır.';
       }
     }
   };
 
-  // Sayfa yüklenince bugünü min olarak ayarla
-  setTimeout(function() {
-    var today = new Date().toISOString().split('T')[0];
+  // Çıkış tarihi seçilince kontrol et
+  window.vpValidateCheckout = function() {
     var ci = document.getElementById('rezv-checkin');
-    if (ci) ci.min = today;
-  }, 100);
+    var co = document.getElementById('rezv-checkout');
+    var errEl = document.getElementById('rezv-date-error');
+    if (!ci || !co || !errEl) return;
+    if (!ci.value) {
+      errEl.textContent = 'Önce giriş tarihini seçiniz.';
+      co.value = '';
+      return;
+    }
+    if (co.value && co.value <= ci.value) {
+      errEl.textContent = 'Çıkış tarihi giriş tarihinden en az 1 gün sonra olmalıdır.';
+      co.value = '';
+      return;
+    }
+    if (co.value === ci.value) {
+      errEl.textContent = 'Giriş ve çıkış tarihi aynı gün olamaz.';
+      co.value = '';
+      return;
+    }
+    errEl.textContent = '';
+  };
 
   window.vpSendRezervasyon = function () {
     const name     = (document.getElementById('rezv-name')?.value || '').trim();
