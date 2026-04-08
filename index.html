@@ -97,7 +97,7 @@
       <div class="hero-top-left">
 
         <!-- Weather -->
-        <div id="hero-weather" class="hero-weather">
+        <div id="hero-weather" class="hero-weather" style="min-height:32px;opacity:0;transition:opacity .5s ease;">
           <span style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(245,237,224,.25);padding:0 8px;">Ayvacık Hava Durumu</span>
         </div>
 
@@ -520,7 +520,8 @@ function pageInit() {
             '<span class="hw-label">' + d.name + '</span>' +
           '</div>'
         ).join('');
-    }).catch(() => {});
+      el.style.opacity = '1';
+    }).catch(() => { el.style.opacity = '1'; });
   })();
 
   function heroSearchSubmit() {
