@@ -5065,11 +5065,22 @@ function closeConfirm() {
    QR KOD
 ══════════════════════════════════════════════════ */
 let currentQRVenueId = null;
+let cachedLogoUrl = null;
 
-function openQRModal(id) {
+async function ensureLogoUrl() {
+  if (cachedLogoUrl) return cachedLogoUrl;
+  try {
+    const doc = await db.collection('settings').doc('site').get();
+    if (doc.exists && doc.data().logoUrl) { cachedLogoUrl = doc.data().logoUrl; return cachedLogoUrl; }
+  } catch(e) {}
+  return null;
+}
+
+async function openQRModal(id) {
   const v = draftData.venues.find(x => x.id === id);
   if (!v) return;
   currentQRVenueId = id;
+  const siteLogoUrl = await ensureLogoUrl();
 
   const url = 'https://assosukesfet.com/mekanlar/mekan-detay?id=' + id;
   document.getElementById('qr-title').textContent = v.emoji + ' ' + v.title;
@@ -5104,8 +5115,7 @@ function openQRModal(id) {
   svg += '<rect x="' + (logoX - 4) + '" y="' + (logoX - 4) + '" width="' + (logoSize + 8) + '" height="' + (logoSize + 8) + '" rx="10" fill="#fff"/>';
   svg += '</svg>';
 
-  const logoUrl = document.getElementById('logo-preview-img')?.src || localStorage.getItem('site_logo_url') || '';
-  const logoHtml = logoUrl ? '<img src="' + logoUrl + '" crossorigin="anonymous" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:' + (logoSize * 1.1) + 'px;height:' + (logoSize * 1.1) + 'px;object-fit:contain;border-radius:6px">' : '';
+  const logoHtml = siteLogoUrl ? '<img src="' + siteLogoUrl + '" crossorigin="anonymous" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:' + (logoSize * 1.1) + 'px;height:' + (logoSize * 1.1) + 'px;object-fit:contain;border-radius:6px">' : '';
   canvas.innerHTML = '<div style="position:relative;display:inline-block">' + svg + logoHtml + '</div>';
   document.getElementById('qr-overlay').classList.add('show');
 }
@@ -5158,8 +5168,7 @@ function downloadQR() {
     }
 
     // Logoyu canvas'a çiz
-    const logoUrl = document.getElementById('logo-preview-img')?.src || localStorage.getItem('site_logo_url') || '';
-    if (logoUrl) {
+    if (cachedLogoUrl) {
       const logoImg = new Image();
       logoImg.crossOrigin = 'anonymous';
       logoImg.onload = function() {
@@ -5170,7 +5179,7 @@ function downloadQR() {
         finalize(qrCanvas);
       };
       logoImg.onerror = function() { finalize(qrCanvas); };
-      logoImg.src = logoUrl;
+      logoImg.src = cachedLogoUrl;
     } else {
       finalize(qrCanvas);
     }
