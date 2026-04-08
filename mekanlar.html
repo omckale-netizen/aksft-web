@@ -134,7 +134,7 @@
 
 <script src="firebase-loader.js"></script>
 <script src="data.js"></script>
-<script src="shared.min.js?v=54"></script>
+<script src="shared.min.js?v=55"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
@@ -451,11 +451,12 @@ function pageInit() {
       const cs = CAT_STYLE[v.category] || { bg:'rgba(26,39,68,.08)', color:'#4A5568', label:v.category };
       const status = getVenueStatus(v);
       return `
-        <div class="mk-vc fade-up" data-delay="${i * 0.05}" onclick="window.location.href='mekanlar/mekan-detay.html?id=${v.id}'">
+        <div class="mk-vc fade-up" data-delay="${i * 0.05}" onclick="window.location.href='mekanlar/mekan-detay.html?id=${v.id}'" style="${isPremiumActive(v)?'border:2px solid rgba(212,147,90,.3);box-shadow:0 4px 20px rgba(212,147,90,.1);':''}">
           <div class="mk-vc-img${(v.images && v.images.length > 0) ? ' has-img' : ''}" style="background:${v.gradient};">
             ${(v.images && v.images.length > 0) ? '<img class="mk-vc-photo" src="' + v.images[0] + '" alt="' + v.title + '" onload="this.classList.add(\'loaded\');this.closest(\'.mk-vc-img\').classList.remove(\'has-img\')">' : '<span class="mk-vc-emoji">' + v.emoji + '</span>'}
             <div class="mk-vc-badges">
-              ${v.featured ? '<span class="mk-vc-featured">⭐ Öne Çıkan</span>' : ''}
+              ${isPremiumActive(v) ? '<span style="font-size:.58rem;font-weight:700;padding:3px 10px;border-radius:999px;background:linear-gradient(135deg,#D4935A,#E8A07A);color:#fff;display:inline-flex;align-items:center;gap:3px;backdrop-filter:blur(8px);">👑 Premium</span>' : ''}
+              ${v.featured && !isPremiumActive(v) ? '<span class="mk-vc-featured">⭐ Öne Çıkan</span>' : ''}
               ${status.badge}
             </div>
             <button class="mk-vc-save save-btn${saved.has(v.id)?' saved':''}" data-id="${v.id}" onclick="toggleSave('${v.id}',event)">

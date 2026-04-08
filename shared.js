@@ -2272,7 +2272,7 @@ function renderVenuePage(venueId) {
       <div class="vp-hero-2col">
         <div class="vp-hero-left">
           <span class="vp-hero-cat-pill" style="background:${cs.bg};color:${cs.color};">${cs.label}</span>
-          <h1 class="vp-hero-title">${v.title}${isPremiumActive(v) ? ' <span style="display:inline-flex;align-items:center;gap:4px;font-size:.45em;font-weight:700;padding:4px 12px;border-radius:999px;background:linear-gradient(135deg,#D4935A,#E8A07A);color:#fff;vertical-align:middle;letter-spacing:0">👑 Premium</span>' : ''}</h1>
+          <h1 class="vp-hero-title">${v.title}${isPremiumActive(v) ? '<div style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:6px 16px;border-radius:999px;background:linear-gradient(135deg,rgba(212,147,90,.15),rgba(232,160,122,.1));border:1px solid rgba(212,147,90,.3);vertical-align:middle;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);"><span style="font-size:.7rem">👑</span><span style="font-size:.55rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#E8A07A">Premium İşletme</span></div>' : ''}</h1>
           <div class="vp-hero-loc">📍 ${v.address || v.location + ', Ayvacık, Çanakkale'}</div>
           <div class="vp-hero-chips">
             ${openBadge}
