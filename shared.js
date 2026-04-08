@@ -1006,6 +1006,36 @@ function renderNav(opts = {}) {
   /* Initialize count */
   window.updateSaveNavCount();
 
+  // Sayfa acilisinda: baskasinin kodunu yuklediyse otomatik guncelle
+  (function autoSyncOnLoad() {
+    var loadedCode = localStorage.getItem('assos_last_loaded_code');
+    if (!loadedCode) return; // Kendi kodu, baskasinin listesi yuklenmemis
+    var currentCode = getFavCode();
+    if (loadedCode !== currentCode) return; // Kod degismis, skip
+    function doAutoSync() {
+      if (typeof firebase === 'undefined' || !firebase.firestore) {
+        setTimeout(doAutoSync, 1000);
+        return;
+      }
+      firebase.firestore().collection('favorites').doc(currentCode).get().then(function(doc) {
+        if (!doc.exists) return;
+        var data = doc.data();
+        var remoteVenues = JSON.stringify(data.venues || []);
+        var remotePlaces = JSON.stringify(data.places || []);
+        var localVenues = localStorage.getItem(SD_KEY) || '[]';
+        var localPlaces = localStorage.getItem(SD_PLACE_KEY) || '[]';
+        // Sadece fark varsa guncelle (gereksiz render onleme)
+        if (remoteVenues !== localVenues || remotePlaces !== localPlaces) {
+          localStorage.setItem(SD_KEY, remoteVenues);
+          localStorage.setItem(SD_PLACE_KEY, remotePlaces);
+          if (typeof renderSaveDrawer === 'function') renderSaveDrawer();
+          if (window.updateSaveNavCount) window.updateSaveNavCount();
+        }
+      }).catch(function() {});
+    }
+    doAutoSync();
+  })();
+
   // Nav scroll behavior
   const nav = document.getElementById('main-nav');
   if (!nav) return;
