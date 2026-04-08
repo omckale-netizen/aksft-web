@@ -782,42 +782,91 @@
       color: rgba(245,237,224,.2);
       font-weight: 500;
     }
-    .hero-mini-stats {
+    .hero-map-cta {
+      margin-top: 36px;
+      display: flex;
+      justify-content: center;
+    }
+    .hero-map-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 28px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.05);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,.1);
+      text-decoration: none;
+      transition: all .3s cubic-bezier(.16,1,.3,1);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-map-link::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(196,82,26,.08), rgba(26,107,138,.06));
+      opacity: 0;
+      transition: opacity .3s;
+    }
+    .hero-map-link:hover {
+      border-color: rgba(196,82,26,.35);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(0,0,0,.2);
+    }
+    .hero-map-link:hover::before { opacity: 1; }
+    .hero-map-pin {
+      position: relative;
+      width: 38px;
+      height: 38px;
+      border-radius: 50% 50% 50% 0;
+      background: linear-gradient(135deg, var(--terra), #D96B2E);
+      transform: rotate(-45deg);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0;
-      margin-top: 32px;
+      box-shadow: 0 4px 14px rgba(196,82,26,.3);
+      flex-shrink: 0;
+      animation: heroMapPinBounce 2s ease-in-out infinite;
     }
-    .hero-mini-stat {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 0 24px;
+    .hero-map-pin span {
+      transform: rotate(45deg);
+      font-size: .95rem;
     }
-    .hero-mini-num {
-      font-family: 'Plus Jakarta Sans', sans-serif;
+    @keyframes heroMapPinBounce {
+      0%,100% { transform: rotate(-45deg) translateY(0); }
+      50% { transform: rotate(-45deg) translateY(-4px); }
+    }
+    .hero-map-text {
+      position: relative;
+      z-index: 1;
+      text-align: left;
+    }
+    .hero-map-text-title {
+      font-size: .88rem;
       font-weight: 800;
-      font-size: 1.3rem;
-      color: rgba(245,237,224,.7);
-      line-height: 1;
+      color: var(--cream);
+      line-height: 1.2;
+      letter-spacing: -.01em;
     }
-    .hero-mini-label {
-      font-size: .6rem;
-      font-weight: 600;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: rgba(245,237,224,.2);
-      margin-top: 4px;
+    .hero-map-text-sub {
+      font-size: .68rem;
+      color: rgba(245,237,224,.35);
+      margin-top: 2px;
     }
-    .hero-mini-sep {
-      width: 1px;
-      height: 28px;
-      background: rgba(245,237,224,.08);
+    .hero-map-arrow {
+      position: relative;
+      z-index: 1;
+      color: rgba(245,237,224,.25);
+      font-size: .9rem;
+      transition: color .2s, transform .2s;
+      flex-shrink: 0;
     }
-    @media(max-width:640px) {
-      .hero-mini-stat { padding: 0 16px; }
-      .hero-mini-num { font-size: 1.1rem; }
+    .hero-map-link:hover .hero-map-arrow {
+      color: var(--terra-light);
+      transform: translateX(3px);
     }
 
 
@@ -972,27 +1021,16 @@
           <p class="hero-search-hint">Rotalar, mekanlar, köyler ve tarihi alanlar arasında arayın</p>
         </div>
 
-        <!-- Mini stats -->
-        <div class="hero-mini-stats">
-          <div class="hero-mini-stat">
-            <span class="hero-mini-num" id="hstat-routes">—</span>
-            <span class="hero-mini-label">Rota</span>
-          </div>
-          <div class="hero-mini-sep"></div>
-          <div class="hero-mini-stat">
-            <span class="hero-mini-num" id="hstat-venues">—</span>
-            <span class="hero-mini-label">Mekan</span>
-          </div>
-          <div class="hero-mini-sep"></div>
-          <div class="hero-mini-stat">
-            <span class="hero-mini-num" id="hstat-places">—</span>
-            <span class="hero-mini-label">Yer</span>
-          </div>
-          <div class="hero-mini-sep"></div>
-          <div class="hero-mini-stat">
-            <span class="hero-mini-num" id="hstat-villages">—</span>
-            <span class="hero-mini-label">Köy</span>
-          </div>
+        <!-- Map CTA -->
+        <div class="hero-map-cta">
+          <a href="harita.html" class="hero-map-link">
+            <div class="hero-map-pin"><span>📍</span></div>
+            <div class="hero-map-text">
+              <div class="hero-map-text-title">Haritada Keşfet</div>
+              <div class="hero-map-text-sub">Tüm mekan ve yerleri haritada gör</div>
+            </div>
+            <span class="hero-map-arrow">→</span>
+          </a>
         </div>
 
       </div>
@@ -1982,15 +2020,6 @@ function pageInit() {
     if (rotalar && DATA.routes)  rotalar.textContent  = DATA.routes.length + '+';
     if (mekanlar && DATA.venues) mekanlar.textContent = DATA.venues.length + '+';
     if (yerler && DATA.places)   yerler.textContent   = DATA.places.length + '+';
-    // Mini hero stats
-    const hr = document.getElementById('hstat-routes');
-    const hv = document.getElementById('hstat-venues');
-    const hp = document.getElementById('hstat-places');
-    const hvl = document.getElementById('hstat-villages');
-    if (hr && DATA.routes) hr.textContent = DATA.routes.length;
-    if (hv && DATA.venues) hv.textContent = DATA.venues.filter(v => v.active !== false).length;
-    if (hp && DATA.places) hp.textContent = DATA.places.length;
-    if (hvl && DATA.villages) hvl.textContent = DATA.villages.length;
   })();
 
   /* ── HP VENUE GRIDS ── */
