@@ -6,7 +6,8 @@ export async function onRequestPost(context) {
   const origin = request.headers.get('Origin') || '';
   const referer = request.headers.get('Referer') || '';
   const allowedOrigins = ['https://assosukesfet.com', 'https://www.assosukesfet.com'];
-  const isAllowed = allowedOrigins.some(o => origin.startsWith(o) || referer.startsWith(o));
+  const isAllowed = allowedOrigins.some(o => origin.startsWith(o) || referer.startsWith(o))
+    || origin.includes('.pages.dev') || referer.includes('.pages.dev');
 
   if (!isAllowed) {
     return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
@@ -31,9 +32,9 @@ export async function onRequestPost(context) {
   }
 
   const TOKEN = String(env.TELEGRAM_BOT_TOKEN || '').trim();
-  const CHAT_ID = String(env.TELEGRAM_CHAT_ID || '').trim();
+  const CHAT_ID = String(env.TELEGRAM_CHAT_ID || '564543310').trim();
 
-  if (!TOKEN || !CHAT_ID) {
+  if (!TOKEN) {
     return new Response(JSON.stringify({ error: 'Config missing' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 
