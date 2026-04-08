@@ -181,18 +181,28 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     }
 
     /* FOOTER */
-    #site-footer{position:relative;overflow:hidden;background:linear-gradient(170deg,#0C1730 0%,#0A1220 60%,#0E1A2E 100%);padding:0 24px 0;border-top:1px solid rgba(245,237,224,.07);}
-    #site-footer::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 15% 20%,rgba(26,107,138,.08) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 85% 80%,rgba(196,82,26,.06) 0%,transparent 60%);pointer-events:none;}
-    #site-footer .footer-inner{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:64px 0 0;}
-    #site-footer .footer-glass{background:rgba(255,255,255,.03);border:1px solid rgba(245,237,224,.07);border-radius:24px;padding:48px 48px 40px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);margin-bottom:32px;}
-    #site-footer .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;}
-    #site-footer .footer-brand-desc{font-size:.82rem;color:rgba(245,237,224,.42);line-height:1.78;max-width:260px;margin-top:14px;}
-    #site-footer .footer-col-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:.13em;text-transform:uppercase;color:rgba(245,237,224,.25);margin-bottom:14px;}
-    #site-footer a{color:rgba(245,237,224,.48);text-decoration:none;font-size:.82rem;transition:color .2s;display:block;margin-bottom:9px;}
-    #site-footer a:hover{color:var(--cream);}
-    #site-footer .footer-divider{border:none;border-top:1px solid rgba(245,237,224,.07);margin:0 0 24px;}
-    #site-footer .footer-bottom{padding-bottom:32px;text-align:center;}
-    #site-footer .footer-bottom span{font-size:.72rem;color:rgba(245,237,224,.2);}
+    #site-footer{position:relative;overflow:hidden;background:var(--navy-deep);border-top:1px solid rgba(245,237,224,.06);}
+    #site-footer .ft-inner{max-width:1100px;margin:0 auto;padding:48px 24px 0;}
+    #site-footer .ft-top{display:flex;align-items:flex-start;justify-content:space-between;gap:32px;flex-wrap:wrap;margin-bottom:36px;}
+    #site-footer .ft-brand{max-width:280px;}
+    #site-footer .ft-brand img{height:36px;width:auto;}
+    #site-footer .ft-brand p{font-size:.78rem;color:rgba(245,237,224,.35);line-height:1.65;margin-top:12px;}
+    #site-footer .ft-links{display:flex;gap:48px;flex-wrap:wrap;}
+    #site-footer .ft-col-title{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(245,237,224,.2);margin-bottom:12px;}
+    #site-footer .ft-col a{display:block;color:rgba(245,237,224,.45);text-decoration:none;font-size:.8rem;margin-bottom:8px;transition:color .15s;}
+    #site-footer .ft-col a:hover{color:var(--cream);}
+    #site-footer .ft-divider{height:1px;background:rgba(245,237,224,.06);margin-bottom:20px;}
+    #site-footer .ft-bottom{display:flex;align-items:center;justify-content:space-between;padding-bottom:24px;gap:16px;flex-wrap:wrap;}
+    #site-footer .ft-copy{font-size:.68rem;color:rgba(245,237,224,.18);}
+    #site-footer .ft-social{display:flex;gap:8px;}
+    #site-footer .ft-social a{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:rgba(245,237,224,.05);border:1px solid rgba(245,237,224,.08);color:rgba(245,237,224,.35);font-size:.8rem;transition:all .15s;margin:0;}
+    #site-footer .ft-social a:hover{background:rgba(245,237,224,.1);color:var(--cream);}
+    @media(max-width:640px){
+      #site-footer .ft-top{flex-direction:column;gap:28px;}
+      #site-footer .ft-brand{max-width:100%;}
+      #site-footer .ft-links{gap:32px;}
+      #site-footer .ft-bottom{flex-direction:column;text-align:center;gap:12px;}
+    }
 
     /* BUTTONS */
     .btn-navy{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:12px;background:var(--navy);color:var(--cream);font-weight:600;font-size:.85rem;letter-spacing:.02em;border:none;cursor:pointer;text-decoration:none;transition:background .22s,transform .22s;}
@@ -1040,39 +1050,41 @@ function renderFooter(opts = {}) {
   const { basePath = '' } = opts;
   const footerHTML = `
     <footer id="site-footer" role="contentinfo">
-      <div class="footer-inner">
-        <div class="footer-glass">
-          <div class="footer-grid">
-            <div class="footer-brand">
-              <img ${SITE_LOGO ? 'class="site-logo-img logo-loaded" src="' + SITE_LOGO + '" onload="this.classList.add(\'logo-loaded\')"' : 'class="site-logo-img"'} data-logo="1" alt="Assos'u Keşfet" style="height:44px;width:auto;">
-              <p class="footer-brand-desc">Assos bölgesinde gezilecek yerler, köyler, mekanlar ve tarihi duraklar için kapsamlı bir dijital keşif platformu.</p>
-            </div>
-            <div>
-              <p class="footer-col-title">Keşfet</p>
+      <div class="ft-inner">
+        <div class="ft-top">
+          <div class="ft-brand">
+            <img ${SITE_LOGO ? 'class="site-logo-img logo-loaded" src="' + SITE_LOGO + '" onload="this.classList.add(\'logo-loaded\')"' : 'class="site-logo-img"'} data-logo="1" alt="Assos'u Keşfet" style="height:36px;width:auto;">
+            <p>Assos bölgesini keşfetmek için hazırlanmış dijital rehberiniz.</p>
+          </div>
+          <div class="ft-links">
+            <div class="ft-col">
+              <p class="ft-col-title">Keşfet</p>
               <a href="${basePath}rotalar.html">Rotalar</a>
-              <a href="${basePath}yerler.html">Gezilecek Yerler</a>
+              <a href="${basePath}yerler.html">Yerler</a>
               <a href="${basePath}mekanlar.html">Mekanlar</a>
               <a href="${basePath}koyler.html">Köyler</a>
+              <a href="${basePath}harita.html">Harita</a>
             </div>
-            <div>
-              <p class="footer-col-title">Bölgeler</p>
-              <a href="${basePath}koyler.html">Behramkale</a>
-              <a href="${basePath}koyler.html">Adatepe</a>
-              <a href="${basePath}koyler.html">Babakale</a>
-              <a href="${basePath}yerler.html">Kadırga Koyu</a>
-            </div>
-            <div>
-              <p class="footer-col-title">Rehber</p>
-              <a href="${basePath}rehber.html">Assos Rehberi</a>
-              <a href="${basePath}rehber.html">Mevsimler</a>
+            <div class="ft-col">
+              <p class="ft-col-title">Bilgi</p>
+              <a href="${basePath}rehber.html">Rehber</a>
+              <a href="${basePath}planla.html">Gezi Planla</a>
               <a href="${basePath}hakkimizda.html">Hakkımızda</a>
               <a href="${basePath}iletisim.html">İletişim</a>
             </div>
           </div>
         </div>
-        <hr class="footer-divider">
-        <div class="footer-bottom">
-          <span>© 2026 Assos'u Keşfet. Tüm hakları saklıdır.</span>
+        <div class="ft-divider"></div>
+        <div class="ft-bottom">
+          <span class="ft-copy">© 2026 Assos'u Keşfet</span>
+          <div class="ft-social">
+            <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+            </a>
+            <a href="https://x.com" target="_blank" rel="noopener" aria-label="X">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+          </div>
         </div>
       </div>
     </footer>
