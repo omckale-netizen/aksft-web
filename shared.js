@@ -386,7 +386,7 @@ function renderNav(opts = {}) {
   const navHTML = `
     <div id="mobile-menu" role="dialog" aria-label="Navigasyon menüsü" aria-hidden="true">
       <div class="mm-header">
-        <a href="${basePath}index.html"><img ${SITE_LOGO ? 'class="site-logo-img logo-loaded" src="' + SITE_LOGO + '" onload="this.classList.add(\'logo-loaded\')"' : 'class="site-logo-img"'} data-logo="1" alt="Assos'u Keşfet" width="120" height="40"></a>
+        <a href="${basePath}index.html"><img ${SITE_LOGO ? 'class="site-logo-img logo-loaded" src="' + SITE_LOGO + '" onload="this.classList.add(\'logo-loaded\')"' : 'class="site-logo-img"'} data-logo="1" alt="Assos'u Keşfet" width="120" height="40" loading="eager" decoding="async"></a>
         <button id="close-menu-btn" aria-label="Kapat">✕</button>
       </div>
       <div class="mm-links">
@@ -404,7 +404,7 @@ function renderNav(opts = {}) {
     <nav id="main-nav" class="${heroMode ? 'hero-mode' : 'solid'}" aria-label="Ana navigasyon">
       <div class="nav-inner">
         <a href="${basePath}index.html" class="nav-logo" aria-label="Ana Sayfa">
-          <img ${SITE_LOGO ? 'class="site-logo-img logo-loaded" src="' + SITE_LOGO + '" onload="this.classList.add(\'logo-loaded\')"' : 'class="site-logo-img"'} data-logo="1" alt="Assos'u Keşfet" width="120" height="40">
+          <img ${SITE_LOGO ? 'class="site-logo-img logo-loaded" src="' + SITE_LOGO + '" onload="this.classList.add(\'logo-loaded\')"' : 'class="site-logo-img"'} data-logo="1" alt="Assos'u Keşfet" width="120" height="40" loading="eager" decoding="async">
         </a>
         <div class="nav-links">
           ${links.map(l => `<a href="${basePath}${l.href}" class="nav-link${isActive(l.href) ? ' active' : ''}">${l.label}</a>`).join('')}
@@ -1081,7 +1081,7 @@ function renderFooter(opts = {}) {
       <div class="ft-inner">
         <div class="ft-glass">
           <div class="ft-brand">
-            <img ${SITE_LOGO ? 'class="site-logo-img logo-loaded" src="' + SITE_LOGO + '" onload="this.classList.add(\'logo-loaded\')"' : 'class="site-logo-img"'} data-logo="1" alt="Assos'u Keşfet" width="120" height="40">
+            <img ${SITE_LOGO ? 'class="site-logo-img logo-loaded" src="' + SITE_LOGO + '" onload="this.classList.add(\'logo-loaded\')"' : 'class="site-logo-img"'} data-logo="1" alt="Assos'u Keşfet" width="120" height="40" loading="eager" decoding="async">
             <p>Assos bölgesini keşfetmek için hazırlanmış dijital bir rehber.</p>
           </div>
           <div class="ft-cols">
