@@ -33,7 +33,7 @@ function buildOgHtml({ title, description, url, image }) {
   <meta property="og:description" content="${escHtml(description)}">
   <meta property="og:type" content="website">
   <meta property="og:url" content="${escHtml(url)}">
-  <meta property="og:image" content="${escHtml(image)}">
+  <meta property="og:image" content="${image}">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="tr_TR">
@@ -41,7 +41,7 @@ function buildOgHtml({ title, description, url, image }) {
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${escHtml(title)}">
   <meta name="twitter:description" content="${escHtml(description)}">
-  <meta name="twitter:image" content="${escHtml(image)}">
+  <meta name="twitter:image" content="${image}">
 </head>
 <body><p>${escHtml(title)}</p></body>
 </html>`;
