@@ -73,13 +73,16 @@ export async function onRequest(context) {
       const fields = await fetchFirestoreDoc('venues', id);
       if (!fields) return next();
 
-      const catLabels = {kafe:'Assos Kafeler',restoran:'Assos Restoranlar',kahvalti:'Assos Kahvalti',konaklama:'Assos Oteller',beach:'Assos Beach',iskele:'Assos Iskeleler'};
+      const catLabels = {kafe:'Assos Kafeler',restoran:'Assos Restoranlar',kahvalti:'Assos Kahvalti Mekanlari',konaklama:'Assos Otelleri',beach:'Assos Beach Club',iskele:'Assos Iskeleler'};
+      const catSingular = {kafe:'kafe',restoran:'restoran',kahvalti:'kahvalti mekani',konaklama:'otel',beach:'beach club',iskele:'iskele'};
       const cat = fields.category?.stringValue || '';
       const catLabel = catLabels[cat] || 'Assos Mekanlar';
+      const catSing = catSingular[cat] || 'mekan';
       const venueName = fields.title?.stringValue || 'Mekan';
+      const loc = fields.location?.stringValue || 'Assos';
       const title = venueName + ' \u2014 ' + catLabel + ' | Assos\'u Kesfet';
-      const shortDesc = (fields.shortDesc?.stringValue || fields.description?.stringValue || '').replace(/<[^>]*>/g, '').substring(0, 200);
-      const desc = venueName + ': ' + shortDesc;
+      const shortDesc = (fields.shortDesc?.stringValue || '').replace(/<[^>]*>/g, '').substring(0, 120);
+      const desc = venueName + '. ' + loc + ' bolgesinde ' + catSing + '. ' + shortDesc;
       let image = DEFAULT_OG_IMAGE;
       if (fields.images?.arrayValue?.values?.length > 0) {
         image = fields.images.arrayValue.values[0].stringValue || image;

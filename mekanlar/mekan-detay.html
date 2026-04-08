@@ -52,10 +52,16 @@ function pageInit() {
   // Sayfa başlığını güncelle
   const venue = (window.DATA?.venues || []).find(v => v.id === venueId);
   if (venue) {
-    const catLabels = {kafe:'Assos Kafeler',restoran:'Assos Restoranlar',kahvalti:'Assos Kahvaltı',konaklama:'Assos Oteller',beach:'Assos Beach',iskele:'Assos İskeleler'};
+    const catLabels = {kafe:'Assos Kafeler',restoran:'Assos Restoranlar',kahvalti:'Assos Kahvaltı Mekanları',konaklama:'Assos Otelleri',beach:'Assos Beach Club',iskele:'Assos İskeleler'};
+    const catSingular = {kafe:'kafe',restoran:'restoran',kahvalti:'kahvaltı mekanı',konaklama:'otel',beach:'beach club',iskele:'iskele'};
     const catLabel = catLabels[venue.category] || 'Assos Mekanlar';
+    const catSing = catSingular[venue.category] || 'mekan';
+    const loc = venue.location || 'Assos';
     const seoTitle = venue.title + ' — ' + catLabel + ' | Assos\'u Keşfet';
-    const seoDesc = venue.shortDesc ? venue.title + ': ' + venue.shortDesc + ' | ' + (venue.location || 'Assos') : venue.title + ' — ' + catLabel;
+    const descParts = [venue.title, loc + ' bölgesinde ' + catSing];
+    if (venue.shortDesc) descParts.push(venue.shortDesc);
+    if (venue.phone) descParts.push('İletişim ve yol tarifi');
+    const seoDesc = descParts.join('. ').substring(0, 160);
 
     document.title = seoTitle;
     const descMeta = document.querySelector('meta[name="description"]');
