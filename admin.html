@@ -704,7 +704,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
           <div class="form-row">
             <div class="form-group">
               <label>Telefon</label>
-              <input type="text" id="bot-r-phone" placeholder="0532 xxx xx xx">
+              <input type="text" id="bot-r-phone" placeholder="+90 532 xxx xx xx">
             </div>
             <div class="form-group">
               <label>Website</label>
@@ -1760,7 +1760,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
           </div>
           <div class="form-group">
             <label>Telefon</label>
-            <input type="text" id="f-phone" placeholder="0532 xxx xx xx">
+            <input type="text" id="f-phone" placeholder="+90 532 xxx xx xx">
           </div>
         </div>
         <div class="form-group">
@@ -3986,6 +3986,25 @@ function renderVenueTable() {
 ══════════════════════════════════════════════════ */
 let editingVenueId = null;
 
+function formatPhoneNumber(phone) {
+  if (!phone) return '';
+  // Tum bosluk, parantez, tire temizle
+  let clean = phone.replace(/[\s\(\)\-\.]/g, '');
+  // Basinda 0 varsa kaldir
+  if (clean.startsWith('0')) clean = clean.substring(1);
+  // +90 yoksa ekle
+  if (!clean.startsWith('+90') && !clean.startsWith('90')) {
+    clean = '+90' + clean;
+  } else if (clean.startsWith('90') && !clean.startsWith('+90')) {
+    clean = '+' + clean;
+  }
+  // Formatla: +90 5XX XXX XX XX
+  if (clean.length === 13) {
+    return clean.substring(0,3) + ' ' + clean.substring(3,6) + ' ' + clean.substring(6,9) + ' ' + clean.substring(9,11) + ' ' + clean.substring(11,13);
+  }
+  return clean;
+}
+
 function generateId(title) {
   return title.toLowerCase()
     .replace(/\u00e7/g,'c').replace(/\u011f/g,'g').replace(/\u0131/g,'i')
@@ -4336,7 +4355,7 @@ async function saveVenue(e) {
     keywords: [],
     hours: category === 'konaklama' ? 'Check-in ' + (checkin || '14:00') : (dayHours ? (dayHours.find(d=>!d.closed)||{}).open + ' - ' + (dayHours.find(d=>!d.closed)||{}).close : ''),
     images: allImages,
-    phone: document.getElementById('f-phone').value.trim(),
+    phone: formatPhoneNumber(document.getElementById('f-phone').value.trim()),
     address: document.getElementById('f-address').value.trim(),
     website: document.getElementById('f-website').value.trim(),
     instagram: document.getElementById('f-instagram').value.trim(),
