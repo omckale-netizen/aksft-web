@@ -238,7 +238,10 @@ async function submitContact(e) {
     message: document.getElementById('ct-message').value.trim(),
     timestamp: new Date().toISOString(),
     date: new Date().toISOString().split('T')[0],
-    read: false
+    read: false,
+    consentGiven: true,
+    consentText: 'Gizlilik Politikasını okudum, kabul ediyorum.',
+    consentDate: new Date().toISOString()
   };
 
   try {
