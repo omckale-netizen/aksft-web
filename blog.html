@@ -35,15 +35,21 @@
     .bh-orb-2{width:300px;height:300px;background:rgba(26,107,138,.06);bottom:-80px;right:-60px;animation:bhFloat 10s ease-in-out infinite reverse}
     @keyframes bhFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-20px) scale(1.05)}}
     .bh-content{position:relative;z-index:2;max-width:600px;margin:0 auto}
-    .bh-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);font-size:.68rem;font-weight:700;color:rgba(245,237,224,.5);text-transform:uppercase;letter-spacing:.14em;margin-bottom:20px}
-    .bh-h1{font-size:clamp(2rem,5vw,3rem);font-weight:800;color:#F5EDE0;line-height:1.12;margin-bottom:14px;letter-spacing:-.03em}
+    .bh-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);font-size:.68rem;font-weight:700;color:rgba(245,237,224,.5);text-transform:uppercase;letter-spacing:.14em;margin-bottom:20px;animation:blogFadeIn .5s ease both}
+    .bh-h1{font-size:clamp(2rem,5vw,3rem);font-weight:800;color:#F5EDE0;line-height:1.12;margin-bottom:14px;letter-spacing:-.03em;animation:blogFadeIn .5s .1s ease both}
     .bh-h1 em{font-family:'Lora',serif;font-style:italic;font-weight:500;color:var(--terra-light)}
-    .bh-sub{font-size:.88rem;color:rgba(245,237,224,.4);max-width:420px;margin:0 auto;line-height:1.6}
+    .bh-sub{font-size:.88rem;color:rgba(245,237,224,.4);max-width:420px;margin:0 auto;line-height:1.6;animation:blogFadeIn .5s .2s ease both}
 
     /* Blog grid */
+    /* Sayfa gecis animasyonlari */
+    @keyframes blogFadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes blogFadeOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-10px)}}
+    .blog-animate-in{animation:blogFadeIn .5s ease both}
+    .blog-animate-out{animation:blogFadeOut .25s ease both}
+    .blog-hero{transition:all .4s ease}
     .blog-section{max-width:900px;margin:0 auto;padding:48px 24px 80px}
     .blog-grid{display:grid;grid-template-columns:1fr;gap:24px}
-    .blog-card{display:flex;gap:20px;background:#fff;border:1px solid rgba(0,0,0,.05);border-radius:16px;overflow:hidden;text-decoration:none;color:inherit;transition:all .25s}
+    .blog-card{display:flex;gap:20px;background:#fff;border:1px solid rgba(0,0,0,.05);border-radius:16px;overflow:hidden;text-decoration:none;color:inherit;transition:all .25s;opacity:0;animation:blogFadeIn .5s ease both}
     .blog-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.08)}
     .blog-card-img{width:220px;min-height:180px;flex-shrink:0;background:linear-gradient(135deg,var(--navy),#243255);position:relative;overflow:hidden}
     .blog-card-img img{width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s}
@@ -184,14 +190,14 @@ async function loadBlogPosts() {
       return;
     }
 
-    grid.innerHTML = publishedDocs.map(function(doc) {
+    grid.innerHTML = publishedDocs.map(function(doc, idx) {
       var p = doc.data();
       var readTime = ''; var date = '';
       var imgHtml = p.image
         ? '<img src="' + p.image + '" alt="' + (p.title || '') + '" loading="lazy" onload="var el=this;setTimeout(function(){el.classList.add(\'loaded\')},50)">'
         : '<div class="blog-emoji">' + (p.emoji || '📝') + '</div>';
 
-      return '<a href="blog?yazi=' + doc.id + '" class="blog-card">' +
+      return '<a href="blog?yazi=' + doc.id + '" class="blog-card" style="animation-delay:' + (idx * 0.08) + 's">' +
         '<div class="blog-card-img">' + imgHtml + '</div>' +
         '<div class="blog-card-body">' +
           '<div class="blog-card-cat">' + (p.category || 'Genel') + '</div>' +
@@ -207,8 +213,17 @@ async function loadBlogPosts() {
 }
 
 async function loadSinglePost(slug) {
-  document.getElementById('blog-list-section').style.display = 'none';
-  document.getElementById('blog-post-section').style.display = '';
+  var listSection = document.getElementById('blog-list-section');
+  var postSection = document.getElementById('blog-post-section');
+  // Fade out liste
+  listSection.classList.add('blog-animate-out');
+  setTimeout(function() {
+    listSection.style.display = 'none';
+    listSection.classList.remove('blog-animate-out');
+    postSection.style.display = '';
+    postSection.classList.add('blog-animate-in');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, 250);
   // Hero'yu güncelle
   var heroContent = document.querySelector('.bh-content');
 
