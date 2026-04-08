@@ -292,10 +292,12 @@
 .ct-field:last-child{margin-bottom:0}
 .ct-field label{font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-mid);margin-left:2px}
 .ct-input-wrap{position:relative}
-.ct-phone-wrap{display:flex;gap:8px;align-items:center}
-.ct-phone-code{width:110px;padding:12px 8px;border:1.5px solid rgba(26,39,68,.08);border-radius:12px;font-size:16px;font-family:inherit;background:rgba(255,255,255,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--navy);cursor:pointer;outline:none;transition:all .25s;-webkit-appearance:none;appearance:none;flex-shrink:0}
+.ct-phone-wrap{display:flex;gap:8px;align-items:center;width:100%}
+.ct-phone-code{width:105px;min-width:105px;max-width:105px;padding:12px 8px;border:1.5px solid rgba(26,39,68,.08);border-radius:12px;font-size:16px;font-family:inherit;background:rgba(255,255,255,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--navy);cursor:pointer;outline:none;transition:all .25s;-webkit-appearance:none;appearance:none;flex-shrink:0}
 .ct-phone-code:focus{border-color:var(--terra);box-shadow:0 0 0 3px rgba(196,82,26,.08)}
-.ct-phone-wrap input{flex:1}
+.ct-phone-wrap input[type="tel"]{flex:1;min-width:0;width:100%;padding:12px 15px;border:1.5px solid rgba(26,39,68,.08);border-radius:12px;font-size:16px;font-family:inherit;background:rgba(255,255,255,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--navy);outline:none;transition:all .25s}
+.ct-phone-wrap input[type="tel"]:focus{border-color:var(--terra);box-shadow:0 0 0 3px rgba(196,82,26,.08),0 4px 12px rgba(196,82,26,.06);background:rgba(255,255,255,.9)}
+.ct-phone-wrap input[type="tel"]::placeholder{color:rgba(74,88,112,.35)}
 .ct-input-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:.82rem;pointer-events:none;z-index:1}
 .ct-input-wrap input,.ct-input-wrap select{padding-left:38px !important}
 .ct-field input,.ct-field select,.ct-field textarea{width:100%;padding:12px 15px;border:1.5px solid rgba(26,39,68,.08);border-radius:12px;font-size:16px;font-family:inherit;outline:none;transition:all .25s;background:rgba(255,255,255,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--navy)}
