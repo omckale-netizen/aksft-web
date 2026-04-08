@@ -2034,6 +2034,21 @@ function saveDraft() {
 }
 
 /* ── Aktivite Logu ── */
+/* ── IndexNow — Bing/Yandex aninda indexleme ── */
+function pingIndexNow(url) {
+  try {
+    fetch('https://api.indexnow.org/indexnow', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        host: 'assosukesfet.com',
+        key: '9db06f4e0bab4c04855ea12029fa4daa',
+        urlList: Array.isArray(url) ? url : [url]
+      })
+    }).catch(function(){});
+  } catch(e) {}
+}
+
 function logActivity(action, target, details) {
   try {
     const user = firebase.auth().currentUser;
@@ -2052,6 +2067,7 @@ async function saveVenueToFirestore(venue) {
   delete data.id;
   await db.collection('venues').doc(venue.id).set(data);
   logActivity('mekan_guncelle', venue.id, venue.title);
+  pingIndexNow('https://assosukesfet.com/mekanlar/mekan-detay?id=' + venue.id);
 }
 
 async function deleteVenueFromFirestore(id) {
@@ -4674,6 +4690,7 @@ async function saveRoute(e) {
   }
 
   logActivity(editingRouteId ? 'rota_guncelle' : 'rota_ekle', route.id, route.title);
+  pingIndexNow('https://assosukesfet.com/rotalar/rota-detay?id=' + route.id);
   closeRouteModal();
   renderRoutesTable();
   showToast('"' + route.title + '" ' + (isEdit ? 'guncellendi.' : 'eklendi.'), 'success');
@@ -5973,6 +5990,7 @@ async function saveBlogPost(e) {
   try {
     await db.collection('blog_posts').doc(slug).set(post, { merge: true });
     logActivity('blog_' + (editingBlogId ? 'guncelle' : 'ekle'), slug, post.title);
+    if (post.status === 'published') pingIndexNow('https://assosukesfet.com/blog?yazi=' + slug);
     closeBlogModal();
     renderBlogTable();
     showToast('Yazı kaydedildi!', 'success');
