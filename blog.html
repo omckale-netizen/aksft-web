@@ -215,17 +215,14 @@ async function loadBlogPosts() {
 async function loadSinglePost(slug) {
   var listSection = document.getElementById('blog-list-section');
   var postSection = document.getElementById('blog-post-section');
-  // Fade out liste
-  listSection.classList.add('blog-animate-out');
-  setTimeout(function() {
-    listSection.style.display = 'none';
-    listSection.classList.remove('blog-animate-out');
-    postSection.style.display = '';
-    postSection.classList.add('blog-animate-in');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, 250);
-  // Hero'yu güncelle
+  // Hero'yu hemen temizle — eski başlık görünmesin
   var heroContent = document.querySelector('.bh-content');
+  heroContent.innerHTML = '<div style="height:40px"></div>';
+  // Fade out liste
+  listSection.style.display = 'none';
+  postSection.style.display = '';
+  postSection.classList.add('blog-animate-in');
+  window.scrollTo({ top: 0 });
 
   try {
     var doc = await firebase.firestore().collection('blog_posts').doc(slug).get();
