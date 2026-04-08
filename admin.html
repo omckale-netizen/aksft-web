@@ -2476,7 +2476,7 @@ function initApp() {
   }
   setupDragDrop();
   setupBackupDragDrop();
-  initNotifBadge();
+  try { initNotifBadge(); } catch(e) {}
 }
 
 /* ══════════════════════════════════════════════════
@@ -5259,32 +5259,36 @@ async function renderNotifications() {
     });
 
     // 2. Mekan bot onaylari
-    const botSnap = await db.collection('pending_venues').orderBy('createdAt', 'desc').limit(30).get();
-    botSnap.docs.forEach(d => {
-      const b = d.data();
-      allNotifs.push({
-        id: 'bot_' + d.id, type: 'bot', read: false,
-        icon: '🤖', iconBg: 'rgba(196,82,26,.1)',
-        title: 'Yeni mekan onerisi: ' + (b.title || 'Isimsiz'),
-        desc: (b.location || '') + (b.category ? ' · ' + b.category : ''),
-        time: b.createdAt || '',
-        action: function() { showPage('bot'); }
+    try {
+      const botSnap = await db.collection('pending_venues').limit(30).get();
+      botSnap.docs.forEach(d => {
+        const b = d.data();
+        allNotifs.push({
+          id: 'bot_' + d.id, type: 'bot', read: false,
+          icon: '🤖', iconBg: 'rgba(196,82,26,.1)',
+          title: 'Yeni mekan onerisi: ' + (b.title || 'Isimsiz'),
+          desc: (b.location || '') + (b.category ? ' · ' + b.category : ''),
+          time: b.createdAt || b.timestamp || '',
+          action: function() { showPage('bot'); }
+        });
       });
-    });
+    } catch(e) {}
 
     // 3. Yer bot onaylari
-    const plBotSnap = await db.collection('pending_places').orderBy('createdAt', 'desc').limit(30).get();
-    plBotSnap.docs.forEach(d => {
-      const b = d.data();
-      allNotifs.push({
-        id: 'pbot_' + d.id, type: 'bot', read: false,
-        icon: '📍', iconBg: 'rgba(90,122,86,.1)',
-        title: 'Yeni yer onerisi: ' + (b.title || 'Isimsiz'),
-        desc: b.location || '',
-        time: b.createdAt || '',
-        action: function() { showPage('placebot'); }
+    try {
+      const plBotSnap = await db.collection('pending_places').limit(30).get();
+      plBotSnap.docs.forEach(d => {
+        const b = d.data();
+        allNotifs.push({
+          id: 'pbot_' + d.id, type: 'bot', read: false,
+          icon: '📍', iconBg: 'rgba(90,122,86,.1)',
+          title: 'Yeni yer onerisi: ' + (b.title || 'Isimsiz'),
+          desc: b.location || '',
+          time: b.createdAt || b.timestamp || '',
+          action: function() { showPage('placebot'); }
+        });
       });
-    });
+    } catch(e) {}
 
     // 4. Sistem — son giris bilgileri
     const readNotifs = JSON.parse(localStorage.getItem('readNotifs') || '[]');
