@@ -46,42 +46,64 @@
 </section>
 
 <!-- İçerik -->
-<section class="ct-section" style="padding:0 24px 80px;background:var(--cream-light);margin-top:-40px;position:relative;z-index:2;">
-  <div style="max-width:900px;margin:0 auto;">
+<section class="ct-section">
+  <div class="ct-section-bg">
+    <div class="ct-bg-orb ct-bg-orb-1"></div>
+    <div class="ct-bg-orb ct-bg-orb-2"></div>
+    <div class="ct-bg-orb ct-bg-orb-3"></div>
+  </div>
+  <div style="max-width:940px;margin:0 auto;position:relative;z-index:2;">
 
-    <div class="ct-layout" style="display:grid;grid-template-columns:1fr 340px;gap:32px;align-items:start;">
+    <div class="ct-layout">
 
       <!-- Sol: Form -->
-      <div class="fade-up ct-form-card" style="background:#fff;border-radius:22px;padding:40px 36px;box-shadow:0 8px 32px rgba(26,39,68,.07);border:1px solid rgba(26,39,68,.05);">
-        <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.15rem;color:var(--navy);margin-bottom:4px;">Mesaj Gönderin</h3>
-        <p style="font-size:.8rem;color:var(--text-mid);margin-bottom:28px;">Tüm alanları doldurarak bize ulaşabilirsiniz.</p>
+      <div class="fade-up ct-form-card">
+        <div class="ct-form-header">
+          <div class="ct-form-icon">✉</div>
+          <div>
+            <h3>Mesaj Gönderin</h3>
+            <p>Tüm alanları doldurarak bize ulaşabilirsiniz.</p>
+          </div>
+        </div>
 
         <form id="contact-form" onsubmit="submitContact(event)" novalidate>
           <div class="ct-row">
             <div class="ct-field">
               <label>Ad Soyad *</label>
-              <input type="text" id="ct-name" required placeholder="Adınız ve soyadınız">
+              <div class="ct-input-wrap">
+                <span class="ct-input-icon">👤</span>
+                <input type="text" id="ct-name" required placeholder="Adınız ve soyadınız">
+              </div>
             </div>
             <div class="ct-field">
               <label>E-posta *</label>
-              <input type="email" id="ct-email" required placeholder="ornek@mail.com">
+              <div class="ct-input-wrap">
+                <span class="ct-input-icon">📧</span>
+                <input type="email" id="ct-email" required placeholder="ornek@mail.com">
+              </div>
             </div>
           </div>
           <div class="ct-row">
             <div class="ct-field">
               <label>Konu</label>
-              <select id="ct-subject">
-                <option value="Genel">Genel</option>
-                <option value="Öneri">Öneri</option>
-                <option value="Şikayet">Şikayet</option>
-                <option value="İşbirliği">İşbirliği</option>
-                <option value="Mekan Ekleme Talebi">Mekan Ekleme Talebi</option>
-                <option value="Hata Bildirimi">Hata Bildirimi</option>
-              </select>
+              <div class="ct-input-wrap">
+                <span class="ct-input-icon">📋</span>
+                <select id="ct-subject">
+                  <option value="Genel">Genel</option>
+                  <option value="Öneri">Öneri</option>
+                  <option value="Şikayet">Şikayet</option>
+                  <option value="İşbirliği">İşbirliği</option>
+                  <option value="Mekan Ekleme Talebi">Mekan Ekleme Talebi</option>
+                  <option value="Hata Bildirimi">Hata Bildirimi</option>
+                </select>
+              </div>
             </div>
             <div class="ct-field">
               <label>Telefon *</label>
-              <input type="tel" id="ct-phone" required placeholder="0532 xxx xx xx">
+              <div class="ct-input-wrap">
+                <span class="ct-input-icon">📞</span>
+                <input type="tel" id="ct-phone" required placeholder="0532 xxx xx xx">
+              </div>
             </div>
           </div>
           <div class="ct-field">
@@ -96,16 +118,19 @@
             </label>
             <div id="ct-consent-msg" class="ct-consent-warn" style="display:none;">Devam etmek için Gizlilik Politikası'nı kabul etmeniz gerekmektedir.</div>
           </div>
-          <button type="submit" id="ct-submit" class="ct-btn">Mesaj Gönder →</button>
-          <div id="ct-status" style="text-align:center;margin-top:12px;font-size:.82rem;min-height:20px;"></div>
+          <button type="submit" id="ct-submit" class="ct-btn">
+            <span>Mesaj Gönder</span>
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          <div id="ct-status" style="text-align:center;margin-top:14px;font-size:.82rem;min-height:20px;"></div>
         </form>
       </div>
 
       <!-- Sağ: İletişim kartları -->
-      <div class="fade-up" style="display:flex;flex-direction:column;gap:16px;">
+      <div class="fade-up ct-sidebar">
 
         <div class="ct-card">
-          <div class="ct-card-icon" style="background:rgba(196,82,26,.08);">📧</div>
+          <div class="ct-card-icon" style="background:linear-gradient(135deg,rgba(196,82,26,.12),rgba(196,82,26,.04));">📧</div>
           <div>
             <div class="ct-card-label">E-posta</div>
             <a href="mailto:assosukesfet@gmail.com" class="ct-card-val">assosukesfet@gmail.com</a>
@@ -113,7 +138,7 @@
         </div>
 
         <div class="ct-card">
-          <div class="ct-card-icon" style="background:linear-gradient(135deg,rgba(245,133,41,.08),rgba(221,42,123,.08));">📷</div>
+          <div class="ct-card-icon" style="background:linear-gradient(135deg,rgba(245,133,41,.1),rgba(221,42,123,.06));">📷</div>
           <div>
             <div class="ct-card-label">Instagram</div>
             <a href="https://www.instagram.com/assosukesfet/" target="_blank" rel="noopener" class="ct-card-val">@assosukesfet</a>
@@ -121,20 +146,38 @@
         </div>
 
         <div class="ct-card">
-          <div class="ct-card-icon" style="background:rgba(26,39,68,.06);">📍</div>
+          <div class="ct-card-icon" style="background:linear-gradient(135deg,rgba(26,39,68,.08),rgba(26,107,138,.06));">📍</div>
           <div>
             <div class="ct-card-label">Konum</div>
             <span class="ct-card-val" style="cursor:default;">Ayvacık / Çanakkale</span>
           </div>
         </div>
 
+        <!-- Yanıt Süresi -->
+        <div class="ct-response-card">
+          <div class="ct-response-icon">⚡</div>
+          <div>
+            <div style="font-size:.82rem;font-weight:700;color:var(--navy);">Hızlı Yanıt</div>
+            <div style="font-size:.72rem;color:var(--text-mid);">Genellikle 24 saat içinde dönüş yapıyoruz.</div>
+          </div>
+        </div>
+
         <!-- SSS -->
-        <div style="background:rgba(196,82,26,.04);border:1px solid rgba(196,82,26,.1);border-radius:16px;padding:20px;">
-          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.85rem;color:var(--navy);margin-bottom:8px;">💡 Sıkça Sorulan</div>
-          <div style="font-size:.78rem;color:var(--text-mid);line-height:1.7;">
-            <p style="margin-bottom:6px;">• Mekanınızı eklemek mi istiyorsunuz? <strong>"Mekan Ekleme Talebi"</strong> konusunu seçin.</p>
-            <p style="margin-bottom:6px;">• İşbirliği için detaylı bilgiyi mesajınızda belirtin.</p>
-            <p>• Yanıt süresi genellikle 24 saat içindedir.</p>
+        <div class="ct-faq-card">
+          <div style="font-weight:700;font-size:.82rem;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+            <span style="font-size:1rem">💡</span> Sıkça Sorulan
+          </div>
+          <div class="ct-faq-item">
+            <span class="ct-faq-q">Mekanımı eklemek istiyorum</span>
+            <span class="ct-faq-a">"Mekan Ekleme Talebi" konusunu seçin</span>
+          </div>
+          <div class="ct-faq-item">
+            <span class="ct-faq-q">İşbirliği yapmak istiyorum</span>
+            <span class="ct-faq-a">Detayları mesajınızda belirtin</span>
+          </div>
+          <div class="ct-faq-item" style="border-bottom:none;padding-bottom:0">
+            <span class="ct-faq-q">Bilgi hatası var</span>
+            <span class="ct-faq-a">"Hata Bildirimi" konusunu seçin</span>
           </div>
         </div>
 
@@ -189,7 +232,107 @@
 
 <style>.biz-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.biz-card{background:rgba(255,255,255,.04);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:28px 24px;text-align:center}.biz-icon{font-size:1.8rem;margin-bottom:14px}.biz-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.88rem;color:#F5EDE0;margin-bottom:8px}.biz-desc{font-size:.78rem;color:rgba(245,237,224,.4);line-height:1.65}@media(max-width:768px){.biz-grid{grid-template-columns:1fr;max-width:360px;margin:0 auto;gap:12px}.biz-card{padding:22px 20px;display:flex;align-items:center;gap:16px;text-align:left}.biz-icon{font-size:1.4rem;margin-bottom:0;flex-shrink:0}.biz-title{font-size:.82rem;margin-bottom:4px}.biz-desc{font-size:.72rem;line-height:1.5}}</style>
 
-<style>.ct-hero{position:relative;overflow:hidden;background:linear-gradient(150deg,#06101E 0%,#0C1A30 55%,#091420 100%);padding:120px 24px 80px;text-align:center}.ct-hero-grid{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(245,237,224,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(245,237,224,.03) 1px,transparent 1px);background-size:60px 60px}.ct-hero-orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}.ct-orb-1{width:400px;height:400px;background:rgba(196,82,26,.12);top:-100px;left:-60px}.ct-orb-2{width:300px;height:300px;background:rgba(26,107,138,.1);bottom:-80px;right:-60px}.ct-hero-inner{position:relative;z-index:1;max-width:600px;margin:0 auto}.ct-hero-badge{display:inline-flex;align-items:center;gap:10px;background:rgba(196,82,26,.1);border:1px solid rgba(196,82,26,.25);border-radius:999px;padding:6px 16px;margin-bottom:24px}.ct-hero-dot{width:7px;height:7px;border-radius:50%;background:#C4521A;flex-shrink:0}.ct-hero-badge span{font-size:.65rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#D4935A}.ct-hero-h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(2.2rem,5vw,3.4rem);letter-spacing:-.03em;line-height:1;color:#F5EDE0;margin-bottom:16px}.ct-hero-h1 em{font-style:italic;font-family:'Lora',serif;font-weight:500;font-size:.9em;background:linear-gradient(135deg,#D4935A,#E8A07A);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.ct-hero-sub{font-size:.92rem;color:rgba(245,237,224,.5);line-height:1.75}.ct-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}.ct-field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}.ct-field:last-child{margin-bottom:0}.ct-field label{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-mid)}.ct-field input,.ct-field select,.ct-field textarea{width:100%;padding:11px 15px;border:1.5px solid rgba(26,39,68,.1);border-radius:11px;font-size:.86rem;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s;background:#FAFAFA}.ct-field input:focus,.ct-field select:focus,.ct-field textarea:focus{border-color:var(--terra);box-shadow:0 0 0 3px rgba(196,82,26,.08);background:#fff}.ct-field textarea{resize:vertical;line-height:1.7}.ct-field select{cursor:pointer;color:var(--navy)}.ct-consent{margin:16px 0 4px}.ct-consent-warn{font-size:.76rem;color:#E53E3E;margin-top:8px;padding:8px 12px;background:rgba(229,62,62,.06);border:1px solid rgba(229,62,62,.15);border-radius:8px;animation:ctShake .4s}.ct-consent-error .ct-checkmark{border-color:#E53E3E !important;box-shadow:0 0 0 3px rgba(229,62,62,.1)}@keyframes ctShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}.ct-checkbox-label{display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:.8rem;color:var(--text-mid);line-height:1.6;user-select:none}.ct-checkbox-label input{display:none}.ct-checkmark{width:20px;height:20px;min-width:20px;border:1.5px solid rgba(26,39,68,.15);border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:1px;background:#FAFAFA}.ct-checkbox-label input:checked+.ct-checkmark{background:var(--terra);border-color:var(--terra)}.ct-checkbox-label input:checked+.ct-checkmark::after{content:'✓';color:#fff;font-size:.7rem;font-weight:700}.ct-checkbox-label a{color:var(--terra);text-decoration:underline;font-weight:600}.ct-checkbox-label a:hover{color:#D4682E}.ct-btn{width:100%;padding:14px;border:none;border-radius:13px;background:var(--terra);color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;margin-top:8px}.ct-btn:hover{background:#D4682E;transform:translateY(-1px);box-shadow:0 6px 20px rgba(196,82,26,.3)}.ct-card{background:#fff;border-radius:16px;padding:20px;border:1px solid rgba(26,39,68,.05);display:flex;align-items:center;gap:14px;transition:transform .2s,box-shadow .2s}.ct-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(26,39,68,.07)}.ct-card-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}.ct-card-label{font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:3px}.ct-card-val{font-size:.84rem;font-weight:600;color:var(--navy);text-decoration:none}.ct-card-val:hover{color:var(--terra)}@media(max-width:768px){.ct-hero{padding:100px 24px 50px}.ct-layout{grid-template-columns:1fr !important;gap:20px !important}.ct-row{grid-template-columns:1fr !important}.ct-form-card{padding:28px 20px !important}.ct-section{padding-bottom:60px !important}}</style>
+<style>
+/* ── HERO ── */
+.ct-hero{position:relative;overflow:hidden;background:linear-gradient(150deg,#06101E 0%,#0C1A30 55%,#091420 100%);padding:120px 24px 80px;text-align:center}
+.ct-hero-grid{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(245,237,224,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(245,237,224,.03) 1px,transparent 1px);background-size:60px 60px}
+.ct-hero-orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
+.ct-orb-1{width:400px;height:400px;background:rgba(196,82,26,.12);top:-100px;left:-60px}
+.ct-orb-2{width:300px;height:300px;background:rgba(26,107,138,.1);bottom:-80px;right:-60px}
+.ct-hero-inner{position:relative;z-index:1;max-width:600px;margin:0 auto}
+.ct-hero-badge{display:inline-flex;align-items:center;gap:10px;background:rgba(196,82,26,.1);border:1px solid rgba(196,82,26,.25);border-radius:999px;padding:6px 16px;margin-bottom:24px}
+.ct-hero-dot{width:7px;height:7px;border-radius:50%;background:#C4521A;flex-shrink:0;animation:ctPulse 2s infinite}
+@keyframes ctPulse{0%,100%{opacity:1}50%{opacity:.3}}
+.ct-hero-badge span{font-size:.65rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#D4935A}
+.ct-hero-h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(2.2rem,5vw,3.4rem);letter-spacing:-.03em;line-height:1;color:#F5EDE0;margin-bottom:16px}
+.ct-hero-h1 em{font-style:italic;font-family:'Lora',serif;font-weight:500;font-size:.9em;background:linear-gradient(135deg,#D4935A,#E8A07A);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.ct-hero-sub{font-size:.92rem;color:rgba(245,237,224,.5);line-height:1.75}
+
+/* ── SECTION ── */
+.ct-section{padding:0 24px 80px;margin-top:-40px;position:relative;z-index:2;overflow:hidden}
+.ct-section-bg{position:absolute;inset:0;z-index:0;pointer-events:none}
+.ct-bg-orb{position:absolute;border-radius:50%;filter:blur(120px)}
+.ct-bg-orb-1{width:500px;height:500px;background:rgba(196,82,26,.06);top:-100px;right:-150px}
+.ct-bg-orb-2{width:400px;height:400px;background:rgba(26,107,138,.04);bottom:-80px;left:-100px}
+.ct-bg-orb-3{width:250px;height:250px;background:rgba(212,147,90,.05);top:40%;left:30%}
+
+/* ── LAYOUT ── */
+.ct-layout{display:grid;grid-template-columns:1fr 340px;gap:28px;align-items:start}
+
+/* ── FORM CARD (Glass) ── */
+.ct-form-card{background:rgba(255,255,255,.72);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:24px;padding:36px 32px;box-shadow:0 8px 40px rgba(26,39,68,.08),0 1px 3px rgba(26,39,68,.04),inset 0 1px 0 rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.6)}
+.ct-form-header{display:flex;align-items:center;gap:14px;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid rgba(26,39,68,.06)}
+.ct-form-icon{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--terra),#D4682E);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;box-shadow:0 4px 12px rgba(196,82,26,.25)}
+.ct-form-header h3{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.1rem;color:var(--navy);margin-bottom:2px}
+.ct-form-header p{font-size:.78rem;color:var(--text-mid);margin:0}
+
+/* ── FIELDS ── */
+.ct-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:0}
+.ct-field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.ct-field:last-child{margin-bottom:0}
+.ct-field label{font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-mid);margin-left:2px}
+.ct-input-wrap{position:relative}
+.ct-input-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:.82rem;pointer-events:none;z-index:1}
+.ct-input-wrap input,.ct-input-wrap select{padding-left:38px !important}
+.ct-field input,.ct-field select,.ct-field textarea{width:100%;padding:12px 15px;border:1.5px solid rgba(26,39,68,.08);border-radius:12px;font-size:16px;font-family:inherit;outline:none;transition:all .25s;background:rgba(255,255,255,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--navy)}
+.ct-field input:focus,.ct-field select:focus,.ct-field textarea:focus{border-color:var(--terra);box-shadow:0 0 0 3px rgba(196,82,26,.08),0 4px 12px rgba(196,82,26,.06);background:rgba(255,255,255,.9)}
+.ct-field input::placeholder,.ct-field textarea::placeholder{color:rgba(74,88,112,.35)}
+.ct-field textarea{resize:vertical;line-height:1.7}
+.ct-field select{cursor:pointer;color:var(--navy);-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%234A5870' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+
+/* ── CONSENT ── */
+.ct-consent{margin:18px 0 6px}
+.ct-consent-warn{font-size:.76rem;color:#E53E3E;margin-top:8px;padding:8px 12px;background:rgba(229,62,62,.06);border:1px solid rgba(229,62,62,.15);border-radius:8px;animation:ctShake .4s}
+.ct-consent-error .ct-checkmark{border-color:#E53E3E !important;box-shadow:0 0 0 3px rgba(229,62,62,.1)}
+@keyframes ctShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+.ct-checkbox-label{display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:.78rem;color:var(--text-mid);line-height:1.6;user-select:none}
+.ct-checkbox-label input{display:none}
+.ct-checkmark{width:20px;height:20px;min-width:20px;border:1.5px solid rgba(26,39,68,.15);border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:1px;background:rgba(255,255,255,.6)}
+.ct-checkbox-label input:checked+.ct-checkmark{background:var(--terra);border-color:var(--terra);box-shadow:0 2px 8px rgba(196,82,26,.25)}
+.ct-checkbox-label input:checked+.ct-checkmark::after{content:'✓';color:#fff;font-size:.7rem;font-weight:700}
+.ct-checkbox-label a{color:var(--terra);text-decoration:underline;font-weight:600}
+.ct-checkbox-label a:hover{color:#D4682E}
+
+/* ── SUBMIT BUTTON ── */
+.ct-btn{width:100%;padding:14px 20px;border:none;border-radius:14px;background:linear-gradient(135deg,#C4521A,#D4682E);color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .25s;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(196,82,26,.25);position:relative;overflow:hidden}
+.ct-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);opacity:0;transition:opacity .25s}
+.ct-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(196,82,26,.35)}
+.ct-btn:hover::before{opacity:1}
+.ct-btn:active{transform:translateY(0);box-shadow:0 2px 8px rgba(196,82,26,.2)}
+.ct-btn svg{transition:transform .2s}
+.ct-btn:hover svg{transform:translateX(3px)}
+
+/* ── SIDEBAR ── */
+.ct-sidebar{display:flex;flex-direction:column;gap:14px}
+
+/* ── CARDS (Glass) ── */
+.ct-card{background:rgba(255,255,255,.65);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:16px;padding:18px 20px;border:1px solid rgba(255,255,255,.5);display:flex;align-items:center;gap:14px;transition:all .25s;box-shadow:0 2px 12px rgba(26,39,68,.04)}
+.ct-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(26,39,68,.08);background:rgba(255,255,255,.85)}
+.ct-card-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.ct-card-label{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:3px}
+.ct-card-val{font-size:.82rem;font-weight:600;color:var(--navy);text-decoration:none;transition:color .2s}
+.ct-card-val:hover{color:var(--terra)}
+
+/* ── RESPONSE CARD ── */
+.ct-response-card{display:flex;align-items:center;gap:12px;padding:16px 18px;background:linear-gradient(135deg,rgba(56,161,105,.06),rgba(56,161,105,.02));border:1px solid rgba(56,161,105,.12);border-radius:14px}
+.ct-response-icon{width:38px;height:38px;border-radius:10px;background:rgba(56,161,105,.1);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+
+/* ── FAQ CARD ── */
+.ct-faq-card{background:rgba(255,255,255,.55);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(196,82,26,.08);border-radius:16px;padding:18px 20px}
+.ct-faq-item{padding:10px 0;border-bottom:1px solid rgba(26,39,68,.05)}
+.ct-faq-q{display:block;font-size:.76rem;font-weight:600;color:var(--navy);margin-bottom:2px}
+.ct-faq-a{display:block;font-size:.7rem;color:var(--text-muted)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .ct-hero{padding:100px 24px 50px}
+  .ct-layout{grid-template-columns:1fr !important;gap:20px !important}
+  .ct-row{grid-template-columns:1fr !important}
+  .ct-form-card{padding:28px 20px !important;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+  .ct-section{padding-bottom:60px !important}
+  .ct-form-header{flex-direction:column;text-align:center;gap:10px}
+}
+</style>
 
 <div id="footer-placeholder"></div>
 
