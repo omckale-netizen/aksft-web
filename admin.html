@@ -5098,17 +5098,15 @@ function openQRModal(id) {
       }
     }
   }
-  // Logo ortada
+  // Logo ortada — beyaz alan birak, logo canvas'ta cizilecek
   const logoSize = cellSize * 9;
   const logoX = (size - logoSize) / 2;
   svg += '<rect x="' + (logoX - 4) + '" y="' + (logoX - 4) + '" width="' + (logoSize + 8) + '" height="' + (logoSize + 8) + '" rx="10" fill="#fff"/>';
-  const logoUrl = document.getElementById('logo-preview-img')?.src || localStorage.getItem('site_logo_url') || '';
-  if (logoUrl) {
-    svg += '<image href="' + logoUrl + '" x="' + logoX + '" y="' + logoX + '" width="' + logoSize + '" height="' + logoSize + '" preserveAspectRatio="xMidYMid meet"/>';
-  }
   svg += '</svg>';
 
-  canvas.innerHTML = svg;
+  const logoUrl = document.getElementById('logo-preview-img')?.src || localStorage.getItem('site_logo_url') || '';
+  const logoHtml = logoUrl ? '<img src="' + logoUrl + '" crossorigin="anonymous" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:' + (logoSize * 1.1) + 'px;height:' + (logoSize * 1.1) + 'px;object-fit:contain;border-radius:6px">' : '';
+  canvas.innerHTML = '<div style="position:relative;display:inline-block">' + svg + logoHtml + '</div>';
   document.getElementById('qr-overlay').classList.add('show');
 }
 
@@ -5123,43 +5121,61 @@ function downloadQR() {
   const v = draftData.venues.find(x => x.id === currentQRVenueId);
   const name = v ? v.title.toLowerCase().replace(/\s+/g, '-') : 'qr';
 
-  // SVG → Canvas → PNG
+  // SVG → Canvas → Logo → PNG
   const svgData = new XMLSerializer().serializeToString(svgEl);
-  const img = new Image();
-  const scale = 3; // 3x kalite
-  img.onload = function() {
-    const canvas = document.createElement('canvas');
-    canvas.width = img.width * scale;
-    canvas.height = img.height * scale;
-    const ctx = canvas.getContext('2d');
+  const qrImg = new Image();
+  const scale = 3;
+  qrImg.onload = function() {
+    const qrCanvas = document.createElement('canvas');
+    qrCanvas.width = qrImg.width * scale;
+    qrCanvas.height = qrImg.height * scale;
+    const ctx = qrCanvas.getContext('2d');
     ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, qrCanvas.width, qrCanvas.height);
+    ctx.drawImage(qrImg, 0, 0, qrCanvas.width, qrCanvas.height);
 
-    // Alt yazı ekle
-    const fontSize = 14 * scale;
-    const padding = 10 * scale;
-    const textCanvas = document.createElement('canvas');
-    textCanvas.width = canvas.width;
-    textCanvas.height = canvas.height + fontSize + padding * 2;
-    const tCtx = textCanvas.getContext('2d');
-    tCtx.fillStyle = '#fff';
-    tCtx.fillRect(0, 0, textCanvas.width, textCanvas.height);
-    tCtx.drawImage(canvas, 0, 0);
-    tCtx.fillStyle = '#1A2744';
-    tCtx.font = 'bold ' + fontSize + 'px sans-serif';
-    tCtx.textAlign = 'center';
-    tCtx.fillText((v ? v.title : '') + ' — Assos\'u Kesfet', textCanvas.width / 2, canvas.height + fontSize + padding / 2);
+    function finalize(qc) {
+      const fontSize = 14 * scale;
+      const padding = 10 * scale;
+      const finalCanvas = document.createElement('canvas');
+      finalCanvas.width = qc.width;
+      finalCanvas.height = qc.height + fontSize + padding * 2;
+      const fCtx = finalCanvas.getContext('2d');
+      fCtx.fillStyle = '#fff';
+      fCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+      fCtx.drawImage(qc, 0, 0);
+      fCtx.fillStyle = '#1A2744';
+      fCtx.font = 'bold ' + fontSize + 'px sans-serif';
+      fCtx.textAlign = 'center';
+      fCtx.fillText((v ? v.title : '') + ' — Assos\'u Kesfet', finalCanvas.width / 2, qc.height + fontSize + padding / 2);
+      const a = document.createElement('a');
+      a.href = finalCanvas.toDataURL('image/png');
+      a.download = 'qr-' + name + '.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('QR kod indirildi!', 'success');
+    }
 
-    const a = document.createElement('a');
-    a.href = textCanvas.toDataURL('image/png');
-    a.download = 'qr-' + name + '.png';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    showToast('QR kod indirildi!', 'success');
+    // Logoyu canvas'a çiz
+    const logoUrl = document.getElementById('logo-preview-img')?.src || localStorage.getItem('site_logo_url') || '';
+    if (logoUrl) {
+      const logoImg = new Image();
+      logoImg.crossOrigin = 'anonymous';
+      logoImg.onload = function() {
+        const lSize = qrCanvas.width * 0.22;
+        const lx = (qrCanvas.width - lSize) / 2;
+        const ly = (qrCanvas.height - lSize) / 2;
+        ctx.drawImage(logoImg, lx, ly, lSize, lSize);
+        finalize(qrCanvas);
+      };
+      logoImg.onerror = function() { finalize(qrCanvas); };
+      logoImg.src = logoUrl;
+    } else {
+      finalize(qrCanvas);
+    }
   };
-  img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+  qrImg.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
 }
 
 function copyQRLink() {
