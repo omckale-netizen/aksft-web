@@ -148,17 +148,17 @@ function pageInit() {
 async function loadBlogPosts() {
   const grid = document.getElementById('blog-grid');
   try {
-    const snap = await firebase.firestore().collection('blog_posts')
-      .where('status', '==', 'published')
-      .orderBy('publishedAt', 'desc')
-      .limit(50).get();
+    const snap = await firebase.firestore().collection('blog_posts').limit(50).get();
 
-    if (snap.empty) {
+    const publishedDocs = snap.docs.filter(function(d) { return d.data().status === 'published'; });
+    publishedDocs.sort(function(a, b) { return (b.data().publishedAt || '').localeCompare(a.data().publishedAt || ''); });
+
+    if (publishedDocs.length === 0) {
       grid.innerHTML = '<div class="blog-empty">Henüz yazı yayınlanmadı.</div>';
       return;
     }
 
-    grid.innerHTML = snap.docs.map(function(doc) {
+    grid.innerHTML = publishedDocs.map(function(doc) {
       var p = doc.data();
       var date = p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('tr-TR', { day:'numeric', month:'long', year:'numeric' }) : '';
       var readTime = p.readTime || Math.ceil((p.content || '').split(' ').length / 200) + ' dk';
@@ -181,7 +181,7 @@ async function loadBlogPosts() {
     }).join('');
 
   } catch(err) {
-    grid.innerHTML = '<div class="blog-empty">Yazılar yüklenemedi.</div>';
+    grid.innerHTML = '<div class="blog-empty">Yazılar yüklenemedi: ' + err.message + '</div>';
   }
 }
 
