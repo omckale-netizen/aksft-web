@@ -41,7 +41,6 @@
   // Timeout — 6 saniyede Firebase gelmezse data.js fallback
   var timeout = setTimeout(function() {
     if (!window._firebaseReady) {
-      console.warn('Firebase: Timeout, data.js fallback');
       fallback();
     }
   }, 6000);
@@ -84,7 +83,7 @@
       try {
         var appCheck = firebase.appCheck();
         appCheck.activate('6LdfCqwsAAAAAGECNBwhjW0fCC3lIsvCwZZxrurI', true);
-      } catch(e) { console.warn('App Check: aktif edilemedi', e); }
+      } catch(e) { }
 
       var db = firebase.firestore();
       window._db = db;
@@ -103,7 +102,6 @@
         var routes = results[3].status === 'fulfilled' ? results[3].value.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); }) : [];
 
         var failed = results.filter(function(r) { return r.status === 'rejected'; });
-        if (failed.length > 0) console.warn('Firebase: ' + failed.length + ' koleksiyon yuklenemedi');
 
         venues.sort(function(a, b) { return (a.sortOrder || 999) - (b.sortOrder || 999); });
         places.sort(function(a, b) { return (a.sortOrder || 999) - (b.sortOrder || 999); });
@@ -113,7 +111,6 @@
         // Cache guncelle
         try { localStorage.setItem(DATA_CACHE_KEY, JSON.stringify(window.DATA)); } catch(e) {}
 
-        console.log('Firebase: Data loaded (' + venues.length + ' venues, ' + places.length + ' places, ' + villages.length + ' villages, ' + routes.length + ' routes)');
 
         hideLoader();
         if (window._cacheUsed) {
@@ -124,7 +121,6 @@
         }
       });
     } catch(err) {
-      console.warn('Firebase: Init failed:', err);
       fallback();
     }
   }
