@@ -481,8 +481,8 @@ function pageInit() {
       '&daily=temperature_2m_max,temperature_2m_min,weather_code' +
       '&timezone=Europe%2FIstanbul&forecast_days=3';
     const wmo = {0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌧',63:'🌧',65:'🌧',71:'🌨',73:'🌨',75:'❄️',80:'🌦',81:'🌧',82:'⛈',95:'⛈',96:'⛈',99:'⛈'};
-    const labels = {0:'Acik',1:'Az bulutlu',2:'Parcali',3:'Bulutlu',45:'Sisli',48:'Sisli',51:'Hafif yagmur',53:'Yagmurlu',55:'Yogun yagmur',61:'Yagmurlu',63:'Yagmurlu',65:'Siddetli',71:'Kar',80:'Saganak',81:'Saganak',95:'Firtina'};
-    const gunler = ['Paz','Pzt','Sal','Car','Per','Cum','Cmt'];
+    const labels = {0:'Açık',1:'Az bulutlu',2:'Parçalı',3:'Bulutlu',45:'Sisli',48:'Sisli',51:'Hafif yağmur',53:'Yağmurlu',55:'Yoğun yağmur',61:'Yağmurlu',63:'Yağmurlu',65:'Şiddetli',71:'Kar',80:'Sağanak',81:'Sağanak',95:'Fırtına'};
+    const gunler = ['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];
 
     fetch(url).then(r => r.json()).then(data => {
       if (!data.current || !data.daily) return;
@@ -495,7 +495,7 @@ function pageInit() {
       // Yarın ve öbürgün
       const days = data.daily.time.map((date, i) => {
         const d = new Date(date + 'T12:00:00');
-        const dayName = i === 0 ? 'Bugun' : i === 1 ? 'Yarin' : gunler[d.getDay()];
+        const dayName = i === 0 ? 'Bugün' : i === 1 ? 'Yarın' : gunler[d.getDay()];
         return {
           name: dayName,
           emoji: wmo[data.daily.weather_code[i]] || '🌡',
