@@ -135,4 +135,30 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
+
+  <!-- Mekan Detay Sayfaları -->
+  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=behram-kafe</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=korfez-balik</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=assos-tas-kahvalti</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=gun-batimi-kafe</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=kayalar-koy-evi</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=antik-liman-restoran</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=kadirga-plaj</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=ahmetce-iskele-kafe</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=sivrice-beach</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=sunaba-kasri-otel</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=kafe-meraa</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+
+  <!-- Gezilecek Yer Detay Sayfaları -->
+  <url><loc>https://assosukesfet.com/yerler#athena-tapinagi</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/yerler#assos-antik-liman</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/yerler#kadirga-koyu</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/yerler#behramkale-koyu</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/yerler#apollon-smintheion</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/yerler#ahmetce-iskelesi</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/yerler#adatepe-koyu</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/yerler#sivrice-koyu</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/yerler#adatepe-zeytinyagi-muzesi</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/yerler#sokakagzi-koyu</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://assosukesfet.com/yerler#yesil-liman</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 </urlset>
