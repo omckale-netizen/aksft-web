@@ -1,0 +1,394 @@
+# Assos'u Keşfet — Tam İçerik Rehberi
+
+> Bu dosya assosukesfet.com platformundaki tüm mekan, rota, köy ve yer bilgilerini içermektedir.
+> Kaynak: https://assosukesfet.com
+
+## Mekanlar (11 adet)
+
+### Kafeler (3)
+
+**Behram Kafe**
+Behram Kafe, Behramkale'nin taş sokaklarının kalbinde, Athena Tapınağı'na bakan bir konumda yer alır. Tarihi taş binanın içinde ve teraста sunulan köy kahvesi, bitki çayları ve yerel atıştırmalıklarla
+- Konum: Behramkale Köyü | Tel: 0532 411 72 38 | Saat: 08:00–22:00
+- Etiketler: manzaralı, köy içinde, gün batımı
+- Detay: https://assosukesfet.com/mekanlar/mekan-detay?id=behram-kafe
+
+**Gün Batımı Kafe**
+Gün Batımı Kafe, adını hak ettiğini her gün kanıtlar. Athena Tapınağı'na yürüme mesafesinde, Ege'ye bakan terası ile gün batımı saatlerinde en büyüleyici manzarayı sunar. Filtre kahve, espresso ve soğ
+- Konum: Behramkale Tepesi | Tel: 0533 507 26 91 | Saat: 10:00–21:00
+- Etiketler: gün batımı, manzaralı, fotoğraf
+- Detay: https://assosukesfet.com/mekanlar/mekan-detay?id=gun-batimi-kafe
+
+**Kafe Mera**
+- Konum: Cemaller Köyü | Tel: 0542 724 35 26
+- Etiketler: sakin, huzurlu, doğa, köy
+- Detay: https://assosukesfet.com/mekanlar/mekan-detay?id=kafe-meraa
+
+### Restoranlar (2)
+
+**Körfez Balık**
+Körfez Balık, Assos Antik Limanı'nın taş rıhtımında, denize birkaç metre mesafede hizmet veren balık restoranıdır. Sabah avlanan günlük taze balık, Ege'nin zeytinyağlı mezeleri ve limana bakan masalar
+- Konum: Assos Antik Liman | Tel: 0286 721 84 15 | Saat: 11:00–22:00
+- Etiketler: deniz kenarı, taze balık, manzaralı
+- Detay: https://assosukesfet.com/mekanlar/mekan-detay?id=korfez-balik
+
+**Antik Liman Restoranı**
+Antik Liman Restoranı, Assos'un tarihi limanında Ege mutfağının en özgün tatlarını sunar. Mevsim zeytinyağlıları, taze ot salatalar, denizden çıkmış ürünler ve zeytinyağlı balık yemekleri menünün ana 
+- Konum: Assos Antik Liman | Tel: 0286 721 91 30 | Saat: 12:00–22:30
+- Etiketler: ege mutfağı, tarihi mekân, deniz kenarı
+- Detay: https://assosukesfet.com/mekanlar/mekan-detay?id=antik-liman-restoran
+
+### Kahvaltı Mekanları (1)
+
+**Assos Taş Kahvaltı**
+Assos Taş Kahvaltı, Behramkale'nin restore edilmiş taş evlerinden birinde, geniş taş bahçede sunulan bir köy kahvaltısı deneyimidir. Yerel çiftliklerden gelen taze yumurtalar, çevre köylerden toplanan
+- Konum: Behramkale Köyü | Tel: 0545 332 19 04 | Saat: 08:00–13:00
+- Etiketler: köy içinde, kahvaltı, organik
+- Detay: https://assosukesfet.com/mekanlar/mekan-detay?id=assos-tas-kahvalti
+
+### Konaklama (2)
+
+**Kayalar Köy Evi**
+Kayalar Köy Evi, Kayalar köyünde tarihi bir taş evin özenle restore edilmesiyle oluşturulmuş butik bir konaklama mekânıdır. Bahçesi, taş duvarları ve ahşap çatısıyla özgünlüğünü koruyan ev; bölgenin s
+- Konum: Kayalar Köyü | Tel: 0532 644 83 20 | Saat: Check-in 14:00
+- Etiketler: köy içinde, taş ev, sakin
+- Detay: https://assosukesfet.com/mekanlar/mekan-detay?id=kayalar-koy-evi
+
+**Sunaba Kasrı Otel**
+Sunaba Kasrı Otel, Çanakkale'nin Ayvacık ilçesindeki tarihi Büyükhusun köyünde yer alan, taş mimarisiyle öne çıkan özel sınıf bir butik oteldir. "Köy sessizliğinde, ev sıcaklığında" sloganıyla hizmet 
+- Konum: Büyükhusun Köyü | Tel: 0530 946 71 38 | Saat: Check-in 14:00
+- Etiketler: manzaralı, havuzlu, butik otel, doğa
+- Detay: https://assosukesfet.com/mekanlar/mekan-detay?id=sunaba-kasri-otel
+
+### Plajlar (2)
+
+**Kadırga Plaj Kafe**
+Kadırga Plaj Kafe, bölgenin en popüler koyunun tam bitişiğinde, ahşap bir platformda hizmet veriyor. Yüzmeden çıktıktan sonra soğuk içecek, taze sıkılmış meyve suyu ya da hafif bir sandviç için mükemm
+- Konum: Kadırga Koyu, Behramkale | Tel: 0546 218 44 67 | Saat: 09:00–20:00
+- Etiketler: deniz kenarı, plaj, manzaralı
+- Detay: https://assosukesfet.com/mekanlar/mekan-detay?id=kadirga-plaj
+
+**Sivrice Koy Durağı**
+Sivrice Koy Durağı, yürüyüş patikasının koy girişindeki küçük ve doğal bir dinlenme noktası. Koya inerken ya da çıkarken soğuk su almak, gölgede oturmak ya da sadece koyun kristal berraklığındaki suyu
+- Konum: Sivrice, Behramkale | Tel: 0545 861 27 43 | Saat: 10:00–18:00
+- Etiketler: deniz kenarı, doğa, sakin
+- Detay: https://assosukesfet.com/mekanlar/mekan-detay?id=sivrice-beach
+
+### İskeleler (1)
+
+**Ahmetçe İskele Kafe**
+Ahmetçe İskele Kafe, köyün küçük tahta iskelesinde denize sarkık masalarda servis yapıyor. Sabah erken gelirsen balıkçıların yeni avından taze balık bulabilir, ya da sadece çay içerek Ege'yi seyredebi
+- Konum: Ahmetçe Köyü | Tel: 0532 779 35 52 | Saat: 07:00–19:00
+- Etiketler: iskele, sakin, yerel
+- Detay: https://assosukesfet.com/mekanlar/mekan-detay?id=ahmetce-iskele-kafe
+
+## Gezi Rotaları (6 adet)
+
+**1 Günde Assos**
+Assos'u tek günde keşfetmek mümkün — ama sadece doğru sırayla gidersen. Bu rota, sabahın erken saatlerinde Athena Tapınağı'nın sessizliğiyle başlar; antik kentin taş sokaklarında yürür, limanda öğle y
+- Duraklar: Athena Tapınağı, Behramkale Köyü, Assos Antik Liman, Kadırga Koyu, Gün Batımı Tepesi
+- Detay: https://assosukesfet.com/rotalar/rota-detay?id=bir-gunde-assos
+
+**Gün Batımı Rotası**
+Günün son iki saatini Assos'un en güzel ışığında geçirmek için tasarlanmış bu rota, fotoğraf sevenler ve romantik anlar arayanlar için özeldir. Tapınak tepesinde altın saat fotoğrafları, antik limanda
+- Duraklar: Tapınak Tepesi, Antik Liman, Behramkale Kahvesi
+- Detay: https://assosukesfet.com/rotalar/rota-detay?id=gun-batimi-rotasi
+
+**Tarih Rotası**
+Assos bölgesi, antik çağdan bu yana önemli bir medeniyet merkezi olmuş. Bu rota, Athena Tapınağı'nın görkemli kalıntılarından başlayarak antik kentin nekropolünü, limandaki tarihi yapıları ve bölgenin
+- Duraklar: Athena Tapınağı, Assos Nekropolü, Assos Antik Liman, Apollon Smintheion, Hüdavendigâr Camii, Osmanlı Köprüsü
+- Detay: https://assosukesfet.com/rotalar/rota-detay?id=tarih-rotasi
+
+**Köy Köy Assos**
+Assos bölgesi, taş evleri ve özgün dokusuyla korunmuş köylerin hazinesidir. Bu tam gün rotası, birbirinden farklı karaktere sahip altı köyü keşfettirir. Behramkale'nin antik atmosferinden Adatepe'nin 
+- Duraklar: Behramkale, Adatepe, Kayalar, Büyükhusun, Babakale, Küçükhusun
+- Detay: https://assosukesfet.com/rotalar/rota-detay?id=koy-koy-assos
+
+**Deniz & Koy Rotası**
+Assos kıyıları, Ege'nin en temiz ve en sakin koylarını barındırır. Bu yarım günlük rota, popüler Kadırga Koyu'ndan başlayarak daha sakin Sivrice'ye ve sonra Ahmetçe İskelesi'nin huzurlu atmosferine ul
+- Duraklar: Kadırga Koyu, Sivrice Koyu, Ahmetçe İskelesi, Sokakağzı Koyu, Yeşil Liman
+- Detay: https://assosukesfet.com/rotalar/rota-detay?id=deniz-koy-rotasi
+
+**Kahve Molası Rotası**
+Assos'ta sadece bir şey yapman gerekse, o şey farklı kafelerinde oturup manzarayı seyretmek olmalı. Tapınak tepesindeki kafeden Ege görünürken, liman kenarında çay içerken, köy kahvehanesinde yerel ha
+- Duraklar: Tapınak Kafe, Liman Çay Evi, Behramkale Kahvesi, Adatepe Köy Kafe
+- Detay: https://assosukesfet.com/rotalar/rota-detay?id=kahve-molasi-rotasi
+
+## Köyler (64 adet)
+
+**Behramkale (Assos)**
+Behram, Assos antik kentiyle bütünleşmiş, tarihin üzerinde kurulu yaşayan bir köydür. Athena Tapınağı'nın eteğinden başlayan taş döşeli sokaklar, yüzyıllık çeşmeler, köy meydanı ve küçük dükkanlarla g
+- Özellikler: Antik, Tapınak, Tarihi, Gün Batımı
+
+**Adatepe**
+Adatepe, zeytinliklerin kucağında Ayvacık'ın en özgün köylerinden biridir. Mimari bütünlüğünü koruma altına almış dar sokakları, taş yapıları ve çeşmeleriyle fotoğraf tutkunlarının gözde durağıdır. Ye
+- Özellikler: Zeytinlik, Fotoğraf, Mimari
+
+**Babakale**
+Babakale, Anadolu kıtasının coğrafi olarak en batı noktasını işaret eder. Osmanlı döneminden kalma tarihi kale kalıntıları, küçük balıkçı iskelesi ve sakin koy atmosferiyle tam bir keşif köyüdür. Küçü
+- Özellikler: Kale, İskele, Tarihi, Deniz
+
+**Kayalar**
+Kayalar, adını etrafındaki doğal kaya oluşumlarından alır. Sakin yapısı ve restore edilmiş taş konaklama evleriyle bölgenin en huzurlu köylerindendir. Yoğun turistik dokudan uzak, doğayla baş başa kal
+- Özellikler: Sakin, Konaklama, Taş Ev
+
+**Büyükhusun**
+Büyükhusun, Kaz Dağları'nın eteklerinde denizden yüksekte konumlanmış bir yayla köyüdür. Kışın karla örtülen, yazın serin ve yeşil kalan bu köy, bölgenin yürüyüş rotaları için önemli bir kapı noktasıd
+- Özellikler: Yürüyüş, Kaz Dağları, Yayla
+
+**Küçükhusun**
+Küçükhusun, komşusu Büyükhusun'dan daha küçük ve daha az bilinen bir Ege köyüdür. Turizmin hiç uğramadığı bu köy, tarlalar, çeşme ve köy meydanıyla sade ama özgün bir Ege köy deneyimi sunar.
+- Özellikler: Yerel, Sakin, Özgün
+
+**Gülpınar**
+Gülpınar, Apollon Smintheion olarak bilinen Roma dönemi tapınak kalıntılarının hemen yanı başındaki köydür. Tapınak, Homeros'un İlyada destanında sözü geçen kutsal alanlardan biridir. Tarihi meraklıla
+- Özellikler: Tapınak, Roma, Antik
+
+**Erecek**
+Erecek, Assos'un yakın çevresinde yer alan, turistik yoğunluktan uzak durağan bir köydür. Taş yapıları ve köy dokusunu korumasi, onu bölgenin en otantik duraklarından biri yapar. Assos gezisini köy at
+- Özellikler: Sakin, Özgün, Ege
+
+**Ahmetçe**
+Ahmetçe, Assos kıyısındaki küçük iskelesiyle tanınan huzurlu bir kıyı yerleşimidir. Ahmetçe İskelesi, balıkçıların sabah demledikten sonra tuttuğu taze balıkların satıldığı, sessiz ama büyüleyici bir 
+- Özellikler: İskele, Kıyı, Balıkçı
+
+**Tuzla**
+Tuzla, adını Ege kıyısındaki geleneksel tuz üretiminden alır. Sakin kıyı şeridiyle küçük ama kendine özgü bir yerleşimdir. Denize yakınlığı ve sakin atmosferiyle yaz aylarında huzurlu bir mola noktası
+- Özellikler: Kıyı, Deniz, Sakin
+
+**Güzelköy**
+Güzelköy, Ege sahiline yakın konumuyla bölgenin sessiz kıyı köylerinden biridir. Adına yakışır şekilde sakin ve temiz bir atmosfere sahiptir. Özellikle ilkbahar ve sonbahar aylarında doğasıyla büyüler
+- Özellikler: Kıyı, Sakin, Manzara
+
+**Babadere**
+Babadere, adını içinden geçen dereden alır; bu dere Ege kıyısına ulaşmadan önce küçük bir vadiden akar. Denize yakınlığı ve yeşil doku bir arada, suyu seven ziyaretçilere hem deniz hem de dere keyfini
+- Özellikler: Dere, Doğa, Kıyı Yakını
+
+**Kösedere**
+Kösedere, sahile yakın konumuyla bölgenin kıyı karakterine sahip küçük köylerinden biridir. Sakin yapısı ve doğal çevresiyle ilkbahar yürüyüşleri için elverişli bir köydür.
+- Özellikler: Kıyı Yakını, Dere, Sakin
+
+**Sazlı**
+Sazlı, kıyı yakınındaki sazlıklardan adını alan, doğası ön plana çıkan küçük bir köydür. Kuş gözlemcileri ve doğa tutkunları için ilginç bir duraktır.
+- Özellikler: Doğa, Kıyı Yakını, Kuş Gözlemi
+
+**Ahmetler**
+Ahmetler, kıyı şeridine yakın konumuyla bölgenin sakin sahil köylerinden biridir. Küçük yapısı ve doğayla iç içe dokusuyla huzurlu bir mola noktasıdır.
+- Özellikler: Kıyı, Sakin, Özgün
+
+**Nusratlı**
+Nusratlı, Ayvacık'ın düzenli olarak ziyaret edilen köyleri arasında yer alır. Köy dokusu büyük ölçüde korunmuş, taş yapıları ve geleneksel mimarisiyle bölgenin özgün karakterini yansıtır.
+- Özellikler: Ege, Mimari, Yerel
+
+**Pınardere**
+Pınardere, adını coşkun pınarlardan alır. Orman içindeki konumu ve temiz su kaynakları, onu yazın sıcağında tercih edilen bir mola noktası yapar. Yürüyüş tutkunlarının uğrak yeridir.
+- Özellikler: Pınar, Doğa, Yürüyüş
+
+**Keçikaya**
+Keçikaya, adına yakışır şekilde kayalık ve engebeli bir arazide konumlanmış, hayvancılık geleneğini sürdüren bir köydür. Doğal peyzajı ve köy yaşamını gözlemlemek isteyenler için ilgi çekici bir durak
+- Özellikler: Doğa, Hayvancılık, Kayalık
+
+**Çamköy**
+Çamköy, çam ağaçlarının gölgesinde yüksekte kurulu bir köydür. Serin iklimi ve çevreleyen ormanlarıyla bölgenin en yeşil duraklarından biridir. Piknik ve kısa doğa yürüyüşleri için elverişlidir.
+- Özellikler: Orman, Çam, Serin
+
+**Kocaköy**
+Kocaköy, Ayvacık köyleri arasında nispeten büyük yapısıyla öne çıkar. Haftasonu pazarı ve gündelik köy yaşamıyla bölgeyi daha yakından tanımak isteyenler için ilginç bir duraktır.
+- Özellikler: Büyük Köy, Pazar, Yerel
+
+**Demirciköy**
+Demirciköy, adının ima ettiği gibi tarihsel olarak demircilik ve el zanaatlarıyla tanınan bir köydür. Bölgeye özgü geleneksel yaşamı gözlemlemek ve yerel zanaatı keşfetmek için uğranabilecek ilgi çeki
+- Özellikler: Zanaat, Tarihi, Yerel
+
+**Küçükçetmi**
+Küçükçetmi, bölgenin küçük ama özgün karakterini korumuş köylerinden biridir. Çevreleyen doğa ve köy yaşamıyla bölgeyi ayrıntılı keşfetmek isteyen ziyaretçilerin uğrak noktalarından biridir.
+- Özellikler: Sakin, Özgün, Doğa
+
+**Arıklı**
+Arıklı, adından da anlaşıldığı gibi arıcılık geleneğiyle öne çıkan bir Ege köyüdür. Yerel bal üretimi ve doğal ürünleriyle ilgi çeken köy, yöresel alışveriş yapanların durakları arasındadır.
+- Özellikler: Arıcılık, Bal, Yerel Ürün
+
+**Akçin**
+- Özellikler: Köy, Ege
+
+**Bademli**
+- Özellikler: Doğa, Köy
+
+**Baharlar**
+- Özellikler: Doğa, Köy
+
+**Bahçedere**
+- Özellikler: Bahçe, Dere, Köy
+
+**Balabanlı**
+- Özellikler: Köy, Sakin
+
+**Bektaş**
+- Özellikler: Tarım, Köy
+
+**Bilaller**
+- Özellikler: Köy, Sakin
+
+**Budaklar**
+- Özellikler: Doğa, Orman, Köy
+
+**Cemaller**
+- Özellikler: Tarım, Köy
+
+**Çakmaklar**
+- Özellikler: Köy, Sade
+
+**Çaltı**
+- Özellikler: Tarım, Köy
+
+**Çamkalabak**
+- Özellikler: Çam, Orman, Sakin
+
+**Çınarpınar**
+- Özellikler: Çınar, Pınar, Doğa
+
+**Dibekli**
+- Özellikler: Zeytin, Dibek, Yerel
+
+**Hüseyinfakı**
+- Özellikler: Tarım, Köy
+
+**İlyasfakı**
+- Özellikler: Köy, Sade
+
+**Kestanelik**
+- Özellikler: Kestane, Orman, Doğa
+
+**Kırca**
+- Özellikler: Tarım, Sakin, Köy
+
+**Kısacık**
+- Özellikler: Köy, Sade
+
+**Korubaşı**
+- Özellikler: Koru, Orman, Doğa
+
+**Koyunevi**
+- Özellikler: Hayvancılık, Koyun, Yerel
+
+**Kozlu**
+- Özellikler: Doğa, Köy, Yeşil
+
+**Kulfal**
+- Özellikler: Köy, Sade
+
+**Kuruoba**
+- Özellikler: Ova, Tarım, Köy
+
+**Misvak**
+- Özellikler: Bitki, Doğa, Köy
+
+**Naldöken**
+- Özellikler: Tarım, Sakin, Köy
+
+**Paşaköy**
+- Özellikler: Tarihi, Osmanlı, Köy
+
+**Sapanca**
+- Özellikler: Tarım, Sakin, Köy
+
+**Söğütlü**
+- Özellikler: Söğüt, Doğa, Su
+
+**Süleymanköy**
+- Özellikler: Köy, Sade
+
+**Şapköy**
+- Özellikler: Tarım, Sakin, Köy
+
+**Tabaklar**
+- Özellikler: Zanaat, Tarihi, Köy
+
+**Tamış**
+- Özellikler: Köy, Sade
+
+**Tartaşık**
+- Özellikler: Sakin, Köy, Ege
+
+**Taşağıl**
+- Özellikler: Taş, Doğa, Köy
+
+**Taşboğaz**
+- Özellikler: Taş, Boğaz, Doğa
+
+**Tuztaşı**
+- Özellikler: Köy, Sakin
+
+**Uzunalan**
+- Özellikler: Ova, Tarım, Köy
+
+**Yeniçam**
+- Özellikler: Çam, Orman, Yeşil
+
+**Yeşilyurt**
+- Özellikler: Yeşil, Doğa, Köy
+
+**Yukarıköy**
+- Özellikler: Yüksek, Manzara, Köy
+
+## Gezilecek Yerler (11 adet)
+
+**Athena Tapınağı**
+MÖ 530 yılında inşa edilen Athena Tapınağı, Assos'un zirvesinde yer alır ve Ege'ye nefes kesen bir panorama sunar. Aristoteles'in MÖ 347–345 yılları arasında yaşadığı bu kentte, Dor düzenindeki tapına
+- Konum: Behramkale Tepesi
+- Etiketler: Manzara, Antik, UNESCO
+
+**Assos Antik Liman**
+Assos Antik Limanı, binlerce yıl boyunca Ege ticaretinin önemli bir durağı olmuş. Bugün hâlâ işlevini sürdüren bu tarihi liman, antik dönemden Bizans ve Osmanlı katmanlarına kadar pek çok medeniyetin 
+- Konum: Assos Liman
+- Etiketler: Liman, Fotoğraf, Tarihi
+
+**Kadırga Koyu**
+Kadırga Koyu, Assos bölgesinin en popüler ve en erişilebilir koyudur. Kristal berraklığındaki mavi-yeşil suyu, ince çakıl sahili ve arka planda uzanan zeytinlikleriyle gerçek bir Ege masalı gibi. Araç
+- Konum: Kadırga, Behramkale
+- Etiketler: Yüzme, Sakin, Koy
+
+**Behramkale Köyü**
+Behramkale, Assos antik kentinin hemen yanında kurulmuş, taş döşeli sokaklarıyla tarihin içinde bir köydür. Yüzyıllık taş evler, köy meydanı, çeşme ve kahvehane ile gerçek bir Ege köyü deneyimi sunar.
+- Konum: Behramkale Köyü
+- Etiketler: Taş Ev, Yerel, Antik
+
+**Apollon Smintheion**
+Apollon Smintheion, Troya savaşını anlatan İlyada'nın ilk bölümünde adı geçen, Gülpınar (antik Khrysé) yakınlarındaki önemli bir tapınaktır. MS 2. yüzyılda inşa edilen yapı, Apollon'un fare tanrısı ki
+- Konum: Gülpınar, Ayvacık
+- Etiketler: Roma, Gizli Hazine, Arkeoloji
+
+**Ahmetçe İskelesi**
+Ahmetçe İskelesi, Assos bölgesinin en sakin ve en otantik köy iskele deneyimlerinden birini sunar. Büyük turistik tesislerden uzak, yerel balıkçıların ve köylülerin kullandığı bu küçük iskele; sabah e
+- Konum: Ahmetçe Köyü
+- Etiketler: Sakin, Yerel, İskele
+
+**Adatepe Köyü**
+Adatepe, zeytinlik bahçeler arasında gizlenmiş, özgün Ege mimarisinin en güzel örneklerinden birini barındıran bir köydür. Geleneksel taş evler, çıkmaz sokaklar ve ahşap kepenkler köyün zamandan kopuk
+- Konum: Adatepe Köyü, Ayvacık
+- Etiketler: Zeytinlik, Fotoğraf, Mimari
+
+**Sivrice Koyu**
+Sivrice Koyu, Assos'un gizli cennetidir. Araçla değil, kısa bir yürüyüş patikasıyla ulaşılan bu koy, ulaşım zorluğu sayesinde kalabalıktan korunmuş durumdadır. Kristal berraklığındaki suyu, çevresinde
+- Konum: Sivrice, Behramkale
+- Etiketler: Gizli, Yürüyüş, Doğa
+
+**Adatepe Zeytinyağı Müzesi**
+Adatepe Zeytinyağı Müzesi, köyün merkezinde yer alan ve geleneksel zeytinyağı üretim sürecini ziyaretçilere sunan küçük ama özgün bir müzedir. Taş yapı içinde eski pres ve üretim aletleri sergilenmekt
+- Konum: Adatepe Köyü, Ayvacık
+- Etiketler: Müze, Zeytin, Kültür
+
+**Sokakağzı Koyu**
+Sokakağzı Koyu, Assos'dan Babakale yönüne giderken ulaşılan, son yıllarda popülerliği artan sakin bir koydur. Berrak suları ve doğal yapısıyla yüzme ve güneşlenme için idealdir.
+- Konum: Sokakağzı, Ayvacık
+- Etiketler: Koy, Yüzme, Sakin
+
+**Yeşil Liman**
+Yeşil Liman, Assos'dan Babakale yönüne doğru giderken karşılaşılan, yukarı köylerin sahil yerleşimi olan küçük bir koydur. Son yıllarda turizmde gelişme göstermekle birlikte hâlâ sakin yapısını koruma
+- Konum: Yeşil Liman, Ayvacık
+- Etiketler: Koy, Sakin, Doğa
+
+---
+İletişim: assosukesfet@gmail.com
+Instagram: @assosukesfet
+Web: https://assosukesfet.com

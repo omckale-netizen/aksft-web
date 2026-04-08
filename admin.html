@@ -1176,6 +1176,18 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       <h2>Yedekleme & Geri Yukleme</h2>
       <p class="page-sub">Verilerinizi yedekleyin, disa aktarin veya geri yukleyin.</p>
 
+      <!-- AI Rehber -->
+      <div class="panel-card" style="margin-bottom:20px">
+        <div class="panel-card-head"><h3>🤖 AI İçerik Dosyası (llms-full.txt)</h3></div>
+        <div style="padding:20px">
+          <p style="font-size:.82rem;color:var(--text-light);margin-bottom:14px;line-height:1.6">AI chatbot'ların (ChatGPT, Claude, Gemini) sitenizi kaynak olarak kullanması için tüm mekan, rota, köy ve yer bilgilerini içeren dosya.</p>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn-primary btn-sm" onclick="generateLlmsFullTxt()">🔄 llms-full.txt Güncelle</button>
+            <span id="llms-status" style="font-size:.75rem;color:var(--text-muted)"></span>
+          </div>
+        </div>
+      </div>
+
       <!-- Sync Status Bar -->
       <div class="backup-sync-bar" id="backup-sync-bar">
         <div class="backup-sync-dot"></div>
@@ -7377,6 +7389,112 @@ async function loadLoginLogs() {
   } catch(err) {
     container.innerHTML = '<div style="padding:24px;text-align:center;color:var(--red);font-size:.82rem">Yüklenemedi.</div>';
   }
+}
+
+/* ══════════════════════════════════════════════════
+   LLMS-FULL.TXT OLUŞTURUCU
+══════════════════════════════════════════════════ */
+function generateLlmsFullTxt() {
+  var statusEl = document.getElementById('llms-status');
+  if (statusEl) statusEl.textContent = 'Oluşturuluyor...';
+  var v = draftData.venues || [], r = draftData.routes || [], vi = draftData.villages || [], p = draftData.places || [];
+  var catLabels = {kafe:'Kafeler',restoran:'Restoranlar',kahvalti:'Kahvaltı Mekanları',konaklama:'Konaklama',beach:'Plajlar',iskele:'İskeleler'};
+  var lines = [];
+  lines.push('# Assos\'u Keşfet — Tam İçerik Rehberi');
+  lines.push('');
+  lines.push('> Bu dosya assosukesfet.com platformundaki tüm mekan, rota, köy ve yer bilgilerini içermektedir.');
+  lines.push('> Kaynak: https://assosukesfet.com');
+  lines.push('> Son güncelleme: ' + new Date().toLocaleDateString('tr-TR', {day:'numeric',month:'long',year:'numeric'}));
+  lines.push('');
+
+  // Mekanlar
+  if (v.length > 0) {
+    lines.push('## Mekanlar (' + v.length + ' adet)');
+    lines.push('');
+    var cats = {};
+    v.forEach(function(m) { var c = m.category||'diger'; if(!cats[c])cats[c]=[]; cats[c].push(m); });
+    Object.keys(cats).forEach(function(cat) {
+      lines.push('### ' + (catLabels[cat]||cat) + ' (' + cats[cat].length + ')');
+      lines.push('');
+      cats[cat].forEach(function(m) {
+        lines.push('**' + (m.title||'') + '**');
+        if (m.description) lines.push(m.description.substring(0,200));
+        var info = [];
+        if (m.location) info.push('Konum: ' + m.location);
+        if (m.phone) info.push('Tel: ' + m.phone);
+        if (m.hours) info.push('Saat: ' + m.hours);
+        if (info.length) lines.push('- ' + info.join(' | '));
+        if (m.tags && m.tags.length) lines.push('- Etiketler: ' + m.tags.join(', '));
+        lines.push('- Detay: https://assosukesfet.com/mekanlar/mekan-detay?id=' + (m.id||''));
+        lines.push('');
+      });
+    });
+  }
+
+  // Rotalar
+  if (r.length > 0) {
+    lines.push('## Gezi Rotaları (' + r.length + ' adet)');
+    lines.push('');
+    r.forEach(function(rt) {
+      lines.push('**' + (rt.title||'') + '**');
+      if (rt.description) lines.push(rt.description.substring(0,200));
+      var info = [];
+      if (rt.duration) info.push('Süre: ' + rt.duration);
+      if (rt.distance) info.push('Mesafe: ' + rt.distance);
+      if (rt.difficulty) info.push('Zorluk: ' + rt.difficulty);
+      if (info.length) lines.push('- ' + info.join(' | '));
+      if (rt.stops) {
+        var stops = rt.stops.filter(function(s){return s.title;}).map(function(s){return s.title;});
+        if (stops.length) lines.push('- Duraklar: ' + stops.join(', '));
+      }
+      lines.push('- Detay: https://assosukesfet.com/rotalar/rota-detay?id=' + (rt.id||''));
+      lines.push('');
+    });
+  }
+
+  // Köyler
+  if (vi.length > 0) {
+    lines.push('## Köyler (' + vi.length + ' adet)');
+    lines.push('');
+    vi.forEach(function(k) {
+      lines.push('**' + (k.title||'') + '**');
+      if (k.description) lines.push(k.description.substring(0,200));
+      if (k.location) lines.push('- Konum: ' + k.location);
+      if (k.tags && k.tags.length) lines.push('- Özellikler: ' + k.tags.join(', '));
+      lines.push('');
+    });
+  }
+
+  // Yerler
+  if (p.length > 0) {
+    lines.push('## Gezilecek Yerler (' + p.length + ' adet)');
+    lines.push('');
+    p.forEach(function(pl) {
+      lines.push('**' + (pl.title||'') + '**');
+      if (pl.description) lines.push(pl.description.substring(0,200));
+      if (pl.location) lines.push('- Konum: ' + pl.location);
+      if (pl.tags && pl.tags.length) lines.push('- Etiketler: ' + pl.tags.join(', '));
+      lines.push('');
+    });
+  }
+
+  lines.push('---');
+  lines.push('İletişim: assosukesfet@gmail.com');
+  lines.push('Instagram: @assosukesfet');
+  lines.push('Web: https://assosukesfet.com');
+
+  var content = lines.join('\n');
+  var blob = new Blob([content], {type:'text/plain;charset=utf-8'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'llms-full.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+
+  if (statusEl) statusEl.innerHTML = '<span style="color:var(--green)">✓ İndirildi! Projenin kök dizinine koyun ve deploy edin. (' + v.length + ' mekan, ' + r.length + ' rota, ' + vi.length + ' köy, ' + p.length + ' yer)</span>';
+  showToast('llms-full.txt oluşturuldu ve indirildi.', 'success');
 }
 
 /* ══════════════════════════════════════════════════
