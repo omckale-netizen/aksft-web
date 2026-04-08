@@ -70,7 +70,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 /* ── MAIN ── */
 .admin-main{margin-left:var(--sidebar-w);flex:1;padding:32px 36px;min-height:100vh}
 /* Dark mode switch */
-.dm-switch{position:fixed;top:16px;right:20px;z-index:150;display:flex;align-items:center;gap:8px;padding:6px 14px 6px 10px;border-radius:999px;background:var(--card-bg);border:1px solid var(--card-border);box-shadow:var(--card-shadow);cursor:pointer;transition:all .3s;user-select:none}
+.dm-switch{position:fixed;top:16px;right:20px;z-index:150;display:flex;align-items:center;gap:8px;padding:6px 14px 6px 10px;border-radius:999px;background:var(--card-bg);border:1px solid var(--card-border);box-shadow:var(--card-shadow);cursor:pointer;transition:all .3s;user-select:none;height:40px}
 .dm-switch:hover{box-shadow:0 4px 16px rgba(0,0,0,.1)}
 .dm-track{width:36px;height:20px;border-radius:10px;background:var(--cream-dark);position:relative;transition:background .3s}
 [data-theme="dark"] .dm-track{background:var(--terra)}
@@ -93,7 +93,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .stat-card.green .stat-val{color:var(--green)}
 
 /* ── NOTIF BELL ── */
-.notif-bell{position:fixed;top:16px;right:80px;z-index:150;width:40px;height:40px;border-radius:50%;background:var(--card-bg);border:1px solid var(--card-border);box-shadow:var(--card-shadow);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.05rem;transition:all .2s;user-select:none}
+.notif-bell{position:fixed;top:16px;right:110px;z-index:150;width:40px;height:40px;border-radius:50%;background:var(--card-bg);border:1px solid var(--card-border);box-shadow:var(--card-shadow);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.05rem;transition:all .2s;user-select:none}
 .notif-bell:hover{box-shadow:0 4px 16px rgba(0,0,0,.1);transform:scale(1.05)}
 .notif-bell-badge{position:absolute;top:-2px;right:-2px;min-width:18px;height:18px;border-radius:9px;background:var(--red);color:#fff;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--page-bg)}
 .notif-dropdown{position:fixed;top:62px;right:60px;z-index:160;width:380px;max-height:520px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;box-shadow:0 12px 48px rgba(0,0,0,.12);display:none;flex-direction:column;overflow:hidden}
@@ -103,7 +103,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .notif-dd-tab{padding:5px 12px;border:none;border-radius:8px;background:transparent;font-family:inherit;font-size:.72rem;font-weight:600;color:var(--text-muted);cursor:pointer;transition:all .15s}
 .notif-dd-tab:hover{background:rgba(0,0,0,.04)}
 .notif-dd-tab.active{background:var(--navy);color:#fff}
-@media(max-width:768px){.notif-dropdown{right:12px;left:12px;width:auto}.notif-bell{right:68px}}
+@media(max-width:768px){.notif-dropdown{right:12px;left:12px;width:auto}.notif-bell{right:100px}}
 
 /* ── TABLE ── */
 .panel-card{background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--card-shadow);border:1px solid var(--card-border);overflow:hidden;margin-bottom:24px;transition:background .3s}
