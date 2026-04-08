@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>Assos'u Kesfet - Yonetim Paneli</title>
+<title>Assos'u Keşfet - Yönetim Paneli</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js" crossorigin="anonymous" integrity="sha384-4DnN3LMk363cZnO0ZZ+46dvN6+1On5ODUbq/68J4ZeSDAghncVXodw2jecSmTyAe"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js" crossorigin="anonymous" integrity="sha384-OWv+RYFfLxKnRm2S6RYMcxn1Un3vxC0dbSWy7XC9DKsJGGHMWBCbDV27k62l/2XK"></script>
@@ -407,8 +407,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
   <div class="auth-orb auth-orb-2"></div>
   <div class="auth-box">
     <div class="auth-logo">A</div>
-    <h1>Assos'u Kesfet</h1>
-    <p class="auth-sub">Yonetim paneline giris yapin</p>
+    <h1>Assos'u Keşfet</h1>
+    <p class="auth-sub">Yönetim paneline giriş yapın</p>
     <div class="auth-field">
       <label>E-posta</label>
       <span class="auth-field-icon">✉</span>
@@ -421,7 +421,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
     </div>
     <button class="auth-btn" onclick="checkAuth()">Giriş Yap</button>
     <div class="auth-err" id="auth-err"></div>
-    <div class="auth-footer">Assos'u Kesfet &middot; Yonetim Paneli</div>
+    <div class="auth-footer">Assos'u Keşfet &middot; Yönetim Paneli</div>
   </div>
 </div>
 
@@ -434,14 +434,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 
   <!-- SIDEBAR -->
   <nav class="admin-sidebar" id="admin-sidebar">
-    <div class="admin-logo">Assos'u Kesfet<br><small>Yonetim Paneli</small></div>
+    <div class="admin-logo">Assos'u Keşfet<br><small>Yönetim Paneli</small></div>
     <div class="admin-nav">
 
       <a class="admin-nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
-        <span class="nav-icon">📊</span> Genel Bakis
+        <span class="nav-icon">📊</span> Genel Bakış
       </a>
 
-      <div class="nav-group-label">Icerik Yonetimi</div>
+      <div class="nav-group-label">İçerik Yönetimi</div>
       <a class="admin-nav-item" data-page="venues" onclick="showPage('venues')">
         <span class="nav-icon">🏪</span> Mekanlar
       </a>
@@ -452,7 +452,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
         <span class="nav-icon">🗺</span> Rotalar
       </a>
       <a class="admin-nav-item" data-page="villages" onclick="showPage('villages')">
-        <span class="nav-icon">🏘</span> Koyler & Yerler
+        <span class="nav-icon">🏘</span> Köyler & Yerler
       </a>
 
       <div class="nav-group-label">Botlar</div>
@@ -463,12 +463,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
         <span class="nav-icon">📍</span> Yer Botu
       </a>
 
-      <div class="nav-group-label">Iletisim & Analiz</div>
+      <div class="nav-group-label">İletişim & Analiz</div>
       <a class="admin-nav-item" data-page="notifications" onclick="showPage('notifications')">
         <span class="nav-icon">🔔</span> Bildirimler <span id="notif-badge" style="background:var(--red);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;display:none"></span>
       </a>
       <a class="admin-nav-item" data-page="analytics" onclick="showPage('analytics')">
-        <span class="nav-icon">📈</span> Istatistikler
+        <span class="nav-icon">📈</span> İstatistikler
       </a>
 
       <a class="admin-nav-item" data-page="gallery" onclick="showPage('gallery')">
@@ -572,7 +572,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 
     <!-- ══════ VENUES ══════ -->
     <div class="admin-page" id="page-venues">
-      <h2>Mekanlar Yonetimi</h2>
+      <h2>Mekanlar Yönetimi</h2>
       <p class="page-sub">Tum mekanlari goruntuleyin, duzenleyin veya yeni mekan ekleyin.</p>
       <div class="panel-card">
         <div class="panel-card-head">
@@ -891,7 +891,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 
     <!-- ══════ VILLAGES ══════ -->
     <div class="admin-page" id="page-villages">
-      <h2>Koyler & Yerler</h2>
+      <h2>Köyler & Yerler</h2>
       <p class="page-sub">Koyleri ve yerleri yonetin.</p>
       <div class="tabs">
         <button class="tab active" onclick="switchVillageTab('villages')">Koyler</button>
@@ -1418,7 +1418,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
     </div>
 
     <div class="admin-page" id="page-analytics">
-      <h2>Istatistikler</h2>
+      <h2>İstatistikler</h2>
       <p class="page-sub">Sayfa goruntulenmeleri ve kullanici aksiyonlari.</p>
 
       <!-- Tarih filtresi -->
@@ -1482,7 +1482,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
 
       <!-- Rota İstatistikleri -->
       <div class="panel-card" style="margin-top:20px">
-        <div class="panel-card-head"><h3>🗺 Rota Istatistikleri</h3></div>
+        <div class="panel-card-head"><h3>🗺 Rota İstatistikleri</h3></div>
         <div id="analytics-routes"></div>
       </div>
 
