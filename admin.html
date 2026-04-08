@@ -2950,10 +2950,10 @@ function initApp() {
   setupDragDrop();
   setupBackupDragDrop();
   try { initNotifBadge(); } catch(e) {}
-  // Haftalık llms-full.txt otomatik güncelleme kontrolü
-  checkAutoLlmsUpdate();
-  // Haftalık otomatik yedekleme kontrolü
-  checkAutoBackup();
+  // Haftalık llms-full.txt otomatik güncelleme kontrolü (8sn sonra)
+  setTimeout(checkAutoLlmsUpdate, 8000);
+  // Haftalık otomatik yedekleme kontrolü (5sn sonra, sayfa yüklenmesini engellemesin)
+  setTimeout(checkAutoBackup, 5000);
 }
 
 /* ══════════════════════════════════════════════════
