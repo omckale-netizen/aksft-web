@@ -106,6 +106,7 @@
     <div id="bp-content" class="post-content"></div>
     <div id="bp-tags" class="post-tags" style="display:none"></div>
     <div id="bp-share" class="post-share"></div>
+    <div id="bp-related" style="display:none"></div>
   </article>
 </section>
 
@@ -137,6 +138,19 @@
 .ps-btn.xb:hover{background:rgba(0,0,0,.07);border-color:rgba(0,0,0,.12)}
 .ps-btn.cp{background:rgba(196,82,26,.04);color:#C4521A;border-color:rgba(196,82,26,.1)}
 .ps-btn.cp:hover{background:rgba(196,82,26,.1);border-color:rgba(196,82,26,.16)}
+.bp-related{margin-top:48px;padding-top:36px;border-top:1px solid rgba(0,0,0,.06)}
+.bp-related-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:#718096;margin-bottom:18px;text-align:center}
+.bp-related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.bp-related-card{background:#fff;border:1px solid rgba(0,0,0,.05);border-radius:14px;overflow:hidden;text-decoration:none;color:inherit;transition:all .2s}
+.bp-related-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.07)}
+.bp-related-img{height:100px;background:linear-gradient(135deg,#1A2744,#243255);overflow:hidden;position:relative}
+.bp-related-img img{width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s}
+.bp-related-img img.loaded{opacity:1}
+.bp-related-img .bp-rel-emoji{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.8rem;opacity:.5}
+.bp-related-body{padding:12px 14px}
+.bp-related-cat{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#C4521A;margin-bottom:4px}
+.bp-related-name{font-size:.8rem;font-weight:700;color:#1A2744;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+@media(max-width:640px){.bp-related-grid{grid-template-columns:1fr;max-width:320px;margin:0 auto}}
 </style>
 
 <div id="footer-placeholder"></div>
@@ -233,6 +247,26 @@ async function loadSinglePost(slug) {
           '<button onclick="navigator.clipboard.writeText(\''+url.replace(/'/g,"\\'")+'\').then(function(){this.querySelector(\'span\').textContent=\'Kopyalandı!\';var b=this;setTimeout(function(){b.querySelector(\'span\').textContent=\'Kopyala\'},1500)}.bind(this))" class="ps-btn cp" style="cursor:pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg><span>Kopyala</span></button>' +
         '</div>' +
       '</div>';
+
+    // İlgili yazılar
+    try {
+      var allSnap = await firebase.firestore().collection('blog_posts').limit(50).get();
+      var others = allSnap.docs.filter(function(d) { return d.id !== slug && d.data().status === 'published'; });
+      // Aynı kategoriden öncelikli, sonra rastgele
+      var sameCat = others.filter(function(d) { return d.data().category === p.category; });
+      var diffCat = others.filter(function(d) { return d.data().category !== p.category; });
+      var related = sameCat.concat(diffCat).slice(0, 3);
+      if (related.length > 0) {
+        var relEl = document.getElementById('bp-related');
+        relEl.style.display = '';
+        relEl.innerHTML = '<div class="bp-related"><div class="bp-related-title">Bunları da okuyabilirsin</div><div class="bp-related-grid">' +
+          related.map(function(d) {
+            var r = d.data();
+            var imgHtml = r.image ? '<img src="'+r.image+'" alt="'+r.title+'" loading="lazy" onload="this.classList.add(\'loaded\')">' : '<div class="bp-rel-emoji">'+(r.emoji||'📝')+'</div>';
+            return '<a href="blog?yazi='+d.id+'" class="bp-related-card"><div class="bp-related-img">'+imgHtml+'</div><div class="bp-related-body"><div class="bp-related-cat">'+(r.category||'')+'</div><div class="bp-related-name">'+(r.title||'')+'</div></div></a>';
+          }).join('') + '</div></div>';
+      }
+    } catch(e) {}
 
     // SEO
     document.title = p.title + ' — Assos\'u Keşfet Blog';
