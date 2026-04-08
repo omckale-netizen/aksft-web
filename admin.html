@@ -90,6 +90,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
 /* ── MAIN ── */
 .admin-main{margin-left:var(--sidebar-w);flex:1;padding:32px 36px;min-height:100vh}
+/* Dark mode switch */
+.dm-switch{position:fixed;top:16px;right:20px;z-index:150;display:flex;align-items:center;gap:8px;padding:6px 14px 6px 10px;border-radius:999px;background:var(--card-bg);border:1px solid var(--card-border);box-shadow:var(--card-shadow);cursor:pointer;transition:all .3s;user-select:none}
+.dm-switch:hover{box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.dm-track{width:36px;height:20px;border-radius:10px;background:var(--cream-dark);position:relative;transition:background .3s}
+[data-theme="dark"] .dm-track{background:var(--terra)}
+.dm-thumb{width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform .3s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+[data-theme="dark"] .dm-thumb{transform:translateX(16px)}
+.dm-label{font-size:.7rem;font-weight:600;color:var(--text-muted);transition:color .3s}
 .admin-main h2{font-size:1.5rem;font-weight:700;color:var(--navy);margin-bottom:4px}
 .admin-main .page-sub{color:var(--text-light);font-size:.88rem;margin-bottom:28px}
 
@@ -445,6 +453,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <!-- APP -->
+<div class="dm-switch" onclick="toggleDarkMode()" title="Tema değiştir">
+  <span class="dm-label" id="dark-mode-label">🌙</span>
+  <div class="dm-track"><div class="dm-thumb"></div></div>
+</div>
 <div class="admin-wrap" id="admin-wrap" style="display:none">
 
   <!-- SIDEBAR -->
@@ -503,9 +515,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       </a>
       <a class="admin-nav-item" data-page="settings" onclick="showPage('settings')">
         <span class="nav-icon">⚙️</span> Ayarlar
-      </a>
-      <a class="admin-nav-item" onclick="toggleDarkMode()" id="dark-mode-btn">
-        <span class="nav-icon" id="dark-mode-icon">🌙</span> <span id="dark-mode-label">Karanlık Mod</span>
       </a>
       <a class="admin-nav-item" onclick="logout()">
         <span class="nav-icon">🚪</span> Çıkış
@@ -4041,23 +4050,18 @@ function toggleDarkMode() {
   if (isDark) {
     document.documentElement.removeAttribute('data-theme');
     localStorage.removeItem('adminDarkMode');
-    document.getElementById('dark-mode-icon').textContent = '🌙';
-    document.getElementById('dark-mode-label').textContent = 'Karanlık Mod';
+    document.getElementById('dark-mode-label').textContent = '🌙';
   } else {
     document.documentElement.setAttribute('data-theme', 'dark');
     localStorage.setItem('adminDarkMode', '1');
-    document.getElementById('dark-mode-icon').textContent = '☀️';
-    document.getElementById('dark-mode-label').textContent = 'Aydınlık Mod';
+    document.getElementById('dark-mode-label').textContent = '☀️';
   }
 }
-// Sayfa yüklendiğinde tercih uygula
 (function() {
   if (localStorage.getItem('adminDarkMode') === '1') {
     document.documentElement.setAttribute('data-theme', 'dark');
-    var icon = document.getElementById('dark-mode-icon');
     var label = document.getElementById('dark-mode-label');
-    if (icon) icon.textContent = '☀️';
-    if (label) label.textContent = 'Aydınlık Mod';
+    if (label) label.textContent = '☀️';
   }
 })();
 
