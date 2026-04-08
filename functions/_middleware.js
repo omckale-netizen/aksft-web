@@ -136,9 +136,9 @@ export async function onRequest(context) {
     } catch (e) { return next(); }
   }
 
-  // Blog detay sayfasi
-  if (path.includes('/blog/') && path !== '/blog/' && path !== '/blog') {
-    const slug = path.split('/').pop();
+  // Blog detay sayfasi (?yazi=slug)
+  if ((path === '/blog' || path === '/blog.html') && url.searchParams.get('yazi')) {
+    const slug = url.searchParams.get('yazi');
     if (!slug) return next();
 
     try {
@@ -147,12 +147,12 @@ export async function onRequest(context) {
 
       const title = (fields.title?.stringValue || 'Blog') + ' \u2014 Assos\'u Kesfet';
       const desc = (fields.excerpt?.stringValue || '').substring(0, 200);
-      const image = fields.image?.stringValue || DEFAULT_OG_IMAGE;
+      const image = fields.coverImage?.stringValue || fields.image?.stringValue || DEFAULT_OG_IMAGE;
 
       return new Response(buildOgHtml({
         title,
         description: desc || 'Assos hakkinda blog yazisi.',
-        url: `https://assosukesfet.com/blog/${slug}`,
+        url: `https://assosukesfet.com/blog?yazi=${slug}`,
         image
       }), { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
     } catch (e) { return next(); }
