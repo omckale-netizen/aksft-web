@@ -3784,10 +3784,14 @@ function toggleFeatured(id, e) {
   e.stopPropagation();
   const v = draftData.venues.find(x => x.id === id);
   if (!v) return;
+  if (isPremiumActive(v)) {
+    showToast('👑 Premium işletmeler zaten öne çıkanlarda görünür.', 'error');
+    return;
+  }
   v.featured = !v.featured;
   saveVenueToFirestore(v);
   renderVenueTable();
-  showToast(v.featured ? '⭐ "' + v.title + '" one cikanlara eklendi.' : '"' + v.title + '" one cikanlardan kaldirildi.', 'success');
+  showToast(v.featured ? '⭐ "' + v.title + '" öne çıkanlara eklendi.' : '"' + v.title + '" öne çıkanlardan kaldırıldı.', 'success');
 }
 
 const VENUE_STATUS = {
