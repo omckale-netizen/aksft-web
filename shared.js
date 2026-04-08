@@ -2468,9 +2468,11 @@ function renderVenuePage(venueId) {
                 </div>
               </div>
               <div id="rezv-date-error" style="font-size:.75rem;color:#E53E3E;min-height:18px;margin-top:-4px"></div>
-              <div id="rezv-summary" style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(26,107,138,.06);border:1px solid rgba(26,107,138,.12);border-radius:10px;margin-bottom:10px;font-size:.78rem;color:#1A6B8A;font-weight:600">
-                <span style="font-size:1rem">🌙</span>
-                <span id="rezv-summary-text">1 gece · 2 gün</span>
+              <div id="rezv-summary" style="display:none;justify-content:center;align-items:center;gap:6px;margin-bottom:10px;font-size:.78rem;color:var(--text-mid,#4A5870)">
+                <span style="font-weight:600">Toplam:</span>
+                <span id="rezv-summary-nights" style="display:inline-flex;align-items:center;gap:3px;font-weight:700;color:#1A2744">🌙 <span id="rezv-n"></span></span>
+                <span style="color:rgba(0,0,0,.2)">|</span>
+                <span id="rezv-summary-days" style="display:inline-flex;align-items:center;gap:3px;font-weight:700;color:#C4521A">☀️ <span id="rezv-d"></span></span>
               </div>
               <div class="vp-rezv-field">
                 <label class="vp-rezv-label">Kişi Sayısı</label>
@@ -2702,14 +2704,16 @@ function renderVenuePage(venueId) {
     var ci = document.getElementById('rezv-checkin');
     var co = document.getElementById('rezv-checkout');
     var sumEl = document.getElementById('rezv-summary');
-    var sumText = document.getElementById('rezv-summary-text');
-    if (!ci || !co || !sumEl || !sumText) return;
+    var nEl = document.getElementById('rezv-n');
+    var dEl = document.getElementById('rezv-d');
+    if (!ci || !co || !sumEl || !nEl || !dEl) return;
     if (ci.value && co.value && co.value > ci.value) {
       var d1 = new Date(ci.value);
       var d2 = new Date(co.value);
       var nights = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
       var days = nights + 1;
-      sumText.textContent = nights + ' gece · ' + days + ' gün';
+      nEl.textContent = nights + ' gece';
+      dEl.textContent = days + ' gün';
       sumEl.style.display = 'flex';
     } else {
       sumEl.style.display = 'none';
