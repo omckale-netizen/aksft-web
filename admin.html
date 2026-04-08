@@ -1516,15 +1516,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         <div id="analytics-conversion" style="padding:16px 20px"></div>
       </div>
 
-      <div class="dash-row">
-        <div class="panel-card dash-half">
-          <div class="panel-card-head"><h3>Aksiyonlar (Ara / WhatsApp / Rez.)</h3></div>
-          <div id="analytics-actions"></div>
-        </div>
-        <div class="panel-card dash-half">
-          <div class="panel-card-head"><h3>Sayfa Görüntülenmeleri</h3></div>
-          <div id="analytics-pages"></div>
-        </div>
+      <div class="panel-card" style="margin-bottom:20px">
+        <div class="panel-card-head"><h3>Aksiyonlar (Ara / WhatsApp / Rez.)</h3></div>
+        <div id="analytics-actions"></div>
       </div>
 
       <!-- Tıklama Raporu -->
@@ -3514,15 +3508,6 @@ async function renderAnalytics() {
           '<span style="color:#25D366">💬 ' + v.whatsapp + '</span>' +
           '<span style="color:var(--terra)">📋 ' + v.reservation + '</span>' +
         '</div></div>').join('');
-
-    // Sayfa görüntüleme
-    const pageList = Object.entries(pageCounts).map(([page, views]) => ({ page, views })).sort((a, b) => b.views - a.views);
-    document.getElementById('analytics-pages').innerHTML = pageList.length === 0
-      ? '<div style="padding:24px;text-align:center;color:var(--text-muted)">Henuz veri yok.</div>'
-      : pageList.map(p =>
-        '<div class="recent-item"><div class="recent-emoji">📄</div>' +
-        '<div class="recent-info" style="flex:1"><div class="ri-title">' + p.page + '</div></div>' +
-        '<div style="font-size:.85rem;font-weight:700;color:var(--navy)">' + p.views + '</div></div>').join('');
 
     // Tıklama raporu tablosu
     const clickData = venueList.map(v => {
