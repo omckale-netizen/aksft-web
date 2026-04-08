@@ -2460,13 +2460,14 @@ function renderVenuePage(venueId) {
               <div class="vp-rezv-row">
                 <div class="vp-rezv-field">
                   <label class="vp-rezv-label">Giriş Tarihi</label>
-                  <input type="date" id="rezv-checkin" class="vp-rezv-input">
+                  <input type="date" id="rezv-checkin" class="vp-rezv-input" onchange="vpUpdateCheckoutMin()">
                 </div>
                 <div class="vp-rezv-field">
                   <label class="vp-rezv-label">Çıkış Tarihi</label>
                   <input type="date" id="rezv-checkout" class="vp-rezv-input">
                 </div>
               </div>
+              <div id="rezv-date-error" style="font-size:.75rem;color:#E53E3E;min-height:18px;margin-top:-4px"></div>
               <div class="vp-rezv-field">
                 <label class="vp-rezv-label">Kişi Sayısı</label>
                 <select id="rezv-guests" class="vp-rezv-input">
@@ -2692,14 +2693,54 @@ function renderVenuePage(venueId) {
     if (wrap && dd && !wrap.contains(e.target)) dd.classList.remove('open');
   });
 
+  // Giriş tarihi seçilince çıkış min tarihini güncelle
+  window.vpUpdateCheckoutMin = function() {
+    var ci = document.getElementById('rezv-checkin');
+    var co = document.getElementById('rezv-checkout');
+    var errEl = document.getElementById('rezv-date-error');
+    if (ci && co && ci.value) {
+      // Çıkış min = giriş + 1 gün
+      var nextDay = new Date(ci.value);
+      nextDay.setDate(nextDay.getDate() + 1);
+      co.min = nextDay.toISOString().split('T')[0];
+      // Eğer çıkış tarihi geçersizse temizle
+      if (co.value && co.value <= ci.value) {
+        co.value = '';
+        if (errEl) errEl.textContent = 'Çıkış tarihi giriş tarihinden sonra olmalıdır.';
+      } else {
+        if (errEl) errEl.textContent = '';
+      }
+    }
+  };
+
+  // Sayfa yüklenince bugünü min olarak ayarla
+  setTimeout(function() {
+    var today = new Date().toISOString().split('T')[0];
+    var ci = document.getElementById('rezv-checkin');
+    if (ci) ci.min = today;
+  }, 100);
+
   window.vpSendRezervasyon = function () {
     const name     = (document.getElementById('rezv-name')?.value || '').trim();
     const checkin  = document.getElementById('rezv-checkin')?.value  || '';
     const checkout = document.getElementById('rezv-checkout')?.value || '';
     const guests   = document.getElementById('rezv-guests')?.value   || '1';
+    const errEl    = document.getElementById('rezv-date-error');
     if (!name)     { alert('Lütfen ad soyad giriniz.'); return; }
     if (!checkin)  { alert('Lütfen giriş tarihini seçiniz.'); return; }
     if (!checkout) { alert('Lütfen çıkış tarihini seçiniz.'); return; }
+
+    // Tarih validasyonları
+    var today = new Date().toISOString().split('T')[0];
+    if (checkin < today) {
+      if (errEl) errEl.textContent = 'Giriş tarihi bugünden önce olamaz.';
+      return;
+    }
+    if (checkout <= checkin) {
+      if (errEl) errEl.textContent = 'Çıkış tarihi giriş tarihinden sonra olmalıdır.';
+      return;
+    }
+    if (errEl) errEl.textContent = '';
     if (window.trackAction) trackAction(v.id, 'reservation');
     const fmt = d => { if (!d) return '—'; const [y,m,day]=d.split('-'); return `${day}.${m}.${y}`; };
     const lines = [
