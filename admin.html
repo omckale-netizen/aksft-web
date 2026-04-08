@@ -2194,13 +2194,16 @@ async function checkAuth() {
   const attempts = getLoginAttempts();
   if (attempts.lockedUntil && Date.now() < attempts.lockedUntil) {
     const remaining = Math.ceil((attempts.lockedUntil - Date.now()) / 1000);
-    errEl.textContent = `Cok fazla basarisiz deneme. ${remaining} saniye bekleyin.`;
+    errEl.textContent = `Çok fazla başarısız deneme. ${remaining} saniye bekleyin.`;
     return;
   }
 
   try {
     await fbAuth.signInWithEmailAndPassword(email, pw);
     clearLoginAttempts();
+    errEl.style.color = '#38A169';
+    errEl.textContent = '✓ Giriş başarılı! Yönlendiriliyorsunuz...';
+    await new Promise(r => setTimeout(r, 800));
     document.getElementById('auth-gate').classList.add('hidden');
     document.getElementById('admin-wrap').style.display = 'flex';
     await loadDataFromFirestore();
@@ -2224,9 +2227,9 @@ async function checkAuth() {
     if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
       const left = LOGIN_MAX_ATTEMPTS - updated.count;
       if (left > 0) {
-        errEl.textContent = `E-posta veya sifre hatali. ${left} deneme hakkiniz kaldi.`;
+        errEl.textContent = `E-posta veya şifre hatalı. ${left} deneme hakkınız kaldı.`;
       } else {
-        errEl.textContent = `Hesap 5 dakika kitlendi. Lutfen bekleyin.`;
+        errEl.textContent = `Hesap 5 dakika kitlendi. Lütfen bekleyin.`;
         // Basarisiz giris bildirimi gonder
         const device = getDeviceInfo();
         const ip = await getClientIP();
