@@ -1639,12 +1639,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               </div>
               <div class="form-group">
                 <label>Yeni Şifre</label>
-                <input type="password" id="pw-new" placeholder="Yeni şifre">
+                <input type="password" id="pw-new" placeholder="Yeni şifre" oninput="checkPwMatch()">
               </div>
               <div class="form-group">
                 <label>Yeni Şifre (Tekrar)</label>
-                <input type="password" id="pw-confirm" placeholder="Yeni şifreyi tekrar girin">
+                <input type="password" id="pw-confirm" placeholder="Yeni şifreyi tekrar girin" oninput="checkPwMatch()">
               </div>
+              <div id="pw-match" style="font-size:.78rem;min-height:20px;margin-bottom:4px"></div>
               <div id="pw-error" style="color:var(--red);font-size:.82rem;min-height:20px;margin-bottom:12px"></div>
               <button class="btn btn-primary" style="width:100%" onclick="changePassword()">Şifreyi Değiştir</button>
             </div>
@@ -2254,17 +2255,33 @@ function logout() {
   window.location.replace('admin-login.html');
 }
 
+function checkPwMatch() {
+  const newPw = document.getElementById('pw-new').value;
+  const confirmPw = document.getElementById('pw-confirm').value;
+  const matchEl = document.getElementById('pw-match');
+  if (!newPw || !confirmPw) { matchEl.innerHTML = ''; return; }
+  if (newPw === confirmPw) {
+    matchEl.innerHTML = '<span style="color:var(--green)">✓ Şifreler eşleşiyor</span>';
+  } else {
+    matchEl.innerHTML = '<span style="color:var(--red)">✗ Şifreler eşleşmiyor</span>';
+  }
+}
+
 async function changePassword() {
   const errEl = document.getElementById('pw-error');
+  const matchEl = document.getElementById('pw-match');
   errEl.textContent = '';
   const current = document.getElementById('pw-current').value;
   const newPw = document.getElementById('pw-new').value;
-  const confirm = document.getElementById('pw-confirm').value;
+  const confirmPw = document.getElementById('pw-confirm').value;
 
-  if (!current) { errEl.textContent = 'Mevcut sifreyi girin.'; return; }
-  if (!newPw) { errEl.textContent = 'Yeni sifreyi girin.'; return; }
-  if (newPw.length < 6) { errEl.textContent = 'Yeni sifre en az 6 karakter olmali.'; return; }
-  if (newPw !== confirm) { errEl.textContent = 'Yeni sifreler eslesmiyor.'; return; }
+  if (!current) { errEl.textContent = 'Mevcut şifreyi girin.'; return; }
+  if (!newPw) { errEl.textContent = 'Yeni şifreyi girin.'; return; }
+  if (newPw.length < 6) { errEl.textContent = 'Yeni şifre en az 6 karakter olmalı.'; return; }
+  if (newPw !== confirmPw) { errEl.textContent = 'Yeni şifreler eşleşmiyor.'; return; }
+
+  // Onay dialogu
+  if (!confirm('Şifreniz değiştirilecek. Devam etmek istiyor musunuz?')) return;
 
   try {
     const user = fbAuth.currentUser;
@@ -2274,9 +2291,24 @@ async function changePassword() {
     document.getElementById('pw-current').value = '';
     document.getElementById('pw-new').value = '';
     document.getElementById('pw-confirm').value = '';
+    matchEl.innerHTML = '';
     showToast('Şifre başarıyla değiştirildi!', 'success');
+    logActivity('sifre_degistir', user.email, 'Şifre değiştirildi');
+    // Telegram bildirim
+    const device = getDeviceInfo();
+    const ip = await getClientIP();
+    fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      type:'message',
+      data:{
+        name: 'Güvenlik Sistemi',
+        email: user.email,
+        phone: '',
+        subject: 'Şifre Değişikliği',
+        message: '🔑 Admin şifresi değiştirildi.\n📅 ' + new Date().toLocaleString('tr-TR') + '\n🌐 IP: ' + ip + '\n📱 Cihaz: ' + device.platform
+      }
+    })}).catch(()=>{});
   } catch(err) {
-    if (err.code === 'auth/wrong-password') errEl.textContent = 'Mevcut sifre yanlis.';
+    if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') errEl.textContent = 'Mevcut şifre yanlış.';
     else errEl.textContent = 'Hata: ' + err.message;
   }
 }
