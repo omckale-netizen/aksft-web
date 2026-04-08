@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Giriş — Assos'u Keşfet Yönetim</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js" crossorigin="anonymous" integrity="sha384-4DnN3LMk363cZnO0ZZ+46dvN6+1On5ODUbq/68J4ZeSDAghncVXodw2jecSmTyAe"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js" crossorigin="anonymous" integrity="sha384-XkNx6yfzInowq3eeLw+tOjPN3eJZ5kjET5iIbCABcI8RkLWOr6XAtva7++KOxiqp"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(150deg,#06101E 0%,#0C1A30 55%,#091420 100%);
+  font-family:'Plus Jakarta Sans',sans-serif;color:#F5EDE0;overflow:hidden;position:relative;
+}
+body::before{content:'';position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(245,237,224,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(245,237,224,.02) 1px,transparent 1px);background-size:60px 60px;}
+.auth-orb{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none}
+.auth-orb-1{width:400px;height:400px;background:rgba(196,82,26,.12);top:-100px;left:-80px}
+.auth-orb-2{width:300px;height:300px;background:rgba(26,107,138,.1);bottom:-80px;right:-60px}
+.auth-box{position:relative;z-index:1;background:rgba(255,255,255,.04);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:48px 40px;text-align:center;max-width:400px;width:90%;box-shadow:0 24px 64px rgba(0,0,0,.3)}
+.auth-logo{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#C4521A,#D4682E);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:1.4rem;color:#fff;font-weight:800;box-shadow:0 8px 24px rgba(196,82,26,.3)}
+.auth-box h1{color:#F5EDE0;font-size:1.4rem;font-weight:800;margin-bottom:4px;letter-spacing:-.02em}
+.auth-box .auth-sub{color:rgba(245,237,224,.35);font-size:.82rem;margin-bottom:32px}
+.auth-field{position:relative;margin-bottom:14px;text-align:left}
+.auth-field label{display:block;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(245,237,224,.35);margin-bottom:6px}
+.auth-field input{width:100%;padding:12px 16px 12px 42px;border:1.5px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.04);color:#F5EDE0;font-size:.92rem;font-family:inherit;outline:none;transition:border .2s,background .2s}
+.auth-field input:focus{border-color:#C4521A;background:rgba(255,255,255,.07)}
+.auth-field input::placeholder{color:rgba(245,237,224,.2)}
+.auth-field-icon{position:absolute;left:14px;bottom:13px;color:rgba(245,237,224,.3);font-size:.9rem}
+.auth-btn{margin-top:20px;width:100%;padding:13px;border:none;border-radius:12px;background:#C4521A;color:#fff;font-size:.95rem;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(196,82,26,.3)}
+.auth-btn:hover{background:#D4682E;transform:translateY(-1px);box-shadow:0 8px 24px rgba(196,82,26,.4)}
+.auth-err{color:#F87171;font-size:.78rem;margin-top:14px;min-height:18px}
+.auth-footer{margin-top:24px;font-size:.68rem;color:rgba(245,237,224,.2)}
+.loading{display:flex;align-items:center;justify-content:center;min-height:100vh;position:fixed;inset:0;z-index:10;background:linear-gradient(150deg,#06101E 0%,#0C1A30 55%,#091420 100%)}
+.ld-spinner{width:28px;height:28px;border:3px solid rgba(245,237,224,.1);border-top-color:#C4521A;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<div class="loading" id="loading">
+  <div class="ld-spinner"></div>
+</div>
+
+<div class="auth-orb auth-orb-1"></div>
+<div class="auth-orb auth-orb-2"></div>
+
+<div class="auth-box hidden" id="login-box">
+  <div class="auth-logo">A</div>
+  <h1>Assos'u Keşfet</h1>
+  <p class="auth-sub">Yönetim paneline giriş yapın</p>
+  <div class="auth-field">
+    <label>E-posta</label>
+    <span class="auth-field-icon">✉</span>
+    <input type="email" id="auth-email" placeholder="E-posta adresiniz" onkeydown="if(event.key==='Enter')document.getElementById('auth-pw').focus()">
+  </div>
+  <div class="auth-field">
+    <label>Şifre</label>
+    <span class="auth-field-icon">🔒</span>
+    <input type="password" id="auth-pw" placeholder="Şifreniz" onkeydown="if(event.key==='Enter')checkAuth()">
+  </div>
+  <button class="auth-btn" onclick="checkAuth()">Giriş Yap</button>
+  <div class="auth-err" id="auth-err"></div>
+  <div class="auth-footer">Assos'u Keşfet &middot; Yönetim Paneli</div>
+</div>
+
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyCXqgczplchzjClAZt-Wl2eqgqmUMhLVJs",
+  authDomain: "assosu-kesfet.firebaseapp.com",
+  projectId: "assosu-kesfet",
+  storageBucket: "assosu-kesfet.firebasestorage.app",
+  messagingSenderId: "225032191860",
+  appId: "1:225032191860:web:61ac6ba36764b530be3621"
+});
+
+const fbAuth = firebase.auth();
+
+// Brute force koruma
+const LOGIN_MAX_ATTEMPTS = 5;
+const LOGIN_LOCKOUT_MS = 5 * 60 * 1000;
+
+function getLoginAttempts() {
+  try {
+    const data = JSON.parse(localStorage.getItem('loginAttempts') || '{}');
+    if (data.lockedUntil && Date.now() < data.lockedUntil) return data;
+    if (data.lockedUntil && Date.now() >= data.lockedUntil) { localStorage.removeItem('loginAttempts'); return { count: 0 }; }
+    return data;
+  } catch(e) { return { count: 0 }; }
+}
+
+function recordFailedLogin() {
+  const data = getLoginAttempts();
+  data.count = (data.count || 0) + 1;
+  if (data.count >= LOGIN_MAX_ATTEMPTS) {
+    data.lockedUntil = Date.now() + LOGIN_LOCKOUT_MS;
+  }
+  localStorage.setItem('loginAttempts', JSON.stringify(data));
+  return data;
+}
+
+function clearLoginAttempts() {
+  localStorage.removeItem('loginAttempts');
+}
+
+function getDeviceInfo() {
+  const ua = navigator.userAgent;
+  let browser = 'Bilinmeyen';
+  if (ua.includes('Firefox')) browser = 'Firefox';
+  else if (ua.includes('Edg')) browser = 'Edge';
+  else if (ua.includes('Chrome')) browser = 'Chrome';
+  else if (ua.includes('Safari')) browser = 'Safari';
+  let os = 'Bilinmeyen';
+  if (ua.includes('Windows')) os = 'Windows';
+  else if (ua.includes('Mac')) os = 'macOS';
+  else if (ua.includes('iPhone')) os = 'iPhone';
+  else if (ua.includes('Android')) os = 'Android';
+  else if (ua.includes('Linux')) os = 'Linux';
+  return { browser, os, platform: os + ' / ' + browser };
+}
+
+async function getClientIP() {
+  try {
+    const resp = await fetch('https://api.ipify.org?format=json');
+    const data = await resp.json();
+    return data.ip || 'Bilinmeyen';
+  } catch(e) { return 'Alınamadı'; }
+}
+
+async function checkAuth() {
+  const email = (document.getElementById('auth-email').value || '').trim();
+  const pw = document.getElementById('auth-pw').value;
+  const errEl = document.getElementById('auth-err');
+
+  if (!email) { errEl.textContent = 'E-posta adresinizi girin.'; return; }
+  if (!pw) { errEl.textContent = 'Şifrenizi girin.'; return; }
+
+  const attempts = getLoginAttempts();
+  if (attempts.lockedUntil && Date.now() < attempts.lockedUntil) {
+    const remaining = Math.ceil((attempts.lockedUntil - Date.now()) / 1000);
+    errEl.textContent = `Çok fazla başarısız deneme. ${remaining} saniye bekleyin.`;
+    return;
+  }
+
+  try {
+    await fbAuth.signInWithEmailAndPassword(email, pw);
+    clearLoginAttempts();
+    errEl.style.color = '#38A169';
+    errEl.textContent = '✓ Giriş başarılı! Yönlendiriliyorsunuz...';
+    // Telegram bildirim
+    const device = getDeviceInfo();
+    const ip = await getClientIP();
+    fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      type:'login',
+      data:{
+        date: new Date().toLocaleString('tr-TR'),
+        email: email,
+        ip: ip,
+        device: device.platform
+      }
+    })}).catch(()=>{});
+    localStorage.setItem('lastActivity', Date.now().toString());
+    setTimeout(() => { window.location.href = 'admin.html'; }, 800);
+  } catch(err) {
+    const updated = recordFailedLogin();
+    if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+      const left = LOGIN_MAX_ATTEMPTS - updated.count;
+      if (left > 0) {
+        errEl.textContent = `E-posta veya şifre hatalı. ${left} deneme hakkınız kaldı.`;
+      } else {
+        errEl.textContent = `Hesap 5 dakika kitlendi. Lütfen bekleyin.`;
+        const device = getDeviceInfo();
+        const ip = await getClientIP();
+        fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+          type:'login_blocked',
+          data:{
+            date: new Date().toLocaleString('tr-TR'),
+            email: email,
+            ip: ip,
+            device: device.platform,
+            attempts: updated.count
+          }
+        })}).catch(()=>{});
+      }
+    } else {
+      errEl.textContent = 'Giriş hatası: ' + err.message;
+    }
+  }
+}
+
+// Zaten giriş yapmışsa direkt admin'e yönlendir
+fbAuth.onAuthStateChanged((user) => {
+  if (user) {
+    window.location.href = 'admin.html';
+  } else {
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('login-box').classList.remove('hidden');
+  }
+});
+</script>
+</body>
+</html>
