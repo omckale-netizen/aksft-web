@@ -1087,8 +1087,8 @@ function renderFooter(opts = {}) {
             <p class="ft-tagline">Assos'un Dijital Keşif Rehberi</p>
           </div>
           <nav class="ft-links">
-            <a href="${basePath}blog.html">Blog</a>
-            <a href="${basePath}iletisim.html">İletişim</a>
+            <a href="${basePath}blog.html">✍️ Blog</a>
+            <a href="${basePath}iletisim.html">✉️ İletişim</a>
           </nav>
         </div>
         <!-- Alt: Copyright -->
