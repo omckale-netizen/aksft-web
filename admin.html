@@ -2264,6 +2264,43 @@ async function saveVillageToFirestore(village) {
 }
 
 /* ── Gorsel yukle: Firebase Storage ── */
+// Blog kapak görselini OG uyumlu boyuta küçült (1200x630, JPG, max ~200KB)
+function resizeImageForOG(blob) {
+  return new Promise(function(resolve, reject) {
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      var MAX_W = 1200;
+      var MAX_H = 630;
+      var w = img.width;
+      var h = img.height;
+      // 1200x630 oranına kırp + küçült
+      var targetRatio = MAX_W / MAX_H;
+      var srcRatio = w / h;
+      var sx = 0, sy = 0, sw = w, sh = h;
+      if (srcRatio > targetRatio) {
+        // Yatay fazla — kenarları kırp
+        sw = Math.round(h * targetRatio);
+        sx = Math.round((w - sw) / 2);
+      } else {
+        // Dikey fazla — üst/alt kırp
+        sh = Math.round(w / targetRatio);
+        sy = Math.round((h - sh) / 2);
+      }
+      canvas.width = MAX_W;
+      canvas.height = MAX_H;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, MAX_W, MAX_H);
+      canvas.toBlob(function(b) {
+        if (b) resolve(b);
+        else reject(new Error('Görsel sıkıştırılamadı'));
+      }, 'image/jpeg', 0.82);
+    };
+    img.onerror = function() { reject(new Error('Görsel okunamadı')); };
+    img.src = URL.createObjectURL(blob);
+  });
+}
+
 async function uploadImageToServer(blob, path) {
   try {
     showToast('Gorsel yukleniyor...', 'success');
@@ -6216,13 +6253,15 @@ async function saveBlogPost(e) {
   const status = document.getElementById('bf-status').value;
   const tagsStr = document.getElementById('bf-tags').value;
 
-  // Görsel yükleme
+  // Görsel yükleme (otomatik sıkıştırma + JPG dönüşüm)
   let imageUrl = document.getElementById('bf-image').value.trim();
   if (blogPendingImg) {
     try {
-      showToast('Görsel yükleniyor...', 'success');
-      const path = 'images/blog/' + slug + '/kapak.' + (blogPendingImg.ext || 'webp');
-      imageUrl = await uploadImageToServer(blogPendingImg.blob, path);
+      showToast('Görsel sıkıştırılıp yükleniyor...', 'success');
+      // Canvas ile 1200px genişliğe küçült ve JPG olarak sıkıştır
+      var resizedBlob = await resizeImageForOG(blogPendingImg.blob);
+      const path = 'images/blog/' + slug + '/kapak.jpg';
+      imageUrl = await uploadImageToServer(resizedBlob, path);
       blogPendingImg = null;
     } catch(err) {
       showToast('Görsel yüklenemedi: ' + err.message, 'error');
