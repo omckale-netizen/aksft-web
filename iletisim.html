@@ -199,8 +199,21 @@ async function submitContact(e) {
   e.preventDefault();
   const btn = document.getElementById('ct-submit');
   const status = document.getElementById('ct-status');
+
+  // Rate limiting — dakikada max 2 mesaj
+  var rlKey = 'rl_contact';
+  var rlData = JSON.parse(localStorage.getItem(rlKey) || '{"count":0,"time":0}');
+  var now = Date.now();
+  if (now - rlData.time > 60000) { rlData = { count: 0, time: now }; }
+  if (rlData.count >= 2) {
+    status.innerHTML = '<span style="color:#E53E3E">Çok fazla mesaj gönderdiniz. Lütfen 1 dakika bekleyin.</span>';
+    return;
+  }
+  rlData.count++;
+  localStorage.setItem(rlKey, JSON.stringify(rlData));
+
   btn.disabled = true;
-  btn.textContent = 'Gonderiliyor...';
+  btn.textContent = 'Gönderiliyor...';
   status.textContent = '';
 
   const msg = {
@@ -230,13 +243,13 @@ async function submitContact(e) {
     await db.collection('messages').add(msg);
     // Telegram bildirim
     fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'message',data:{name:msg.name,email:msg.email,phone:msg.phone,subject:msg.subject,message:msg.message}})}).catch(()=>{});
-    status.innerHTML = '<span style="color:#38A169">✓ Mesajiniz basariyla gonderildi! En kisa surede donus yapacagiz.</span>';
+    status.innerHTML = '<span style="color:#38A169">✓ Mesajınız başarıyla gönderildi! En kısa sürede dönüş yapacağız.</span>';
     document.getElementById('contact-form').reset();
   } catch(err) {
-    status.innerHTML = '<span style="color:#E53E3E">Gonderme hatasi. Lutfen tekrar deneyin.</span>';
+    status.innerHTML = '<span style="color:#E53E3E">Gönderme hatası. Lütfen tekrar deneyin.</span>';
   }
   btn.disabled = false;
-  btn.textContent = 'Mesaj Gonder →';
+  btn.textContent = 'Mesaj Gönder →';
 }
 </script>
 </body>
