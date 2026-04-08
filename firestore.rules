@@ -45,9 +45,19 @@ service cloud.firestore {
       allow read, delete: if isAdmin();
     }
 
-    // Favoriler: herkes okuyabilir/yazabilir (paylasim kodu ile senkron)
+    // Favoriler: herkes okuyabilir (kod ile paylasim), yazma validasyonlu
     match /favorites/{docId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow create, update: if
+        // Sadece izin verilen alanlar
+        request.resource.data.keys().hasOnly(['venues', 'places', 'updatedAt'])
+        // venues ve places array olmali
+        && request.resource.data.venues is list
+        && request.resource.data.places is list
+        // Maksimum 50 favori (spam onleme)
+        && request.resource.data.venues.size() <= 50
+        && request.resource.data.places.size() <= 50;
+      allow delete: if isAdmin();
     }
 
     // Bot onay bekleyenler: herkes yazabilir, sadece admin yonetebilir
