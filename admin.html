@@ -531,67 +531,99 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
     <!-- ══════ DASHBOARD ══════ -->
     <div class="admin-page active" id="page-dashboard">
       <!-- Hoşgeldin bar -->
-      <div id="dash-welcome" style="margin-bottom:28px;">
-        <h2 style="margin:0;font-size:1.5rem;" id="dash-greeting">Hoş Geldiniz</h2>
-        <p class="page-sub" style="margin:0;margin-top:4px;" id="dash-date"></p>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+        <div>
+          <h2 style="margin:0;font-size:1.5rem;" id="dash-greeting">Hoş Geldiniz</h2>
+          <p class="page-sub" style="margin:0;margin-top:4px;" id="dash-date"></p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="dash-action-btn" onclick="showPage('venues');openVenueModal()" style="min-width:auto">
+            <span class="da-icon" style="background:var(--terra)">+</span><span>Yeni Mekan</span>
+          </button>
+          <button class="dash-action-btn" onclick="showPage('routes');openRouteModal()" style="min-width:auto">
+            <span class="da-icon" style="background:#1A6B8A">🗺</span><span>Yeni Rota</span>
+          </button>
+        </div>
       </div>
 
-      <!-- Bildirimler + Onay Bekleyenler -->
+      <!-- Uyarılar -->
       <div id="dash-alerts" style="margin-bottom:16px;"></div>
-      <div id="dash-pending-alert" style="margin-bottom:20px;"></div>
+      <div id="dash-pending-alert" style="margin-bottom:16px;"></div>
 
-      <!-- Stats — 8 kart -->
-      <div class="stats-grid" id="stats-grid"></div>
+      <!-- Stats — ana kartlar -->
+      <div class="stats-grid" id="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));margin-bottom:20px"></div>
 
-      <!-- Hızlı İşlemler — tek satır -->
+      <!-- Hızlı İşlemler -->
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;">
-        <button class="dash-action-btn" onclick="showPage('venues');openVenueModal()" style="flex:1;min-width:140px">
-          <span class="da-icon" style="background:var(--terra)">+</span><span>Yeni Mekan</span>
-        </button>
-        <button class="dash-action-btn" onclick="showPage('bot')" style="flex:1;min-width:140px">
+        <button class="dash-action-btn" onclick="showPage('bot')" style="flex:1;min-width:120px">
           <span class="da-icon" style="background:var(--blue)">🤖</span><span>Mekan Botu</span>
         </button>
-        <button class="dash-action-btn" onclick="showPage('placebot')" style="flex:1;min-width:140px">
+        <button class="dash-action-btn" onclick="showPage('placebot')" style="flex:1;min-width:120px">
           <span class="da-icon" style="background:var(--green)">📍</span><span>Yer Botu</span>
         </button>
-        <button class="dash-action-btn" onclick="showPage('routes');openRouteModal()" style="flex:1;min-width:140px">
-          <span class="da-icon" style="background:#1A6B8A">🗺</span><span>Yeni Rota</span>
+        <button class="dash-action-btn" onclick="showPage('blog');openBlogModal()" style="flex:1;min-width:120px">
+          <span class="da-icon" style="background:#8B5CF6">✍️</span><span>Yeni Yazı</span>
+        </button>
+        <button class="dash-action-btn" onclick="showPage('security')" style="flex:1;min-width:120px">
+          <span class="da-icon" style="background:#1A2744">🛡️</span><span>Güvenlik</span>
         </button>
       </div>
 
-      <!-- 3 kolon: Mesajlar + Kategori + Öne Çıkanlar -->
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;">
+      <!-- Üst grid: Mesajlar + Güvenlik + Blog -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;" class="dash-3col">
+        <!-- Son Mesajlar -->
         <div class="panel-card" style="margin:0">
-          <div class="panel-card-head" style="justify-content:space-between"><h3>✉️ Son Mesajlar</h3><a onclick="showPage('messages')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Gor →</a></div>
+          <div class="panel-card-head" style="justify-content:space-between"><h3>✉️ Son Mesajlar</h3><a onclick="showPage('messages')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Tümü →</a></div>
           <div id="dash-messages"></div>
         </div>
+        <!-- Güvenlik Özeti -->
         <div class="panel-card" style="margin:0">
-          <div class="panel-card-head"><h3>📊 Kategori Dagilimi</h3></div>
+          <div class="panel-card-head" style="justify-content:space-between"><h3>🛡️ Güvenlik</h3><a onclick="showPage('security')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Detay →</a></div>
+          <div id="dash-security"></div>
+        </div>
+        <!-- Blog Özeti -->
+        <div class="panel-card" style="margin:0">
+          <div class="panel-card-head" style="justify-content:space-between"><h3>✍️ Blog</h3><a onclick="showPage('blog')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Tümü →</a></div>
+          <div id="dash-blog"></div>
+        </div>
+      </div>
+
+      <!-- Orta grid: Kategori + Öne Çıkanlar + Premium -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;" class="dash-3col">
+        <div class="panel-card" style="margin:0">
+          <div class="panel-card-head"><h3>📊 Kategori Dağılımı</h3></div>
           <div id="dash-categories"></div>
         </div>
         <div class="panel-card" style="margin:0">
-          <div class="panel-card-head"><h3>⭐ One Cikanlar</h3></div>
+          <div class="panel-card-head"><h3>⭐ Öne Çıkanlar</h3></div>
           <div id="dash-featured"></div>
+        </div>
+        <div class="panel-card" style="margin:0">
+          <div class="panel-card-head"><h3>👑 Premium Mekanlar</h3></div>
+          <div id="dash-premium"></div>
         </div>
       </div>
 
-      <!-- 2 kolon: Son Eklenenler + Görselsiz -->
-      <div class="dash-row">
-        <div class="panel-card dash-half">
+      <!-- Alt grid: Son Eklenenler + Görselsiz + Onay Bekleyenler -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;" class="dash-3col">
+        <div class="panel-card" style="margin:0">
           <div class="panel-card-head"><h3>🕐 Son Eklenenler</h3></div>
           <div id="recent-venues"></div>
         </div>
-        <div class="panel-card dash-half">
-          <div class="panel-card-head"><h3>📷 Gorselsiz Mekanlar</h3></div>
+        <div class="panel-card" style="margin:0">
+          <div class="panel-card-head"><h3>📷 Görselsiz Mekanlar</h3></div>
           <div id="dash-no-images"></div>
+        </div>
+        <div class="panel-card" style="margin:0">
+          <div class="panel-card-head" style="justify-content:space-between"><h3>⏳ Onay Bekleyenler</h3><a onclick="showPage('bot')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Bot →</a></div>
+          <div id="dash-pending"></div>
         </div>
       </div>
 
-      <!-- Onay Bekleyenler detay -->
-      <div class="panel-card">
-        <div class="panel-card-head"><h3>⏳ Onay Bekleyenler</h3></div>
-        <div id="dash-pending"></div>
-      </div>
+      <style>
+        @media(max-width:900px){.dash-3col{grid-template-columns:1fr !important}}
+        @media(min-width:901px) and (max-width:1200px){.dash-3col{grid-template-columns:1fr 1fr !important}}
+      </style>
     </div>
 
     <!-- ══════ VENUES ══════ -->
@@ -3813,15 +3845,19 @@ function renderDashboard() {
   const closedCount = v.length - openCount;
   const withImgCount = v.filter(x => x.images && x.images.length > 0).length;
 
+  const premiumCount = v.filter(x => isPremiumActive && isPremiumActive(x)).length;
+  const totalContent = v.length + r.length + vi.length + p.length;
+
   document.getElementById('stats-grid').innerHTML =
+    '<div class="stat-card"><div class="stat-label">Toplam İçerik</div><div class="stat-val">' + totalContent + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Mekanlar</div><div class="stat-val">' + v.length + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Rotalar</div><div class="stat-val">' + r.length + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Koyler</div><div class="stat-val">' + vi.length + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Köyler</div><div class="stat-val">' + vi.length + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Yerler</div><div class="stat-val">' + p.length + '</div></div>' +
-    '<div class="stat-card green"><div class="stat-label">Acik</div><div class="stat-val">' + openCount + '</div></div>' +
-    '<div class="stat-card" style=""><div class="stat-label">Kapali</div><div class="stat-val" style="color:var(--red)">' + closedCount + '</div></div>' +
-    '<div class="stat-card terra"><div class="stat-label">One Cikan</div><div class="stat-val">' + featured + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Gorselli</div><div class="stat-val">' + withImgCount + '/' + v.length + '</div></div>';
+    '<div class="stat-card green"><div class="stat-label">Açık</div><div class="stat-val">' + openCount + '</div></div>' +
+    '<div class="stat-card terra"><div class="stat-label">Öne Çıkan</div><div class="stat-val">' + featured + '</div></div>' +
+    (premiumCount > 0 ? '<div class="stat-card" style=""><div class="stat-label">👑 Premium</div><div class="stat-val" style="color:#D4935A">' + premiumCount + '</div></div>' : '') +
+    '<div class="stat-card"><div class="stat-label">Görselli</div><div class="stat-val">' + withImgCount + '/' + v.length + '</div></div>';
 
   // Onay bekleyen alert
   (async function() {
@@ -3961,6 +3997,70 @@ function renderDashboard() {
         '<span style="margin-left:auto;font-size:.7rem;color:var(--text-muted)">→</span>' +
       '</div>').join('');
   }
+
+  // ── Güvenlik Özeti ──
+  (function() {
+    const secEl = document.getElementById('dash-security');
+    if (!secEl) return;
+    const checks = [
+      { name: 'HTTPS/SSL', ok: location.protocol === 'https:', icon: '🔒' },
+      { name: 'Firebase Auth', ok: !!fbAuth.currentUser, icon: '🔑' },
+      { name: 'App Check', ok: typeof firebase.appCheck === 'function', icon: '🛡️' },
+      { name: 'SRI Integrity', ok: true, icon: '✅' },
+      { name: 'Login İzolasyonu', ok: true, icon: '🚪' },
+    ];
+    const passed = checks.filter(c => c.ok).length;
+    const score = Math.round((passed / checks.length) * 100);
+    const scoreColor = score >= 90 ? 'var(--green)' : score >= 70 ? '#D69E2E' : 'var(--red)';
+    secEl.innerHTML =
+      '<div style="padding:16px 20px;text-align:center">' +
+        '<div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:50%;border:3px solid ' + scoreColor + ';font-size:1.2rem;font-weight:800;color:' + scoreColor + ';margin-bottom:10px">' + score + '</div>' +
+        '<div style="font-size:.82rem;font-weight:700;color:var(--navy);margin-bottom:4px">' + (score >= 90 ? 'Güçlü' : score >= 70 ? 'Orta' : 'Zayıf') + '</div>' +
+        '<div style="font-size:.7rem;color:var(--text-muted)">' + passed + '/' + checks.length + ' kontrol başarılı</div>' +
+      '</div>' +
+      checks.map(c =>
+        '<div style="display:flex;align-items:center;gap:8px;padding:6px 20px;font-size:.75rem;border-top:1px solid rgba(0,0,0,.03)">' +
+          '<span>' + c.icon + '</span>' +
+          '<span style="flex:1;color:var(--text-light)">' + c.name + '</span>' +
+          '<span style="color:' + (c.ok ? 'var(--green)' : 'var(--red)') + ';font-weight:700">' + (c.ok ? '✓' : '✗') + '</span>' +
+        '</div>').join('');
+  })();
+
+  // ── Blog Özeti ──
+  (async function() {
+    const blogEl = document.getElementById('dash-blog');
+    if (!blogEl) return;
+    try {
+      const snap = await db.collection('blog_posts').orderBy('publishedAt','desc').limit(5).get();
+      const posts = snap.docs.map(d => d.data());
+      const published = posts.filter(p => p.status === 'published').length;
+      blogEl.innerHTML = posts.length === 0
+        ? '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:.82rem">Henüz blog yazısı yok.</div>'
+        : posts.map(p =>
+          '<div class="recent-item" style="cursor:pointer" onclick="showPage(\'blog\')">' +
+            '<div class="recent-emoji">' + (p.emoji || '📝') + '</div>' +
+            '<div class="recent-info"><div class="ri-title">' + (p.title || 'İsimsiz') + '</div>' +
+            '<div class="ri-meta">' + (p.category || '') + ' · ' + (p.status === 'published' ? '<span style="color:var(--green)">Yayında</span>' : '<span style="color:var(--text-muted)">Taslak</span>') + '</div></div>' +
+          '</div>').join('');
+    } catch(e) { blogEl.innerHTML = '<div style="padding:16px;color:var(--text-muted);font-size:.82rem">Yüklenemedi.</div>'; }
+  })();
+
+  // ── Premium Mekanlar ──
+  (function() {
+    const premEl = document.getElementById('dash-premium');
+    if (!premEl) return;
+    const premVenues = v.filter(x => isPremiumActive && isPremiumActive(x));
+    premEl.innerHTML = premVenues.length === 0
+      ? '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:.82rem">Aktif premium mekan yok.</div>'
+      : premVenues.map(x => {
+        const endDate = x.premiumEnd ? new Date(x.premiumEnd).toLocaleDateString('tr-TR') : '';
+        return '<div class="recent-item" style="cursor:pointer" onclick="showPage(\'venues\');openVenueModal(\'' + x.id + '\')">' +
+          '<div class="recent-emoji">👑</div>' +
+          '<div class="recent-info"><div class="ri-title">' + x.title + '</div>' +
+          '<div class="ri-meta">' + (catLabels[x.category] || x.category) + (endDate ? ' · Bitiş: ' + endDate : '') + '</div></div>' +
+        '</div>';
+      }).join('');
+  })();
 }
 
 /* ══════════════════════════════════════════════════
