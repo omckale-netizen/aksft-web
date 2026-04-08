@@ -92,6 +92,19 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .stat-card.terra .stat-val{color:var(--terra)}
 .stat-card.green .stat-val{color:var(--green)}
 
+/* ── NOTIF BELL ── */
+.notif-bell{position:fixed;top:16px;right:80px;z-index:150;width:40px;height:40px;border-radius:50%;background:var(--card-bg);border:1px solid var(--card-border);box-shadow:var(--card-shadow);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.05rem;transition:all .2s;user-select:none}
+.notif-bell:hover{box-shadow:0 4px 16px rgba(0,0,0,.1);transform:scale(1.05)}
+.notif-bell-badge{position:absolute;top:-2px;right:-2px;min-width:18px;height:18px;border-radius:9px;background:var(--red);color:#fff;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--page-bg)}
+.notif-dropdown{position:fixed;top:62px;right:60px;z-index:160;width:380px;max-height:520px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;box-shadow:0 12px 48px rgba(0,0,0,.12);display:none;flex-direction:column;overflow:hidden}
+.notif-dropdown.open{display:flex}
+.notif-dd-head{padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,0,0,.06)}
+.notif-dd-tabs{display:flex;gap:4px;padding:10px 16px 8px}
+.notif-dd-tab{padding:5px 12px;border:none;border-radius:8px;background:transparent;font-family:inherit;font-size:.72rem;font-weight:600;color:var(--text-muted);cursor:pointer;transition:all .15s}
+.notif-dd-tab:hover{background:rgba(0,0,0,.04)}
+.notif-dd-tab.active{background:var(--navy);color:#fff}
+@media(max-width:768px){.notif-dropdown{right:12px;left:12px;width:auto}.notif-bell{right:68px}}
+
 /* ── TABLE ── */
 .panel-card{background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--card-shadow);border:1px solid var(--card-border);overflow:hidden;margin-bottom:24px;transition:background .3s}
 .panel-card-head{padding:18px 22px;border-bottom:1px solid var(--cream-dark);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
@@ -421,6 +434,23 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <!-- APP -->
+<!-- Bildirim ikonu -->
+<div class="notif-bell" id="notif-bell" onclick="toggleNotifDropdown()" title="Bildirimler">
+  🔔
+  <span class="notif-bell-badge" id="notif-badge" style="display:none"></span>
+</div>
+<div class="notif-dropdown" id="notif-dropdown">
+  <div class="notif-dd-head">
+    <span style="font-weight:700;font-size:.88rem;color:var(--navy)">Bildirimler</span>
+    <button style="background:none;border:none;font-size:.72rem;color:var(--terra);cursor:pointer;font-weight:600" onclick="markAllNotifsRead()">Tümünü okundu işaretle</button>
+  </div>
+  <div class="notif-dd-tabs">
+    <button class="notif-dd-tab active" onclick="filterNotifs('all',this)">Tümü</button>
+    <button class="notif-dd-tab" onclick="filterNotifs('message',this)">Mesajlar</button>
+    <button class="notif-dd-tab" onclick="filterNotifs('bot',this)">Bot</button>
+  </div>
+  <div id="notif-list" style="max-height:400px;overflow-y:auto"></div>
+</div>
 <div class="dm-switch" onclick="toggleDarkMode()" title="Tema değiştir">
   <span class="dm-label" id="dark-mode-label">🌙</span>
   <div class="dm-track"><div class="dm-thumb"></div></div>
@@ -459,8 +489,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       </a>
 
       <div class="nav-group-label">İletişim & Analiz</div>
-      <a class="admin-nav-item" data-page="notifications" onclick="showPage('notifications')">
-        <span class="nav-icon">🔔</span> Bildirimler <span id="notif-badge" style="background:var(--red);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;display:none"></span>
+      <a class="admin-nav-item" data-page="messages" onclick="showPage('messages')">
+        <span class="nav-icon">✉️</span> Mesajlar <span id="msg-badge" style="background:var(--red);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;display:none"></span>
       </a>
       <a class="admin-nav-item" data-page="analytics" onclick="showPage('analytics')">
         <span class="nav-icon">📈</span> İstatistikler
@@ -1284,33 +1314,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
     </div>
 
     <!-- ══════ ANALYTICS ══════ -->
-    <!-- ══════ NOTIFICATIONS ══════ -->
-    <div class="admin-page" id="page-notifications">
-      <h2>Bildirim Merkezi</h2>
-      <p class="page-sub">Mesajlar, bot onaylari ve sistem bildirimleri tek yerde.</p>
-      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
-        <button class="btn btn-sm btn-secondary notif-tab active" onclick="filterNotifs('all',this)">Tumunu Gor</button>
-        <button class="btn btn-sm btn-secondary notif-tab" onclick="filterNotifs('message',this)">✉️ Mesajlar</button>
-        <button class="btn btn-sm btn-secondary notif-tab" onclick="filterNotifs('bot',this)">🤖 Bot Onaylari</button>
-        <button class="btn btn-sm btn-secondary notif-tab" onclick="filterNotifs('system',this)">⚙️ Sistem</button>
-        <button class="btn btn-sm" style="margin-left:auto;background:transparent;color:var(--text-muted);font-size:.75rem" onclick="markAllNotifsRead()">Tumunu okundu isaretle</button>
-      </div>
-      <div class="panel-card">
-        <div id="notif-list" style="max-height:70vh;overflow-y:auto"></div>
-      </div>
-
-      <!-- Mesaj Detay Modal -->
-      <div class="confirm-overlay" id="notif-msg-overlay" onclick="if(event.target===this)closeNotifMsg()">
-        <div class="confirm-box" style="max-width:500px;padding:0;text-align:left">
-          <div style="padding:20px 24px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-between">
-            <h4 id="notif-msg-title" style="font-size:.95rem">Mesaj Detayi</h4>
-            <button onclick="closeNotifMsg()" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--text-muted)">✕</button>
-          </div>
-          <div style="padding:20px 24px" id="notif-msg-body"></div>
-          <div style="padding:12px 24px 20px;display:flex;gap:8px;border-top:1px solid rgba(0,0,0,.06)" id="notif-msg-actions"></div>
-        </div>
-      </div>
-    </div>
 
     <!-- ══════ BLOG ══════ -->
     <div class="admin-page" id="page-blog">
@@ -2768,7 +2771,6 @@ function showPage(page) {
   if (page === 'placebot') { renderPendingPlaces(); }
   if (page === 'analytics') renderAnalytics();
   if (page === 'messages') renderMessages();
-  if (page === 'notifications') renderNotifications();
   if (page === 'activity') renderActivityLog();
   if (page === 'blog') renderBlogTable();
 }
@@ -2785,7 +2787,7 @@ function initApp() {
   // Hash'ten son kaldığı sekmeyi aç
   const hash = window.location.hash.replace('#', '');
   loadCategories();
-  const validPages = ['dashboard','venues','categories','bot','placebot','routes','villages','export','settings','security','analytics','messages','gallery','notifications','activity','blog'];
+  const validPages = ['dashboard','venues','categories','bot','placebot','routes','villages','export','settings','security','analytics','messages','gallery','activity','blog'];
   if (hash && validPages.includes(hash)) {
     showPage(hash);
   } else {
@@ -5830,11 +5832,13 @@ function formatNotifTime(t) {
 function openNotif(id) {
   const n = allNotifs.find(x => x.id === id);
   if (!n) return;
-  // Okundu isaretle
   markNotifRead(id);
+  // Dropdown'ı kapat
+  document.getElementById('notif-dropdown').classList.remove('open');
 
   if (n.type === 'message') {
-    openNotifMessage(n);
+    showPage('messages');
+    setTimeout(() => openMessage(id), 300);
   } else if (n.action) {
     n.action();
   }
@@ -5849,72 +5853,30 @@ function markNotifRead(id) {
   renderNotifList();
 }
 
-async function openNotifMessage(n) {
-  try {
-    const doc = await db.collection('messages').doc(n.id).get();
-    if (!doc.exists) { showToast('Mesaj bulunamadi.', 'error'); return; }
-    const m = doc.data();
 
-    // Okundu olarak isaretle Firebase'de
-    if (!m.read) {
-      await db.collection('messages').doc(n.id).update({ read: true });
-    }
-
-    document.getElementById('notif-msg-title').textContent = '✉️ ' + (m.name || 'Anonim');
-
-    document.getElementById('notif-msg-body').innerHTML =
-      '<div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:.82rem;margin-bottom:16px">' +
-        '<span style="color:var(--text-muted);font-weight:600">Gonderen:</span><span>' + (m.name || '-') + '</span>' +
-        '<span style="color:var(--text-muted);font-weight:600">E-posta:</span><span>' + (m.email || '-') + '</span>' +
-        (m.phone ? '<span style="color:var(--text-muted);font-weight:600">Telefon:</span><span>' + m.phone + '</span>' : '') +
-        '<span style="color:var(--text-muted);font-weight:600">Konu:</span><span>' + (m.subject || 'Genel') + '</span>' +
-        '<span style="color:var(--text-muted);font-weight:600">Tarih:</span><span>' + (m.timestamp ? new Date(m.timestamp).toLocaleString('tr-TR') : '-') + '</span>' +
-      '</div>' +
-      '<div style="background:var(--cream);border-radius:10px;padding:14px 16px;font-size:.85rem;color:var(--text);line-height:1.7;white-space:pre-wrap">' + (m.message || '') + '</div>';
-
-    const isTrashed = !!m.trashed;
-    document.getElementById('notif-msg-actions').innerHTML =
-      (m.email ? '<a href="mailto:' + m.email + '" class="btn btn-primary btn-sm">✉️ Yanıtla</a>' : '') +
-      (m.phone ? '<a href="tel:' + m.phone.replace(/\\s/g,'') + '" class="btn btn-secondary btn-sm">📞 Ara</a>' : '') +
-      (!isTrashed ? '<button class="btn btn-secondary btn-sm" onclick="notifTrashMsg(\'' + n.id + '\')">🗑 Cope At</button>' : '<button class="btn btn-secondary btn-sm" onclick="notifRestoreMsg(\'' + n.id + '\')">↩ Geri Al</button>') +
-      '<button class="btn btn-danger btn-sm" onclick="notifDeleteMsg(\'' + n.id + '\')">Kalici Sil</button>';
-
-    document.getElementById('notif-msg-overlay').classList.add('show');
-  } catch(err) {
-    showToast('Mesaj acilamadi: ' + err.message, 'error');
+function toggleNotifDropdown() {
+  const dd = document.getElementById('notif-dropdown');
+  const isOpen = dd.classList.contains('open');
+  if (isOpen) {
+    dd.classList.remove('open');
+  } else {
+    dd.classList.add('open');
+    renderNotifications();
   }
 }
 
-function closeNotifMsg() {
-  document.getElementById('notif-msg-overlay').classList.remove('show');
-}
-
-async function notifTrashMsg(id) {
-  await db.collection('messages').doc(id).update({ trashed: true });
-  closeNotifMsg();
-  showToast('Mesaj cope atildi.', 'success');
-  renderNotifications();
-}
-
-async function notifRestoreMsg(id) {
-  await db.collection('messages').doc(id).update({ trashed: false });
-  closeNotifMsg();
-  showToast('Mesaj geri alindi.', 'success');
-  renderNotifications();
-}
-
-async function notifDeleteMsg(id) {
-  showConfirm('Mesaji Sil', 'Bu mesaj kalici olarak silinecek. Devam?', async () => {
-    await db.collection('messages').doc(id).delete();
-    closeNotifMsg();
-    showToast('Mesaj silindi.', 'success');
-    renderNotifications();
-  });
-}
+// Dışarı tıklayınca kapat
+document.addEventListener('click', function(e) {
+  const dd = document.getElementById('notif-dropdown');
+  const bell = document.getElementById('notif-bell');
+  if (dd && bell && !dd.contains(e.target) && !bell.contains(e.target)) {
+    dd.classList.remove('open');
+  }
+});
 
 function filterNotifs(type, btn) {
   notifFilter = type;
-  document.querySelectorAll('.notif-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.notif-dd-tab').forEach(t => t.classList.remove('active'));
   if (btn) btn.classList.add('active');
   renderNotifList();
 }
@@ -5925,7 +5887,7 @@ function markAllNotifsRead() {
   localStorage.setItem('readNotifs', JSON.stringify(readNotifs));
   updateNotifBadge();
   renderNotifList();
-  showToast('Tum bildirimler okundu olarak isaretlendi.', 'success');
+  showToast('Tüm bildirimler okundu olarak işaretlendi.', 'success');
 }
 
 function updateNotifBadge() {
