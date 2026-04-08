@@ -833,7 +833,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
                 <span style="font-size:1.5rem">📷</span>
                 <p>Gorsel yuklemek icin tiklayin</p>
               </div>
-              <img id="pbot-crop-img" class="crop-img" style="display:none" draggable="false">
+              <img id="pbot-crop-img" class="crop-img" style="display:none" draggable="false" alt="Yer görseli">
               <div class="crop-hint" id="pbot-crop-hint" style="display:none">↕ Surukleyerek konumlandir</div>
             </div>
             <input type="file" id="pbot-img-file" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="pbotHandleImage(this.files[0])">
@@ -930,7 +930,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
                 <span style="font-size:2rem">📷</span>
                 <p>Gorsel yuklemek icin tiklayin</p>
               </div>
-              <img id="crop-img" class="crop-img" style="display:none" draggable="false">
+              <img id="crop-img" class="crop-img" style="display:none" draggable="false" alt="Mekan görseli">
               <div class="crop-hint" id="crop-hint" style="display:none">↕ Surukleyerek konumlandir</div>
             </div>
             <input type="file" id="place-img-file" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handlePlaceImage(this.files[0])">
@@ -1009,7 +1009,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
             <div class="form-group" id="vpf-img-group">
               <label>Kapak Gorseli <span id="vpf-img-info" style="font-weight:400;color:var(--text-muted);font-size:.72rem"></span></label>
               <div id="vpf-img-preview" style="aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#e8e4de,#f0ece6);display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;margin-bottom:8px" onclick="document.getElementById('vpf-img-input').click()">
-                <img id="vpf-img-thumb" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none">
+                <img id="vpf-img-thumb" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none" alt="Önizleme">
                 <span id="vpf-img-empty" style="color:var(--text-muted);font-size:.82rem">📷 Gorsel yuklemek icin tiklayin</span>
               </div>
               <input type="file" id="vpf-img-input" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="vpHandleImage(this.files[0])">
@@ -1369,7 +1369,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
             <div class="form-group">
               <label>Kapak Görseli</label>
               <div id="bf-img-preview" style="aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#e8e4de,#f0ece6);display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;margin-bottom:8px" onclick="document.getElementById('bf-img-input').click()">
-                <img id="bf-img-thumb" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none">
+                <img id="bf-img-thumb" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none" alt="Blog kapak görseli">
                 <span id="bf-img-empty" style="color:var(--text-muted);font-size:.82rem">📷 Kapak görseli yüklemek için tıklayın</span>
               </div>
               <input type="file" id="bf-img-input" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleBlogImage(this.files[0])">
