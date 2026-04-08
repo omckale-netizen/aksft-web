@@ -366,7 +366,18 @@ function renderNav(opts = {}) {
     { href: 'rehber.html',   label: 'Rehber' },
   ];
 
-  const isActive = (href) => href === currentPage || (currentPage === '' && href === 'index.html');
+  const fullPath = window.location.pathname;
+  const isActive = (href) => {
+    if (href === currentPage) return true;
+    if (currentPage === '' && href === 'index.html') return true;
+    // Alt sayfa eşleştirme
+    if (href === 'mekanlar.html' && (currentPage === 'mekan-detay.html' || fullPath.includes('/mekanlar/'))) return true;
+    if (href === 'rotalar.html' && (currentPage === 'rota-detay.html' || fullPath.includes('/rotalar/'))) return true;
+    if (href === 'yerler.html' && fullPath.includes('/yerler/')) return true;
+    if (href === 'koyler.html' && fullPath.includes('/koyler/')) return true;
+    if (href === 'harita.html' && fullPath.includes('/harita')) return true;
+    return false;
+  };
 
   const navHTML = `
     <div id="mobile-menu" role="dialog" aria-label="Navigasyon menüsü" aria-hidden="true">
