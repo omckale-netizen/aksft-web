@@ -101,10 +101,29 @@
             </div>
             <div class="ct-field">
               <label>Telefon *</label>
-              <div class="ct-input-wrap">
-                <span class="ct-input-icon">📞</span>
-                <input type="tel" id="ct-phone" required placeholder="0532 xxx xx xx">
+              <div class="ct-phone-wrap">
+                <select id="ct-phone-code" class="ct-phone-code">
+                  <option value="+90" selected>🇹🇷 +90</option>
+                  <option value="+1">🇺🇸 +1</option>
+                  <option value="+44">🇬🇧 +44</option>
+                  <option value="+49">🇩🇪 +49</option>
+                  <option value="+33">🇫🇷 +33</option>
+                  <option value="+39">🇮🇹 +39</option>
+                  <option value="+31">🇳🇱 +31</option>
+                  <option value="+34">🇪🇸 +34</option>
+                  <option value="+30">🇬🇷 +30</option>
+                  <option value="+7">🇷🇺 +7</option>
+                  <option value="+966">🇸🇦 +966</option>
+                  <option value="+971">🇦🇪 +971</option>
+                  <option value="+61">🇦🇺 +61</option>
+                  <option value="+81">🇯🇵 +81</option>
+                  <option value="+82">🇰🇷 +82</option>
+                  <option value="+86">🇨🇳 +86</option>
+                  <option value="+91">🇮🇳 +91</option>
+                </select>
+                <input type="tel" id="ct-phone" required placeholder="5XX XXX XX XX" oninput="formatPhoneInput(this)" maxlength="15">
               </div>
+              <div id="ct-phone-error" style="font-size:.72rem;color:#E53E3E;min-height:16px;margin-top:3px"></div>
             </div>
           </div>
           <div class="ct-field">
@@ -273,6 +292,10 @@
 .ct-field:last-child{margin-bottom:0}
 .ct-field label{font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-mid);margin-left:2px}
 .ct-input-wrap{position:relative}
+.ct-phone-wrap{display:flex;gap:8px;align-items:center}
+.ct-phone-code{width:110px;padding:12px 8px;border:1.5px solid rgba(26,39,68,.08);border-radius:12px;font-size:16px;font-family:inherit;background:rgba(255,255,255,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--navy);cursor:pointer;outline:none;transition:all .25s;-webkit-appearance:none;appearance:none;flex-shrink:0}
+.ct-phone-code:focus{border-color:var(--terra);box-shadow:0 0 0 3px rgba(196,82,26,.08)}
+.ct-phone-wrap input{flex:1}
 .ct-input-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:.82rem;pointer-events:none;z-index:1}
 .ct-input-wrap input,.ct-input-wrap select{padding-left:38px !important}
 .ct-field input,.ct-field select,.ct-field textarea{width:100%;padding:12px 15px;border:1.5px solid rgba(26,39,68,.08);border-radius:12px;font-size:16px;font-family:inherit;outline:none;transition:all .25s;background:rgba(255,255,255,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--navy)}
@@ -348,6 +371,50 @@ function pageInit() {
 }
 document.addEventListener('dataReady', pageInit);
 
+// Telefon formatla — sadece rakam, boşluk ile grupla
+function formatPhoneInput(el) {
+  var raw = el.value.replace(/\D/g, '');
+  var code = document.getElementById('ct-phone-code').value;
+  var errEl = document.getElementById('ct-phone-error');
+
+  // TR formatı: 5XX XXX XX XX (10 hane)
+  if (code === '+90') {
+    if (raw.startsWith('0')) raw = raw.substring(1); // başındaki 0'ı kaldır
+    if (raw.length > 10) raw = raw.substring(0, 10);
+    var formatted = '';
+    if (raw.length > 0) formatted = raw.substring(0, 3);
+    if (raw.length > 3) formatted += ' ' + raw.substring(3, 6);
+    if (raw.length > 6) formatted += ' ' + raw.substring(6, 8);
+    if (raw.length > 8) formatted += ' ' + raw.substring(8, 10);
+    el.value = formatted;
+    if (raw.length === 10) {
+      if (errEl) errEl.textContent = '';
+    } else if (raw.length > 0) {
+      if (errEl) errEl.textContent = 'Telefon numarası 10 haneli olmalıdır.';
+    } else {
+      if (errEl) errEl.textContent = '';
+    }
+  } else {
+    // Diğer ülkeler — sadece rakam, max 15
+    if (raw.length > 15) raw = raw.substring(0, 15);
+    el.value = raw;
+    if (raw.length >= 7) {
+      if (errEl) errEl.textContent = '';
+    } else if (raw.length > 0) {
+      if (errEl) errEl.textContent = 'Geçerli bir telefon numarası girin.';
+    } else {
+      if (errEl) errEl.textContent = '';
+    }
+  }
+}
+
+function validatePhone() {
+  var code = document.getElementById('ct-phone-code').value;
+  var raw = document.getElementById('ct-phone').value.replace(/\D/g, '');
+  if (code === '+90') return raw.length === 10;
+  return raw.length >= 7;
+}
+
 async function submitContact(e) {
   e.preventDefault();
   const btn = document.getElementById('ct-submit');
@@ -356,14 +423,24 @@ async function submitContact(e) {
   // Zorunlu alan kontrolü
   var name = document.getElementById('ct-name').value.trim();
   var email = document.getElementById('ct-email').value.trim();
-  var phone = document.getElementById('ct-phone').value.trim();
+  var phoneCode = document.getElementById('ct-phone-code').value;
+  var phoneRaw = document.getElementById('ct-phone').value.trim();
+  var phone = phoneCode + ' ' + phoneRaw;
   var message = document.getElementById('ct-message').value.trim();
-  if (!name || !email || !phone || !message) {
+  if (!name || !email || !phoneRaw || !message) {
     status.innerHTML = '<span style="color:#E53E3E">Lütfen tüm zorunlu alanları doldurun.</span>';
     return;
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     status.innerHTML = '<span style="color:#E53E3E">Lütfen geçerli bir e-posta adresi girin.</span>';
+    return;
+  }
+
+  // Telefon format kontrolü
+  if (!validatePhone()) {
+    var phoneErr = document.getElementById('ct-phone-error');
+    if (phoneErr) phoneErr.textContent = phoneCode === '+90' ? 'Telefon numarası 10 haneli olmalıdır.' : 'Geçerli bir telefon numarası girin.';
+    document.getElementById('ct-phone').focus();
     return;
   }
 
