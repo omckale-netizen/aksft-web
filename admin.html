@@ -1525,122 +1525,174 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
     <div class="admin-page" id="page-settings">
       <h2>Ayarlar</h2>
-      <p class="page-sub">Profil ve guvenlik ayarlari.</p>
+      <p class="page-sub">Profil, site görselleri ve güvenlik ayarları.</p>
 
-      <div class="panel-card" style="max-width:480px;margin-bottom:20px">
-        <div class="panel-card-head"><h3>👤 Profil</h3></div>
-        <div style="padding:20px">
-          <div class="form-group">
-            <label>Adiniz (Hos geldiniz mesaji icin)</label>
-            <input type="text" id="settings-name" placeholder="Adinizi girin" value="" oninput="localStorage.setItem('admin_name',this.value)">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
+
+        <!-- SOL KOLON -->
+        <div style="display:flex;flex-direction:column;gap:20px">
+
+          <!-- Profil -->
+          <div class="panel-card">
+            <div class="panel-card-head"><h3>👤 Profil</h3></div>
+            <div style="padding:20px">
+              <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+                <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--terra),#D4682E);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff;font-weight:800;flex-shrink:0" id="settings-avatar">A</div>
+                <div style="flex:1">
+                  <div style="font-size:.88rem;font-weight:700;color:var(--navy)" id="settings-display-name">Admin</div>
+                  <div style="font-size:.72rem;color:var(--text-muted)" id="settings-email"></div>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label>Adınız</label>
+                <input type="text" id="settings-name" placeholder="Adınızı girin" value="" oninput="updateAdminName(this.value)">
+              </div>
+              <div style="font-size:.68rem;color:var(--text-muted);margin-top:6px">"Hoş geldiniz" mesajında görünür. Değişiklik anında kaydedilir.</div>
+            </div>
           </div>
-          <div style="font-size:.72rem;color:var(--text-muted)">Bu isim sadece panel icerisinde "Hos geldiniz" mesajinda kullanilir.</div>
+
+          <!-- Logo + Favicon yan yana -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="panel-card">
+              <div class="panel-card-head"><h3>🖼 Logo</h3></div>
+              <div style="padding:16px">
+                <div id="logo-preview" style="margin-bottom:12px;text-align:center;padding:16px;background:var(--navy);border-radius:10px">
+                  <img id="logo-preview-img" src="" alt="Logo" style="max-height:40px;width:auto;display:none">
+                  <div id="logo-preview-empty" style="color:rgba(255,255,255,.4);font-size:.75rem">Yüklenmemiş</div>
+                </div>
+                <button class="btn btn-primary btn-sm" style="width:100%" onclick="document.getElementById('logo-file-input').click()">Logo Yükle</button>
+                <span id="logo-upload-status" style="font-size:.68rem;color:var(--text-muted);display:block;margin-top:6px;text-align:center"></span>
+                <input type="file" id="logo-file-input" accept="image/png" style="display:none" onchange="uploadLogo(this.files[0])">
+                <div id="logo-url-box" style="display:none;margin-top:10px">
+                  <div style="display:flex;gap:4px">
+                    <input type="text" id="logo-url-display" readonly style="flex:1;padding:5px 8px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.65rem;background:rgba(0,0,0,.02);color:var(--text)">
+                    <button class="btn btn-sm btn-secondary" style="padding:4px 8px;font-size:.65rem" onclick="navigator.clipboard.writeText(document.getElementById('logo-url-display').value);showToast('Kopyalandı','success')">📋</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="panel-card">
+              <div class="panel-card-head"><h3>⭐ Favicon</h3></div>
+              <div style="padding:16px">
+                <div style="text-align:center;margin-bottom:12px;padding:16px;background:rgba(0,0,0,.03);border-radius:10px;border:1px solid rgba(0,0,0,.06)">
+                  <div id="fav-preview" style="display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px">
+                    <img id="fav-preview-img" src="" alt="Favicon" style="width:32px;height:32px;display:none">
+                    <span id="fav-preview-empty" style="font-size:1.4rem;color:var(--text-muted)">⭐</span>
+                  </div>
+                </div>
+                <button class="btn btn-primary btn-sm" style="width:100%" onclick="document.getElementById('fav-file-input').click()">Favicon Yükle</button>
+                <span id="fav-upload-status" style="font-size:.68rem;color:var(--text-muted);display:block;margin-top:6px;text-align:center"></span>
+                <input type="file" id="fav-file-input" accept="image/png,image/x-icon,image/svg+xml" style="display:none" onchange="uploadFavicon(this.files[0])">
+                <div id="fav-url-box" style="display:none;margin-top:10px">
+                  <div style="display:flex;gap:4px">
+                    <input type="text" id="fav-url-display" readonly style="flex:1;padding:5px 8px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.65rem;background:rgba(0,0,0,.02);color:var(--text)">
+                    <button class="btn btn-sm btn-secondary" style="padding:4px 8px;font-size:.65rem" onclick="navigator.clipboard.writeText(document.getElementById('fav-url-display').value);showToast('Kopyalandı','success')">📋</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- OG Image -->
+          <div class="panel-card">
+            <div class="panel-card-head"><h3>🌐 Sosyal Medya Görseli (OG Image)</h3></div>
+            <div style="padding:20px">
+              <div id="og-preview" style="margin-bottom:14px;border-radius:10px;overflow:hidden;background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.08)">
+                <img id="og-preview-img" src="" alt="OG Image" style="width:100%;display:none;border-radius:10px">
+                <div id="og-preview-empty" style="padding:32px 20px;text-align:center">
+                  <div style="font-size:1.6rem;margin-bottom:6px">🖼</div>
+                  <div style="font-size:.78rem;color:var(--text-muted)">Henüz görsel yüklenmemiş</div>
+                </div>
+              </div>
+              <div style="background:rgba(49,130,206,.05);border:1px solid rgba(49,130,206,.12);border-radius:8px;padding:10px 12px;margin-bottom:14px">
+                <div style="font-size:.72rem;color:var(--text-light);line-height:1.5">
+                  <strong>1200 × 630 px</strong> · JPG/PNG · Maks 5MB<br>
+                  WhatsApp, Instagram, Twitter, Facebook ve Google paylaşımlarında görünür.
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <button class="btn btn-primary btn-sm" onclick="document.getElementById('og-file-input').click()">Görsel Yükle</button>
+                <span id="og-upload-status" style="font-size:.72rem;color:var(--text-muted)"></span>
+              </div>
+              <input type="file" id="og-file-input" accept="image/jpeg,image/png" style="display:none" onchange="uploadOgImage(this.files[0])">
+              <div id="og-url-box" style="display:none;margin-top:12px">
+                <div style="display:flex;gap:6px">
+                  <input type="text" id="og-url-display" readonly style="flex:1;padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.68rem;background:rgba(0,0,0,.02);color:var(--text)">
+                  <button class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText(document.getElementById('og-url-display').value);showToast('Kopyalandı','success')">Kopyala</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- SAĞ KOLON -->
+        <div style="display:flex;flex-direction:column;gap:20px">
+
+          <!-- Şifre Değiştir -->
+          <div class="panel-card">
+            <div class="panel-card-head"><h3>🔒 Şifre Değiştir</h3></div>
+            <div style="padding:20px">
+              <div class="form-group">
+                <label>Mevcut Şifre</label>
+                <input type="password" id="pw-current" placeholder="Mevcut şifrenizi girin">
+              </div>
+              <div class="form-group">
+                <label>Yeni Şifre</label>
+                <input type="password" id="pw-new" placeholder="Yeni şifre">
+              </div>
+              <div class="form-group">
+                <label>Yeni Şifre (Tekrar)</label>
+                <input type="password" id="pw-confirm" placeholder="Yeni şifreyi tekrar girin">
+              </div>
+              <div id="pw-error" style="color:var(--red);font-size:.82rem;min-height:20px;margin-bottom:12px"></div>
+              <button class="btn btn-primary" style="width:100%" onclick="changePassword()">Şifreyi Değiştir</button>
+            </div>
+          </div>
+
+          <!-- Hesap Bilgileri -->
+          <div class="panel-card">
+            <div class="panel-card-head"><h3>📊 Hesap Bilgileri</h3></div>
+            <div style="padding:20px">
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,0,0,.02);border-radius:8px">
+                  <span style="font-size:.78rem;color:var(--text-light)">E-posta</span>
+                  <span style="font-size:.78rem;font-weight:600;color:var(--navy)" id="settings-email-info"></span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,0,0,.02);border-radius:8px">
+                  <span style="font-size:.78rem;color:var(--text-light)">Oturum</span>
+                  <span class="badge badge-open">Aktif</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,0,0,.02);border-radius:8px">
+                  <span style="font-size:.78rem;color:var(--text-light)">Oturum Süresi</span>
+                  <span style="font-size:.78rem;font-weight:600;color:var(--navy)">4 saat</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,0,0,.02);border-radius:8px">
+                  <span style="font-size:.78rem;color:var(--text-light)">Son Giriş</span>
+                  <span style="font-size:.78rem;font-weight:600;color:var(--navy)" id="settings-last-login"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tehlikeli Alan -->
+          <div class="panel-card" style="border:1px solid rgba(229,62,62,.15)">
+            <div class="panel-card-head" style="border-bottom-color:rgba(229,62,62,.1)"><h3 style="color:var(--red)">⚠️ Tehlikeli Alan</h3></div>
+            <div style="padding:20px">
+              <div style="font-size:.78rem;color:var(--text-light);line-height:1.6;margin-bottom:14px">Oturumu sonlandırır ve giriş sayfasına yönlendirir.</div>
+              <button class="btn" style="width:100%;background:var(--red-bg);color:var(--red);border:1px solid rgba(229,62,62,.2)" onclick="if(confirm('Oturumu kapatmak istediğinize emin misiniz?'))logout()">Oturumu Kapat</button>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <div class="panel-card" style="max-width:480px;margin-bottom:20px">
-        <div class="panel-card-head"><h3>🖼 Site Logosu</h3></div>
-        <div style="padding:20px">
-          <div id="logo-preview" style="margin-bottom:16px;text-align:center;padding:20px;background:var(--navy);border-radius:10px">
-            <img id="logo-preview-img" src="" alt="Logo" style="max-height:50px;width:auto;display:none">
-            <div id="logo-preview-empty" style="color:rgba(255,255,255,.4);font-size:.82rem">Logo yuklenmemis</div>
-          </div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <button class="btn btn-primary btn-sm" onclick="document.getElementById('logo-file-input').click()">Logo Yukle (PNG)</button>
-            <span id="logo-upload-status" style="font-size:.72rem;color:var(--text-muted)"></span>
-          </div>
-          <input type="file" id="logo-file-input" accept="image/png" style="display:none" onchange="uploadLogo(this.files[0])">
-          <div id="logo-url-box" style="display:none;margin-top:12px">
-            <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Logo URL</label>
-            <div style="display:flex;gap:6px">
-              <input type="text" id="logo-url-display" readonly style="flex:1;padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.72rem;background:rgba(0,0,0,.02);color:var(--text)">
-              <button class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText(document.getElementById('logo-url-display').value);showToast('URL kopyalandi','success')">Kopyala</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel-card" style="max-width:480px;margin-bottom:20px">
-        <div class="panel-card-head"><h3>⭐ Favicon</h3></div>
-        <div style="padding:20px">
-          <div style="display:flex;gap:16px;align-items:center;margin-bottom:16px">
-            <div id="fav-preview" style="width:48px;height:48px;border-radius:8px;background:rgba(0,0,0,.04);display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(0,0,0,.08)">
-              <img id="fav-preview-img" src="" alt="Favicon" style="width:32px;height:32px;display:none">
-              <span id="fav-preview-empty" style="font-size:1.2rem;color:var(--text-muted)">⭐</span>
-            </div>
-            <div>
-              <div style="font-size:.82rem;font-weight:600;color:var(--navy)">Site Faviconu</div>
-              <div style="font-size:.68rem;color:var(--text-muted)">PNG, 32x32 veya 512x512 piksel onerili</div>
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <button class="btn btn-primary btn-sm" onclick="document.getElementById('fav-file-input').click()">Favicon Yukle</button>
-            <span id="fav-upload-status" style="font-size:.72rem;color:var(--text-muted)"></span>
-          </div>
-          <input type="file" id="fav-file-input" accept="image/png,image/x-icon,image/svg+xml" style="display:none" onchange="uploadFavicon(this.files[0])">
-          <div id="fav-url-box" style="display:none;margin-top:12px">
-            <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Favicon URL</label>
-            <div style="display:flex;gap:6px">
-              <input type="text" id="fav-url-display" readonly style="flex:1;padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.72rem;background:rgba(0,0,0,.02);color:var(--text)">
-              <button class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText(document.getElementById('fav-url-display').value);showToast('URL kopyalandi','success')">Kopyala</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel-card" style="max-width:480px;margin-bottom:20px">
-        <div class="panel-card-head"><h3>🌐 Sosyal Medya Gorseli (OG Image)</h3></div>
-        <div style="padding:20px">
-          <div id="og-preview" style="margin-bottom:16px;border-radius:10px;overflow:hidden;background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.08)">
-            <img id="og-preview-img" src="" alt="OG Image" style="width:100%;display:none;border-radius:10px">
-            <div id="og-preview-empty" style="padding:40px 20px;text-align:center">
-              <div style="font-size:2rem;margin-bottom:8px">🖼</div>
-              <div style="font-size:.82rem;color:var(--text-muted)">Henuz gorsel yuklenmemis</div>
-            </div>
-          </div>
-          <div style="background:rgba(49,130,206,.05);border:1px solid rgba(49,130,206,.12);border-radius:8px;padding:12px 14px;margin-bottom:14px">
-            <div style="font-size:.75rem;font-weight:600;color:var(--navy);margin-bottom:4px">Onerilen Olculer</div>
-            <div style="font-size:.72rem;color:var(--text-light);line-height:1.5">
-              <strong>1200 x 630 piksel</strong> (zorunlu minimum)<br>
-              JPG veya PNG · Maks 5MB<br>
-              Bu gorsel WhatsApp, Instagram, Twitter, Facebook ve Google'da site linki paylasildiginda gosterilir.
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <button class="btn btn-primary btn-sm" onclick="document.getElementById('og-file-input').click()">Gorsel Yukle</button>
-            <span id="og-upload-status" style="font-size:.72rem;color:var(--text-muted)"></span>
-          </div>
-          <input type="file" id="og-file-input" accept="image/jpeg,image/png" style="display:none" onchange="uploadOgImage(this.files[0])">
-          <div id="og-url-box" style="display:none;margin-top:12px">
-            <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">OG Image URL</label>
-            <div style="display:flex;gap:6px">
-              <input type="text" id="og-url-display" readonly style="flex:1;padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.72rem;background:rgba(0,0,0,.02);color:var(--text)">
-              <button class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText(document.getElementById('og-url-display').value);showToast('URL kopyalandi','success')">Kopyala</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel-card" style="max-width:480px">
-        <div class="panel-card-head"><h3>🔒 Şifre Değiştir</h3></div>
-        <div style="padding:20px">
-          <div class="form-group">
-            <label>Mevcut Şifre</label>
-            <input type="password" id="pw-current" placeholder="Mevcut sifrenizi girin">
-          </div>
-          <div class="form-group">
-            <label>Yeni Şifre</label>
-            <input type="password" id="pw-new" placeholder="Yeni sifre">
-          </div>
-          <div class="form-group">
-            <label>Yeni Şifre (Tekrar)</label>
-            <input type="password" id="pw-confirm" placeholder="Yeni sifreyi tekrar girin">
-          </div>
-          <div id="pw-error" style="color:var(--red);font-size:.82rem;min-height:20px;margin-bottom:12px"></div>
-          <button class="btn btn-primary" onclick="changePassword()">Şifreyi Değiştir</button>
-        </div>
-      </div>
-
+      <style>
+        @media(max-width:900px){
+          #page-settings > div:nth-child(3){grid-template-columns:1fr !important}
+          #page-settings > div:nth-child(3) > div:first-child > div:nth-child(2){grid-template-columns:1fr !important}
+        }
+      </style>
     </div>
 
   </div>
@@ -2436,6 +2488,22 @@ function showLogoPreview(url) {
   }
 }
 
+function updateAdminName(val) {
+  localStorage.setItem('admin_name', val);
+  // Avatar ve görünen ad anında güncelle
+  const displayEl = document.getElementById('settings-display-name');
+  const avatarEl = document.getElementById('settings-avatar');
+  if (displayEl) displayEl.textContent = val || 'Admin';
+  if (avatarEl) avatarEl.textContent = val ? val.charAt(0).toUpperCase() : 'A';
+  // Dashboard hoşgeldin mesajını da güncelle
+  const greetEl = document.getElementById('dash-greeting');
+  if (greetEl) {
+    const hour = getTRDate().getHours();
+    const greet = hour >= 6 && hour < 12 ? 'Günaydın' : hour >= 12 && hour < 18 ? 'İyi günler' : 'İyi akşamlar';
+    greetEl.textContent = val ? greet + ', ' + val + ' 👋' : greet + ' 👋';
+  }
+}
+
 async function loadLogoPreview() {
   try {
     const doc = await db.collection('settings').doc('site').get();
@@ -2445,6 +2513,23 @@ async function loadLogoPreview() {
       if (doc.data().ogImageUrl) showOgPreview(doc.data().ogImageUrl);
     }
   } catch(e) {}
+  // Profil bilgilerini doldur
+  const adminName = localStorage.getItem('admin_name') || '';
+  const nameInput = document.getElementById('settings-name');
+  const displayEl = document.getElementById('settings-display-name');
+  const avatarEl = document.getElementById('settings-avatar');
+  const emailEl = document.getElementById('settings-email');
+  const emailInfoEl = document.getElementById('settings-email-info');
+  const lastLoginEl = document.getElementById('settings-last-login');
+  if (nameInput) nameInput.value = adminName;
+  if (displayEl) displayEl.textContent = adminName || 'Admin';
+  if (avatarEl) avatarEl.textContent = adminName ? adminName.charAt(0).toUpperCase() : 'A';
+  const user = fbAuth.currentUser;
+  if (user) {
+    if (emailEl) emailEl.textContent = user.email;
+    if (emailInfoEl) emailInfoEl.textContent = user.email;
+    if (lastLoginEl) lastLoginEl.textContent = user.metadata.lastSignInTime ? new Date(user.metadata.lastSignInTime).toLocaleString('tr-TR') : '—';
+  }
 }
 
 // OG Image yükleme
@@ -3561,7 +3646,7 @@ function renderDashboard() {
 
   // Settings name input sync
   const nameInput = document.getElementById('settings-name');
-  if (nameInput && !nameInput.value && adminName) nameInput.value = adminName;
+  if (nameInput && adminName) nameInput.value = adminName;
 
   const v = draftData.venues || [];
   const r = draftData.routes || [];
