@@ -8,6 +8,15 @@ function escAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/'/g,'&#39;
 
 /* ── Preconnect kaldirildi — HTML'deki yeterli ── */
 
+/* ── Premium Helper ── */
+function isPremiumActive(v) {
+  if (!v || !v.premium) return false;
+  var now = new Date().toISOString().split('T')[0];
+  if (v.premiumStart && now < v.premiumStart) return false;
+  if (v.premiumEnd && now > v.premiumEnd) return false;
+  return true;
+}
+
 /* ── Favicon (cache + Firebase) ── */
 (function() {
   var fav32 = localStorage.getItem('site_favicon_url') || '';
@@ -1751,13 +1760,15 @@ const VENUE_TAG_COLORS = { kafe: 'rgba(196,82,26,.1)', restoran: 'rgba(26,107,13
 const VENUE_TAG_TEXT = { kafe: 'var(--terra)', restoran: 'var(--aegean)', kahvalti: '#8A5520', konaklama: 'var(--sage)' };
 const VENUE_LABELS = { kafe: 'Kafe', restoran: 'Restoran', kahvalti: 'Kahvaltı', konaklama: 'Konaklama' };
 function venueCardHTML(v, delay = 0) {
+  const premBadge = isPremiumActive(v) ? '<span style="display:inline-flex;align-items:center;gap:3px;font-size:.58rem;font-weight:700;padding:2px 8px;border-radius:999px;background:linear-gradient(135deg,#D4935A,#E8A07A);color:#fff;margin-left:6px;vertical-align:middle;">👑 Premium</span>' : '';
+  const premBorder = isPremiumActive(v) ? 'border:1.5px solid rgba(212,147,90,.25);box-shadow:0 2px 12px rgba(212,147,90,.08);' : '';
   return `
-    <a class="venue-card fade-up" href="mekanlar.html?id=${v.id}" data-delay="${delay}" aria-label="${v.title}" style="display:block;padding:22px;">
+    <a class="venue-card fade-up" href="mekanlar.html?id=${v.id}" data-delay="${delay}" aria-label="${v.title}" style="display:block;padding:22px;${premBorder}">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;">
         <div style="width:46px;height:46px;border-radius:13px;background:${VENUE_ICONS[v.category]||'rgba(26,39,68,.06)'};display:flex;align-items:center;justify-content:center;font-size:1.2rem;">${v.emoji}</div>
         <span style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:${VENUE_TAG_COLORS[v.category]||'rgba(26,39,68,.06)'};color:${VENUE_TAG_TEXT[v.category]||'var(--text-mid)'};">${VENUE_LABELS[v.category]||v.category}</span>
       </div>
-      <h3 style="margin-bottom:6px;">${v.title}</h3>
+      <h3 style="margin-bottom:6px;">${v.title}${premBadge}</h3>
       <p style="margin-bottom:12px;">${v.shortDesc}</p>
       <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;">
         ${(v.tags||[]).map(t=>`<span style="font-size:.62rem;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(26,39,68,.06);color:var(--text-mid);">${t}</span>`).join('')}
@@ -2261,7 +2272,7 @@ function renderVenuePage(venueId) {
       <div class="vp-hero-2col">
         <div class="vp-hero-left">
           <span class="vp-hero-cat-pill" style="background:${cs.bg};color:${cs.color};">${cs.label}</span>
-          <h1 class="vp-hero-title">${v.title}</h1>
+          <h1 class="vp-hero-title">${v.title}${isPremiumActive(v) ? ' <span style="display:inline-flex;align-items:center;gap:4px;font-size:.45em;font-weight:700;padding:4px 12px;border-radius:999px;background:linear-gradient(135deg,#D4935A,#E8A07A);color:#fff;vertical-align:middle;letter-spacing:0">👑 Premium</span>' : ''}</h1>
           <div class="vp-hero-loc">📍 ${v.address || v.location + ', Ayvacık, Çanakkale'}</div>
           <div class="vp-hero-chips">
             ${openBadge}

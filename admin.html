@@ -1779,6 +1779,25 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
             <span style="font-size:.72rem;color:var(--text-muted);font-weight:400">(Anasayfada gösterilir)</span>
           </label>
         </div>
+        <div class="form-group" style="background:linear-gradient(135deg,rgba(212,147,90,.06),rgba(196,82,26,.04));border:1px solid rgba(212,147,90,.15);border-radius:12px;padding:16px">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:10px">
+            <input type="checkbox" id="f-premium" style="width:18px;height:18px;accent-color:#D4935A;cursor:pointer" onchange="togglePremiumDates()">
+            <span>👑 Premium İşletme</span>
+            <span style="font-size:.72rem;color:var(--text-muted);font-weight:400">(Rozet + üst sıralama + haritada altın pin)</span>
+          </label>
+          <div id="premium-dates" style="display:none;margin-top:8px">
+            <div class="form-row">
+              <div class="form-group" style="margin-bottom:0">
+                <label style="font-size:.72rem">Başlangıç Tarihi</label>
+                <input type="date" id="f-premium-start" style="padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit">
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label style="font-size:.72rem">Bitiş Tarihi</label>
+                <input type="date" id="f-premium-end" style="padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit">
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="form-group">
           <label>Etiketler</label>
           <div class="tag-chips" id="f-tag-chips"></div>
@@ -3964,7 +3983,7 @@ function renderVenueTable() {
         <td><strong>${v.title}</strong>${statusLabel}</td>
         <td><span class="badge badge-cat">${catLabels[v.category] || v.category || '-'}</span></td>
         <td>${v.location || '-'}</td>
-        <td><span style="${starStyle}" onclick="toggleFeatured('${v.id}',event)" title="${v.featured ? 'Öne çıkanlardan kaldır' : 'Öne çıkanlara ekle'}">${v.featured ? '★' : '☆'}</span></td>
+        <td><span style="${starStyle}" onclick="toggleFeatured('${v.id}',event)" title="${v.featured ? 'Öne çıkanlardan kaldır' : 'Öne çıkanlara ekle'}">${v.featured ? '★' : '☆'}</span>${isPremiumActive(v) ? ' <span style="font-size:.7rem" title="Premium İşletme">👑</span>' : ''}</td>
         <td><select onchange="changeVenueStatus('${v.id}',this.value)" style="padding:4px 8px;border-radius:8px;border:1.5px solid rgba(0,0,0,.08);font-size:.72rem;font-family:inherit;background:${st.bg};color:${st.color};font-weight:600;cursor:pointer">
           <option value="published" ${statusKey==='published'?'selected':''}>🟢 Yayında</option>
           <option value="draft" ${statusKey==='draft'?'selected':''}>📝 Taslak</option>
@@ -3986,6 +4005,19 @@ function renderVenueTable() {
    VENUE MODAL
 ══════════════════════════════════════════════════ */
 let editingVenueId = null;
+
+function togglePremiumDates() {
+  var el = document.getElementById('premium-dates');
+  if (el) el.style.display = document.getElementById('f-premium').checked ? '' : 'none';
+}
+
+function isPremiumActive(v) {
+  if (!v.premium) return false;
+  var now = new Date().toISOString().split('T')[0];
+  if (v.premiumStart && now < v.premiumStart) return false;
+  if (v.premiumEnd && now > v.premiumEnd) return false;
+  return true;
+}
 
 function formatPhoneNumber(phone) {
   if (!phone) return '';
@@ -4111,6 +4143,10 @@ function openVenueModal(id) {
     document.getElementById('f-website').value = v.website || '';
     document.getElementById('f-instagram').value = v.instagram || '';
     document.getElementById('f-featured').checked = !!v.featured;
+    document.getElementById('f-premium').checked = !!v.premium;
+    document.getElementById('f-premium-start').value = v.premiumStart || '';
+    document.getElementById('f-premium-end').value = v.premiumEnd || '';
+    togglePremiumDates();
     setTagsFromString((v.tags || []).join(', '));
     // Saat girişlerini yükle
     renderWhGrid(v.dayHours || null);
@@ -4361,6 +4397,9 @@ async function saveVenue(e) {
     website: document.getElementById('f-website').value.trim(),
     instagram: document.getElementById('f-instagram').value.trim(),
     featured: document.getElementById('f-featured').checked,
+    premium: document.getElementById('f-premium').checked,
+    premiumStart: document.getElementById('f-premium-start').value || null,
+    premiumEnd: document.getElementById('f-premium-end').value || null,
     weeklyHours: weeklyHours,
     dayHours: dayHours,
     checkin: checkin,

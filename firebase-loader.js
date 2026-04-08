@@ -103,7 +103,15 @@
 
         var failed = results.filter(function(r) { return r.status === 'rejected'; });
 
-        venues.sort(function(a, b) { return (a.sortOrder || 999) - (b.sortOrder || 999); });
+        // Premium mekanlar üstte, sonra sortOrder
+        var now = new Date().toISOString().split('T')[0];
+        function isPrem(v) { return v.premium && (!v.premiumStart || now >= v.premiumStart) && (!v.premiumEnd || now <= v.premiumEnd); }
+        venues.sort(function(a, b) {
+          var pa = isPrem(a) ? 0 : 1;
+          var pb = isPrem(b) ? 0 : 1;
+          if (pa !== pb) return pa - pb;
+          return (a.sortOrder || 999) - (b.sortOrder || 999);
+        });
         places.sort(function(a, b) { return (a.sortOrder || 999) - (b.sortOrder || 999); });
         window.DATA = { routes: routes, places: places, venues: venues, villages: villages };
         window._firebaseReady = true;
