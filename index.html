@@ -786,87 +786,152 @@
       margin-top: 36px;
       display: flex;
       justify-content: center;
+      perspective: 800px;
     }
-    .hero-map-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 28px;
-      border-radius: 16px;
-      background: rgba(255,255,255,.05);
+    .hero-map-card {
+      width: 260px;
+      height: 150px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.04);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(255,255,255,.1);
-      text-decoration: none;
-      transition: all .3s cubic-bezier(.16,1,.3,1);
-      cursor: pointer;
       position: relative;
       overflow: hidden;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+      transition: transform .4s cubic-bezier(.16,1,.3,1), border-color .3s, box-shadow .3s;
+      transform-style: preserve-3d;
     }
-    .hero-map-link::before {
-      content: '';
+    .hero-map-card:hover {
+      border-color: rgba(196,82,26,.3);
+      box-shadow: 0 16px 40px rgba(0,0,0,.25), 0 0 30px rgba(196,82,26,.08);
+      transform: translateY(-5px);
+    }
+    /* Grid pattern */
+    .hmc-grid {
+      position: absolute; inset: 0; opacity: .04;
+      background-image:
+        linear-gradient(rgba(245,237,224,.5) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,237,224,.5) 1px, transparent 1px);
+      background-size: 24px 24px;
+      transition: opacity .4s;
+    }
+    .hero-map-card:hover .hmc-grid { opacity: .08; }
+    /* Map roads that animate in */
+    .hmc-roads { position: absolute; inset: 0; }
+    .hmc-road {
       position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(196,82,26,.08), rgba(26,107,138,.06));
+      background: rgba(245,237,224,.06);
+      transition: opacity .5s, transform .6s cubic-bezier(.16,1,.3,1);
       opacity: 0;
-      transition: opacity .3s;
+      border-radius: 1px;
     }
-    .hero-map-link:hover {
-      border-color: rgba(196,82,26,.35);
-      transform: translateY(-3px);
-      box-shadow: 0 12px 32px rgba(0,0,0,.2);
+    .hero-map-card:hover .hmc-road { opacity: 1; }
+    .hmc-road-h1 { left: 0; right: 0; top: 38%; height: 3px; transform: scaleX(0); transform-origin: left; }
+    .hmc-road-h2 { left: 0; right: 0; top: 65%; height: 2px; transform: scaleX(0); transform-origin: right; }
+    .hmc-road-v1 { top: 0; bottom: 0; left: 32%; width: 2px; transform: scaleY(0); transform-origin: top; }
+    .hmc-road-v2 { top: 0; bottom: 0; left: 68%; width: 2px; transform: scaleY(0); transform-origin: bottom; }
+    .hero-map-card:hover .hmc-road-h1 { transform: scaleX(1); transition-delay: .05s; }
+    .hero-map-card:hover .hmc-road-h2 { transform: scaleX(1); transition-delay: .12s; }
+    .hero-map-card:hover .hmc-road-v1 { transform: scaleY(1); transition-delay: .18s; }
+    .hero-map-card:hover .hmc-road-v2 { transform: scaleY(1); transition-delay: .24s; }
+    /* Glow orb */
+    .hmc-glow {
+      position: absolute; width: 120px; height: 120px;
+      border-radius: 50%; top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      background: radial-gradient(circle, rgba(196,82,26,.12), transparent 70%);
+      opacity: 0; transition: opacity .4s;
+      pointer-events: none;
     }
-    .hero-map-link:hover::before { opacity: 1; }
-    .hero-map-pin {
-      position: relative;
-      width: 38px;
-      height: 38px;
+    .hero-map-card:hover .hmc-glow { opacity: 1; }
+    /* Pin */
+    .hmc-pin {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      transition: transform .4s cubic-bezier(.16,1,.3,1);
+    }
+    .hero-map-card:hover .hmc-pin { transform: translate(-50%, -60%); }
+    .hmc-pin-body {
+      width: 28px; height: 28px;
       border-radius: 50% 50% 50% 0;
-      background: rgba(255,255,255,.95);
+      background: var(--terra);
       transform: rotate(-45deg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 14px rgba(0,0,0,.15);
-      flex-shrink: 0;
-      animation: heroMapPinBounce 2s ease-in-out infinite;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 16px rgba(196,82,26,.4);
+      animation: hmcPinFloat 3s ease-in-out infinite;
     }
-    .hero-map-pin span {
-      transform: rotate(45deg);
-      font-size: .95rem;
-    }
-    @keyframes heroMapPinBounce {
+    .hmc-pin-body span { transform: rotate(45deg); font-size: .75rem; }
+    @keyframes hmcPinFloat {
       0%,100% { transform: rotate(-45deg) translateY(0); }
-      50% { transform: rotate(-45deg) translateY(-4px); }
+      50% { transform: rotate(-45deg) translateY(-3px); }
     }
-    .hero-map-text {
-      position: relative;
-      z-index: 1;
-      text-align: left;
+    .hmc-pin-shadow {
+      width: 16px; height: 4px;
+      background: rgba(0,0,0,.15);
+      border-radius: 50%;
+      margin: 4px auto 0;
+      animation: hmcShadow 3s ease-in-out infinite;
     }
-    .hero-map-text-title {
-      font-size: .88rem;
-      font-weight: 800;
-      color: var(--cream);
-      line-height: 1.2;
-      letter-spacing: -.01em;
+    @keyframes hmcShadow {
+      0%,100% { transform: scale(1); opacity: .15; }
+      50% { transform: scale(.7); opacity: .08; }
     }
-    .hero-map-text-sub {
-      font-size: .68rem;
-      color: rgba(245,237,224,.35);
-      margin-top: 2px;
+    /* Live badge */
+    .hmc-live {
+      position: absolute; top: 12px; right: 12px;
+      display: flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 20px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      z-index: 2;
     }
-    .hero-map-arrow {
-      position: relative;
-      z-index: 1;
-      color: rgba(245,237,224,.25);
-      font-size: .9rem;
-      transition: color .2s, transform .2s;
-      flex-shrink: 0;
+    .hmc-live-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: #34D399;
+      animation: hmcLivePulse 2s infinite;
     }
-    .hero-map-link:hover .hero-map-arrow {
+    @keyframes hmcLivePulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+    .hmc-live-text {
+      font-size: .58rem; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: rgba(245,237,224,.4);
+    }
+    /* Bottom content */
+    .hmc-bottom {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 14px 16px; z-index: 2;
+    }
+    .hmc-title {
+      font-size: .88rem; font-weight: 800;
+      color: var(--cream); line-height: 1.2;
+      transition: transform .3s;
+    }
+    .hero-map-card:hover .hmc-title { transform: translateX(4px); }
+    .hmc-sub {
+      font-size: .65rem; color: rgba(245,237,224,.3);
+      margin-top: 3px; transition: transform .3s .05s;
+    }
+    .hero-map-card:hover .hmc-sub { transform: translateX(4px); }
+    .hmc-line {
+      height: 1.5px; margin-top: 10px;
+      background: linear-gradient(90deg, rgba(196,82,26,.5), rgba(26,107,138,.3), transparent);
+      transform: scaleX(.2); transform-origin: left;
+      transition: transform .5s cubic-bezier(.16,1,.3,1);
+    }
+    .hero-map-card:hover .hmc-line { transform: scaleX(1); }
+    /* Map icon top-left */
+    .hmc-icon {
+      position: absolute; top: 12px; left: 14px; z-index: 2;
+      color: rgba(196,82,26,.6);
+      transition: color .3s, filter .3s;
+    }
+    .hero-map-card:hover .hmc-icon {
       color: var(--terra-light);
-      transform: translateX(3px);
+      filter: drop-shadow(0 0 6px rgba(196,82,26,.4));
     }
 
 
@@ -1023,13 +1088,31 @@
 
         <!-- Map CTA -->
         <div class="hero-map-cta">
-          <a href="harita.html" class="hero-map-link">
-            <div class="hero-map-pin"><span>📍</span></div>
-            <div class="hero-map-text">
-              <div class="hero-map-text-title">Haritada Keşfet</div>
-              <div class="hero-map-text-sub">Tüm mekan ve yerleri haritada gör</div>
+          <a href="harita.html" class="hero-map-card">
+            <div class="hmc-grid"></div>
+            <div class="hmc-roads">
+              <div class="hmc-road hmc-road-h1"></div>
+              <div class="hmc-road hmc-road-h2"></div>
+              <div class="hmc-road hmc-road-v1"></div>
+              <div class="hmc-road hmc-road-v2"></div>
             </div>
-            <span class="hero-map-arrow">→</span>
+            <div class="hmc-glow"></div>
+            <div class="hmc-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>
+            </div>
+            <div class="hmc-live">
+              <div class="hmc-live-dot"></div>
+              <span class="hmc-live-text">Canlı</span>
+            </div>
+            <div class="hmc-pin">
+              <div class="hmc-pin-body"><span>📍</span></div>
+              <div class="hmc-pin-shadow"></div>
+            </div>
+            <div class="hmc-bottom">
+              <div class="hmc-title">Haritada Keşfet</div>
+              <div class="hmc-sub">Tüm mekan ve yerleri haritada gör →</div>
+              <div class="hmc-line"></div>
+            </div>
           </a>
         </div>
 
