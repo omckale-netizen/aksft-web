@@ -231,8 +231,12 @@ async function loadSinglePost(slug) {
   }
 }
 
-document.addEventListener('dataReady', pageInit);
-if (window.DATA && window.DATA.venues) pageInit();
+var blogInited = false;
+document.addEventListener('dataReady', function() {
+  if (!window._firebaseReady || blogInited) return;
+  blogInited = true;
+  pageInit();
+});
 </script>
 </body>
 </html>
