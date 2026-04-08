@@ -1300,6 +1300,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
     <div class="admin-page" id="page-blog">
       <h2>Blog Yönetimi</h2>
       <p class="page-sub">SEO odaklı blog yazıları ekleyin ve yönetin.</p>
+      <div class="stats-grid" id="blog-stats" style="margin-bottom:20px"></div>
       <div class="panel-card">
         <div class="panel-card-head">
           <div class="search-bar" style="flex:1;min-width:160px">
@@ -5708,6 +5709,15 @@ async function renderBlogTable() {
   const q = (document.getElementById('blog-search')?.value || '').toLowerCase();
   let filtered = blogPosts;
   if (q) filtered = filtered.filter(p => (p.title||'').toLowerCase().includes(q) || (p.category||'').toLowerCase().includes(q));
+
+  // Blog istatistikleri
+  const totalPosts = blogPosts.length;
+  const activePosts = blogPosts.filter(p => p.status === 'published').length;
+  const draftPosts = blogPosts.filter(p => p.status !== 'published').length;
+  document.getElementById('blog-stats').innerHTML =
+    '<div class="stat-card"><div class="stat-label">Toplam Yazı</div><div class="stat-val">' + totalPosts + '</div></div>' +
+    '<div class="stat-card green"><div class="stat-label">Yayında</div><div class="stat-val">' + activePosts + '</div></div>' +
+    '<div class="stat-card terra"><div class="stat-label">Taslak</div><div class="stat-val">' + draftPosts + '</div></div>';
 
   document.getElementById('blog-tbody').innerHTML = filtered.length === 0
     ? '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">Henüz yazı yok.</td></tr>'
