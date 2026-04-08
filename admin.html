@@ -467,9 +467,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
       <a class="admin-nav-item" data-page="notifications" onclick="showPage('notifications')">
         <span class="nav-icon">🔔</span> Bildirimler <span id="notif-badge" style="background:var(--red);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;display:none"></span>
       </a>
-      <a class="admin-nav-item" data-page="messages" onclick="showPage('messages')">
-        <span class="nav-icon">✉️</span> Mesajlar <span id="msg-badge" style="background:var(--red);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;display:none"></span>
-      </a>
       <a class="admin-nav-item" data-page="analytics" onclick="showPage('analytics')">
         <span class="nav-icon">📈</span> Istatistikler
       </a>
@@ -1281,6 +1278,18 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
       </div>
       <div class="panel-card">
         <div id="notif-list" style="max-height:70vh;overflow-y:auto"></div>
+      </div>
+
+      <!-- Mesaj Detay Modal -->
+      <div class="confirm-overlay" id="notif-msg-overlay" onclick="if(event.target===this)closeNotifMsg()">
+        <div class="confirm-box" style="max-width:500px;padding:0;text-align:left">
+          <div style="padding:20px 24px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-between">
+            <h4 id="notif-msg-title" style="font-size:.95rem">Mesaj Detayi</h4>
+            <button onclick="closeNotifMsg()" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--text-muted)">✕</button>
+          </div>
+          <div style="padding:20px 24px" id="notif-msg-body"></div>
+          <div style="padding:12px 24px 20px;display:flex;gap:8px;border-top:1px solid rgba(0,0,0,.06)" id="notif-msg-actions"></div>
+        </div>
       </div>
     </div>
 
@@ -5391,13 +5400,85 @@ function openNotif(id) {
   const n = allNotifs.find(x => x.id === id);
   if (!n) return;
   // Okundu isaretle
-  n.read = true;
+  markNotifRead(id);
+
+  if (n.type === 'message') {
+    openNotifMessage(n);
+  } else if (n.action) {
+    n.action();
+  }
+}
+
+function markNotifRead(id) {
+  const n = allNotifs.find(x => x.id === id);
+  if (n) n.read = true;
   const readNotifs = JSON.parse(localStorage.getItem('readNotifs') || '[]');
   if (!readNotifs.includes(id)) { readNotifs.push(id); localStorage.setItem('readNotifs', JSON.stringify(readNotifs)); }
   updateNotifBadge();
   renderNotifList();
-  // Ilgili sayfaya git
-  if (n.action) n.action();
+}
+
+async function openNotifMessage(n) {
+  try {
+    const doc = await db.collection('messages').doc(n.id).get();
+    if (!doc.exists) { showToast('Mesaj bulunamadi.', 'error'); return; }
+    const m = doc.data();
+
+    // Okundu olarak isaretle Firebase'de
+    if (!m.read) {
+      await db.collection('messages').doc(n.id).update({ read: true });
+    }
+
+    document.getElementById('notif-msg-title').textContent = '✉️ ' + (m.name || 'Anonim');
+
+    document.getElementById('notif-msg-body').innerHTML =
+      '<div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:.82rem;margin-bottom:16px">' +
+        '<span style="color:var(--text-muted);font-weight:600">Gonderen:</span><span>' + (m.name || '-') + '</span>' +
+        '<span style="color:var(--text-muted);font-weight:600">E-posta:</span><span>' + (m.email || '-') + '</span>' +
+        (m.phone ? '<span style="color:var(--text-muted);font-weight:600">Telefon:</span><span>' + m.phone + '</span>' : '') +
+        '<span style="color:var(--text-muted);font-weight:600">Konu:</span><span>' + (m.subject || 'Genel') + '</span>' +
+        '<span style="color:var(--text-muted);font-weight:600">Tarih:</span><span>' + (m.timestamp ? new Date(m.timestamp).toLocaleString('tr-TR') : '-') + '</span>' +
+      '</div>' +
+      '<div style="background:var(--cream);border-radius:10px;padding:14px 16px;font-size:.85rem;color:var(--text);line-height:1.7;white-space:pre-wrap">' + (m.message || '') + '</div>';
+
+    const isTrashed = !!m.trashed;
+    document.getElementById('notif-msg-actions').innerHTML =
+      (m.email ? '<a href="mailto:' + m.email + '" class="btn btn-primary btn-sm">✉️ Yanıtla</a>' : '') +
+      (m.phone ? '<a href="tel:' + m.phone.replace(/\\s/g,'') + '" class="btn btn-secondary btn-sm">📞 Ara</a>' : '') +
+      (!isTrashed ? '<button class="btn btn-secondary btn-sm" onclick="notifTrashMsg(\'' + n.id + '\')">🗑 Cope At</button>' : '<button class="btn btn-secondary btn-sm" onclick="notifRestoreMsg(\'' + n.id + '\')">↩ Geri Al</button>') +
+      '<button class="btn btn-danger btn-sm" onclick="notifDeleteMsg(\'' + n.id + '\')">Kalici Sil</button>';
+
+    document.getElementById('notif-msg-overlay').classList.add('show');
+  } catch(err) {
+    showToast('Mesaj acilamadi: ' + err.message, 'error');
+  }
+}
+
+function closeNotifMsg() {
+  document.getElementById('notif-msg-overlay').classList.remove('show');
+}
+
+async function notifTrashMsg(id) {
+  await db.collection('messages').doc(id).update({ trashed: true });
+  closeNotifMsg();
+  showToast('Mesaj cope atildi.', 'success');
+  renderNotifications();
+}
+
+async function notifRestoreMsg(id) {
+  await db.collection('messages').doc(id).update({ trashed: false });
+  closeNotifMsg();
+  showToast('Mesaj geri alindi.', 'success');
+  renderNotifications();
+}
+
+async function notifDeleteMsg(id) {
+  showConfirm('Mesaji Sil', 'Bu mesaj kalici olarak silinecek. Devam?', async () => {
+    await db.collection('messages').doc(id).delete();
+    closeNotifMsg();
+    showToast('Mesaj silindi.', 'success');
+    renderNotifications();
+  });
 }
 
 function filterNotifs(type, btn) {
