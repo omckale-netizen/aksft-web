@@ -3109,7 +3109,7 @@ async function openMessage(docId) {
   var consentHtml = '';
   if (m.consentGiven) {
     consentHtml += '<div class="msg-consent-box">' +
-      '<div class="consent-label">✓ Gizlilik Politikası Onayı</div>' +
+      '<div class="consent-label">✓ Gizlilik Politikası ve Kullanım Koşulları Onayı</div>' +
       '<div class="msg-consent-row"><span>Onay Durumu</span><span style="color:var(--green);font-weight:700">Kabul Edildi</span></div>' +
       '<div class="msg-consent-row"><span>Onay Metni</span><span>' + (m.consentText || '-') + '</span></div>' +
       '<div class="msg-consent-row"><span>Onay Tarihi</span><span>' + (m.consentDate ? new Date(m.consentDate).toLocaleString('tr-TR') : '-') + '</span></div>' +
