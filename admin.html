@@ -478,6 +478,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
         <span class="nav-icon">🖼</span> Galeri
       </a>
 
+      <a class="admin-nav-item" data-page="activity" onclick="showPage('activity')">
+        <span class="nav-icon">📋</span> Aktivite Logu
+      </a>
+
       <div class="admin-nav-sep"></div>
       <a class="admin-nav-item" data-page="export" onclick="showPage('export')">
         <span class="nav-icon">📦</span> Yedekleme
@@ -1280,6 +1284,26 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
       </div>
     </div>
 
+    <!-- ══════ ACTIVITY LOG ══════ -->
+    <div class="admin-page" id="page-activity">
+      <h2>Aktivite Logu</h2>
+      <p class="page-sub">Tum islemler ve degisiklikler burada kayit altinda.</p>
+      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
+        <select id="activity-filter" onchange="renderActivityLog()" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:#fff;color:var(--text);cursor:pointer">
+          <option value="all">Tum Islemler</option>
+          <option value="giris">🔐 Giris</option>
+          <option value="mekan">🏪 Mekan</option>
+          <option value="yer">📍 Yer</option>
+          <option value="koy">🏘 Koy</option>
+          <option value="rota">🗺 Rota</option>
+        </select>
+        <span id="activity-count" style="font-size:.75rem;color:var(--text-muted);margin-left:auto"></span>
+      </div>
+      <div class="panel-card">
+        <div id="activity-list" style="max-height:70vh;overflow-y:auto"></div>
+      </div>
+    </div>
+
     <div class="admin-page" id="page-analytics">
       <h2>Istatistikler</h2>
       <p class="page-sub">Sayfa goruntulenmeleri ve kullanici aksiyonlari.</p>
@@ -1850,10 +1874,25 @@ function saveDraft() {
   // No-op — individual saves happen in saveVenue, deleteVenue, etc.
 }
 
+/* ── Aktivite Logu ── */
+function logActivity(action, target, details) {
+  try {
+    const user = firebase.auth().currentUser;
+    db.collection('activity_logs').add({
+      action: action,
+      target: target,
+      details: details || '',
+      user: user ? user.email : 'bilinmeyen',
+      timestamp: new Date().toISOString()
+    });
+  } catch(e) {}
+}
+
 async function saveVenueToFirestore(venue) {
   const data = { ...venue };
   delete data.id;
   await db.collection('venues').doc(venue.id).set(data);
+  logActivity('mekan_guncelle', venue.id, venue.title);
 }
 
 async function deleteVenueFromFirestore(id) {
@@ -1871,18 +1910,21 @@ async function deleteVenueFromFirestore(id) {
   await db.collection('venues').doc(id).delete();
   // Analytics verisini de temizle
   try { await db.collection('analytics').doc('venue_' + id).delete(); } catch(e) {}
+  logActivity('mekan_sil', id, v ? v.title : id);
 }
 
 async function savePlaceToFirestore(place) {
   const data = { ...place };
   delete data.id;
   await db.collection('places').doc(place.id).set(data, { merge: true });
+  logActivity('yer_guncelle', place.id, place.title);
 }
 
 async function saveVillageToFirestore(village) {
   const data = { ...village };
   delete data.id;
   await db.collection('villages').doc(village.id).set(data, { merge: true });
+  logActivity('koy_guncelle', village.id, village.title);
 }
 
 /* ── Gorsel yukle: Firebase Storage ── */
@@ -2005,6 +2047,7 @@ async function checkAuth() {
     await loadDataFromFirestore();
     initApp();
     startSessionTimer();
+    logActivity('giris', email, 'Admin panele giris yapildi');
     // Telegram bildirim — IP ve cihaz bilgisi ile
     const device = getDeviceInfo();
     const ip = await getClientIP();
@@ -2454,6 +2497,7 @@ function showPage(page) {
   if (page === 'analytics') renderAnalytics();
   if (page === 'messages') renderMessages();
   if (page === 'notifications') renderNotifications();
+  if (page === 'activity') renderActivityLog();
 }
 
 function toggleSidebar() {
@@ -2468,7 +2512,7 @@ function initApp() {
   // Hash'ten son kaldığı sekmeyi aç
   const hash = window.location.hash.replace('#', '');
   loadCategories();
-  const validPages = ['dashboard','venues','bot','placebot','routes','villages','export','settings','analytics','messages','gallery','notifications'];
+  const validPages = ['dashboard','venues','bot','placebot','routes','villages','export','settings','analytics','messages','gallery','notifications','activity'];
   if (hash && validPages.includes(hash)) {
     showPage(hash);
   } else {
@@ -4347,6 +4391,7 @@ async function saveRoute(e) {
     await db.collection('routes').doc(route.id).set(route);
   }
 
+  logActivity(editingRouteId ? 'rota_guncelle' : 'rota_ekle', route.id, route.title);
   closeRouteModal();
   renderRoutesTable();
   showToast('"' + route.title + '" ' + (isEdit ? 'guncellendi.' : 'eklendi.'), 'success');
@@ -5377,6 +5422,74 @@ function updateNotifBadge() {
   if (badge) {
     badge.textContent = unread;
     badge.style.display = unread > 0 ? '' : 'none';
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   AKTIVITE LOGU
+══════════════════════════════════════════════════ */
+const ACTIVITY_LABELS = {
+  giris: { icon: '🔐', label: 'Giris', color: 'rgba(49,130,206,.1)' },
+  mekan_guncelle: { icon: '🏪', label: 'Mekan Guncellendi', color: 'rgba(196,82,26,.1)' },
+  mekan_sil: { icon: '🗑', label: 'Mekan Silindi', color: 'rgba(229,62,62,.1)' },
+  yer_guncelle: { icon: '📍', label: 'Yer Guncellendi', color: 'rgba(26,107,138,.1)' },
+  koy_guncelle: { icon: '🏘', label: 'Koy Guncellendi', color: 'rgba(90,122,86,.1)' },
+  rota_guncelle: { icon: '🗺', label: 'Rota Guncellendi', color: 'rgba(212,147,90,.1)' },
+  rota_ekle: { icon: '🗺', label: 'Rota Eklendi', color: 'rgba(56,161,105,.1)' }
+};
+
+async function renderActivityLog() {
+  const list = document.getElementById('activity-list');
+  if (!list) return;
+  list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted)">Yukleniyor...</div>';
+
+  try {
+    const filter = document.getElementById('activity-filter')?.value || 'all';
+    let query = db.collection('activity_logs').orderBy('timestamp', 'desc').limit(100);
+    const snap = await query.get();
+    let logs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    if (filter !== 'all') {
+      logs = logs.filter(l => l.action && l.action.startsWith(filter));
+    }
+
+    document.getElementById('activity-count').textContent = logs.length + ' kayit';
+
+    if (logs.length === 0) {
+      list.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted)">Henuz aktivite yok.</div>';
+      return;
+    }
+
+    // Tarihe gore grupla
+    const groups = {};
+    logs.forEach(l => {
+      const date = (l.timestamp || '').split('T')[0] || 'Bilinmeyen';
+      if (!groups[date]) groups[date] = [];
+      groups[date].push(l);
+    });
+
+    let html = '';
+    Object.entries(groups).forEach(([date, items]) => {
+      const d = new Date(date);
+      const dateLabel = isNaN(d) ? date : d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' });
+      html += '<div style="padding:10px 20px;font-size:.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;background:var(--cream);border-bottom:1px solid rgba(0,0,0,.04)">' + dateLabel + '</div>';
+      items.forEach(l => {
+        const cfg = ACTIVITY_LABELS[l.action] || { icon: '📋', label: l.action, color: 'rgba(0,0,0,.05)' };
+        const time = l.timestamp ? new Date(l.timestamp).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '';
+        html += '<div style="display:flex;gap:12px;padding:12px 20px;border-bottom:1px solid rgba(0,0,0,.03);align-items:center">' +
+          '<div style="width:36px;height:36px;border-radius:10px;background:' + cfg.color + ';display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">' + cfg.icon + '</div>' +
+          '<div style="flex:1;min-width:0">' +
+            '<div style="font-size:.82rem;font-weight:600;color:var(--navy)">' + cfg.label + (l.details ? ' — <span style="font-weight:700">' + l.details + '</span>' : '') + '</div>' +
+            '<div style="font-size:.7rem;color:var(--text-muted);margin-top:2px">' + (l.user || '') + '</div>' +
+          '</div>' +
+          '<div style="font-size:.72rem;color:var(--text-muted);flex-shrink:0">' + time + '</div>' +
+        '</div>';
+      });
+    });
+
+    list.innerHTML = html;
+  } catch(err) {
+    list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--red)">Yuklenemedi: ' + err.message + '</div>';
   }
 }
 

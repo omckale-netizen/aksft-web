@@ -72,6 +72,11 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    // Aktivite logu: sadece admin
+    match /activity_logs/{docId} {
+      allow read, write: if isAdmin();
+    }
+
     // Diger tum koleksiyonlar: varsayilan olarak engelle
     match /{document=**} {
       allow read, write: if false;
