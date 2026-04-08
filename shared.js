@@ -2229,7 +2229,7 @@ function renderVenuePage(venueId) {
       @media(max-width:540px){.vp-rezv-row{grid-template-columns:1fr;}.vp-rezv-box{padding:22px 20px;}}
       .vp-rezv-field{display:flex;flex-direction:column;gap:6px;}
       .vp-rezv-label{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#718096;}
-      .vp-rezv-input{border:1.5px solid rgba(26,39,68,.12);border-radius:10px;padding:10px 14px;font-size:.88rem;color:#1A2744;background:#FAFAFA;outline:none;transition:border-color .2s;font-family:inherit;}
+      .vp-rezv-input{border:1.5px solid rgba(26,39,68,.12);border-radius:10px;padding:10px 14px;font-size:16px;color:#1A2744;background:#FAFAFA;outline:none;transition:border-color .2s;font-family:inherit;}
       .vp-rezv-input:focus{border-color:#C4521A;background:#fff;}
       .vp-rezv-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:#25D366;color:#fff;border:none;border-radius:13px;padding:14px 28px;font-size:.92rem;font-weight:700;cursor:pointer;transition:all .22s;font-family:inherit;}
       .vp-rezv-btn:hover{background:#1CB85A;transform:translateY(-2px);box-shadow:0 8px 24px rgba(37,211,102,.3);}
