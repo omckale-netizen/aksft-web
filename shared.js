@@ -518,7 +518,7 @@ function renderNav(opts = {}) {
       .sd-sync-code:hover{background:rgba(196,82,26,.12);}
       .sd-sync-code[data-tip]:not([data-tip=""])::after{content:attr(data-tip);position:absolute;top:-28px;left:50%;transform:translateX(-50%);background:#1A2744;color:#fff;padding:3px 10px;border-radius:6px;font-size:.65rem;font-weight:600;white-space:nowrap;letter-spacing:0;}
       .sd-sync-hint{font-size:.68rem;color:rgba(26,39,68,.35);margin-top:6px;}
-      .sd-sync-inp{flex:1;padding:8px 12px;border:1.5px solid rgba(26,39,68,.1);border-radius:8px;font-size:.82rem;font-family:inherit;outline:none;letter-spacing:.1em;text-transform:uppercase;}
+      .sd-sync-inp{flex:1;padding:8px 12px;border:1.5px solid rgba(26,39,68,.1);border-radius:8px;font-size:16px;font-family:inherit;outline:none;letter-spacing:.1em;text-transform:uppercase;}
       .sd-sync-inp:focus{border-color:#C4521A;}
       .sd-sync-load{padding:8px 14px;border:none;border-radius:8px;background:#1A2744;color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit;transition:background .2s;}
       .sd-sync-load:hover{background:#2A3A5A;}
