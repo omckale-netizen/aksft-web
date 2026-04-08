@@ -103,13 +103,20 @@
 
         var failed = results.filter(function(r) { return r.status === 'rejected'; });
 
-        // Premium mekanlar üstte, sonra sortOrder
+        // Premium mekanlar üstte, kendi aralarında saatlik rotasyon
         var now = new Date().toISOString().split('T')[0];
         function isPrem(v) { return v.premium && (!v.premiumStart || now >= v.premiumStart) && (!v.premiumEnd || now <= v.premiumEnd); }
+        var hourSeed = Math.floor(Date.now() / 3600000); // her saat degisir
         venues.sort(function(a, b) {
           var pa = isPrem(a) ? 0 : 1;
           var pb = isPrem(b) ? 0 : 1;
           if (pa !== pb) return pa - pb;
+          // Premium'lar kendi aralarinda saatlik rotasyon
+          if (pa === 0 && pb === 0) {
+            var ha = ((a.id || '').charCodeAt(0) + hourSeed) % 100;
+            var hb = ((b.id || '').charCodeAt(0) + hourSeed) % 100;
+            return ha - hb;
+          }
           return (a.sortOrder || 999) - (b.sortOrder || 999);
         });
         places.sort(function(a, b) { return (a.sortOrder || 999) - (b.sortOrder || 999); });
