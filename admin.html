@@ -1767,6 +1767,27 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             </div>
           </div>
 
+          <!-- AI İçerik Durumu -->
+          <div class="panel-card" style="margin-bottom:20px">
+            <div class="panel-card-head"><h3>🤖 AI İçerik Dosyası</h3></div>
+            <div style="padding:20px">
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,0,0,.02);border-radius:8px">
+                  <span style="font-size:.78rem;color:var(--text-light)">llms-full.txt Durumu</span>
+                  <span id="llms-auto-status" style="font-size:.78rem;font-weight:600;color:var(--green)">Kontrol ediliyor...</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,0,0,.02);border-radius:8px">
+                  <span style="font-size:.78rem;color:var(--text-light)">Son Güncelleme</span>
+                  <span id="llms-last-update" style="font-size:.78rem;font-weight:600;color:var(--navy)">—</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,0,0,.02);border-radius:8px">
+                  <span style="font-size:.78rem;color:var(--text-light)">Sonraki Kontrol</span>
+                  <span id="llms-next-check" style="font-size:.78rem;font-weight:600;color:var(--navy)">—</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Tehlikeli Alan -->
           <div class="panel-card" style="border:1px solid rgba(229,62,62,.15)">
             <div class="panel-card-head" style="border-bottom-color:rgba(229,62,62,.1)"><h3 style="color:var(--red)">⚠️ Tehlikeli Alan</h3></div>
@@ -2850,6 +2871,8 @@ function initApp() {
   setupDragDrop();
   setupBackupDragDrop();
   try { initNotifBadge(); } catch(e) {}
+  // Haftalık llms-full.txt otomatik güncelleme kontrolü
+  checkAutoLlmsUpdate();
 }
 
 /* ══════════════════════════════════════════════════
@@ -3331,7 +3354,7 @@ showPage = function(page) {
   _origShowPage(page);
   if (page === 'gallery' && galItems.length === 0) galLoadItems();
   if (page === 'categories') renderCatList();
-  if (page === 'settings') loadLogoPreview();
+  if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); }
   if (page === 'security') runSecurityCheck();
 };
 
@@ -7495,6 +7518,195 @@ function generateLlmsFullTxt() {
 
   if (statusEl) statusEl.innerHTML = '<span style="color:var(--green)">✓ İndirildi! Projenin kök dizinine koyun ve deploy edin. (' + v.length + ' mekan, ' + r.length + ' rota, ' + vi.length + ' köy, ' + p.length + ' yer)</span>';
   showToast('llms-full.txt oluşturuldu ve indirildi.', 'success');
+}
+
+/* ══════════════════════════════════════════════════
+   LLMS-FULL.TXT OTOMATİK GÜNCELLEME (haftalık)
+══════════════════════════════════════════════════ */
+function checkAutoLlmsUpdate() {
+  var WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+  var lastCheck = localStorage.getItem('llms_last_update') || '';
+  var lastHash = localStorage.getItem('llms_data_hash') || '';
+
+  // Ayarlar sayfasındaki bilgileri güncelle
+  updateLlmsSettingsInfo();
+
+  // Mevcut veri hash'ini hesapla
+  var currentHash = computeDataHash();
+
+  // Hash değişmişse veya 7 günden eski ise güncelle
+  var needsUpdate = false;
+  if (!lastCheck) {
+    needsUpdate = true;
+  } else {
+    var daysSince = (Date.now() - new Date(lastCheck).getTime()) / WEEK_MS;
+    if (daysSince >= 1) needsUpdate = true; // 1 hafta geçmiş
+    if (currentHash !== lastHash) needsUpdate = true; // veri değişmiş
+  }
+
+  if (needsUpdate) {
+    autoUpdateLlmsFile(currentHash);
+  }
+}
+
+function computeDataHash() {
+  var v = draftData.venues || [], r = draftData.routes || [], vi = draftData.villages || [], p = draftData.places || [];
+  // Basit hash: sayılar + ilk/son ID'ler
+  var parts = [
+    'v' + v.length,
+    'r' + r.length,
+    'vi' + vi.length,
+    'p' + p.length,
+    v.length > 0 ? v[0].id + v[v.length-1].id : '',
+    r.length > 0 ? r[0].id : '',
+    vi.length > 0 ? vi[0].id : '',
+    p.length > 0 ? p[0].id : ''
+  ];
+  // Mekan title'larının toplamı (değişiklik algılama)
+  var titleSum = 0;
+  v.forEach(function(m) { for(var i=0;i<(m.title||'').length;i++) titleSum += (m.title||'').charCodeAt(i); });
+  parts.push('t' + titleSum);
+  return parts.join('|');
+}
+
+async function autoUpdateLlmsFile(currentHash) {
+  try {
+    var v = draftData.venues || [], r = draftData.routes || [], vi = draftData.villages || [], p = draftData.places || [];
+    var catLabels = {kafe:'Kafeler',restoran:'Restoranlar',kahvalti:'Kahvaltı Mekanları',konaklama:'Konaklama',beach:'Plajlar',iskele:'İskeleler'};
+    var lines = [];
+    lines.push('# Assos\'u Keşfet — Tam İçerik Rehberi');
+    lines.push('');
+    lines.push('> Bu dosya assosukesfet.com platformundaki tüm mekan, rota, köy ve yer bilgilerini içermektedir.');
+    lines.push('> Kaynak: https://assosukesfet.com');
+    lines.push('> Son güncelleme: ' + new Date().toLocaleDateString('tr-TR', {day:'numeric',month:'long',year:'numeric'}));
+    lines.push('');
+
+    if (v.length > 0) {
+      lines.push('## Mekanlar (' + v.length + ' adet)');
+      lines.push('');
+      var cats = {};
+      v.forEach(function(m) { var c=m.category||'diger'; if(!cats[c])cats[c]=[]; cats[c].push(m); });
+      Object.keys(cats).forEach(function(cat) {
+        lines.push('### ' + (catLabels[cat]||cat) + ' (' + cats[cat].length + ')');
+        lines.push('');
+        cats[cat].forEach(function(m) {
+          lines.push('**' + (m.title||'') + '**');
+          if (m.description) lines.push(m.description.substring(0,200));
+          var info = [];
+          if (m.location) info.push('Konum: ' + m.location);
+          if (m.phone) info.push('Tel: ' + m.phone);
+          if (m.hours) info.push('Saat: ' + m.hours);
+          if (info.length) lines.push('- ' + info.join(' | '));
+          if (m.tags && m.tags.length) lines.push('- Etiketler: ' + m.tags.join(', '));
+          lines.push('- Detay: https://assosukesfet.com/mekanlar/mekan-detay?id=' + (m.id||''));
+          lines.push('');
+        });
+      });
+    }
+    if (r.length > 0) {
+      lines.push('## Gezi Rotaları (' + r.length + ' adet)');
+      lines.push('');
+      r.forEach(function(rt) {
+        lines.push('**' + (rt.title||'') + '**');
+        if (rt.description) lines.push(rt.description.substring(0,200));
+        var info = [];
+        if (rt.duration) info.push('Süre: ' + rt.duration);
+        if (rt.distance) info.push('Mesafe: ' + rt.distance);
+        if (info.length) lines.push('- ' + info.join(' | '));
+        if (rt.stops) {
+          var stops = rt.stops.filter(function(s){return s.title;}).map(function(s){return s.title;});
+          if (stops.length) lines.push('- Duraklar: ' + stops.join(', '));
+        }
+        lines.push('- Detay: https://assosukesfet.com/rotalar/rota-detay?id=' + (rt.id||''));
+        lines.push('');
+      });
+    }
+    if (vi.length > 0) {
+      lines.push('## Köyler (' + vi.length + ' adet)');
+      lines.push('');
+      vi.forEach(function(k) {
+        lines.push('**' + (k.title||'') + '**');
+        if (k.description) lines.push(k.description.substring(0,200));
+        if (k.location) lines.push('- Konum: ' + k.location);
+        if (k.tags && k.tags.length) lines.push('- Özellikler: ' + k.tags.join(', '));
+        lines.push('');
+      });
+    }
+    if (p.length > 0) {
+      lines.push('## Gezilecek Yerler (' + p.length + ' adet)');
+      lines.push('');
+      p.forEach(function(pl) {
+        lines.push('**' + (pl.title||'') + '**');
+        if (pl.description) lines.push(pl.description.substring(0,200));
+        if (pl.location) lines.push('- Konum: ' + pl.location);
+        if (pl.tags && pl.tags.length) lines.push('- Etiketler: ' + pl.tags.join(', '));
+        lines.push('');
+      });
+    }
+    lines.push('---');
+    lines.push('İletişim: assosukesfet@gmail.com');
+    lines.push('Instagram: @assosukesfet');
+    lines.push('Web: https://assosukesfet.com');
+
+    var content = lines.join('\n');
+
+    // Firebase Storage'a yükle
+    var ref = firebase.storage().ref('site/llms-full.txt');
+    var blob = new Blob([content], {type:'text/plain;charset=utf-8'});
+    await ref.put(blob, {contentType:'text/plain; charset=utf-8'});
+
+    // Son güncelleme kaydı
+    var now = new Date().toISOString();
+    localStorage.setItem('llms_last_update', now);
+    localStorage.setItem('llms_data_hash', currentHash);
+
+    // Firestore'a da kaydet (tarih takibi)
+    await db.collection('settings').doc('site').set({
+      llmsLastUpdate: now,
+      llmsVenueCount: v.length,
+      llmsRouteCount: r.length,
+      llmsVillageCount: vi.length,
+      llmsPlaceCount: p.length
+    }, { merge: true });
+
+    updateLlmsSettingsInfo();
+    logActivity('llms_guncelle', 'otomatik', v.length + ' mekan, ' + r.length + ' rota, ' + vi.length + ' köy, ' + p.length + ' yer');
+
+  } catch(e) {
+    console.warn('llms-full.txt otomatik güncelleme hatası:', e);
+  }
+}
+
+function updateLlmsSettingsInfo() {
+  var lastUpdate = localStorage.getItem('llms_last_update');
+  var statusEl = document.getElementById('llms-auto-status');
+  var lastEl = document.getElementById('llms-last-update');
+  var nextEl = document.getElementById('llms-next-check');
+
+  if (statusEl) statusEl.innerHTML = '<span style="color:var(--green)">✓ Aktif (haftalık)</span>';
+
+  if (lastEl) {
+    if (lastUpdate) {
+      lastEl.textContent = new Date(lastUpdate).toLocaleString('tr-TR');
+    } else {
+      lastEl.textContent = 'Henüz güncellenmedi';
+    }
+  }
+
+  if (nextEl) {
+    if (lastUpdate) {
+      var next = new Date(new Date(lastUpdate).getTime() + 7 * 24 * 60 * 60 * 1000);
+      var now = new Date();
+      if (next <= now) {
+        nextEl.innerHTML = '<span style="color:var(--terra)">Bugün kontrol edilecek</span>';
+      } else {
+        var daysLeft = Math.ceil((next - now) / (24 * 60 * 60 * 1000));
+        nextEl.textContent = daysLeft + ' gün sonra (' + next.toLocaleDateString('tr-TR') + ')';
+      }
+    } else {
+      nextEl.textContent = 'İlk giriş';
+    }
+  }
 }
 
 /* ══════════════════════════════════════════════════
