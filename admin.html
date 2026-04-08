@@ -1484,6 +1484,19 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
       <div class="stats-grid" id="analytics-stats"></div>
 
+      <!-- Günlük Aksiyon Detayı -->
+      <div class="panel-card" style="margin-bottom:20px">
+        <div class="panel-card-head"><h3>📅 Günlük Aksiyon Detayı</h3></div>
+        <div class="panel-table-wrap">
+          <table class="panel-table" id="analytics-daily-table">
+            <thead><tr>
+              <th>Tarih</th><th>👁 Görüntüleme</th><th>📞 Arama</th><th>💬 WhatsApp</th><th>📋 Rezervasyon</th><th>🗺 Yol Tarifi</th><th>Toplam Aksiyon</th>
+            </tr></thead>
+            <tbody id="analytics-daily-body"></tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- Günlük grafik -->
       <div class="panel-card" style="margin-bottom:20px">
         <div class="panel-card-head"><h3>Gunluk Görüntüleme</h3></div>
@@ -3348,15 +3361,27 @@ async function renderAnalytics() {
 
     // Günlük sayılar (grafik için)
     const dailyCounts = {};
+    const dailyBreakdown = {};
     const venueViews = {};
     const venueActions = {};
     const pageCounts = {};
-    let totalViews = 0, totalCalls = 0, totalWA = 0, totalRez = 0;
+    let totalViews = 0, totalCalls = 0, totalWA = 0, totalRez = 0, totalDir = 0;
 
     events.forEach(ev => {
       const date = ev.date || ev.timestamp?.split('T')[0] || '';
       // Günlük grafik
       dailyCounts[date] = (dailyCounts[date] || 0) + 1;
+
+      // Günlük aksiyon breakdown
+      if (!dailyBreakdown[date]) dailyBreakdown[date] = { views: 0, call: 0, whatsapp: 0, reservation: 0, directions: 0 };
+      if (ev.type === 'pageview') {
+        dailyBreakdown[date].views++;
+      } else if (ev.type === 'action') {
+        if (ev.action === 'call') dailyBreakdown[date].call++;
+        if (ev.action === 'whatsapp') dailyBreakdown[date].whatsapp++;
+        if (ev.action === 'reservation') dailyBreakdown[date].reservation++;
+        if (ev.action === 'directions') dailyBreakdown[date].directions++;
+      }
 
       if (ev.type === 'pageview') {
         totalViews++;
@@ -3377,12 +3402,47 @@ async function renderAnalytics() {
       }
     });
 
+    // Directions toplam
+    Object.values(venueActions).forEach(a => { totalDir += a.directions; });
+
     // Stats
     document.getElementById('analytics-stats').innerHTML =
       '<div class="stat-card"><div class="stat-label">Görüntüleme</div><div class="stat-val">' + totalViews + '</div></div>' +
-      '<div class="stat-card"><div class="stat-label">Telefon Arama</div><div class="stat-val">' + totalCalls + '</div></div>' +
-      '<div class="stat-card terra"><div class="stat-label">WhatsApp</div><div class="stat-val">' + totalWA + '</div></div>' +
-      '<div class="stat-card green"><div class="stat-label">Rezervasyon</div><div class="stat-val">' + totalRez + '</div></div>';
+      '<div class="stat-card"><div class="stat-label">📞 Arama</div><div class="stat-val">' + totalCalls + '</div></div>' +
+      '<div class="stat-card terra"><div class="stat-label">💬 WhatsApp</div><div class="stat-val">' + totalWA + '</div></div>' +
+      '<div class="stat-card green"><div class="stat-label">📋 Rezervasyon</div><div class="stat-val">' + totalRez + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">🗺 Yol Tarifi</div><div class="stat-val">' + totalDir + '</div></div>';
+
+    // Günlük Aksiyon Detayı tablosu
+    const dailyBody = document.getElementById('analytics-daily-body');
+    if (dailyBody) {
+      const sortedDates = Object.keys(dailyBreakdown).sort().reverse();
+      const today = new Date().toISOString().split('T')[0];
+      const yesterday = (function(){ var d=new Date(); d.setDate(d.getDate()-1); return d.toISOString().split('T')[0]; })();
+      const dayNames = { 0:'Paz', 1:'Pzt', 2:'Sal', 3:'Çar', 4:'Per', 5:'Cum', 6:'Cmt' };
+
+      if (sortedDates.length === 0) {
+        dailyBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px">Henüz veri yok.</td></tr>';
+      } else {
+        dailyBody.innerHTML = sortedDates.map(date => {
+          var b = dailyBreakdown[date];
+          var totalAct = b.call + b.whatsapp + b.reservation + b.directions;
+          var d = new Date(date);
+          var dayName = dayNames[d.getDay()];
+          var dateLabel = date === today ? '<strong style="color:var(--green)">Bugün</strong>' : date === yesterday ? '<strong style="color:var(--blue)">Dün</strong>' : dayName + ', ' + d.toLocaleDateString('tr-TR',{day:'numeric',month:'short'});
+          var rowStyle = date === today ? 'background:rgba(56,161,105,.04)' : '';
+          return '<tr style="' + rowStyle + '">' +
+            '<td style="font-size:.78rem;white-space:nowrap">' + dateLabel + '</td>' +
+            '<td style="font-size:.82rem;font-weight:700">' + b.views + '</td>' +
+            '<td style="font-size:.82rem">' + (b.call > 0 ? '<span style="color:var(--navy);font-weight:700">' + b.call + '</span>' : '<span style="color:var(--text-muted)">—</span>') + '</td>' +
+            '<td style="font-size:.82rem">' + (b.whatsapp > 0 ? '<span style="color:var(--terra);font-weight:700">' + b.whatsapp + '</span>' : '<span style="color:var(--text-muted)">—</span>') + '</td>' +
+            '<td style="font-size:.82rem">' + (b.reservation > 0 ? '<span style="color:var(--green);font-weight:700">' + b.reservation + '</span>' : '<span style="color:var(--text-muted)">—</span>') + '</td>' +
+            '<td style="font-size:.82rem">' + (b.directions > 0 ? '<span style="font-weight:700">' + b.directions + '</span>' : '<span style="color:var(--text-muted)">—</span>') + '</td>' +
+            '<td style="font-size:.82rem;font-weight:700;color:var(--navy)">' + totalAct + '</td>' +
+          '</tr>';
+        }).join('');
+      }
+    }
 
     // Günlük grafik
     const dates = Object.keys(dailyCounts).sort();
