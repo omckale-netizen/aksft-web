@@ -61,6 +61,13 @@ export async function onRequest(context) {
   const url = new URL(request.url);
   const path = url.pathname;
 
+  // Dinamik Sitemap
+  if (path === '/sitemap.xml') {
+    try {
+      return await generateDynamicSitemap();
+    } catch(e) { return next(); }
+  }
+
   // Sadece botlar icin calis
   if (!isBot(ua)) return next();
 
@@ -153,4 +160,133 @@ export async function onRequest(context) {
 
   // Diger sayfalar — normal devam
   return next();
+}
+
+// ══════════════════════════════════════════════════
+// DINAMIK SITEMAP + GORSEL SITEMAP
+// ══════════════════════════════════════════════════
+async function generateDynamicSitemap() {
+  const BASE = 'https://assosukesfet.com';
+  const today = new Date().toISOString().split('T')[0];
+
+  // Statik sayfalar
+  const staticPages = [
+    { loc: '/', priority: '1.0', freq: 'weekly' },
+    { loc: '/mekanlar', priority: '0.9', freq: 'weekly' },
+    { loc: '/rotalar', priority: '0.9', freq: 'weekly' },
+    { loc: '/yerler', priority: '0.9', freq: 'weekly' },
+    { loc: '/koyler', priority: '0.9', freq: 'weekly' },
+    { loc: '/harita', priority: '0.8', freq: 'weekly' },
+    { loc: '/rehber', priority: '0.8', freq: 'monthly' },
+    { loc: '/blog', priority: '0.8', freq: 'weekly' },
+    { loc: '/planla', priority: '0.7', freq: 'monthly' },
+    { loc: '/hakkimizda', priority: '0.4', freq: 'monthly' },
+    { loc: '/iletisim', priority: '0.4', freq: 'monthly' },
+  ];
+
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n';
+
+  // Statik sayfalar
+  for (const p of staticPages) {
+    xml += `  <url><loc>${BASE}${p.loc}</loc><lastmod>${today}</lastmod><changefreq>${p.freq}</changefreq><priority>${p.priority}</priority></url>\n`;
+  }
+
+  // Mekanlar — Firebase'den cek
+  try {
+    const venuesUrl = 'https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents/venues?pageSize=100';
+    const vResp = await fetch(venuesUrl);
+    if (vResp.ok) {
+      const vData = await vResp.json();
+      const docs = vData.documents || [];
+      for (const doc of docs) {
+        const f = doc.fields || {};
+        const id = doc.name.split('/').pop();
+        const active = f.active?.booleanValue !== false;
+        const status = f.status?.stringValue || 'published';
+        if (!active || status === 'hidden' || status === 'draft') continue;
+
+        xml += `  <url>\n    <loc>${BASE}/mekanlar/mekan-detay?id=${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n`;
+        // Gorseller
+        const images = f.images?.arrayValue?.values || [];
+        for (const img of images) {
+          const imgUrl = img.stringValue;
+          if (imgUrl) {
+            const title = f.title?.stringValue || id;
+            xml += `    <image:image><image:loc>${escHtml(imgUrl)}</image:loc><image:title>${escHtml(title)} - Assos</image:title></image:image>\n`;
+          }
+        }
+        xml += '  </url>\n';
+      }
+    }
+  } catch(e) {}
+
+  // Rotalar — Firebase'den cek
+  try {
+    const routesUrl = 'https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents/routes?pageSize=50';
+    const rResp = await fetch(routesUrl);
+    if (rResp.ok) {
+      const rData = await rResp.json();
+      const docs = rData.documents || [];
+      for (const doc of docs) {
+        const id = doc.name.split('/').pop();
+        xml += `  <url><loc>${BASE}/rotalar/rota-detay?id=${id}</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>\n`;
+      }
+    }
+  } catch(e) {}
+
+  // Yerler — Firebase'den cek
+  try {
+    const placesUrl = 'https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents/places?pageSize=50';
+    const pResp = await fetch(placesUrl);
+    if (pResp.ok) {
+      const pData = await pResp.json();
+      const docs = pData.documents || [];
+      for (const doc of docs) {
+        const f = doc.fields || {};
+        const id = doc.name.split('/').pop();
+        xml += `  <url>\n    <loc>${BASE}/yerler#${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n`;
+        const imgUrl = f.image?.stringValue;
+        if (imgUrl) {
+          const title = f.title?.stringValue || id;
+          xml += `    <image:image><image:loc>${escHtml(imgUrl)}</image:loc><image:title>${escHtml(title)} - Assos</image:title></image:image>\n`;
+        }
+        xml += '  </url>\n';
+      }
+    }
+  } catch(e) {}
+
+  // Blog yazilari — Firebase'den cek
+  try {
+    const blogUrl = 'https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents/blog_posts?pageSize=100';
+    const bResp = await fetch(blogUrl);
+    if (bResp.ok) {
+      const bData = await bResp.json();
+      const docs = bData.documents || [];
+      for (const doc of docs) {
+        const f = doc.fields || {};
+        const id = doc.name.split('/').pop();
+        const status = f.status?.stringValue;
+        if (status !== 'published') continue;
+
+        xml += `  <url>\n    <loc>${BASE}/blog?yazi=${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n`;
+        const imgUrl = f.image?.stringValue;
+        if (imgUrl) {
+          const title = f.title?.stringValue || id;
+          xml += `    <image:image><image:loc>${escHtml(imgUrl)}</image:loc><image:title>${escHtml(title)}</image:title></image:image>\n`;
+        }
+        xml += '  </url>\n';
+      }
+    }
+  } catch(e) {}
+
+  xml += '</urlset>';
+
+  return new Response(xml, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/xml; charset=UTF-8',
+      'Cache-Control': 'public, max-age=3600'
+    }
+  });
 }
