@@ -630,6 +630,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
                 <th>Kategori</th>
                 <th>Konum</th>
                 <th>⭐</th>
+                <th>👑</th>
                 <th>Aktif</th>
                 <th>Durum</th>
                 <th>İşlemler</th>
@@ -3955,7 +3956,12 @@ function renderVenueTable() {
   const catFilter = document.getElementById('venue-cat-filter')?.value || 'all';
   const activeFilter = document.getElementById('venue-active-filter')?.value || 'all';
   const catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvalti',konaklama:'Konaklama',beach:'Beach',iskele:'Iskele'};
-  let venues = [...(draftData.venues || [])].sort((a, b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999));
+  let venues = [...(draftData.venues || [])].sort((a, b) => {
+    const pa = isPremiumActive(a) ? 0 : 1;
+    const pb = isPremiumActive(b) ? 0 : 1;
+    if (pa !== pb) return pa - pb;
+    return (a.sortOrder ?? 999) - (b.sortOrder ?? 999);
+  });
   if (q) venues = venues.filter(v => v.title.toLowerCase().includes(q) || (v.category||'').toLowerCase().includes(q) || (v.location||'').toLowerCase().includes(q));
   if (catFilter !== 'all') venues = venues.filter(v => v.category === catFilter);
   if (showFeaturedOnly) venues = venues.filter(v => v.featured);
@@ -3964,7 +3970,7 @@ function renderVenueTable() {
   if (activeFilter === 'hidden') venues = venues.filter(v => getVenueStatusKey(v) === 'hidden');
 
   document.getElementById('venue-tbody').innerHTML = venues.length === 0
-    ? '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-muted)">Mekan bulunamadi.</td></tr>'
+    ? '<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--text-muted)">Mekan bulunamadi.</td></tr>'
     : venues.map(v => {
       const s = getVenueStatus(v);
       const sBadge = s === true ? '<span class="badge badge-open">Acik</span>'
@@ -3983,7 +3989,8 @@ function renderVenueTable() {
         <td><strong>${v.title}</strong>${statusLabel}</td>
         <td><span class="badge badge-cat">${catLabels[v.category] || v.category || '-'}</span></td>
         <td>${v.location || '-'}</td>
-        <td><span style="${starStyle}" onclick="toggleFeatured('${v.id}',event)" title="${v.featured ? 'Öne çıkanlardan kaldır' : 'Öne çıkanlara ekle'}">${v.featured ? '★' : '☆'}</span>${isPremiumActive(v) ? ' <span style="font-size:.7rem" title="Premium İşletme">👑</span>' : ''}</td>
+        <td><span style="${starStyle}" onclick="toggleFeatured('${v.id}',event)" title="${v.featured ? 'Öne çıkanlardan kaldır' : 'Öne çıkanlara ekle'}">${v.featured ? '★' : '☆'}</span></td>
+        <td>${isPremiumActive(v) ? '<span style="font-size:.85rem;cursor:default" title="Premium İşletme — Aktif">👑</span>' : v.premium ? '<span style="font-size:.85rem;opacity:.3;cursor:default" title="Premium süresi dolmuş">👑</span>' : '<span style="font-size:.85rem;opacity:.15;cursor:default">—</span>'}</td>
         <td><select onchange="changeVenueStatus('${v.id}',this.value)" style="padding:4px 8px;border-radius:8px;border:1.5px solid rgba(0,0,0,.08);font-size:.72rem;font-family:inherit;background:${st.bg};color:${st.color};font-weight:600;cursor:pointer">
           <option value="published" ${statusKey==='published'?'selected':''}>🟢 Yayında</option>
           <option value="draft" ${statusKey==='draft'?'selected':''}>📝 Taslak</option>
