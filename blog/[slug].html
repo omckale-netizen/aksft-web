@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;1,400;1,500&display=swap" onload="this.rel='stylesheet'">
+  <title>Blog — Assos'u Keşfet</title>
+  <meta name="description" content="Assos ve Ayvacık hakkında gezi yazısı.">
+  <meta property="og:title" content="Blog — Assos'u Keşfet">
+  <meta property="og:description" content="Assos ve Ayvacık hakkında gezi yazısı.">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/assosu-kesfet.firebasestorage.app/o/site%2Fog-image.jpg?alt=media&token=70d62a44-9142-43d8-aee4-de790f5c7dcd">
+  <meta property="og:locale" content="tr_TR">
+  <meta property="og:site_name" content="Assos'u Keşfet">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Blog — Assos'u Keşfet">
+  <meta name="twitter:description" content="Assos ve Ayvacık hakkında gezi yazısı.">
+  <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/assosu-kesfet.firebasestorage.app/o/site%2Fog-image.jpg?alt=media&token=70d62a44-9142-43d8-aee4-de790f5c7dcd">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--navy:#1A2744;--cream:#F5EDE0;--cream-light:#FAF7F2;--terra:#C4521A;--terra-light:#D96B2E;--text-dark:#1A2744;--text-mid:#4A5870;--text-muted:#718096}
+    html,body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream-light);color:var(--text-dark)}
+
+    .post-hero{position:relative;overflow:hidden;padding:120px 24px 48px;text-align:center;background:linear-gradient(160deg,#06101E 0%,#0C1A30 55%,#0A1520 100%)}
+    .post-hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(245,237,224,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(245,237,224,.02) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+    .ph-content{position:relative;z-index:2;max-width:680px;margin:0 auto}
+    .ph-back{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:600;color:rgba(245,237,224,.4);text-decoration:none;margin-bottom:24px;transition:color .2s}
+    .ph-back:hover{color:rgba(245,237,224,.7)}
+    .ph-cat{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--terra-light);margin-bottom:12px}
+    .ph-title{font-size:clamp(1.6rem,4.5vw,2.4rem);font-weight:800;color:#F5EDE0;line-height:1.2;letter-spacing:-.02em;margin-bottom:16px}
+    .ph-meta{display:flex;justify-content:center;gap:16px;font-size:.75rem;color:rgba(245,237,224,.35)}
+
+    .post-img{max-width:800px;margin:-30px auto 0;padding:0 24px;position:relative;z-index:3}
+    .post-img img{width:100%;border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.15);opacity:0;transition:opacity .5s}
+    .post-img img.loaded{opacity:1}
+
+    .post-body{max-width:680px;margin:0 auto;padding:40px 24px 80px}
+    .post-content{font-size:1rem;color:var(--text-mid);line-height:1.85}
+    .post-content h2{font-size:1.3rem;font-weight:800;color:var(--navy);margin:32px 0 12px}
+    .post-content h3{font-size:1.1rem;font-weight:700;color:var(--navy);margin:24px 0 10px}
+    .post-content p{margin-bottom:16px}
+    .post-content ul,.post-content ol{margin:12px 0 16px 20px}
+    .post-content li{margin-bottom:6px}
+    .post-content blockquote{border-left:3px solid var(--terra);padding:12px 20px;margin:20px 0;background:rgba(196,82,26,.04);border-radius:0 10px 10px 0;font-style:italic;color:var(--text-dark)}
+    .post-content a{color:var(--terra);text-decoration:underline}
+    .post-content img{max-width:100%;border-radius:12px;margin:20px 0}
+
+    .post-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:32px;padding-top:24px;border-top:1px solid rgba(0,0,0,.06)}
+    .post-tag{padding:5px 14px;border-radius:999px;font-size:.72rem;font-weight:600;background:rgba(26,39,68,.05);color:var(--text-muted)}
+
+    .post-share{display:flex;gap:8px;justify-content:center;margin-top:32px}
+    .post-share a{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:rgba(26,39,68,.05);color:var(--text-mid);text-decoration:none;font-size:1rem;transition:all .15s}
+    .post-share a:hover{background:var(--terra);color:#fff}
+
+    .post-loading{text-align:center;padding:80px 24px;color:var(--text-muted)}
+
+    @media(max-width:640px){
+      .post-hero{padding:100px 20px 36px}
+      .ph-title{font-size:clamp(1.4rem,6vw,2rem)}
+      .post-body{padding:28px 20px 60px}
+    }
+  </style>
+
+  <script type="application/ld+json" id="post-schema"></script>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<section class="post-hero" id="post-hero">
+  <div class="ph-content">
+    <a href="../blog" class="ph-back">← Blog'a Dön</a>
+    <div class="ph-cat" id="post-cat"></div>
+    <h1 class="ph-title" id="post-title">Yükleniyor...</h1>
+    <div class="ph-meta" id="post-meta"></div>
+  </div>
+</section>
+
+<div class="post-img" id="post-img-wrap" style="display:none">
+  <img id="post-img" onload="this.classList.add('loaded')">
+</div>
+
+<article class="post-body">
+  <div class="post-content" id="post-content">
+    <div class="post-loading">Yazı yükleniyor...</div>
+  </div>
+  <div class="post-tags" id="post-tags" style="display:none"></div>
+  <div class="post-share" id="post-share"></div>
+</article>
+
+<div id="footer-placeholder"></div>
+
+<script src="../firebase-loader.js"></script>
+<script src="../data.js"></script>
+<script src="../shared.min.js?v=45"></script>
+<script>
+function pageInit() {
+  renderNav({ heroMode: false, basePath: '../' });
+  renderFooter({ basePath: '../' });
+  loadPost();
+}
+
+async function loadPost() {
+  var slug = window.location.pathname.split('/').pop().replace('.html','');
+  if (!slug) { document.getElementById('post-content').innerHTML = '<div class="post-loading">Yazı bulunamadı.</div>'; return; }
+
+  try {
+    var doc = await firebase.firestore().collection('blog_posts').doc(slug).get();
+    if (!doc.exists) { document.getElementById('post-content').innerHTML = '<div class="post-loading">Yazı bulunamadı.</div>'; return; }
+
+    var p = doc.data();
+    var date = p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('tr-TR', { day:'numeric', month:'long', year:'numeric' }) : '';
+    var readTime = p.readTime || Math.ceil((p.content || '').split(' ').length / 200) + ' dk';
+
+    // Hero
+    document.getElementById('post-cat').textContent = p.category || 'Genel';
+    document.getElementById('post-title').textContent = p.title || '';
+    document.getElementById('post-meta').innerHTML = '<span>📅 ' + date + '</span><span>⏱ ' + readTime + ' okuma</span>';
+
+    // Image
+    if (p.image) {
+      document.getElementById('post-img-wrap').style.display = '';
+      document.getElementById('post-img').src = p.image;
+      document.getElementById('post-img').alt = p.title || '';
+    }
+
+    // Content
+    document.getElementById('post-content').innerHTML = p.content || '';
+
+    // Tags
+    if (p.tags && p.tags.length) {
+      var tagsEl = document.getElementById('post-tags');
+      tagsEl.style.display = '';
+      tagsEl.innerHTML = p.tags.map(function(t) { return '<span class="post-tag">#' + t + '</span>'; }).join('');
+    }
+
+    // Share
+    var url = window.location.href;
+    document.getElementById('post-share').innerHTML =
+      '<a href="https://wa.me/?text=' + encodeURIComponent(p.title + ' ' + url) + '" target="_blank" title="WhatsApp">💬</a>' +
+      '<a href="https://twitter.com/intent/tweet?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(p.title) + '" target="_blank" title="X">𝕏</a>' +
+      '<a href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url) + '" target="_blank" title="Facebook">📘</a>';
+
+    // SEO — update meta
+    document.title = p.title + ' — Assos\'u Keşfet Blog';
+    var descText = (p.excerpt || (p.content || '').replace(/<[^>]*>/g,'').substring(0,160));
+    document.querySelector('meta[name="description"]').content = descText;
+    document.querySelector('meta[property="og:title"]').content = p.title + ' — Assos\'u Keşfet';
+    document.querySelector('meta[property="og:description"]').content = descText;
+    if (p.image) {
+      document.querySelector('meta[property="og:image"]').content = p.image;
+      document.querySelector('meta[name="twitter:image"]').content = p.image;
+    }
+    document.querySelector('meta[name="twitter:title"]').content = p.title + ' — Assos\'u Keşfet';
+    document.querySelector('meta[name="twitter:description"]').content = descText;
+
+    // Schema.org
+    document.getElementById('post-schema').textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": p.title,
+      "description": descText,
+      "image": p.image || '',
+      "datePublished": p.publishedAt || '',
+      "author": { "@type": "Organization", "name": "Assos'u Keşfet" },
+      "publisher": { "@type": "Organization", "name": "Assos'u Keşfet", "url": "https://assosukesfet.com" }
+    });
+
+  } catch(err) {
+    document.getElementById('post-content').innerHTML = '<div class="post-loading">Yazı yüklenemedi.</div>';
+  }
+}
+
+document.addEventListener('dataReady', pageInit);
+if (window.DATA && window.DATA.venues) pageInit();
+</script>
+</body>
+</html>

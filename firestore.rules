@@ -72,6 +72,12 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    // Blog: herkes okuyabilir, sadece admin yazabilir
+    match /blog_posts/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Aktivite logu: sadece admin
     match /activity_logs/{docId} {
       allow read, write: if isAdmin();

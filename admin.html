@@ -475,6 +475,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
         <span class="nav-icon">🖼</span> Galeri
       </a>
 
+      <a class="admin-nav-item" data-page="blog" onclick="showPage('blog')">
+        <span class="nav-icon">✍️</span> Blog
+      </a>
       <a class="admin-nav-item" data-page="activity" onclick="showPage('activity')">
         <span class="nav-icon">📋</span> Aktivite Logu
       </a>
@@ -1289,6 +1292,96 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
           </div>
           <div style="padding:20px 24px" id="notif-msg-body"></div>
           <div style="padding:12px 24px 20px;display:flex;gap:8px;border-top:1px solid rgba(0,0,0,.06)" id="notif-msg-actions"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ BLOG ══════ -->
+    <div class="admin-page" id="page-blog">
+      <h2>Blog Yönetimi</h2>
+      <p class="page-sub">SEO odaklı blog yazıları ekleyin ve yönetin.</p>
+      <div class="panel-card">
+        <div class="panel-card-head">
+          <div class="search-bar" style="flex:1;min-width:160px">
+            <span>&#128269;</span>
+            <input type="text" id="blog-search" placeholder="Yazı ara..." oninput="renderBlogTable()">
+          </div>
+          <button class="btn btn-primary" onclick="openBlogModal()" style="white-space:nowrap">+ Yeni Yazı</button>
+        </div>
+        <div class="panel-table-wrap">
+          <table class="panel-table">
+            <thead><tr><th></th><th>Başlık</th><th>Kategori</th><th>Durum</th><th>Tarih</th><th>İşlemler</th></tr></thead>
+            <tbody id="blog-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Blog Modal -->
+    <div class="modal-overlay" id="blog-modal">
+      <div class="modal" style="max-width:700px">
+        <div class="modal-head">
+          <h3 id="blog-modal-title">Yeni Yazı</h3>
+          <button class="modal-close" onclick="closeBlogModal()">&times;</button>
+        </div>
+        <div class="modal-body" style="max-height:75vh;overflow-y:auto">
+          <form id="blog-form" onsubmit="saveBlogPost(event)">
+            <div class="form-row">
+              <div class="form-group" style="flex:2">
+                <label>Başlık</label>
+                <input type="text" id="bf-title" required placeholder="Yazı başlığı" oninput="autoBlogSlug()">
+              </div>
+              <div class="form-group" style="flex:1">
+                <label>Slug (URL)</label>
+                <input type="text" id="bf-slug" placeholder="otomatik" style="font-size:.78rem">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Kategori</label>
+                <select id="bf-category">
+                  <option value="Gezi Rehberi">Gezi Rehberi</option>
+                  <option value="Mekan Önerisi">Mekan Önerisi</option>
+                  <option value="Rota İpucu">Rota İpucu</option>
+                  <option value="Tarih & Kültür">Tarih & Kültür</option>
+                  <option value="Doğa">Doğa</option>
+                  <option value="Yeme İçme">Yeme İçme</option>
+                  <option value="Genel">Genel</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Durum</label>
+                <select id="bf-status">
+                  <option value="draft">📝 Taslak</option>
+                  <option value="published">🟢 Yayında</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Emoji</label>
+                <input type="text" id="bf-emoji" placeholder="📝" style="width:60px">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Özet (SEO açıklaması)</label>
+              <textarea id="bf-excerpt" rows="2" placeholder="Google'da görünecek kısa açıklama (max 160 karakter)" maxlength="200"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Kapak Görseli URL</label>
+              <input type="text" id="bf-image" placeholder="https://... (opsiyonel)">
+            </div>
+            <div class="form-group">
+              <label>İçerik (HTML)</label>
+              <textarea id="bf-content" rows="12" placeholder="<h2>Alt Başlık</h2><p>Paragraf...</p>" style="font-family:monospace;font-size:.8rem"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Etiketler (virgülle)</label>
+              <input type="text" id="bf-tags" placeholder="assos, gezi, koy, tarih">
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+              <button type="button" class="btn btn-secondary" onclick="closeBlogModal()">İptal</button>
+              <button type="submit" class="btn btn-primary">Kaydet</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -2507,6 +2600,7 @@ function showPage(page) {
   if (page === 'messages') renderMessages();
   if (page === 'notifications') renderNotifications();
   if (page === 'activity') renderActivityLog();
+  if (page === 'blog') renderBlogTable();
 }
 
 function toggleSidebar() {
@@ -2521,7 +2615,7 @@ function initApp() {
   // Hash'ten son kaldığı sekmeyi aç
   const hash = window.location.hash.replace('#', '');
   loadCategories();
-  const validPages = ['dashboard','venues','bot','placebot','routes','villages','export','settings','analytics','messages','gallery','notifications','activity'];
+  const validPages = ['dashboard','venues','bot','placebot','routes','villages','export','settings','analytics','messages','gallery','notifications','activity','blog'];
   if (hash && validPages.includes(hash)) {
     showPage(hash);
   } else {
@@ -5504,6 +5598,137 @@ function updateNotifBadge() {
     badge.textContent = unread;
     badge.style.display = unread > 0 ? '' : 'none';
   }
+}
+
+/* ══════════════════════════════════════════════════
+   BLOG YONETIMI
+══════════════════════════════════════════════════ */
+let blogPosts = [];
+let editingBlogId = null;
+
+async function renderBlogTable() {
+  try {
+    const snap = await db.collection('blog_posts').orderBy('createdAt', 'desc').limit(100).get();
+    blogPosts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch(e) { blogPosts = []; }
+
+  const q = (document.getElementById('blog-search')?.value || '').toLowerCase();
+  let filtered = blogPosts;
+  if (q) filtered = filtered.filter(p => (p.title||'').toLowerCase().includes(q) || (p.category||'').toLowerCase().includes(q));
+
+  document.getElementById('blog-tbody').innerHTML = filtered.length === 0
+    ? '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">Henüz yazı yok.</td></tr>'
+    : filtered.map(p => {
+      const st = p.status === 'published'
+        ? '<span style="color:#276749;background:rgba(56,161,105,.1);padding:2px 8px;border-radius:6px;font-size:.7rem;font-weight:700">Yayında</span>'
+        : '<span style="color:#975A16;background:rgba(221,173,32,.1);padding:2px 8px;border-radius:6px;font-size:.7rem;font-weight:700">Taslak</span>';
+      const date = p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('tr-TR',{day:'numeric',month:'short',year:'numeric'}) : '-';
+      return '<tr>' +
+        '<td style="font-size:1.2rem">' + (p.emoji || '📝') + '</td>' +
+        '<td><strong>' + (p.title || '') + '</strong></td>' +
+        '<td><span class="badge badge-cat">' + (p.category || 'Genel') + '</span></td>' +
+        '<td>' + st + '</td>' +
+        '<td style="font-size:.78rem;color:var(--text-muted)">' + date + '</td>' +
+        '<td>' +
+          '<button class="btn-icon" title="Düzenle" onclick="openBlogModal(\'' + p.id + '\')" style="margin-right:4px">✏️</button>' +
+          '<button class="btn-icon" title="Sil" onclick="deleteBlogPost(\'' + p.id + '\')" style="color:var(--red)">🗑</button>' +
+        '</td></tr>';
+    }).join('');
+}
+
+function openBlogModal(id) {
+  editingBlogId = id || null;
+  const form = document.getElementById('blog-form');
+  form.reset();
+
+  if (id) {
+    const p = blogPosts.find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('blog-modal-title').textContent = 'Yazıyı Düzenle';
+    document.getElementById('bf-title').value = p.title || '';
+    document.getElementById('bf-slug').value = p.id || '';
+    document.getElementById('bf-slug').readOnly = true;
+    document.getElementById('bf-category').value = p.category || 'Genel';
+    document.getElementById('bf-status').value = p.status || 'draft';
+    document.getElementById('bf-emoji').value = p.emoji || '';
+    document.getElementById('bf-excerpt').value = p.excerpt || '';
+    document.getElementById('bf-image').value = p.image || '';
+    document.getElementById('bf-content').value = p.content || '';
+    document.getElementById('bf-tags').value = (p.tags || []).join(', ');
+  } else {
+    document.getElementById('blog-modal-title').textContent = 'Yeni Yazı';
+    document.getElementById('bf-slug').readOnly = false;
+  }
+  document.getElementById('blog-modal').classList.add('show');
+}
+
+function closeBlogModal() {
+  document.getElementById('blog-modal').classList.remove('show');
+  editingBlogId = null;
+}
+
+function autoBlogSlug() {
+  if (editingBlogId) return;
+  const title = document.getElementById('bf-title').value;
+  document.getElementById('bf-slug').value = title.toLowerCase()
+    .replace(/ç/g,'c').replace(/ğ/g,'g').replace(/ı/g,'i').replace(/ö/g,'o').replace(/ş/g,'s').replace(/ü/g,'u')
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+}
+
+async function saveBlogPost(e) {
+  e.preventDefault();
+  const slug = document.getElementById('bf-slug').value.trim();
+  if (!slug) { showToast('Slug boş olamaz.', 'error'); return; }
+
+  const status = document.getElementById('bf-status').value;
+  const tagsStr = document.getElementById('bf-tags').value;
+
+  const post = {
+    title: document.getElementById('bf-title').value.trim(),
+    category: document.getElementById('bf-category').value,
+    status: status,
+    emoji: document.getElementById('bf-emoji').value.trim() || '📝',
+    excerpt: document.getElementById('bf-excerpt').value.trim(),
+    image: document.getElementById('bf-image').value.trim(),
+    content: document.getElementById('bf-content').value,
+    tags: tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [],
+    updatedAt: new Date().toISOString()
+  };
+
+  if (!editingBlogId) {
+    post.createdAt = new Date().toISOString();
+  }
+  if (status === 'published' && !post.publishedAt) {
+    post.publishedAt = new Date().toISOString();
+  }
+  // Mevcut yazının publishedAt'ını koru
+  if (editingBlogId) {
+    const existing = blogPosts.find(x => x.id === editingBlogId);
+    if (existing && existing.publishedAt) post.publishedAt = existing.publishedAt;
+    if (status === 'published' && !post.publishedAt) post.publishedAt = new Date().toISOString();
+  }
+
+  try {
+    await db.collection('blog_posts').doc(slug).set(post, { merge: true });
+    logActivity('blog_' + (editingBlogId ? 'guncelle' : 'ekle'), slug, post.title);
+    closeBlogModal();
+    renderBlogTable();
+    showToast('Yazı kaydedildi!', 'success');
+  } catch(err) {
+    showToast('Hata: ' + err.message, 'error');
+  }
+}
+
+function deleteBlogPost(id) {
+  const p = blogPosts.find(x => x.id === id);
+  showConfirm('Yazıyı Sil', '"' + (p ? p.title : id) + '" kalıcı olarak silinecek. Devam?', async () => {
+    try {
+      await db.collection('blog_posts').doc(id).delete();
+      logActivity('blog_sil', id, p ? p.title : id);
+      renderBlogTable();
+      showToast('Yazı silindi.', 'success');
+    } catch(err) { showToast('Hata: ' + err.message, 'error'); }
+  });
 }
 
 /* ══════════════════════════════════════════════════

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" onload="this.rel='stylesheet'">
+  <link rel="preconnect" href="https://firebasestorage.googleapis.com">
+  <title>Blog — Assos'u Keşfet</title>
+  <meta name="description" content="Assos ve Ayvacık hakkında gezi rehberleri, mekan önerileri, rota ipuçları ve bölge keşifleri.">
+  <meta property="og:title" content="Blog — Assos'u Keşfet">
+  <meta property="og:description" content="Assos ve Ayvacık hakkında gezi rehberleri, mekan önerileri, rota ipuçları ve bölge keşifleri.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://assosukesfet.com/blog">
+  <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/assosu-kesfet.firebasestorage.app/o/site%2Fog-image.jpg?alt=media&token=70d62a44-9142-43d8-aee4-de790f5c7dcd">
+  <meta property="og:locale" content="tr_TR">
+  <meta property="og:site_name" content="Assos'u Keşfet">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Blog — Assos'u Keşfet">
+  <meta name="twitter:description" content="Assos ve Ayvacık hakkında gezi rehberleri, mekan önerileri, rota ipuçları ve bölge keşifleri.">
+  <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/assosu-kesfet.firebasestorage.app/o/site%2Fog-image.jpg?alt=media&token=70d62a44-9142-43d8-aee4-de790f5c7dcd">
+  <link rel="canonical" href="https://assosukesfet.com/blog">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--navy:#1A2744;--navy-deep:#0D1829;--cream:#F5EDE0;--cream-light:#FAF7F2;--terra:#C4521A;--terra-light:#D96B2E;--aegean:#1A6B8A;--text-dark:#1A2744;--text-mid:#4A5870;--text-muted:#718096}
+    html,body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream-light);color:var(--text-dark)}
+
+    /* Hero */
+    .blog-hero{position:relative;overflow:hidden;padding:130px 24px 60px;text-align:center;background:linear-gradient(160deg,#06101E 0%,#0C1A30 55%,#0A1520 100%)}
+    .blog-hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(245,237,224,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(245,237,224,.02) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+    .bh-orb{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none}
+    .bh-orb-1{width:400px;height:400px;background:rgba(196,82,26,.08);top:-120px;left:-80px;animation:bhFloat 8s ease-in-out infinite}
+    .bh-orb-2{width:300px;height:300px;background:rgba(26,107,138,.06);bottom:-80px;right:-60px;animation:bhFloat 10s ease-in-out infinite reverse}
+    @keyframes bhFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-20px) scale(1.05)}}
+    .bh-content{position:relative;z-index:2;max-width:600px;margin:0 auto}
+    .bh-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);font-size:.68rem;font-weight:700;color:rgba(245,237,224,.5);text-transform:uppercase;letter-spacing:.14em;margin-bottom:20px}
+    .bh-h1{font-size:clamp(2rem,5vw,3rem);font-weight:800;color:#F5EDE0;line-height:1.12;margin-bottom:14px;letter-spacing:-.03em}
+    .bh-h1 em{font-family:'Lora',serif;font-style:italic;font-weight:500;color:var(--terra-light)}
+    .bh-sub{font-size:.88rem;color:rgba(245,237,224,.4);max-width:420px;margin:0 auto;line-height:1.6}
+
+    /* Blog grid */
+    .blog-section{max-width:900px;margin:0 auto;padding:48px 24px 80px}
+    .blog-grid{display:grid;grid-template-columns:1fr;gap:24px}
+    .blog-card{display:flex;gap:20px;background:#fff;border:1px solid rgba(0,0,0,.05);border-radius:16px;overflow:hidden;text-decoration:none;color:inherit;transition:all .25s}
+    .blog-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.08)}
+    .blog-card-img{width:220px;min-height:180px;flex-shrink:0;background:linear-gradient(135deg,var(--navy),#243255);position:relative;overflow:hidden}
+    .blog-card-img img{width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s}
+    .blog-card-img img.loaded{opacity:1}
+    .blog-card-img .blog-emoji{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2.5rem}
+    .blog-card-body{padding:22px 22px 22px 0;display:flex;flex-direction:column;justify-content:center;flex:1;min-width:0}
+    .blog-card-cat{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--terra);margin-bottom:8px}
+    .blog-card-title{font-size:1.1rem;font-weight:800;color:var(--navy);line-height:1.3;margin-bottom:8px}
+    .blog-card-desc{font-size:.82rem;color:var(--text-muted);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:12px}
+    .blog-card-meta{display:flex;gap:12px;font-size:.7rem;color:var(--text-muted)}
+    .blog-empty{text-align:center;padding:60px 20px;color:var(--text-muted)}
+
+    @media(max-width:640px){
+      .blog-hero{padding:110px 20px 44px}
+      .blog-card{flex-direction:column}
+      .blog-card-img{width:100%;min-height:160px;height:160px}
+      .blog-card-body{padding:18px}
+    }
+  </style>
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "Assos'u Keşfet Blog",
+    "description": "Assos ve Ayvacık hakkında gezi rehberleri, mekan önerileri ve bölge keşifleri.",
+    "url": "https://assosukesfet.com/blog",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Assos'u Keşfet",
+      "url": "https://assosukesfet.com"
+    }
+  }
+  </script>
+</head>
+<body>
+
+<div id="nav-placeholder"></div>
+
+<section class="blog-hero">
+  <div class="bh-orb bh-orb-1"></div>
+  <div class="bh-orb bh-orb-2"></div>
+  <div class="bh-content">
+    <div class="bh-badge">✍️ Blog</div>
+    <h1 class="bh-h1">Assos'u <em>Yazılarla</em> Keşfet</h1>
+    <p class="bh-sub">Gezi rehberleri, mekan önerileri, rota ipuçları ve bölge keşifleri.</p>
+  </div>
+</section>
+
+<section class="blog-section">
+  <div class="blog-grid" id="blog-grid">
+    <div class="blog-empty">Yazılar yükleniyor...</div>
+  </div>
+</section>
+
+<div id="footer-placeholder"></div>
+
+<script src="firebase-loader.js"></script>
+<script src="data.js"></script>
+<script src="shared.min.js?v=45"></script>
+<script>
+function pageInit() {
+  renderNav({ heroMode: false });
+  renderFooter({});
+  loadBlogPosts();
+}
+
+async function loadBlogPosts() {
+  const grid = document.getElementById('blog-grid');
+  try {
+    const snap = await firebase.firestore().collection('blog_posts')
+      .where('status', '==', 'published')
+      .orderBy('publishedAt', 'desc')
+      .limit(50).get();
+
+    if (snap.empty) {
+      grid.innerHTML = '<div class="blog-empty">Henüz yazı yayınlanmadı.</div>';
+      return;
+    }
+
+    grid.innerHTML = snap.docs.map(function(doc) {
+      var p = doc.data();
+      var date = p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('tr-TR', { day:'numeric', month:'long', year:'numeric' }) : '';
+      var readTime = p.readTime || Math.ceil((p.content || '').split(' ').length / 200) + ' dk';
+      var imgHtml = p.image
+        ? '<img src="' + p.image + '" alt="' + (p.title || '') + '" loading="lazy" onload="this.classList.add(\'loaded\')">'
+        : '<div class="blog-emoji">' + (p.emoji || '📝') + '</div>';
+
+      return '<a href="blog/' + doc.id + '" class="blog-card">' +
+        '<div class="blog-card-img">' + imgHtml + '</div>' +
+        '<div class="blog-card-body">' +
+          '<div class="blog-card-cat">' + (p.category || 'Genel') + '</div>' +
+          '<h2 class="blog-card-title">' + (p.title || '') + '</h2>' +
+          '<p class="blog-card-desc">' + (p.excerpt || '') + '</p>' +
+          '<div class="blog-card-meta">' +
+            '<span>📅 ' + date + '</span>' +
+            '<span>⏱ ' + readTime + ' okuma</span>' +
+          '</div>' +
+        '</div>' +
+      '</a>';
+    }).join('');
+
+  } catch(err) {
+    grid.innerHTML = '<div class="blog-empty">Yazılar yüklenemedi.</div>';
+  }
+}
+
+document.addEventListener('dataReady', pageInit);
+if (window.DATA && window.DATA.venues) pageInit();
+</script>
+</body>
+</html>

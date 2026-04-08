@@ -110,6 +110,28 @@ export async function onRequest(context) {
     } catch (e) { return next(); }
   }
 
+  // Blog detay sayfasi
+  if (path.includes('/blog/') && path !== '/blog/' && path !== '/blog') {
+    const slug = path.split('/').pop();
+    if (!slug) return next();
+
+    try {
+      const fields = await fetchFirestoreDoc('blog_posts', slug);
+      if (!fields) return next();
+
+      const title = (fields.title?.stringValue || 'Blog') + ' \u2014 Assos\'u Kesfet';
+      const desc = (fields.excerpt?.stringValue || '').substring(0, 200);
+      const image = fields.image?.stringValue || DEFAULT_OG_IMAGE;
+
+      return new Response(buildOgHtml({
+        title,
+        description: desc || 'Assos hakkinda blog yazisi.',
+        url: `https://assosukesfet.com/blog/${slug}`,
+        image
+      }), { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
+    } catch (e) { return next(); }
+  }
+
   // Diger sayfalar — normal devam
   return next();
 }
