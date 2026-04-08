@@ -5124,8 +5124,8 @@ async function openQRModal(id) {
   const boxX = (size - boxW) / 2;
   const boxY = (size - boxH) / 2;
   svg += '<rect x="' + (boxX - 4) + '" y="' + (boxY - 4) + '" width="' + (boxW + 8) + '" height="' + (boxH + 8) + '" rx="6" fill="#fff"/>';
-  svg += '<text x="' + (size/2) + '" y="' + (boxY + boxH * 0.42) + '" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="' + (cellSize * 2.2) + '" fill="#1A2744">ASSOS\'U</text>';
-  svg += '<text x="' + (size/2) + '" y="' + (boxY + boxH * 0.82) + '" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="' + (cellSize * 2.2) + '" fill="#C4521A">KEŞFET</text>';
+  svg += '<text x="' + (size/2) + '" y="' + (boxY + boxH * 0.42) + '" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="' + (cellSize * 2.2) + '" fill="#1A2744">ASSOS&#39;U</text>';
+  svg += '<text x="' + (size/2) + '" y="' + (boxY + boxH * 0.82) + '" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="' + (cellSize * 2.2) + '" fill="#C4521A">KE&#350;FET</text>';
   svg += '</svg>';
 
   canvas.innerHTML = svg;
