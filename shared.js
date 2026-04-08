@@ -2158,20 +2158,27 @@ function renderVenuePage(venueId) {
       .vp-lb-counter{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.5);font-size:.78rem;font-weight:600;}
 
       /* ── Sticky Action Bar ── */
-      .vp-sticky{position:fixed;bottom:-70px;left:0;right:0;z-index:100;background:rgba(255,255,255,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 -4px 20px rgba(26,39,68,.1);transition:bottom .35s cubic-bezier(.16,1,.3,1);border-top:1px solid rgba(26,39,68,.06);}
+      .vp-sticky{position:fixed;bottom:-80px;left:0;right:0;z-index:100;transition:bottom .4s cubic-bezier(.16,1,.3,1);}
       .vp-sticky.show{bottom:0;}
-      .vp-sticky-inner{max-width:1100px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
-      .vp-sticky-info{display:flex;align-items:center;gap:10px;min-width:0;}
-      .vp-sticky-emoji{font-size:1.2rem;flex-shrink:0;}
-      .vp-sticky-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.85rem;color:#1A2744;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-      .vp-sticky-acts{display:flex;gap:8px;flex-shrink:0;}
-      .vp-sticky-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:10px;font-size:.78rem;font-weight:700;text-decoration:none;white-space:nowrap;transition:all .2s;border:none;cursor:pointer;font-family:inherit;}
-      .vp-sticky-call{background:#1A2744;color:#fff;}
-      .vp-sticky-call:hover{background:#2A3A5A;}
-      .vp-sticky-wa{background:#25D366;color:#fff;}
+      .vp-sticky-glass{margin:0 12px 12px;padding:12px 16px;background:rgba(13,24,41,.82);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:16px;border:1px solid rgba(245,237,224,.1);box-shadow:0 8px 32px rgba(0,0,0,.25);}
+      .vp-sticky-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+      .vp-sticky-info{display:flex;align-items:center;gap:9px;min-width:0;}
+      .vp-sticky-emoji{font-size:1.1rem;flex-shrink:0;}
+      .vp-sticky-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.82rem;color:rgba(245,237,224,.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+      .vp-sticky-acts{display:flex;gap:6px;flex-shrink:0;}
+      .vp-sticky-btn{display:inline-flex;align-items:center;gap:5px;padding:9px 14px;border-radius:10px;font-size:.75rem;font-weight:700;text-decoration:none;white-space:nowrap;transition:all .15s;border:none;cursor:pointer;font-family:inherit;}
+      .vp-sticky-btn:hover{transform:translateY(-1px);}
+      .vp-sticky-call{background:rgba(245,237,224,.12);color:rgba(245,237,224,.9);border:1px solid rgba(245,237,224,.15);}
+      .vp-sticky-call:hover{background:rgba(245,237,224,.18);}
+      .vp-sticky-wa{background:#25D366;color:#fff;box-shadow:0 2px 10px rgba(37,211,102,.25);}
       .vp-sticky-wa:hover{background:#1CB85A;}
-      .vp-sticky-map{background:rgba(26,39,68,.06);color:#1A2744;}
-      .vp-sticky-map:hover{background:rgba(26,39,68,.12);}
+      .vp-sticky-map{background:rgba(245,237,224,.1);color:rgba(245,237,224,.85);border:1px solid rgba(245,237,224,.12);}
+      .vp-sticky-map:hover{background:rgba(245,237,224,.16);}
+      @media(max-width:640px){
+        .vp-sticky-glass{margin:0 8px 8px;padding:10px 12px;}
+        .vp-sticky-btn{padding:8px 10px;font-size:.7rem;}
+        .vp-sticky-name{font-size:.76rem;max-width:90px;}
+      }
       @media(max-width:480px){.vp-sticky-name{max-width:120px;}.vp-sticky-btn{padding:8px 12px;font-size:.72rem;}}
 
       /* ── Instagram card ── */
@@ -2549,15 +2556,17 @@ function renderVenuePage(venueId) {
 
     <!-- Sticky action bar -->
     <div class="vp-sticky" id="vp-sticky">
-      <div class="vp-sticky-inner">
-        <div class="vp-sticky-info">
-          <span class="vp-sticky-emoji">${v.emoji}</span>
-          <span class="vp-sticky-name">${v.title}</span>
-        </div>
-        <div class="vp-sticky-acts">
-          ${v.phone ? '<a href="tel:' + v.phone.replace(/\\s/g,'') + '" class="vp-sticky-btn vp-sticky-call" onclick="event.preventDefault();if(window.trackAction)trackAction(\'' + escAttr(v.id) + '\',\'call\');setTimeout(()=>{window.location.href=this.href},300)">📞 Ara</a>' : ''}
-          ${v.phone && v.category !== 'konaklama' ? '<a href="' + waContactUrl + '" target="_blank" rel="noopener" class="vp-sticky-btn vp-sticky-wa" onclick="if(window.trackAction)trackAction(\'' + escAttr(v.id) + '\',\'whatsapp\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff" style="vertical-align:middle;margin-right:4px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.528 5.855L0 24l6.335-1.52C8.034 23.46 9.98 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.846 0-3.584-.479-5.104-1.32l-.369-.21-3.76.902.948-3.668-.223-.374A9.944 9.944 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>WhatsApp</a>' : ''}
-          <a href="${mapsUrl}" target="_blank" rel="noopener" class="vp-sticky-btn vp-sticky-map" onclick="if(window.trackAction)trackAction('${escAttr(v.id)}','directions')">🗺 Yol Tarifi</a>
+      <div class="vp-sticky-glass">
+        <div class="vp-sticky-inner">
+          <div class="vp-sticky-info">
+            <span class="vp-sticky-emoji">${v.emoji}</span>
+            <span class="vp-sticky-name">${v.title}</span>
+          </div>
+          <div class="vp-sticky-acts">
+            ${v.phone ? '<a href="tel:' + v.phone.replace(/\\s/g,'') + '" class="vp-sticky-btn vp-sticky-call" onclick="event.preventDefault();if(window.trackAction)trackAction(\'' + escAttr(v.id) + '\',\'call\');setTimeout(()=>{window.location.href=this.href},300)">📞 Ara</a>' : ''}
+            ${v.phone && v.category !== 'konaklama' ? '<a href="' + waContactUrl + '" target="_blank" rel="noopener" class="vp-sticky-btn vp-sticky-wa" onclick="if(window.trackAction)trackAction(\'' + escAttr(v.id) + '\',\'whatsapp\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="#fff" style="vertical-align:middle;margin-right:3px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.528 5.855L0 24l6.335-1.52C8.034 23.46 9.98 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.846 0-3.584-.479-5.104-1.32l-.369-.21-3.76.902.948-3.668-.223-.374A9.944 9.944 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>WA</a>' : ''}
+            <a href="${mapsUrl}" target="_blank" rel="noopener" class="vp-sticky-btn vp-sticky-map" onclick="if(window.trackAction)trackAction('${escAttr(v.id)}','directions')">🗺 Yol</a>
+          </div>
         </div>
       </div>
     </div>
