@@ -136,6 +136,14 @@
     <priority>0.7</priority>
   </url>
 
+  <!-- Rota Detay Sayfaları (6 rota) -->
+  <url><loc>https://assosukesfet.com/rotalar/rota-detay?id=bir-gunde-assos</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://assosukesfet.com/rotalar/rota-detay?id=gun-batimi-rotasi</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://assosukesfet.com/rotalar/rota-detay?id=tarih-rotasi</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://assosukesfet.com/rotalar/rota-detay?id=koy-koy-assos</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://assosukesfet.com/rotalar/rota-detay?id=deniz-koy-rotasi</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://assosukesfet.com/rotalar/rota-detay?id=kahve-molasi-rotasi</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+
   <!-- Mekan Detay Sayfaları (5 aktif) -->
   <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=ahmetce-kadin-kooperatifi</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://assosukesfet.com/mekanlar/mekan-detay?id=kafe-mera</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
