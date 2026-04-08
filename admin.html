@@ -5099,10 +5099,13 @@ function openQRModal(id) {
     }
   }
   // Logo ortada
-  const logoSize = cellSize * 7;
+  const logoSize = cellSize * 9;
   const logoX = (size - logoSize) / 2;
-  svg += '<rect x="' + (logoX - 3) + '" y="' + (logoX - 3) + '" width="' + (logoSize + 6) + '" height="' + (logoSize + 6) + '" rx="8" fill="#fff"/>';
-  svg += '<text x="' + (size/2) + '" y="' + (size/2 + 5) + '" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="' + (cellSize * 3) + '" fill="#C4521A">AK</text>';
+  svg += '<rect x="' + (logoX - 4) + '" y="' + (logoX - 4) + '" width="' + (logoSize + 8) + '" height="' + (logoSize + 8) + '" rx="10" fill="#fff"/>';
+  const logoUrl = document.getElementById('logo-preview-img')?.src || localStorage.getItem('site_logo_url') || '';
+  if (logoUrl) {
+    svg += '<image href="' + logoUrl + '" x="' + logoX + '" y="' + logoX + '" width="' + logoSize + '" height="' + logoSize + '" preserveAspectRatio="xMidYMid meet"/>';
+  }
   svg += '</svg>';
 
   canvas.innerHTML = svg;
