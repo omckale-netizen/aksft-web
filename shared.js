@@ -2461,11 +2461,11 @@ function renderVenuePage(venueId) {
               <div class="vp-rezv-row">
                 <div class="vp-rezv-field">
                   <label class="vp-rezv-label">Giriş Tarihi</label>
-                  <input type="date" id="rezv-checkin" class="vp-rezv-input" value="${new Date().toISOString().split('T')[0]}" min="${new Date().toISOString().split('T')[0]}" onchange="vpUpdateCheckoutMin()">
+                  <input type="date" id="rezv-checkin" class="vp-rezv-input" onchange="vpUpdateCheckoutMin()">
                 </div>
                 <div class="vp-rezv-field">
                   <label class="vp-rezv-label">Çıkış Tarihi</label>
-                  <input type="date" id="rezv-checkout" class="vp-rezv-input" value="${(()=>{var d=new Date();d.setDate(d.getDate()+1);return d.toISOString().split('T')[0]})()}" min="${(()=>{var d=new Date();d.setDate(d.getDate()+1);return d.toISOString().split('T')[0]})()}" onchange="vpValidateCheckout()">
+                  <input type="date" id="rezv-checkout" class="vp-rezv-input" onchange="vpValidateCheckout()">
                 </div>
               </div>
               <div id="rezv-date-error" style="font-size:.75rem;color:#E53E3E;min-height:18px;margin-top:-4px"></div>
@@ -2720,6 +2720,22 @@ function renderVenuePage(venueId) {
       sumEl.style.display = 'none';
     }
   }
+
+  // Tarihleri şu anki zamana göre set et (her sayfa yüklemesinde güncel)
+  (function setRezvDates() {
+    var ci = document.getElementById('rezv-checkin');
+    var co = document.getElementById('rezv-checkout');
+    if (!ci || !co) return;
+    var now = new Date();
+    var today = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+    var tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    var tmrw = tomorrow.getFullYear() + '-' + String(tomorrow.getMonth()+1).padStart(2,'0') + '-' + String(tomorrow.getDate()).padStart(2,'0');
+    ci.value = today;
+    ci.min = today;
+    co.value = tmrw;
+    co.min = tmrw;
+  })();
 
   // Giriş tarihi seçilince çıkış min tarihini güncelle
   window.vpUpdateCheckoutMin = function() {
