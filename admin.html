@@ -1479,7 +1479,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         <button class="btn btn-sm btn-secondary ana-filter" onclick="setAnalyticsPeriod(30,this)">Son 30 Gun</button>
         <button class="btn btn-sm btn-secondary ana-filter" onclick="setAnalyticsPeriod(90,this)">Son 90 Gun</button>
         <button class="btn btn-sm btn-secondary ana-filter" onclick="setAnalyticsPeriod(0,this)">Tum Zamanlar</button>
-        <span style="margin-left:auto;font-size:.75rem;color:var(--text-muted)" id="analytics-period-label">Son 7 gun</span>
+        <span style="font-size:.75rem;color:var(--text-muted);margin-left:auto" id="analytics-period-label">Son 7 gün</span>
+        <button class="btn btn-sm btn-primary" onclick="generateReport('general')" style="margin-left:8px">📄 Genel Rapor</button>
+        <button class="btn btn-sm btn-secondary" onclick="generateReport('venue')" style="">📄 Mekan Raporu</button>
       </div>
 
       <div class="stats-grid" id="analytics-stats"></div>
@@ -7425,6 +7427,168 @@ async function loadLoginLogs() {
   }
 }
 
+/* ══════════════════════════════════════════════════
+   PDF RAPOR OLUŞTURUCU
+══════════════════════════════════════════════════ */
+async function generateReport(type) {
+  showToast('Rapor hazırlanıyor...', 'success');
+
+  // Verileri topla
+  let eventsQuery = db.collection('analytics_events').orderBy('timestamp', 'desc');
+  if (analyticsPeriod > 0) {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - analyticsPeriod);
+    eventsQuery = eventsQuery.where('timestamp', '>=', cutoff.toISOString());
+  }
+  const eventsSnap = await eventsQuery.limit(5000).get();
+  const events = eventsSnap.docs.map(d => d.data());
+
+  const dailyBreak = {};
+  const venueData = {};
+  let totals = { views: 0, call: 0, whatsapp: 0, reservation: 0, directions: 0 };
+
+  events.forEach(ev => {
+    const date = ev.date || ev.timestamp?.split('T')[0] || '';
+    if (!dailyBreak[date]) dailyBreak[date] = { views: 0, call: 0, whatsapp: 0, reservation: 0, directions: 0 };
+
+    if (ev.type === 'pageview') {
+      dailyBreak[date].views++;
+      totals.views++;
+      if (ev.target?.startsWith('venue_')) {
+        const vid = ev.target.replace('venue_', '');
+        if (!venueData[vid]) venueData[vid] = { views: 0, call: 0, whatsapp: 0, reservation: 0, directions: 0 };
+        venueData[vid].views++;
+      }
+    } else if (ev.type === 'action') {
+      const act = ev.action;
+      if (dailyBreak[date][act] !== undefined) dailyBreak[date][act]++;
+      if (totals[act] !== undefined) totals[act]++;
+      const vid = ev.target;
+      if (vid) {
+        if (!venueData[vid]) venueData[vid] = { views: 0, call: 0, whatsapp: 0, reservation: 0, directions: 0 };
+        if (venueData[vid][act] !== undefined) venueData[vid][act]++;
+      }
+    }
+  });
+
+  const periodLabel = analyticsPeriod === 0 ? 'Tüm Zamanlar' : 'Son ' + analyticsPeriod + ' Gün';
+  const now = new Date();
+  const reportDate = now.toLocaleDateString('tr-TR', { day:'numeric', month:'long', year:'numeric' });
+  const sortedDates = Object.keys(dailyBreak).sort().reverse();
+
+  // Venue listesi
+  const venueList = Object.entries(venueData).map(([id, d]) => {
+    const v = draftData.venues.find(x => x.id === id);
+    const totalAct = d.call + d.whatsapp + d.reservation + d.directions;
+    const conv = d.views > 0 ? Math.round((totalAct / d.views) * 100) : 0;
+    return { id, title: v ? v.title : id, emoji: v ? v.emoji : '📍', category: v ? v.category : '', ...d, totalAct, conv };
+  }).sort((a, b) => b.views - a.views);
+
+  // HTML rapor oluştur
+  let html = '<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><title>Assos\'u Keşfet — ' + (type === 'venue' ? 'Mekan Raporu' : 'Genel Rapor') + '</title>';
+  html += '<style>';
+  html += 'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#1A2744;padding:40px;max-width:900px;margin:0 auto;font-size:13px}';
+  html += 'h1{font-size:22px;margin-bottom:4px}h2{font-size:16px;margin:28px 0 12px;padding-bottom:6px;border-bottom:2px solid #C4521A}h3{font-size:14px;margin:18px 0 8px}';
+  html += '.sub{color:#718096;font-size:12px;margin-bottom:24px}';
+  html += '.logo-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #eee}';
+  html += '.logo-text{font-size:20px;font-weight:800;color:#1A2744}.logo-sub{font-size:11px;color:#C4521A;font-weight:600}';
+  html += 'table{width:100%;border-collapse:collapse;margin-bottom:20px}th{text-align:left;padding:8px 10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#718096;background:#F7F5F0;border-bottom:2px solid #E2DED5}';
+  html += 'td{padding:8px 10px;border-bottom:1px solid #f0ece5;font-size:12px}.num{font-weight:700;text-align:center}.highlight{background:#FFFBF5}';
+  html += '.stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}';
+  html += '.stat-box{text-align:center;padding:14px;border:1px solid #eee;border-radius:10px}.stat-num{font-size:22px;font-weight:800}.stat-label{font-size:10px;color:#718096;margin-top:2px;text-transform:uppercase;letter-spacing:.5px}';
+  html += '.footer{margin-top:40px;padding-top:16px;border-top:1px solid #eee;font-size:10px;color:#A0AEC0;text-align:center}';
+  html += '.terra{color:#C4521A}.green{color:#38A169}.navy{color:#1A2744}';
+  html += '@media print{body{padding:20px}@page{margin:15mm}}';
+  html += '</style></head><body>';
+
+  // Header
+  html += '<div class="logo-row"><div><div class="logo-text">Assos\'u Keşfet</div><div class="logo-sub">' + (type === 'venue' ? 'Mekan Performans Raporu' : 'Genel İstatistik Raporu') + '</div></div>';
+  html += '<div style="text-align:right;font-size:11px;color:#718096">Rapor Tarihi: ' + reportDate + '<br>Dönem: ' + periodLabel + '</div></div>';
+
+  // Genel istatistikler
+  html += '<h2>Genel Özet</h2>';
+  html += '<div class="stat-grid">';
+  html += '<div class="stat-box"><div class="stat-num navy">' + totals.views + '</div><div class="stat-label">Görüntüleme</div></div>';
+  html += '<div class="stat-box"><div class="stat-num">' + totals.call + '</div><div class="stat-label">📞 Arama</div></div>';
+  html += '<div class="stat-box"><div class="stat-num terra">' + totals.whatsapp + '</div><div class="stat-label">💬 WhatsApp</div></div>';
+  html += '<div class="stat-box"><div class="stat-num green">' + totals.reservation + '</div><div class="stat-label">📋 Rezervasyon</div></div>';
+  html += '<div class="stat-box"><div class="stat-num">' + totals.directions + '</div><div class="stat-label">🗺 Yol Tarifi</div></div>';
+  html += '</div>';
+
+  // İçerik özeti
+  var v = draftData.venues || [], r = draftData.routes || [], vi = draftData.villages || [], p = draftData.places || [];
+  html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px;font-size:12px;text-align:center">';
+  html += '<div style="padding:10px;background:#F7F5F0;border-radius:8px"><strong>' + v.length + '</strong> Mekan</div>';
+  html += '<div style="padding:10px;background:#F7F5F0;border-radius:8px"><strong>' + r.length + '</strong> Rota</div>';
+  html += '<div style="padding:10px;background:#F7F5F0;border-radius:8px"><strong>' + vi.length + '</strong> Köy</div>';
+  html += '<div style="padding:10px;background:#F7F5F0;border-radius:8px"><strong>' + p.length + '</strong> Yer</div>';
+  html += '</div>';
+
+  if (type === 'general') {
+    // Günlük breakdown tablosu
+    html += '<h2>Günlük Aksiyon Detayı</h2>';
+    html += '<table><thead><tr><th>Tarih</th><th class="num">Görüntüleme</th><th class="num">Arama</th><th class="num">WhatsApp</th><th class="num">Rezervasyon</th><th class="num">Yol Tarifi</th><th class="num">Toplam</th></tr></thead><tbody>';
+    sortedDates.forEach(date => {
+      var b = dailyBreak[date];
+      var total = b.call + b.whatsapp + b.reservation + b.directions;
+      var d = new Date(date);
+      var dayNames = ['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];
+      var label = dayNames[d.getDay()] + ', ' + d.toLocaleDateString('tr-TR',{day:'numeric',month:'short'});
+      html += '<tr><td>' + label + '</td><td class="num">' + b.views + '</td><td class="num">' + b.call + '</td><td class="num">' + b.whatsapp + '</td><td class="num">' + b.reservation + '</td><td class="num">' + b.directions + '</td><td class="num" style="font-weight:800">' + total + '</td></tr>';
+    });
+    html += '</tbody></table>';
+
+    // Top 10 mekan
+    html += '<h2>En Çok Görüntülenen Mekanlar (Top 10)</h2>';
+    html += '<table><thead><tr><th>#</th><th>Mekan</th><th class="num">Görüntüleme</th><th class="num">Arama</th><th class="num">WhatsApp</th><th class="num">Rez.</th><th class="num">Dönüşüm</th></tr></thead><tbody>';
+    venueList.slice(0, 10).forEach((vn, i) => {
+      html += '<tr><td>' + (i+1) + '</td><td>' + vn.emoji + ' ' + vn.title + '</td><td class="num">' + vn.views + '</td><td class="num">' + vn.call + '</td><td class="num">' + vn.whatsapp + '</td><td class="num">' + vn.reservation + '</td><td class="num terra">%' + vn.conv + '</td></tr>';
+    });
+    html += '</tbody></table>';
+  }
+
+  if (type === 'venue') {
+    // Tüm mekanlar detaylı
+    html += '<h2>Mekan Bazlı Performans</h2>';
+    html += '<table><thead><tr><th>#</th><th>Mekan</th><th>Kategori</th><th class="num">👁</th><th class="num">📞</th><th class="num">💬</th><th class="num">📋</th><th class="num">🗺</th><th class="num">Toplam</th><th class="num">% Dönüşüm</th></tr></thead><tbody>';
+    var catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskele'};
+    venueList.forEach((vn, i) => {
+      html += '<tr' + (i % 2 === 0 ? ' class="highlight"' : '') + '><td>' + (i+1) + '</td><td><strong>' + vn.emoji + ' ' + vn.title + '</strong></td><td>' + (catLabels[vn.category] || vn.category) + '</td>';
+      html += '<td class="num">' + vn.views + '</td><td class="num">' + vn.call + '</td><td class="num">' + vn.whatsapp + '</td><td class="num">' + vn.reservation + '</td><td class="num">' + vn.directions + '</td>';
+      html += '<td class="num" style="font-weight:800">' + vn.totalAct + '</td><td class="num terra">%' + vn.conv + '</td></tr>';
+    });
+    html += '</tbody></table>';
+
+    // Kategori bazlı özet
+    html += '<h2>Kategori Bazlı Özet</h2>';
+    var catStats = {};
+    venueList.forEach(vn => {
+      var c = vn.category || 'diger';
+      if (!catStats[c]) catStats[c] = { count: 0, views: 0, call: 0, whatsapp: 0, reservation: 0, directions: 0 };
+      catStats[c].count++;
+      catStats[c].views += vn.views;
+      catStats[c].call += vn.call;
+      catStats[c].whatsapp += vn.whatsapp;
+      catStats[c].reservation += vn.reservation;
+      catStats[c].directions += vn.directions;
+    });
+    html += '<table><thead><tr><th>Kategori</th><th class="num">Mekan</th><th class="num">Görüntüleme</th><th class="num">Arama</th><th class="num">WhatsApp</th><th class="num">Rez.</th></tr></thead><tbody>';
+    Object.entries(catStats).sort((a,b) => b[1].views - a[1].views).forEach(([cat, s]) => {
+      html += '<tr><td><strong>' + (catLabels[cat] || cat) + '</strong></td><td class="num">' + s.count + '</td><td class="num">' + s.views + '</td><td class="num">' + s.call + '</td><td class="num">' + s.whatsapp + '</td><td class="num">' + s.reservation + '</td></tr>';
+    });
+    html += '</tbody></table>';
+  }
+
+  // Footer
+  html += '<div class="footer">Bu rapor Assos\'u Keşfet yönetim paneli tarafından otomatik oluşturulmuştur.<br>assosukesfet.com · ' + reportDate + '</div>';
+  html += '</body></html>';
+
+  // Yeni pencerede aç — kullanıcı Ctrl+P / PDF olarak kaydet yapabilir
+  var win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(function() { win.print(); }, 500);
+}
 </script>
 </body>
 </html>
