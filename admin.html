@@ -1310,7 +1310,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
         </div>
         <div class="panel-table-wrap">
           <table class="panel-table">
-            <thead><tr><th></th><th>Başlık</th><th>Kategori</th><th>Durum</th><th>Tarih</th><th>İşlemler</th></tr></thead>
+            <thead><tr><th></th><th>Başlık</th><th>Kategori</th><th>Durum</th><th>👁 Okunma</th><th>İşlemler</th></tr></thead>
             <tbody id="blog-tbody"></tbody>
           </table>
         </div>
@@ -1482,6 +1482,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
       <div class="panel-card" style="margin-top:20px">
         <div class="panel-card-head"><h3>🗺 Rota Istatistikleri</h3></div>
         <div id="analytics-routes"></div>
+      </div>
+
+      <!-- Blog İstatistikleri -->
+      <div class="panel-card" style="margin-top:20px">
+        <div class="panel-card-head"><h3>✍️ En Çok Okunan Yazılar</h3></div>
+        <div id="analytics-blog"></div>
       </div>
 
       <!-- Hava Durumu Korelasyonu -->
@@ -3339,6 +3345,37 @@ async function renderAnalytics() {
           '</div>' +
           '<div style="font-size:.85rem;font-weight:700;color:var(--navy)">' + r.views + ' <span style="font-weight:400;font-size:.7rem;color:var(--text-muted)">goruntuleme</span></div>' +
         '</div>').join('');
+
+    // ── En Çok Okunan Blog Yazıları ──
+    const blogViewsMap = {};
+    events.forEach(ev => {
+      if (ev.type === 'pageview' && ev.target?.startsWith('blog_')) {
+        const bid = ev.target.replace('blog_', '');
+        blogViewsMap[bid] = (blogViewsMap[bid] || 0) + 1;
+      }
+    });
+    const blogStatList = Object.entries(blogViewsMap).map(([id, views]) => {
+      const post = blogPosts.find(p => p.id === id);
+      return { id, title: post ? post.title : id, emoji: post ? post.emoji : '📝', category: post ? post.category : '', views };
+    }).sort((a, b) => b.views - a.views);
+
+    const blogStatsEl = document.getElementById('analytics-blog');
+    if (blogStatsEl) {
+      blogStatsEl.innerHTML = blogStatList.length === 0
+        ? '<div style="padding:24px;text-align:center;color:var(--text-muted)">Henüz blog görüntülemesi yok.</div>'
+        : blogStatList.slice(0, 10).map((b, i) => {
+          const maxBlogViews = blogStatList[0].views || 1;
+          const pct = Math.max(Math.round((b.views / maxBlogViews) * 100), 5);
+          return '<div style="display:flex;align-items:center;gap:12px;padding:10px 20px;border-bottom:1px solid rgba(0,0,0,.03)">' +
+            '<span style="font-size:1rem">' + b.emoji + '</span>' +
+            '<div style="flex:1;min-width:0">' +
+              '<div style="font-size:.82rem;font-weight:700;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + b.title + '</div>' +
+              '<div style="height:4px;background:rgba(0,0,0,.04);border-radius:2px;margin-top:4px"><div style="height:100%;width:' + pct + '%;background:var(--terra);border-radius:2px;transition:width .5s"></div></div>' +
+            '</div>' +
+            '<span style="font-size:.85rem;font-weight:700;color:var(--navy);flex-shrink:0">' + b.views + '</span>' +
+          '</div>';
+        }).join('');
+    }
 
     // ── Hava Durumu Korelasyonu ──
     const weatherCounts = {};
@@ -5621,6 +5658,17 @@ async function renderBlogTable() {
     blogPosts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch(e) { blogPosts = []; }
 
+  // Okunma sayılarını çek
+  const blogViews = {};
+  try {
+    const aSnap = await db.collection('analytics').get();
+    aSnap.docs.forEach(d => {
+      if (d.id.startsWith('blog_')) {
+        blogViews[d.id.replace('blog_', '')] = d.data().views || 0;
+      }
+    });
+  } catch(e) {}
+
   const q = (document.getElementById('blog-search')?.value || '').toLowerCase();
   let filtered = blogPosts;
   if (q) filtered = filtered.filter(p => (p.title||'').toLowerCase().includes(q) || (p.category||'').toLowerCase().includes(q));
@@ -5631,13 +5679,13 @@ async function renderBlogTable() {
       const st = p.status === 'published'
         ? '<span style="color:#276749;background:rgba(56,161,105,.1);padding:2px 8px;border-radius:6px;font-size:.7rem;font-weight:700">Yayında</span>'
         : '<span style="color:#975A16;background:rgba(221,173,32,.1);padding:2px 8px;border-radius:6px;font-size:.7rem;font-weight:700">Taslak</span>';
-      const date = p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('tr-TR',{day:'numeric',month:'short',year:'numeric'}) : '-';
+      const views = blogViews[p.id] || 0;
       return '<tr>' +
         '<td style="font-size:1.2rem">' + (p.emoji || '📝') + '</td>' +
         '<td><strong>' + (p.title || '') + '</strong></td>' +
         '<td><span class="badge badge-cat">' + (p.category || 'Genel') + '</span></td>' +
         '<td>' + st + '</td>' +
-        '<td style="font-size:.78rem;color:var(--text-muted)">' + date + '</td>' +
+        '<td style="font-size:.85rem;font-weight:700;color:var(--navy)">' + views + '</td>' +
         '<td>' +
           '<a class="btn-icon" href="blog?yazi=' + p.id + '" target="_blank" title="Görüntüle" style="text-decoration:none;margin-right:4px">👁</a>' +
           '<button class="btn-icon" title="Düzenle" onclick="openBlogModal(\'' + p.id + '\')" style="margin-right:4px">✏️</button>' +

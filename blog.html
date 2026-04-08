@@ -248,6 +248,9 @@ async function loadSinglePost(slug) {
         '</div>' +
       '</div>';
 
+    // Okunma sayısı takibi
+    if (window.trackPageView) trackPageView('blog_' + slug);
+
     // İlgili yazılar
     try {
       var allSnap = await firebase.firestore().collection('blog_posts').limit(50).get();
