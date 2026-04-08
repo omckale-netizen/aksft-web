@@ -100,9 +100,11 @@
   </div>
 </section>
 <script>
-// Detay sayfasiysa hero'yu hemen temizle — flash onlenir
+// Detay sayfasiysa tum sayfayi gizle, icerik hazir olunca fade-in
 if (new URLSearchParams(window.location.search).get('yazi')) {
-  document.getElementById('bh-content').innerHTML = '<div style="height:40px"></div>';
+  document.body.style.opacity = '0';
+  document.body.style.transition = 'opacity .4s ease';
+  document.getElementById('bh-content').innerHTML = '';
   var ls = document.getElementById('blog-list-section');
   if (ls) ls.style.display = 'none';
 }
@@ -306,6 +308,8 @@ async function loadSinglePost(slug) {
   } catch(err) {
     document.getElementById('bp-content').innerHTML = '<div style="text-align:center;padding:40px;color:#718096">Yazı yüklenemedi.</div>';
   }
+  // Icerik hazir — sayfayi goster
+  document.body.style.opacity = '1';
 }
 
 var blogInited = false;
