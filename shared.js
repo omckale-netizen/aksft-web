@@ -173,35 +173,24 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     /* FOOTER */
     #site-footer{position:relative;overflow:hidden;background:linear-gradient(170deg,#0A1220 0%,#0D1829 50%,#0E1A2E 100%);}
     #site-footer::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 20% 100%,rgba(196,82,26,.06) 0%,transparent 60%),radial-gradient(ellipse 40% 50% at 80% 0%,rgba(26,107,138,.05) 0%,transparent 60%);pointer-events:none;}
-    #site-footer .ft-inner{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:56px 24px 0;}
-    #site-footer .ft-cta{text-align:center;padding-bottom:48px;border-bottom:1px solid rgba(245,237,224,.06);margin-bottom:40px;}
-    #site-footer .ft-cta h3{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.4rem;color:var(--cream);margin-bottom:8px;letter-spacing:-.02em;}
-    #site-footer .ft-cta p{font-size:.82rem;color:rgba(245,237,224,.35);margin-bottom:20px;}
-    #site-footer .ft-cta a{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:12px;background:var(--terra);color:#fff;font-size:.85rem;font-weight:700;text-decoration:none;transition:all .2s;box-shadow:0 4px 16px rgba(196,82,26,.25);}
-    #site-footer .ft-cta a:hover{background:#D96B2E;transform:translateY(-2px);box-shadow:0 8px 24px rgba(196,82,26,.3);}
-    #site-footer .ft-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:32px;margin-bottom:40px;}
+    #site-footer .ft-inner{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:48px 24px 0;}
+    #site-footer .ft-glass{background:rgba(255,255,255,.03);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(245,237,224,.07);border-radius:20px;padding:36px 32px;margin-bottom:32px;}
+    #site-footer .ft-brand{text-align:center;margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid rgba(245,237,224,.06);}
     #site-footer .ft-brand img{height:36px;width:auto;}
-    #site-footer .ft-brand p{font-size:.78rem;color:rgba(245,237,224,.3);line-height:1.65;margin-top:12px;max-width:240px;}
-    #site-footer .ft-col-title{font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,237,224,.2);margin-bottom:14px;}
-    #site-footer .ft-col a{display:flex;align-items:center;gap:6px;color:rgba(245,237,224,.4);text-decoration:none;font-size:.8rem;margin-bottom:9px;transition:all .15s;}
-    #site-footer .ft-col a:hover{color:var(--cream);transform:translateX(3px);}
-    #site-footer .ft-col a span{font-size:.75rem;}
-    #site-footer .ft-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(245,237,224,.08),transparent);margin-bottom:20px;}
-    #site-footer .ft-bottom{display:flex;align-items:center;justify-content:space-between;padding-bottom:24px;gap:12px;flex-wrap:wrap;}
-    #site-footer .ft-copy{font-size:.66rem;color:rgba(245,237,224,.15);line-height:1.35;}
-    #site-footer .ft-badge{font-size:.6rem;color:rgba(245,237,224,.2);padding:4px 12px;border:1px solid rgba(245,237,224,.08);border-radius:999px;}
-    @media(max-width:768px){
-      #site-footer .ft-grid{grid-template-columns:1fr 1fr;gap:24px;}
-      #site-footer .ft-brand{grid-column:1/-1;}
-      #site-footer .ft-brand p{max-width:100%;}
+    #site-footer .ft-brand p{font-size:.78rem;color:rgba(245,237,224,.3);line-height:1.65;margin-top:10px;max-width:320px;margin-left:auto;margin-right:auto;}
+    #site-footer .ft-cols{display:flex;justify-content:center;gap:48px;flex-wrap:wrap;}
+    #site-footer .ft-col-title{font-size:.58rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,237,224,.2);margin-bottom:12px;text-align:center;}
+    #site-footer .ft-col a{display:flex;align-items:center;gap:6px;color:rgba(245,237,224,.4);text-decoration:none;font-size:.78rem;margin-bottom:8px;transition:all .15s;justify-content:center;}
+    #site-footer .ft-col a:hover{color:var(--cream);}
+    #site-footer .ft-col a span{font-size:.72rem;}
+    #site-footer .ft-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(245,237,224,.06),transparent);margin-bottom:18px;}
+    #site-footer .ft-bottom{display:flex;align-items:center;justify-content:space-between;padding-bottom:22px;gap:12px;flex-wrap:wrap;}
+    #site-footer .ft-copy{font-size:.64rem;color:rgba(245,237,224,.15);line-height:1.35;}
+    #site-footer .ft-badge{font-size:.58rem;color:rgba(245,237,224,.2);padding:4px 12px;border:1px solid rgba(245,237,224,.08);border-radius:999px;}
+    @media(max-width:640px){
+      #site-footer .ft-glass{padding:28px 20px;}
+      #site-footer .ft-cols{gap:28px;}
       #site-footer .ft-bottom{flex-direction:column;text-align:center;}
-      #site-footer .ft-cta h3{font-size:1.2rem;}
-    }
-    @media(max-width:480px){
-      #site-footer .ft-grid{grid-template-columns:1fr 1fr;gap:20px;text-align:center;}
-      #site-footer .ft-brand{grid-column:1/-1;align-items:center;display:flex;flex-direction:column;}
-      #site-footer .ft-brand p{text-align:center;}
-      #site-footer .ft-col a{justify-content:center;}
     }
 
     /* BUTTONS */
@@ -1047,29 +1036,31 @@ function renderFooter(opts = {}) {
   const footerHTML = `
     <footer id="site-footer" role="contentinfo">
       <div class="ft-inner">
-        <div class="ft-grid">
+        <div class="ft-glass">
           <div class="ft-brand">
             <img ${SITE_LOGO ? 'class="site-logo-img logo-loaded" src="' + SITE_LOGO + '" onload="this.classList.add(\'logo-loaded\')"' : 'class="site-logo-img"'} data-logo="1" alt="Assos'u Keşfet">
             <p>Assos bölgesini keşfetmek için hazırlanmış dijital bir rehber.</p>
           </div>
-          <div class="ft-col">
-            <p class="ft-col-title">Keşfet</p>
-            <a href="${basePath}rotalar.html"><span>🗺</span> Rotalar</a>
-            <a href="${basePath}yerler.html"><span>📍</span> Yerler</a>
-            <a href="${basePath}mekanlar.html"><span>🏪</span> Mekanlar</a>
-            <a href="${basePath}koyler.html"><span>🏘</span> Köyler</a>
-            <a href="${basePath}harita.html"><span>🧭</span> Harita</a>
-          </div>
-          <div class="ft-col">
-            <p class="ft-col-title">Rehber</p>
-            <a href="${basePath}rehber.html"><span>📖</span> Gezi Rehberi</a>
-            <a href="${basePath}blog.html"><span>✍️</span> Blog</a>
-            <a href="${basePath}planla.html"><span>🗓</span> Gezi Planla</a>
-          </div>
-          <div class="ft-col">
-            <p class="ft-col-title">Hakkımızda</p>
-            <a href="${basePath}hakkimizda.html"><span>💡</span> Biz Kimiz</a>
-            <a href="${basePath}iletisim.html"><span>✉️</span> İletişim</a>
+          <div class="ft-cols">
+            <div class="ft-col">
+              <p class="ft-col-title">Keşfet</p>
+              <a href="${basePath}rotalar.html"><span>🗺</span> Rotalar</a>
+              <a href="${basePath}yerler.html"><span>📍</span> Yerler</a>
+              <a href="${basePath}mekanlar.html"><span>🏪</span> Mekanlar</a>
+              <a href="${basePath}koyler.html"><span>🏘</span> Köyler</a>
+              <a href="${basePath}harita.html"><span>🧭</span> Harita</a>
+            </div>
+            <div class="ft-col">
+              <p class="ft-col-title">Rehber</p>
+              <a href="${basePath}rehber.html"><span>📖</span> Gezi Rehberi</a>
+              <a href="${basePath}blog.html"><span>✍️</span> Blog</a>
+              <a href="${basePath}planla.html"><span>🗓</span> Gezi Planla</a>
+            </div>
+            <div class="ft-col">
+              <p class="ft-col-title">Hakkımızda</p>
+              <a href="${basePath}hakkimizda.html"><span>💡</span> Biz Kimiz</a>
+              <a href="${basePath}iletisim.html"><span>✉️</span> İletişim</a>
+            </div>
           </div>
         </div>
         <div class="ft-divider"></div>
