@@ -196,10 +196,11 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     #site-footer .ft-legal a{color:rgba(245,237,224,.2);text-decoration:none;transition:color .15s;}
     #site-footer .ft-legal a:hover{color:rgba(245,237,224,.5);}
     @media(max-width:768px){
-      #site-footer .ft-top{flex-direction:column;text-align:center;gap:16px;}
-      #site-footer .ft-logo-area{flex-direction:column;gap:6px;}
-      #site-footer .ft-links{gap:4px;}
-      #site-footer .ft-bottom{flex-direction:column;text-align:center;}
+      #site-footer .ft-top{flex-direction:row;gap:12px;}
+      #site-footer .ft-logo-area{gap:8px;}
+      #site-footer .ft-tagline{display:none;}
+      #site-footer .ft-bottom{flex-direction:column;text-align:center;gap:6px;}
+      #site-footer .ft-legal{margin-top:0;}
     }
 
     /* BUTTONS */
