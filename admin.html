@@ -5748,7 +5748,7 @@ async function handleBlogImage(file) {
     const img = new Image();
     img.onload = function() {
       const canvas = document.createElement('canvas');
-      const maxW = 1200;
+      const maxW = 1000;
       let w = img.width, h = img.height;
       if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
       canvas.width = w; canvas.height = h;
@@ -6035,7 +6035,7 @@ function compressImage(file, callback) {
       // WebP destekleniyorsa WebP, yoksa JPEG fallback
       const useWebP = canvas.toDataURL('image/webp').startsWith('data:image/webp');
       const format = useWebP ? 'image/webp' : 'image/jpeg';
-      const quality = useWebP ? 0.82 : 0.8;
+      const quality = useWebP ? 0.72 : 0.75;
       canvas.toBlob(blob => {
         callback(blob, canvas.toDataURL(format, quality), useWebP ? 'webp' : 'jpg', { w: Math.round(w), h: Math.round(h), origW: img.width, origH: img.height });
       }, format, quality);

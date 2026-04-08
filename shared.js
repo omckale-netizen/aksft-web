@@ -6,17 +6,7 @@
 /* ── HTML attribute escape (XSS koruması) ── */
 function escAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-/* ── Preconnect (erken baglanti) ── */
-(function() {
-  var hosts = ['https://firestore.googleapis.com','https://www.gstatic.com','https://fonts.googleapis.com','https://fonts.gstatic.com','https://firebasestorage.googleapis.com'];
-  hosts.forEach(function(h) {
-    var l = document.createElement('link');
-    l.rel = 'preconnect';
-    l.href = h;
-    l.crossOrigin = '';
-    document.head.insertBefore(l, document.head.firstChild);
-  });
-})();
+/* ── Preconnect kaldirildi — HTML'deki yeterli ── */
 
 /* ── Favicon (cache + Firebase) ── */
 (function() {
@@ -352,11 +342,7 @@ document.addEventListener('dataReady', _fetchSiteLogo);
   link.dataset.assosFonts = '1';
   link.href = 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap';
   document.head.appendChild(link);
-  const preconn = document.createElement('link');
-  preconn.rel = 'preconnect';
-  preconn.href = 'https://fonts.gstatic.com';
-  preconn.crossOrigin = '';
-  document.head.insertBefore(preconn, link);
+  // preconnect HTML'de zaten var
 })();
 
 /* ═══════════════════
