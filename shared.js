@@ -827,6 +827,8 @@ function renderNav(opts = {}) {
     if (showVenues && allVenues.length > 0) {
       const venues = venueFilter ? allVenues.filter(v => (v.category || '') === venueFilter) : allVenues;
       if (venues.length > 0) {
+        // Premium üstte
+        venues.sort(function(a,b) { return (isPremiumActive(b)?1:0) - (isPremiumActive(a)?1:0); });
         const groups = {};
         venues.forEach(v => {
           const m = SD_VMETA[v.id] || { g:'linear-gradient(160deg,#1A2744,#2A3A5A)', cat:v.category||'diger', catBg:'rgba(26,39,68,.08)', catC:'#4A5568', catL:v.tagText||v.category||'Diğer' };
@@ -842,7 +844,9 @@ function renderNav(opts = {}) {
             const cards = items.map(v => {
               const hasPhoto = v.images && v.images.length > 0;
               const imgContent = hasPhoto ? '<img src="' + v.images[0] + '" onload="this.classList.add(\'sd-loaded\')">' : v.emoji;
-              return '<a class="sd-venue" href="' + getMekanPath(v.id) + '"><div class="sd-venue-img" style="background:' + m.g + ';">' + imgContent + '</div><div class="sd-venue-info"><div class="sd-venue-name">' + v.title + '</div><div class="sd-venue-loc">📍 ' + v.location + '</div></div><button class="sd-venue-remove" onclick="removeSave(\'' + escAttr(v.id) + '\',event)" aria-label="Kaldır">✕</button></a>';
+              var premTag = isPremiumActive(v) ? '<span style="font-size:.5rem;font-weight:700;padding:1px 6px;border-radius:999px;background:linear-gradient(135deg,#D4935A,#E8A07A);color:#fff;margin-left:4px;vertical-align:middle;">👑</span>' : '';
+              var premBorder = isPremiumActive(v) ? 'border:1.5px solid rgba(212,147,90,.25);' : '';
+              return '<a class="sd-venue" href="' + getMekanPath(v.id) + '" style="' + premBorder + '"><div class="sd-venue-img" style="background:' + m.g + ';">' + imgContent + '</div><div class="sd-venue-info"><div class="sd-venue-name">' + v.title + premTag + '</div><div class="sd-venue-loc">📍 ' + v.location + '</div></div><button class="sd-venue-remove" onclick="removeSave(\'' + escAttr(v.id) + '\',event)" aria-label="Kaldır">✕</button></a>';
             }).join('');
             return header + cards;
           }).join('');
