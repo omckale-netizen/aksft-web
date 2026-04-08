@@ -1047,11 +1047,6 @@ function renderFooter(opts = {}) {
   const footerHTML = `
     <footer id="site-footer" role="contentinfo">
       <div class="ft-inner">
-        <div class="ft-cta">
-          <h3>Assos'u Keşfetmeye Hazır mısın?</h3>
-          <p>Rotanı belirle, mekanları keşfet, gezini planla.</p>
-          <a href="${basePath}planla.html">🗓 Gezimi Planla →</a>
-        </div>
         <div class="ft-grid">
           <div class="ft-brand">
             <img ${SITE_LOGO ? 'class="site-logo-img logo-loaded" src="' + SITE_LOGO + '" onload="this.classList.add(\'logo-loaded\')"' : 'class="site-logo-img"'} data-logo="1" alt="Assos'u Keşfet">
