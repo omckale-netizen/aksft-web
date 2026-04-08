@@ -5639,7 +5639,7 @@ async function renderBlogTable() {
         '<td>' + st + '</td>' +
         '<td style="font-size:.78rem;color:var(--text-muted)">' + date + '</td>' +
         '<td>' +
-          '<a class="btn-icon" href="blog/' + p.id + '" target="_blank" title="Görüntüle" style="text-decoration:none;margin-right:4px">👁</a>' +
+          '<a class="btn-icon" href="blog?yazi=' + p.id + '" target="_blank" title="Görüntüle" style="text-decoration:none;margin-right:4px">👁</a>' +
           '<button class="btn-icon" title="Düzenle" onclick="openBlogModal(\'' + p.id + '\')" style="margin-right:4px">✏️</button>' +
           '<button class="btn-icon" title="Sil" onclick="deleteBlogPost(\'' + p.id + '\')" style="color:var(--red)">🗑</button>' +
         '</td></tr>';

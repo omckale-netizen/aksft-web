@@ -93,11 +93,40 @@
   </div>
 </section>
 
-<section class="blog-section">
+<section class="blog-section" id="blog-list-section">
   <div class="blog-grid" id="blog-grid">
     <div class="blog-empty">Yazılar yükleniyor...</div>
   </div>
 </section>
+
+<!-- Yazı detay -->
+<section id="blog-post-section" style="display:none">
+  <div style="max-width:800px;margin:-30px auto 0;padding:0 24px;position:relative;z-index:3" id="bp-img-wrap" class="post-img"></div>
+  <article style="max-width:680px;margin:0 auto;padding:40px 24px 80px">
+    <div id="bp-content" class="post-content"></div>
+    <div id="bp-tags" class="post-tags" style="display:none"></div>
+    <div id="bp-share" class="post-share"></div>
+  </article>
+</section>
+
+<style>
+.post-content{font-size:1rem;color:#4A5870;line-height:1.85}
+.post-content h2{font-size:1.3rem;font-weight:800;color:#1A2744;margin:32px 0 12px}
+.post-content h3{font-size:1.1rem;font-weight:700;color:#1A2744;margin:24px 0 10px}
+.post-content p{margin-bottom:16px}
+.post-content ul,.post-content ol{margin:12px 0 16px 20px}
+.post-content li{margin-bottom:6px}
+.post-content blockquote{border-left:3px solid #C4521A;padding:12px 20px;margin:20px 0;background:rgba(196,82,26,.04);border-radius:0 10px 10px 0;font-style:italic;color:#1A2744}
+.post-content a{color:#C4521A;text-decoration:underline}
+.post-content img{max-width:100%;border-radius:12px;margin:20px 0}
+.post-img img{width:100%;border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.15);opacity:0;transition:opacity .5s}
+.post-img img.loaded{opacity:1}
+.post-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:32px;padding-top:24px;border-top:1px solid rgba(0,0,0,.06)}
+.post-tag{padding:5px 14px;border-radius:999px;font-size:.72rem;font-weight:600;background:rgba(26,39,68,.05);color:#718096}
+.post-share{display:flex;gap:8px;justify-content:center;margin-top:32px}
+.post-share a{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:rgba(26,39,68,.05);color:#4A5870;text-decoration:none;font-size:1rem;transition:all .15s}
+.post-share a:hover{background:#C4521A;color:#fff}
+</style>
 
 <div id="footer-placeholder"></div>
 
@@ -108,7 +137,12 @@
 function pageInit() {
   renderNav({ heroMode: false });
   renderFooter({});
-  loadBlogPosts();
+  var slug = new URLSearchParams(window.location.search).get('yazi');
+  if (slug) {
+    loadSinglePost(slug);
+  } else {
+    loadBlogPosts();
+  }
 }
 
 async function loadBlogPosts() {
@@ -132,7 +166,7 @@ async function loadBlogPosts() {
         ? '<img src="' + p.image + '" alt="' + (p.title || '') + '" loading="lazy" onload="this.classList.add(\'loaded\')">'
         : '<div class="blog-emoji">' + (p.emoji || '📝') + '</div>';
 
-      return '<a href="blog/' + doc.id + '" class="blog-card">' +
+      return '<a href="blog?yazi=' + doc.id + '" class="blog-card">' +
         '<div class="blog-card-img">' + imgHtml + '</div>' +
         '<div class="blog-card-body">' +
           '<div class="blog-card-cat">' + (p.category || 'Genel') + '</div>' +
@@ -148,6 +182,58 @@ async function loadBlogPosts() {
 
   } catch(err) {
     grid.innerHTML = '<div class="blog-empty">Yazılar yüklenemedi.</div>';
+  }
+}
+
+async function loadSinglePost(slug) {
+  document.getElementById('blog-list-section').style.display = 'none';
+  document.getElementById('blog-post-section').style.display = '';
+  // Hero'yu güncelle
+  var heroContent = document.querySelector('.bh-content');
+
+  try {
+    var doc = await firebase.firestore().collection('blog_posts').doc(slug).get();
+    if (!doc.exists) {
+      heroContent.innerHTML = '<a href="blog" style="font-size:.72rem;color:rgba(245,237,224,.4);text-decoration:none;margin-bottom:20px;display:inline-block">← Blog\'a Dön</a><h1 class="bh-h1">Yazı Bulunamadı</h1>';
+      document.getElementById('bp-content').innerHTML = '<div style="text-align:center;padding:40px;color:#718096"><a href="blog" style="color:#C4521A;font-weight:700">← Blog\'a Dön</a></div>';
+      return;
+    }
+    var p = doc.data();
+    var date = p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('tr-TR', {day:'numeric',month:'long',year:'numeric'}) : '';
+    var readTime = p.readTime || Math.ceil((p.content||'').split(' ').length / 200) + ' dk';
+
+    heroContent.innerHTML =
+      '<a href="blog" style="font-size:.72rem;font-weight:600;color:rgba(245,237,224,.4);text-decoration:none;margin-bottom:20px;display:inline-block">← Blog\'a Dön</a>' +
+      '<div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#D96B2E;margin-bottom:12px">' + (p.category||'Genel') + '</div>' +
+      '<h1 class="bh-h1">' + (p.title||'') + '</h1>' +
+      '<div style="display:flex;justify-content:center;gap:16px;font-size:.75rem;color:rgba(245,237,224,.35)"><span>📅 ' + date + '</span><span>⏱ ' + readTime + ' okuma</span></div>';
+
+    if (p.image) {
+      document.getElementById('bp-img-wrap').innerHTML = '<img src="' + p.image + '" alt="' + (p.title||'') + '" onload="this.classList.add(\'loaded\')">';
+    }
+
+    document.getElementById('bp-content').innerHTML = p.content || '';
+
+    if (p.tags && p.tags.length) {
+      var tagsEl = document.getElementById('bp-tags');
+      tagsEl.style.display = '';
+      tagsEl.innerHTML = p.tags.map(function(t){return '<span class="post-tag">#'+t+'</span>';}).join('');
+    }
+
+    var url = window.location.href;
+    document.getElementById('bp-share').innerHTML =
+      '<a href="https://wa.me/?text='+encodeURIComponent(p.title+' '+url)+'" target="_blank" title="WhatsApp">💬</a>' +
+      '<a href="https://twitter.com/intent/tweet?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(p.title)+'" target="_blank" title="X">𝕏</a>' +
+      '<a href="https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(url)+'" target="_blank" title="Facebook">📘</a>';
+
+    // SEO
+    document.title = p.title + ' — Assos\'u Keşfet Blog';
+    var descText = p.excerpt || (p.content||'').replace(/<[^>]*>/g,'').substring(0,160);
+    document.querySelector('meta[name="description"]').content = descText;
+    document.querySelector('meta[property="og:title"]').content = p.title;
+    document.querySelector('meta[property="og:description"]').content = descText;
+  } catch(err) {
+    document.getElementById('bp-content').innerHTML = '<div style="text-align:center;padding:40px;color:#718096">Yazı yüklenemedi.</div>';
   }
 }
 
