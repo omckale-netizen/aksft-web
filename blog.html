@@ -93,12 +93,20 @@
 <section class="blog-hero">
   <div class="bh-orb bh-orb-1"></div>
   <div class="bh-orb bh-orb-2"></div>
-  <div class="bh-content">
+  <div class="bh-content" id="bh-content">
     <div class="bh-badge">✍️ Blog</div>
     <h1 class="bh-h1">Assos'u <em>Yazılarla</em> Keşfet</h1>
     <p class="bh-sub">Gezi rehberleri, mekan önerileri, rota ipuçları ve bölge keşifleri.</p>
   </div>
 </section>
+<script>
+// Detay sayfasiysa hero'yu hemen temizle — flash onlenir
+if (new URLSearchParams(window.location.search).get('yazi')) {
+  document.getElementById('bh-content').innerHTML = '<div style="height:40px"></div>';
+  var ls = document.getElementById('blog-list-section');
+  if (ls) ls.style.display = 'none';
+}
+</script>
 
 <section class="blog-section" id="blog-list-section">
   <div class="blog-grid" id="blog-grid">
