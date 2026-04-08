@@ -1271,20 +1271,27 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--cream);color:va
         <div id="analytics-chart" style="padding:16px 20px;display:flex;align-items:flex-end;gap:3px;height:160px;overflow-x:auto"></div>
       </div>
 
-      <div class="dash-row">
-        <div class="panel-card dash-half">
-          <div class="panel-card-head"><h3>En Cok Goruntulenen Mekanlar</h3></div>
-          <div id="analytics-top-venues"></div>
-        </div>
-        <div class="panel-card dash-half">
-          <div class="panel-card-head"><h3>Aksiyonlar (Ara / WhatsApp / Rezervasyon)</h3></div>
-          <div id="analytics-actions"></div>
-        </div>
+      <!-- Mekan Performans -->
+      <div class="panel-card" style="margin-bottom:20px">
+        <div class="panel-card-head"><h3>🏪 Mekan Performansi</h3><span style="font-size:.68rem;color:var(--text-muted)">Goruntuleme + Aksiyon</span></div>
+        <div id="analytics-venue-perf" style="padding:16px 20px"></div>
       </div>
 
-      <div class="panel-card">
-        <div class="panel-card-head"><h3>Sayfa Goruntulenmeleri</h3></div>
-        <div id="analytics-pages"></div>
+      <!-- Dönüşüm Oranı -->
+      <div class="panel-card" style="margin-bottom:20px">
+        <div class="panel-card-head"><h3>📈 Donusum Orani</h3><span style="font-size:.68rem;color:var(--text-muted)">Goruntuleme → Aksiyon</span></div>
+        <div id="analytics-conversion" style="padding:16px 20px"></div>
+      </div>
+
+      <div class="dash-row">
+        <div class="panel-card dash-half">
+          <div class="panel-card-head"><h3>Aksiyonlar (Ara / WhatsApp / Rez.)</h3></div>
+          <div id="analytics-actions"></div>
+        </div>
+        <div class="panel-card dash-half">
+          <div class="panel-card-head"><h3>Sayfa Goruntulenmeleri</h3></div>
+          <div id="analytics-pages"></div>
+        </div>
       </div>
 
       <!-- Dönem Karşılaştırma -->
@@ -2904,24 +2911,69 @@ async function renderAnalytics() {
       }).join('');
     }
 
-    // Top mekanlar
+    // Mekan performans listesi
     const venueList = Object.entries(venueViews).map(([id, views]) => {
       const venue = draftData.venues.find(v => v.id === id);
       const acts = venueActions[id] || { call: 0, whatsapp: 0, reservation: 0 };
-      return { id, title: venue ? venue.title : id, emoji: venue ? venue.emoji : '📍', views, ...acts };
+      const totalActs = acts.call + acts.whatsapp + acts.reservation;
+      const convRate = views > 0 ? Math.round((totalActs / views) * 100) : 0;
+      return { id, title: venue ? venue.title : id, emoji: venue ? venue.emoji : '📍', category: venue ? venue.category : '', views, totalActs, convRate, ...acts };
     }).sort((a, b) => b.views - a.views);
 
-    document.getElementById('analytics-top-venues').innerHTML = venueList.length === 0
-      ? '<div style="padding:24px;text-align:center;color:var(--text-muted)">Henuz veri yok.</div>'
-      : venueList.slice(0, 10).map(v =>
-        '<div class="recent-item"><div class="recent-emoji">' + v.emoji + '</div>' +
-        '<div class="recent-info" style="flex:1"><div class="ri-title">' + v.title + '</div>' +
-        '<div class="ri-meta">' + v.views + ' goruntuleme</div></div>' +
-        '<div style="text-align:right;font-size:.75rem;color:var(--text-light)">' +
-          (v.call > 0 ? '<span style="margin-right:8px">📞 ' + v.call + '</span>' : '') +
-          (v.whatsapp > 0 ? '<span style="margin-right:8px">💬 ' + v.whatsapp + '</span>' : '') +
-          (v.reservation > 0 ? '<span>📋 ' + v.reservation + '</span>' : '') +
-        '</div></div>').join('');
+    const maxViews = venueList.length > 0 ? venueList[0].views : 1;
+
+    // Mekan performans barları
+    document.getElementById('analytics-venue-perf').innerHTML = venueList.length === 0
+      ? '<div style="text-align:center;color:var(--text-muted);padding:16px">Henuz veri yok.</div>'
+      : venueList.slice(0, 10).map((v, i) => {
+        const viewPct = Math.max(Math.round((v.views / maxViews) * 100), 3);
+        const actPct = v.totalActs > 0 ? Math.max(Math.round((v.totalActs / maxViews) * 100), 3) : 0;
+        return '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">' +
+          '<div style="width:18px;font-size:.65rem;font-weight:800;color:var(--text-muted);text-align:right">' + (i+1) + '</div>' +
+          '<div style="font-size:1rem;width:24px;text-align:center">' + v.emoji + '</div>' +
+          '<div style="flex:1;min-width:0">' +
+            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">' +
+              '<span style="font-size:.8rem;font-weight:700;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + v.title + '</span>' +
+              '<span style="font-size:.68rem;color:var(--text-muted);flex-shrink:0;margin-left:8px">' + v.views + ' goruntuleme</span>' +
+            '</div>' +
+            '<div style="display:flex;gap:3px;height:6px">' +
+              '<div style="width:' + viewPct + '%;background:var(--aegean);border-radius:3px;transition:width .5s" title="Goruntuleme: ' + v.views + '"></div>' +
+              (actPct > 0 ? '<div style="width:' + actPct + '%;background:var(--terra);border-radius:3px;transition:width .5s" title="Aksiyonlar: ' + v.totalActs + '"></div>' : '') +
+            '</div>' +
+            '<div style="display:flex;gap:10px;margin-top:4px;font-size:.65rem;color:var(--text-muted)">' +
+              (v.call > 0 ? '<span>📞 ' + v.call + '</span>' : '') +
+              (v.whatsapp > 0 ? '<span>💬 ' + v.whatsapp + '</span>' : '') +
+              (v.reservation > 0 ? '<span>📋 ' + v.reservation + '</span>' : '') +
+              (v.convRate > 0 ? '<span style="color:var(--green);font-weight:700">↗ %' + v.convRate + ' donusum</span>' : '') +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('') +
+      '<div style="display:flex;gap:16px;margin-top:8px;font-size:.65rem;color:var(--text-muted);justify-content:flex-end">' +
+        '<span><span style="display:inline-block;width:10px;height:6px;background:var(--aegean);border-radius:3px;margin-right:4px"></span>Goruntuleme</span>' +
+        '<span><span style="display:inline-block;width:10px;height:6px;background:var(--terra);border-radius:3px;margin-right:4px"></span>Aksiyon</span>' +
+      '</div>';
+
+    // Dönüşüm oranı tablosu
+    const convVenues = venueList.filter(v => v.views >= 3).sort((a, b) => b.convRate - a.convRate);
+    document.getElementById('analytics-conversion').innerHTML = convVenues.length === 0
+      ? '<div style="text-align:center;color:var(--text-muted);padding:16px">Yeterli veri yok (min 3 goruntuleme).</div>'
+      : '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">' +
+        convVenues.slice(0, 8).map(v => {
+          const ringPct = v.convRate;
+          const ringColor = ringPct >= 20 ? 'var(--green)' : ringPct >= 10 ? 'var(--terra)' : 'var(--text-muted)';
+          return '<div style="background:var(--cream);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px">' +
+            '<div style="position:relative;width:44px;height:44px;flex-shrink:0">' +
+              '<svg width="44" height="44" style="transform:rotate(-90deg)"><circle cx="22" cy="22" r="18" fill="none" stroke="rgba(0,0,0,.06)" stroke-width="4"/>' +
+              '<circle cx="22" cy="22" r="18" fill="none" stroke="' + ringColor + '" stroke-width="4" stroke-dasharray="' + Math.round(113 * ringPct / 100) + ' 113" stroke-linecap="round"/></svg>' +
+              '<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:800;color:' + ringColor + '">%' + ringPct + '</span>' +
+            '</div>' +
+            '<div style="min-width:0">' +
+              '<div style="font-size:.78rem;font-weight:700;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + v.emoji + ' ' + v.title + '</div>' +
+              '<div style="font-size:.65rem;color:var(--text-muted)">' + v.views + ' goruntuleme → ' + v.totalActs + ' aksiyon</div>' +
+            '</div>' +
+          '</div>';
+        }).join('') + '</div>';
 
     // Aksiyonlar
     const actList = Object.entries(venueActions).map(([id, acts]) => {
