@@ -1093,7 +1093,7 @@ function renderFooter(opts = {}) {
         </div>
         <!-- Alt: Copyright -->
         <div class="ft-bottom">
-          <span class="ft-copy">© 2026 Assos'u Keşfet · Tüm hakları saklıdır</span>
+          <span class="ft-copy">© ${new Date().getFullYear()} Assos'u Keşfet · Tüm hakları saklıdır</span>
           <span class="ft-legal"><a href="${basePath}gizlilik.html">Gizlilik Politikası</a> · <a href="${basePath}kullanim-kosullari.html">Kullanım Koşulları</a></span>
         </div>
       </div>
