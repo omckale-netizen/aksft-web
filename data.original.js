@@ -482,6 +482,119 @@ window.DATA = {
         "relax",
         "molası"
       ]
+    },
+    {
+      "id": "fotograf-rotasi",
+      "title": "Fotoğraf Rotası",
+      "emoji": "📷",
+      "tag": "📸 Fotoğraf",
+      "tagColor": "rgba(138,85,32,0.3)",
+      "tagTextColor": "#D4935A",
+      "headerBg": "linear-gradient(135deg,rgba(138,85,32,0.3) 0%,rgba(196,82,26,0.15) 100%)",
+      "description": "Assos bölgesinin en fotoğrafik noktalarını kapsayan bu rota, gün boyu farklı ışık koşullarında en iyi kareleri yakalamanız için tasarlandı. Sabahın ilk ışıklarında Athena Tapınağı, öğlen Antik Liman yansımaları, öğleden sonra köylerin taş dokusu ve akşam Ege üzerine batan güneş — her durakta deklanşöre basacaksınız.",
+      "shortDesc": "Gün boyu en iyi fotoğraf noktaları — tapınak, liman, köyler ve gün batımı.",
+      "duration": "6–8 saat",
+      "distance": "",
+      "difficulty": "Kolay",
+      "zorluk": "Kolay",
+      "sure": "6–8 saat",
+      "keywords": [
+        "fotoğraf",
+        "gün batımı",
+        "manzara",
+        "sunset",
+        "altın saat",
+        "tapınak",
+        "köy",
+        "taş ev",
+        "antik",
+        "panorama",
+        "ışık"
+      ],
+      "stops": [
+        {
+          "title": "Athena Tapınağı — Sabah Işığı",
+          "desc": "Sabahın ilk ışıklarında tapınak, en az kalabalık ve en yumuşak ışıkla sizi karşılar. Ege manzarası arka planda, sütunlar arasından gün doğumu.",
+          "emoji": "🏛"
+        },
+        {
+          "title": "Assos Antik Liman — Yansımalar",
+          "desc": "Öğlene doğru limandaki taş yapılar ve deniz yansımaları mükemmel kareler sunar. Balıkçı tekneleri ve tarihi atmosfer.",
+          "emoji": "⚓"
+        },
+        {
+          "title": "Behramkale Köyü — Taş Dokular",
+          "desc": "Dar sokaklar, taş evler, sarmaşıklar ve ahşap kapılar. Köy içi doku fotoğrafları için ideal.",
+          "emoji": "🏘"
+        },
+        {
+          "title": "Adatepe — Panorama Noktası",
+          "desc": "Adatepe köyünden Ege adalarına uzanan panoramik manzara. Zeus Altarı bölgesinden geniş açı çekimler.",
+          "emoji": "🌄"
+        },
+        {
+          "title": "Gün Batımı — Farklı Noktalar",
+          "desc": "Tapınak tepesi, Behramkale surları, Kadırga sahili veya Babakale kalesi — her biri farklı bir gün batımı deneyimi sunar.",
+          "emoji": "🌅"
+        }
+      ]
+    },
+    {
+      "id": "lezzet-rotasi",
+      "title": "Lezzet Rotası",
+      "emoji": "🍽",
+      "tag": "🍴 Gastronomi",
+      "tagColor": "rgba(26,107,138,0.3)",
+      "tagTextColor": "#4DBDE8",
+      "headerBg": "linear-gradient(135deg,rgba(26,107,138,0.3) 0%,rgba(90,122,86,0.15) 100%)",
+      "description": "Assos ve çevresinin yerel lezzetlerini keşfetmek için hazırlanmış bu rota, sabah serpme köy kahvaltısından başlayıp akşam deniz kenarında taze balıkla biten bir gastronomi yolculuğu. Zeytinyağlı mezeler, otlu peynirler, ev yapımı pideler ve Ege mutfağının en otantik tatları sizi bekliyor.",
+      "shortDesc": "Kahvaltıdan akşam yemeğine — Assos'un yerel lezzetlerini keşfet.",
+      "duration": "Tam gün",
+      "distance": "",
+      "difficulty": "Çok Kolay",
+      "zorluk": "Çok Kolay",
+      "sure": "Tam gün",
+      "keywords": [
+        "yemek",
+        "lezzet",
+        "kahvaltı",
+        "balık",
+        "restoran",
+        "kafe",
+        "gastronomi",
+        "zeytinyağı",
+        "ege",
+        "serpme",
+        "köy kahvaltısı",
+        "pide"
+      ],
+      "stops": [
+        {
+          "title": "Serpme Köy Kahvaltısı",
+          "desc": "Güne bölgenin organik ürünleriyle başlayın — ev yapımı peynirler, taze otlar, zeytinyağı ve köy ekmeği. Manzara eşliğinde uzun bir kahvaltı.",
+          "emoji": "🌞"
+        },
+        {
+          "title": "Zeytinyağı Tadımı — Adatepe",
+          "desc": "Adatepe Zeytinyağı Müzesi'nde bölgenin ödüllü zeytinyağlarını tadın. Soğuk sıkım yağların farkını keşfedin.",
+          "emoji": "🫒"
+        },
+        {
+          "title": "Antik Liman — Öğle Yemeği",
+          "desc": "Denize sıfır konumda taze balık ve Ege mezeleri. Ahtapot ızgara, karides güveç ve mevsim salatası.",
+          "emoji": "🐟"
+        },
+        {
+          "title": "Kafe Molası — Manzaralı Çay/Kahve",
+          "desc": "Bölgenin kafelerinde Türk kahvesi veya filtre kahve eşliğinde Ege manzarasının tadını çıkarın.",
+          "emoji": "☕"
+        },
+        {
+          "title": "Akşam Yemeği",
+          "desc": "Günün finalinde yerel bir restoranda Ege mutfağının en güzel yemekleriyle veda edin. Zeytinyağlılar, taze balık ve ev tatlıları.",
+          "emoji": "🍷"
+        }
+      ]
     }
   ],
   "places": [
@@ -727,8 +840,19 @@ window.DATA = {
       "shortDesc": "Geleneksel zeytinyağı üretim sürecini anlatan küçük ama etkileyici bir müze. Adatepe köyünde.",
       "description": "Adatepe Zeytinyağı Müzesi, köyün merkezinde yer alan ve geleneksel zeytinyağı üretim sürecini ziyaretçilere sunan küçük ama özgün bir müzedir. Taş yapı içinde eski pres ve üretim aletleri sergilenmekte, zeytinyağının bölge kültüründeki yeri anlatılmaktadır.",
       "location": "Adatepe Köyü, Ayvacık",
-      "tags": ["Müze", "Zeytin", "Kültür"],
-      "keywords": ["adatepe", "zeytinyağı", "müze", "zeytin", "kültür", "üretim"],
+      "tags": [
+        "Müze",
+        "Zeytin",
+        "Kültür"
+      ],
+      "keywords": [
+        "adatepe",
+        "zeytinyağı",
+        "müze",
+        "zeytin",
+        "kültür",
+        "üretim"
+      ],
       "image": ""
     },
     {
@@ -743,8 +867,18 @@ window.DATA = {
       "shortDesc": "Assos'un en popüler koylarından biri. Sivrice ile birlikte Babakale yönünün gözde durağı.",
       "description": "Sokakağzı Koyu, Assos'dan Babakale yönüne giderken ulaşılan, son yıllarda popülerliği artan sakin bir koydur. Berrak suları ve doğal yapısıyla yüzme ve güneşlenme için idealdir.",
       "location": "Sokakağzı, Ayvacık",
-      "tags": ["Koy", "Yüzme", "Sakin"],
-      "keywords": ["sokakağzı", "koy", "deniz", "yüzme", "sakin"],
+      "tags": [
+        "Koy",
+        "Yüzme",
+        "Sakin"
+      ],
+      "keywords": [
+        "sokakağzı",
+        "koy",
+        "deniz",
+        "yüzme",
+        "sakin"
+      ],
       "image": ""
     },
     {
@@ -759,8 +893,18 @@ window.DATA = {
       "shortDesc": "Assos'dan Babakale yönünde, son yıllarda gelişen sakin bir koy ve sahil yerleşimi.",
       "description": "Yeşil Liman, Assos'dan Babakale yönüne doğru giderken karşılaşılan, yukarı köylerin sahil yerleşimi olan küçük bir koydur. Son yıllarda turizmde gelişme göstermekle birlikte hâlâ sakin yapısını korumaktadır.",
       "location": "Yeşil Liman, Ayvacık",
-      "tags": ["Koy", "Sakin", "Doğa"],
-      "keywords": ["yeşil liman", "koy", "sahil", "sakin", "doğa"],
+      "tags": [
+        "Koy",
+        "Sakin",
+        "Doğa"
+      ],
+      "keywords": [
+        "yeşil liman",
+        "koy",
+        "sahil",
+        "sakin",
+        "doğa"
+      ],
       "image": ""
     }
   ],
@@ -1163,8 +1307,7 @@ window.DATA = {
         "konaklama"
       ],
       "hours": "Check-in 14:00",
-      "images": [
-      ],
+      "images": [],
       "phone": "0530 946 71 38",
       "address": "Büyükhusun Köyü No:281, Ayvacık / Çanakkale",
       "website": "https://sunabakasriotel.com/",
@@ -1212,8 +1355,7 @@ window.DATA = {
         "kafe"
       ],
       "hours": "",
-      "images": [
-      ],
+      "images": [],
       "phone": "0542 724 35 26",
       "address": "Küme evleri no:1, 17860 Cemaller/Ayvacık/",
       "website": "",
