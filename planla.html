@@ -386,29 +386,53 @@ function pageInit() {
   /* ── Recommendation logic ── */
   function scoreRoute(r) {
     let s = 0;
-    const kw = (r.keywords || []).join(' ').toLowerCase();
+    const kw = (r.keywords || []).join(' ').toLowerCase() + ' ' + (r.title || '').toLowerCase() + ' ' + (r.description || '').toLowerCase();
+    const isWinterSel = sel.mevsim === 'kis';
+    const isSummerSel = sel.mevsim === 'yaz';
+    const isDenizRoute = /deniz|koy|yüzme|plaj|beach|sahil/.test(kw);
+
+    // Mevsim kontrolü — kışta deniz rotasını ciddi cezala
+    if (isWinterSel && isDenizRoute) s -= 10;
+    // Yazda deniz rotası bonus
+    if (isSummerSel && isDenizRoute) s += 2;
+
+    // İlgi alanı eşleşmeleri
     if (sel.ilgi.has('tarih') && /antik|tarih|tapınak|arkeoloji/.test(kw)) s += 3;
-    if (sel.ilgi.has('deniz') && /deniz|koy|yüzme|plaj/.test(kw)) s += 3;
+    if (sel.ilgi.has('deniz') && isDenizRoute) s += 3;
+    if (sel.ilgi.has('plaj') && isDenizRoute) s += 3;
     if (sel.ilgi.has('koy') && /köy|village|taş ev/.test(kw)) s += 3;
     if (sel.ilgi.has('fotograf') && /gün batımı|manzara|fotoğraf|sunset/.test(kw)) s += 3;
+    if (sel.ilgi.has('gunbatimi') && /gün batımı|sunset|batım/.test(kw)) s += 3;
     if (sel.ilgi.has('yemek') && /kahve|kafe|balık|yemek|molası/.test(kw)) s += 3;
     if (sel.ilgi.has('doga') && /doğa|yürüyüş|zeytinlik|orman/.test(kw)) s += 2;
     if (sel.ilgi.has('muze') && /müze|zeytin|adatepe|kültür/.test(kw)) s += 3;
+
+    // Kışta tarih/köy/kültür rotaları bonus
+    if (isWinterSel && /tarih|köy|kültür|antik|müze/.test(kw)) s += 2;
+
     // Group bonuses
     if (sel.grup === 'cift' && /gün batımı|romantik|sunset/.test(kw)) s += 2;
     if (sel.grup === 'aile' && r.zorluk === 'Kolay') s += 1;
     if (sel.grup === 'yalniz' && /sakin|yavaş|huzur/.test(kw)) s += 1;
     // Duration
-    if (sel.sure === '1gun' && (r.sure.includes('saat') || r.durak <= 3)) s += 1;
-    if (sel.sure === 'uzun') s += 0.5; // all routes welcome
+    if (sel.sure === '1gun' && (r.sure || '').includes('saat')) s += 1;
+    if (sel.sure === 'uzun') s += 0.5;
     return s;
   }
 
   function scoreVenue(v) {
     let s = 0;
+    const isWinterSel = sel.mevsim === 'kis';
+    // Kışta beach/iskele cezala
+    if (isWinterSel && (v.category === 'beach' || v.category === 'iskele')) s -= 5;
+    // İlgi alanı
     if (sel.ilgi.has('yemek') && (v.category === 'restoran' || v.category === 'kahvalti')) s += 3;
     if (sel.ilgi.has('yemek') && v.category === 'kafe') s += 2;
     if (sel.ilgi.has('fotograf') && v.category === 'kafe') s += 1;
+    if (sel.ilgi.has('plaj') && v.category === 'beach') s += 3;
+    // Kışta konaklama ve yemek öne çık
+    if (isWinterSel && (v.category === 'restoran' || v.category === 'kafe' || v.category === 'konaklama')) s += 1;
+    // Grup
     if (sel.grup === 'cift' && /romantik|manzara|sessiz/.test((v.tags||[]).join(' ').toLowerCase())) s += 2;
     if (sel.grup === 'aile') s += 0.5;
     return s;
