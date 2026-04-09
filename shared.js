@@ -2422,36 +2422,15 @@ function renderVenuePage(venueId) {
   if (window.trackPageView) trackPageView('venue_' + v.id);
 
   document.getElementById('vp-body').innerHTML = `
-    <!-- Info bar -->
-    <div class="vp-info-bar">
-      <div class="vp-info-inner">
-        <div class="vp-info-item">
-          <span class="vp-info-icon">📍</span>
-          <div><span class="vp-info-label">Konum</span><span class="vp-info-text">${v.location}</span></div>
-        </div>
-        <div class="vp-info-item">
-          <span class="vp-info-icon">${v.emoji}</span>
-          <div><span class="vp-info-label">Tür</span><span class="vp-info-text">${cs.label}</span></div>
-        </div>
-        ${(v.tags||[]).length > 0 ? `<div class="vp-info-item">
-          <span class="vp-info-icon">🌿</span>
-          <div><span class="vp-info-label">Atmosfer</span><span class="vp-info-text">${v.tags.join(', ')}</span></div>
-        </div>` : ''}
-        ${v.phone ? `<div class="vp-info-item">
-          <span class="vp-info-icon">📞</span>
-          <div><span class="vp-info-label">Telefon</span><span class="vp-info-text">${v.phone}</span></div>
-        </div>` : ''}
-      </div>
-    </div>
-
     <!-- Content -->
     <div class="vp-body-wrap">
       <div class="vp-body-inner">
 
-        <!-- Description -->
+        <!-- Description + Tags -->
         <div class="vp-section fade-up">
           <div class="vp-eyebrow">Hakkında</div>
           <div class="vp-desc"><p>${(v.description || v.shortDesc).replace(/\. ([A-ZÇŞĞÜÖİ])/g, '.</p><p>$1')}</p></div>
+          ${(v.tags||[]).length > 0 ? '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:16px">' + v.tags.map(t => '<span style="font-size:.72rem;font-weight:600;padding:4px 12px;border-radius:999px;background:rgba(26,39,68,.05);color:#4A5870;">' + t + '</span>').join('') + '</div>' : ''}
         </div>
 
         <!-- Highlights -->
@@ -2581,9 +2560,11 @@ function renderVenuePage(venueId) {
             ${similar.map(s => {
               const sm  = VMETA[s.id] || { g:'linear-gradient(160deg,#1A2744,#2A3A5A)' };
               const scs = CAT_STYLE[s.category] || { bg:'rgba(26,39,68,.08)', color:'#4A5568', label:s.category };
+              const simHasImg = s.images && s.images.length > 0;
               return `<a class="vp-sim-card" href="${base}mekanlar/mekan-detay.html?id=${s.id}">
                 <div class="vp-sim-img" style="background:${sm.g};">
-                  <span class="vp-sim-emoji">${s.emoji}</span>
+                  ${simHasImg ? '<img src="' + s.images[0] + '" alt="' + s.title + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s;" onload="this.style.opacity=\'1\'">' : ''}
+                  <span class="vp-sim-emoji" ${simHasImg ? 'style="position:relative;z-index:1;text-shadow:0 2px 8px rgba(0,0,0,.5)"' : ''}>${s.emoji}</span>
                 </div>
                 <div class="vp-sim-body">
                   <span class="vp-sim-cat" style="background:${scs.bg};color:${scs.color};">${scs.label}</span>
@@ -2619,7 +2600,7 @@ function renderVenuePage(venueId) {
             <span class="vp-note-icon">💡</span>
             <div>
               <div class="vp-note-title">Gitmeden önce bilin</div>
-              <div class="vp-note-text">Çalışma saatleri mevsime ve hava durumuna göre değişebilir. Yoğun dönemlerde — özellikle Temmuz ve Ağustos — rezervasyon öneririz. Küçük mekânlar nakit ödeme talep edebilir. Her ziyaret öncesi sosyal medya hesaplarından güncel bilgiyi kontrol etmek iyi fikir.</div>
+              <div class="vp-note-text">${v.category === 'konaklama' ? 'Rezervasyon için önceden iletişime geçmeniz önerilir. Check-in/check-out saatleri değişiklik gösterebilir. Erken giriş veya geç çıkış için mekana danışın. Ödeme yöntemlerini önceden sorun.' : v.category === 'restoran' || v.category === 'kahvalti' ? 'Çalışma saatleri mevsime göre değişebilir. Yoğun dönemlerde — özellikle Temmuz ve Ağustos — rezervasyon öneririz. Bazı mekanlarda kart geçmeyebilir, nakit bulundurun.' : v.category === 'beach' ? 'Deniz koşulları günden güne değişebilir. Şezlong ve şemsiye durumu için önceden arayın. Güneş kremi ve su getirmeniz önerilir. Koylar genellikle gölgesizdir.' : v.category === 'kafe' ? 'Çalışma saatleri mevsime göre değişebilir. Küçük kafeler nakit ödeme talep edebilir. Yoğun saatlerde yer bulmak zorlaşabilir — erken gidin.' : 'Çalışma saatleri mevsime ve hava durumuna göre değişebilir. Her ziyaret öncesi sosyal medya hesaplarından güncel bilgiyi kontrol etmek iyi fikir.'}</div>
             </div>
           </div>
         </div>
