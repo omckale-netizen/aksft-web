@@ -48,6 +48,8 @@ function pageInit() {
   }
 
   renderRoutePage(routeId);
+  // Firebase'den güncel veri geldiğinde tekrar render et
+  document.addEventListener('dataReady', function() { renderRoutePage(routeId); });
 
   const route = (window.DATA?.routes || []).find(r => r.id === routeId);
   if (route) {
