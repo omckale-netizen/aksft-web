@@ -3882,6 +3882,9 @@ async function renderAnalytics() {
    VENUE STATUS (open/closed)
 ══════════════════════════════════════════════════ */
 function getVenueStatus(v) {
+  // Konaklama mekanları her zaman açık (resepsiyon 7/24)
+  if (v.category === 'konaklama') return true;
+
   const now = new Date();
   const dayNames = ['Pazar','Pazartesi','Sali','Carsamba','Persembe','Cuma','Cumartesi'];
   const todayName = dayNames[now.getDay()];
