@@ -181,8 +181,7 @@ function pageInit() {
   /* ══════════════════════════════════════════
      KATEGORİLER & RENKLER
   ══════════════════════════════════════════ */
-  const CATS = [
-    { id:'all',       label:'Tümü',          icon:'✦' },
+  const ALL_CATS = [
     { id:'kafe',      label:'Kafeler',        icon:'☕' },
     { id:'restoran',  label:'Restoranlar',    icon:'🍽' },
     { id:'kahvalti',  label:'Kahvaltı',       icon:'🥚' },
@@ -190,6 +189,9 @@ function pageInit() {
     { id:'beach',     label:'Beach & Koylar', icon:'🏖' },
     { id:'iskele',    label:'İskeleler',      icon:'⚓' },
   ];
+  // Sadece mekanlarda bulunan kategorileri göster
+  const activeCats = new Set((DATA.venues || []).map(v => v.category));
+  const CATS = [{ id:'all', label:'Tümü', icon:'✦' }, ...ALL_CATS.filter(c => activeCats.has(c.id))];
 
   const CAT_STYLE = {
     kafe:      { bg:'rgba(196,82,26,.1)',   color:'#C4521A',  label:'Kafe' },
