@@ -1651,22 +1651,22 @@ function renderRoutePage(routeId) {
   }
 
   /* ── Build HTML ── */
-  const stopsHTML = r.stops.map(s => `
+  const stopsHTML = (r.stops || []).map((s, idx) => `
     <div class="rp-stop fade-up">
-      <div class="rp-stop-dot">${s.no}</div>
+      <div class="rp-stop-dot">${s.no || (idx + 1)}</div>
       <div class="rp-stop-card">
         <div class="rp-stop-head">
-          <div class="rp-stop-emo" style="background:${p.stopBg};">${s.emoji}</div>
-          <div><div class="rp-stop-name">${s.title}</div><div class="rp-stop-dur">⏱ ${s.duration}</div></div>
+          <div class="rp-stop-emo" style="background:${p.stopBg};">${s.emoji || '📍'}</div>
+          <div><div class="rp-stop-name">${s.title || ''}</div>${s.duration ? '<div class="rp-stop-dur">⏱ ' + s.duration + '</div>' : ''}</div>
         </div>
         <div class="rp-stop-body">
-          <p class="rp-stop-txt">${s.desc}</p>
+          <p class="rp-stop-txt">${s.desc || ''}</p>
           ${s.tip ? `<div class="rp-stop-tip">${s.tip}</div>` : ''}
         </div>
       </div>
     </div>`).join('');
 
-  const tipsHTML = r.tips.map((t, i) => `
+  const tipsHTML = (r.tips || []).map((t, i) => `
     <div class="rp-tip fade-up">
       <div class="rp-tip-num">${i+1}</div>
       <div class="rp-tip-txt">${t}</div>
