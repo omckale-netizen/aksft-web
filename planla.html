@@ -452,79 +452,151 @@ function pageInit() {
     // Render routes
     document.getElementById('plan-routes').innerHTML = routes.map((r, i) => routeCardHTML(r, i * 0.07)).join('');
 
-    // Day-by-day program
-    const hasSea = sel.ilgi.has('deniz');
+    // Day-by-day program — mevsim + ilgi alanına göre dinamik
+    const hasSea = sel.ilgi.has('deniz') || sel.ilgi.has('plaj');
     const hasHistory = sel.ilgi.has('tarih');
     const hasMuseum = sel.ilgi.has('muze');
+    const hasVillage = sel.ilgi.has('koy');
+    const hasFood = sel.ilgi.has('yemek');
+    const hasPhoto = sel.ilgi.has('fotograf') || sel.ilgi.has('gunbatimi');
+    const hasNature = sel.ilgi.has('doga');
+    const isWinter = sel.mevsim === 'kis';
+    const isSummer = sel.mevsim === 'yaz';
+    const isSpring = sel.mevsim === 'ilkbahar';
+
+    // Gün batımı noktaları (blog: assos-gun-batimi-en-iyi-noktalar)
+    const sunsetSpots = ['Athena Tapınağı tepesi', 'Behramkale surları üstü', 'Babakale kalesi', 'Kadırga Koyu sahili', 'Adatepe Zeus Altarı'];
+    const sunsetPick = sunsetSpots[Math.floor(Math.random() * sunsetSpots.length)];
+
+    // Blog linkleri
+    const blogLink = (slug, text) => '<a href="blog?yazi=' + slug + '" style="color:var(--amber);text-decoration:underline;font-size:.72rem;margin-left:6px">' + text + '</a>';
+
     const dayProgram = [];
     if (sel.sure === '1gun') {
-      dayProgram.push({
-        title: 'Gün Programı',
-        items: [
-          { time: '08:30', text: 'Athena Tapınağı (açılışta git, kalabalıksız)' },
-          { time: '10:00', text: 'Behramkale köy sokakları + kahve molası' },
-          { time: '11:30', text: 'Antik Liman\'a iniş + öğle yemeği' },
-          { time: '14:00', text: hasHistory ? 'Nekropol + Surlar gezisi' : 'Kadırga Koyu\'nda deniz' },
-          { time: '16:30', text: hasSea ? 'Sivrice veya Sokakağzı Koyu' : 'Adatepe köy gezisi' },
-          { time: '18:30', text: 'Gün batımı için tapınak tepesine dönüş' },
-          { time: '20:00', text: 'Behramkale\'de akşam yemeği' },
-        ]
-      });
+      const items = [
+        { time: '08:30', text: 'Athena Tapınağı — açılışta git, kalabalıksız' + blogLink('assos-antik-kenti-gezi-rehberi', 'Rehber →') },
+        { time: '10:00', text: 'Behramkale köy sokakları + kahve molası' },
+        { time: '11:30', text: 'Antik Liman\'a iniş + öğle yemeği' + blogLink('assos-yerel-lezzetler-ne-yenir', 'Ne yenir? →') },
+      ];
+      if (isSummer && hasSea) {
+        items.push({ time: '14:00', text: 'Kadırga Koyu\'nda deniz' + blogLink('assos-koy-plaj-rehberi', 'Koy rehberi →') });
+      } else if (hasHistory) {
+        items.push({ time: '14:00', text: 'Nekropol + Antik Surlar gezisi' });
+      } else if (hasVillage) {
+        items.push({ time: '14:00', text: 'Adatepe köy gezisi + Zeytinyağı Müzesi' + blogLink('adatepe-gezi-rehberi', 'Rehber →') });
+      } else {
+        items.push({ time: '14:00', text: isWinter ? 'Adatepe köy gezisi + sıcak çorba molası' + blogLink('adatepe-gezi-rehberi', 'Rehber →') : 'Adatepe köy gezisi' });
+      }
+      if (!isWinter && (hasSea || isSummer)) {
+        items.push({ time: '16:30', text: 'Sivrice veya Sokakağzı Koyu' });
+      } else {
+        items.push({ time: '16:30', text: isWinter ? 'Behramkale\'de sıcak çay ve manzara' : 'Gülpınar — Apollo Smintheion Tapınağı' });
+      }
+      items.push({ time: '18:30', text: 'Gün batımı — ' + sunsetPick + blogLink('assos-gun-batimi-en-iyi-noktalar', '5 nokta →') });
+      items.push({ time: '20:00', text: 'Akşam yemeği' + blogLink('assos-yerel-lezzetler-ne-yenir', 'Lezzetler →') });
+      dayProgram.push({ title: 'Gün Programı', items: items });
+
     } else if (sel.sure === '2gun') {
-      dayProgram.push({
-        title: '1. Gün — Tarih & Keşif',
-        items: [
-          { time: '09:00', text: 'Athena Tapınağı + Surlar + Hüdavendigâr Camii' },
-          { time: '11:00', text: 'Behramkale köy gezisi' },
-          { time: '12:30', text: 'Antik Liman\'da öğle yemeği' },
-          { time: '14:30', text: hasMuseum ? 'Adatepe + Zeytinyağı Müzesi' : 'Adatepe köy gezisi' },
-          { time: '17:00', text: 'Konaklama check-in' },
-          { time: '18:30', text: 'Gün batımı tepede' },
-        ]
-      });
-      dayProgram.push({
-        title: '2. Gün — Koylar & Köyler',
-        items: [
-          { time: '09:00', text: 'Serpme köy kahvaltısı' },
-          { time: '10:30', text: 'Kadırga Koyu\'nda deniz' },
-          { time: '13:00', text: hasSea ? 'Sivrice veya Sokakağzı Koyu' : 'Babakale gezisi' },
-          { time: '15:30', text: 'Babakale — en batı noktası' },
-          { time: '17:00', text: 'Kayalar veya Büyükhusun köyü' },
-          { time: '19:00', text: 'Dönüş yolu + veda' },
-        ]
-      });
+      // 1. GÜN
+      const day1 = [
+        { time: '09:00', text: 'Athena Tapınağı + Surlar + Hüdavendigâr Camii' + blogLink('assos-antik-kenti-gezi-rehberi', 'Tarih rehberi →') },
+        { time: '11:00', text: 'Behramkale köy gezisi + kahve' },
+        { time: '12:30', text: 'Antik Liman\'da öğle yemeği' + blogLink('assos-yerel-lezzetler-ne-yenir', 'Ne yenir? →') },
+      ];
+      if (hasMuseum || hasVillage) {
+        day1.push({ time: '14:30', text: 'Adatepe + Zeytinyağı Müzesi' + blogLink('adatepe-gezi-rehberi', 'Rehber →') });
+      } else if (!isWinter && hasSea) {
+        day1.push({ time: '14:30', text: 'Kadırga Koyu\'nda deniz' + blogLink('assos-koy-plaj-rehberi', 'Koy rehberi →') });
+      } else {
+        day1.push({ time: '14:30', text: isWinter ? 'Gülpınar — Apollo Smintheion Tapınağı' : 'Adatepe köy gezisi' });
+      }
+      day1.push({ time: '17:00', text: 'Konaklama check-in' + blogLink('assos-nerede-kalinir-konaklama', 'Nerede kalınır? →') });
+      day1.push({ time: '18:30', text: 'Gün batımı — ' + sunsetPick + blogLink('assos-gun-batimi-en-iyi-noktalar', '5 nokta →') });
+      dayProgram.push({ title: '1. Gün — Tarih & Keşif', items: day1 });
+
+      // 2. GÜN
+      const day2 = [
+        { time: '09:00', text: hasFood ? 'Serpme köy kahvaltısı' + blogLink('assos-en-iyi-kahvalti-mekanlari', 'Kahvaltı rehberi →') : 'Kahvaltı + yola çıkış' },
+      ];
+      if (!isWinter && (hasSea || isSummer)) {
+        day2.push({ time: '10:30', text: 'Kadırga Koyu\'nda sabah denizi' + blogLink('assos-koy-plaj-rehberi', 'Koy rehberi →') });
+        day2.push({ time: '13:00', text: 'Sivrice veya Sokakağzı Koyu' });
+        day2.push({ time: '15:30', text: 'Babakale — Anadolu\'nun en batı noktası' + blogLink('babakale-gezi-rehberi', 'Rehber →') });
+      } else {
+        day2.push({ time: '10:30', text: 'Babakale gezisi — Anadolu\'nun en batı noktası' + blogLink('babakale-gezi-rehberi', 'Rehber →') });
+        day2.push({ time: '13:00', text: isWinter ? 'Babakale\'de sıcak balık çorbası + manzara' : 'Gülpınar — Apollo Smintheion' });
+        day2.push({ time: '15:00', text: hasVillage ? 'Kayalar + Büyükhusun köyleri' + blogLink('assos-koylari-rehberi', 'Köy rotası →') : 'Yeşilyurt köyü gezisi' });
+      }
+      day2.push({ time: '17:00', text: 'Son molalar + dönüş yolu' });
+      dayProgram.push({ title: isWinter ? '2. Gün — Köyler & Kültür' : '2. Gün — Koylar & Köyler', items: day2 });
+
     } else {
+      // 3+ GÜN (hafta sonu / uzun tatil)
+      // 1. GÜN — Tarih
       dayProgram.push({
-        title: '1. Gün — Tarih',
+        title: '1. Gün — Tarih & Antik Kent',
         items: [
-          { time: '09:00', text: 'Athena Tapınağı + Antik Kent + Surlar' },
-          { time: '11:30', text: 'Behramkale sokakları + kahve' },
-          { time: '13:00', text: 'Antik Liman\'da balık yemeği' },
-          { time: '15:00', text: 'Apollon Smintheion (Gülpınar)' },
-          { time: '18:00', text: 'Gün batımı tepede' },
+          { time: '09:00', text: 'Athena Tapınağı + Antik Kent + Surlar' + blogLink('assos-antik-kenti-gezi-rehberi', 'Tarih rehberi →') },
+          { time: '11:30', text: 'Behramkale sokakları + kahve molası' },
+          { time: '13:00', text: 'Antik Liman\'da balık yemeği' + blogLink('assos-yerel-lezzetler-ne-yenir', 'Lezzetler →') },
+          { time: '15:00', text: 'Gülpınar — Apollo Smintheion Tapınağı' },
+          { time: '17:00', text: 'Konaklama check-in' + blogLink('assos-nerede-kalinir-konaklama', 'Nerede kalınır? →') },
+          { time: '18:30', text: 'Gün batımı — ' + sunsetPick + blogLink('assos-gun-batimi-en-iyi-noktalar', '5 nokta →') },
         ]
       });
+
+      // 2. GÜN — Deniz veya Kış alternatifi
+      if (!isWinter) {
+        dayProgram.push({
+          title: '2. Gün — Deniz & Koylar',
+          items: [
+            { time: '08:30', text: 'Kadırga Koyu — sabah erken, sakin' + blogLink('assos-koy-plaj-rehberi', 'Koy rehberi →') },
+            { time: '11:00', text: 'Sivrice Koyu (yürüyüşle ulaşılır)' },
+            { time: '14:00', text: 'Sokakağzı veya Yeşil Liman' },
+            { time: '16:00', text: hasFood ? 'Antik Liman\'da çay + tatlı' : 'Ahmetçe sahilinde mola' },
+            { time: '18:00', text: 'Konaklama + akşam yemeği' },
+          ]
+        });
+      } else {
+        dayProgram.push({
+          title: '2. Gün — Kış Rotası' + blogLink('assosa-kisin-gitmek', 'Kış rehberi →'),
+          items: [
+            { time: '09:00', text: hasFood ? 'Serpme köy kahvaltısı' + blogLink('assos-en-iyi-kahvalti-mekanlari', 'Kahvaltı →') : 'Kahvaltı + çıkış' },
+            { time: '11:00', text: 'Adatepe köyü + Zeytinyağı Müzesi' + blogLink('adatepe-gezi-rehberi', 'Rehber →') },
+            { time: '13:00', text: 'Yerel zeytinyağlı yemekler' + blogLink('assos-yerel-lezzetler-ne-yenir', 'Lezzetler →') },
+            { time: '15:00', text: 'Kayalar + Büyükhusun köyleri' + blogLink('assos-koylari-rehberi', 'Köy rotası →') },
+            { time: '17:00', text: 'Sıcak şömine başında çay + manzara' },
+          ]
+        });
+      }
+
+      // 3. GÜN — Köyler
       dayProgram.push({
-        title: '2. Gün — Deniz & Koylar',
+        title: '3. Gün — Köyler & Keşif',
         items: [
-          { time: '08:30', text: 'Kadırga Koyu (erken, boş)' },
-          { time: '11:00', text: 'Sivrice Koyu (yürüyüşle)' },
-          { time: '14:00', text: 'Sokakağzı veya Yeşil Liman' },
-          { time: '16:00', text: 'Ahmetçe İskelesi\'nde çay' },
-          { time: '18:00', text: 'Konaklama + akşam yemeği' },
+          { time: '09:00', text: hasFood ? 'Serpme köy kahvaltısı' + blogLink('assos-en-iyi-kahvalti-mekanlari', 'Kahvaltı →') : 'Kahvaltı + çıkış' },
+          { time: '10:30', text: 'Babakale — Anadolu\'nun en batı noktası' + blogLink('babakale-gezi-rehberi', 'Rehber →') },
+          { time: '12:30', text: 'Babakale\'de öğle yemeği + kale gezisi' },
+          { time: '14:30', text: hasNature ? 'Zeytinlik yürüyüş rotası' : 'Yeşilyurt + Koyunevi köyleri' },
+          { time: '16:30', text: 'Son molalar + hediyelik zeytinyağı alışverişi' },
+          { time: '18:00', text: 'Dönüş yolu' },
         ]
       });
-      dayProgram.push({
-        title: '3. Gün — Köyler & Kültür',
-        items: [
-          { time: '09:00', text: 'Adatepe + Zeytinyağı Müzesi' },
-          { time: '11:00', text: 'Kayalar köyü' },
-          { time: '12:30', text: 'Büyükhusun + panorama' },
-          { time: '14:00', text: 'Babakale — en batı noktası + öğle' },
-          { time: '16:00', text: 'Küçükhusun + son molalar' },
-          { time: '18:00', text: 'Dönüş' },
-        ]
-      });
+
+      // 4. GÜN (uzun tatil)
+      if (sel.sure === 'uzun') {
+        dayProgram.push({
+          title: '4. Gün — Serbest Keşif',
+          items: [
+            { time: '09:00', text: 'Geç kahvaltı + dinlenme' },
+            { time: '11:00', text: hasPhoto ? 'Fotoğraf turu — en güzel manzara noktaları' : 'Behramkale\'de serbest gezinti' },
+            { time: '13:00', text: 'Daha önce gidemediğin mekanı dene' },
+            { time: '15:00', text: !isWinter ? 'En sevdiğin koya tekrar git' : 'Antik Liman\'da uzun çay molası' },
+            { time: '17:00', text: 'Son gün batımı — farklı bir noktadan izle' + blogLink('assos-gun-batimi-en-iyi-noktalar', '5 nokta →') },
+            { time: '19:00', text: 'Veda yemeği + dönüş' },
+          ]
+        });
+      }
     }
 
     // Day program section
