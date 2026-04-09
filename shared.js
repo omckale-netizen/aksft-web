@@ -2551,7 +2551,33 @@ function renderVenuePage(venueId) {
           '</div>';
         })()}
 
-        <!-- Similar venues -->
+        <!-- Komşu Mekanlar (aynı konum) -->
+        ${(() => {
+          const neighbors = DATA.venues.filter(x => x.id !== v.id && x.location && v.location && x.location.toLowerCase() === v.location.toLowerCase()).slice(0, 4);
+          if (neighbors.length === 0) return '';
+          return '<div class="vp-section fade-up">' +
+            '<div class="vp-eyebrow">Komşu Mekanlar</div>' +
+            '<h2 class="vp-stitle">' + v.location + '\'da Ayrıca</h2>' +
+            '<div class="vp-sim-track">' +
+            neighbors.map(s => {
+              const sm = VMETA[s.id] || { g:'linear-gradient(160deg,#1A2744,#2A3A5A)' };
+              const scs = CAT_STYLE[s.category] || { bg:'rgba(26,39,68,.08)', color:'#4A5568', label:s.category };
+              const nHasImg = s.images && s.images.length > 0;
+              return '<a class="vp-sim-card" href="' + base + 'mekanlar/mekan-detay.html?id=' + s.id + '">' +
+                '<div class="vp-sim-img" style="background:' + sm.g + ';">' +
+                  (nHasImg ? '<img src="' + s.images[0] + '" alt="' + s.title + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s;" onload="this.style.opacity=\'1\'">' : '') +
+                  '<span class="vp-sim-emoji" ' + (nHasImg ? 'style="position:relative;z-index:1;text-shadow:0 2px 8px rgba(0,0,0,.5)"' : '') + '>' + s.emoji + '</span>' +
+                '</div>' +
+                '<div class="vp-sim-body">' +
+                  '<span class="vp-sim-cat" style="background:' + scs.bg + ';color:' + scs.color + ';">' + scs.label + '</span>' +
+                  '<div class="vp-sim-name">' + s.title + '</div>' +
+                  '<div class="vp-sim-loc">📍 ' + s.location + '</div>' +
+                '</div></a>';
+            }).join('') +
+            '</div></div>';
+        })()}
+
+        <!-- Similar venues (aynı kategori) -->
         ${similar.length > 0 ? `
         <div class="vp-section fade-up">
           <div class="vp-eyebrow">Benzer Mekanlar</div>
