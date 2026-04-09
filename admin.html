@@ -641,7 +641,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <option value="all">Tüm Kategoriler</option>
               <option value="kafe">☕ Kafeler</option>
               <option value="restoran">🍽 Restoranlar</option>
-              <option value="kahvalti">🥚 Kahvaltı</option>
+              <option value="kahvalti">🌞 Kahvaltı</option>
               <option value="konaklama">🏨 Konaklama</option>
               <option value="beach">🏖 Beach</option>
               <option value="iskele">⚓ İskeleler</option>
@@ -664,7 +664,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             <option value="">Kategori Değiştir</option>
             <option value="kafe">☕ Kafe</option>
             <option value="restoran">🍽 Restoran</option>
-            <option value="kahvalti">🥚 Kahvalti</option>
+            <option value="kahvalti">🌞 Kahvalti</option>
             <option value="konaklama">🏨 Konaklama</option>
             <option value="beach">🏖 Beach</option>
             <option value="iskele">⚓ Iskele</option>
@@ -747,7 +747,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                 <option value="">Secin</option>
                 <option value="kafe">☕ Kafe</option>
                 <option value="restoran">🍽 Restoran</option>
-                <option value="kahvalti">🥚 Kahvalti</option>
+                <option value="kahvalti">🌞 Kahvalti</option>
                 <option value="konaklama">🏨 Konaklama</option>
                 <option value="beach">🏖 Beach</option>
                 <option value="iskele">⚓ Iskele</option>
@@ -1883,7 +1883,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <option value="">Secin</option>
               <option value="kafe">☕ Kafe</option>
               <option value="restoran">🍽 Restoran</option>
-              <option value="kahvalti">🥚 Kahvalti</option>
+              <option value="kahvalti">🌞 Kahvalti</option>
               <option value="konaklama">🏨 Konaklama</option>
               <option value="beach">🏖 Beach</option>
               <option value="iskele">⚓ Iskele</option>
@@ -2517,7 +2517,7 @@ let venueCategories = [];
 const DEFAULT_CATS = [
   { id:'kafe', label:'Kafe', emoji:'☕', color:'#C4521A' },
   { id:'restoran', label:'Restoran', emoji:'🍽', color:'#1A6B8A' },
-  { id:'kahvalti', label:'Kahvalti', emoji:'🥚', color:'#8A5520' },
+  { id:'kahvalti', label:'Kahvalti', emoji:'🌞', color:'#8A5520' },
   { id:'konaklama', label:'Konaklama', emoji:'🏨', color:'#5A7A56' },
   { id:'beach', label:'Beach', emoji:'🏖', color:'#1A9A8A' },
   { id:'iskele', label:'Iskele', emoji:'⚓', color:'#3A5A8A' }
@@ -3981,7 +3981,7 @@ function renderDashboard() {
   v.forEach(x => { if (getVenueStatus(x) === true) openCount++; });
 
   const catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvalti',konaklama:'Konaklama',beach:'Beach',iskele:'Iskele'};
-  const catEmojis = {kafe:'☕',restoran:'🍽',kahvalti:'🥚',konaklama:'🏨',beach:'🏖',iskele:'⚓'};
+  const catEmojis = {kafe:'☕',restoran:'🍽',kahvalti:'🌞',konaklama:'🏨',beach:'🏖',iskele:'⚓'};
   const catColors = {kafe:'#C4521A',restoran:'#1A6B8A',kahvalti:'#D4935A',konaklama:'#5A7A56',beach:'#1A9A8A',iskele:'#3A5A8A'};
 
   /* Stats */
@@ -4301,7 +4301,7 @@ function updateBulkBar() {
 function bulkChangeCategory() {
   const cat = document.getElementById('bulk-cat-select').value;
   if (!cat) { showToast('Kategori secin.', 'error'); return; }
-  const catEmojis = {kafe:'☕',restoran:'🍽',kahvalti:'🥚',konaklama:'🏨',beach:'🏖',iskele:'⚓'};
+  const catEmojis = {kafe:'☕',restoran:'🍽',kahvalti:'🌞',konaklama:'🏨',beach:'🏖',iskele:'⚓'};
   showConfirm('Kategori Değiştir', bulkSelected.length + ' mekanin kategorisi "' + cat + '" olarak degistirilecek. Devam?', async () => {
     for (const id of bulkSelected) {
       const v = draftData.venues.find(x => x.id === id);
@@ -4586,7 +4586,7 @@ function generateId(title) {
     .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 }
 
-const CAT_EMOJIS = { kafe:'☕', restoran:'🍽', kahvalti:'🥚', konaklama:'🏨', beach:'🏖', iskele:'⚓' };
+const CAT_EMOJIS = { kafe:'☕', restoran:'🍽', kahvalti:'🌞', konaklama:'🏨', beach:'🏖', iskele:'⚓' };
 
 /* ── Tag chips sistemi ── */
 const PRESET_TAGS = [
@@ -6848,7 +6848,7 @@ async function exportImages() {
 /* ══════════════════════════════════════════════════
    VENUE BOT (improved)
 ══════════════════════════════════════════════════ */
-const BOT_CAT_EMOJIS = { kafe:'☕', restoran:'🍽', kahvalti:'🥚', konaklama:'🏨', beach:'🏖', iskele:'⚓' };
+const BOT_CAT_EMOJIS = { kafe:'☕', restoran:'🍽', kahvalti:'🌞', konaklama:'🏨', beach:'🏖', iskele:'⚓' };
 let botPendingImages = [];
 
 function botAutoCatEmoji() {
