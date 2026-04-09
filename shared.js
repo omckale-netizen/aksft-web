@@ -3,6 +3,23 @@
    Nav, Footer, Search, Utilities
 ═══════════════════════════════════════════ */
 
+// Türkçe karakter düzeltme (Firebase'de eksik karakterler)
+function fixTR(s) {
+  if (!s) return s;
+  return s
+    .replace(/\bPazartesi\b/gi, 'Pazartesi')
+    .replace(/\bSali\b/g, 'Salı')
+    .replace(/\bCarsamba\b/g, 'Çarşamba')
+    .replace(/\bPersembe\b/g, 'Perşembe')
+    .replace(/\bCuma\b/gi, 'Cuma')
+    .replace(/\bCumartesi\b/gi, 'Cumartesi')
+    .replace(/\bPazar\b/gi, 'Pazar')
+    .replace(/\bKapali\b/g, 'Kapalı')
+    .replace(/\bAcik\b/g, 'Açık')
+    .replace(/\bHer gun\b/gi, 'Her gün')
+    .replace(/\bher gun\b/gi, 'her gün');
+}
+
 /* ── HTML attribute escape (XSS koruması) ── */
 function escAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
@@ -2342,8 +2359,8 @@ function renderVenuePage(venueId) {
                 const isToday = idx === todayIdx;
                 const statusCls = isToday ? (isClosed ? ' vp-hca-closed' : (isNowOpen ? ' vp-hca-open' : ' vp-hca-closed')) : '';
                 return '<div class="vp-hero-card-row' + (isToday ? ' vp-hero-card-active' + statusCls : '') + '">' +
-                    '<span class="vp-hero-card-label">' + (isToday ? '<span class="vp-hero-card-dot"></span>' : '') + entry.days + '</span>' +
-                    '<span class="vp-hero-card-val' + (isClosed ? ' vp-hcv-closed' : '') + '">' + entry.hours + '</span>' +
+                    '<span class="vp-hero-card-label">' + (isToday ? '<span class="vp-hero-card-dot"></span>' : '') + fixTR(entry.days) + '</span>' +
+                    '<span class="vp-hero-card-val' + (isClosed ? ' vp-hcv-closed' : '') + '">' + fixTR(entry.hours) + '</span>' +
                   '</div>';
               }).join('');
             })()}
@@ -2371,8 +2388,8 @@ function renderVenuePage(venueId) {
     }
     return rows.filter(entry => entry.days).map(entry =>
       `<div class="vp-hours-row">
-        <span class="vp-hours-day">${entry.days}</span>
-        <span class="vp-hours-val ${(entry.hours || '') === 'Kapalı' ? 'vp-hours-closed' : ''}">${entry.hours || ''}</span>
+        <span class="vp-hours-day">${fixTR(entry.days)}</span>
+        <span class="vp-hours-val ${(entry.hours || '').toLowerCase().includes('kapal') ? 'vp-hours-closed' : ''}">${fixTR(entry.hours) || ''}</span>
       </div>`
     ).join('');
   })();
