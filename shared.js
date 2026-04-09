@@ -2332,35 +2332,56 @@ function renderVenuePage(venueId) {
             :
             (() => {
               const DAY_ORDER = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
+              const DAY_ALIASES = {'pazartesi':0,'sali':1,'salı':1,'carsamba':2,'çarşamba':2,'persembe':3,'perşembe':3,'cuma':4,'cumartesi':5,'pazar':6};
               const entries = (v.weeklyHours || []).filter(e => e.days);
-              // Kronolojik sırala
-              entries.sort((a, b) => {
-                const aIdx = DAY_ORDER.findIndex(d => a.days.toLowerCase().includes(d.toLowerCase()));
-                const bIdx = DAY_ORDER.findIndex(d => b.days.toLowerCase().includes(d.toLowerCase()));
-                return (aIdx === -1 ? 99 : aIdx) - (bIdx === -1 ? 99 : bIdx);
-              });
-              // Bugünün satırını bul — sadece 1 tane işaretle
-              const todayLower = todayName.toLowerCase();
-              let todayIdx = -1;
-              for (let i = 0; i < entries.length; i++) {
-                const d = entries[i].days.toLowerCase();
-                if (d.includes(todayLower) || d.includes('her gün')) { todayIdx = i; break; }
-                // "Pazartesi – Cuma" gibi aralık kontrolü
-                const rangeMatch = d.match(/(\w+)\s*[–\-]\s*(\w+)/);
+
+              // Her günün saatini çıkar
+              var dayMap = {}; // {0:'10:00–18:00', 1:'Kapalı', ...}
+              entries.forEach(entry => {
+                var d = fixTR(entry.days || '').toLowerCase();
+                var h = fixTR(entry.hours || '');
+                // "Her gün" kontrolü
+                if (d.includes('her gün')) { for(var i=0;i<7;i++) if(!dayMap[i]) dayMap[i]=h; return; }
+                // Aralık: "Pazartesi – Cuma" veya "Cumartesi – Pazar"
+                var rangeMatch = d.match(/(\S+)\s*[–\-]\s*(\S+)/);
                 if (rangeMatch) {
-                  const startDay = DAY_ORDER.findIndex(x => x.toLowerCase().includes(rangeMatch[1].toLowerCase()));
-                  const endDay = DAY_ORDER.findIndex(x => x.toLowerCase().includes(rangeMatch[2].toLowerCase()));
-                  const todayDayIdx = DAY_ORDER.findIndex(x => x.toLowerCase() === todayLower);
-                  if (startDay !== -1 && endDay !== -1 && todayDayIdx >= startDay && todayDayIdx <= endDay) { todayIdx = i; break; }
+                  var s = DAY_ALIASES[rangeMatch[1].toLowerCase()];
+                  var e = DAY_ALIASES[rangeMatch[2].toLowerCase()];
+                  if (s !== undefined && e !== undefined) {
+                    if (s <= e) { for(var i=s;i<=e;i++) if(!dayMap[i]) dayMap[i]=h; }
+                    else { for(var i=s;i<7;i++) if(!dayMap[i]) dayMap[i]=h; for(var i=0;i<=e;i++) if(!dayMap[i]) dayMap[i]=h; }
+                    return;
+                  }
                 }
+                // Tek gün
+                Object.keys(DAY_ALIASES).forEach(alias => {
+                  if (d.includes(alias)) { var idx = DAY_ALIASES[alias]; if(!dayMap[idx]) dayMap[idx]=h; }
+                });
+              });
+
+              // Aynı saatleri grupla (Pazartesi-Cuma aynıysa birleştir)
+              var groups = [];
+              var i = 0;
+              while (i < 7) {
+                if (dayMap[i] === undefined) { i++; continue; }
+                var start = i;
+                var hours = dayMap[i];
+                while (i < 7 && dayMap[i] === hours) i++;
+                var end = i - 1;
+                var label = start === end ? DAY_ORDER[start] : DAY_ORDER[start] + ' – ' + DAY_ORDER[end];
+                groups.push({ label: label, hours: hours, startIdx: start, endIdx: end });
               }
-              return entries.map((entry, idx) => {
-                const isClosed = (entry.hours || '').toLowerCase().includes('kapal');
-                const isToday = idx === todayIdx;
-                const statusCls = isToday ? (isClosed ? ' vp-hca-closed' : (isNowOpen ? ' vp-hca-open' : ' vp-hca-closed')) : '';
+
+              // Bugünün indeksini bul
+              var todayDayIdx = DAY_ORDER.findIndex(x => x.toLowerCase() === todayName.toLowerCase());
+
+              return groups.map(g => {
+                var isClosed = g.hours.toLowerCase().includes('kapal');
+                var isToday = todayDayIdx >= g.startIdx && todayDayIdx <= g.endIdx;
+                var statusCls = isToday ? (isClosed ? ' vp-hca-closed' : (isNowOpen ? ' vp-hca-open' : ' vp-hca-closed')) : '';
                 return '<div class="vp-hero-card-row' + (isToday ? ' vp-hero-card-active' + statusCls : '') + '">' +
-                    '<span class="vp-hero-card-label">' + (isToday ? '<span class="vp-hero-card-dot"></span>' : '') + fixTR(entry.days) + '</span>' +
-                    '<span class="vp-hero-card-val' + (isClosed ? ' vp-hcv-closed' : '') + '">' + fixTR(entry.hours) + '</span>' +
+                    '<span class="vp-hero-card-label">' + (isToday ? '<span class="vp-hero-card-dot"></span>' : '') + g.label + '</span>' +
+                    '<span class="vp-hero-card-val' + (isClosed ? ' vp-hcv-closed' : '') + '">' + g.hours + '</span>' +
                   '</div>';
               }).join('');
             })()}
