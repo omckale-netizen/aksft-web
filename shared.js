@@ -2313,18 +2313,40 @@ function renderVenuePage(venueId) {
               '<div class="vp-hero-card-row"><span class="vp-hero-card-label">🔑 Check-in</span><span class="vp-hero-card-val">' + (v.checkin || '14:00') + '</span></div>' +
               '<div class="vp-hero-card-row"><span class="vp-hero-card-label">🚪 Check-out</span><span class="vp-hero-card-val">' + (v.checkout || '11:00') + '</span></div>'
             :
-            (v.weeklyHours || []).filter(entry => entry.days).map(entry => {
-              const isClosed = (entry.hours || '').toLowerCase().includes('kapal');
-              const isActive = entry.days.toLowerCase().includes(todayName.toLowerCase())
-                || entry.days.toLowerCase().includes('her gün')
-                || (entry.days.toLowerCase().includes('pazartesi') && entry.days.toLowerCase().includes('cuma') && ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma'].includes(todayName))
-                || (entry.days.toLowerCase().includes('cumartesi') && entry.days.toLowerCase().includes('pazar') && ['Cumartesi','Pazar'].includes(todayName));
-              const statusCls = isActive ? (isNowOpen ? ' vp-hca-open' : ' vp-hca-closed') : '';
-              return '<div class="vp-hero-card-row' + (isActive ? ' vp-hero-card-active' + statusCls : '') + '">' +
-                  '<span class="vp-hero-card-label">' + (isActive ? '<span class="vp-hero-card-dot"></span>' : '') + entry.days + '</span>' +
-                  '<span class="vp-hero-card-val' + (isClosed ? ' vp-hcv-closed' : '') + '">' + entry.hours + '</span>' +
-                '</div>';
-            }).join('')}
+            (() => {
+              const DAY_ORDER = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
+              const entries = (v.weeklyHours || []).filter(e => e.days);
+              // Kronolojik sırala
+              entries.sort((a, b) => {
+                const aIdx = DAY_ORDER.findIndex(d => a.days.toLowerCase().includes(d.toLowerCase()));
+                const bIdx = DAY_ORDER.findIndex(d => b.days.toLowerCase().includes(d.toLowerCase()));
+                return (aIdx === -1 ? 99 : aIdx) - (bIdx === -1 ? 99 : bIdx);
+              });
+              // Bugünün satırını bul — sadece 1 tane işaretle
+              const todayLower = todayName.toLowerCase();
+              let todayIdx = -1;
+              for (let i = 0; i < entries.length; i++) {
+                const d = entries[i].days.toLowerCase();
+                if (d.includes(todayLower) || d.includes('her gün')) { todayIdx = i; break; }
+                // "Pazartesi – Cuma" gibi aralık kontrolü
+                const rangeMatch = d.match(/(\w+)\s*[–\-]\s*(\w+)/);
+                if (rangeMatch) {
+                  const startDay = DAY_ORDER.findIndex(x => x.toLowerCase().includes(rangeMatch[1].toLowerCase()));
+                  const endDay = DAY_ORDER.findIndex(x => x.toLowerCase().includes(rangeMatch[2].toLowerCase()));
+                  const todayDayIdx = DAY_ORDER.findIndex(x => x.toLowerCase() === todayLower);
+                  if (startDay !== -1 && endDay !== -1 && todayDayIdx >= startDay && todayDayIdx <= endDay) { todayIdx = i; break; }
+                }
+              }
+              return entries.map((entry, idx) => {
+                const isClosed = (entry.hours || '').toLowerCase().includes('kapal');
+                const isToday = idx === todayIdx;
+                const statusCls = isToday ? (isClosed ? ' vp-hca-closed' : (isNowOpen ? ' vp-hca-open' : ' vp-hca-closed')) : '';
+                return '<div class="vp-hero-card-row' + (isToday ? ' vp-hero-card-active' + statusCls : '') + '">' +
+                    '<span class="vp-hero-card-label">' + (isToday ? '<span class="vp-hero-card-dot"></span>' : '') + entry.days + '</span>' +
+                    '<span class="vp-hero-card-val' + (isClosed ? ' vp-hcv-closed' : '') + '">' + entry.hours + '</span>' +
+                  '</div>';
+              }).join('');
+            })()}
             </div>
             <div class="vp-hero-card-footer"><span>${v.category === 'konaklama' ? 'Erken giriş/geç çıkış için iletişime geçin' : 'Saatler mevsime göre değişebilir'}</span></div>
           </div>
