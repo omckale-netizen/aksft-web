@@ -110,7 +110,7 @@
 
         // Premium mekanlar üstte, kendi aralarında saatlik rotasyon
         var now = new Date().toISOString().split('T')[0];
-        function isPrem(v) { return v.premium && (!v.premiumStart || now >= v.premiumStart) && (!v.premiumEnd || now <= v.premiumEnd); }
+        function isPrem(v) { return v.premium && (!v.premiumStart || now >= v.premiumStart) && (!v.premiumEnd || now < v.premiumEnd); }
         var hourSeed = Math.floor(Date.now() / 3600000); // her saat degisir
         venues.sort(function(a, b) {
           var pa = isPrem(a) ? 0 : 1;

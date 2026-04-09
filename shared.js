@@ -13,7 +13,7 @@ function isPremiumActive(v) {
   if (!v || !v.premium) return false;
   var now = new Date().toISOString().split('T')[0];
   if (v.premiumStart && now < v.premiumStart) return false;
-  if (v.premiumEnd && now > v.premiumEnd) return false;
+  if (v.premiumEnd && now >= v.premiumEnd) return false;
   return true;
 }
 
