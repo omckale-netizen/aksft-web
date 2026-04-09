@@ -25,8 +25,7 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ error: 'Missing type or data' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
   }
 
-  // Bilinen type kontrolu
-  const allowedTypes = ['login', 'login_blocked', 'message'];
+  const allowedTypes = ['login', 'login_blocked', 'message', 'backup', 'premium', 'security', 'password'];
   if (!allowedTypes.includes(type)) {
     return new Response(JSON.stringify({ error: 'Unknown type' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
   }
@@ -38,25 +37,71 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ error: 'Config missing' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 
-  // Input sanitizasyon — HTML/script injection onleme
   function sanitize(str, maxLen) {
     if (typeof str !== 'string') return '';
     return str.replace(/[<>&"']/g, '').substring(0, maxLen || 200);
   }
 
   let text = '';
+
   if (type === 'login') {
-    text = '\u{1F510} Admin panele giris yapildi\n\u{1F4C5} ' + sanitize(data.date, 50) + '\n\u{1F464} ' + sanitize(data.email, 100);
-    if (data.ip) text += '\n\u{1F310} IP: ' + sanitize(data.ip, 45);
-    if (data.device) text += '\n\u{1F4F1} Cihaz: ' + sanitize(data.device, 100);
+    text = '━━━━━━━━━━━━━━━━━━━━\n';
+    text += '\u{1F510} ADMIN GIRISI\n';
+    text += '━━━━━━━━━━━━━━━━━━━━\n\n';
+    text += '\u{1F4C5} ' + sanitize(data.date, 50) + '\n';
+    text += '\u{1F464} ' + sanitize(data.email, 100) + '\n';
+    if (data.ip) text += '\u{1F310} IP: ' + sanitize(data.ip, 45) + '\n';
+    if (data.device) text += '\u{1F4F1} ' + sanitize(data.device, 100);
+
   } else if (type === 'login_blocked') {
-    text = '\u{1F6A8} UYARI: Basarisiz giris denemeleri!\n\u{1F4C5} ' + sanitize(data.date, 50) + '\n\u{1F464} ' + sanitize(data.email, 100) + '\n\u{1F6AB} ' + sanitize(String(data.attempts || '?'), 5) + ' basarisiz deneme — hesap kitlendi';
-    if (data.ip) text += '\n\u{1F310} IP: ' + sanitize(data.ip, 45);
-    if (data.device) text += '\n\u{1F4F1} Cihaz: ' + sanitize(data.device, 100);
+    text = '━━━━━━━━━━━━━━━━━━━━\n';
+    text += '\u{1F6A8} BASARISIZ GIRIS UYARISI\n';
+    text += '━━━━━━━━━━━━━━━━━━━━\n\n';
+    text += '\u{1F464} ' + sanitize(data.email, 100) + '\n';
+    text += '\u{1F6AB} ' + sanitize(String(data.attempts || '?'), 5) + ' basarisiz deneme\n';
+    text += '\u{1F512} Hesap kitlendi\n';
+    if (data.ip) text += '\u{1F310} IP: ' + sanitize(data.ip, 45) + '\n';
+    if (data.device) text += '\u{1F4F1} ' + sanitize(data.device, 100);
+
   } else if (type === 'message') {
-    text = '\u{1F4E9} Yeni iletisim mesaji!\n\u{1F464} ' + sanitize(data.name, 100) + '\n\u{1F4E7} ' + sanitize(data.email, 100);
-    if (data.phone) text += '\n\u{1F4DE} ' + sanitize(data.phone, 20);
-    text += '\n\u{1F4CB} ' + sanitize(data.subject || 'Genel', 50) + '\n\u{1F4AC} ' + sanitize(data.message, 500);
+    text = '━━━━━━━━━━━━━━━━━━━━\n';
+    text += '\u{1F4E9} YENI ILETISIM MESAJI\n';
+    text += '━━━━━━━━━━━━━━━━━━━━\n\n';
+    text += '\u{1F464} ' + sanitize(data.name, 100) + '\n';
+    text += '\u{1F4E7} ' + sanitize(data.email, 100) + '\n';
+    if (data.phone) text += '\u{1F4DE} ' + sanitize(data.phone, 30) + '\n';
+    text += '\u{1F4CB} Konu: ' + sanitize(data.subject || 'Genel', 50) + '\n\n';
+    text += '\u{1F4AC} ' + sanitize(data.message, 500);
+
+  } else if (type === 'backup') {
+    text = '━━━━━━━━━━━━━━━━━━━━\n';
+    text += '\u{1F4BE} YEDEKLEME ' + (sanitize(data.backupType, 20) === 'auto' ? '(OTOMATIK)' : '(MANUEL)') + '\n';
+    text += '━━━━━━━━━━━━━━━━━━━━\n\n';
+    text += '\u{2705} Yedekleme tamamlandi\n';
+    text += '\u{1F4C1} ' + sanitize(data.fileName, 100) + '\n';
+    text += '\u{1F4BE} ' + sanitize(data.size, 20) + '\n';
+    text += '\u{1F4C5} ' + sanitize(data.date, 50);
+
+  } else if (type === 'premium') {
+    text = '━━━━━━━━━━━━━━━━━━━━\n';
+    text += '\u{1F451} PREMIUM BILDIRIM\n';
+    text += '━━━━━━━━━━━━━━━━━━━━\n\n';
+    text += sanitize(data.message, 500);
+
+  } else if (type === 'security') {
+    text = '━━━━━━━━━━━━━━━━━━━━\n';
+    text += '\u{1F6E1} GUVENLIK UYARISI\n';
+    text += '━━━━━━━━━━━━━━━━━━━━\n\n';
+    text += sanitize(data.message, 500);
+
+  } else if (type === 'password') {
+    text = '━━━━━━━━━━━━━━━━━━━━\n';
+    text += '\u{1F511} SIFRE DEGISTIRILDI\n';
+    text += '━━━━━━━━━━━━━━━━━━━━\n\n';
+    text += '\u{1F464} ' + sanitize(data.email, 100) + '\n';
+    text += '\u{1F4C5} ' + sanitize(data.date, 50) + '\n';
+    if (data.ip) text += '\u{1F310} IP: ' + sanitize(data.ip, 45) + '\n';
+    if (data.device) text += '\u{1F4F1} ' + sanitize(data.device, 100);
   }
 
   try {

@@ -2489,13 +2489,12 @@ async function changePassword() {
     const device = getDeviceInfo();
     const ip = await getClientIP();
     fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      type:'message',
+      type:'password',
       data:{
-        name: 'Güvenlik Sistemi',
         email: user.email,
-        phone: '',
-        subject: 'Şifre Değişikliği',
-        message: '🔑 Admin şifresi değiştirildi.\n📅 ' + new Date().toLocaleString('tr-TR') + '\n🌐 IP: ' + ip + '\n📱 Cihaz: ' + device.platform
+        date: new Date().toLocaleString('tr-TR'),
+        ip: ip,
+        device: device.platform
       }
     })}).catch(()=>{});
   } catch(err) {
@@ -7424,13 +7423,9 @@ async function runSecurityCheck() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        type: 'message',
+        type: 'security',
         data: {
-          name: 'Güvenlik Sistemi',
-          email: 'sistem@assosukesfet.com',
-          phone: '',
-          subject: 'Güvenlik Uyarısı',
-          message: '⚠️ Güvenlik taramasında ' + failed.length + ' sorun tespit edildi: ' + failNames + ' — Skor: ' + score + '/100'
+          message: '⚠️ Güvenlik taramasında ' + failed.length + ' sorun tespit edildi:\n' + failNames + '\nSkor: ' + score + '/100'
         }
       })
     }).catch(() => {});
@@ -7644,13 +7639,9 @@ async function cleanExpiredPremiums() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      type: 'message',
+      type: 'premium',
       data: {
-        name: 'Premium Sistemi',
-        email: 'sistem@assosukesfet.com',
-        phone: '',
-        subject: 'Premium Süresi Doldu',
-        message: '⏰ ' + expired.length + ' mekanın premium süresi doldu ve otomatik kapatıldı:\n' + names
+        message: '⏰ ' + expired.length + ' mekanın premium süresi doldu ve otomatik kapatıldı:\n\n' + names
       }
     })
   }).catch(function(){});
@@ -7740,13 +7731,12 @@ async function runAutoBackup(manual) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        type: 'message',
+        type: 'backup',
         data: {
-          name: 'Yedekleme Sistemi',
-          email: 'sistem@assosukesfet.com',
-          phone: '',
-          subject: (manual ? 'Manuel' : 'Otomatik') + ' Yedekleme',
-          message: '✅ Yedekleme tamamlandı\n📁 ' + fileName + '\n💾 ' + sizeKB + ' KB\n📅 ' + now.toLocaleString('tr-TR')
+          backupType: manual ? 'manual' : 'auto',
+          fileName: fileName,
+          size: sizeKB + ' KB',
+          date: now.toLocaleString('tr-TR')
         }
       })
     }).catch(function(){});
