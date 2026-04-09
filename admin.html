@@ -2950,6 +2950,8 @@ function initApp() {
   setupDragDrop();
   setupBackupDragDrop();
   try { initNotifBadge(); } catch(e) {}
+  // Süresi dolan premium mekanları otomatik temizle
+  cleanExpiredPremiums();
   // Haftalık llms-full.txt otomatik güncelleme kontrolü (8sn sonra)
   setTimeout(checkAutoLlmsUpdate, 8000);
   // Haftalık otomatik yedekleme kontrolü (5sn sonra, sayfa yüklenmesini engellemesin)
@@ -4603,10 +4605,23 @@ function openVenueModal(id) {
     document.getElementById('f-website').value = v.website || '';
     document.getElementById('f-instagram').value = v.instagram || '';
     document.getElementById('f-featured').checked = !!v.featured;
-    document.getElementById('f-premium').checked = !!v.premium;
+    // Premium süresi kontrolü — dolmuşsa otomatik kapat
+    var premActive = !!v.premium;
+    if (premActive && v.premiumEnd) {
+      var today = new Date().toISOString().split('T')[0];
+      if (today >= v.premiumEnd) {
+        premActive = false;
+        v.premium = false;
+        v.premiumStart = null;
+        v.premiumEnd = null;
+        saveVenueToFirestore(v);
+        showToast('⚠️ "' + v.title + '" premium süresi dolmuş, otomatik kapatıldı.', 'error');
+      }
+    }
+    document.getElementById('f-premium').checked = premActive;
     document.getElementById('f-premium-start').value = v.premiumStart || '';
     document.getElementById('f-premium-end').value = v.premiumEnd || '';
-    document.getElementById('f-featured').disabled = !!v.premium;
+    document.getElementById('f-featured').disabled = premActive;
     togglePremiumDates();
     setTagsFromString((v.tags || []).join(', '));
     // Saat girişlerini yükle
@@ -7602,6 +7617,45 @@ function generateLlmsFullTxt() {
 
   if (statusEl) statusEl.innerHTML = '<span style="color:var(--green)">✓ İndirildi! Projenin kök dizinine koyun ve deploy edin. (' + v.length + ' mekan, ' + r.length + ' rota, ' + vi.length + ' köy, ' + p.length + ' yer)</span>';
   showToast('llms-full.txt oluşturuldu ve indirildi.', 'success');
+}
+
+/* ══════════════════════════════════════════════════
+   PREMIUM SÜRESİ DOLANLARI OTOMATİK TEMİZLE
+══════════════════════════════════════════════════ */
+async function cleanExpiredPremiums() {
+  var today = new Date().toISOString().split('T')[0];
+  var expired = (draftData.venues || []).filter(function(v) {
+    return v.premium && v.premiumEnd && today >= v.premiumEnd;
+  });
+  if (expired.length === 0) return;
+
+  for (var i = 0; i < expired.length; i++) {
+    var v = expired[i];
+    v.premium = false;
+    v.premiumStart = null;
+    v.premiumEnd = null;
+    await db.collection('venues').doc(v.id).update({ premium: false, premiumStart: null, premiumEnd: null }).catch(function(){});
+    logActivity('premium_bitti', v.id, v.title + ' — premium süresi doldu, otomatik kapatıldı');
+  }
+
+  // Telegram bildirim
+  var names = expired.map(function(v) { return v.title; }).join(', ');
+  fetch('/api/notify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      type: 'message',
+      data: {
+        name: 'Premium Sistemi',
+        email: 'sistem@assosukesfet.com',
+        phone: '',
+        subject: 'Premium Süresi Doldu',
+        message: '⏰ ' + expired.length + ' mekanın premium süresi doldu ve otomatik kapatıldı:\n' + names
+      }
+    })
+  }).catch(function(){});
+
+  showToast('⏰ ' + expired.length + ' mekanın premium süresi doldu, otomatik kapatıldı.', 'error');
 }
 
 /* ══════════════════════════════════════════════════
