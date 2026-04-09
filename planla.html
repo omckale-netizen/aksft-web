@@ -47,16 +47,21 @@
     <div class="pl-hero-steps">
       <div class="pl-hero-step">
         <span class="pl-hero-step-num">1</span>
-        <span>Süre</span>
+        <span>Mevsim</span>
       </div>
       <div class="pl-hero-step-arrow"></div>
       <div class="pl-hero-step">
         <span class="pl-hero-step-num">2</span>
-        <span>İlgi Alanı</span>
+        <span>Süre</span>
       </div>
       <div class="pl-hero-step-arrow"></div>
       <div class="pl-hero-step">
         <span class="pl-hero-step-num">3</span>
+        <span>İlgi Alanı</span>
+      </div>
+      <div class="pl-hero-step-arrow"></div>
+      <div class="pl-hero-step">
+        <span class="pl-hero-step-num">4</span>
         <span>Grup</span>
       </div>
       <div class="pl-hero-step-arrow"></div>
@@ -73,27 +78,66 @@
   <div style="max-width:900px;margin:0 auto;">
 
     <!-- Progress bar -->
-    <div id="progress-bar" style="display:flex;align-items:center;gap:0;margin-bottom:56px;max-width:480px;margin-left:auto;margin-right:auto;">
+    <div id="progress-bar" style="display:flex;align-items:center;gap:0;margin-bottom:56px;max-width:580px;margin-left:auto;margin-right:auto;">
       <div class="prog-step active" data-step="1">
         <div class="prog-dot">1</div>
-        <span class="prog-label">Süre</span>
+        <span class="prog-label">Mevsim</span>
       </div>
       <div class="prog-line"></div>
       <div class="prog-step" data-step="2">
         <div class="prog-dot">2</div>
-        <span class="prog-label">İlgiler</span>
+        <span class="prog-label">Süre</span>
       </div>
       <div class="prog-line"></div>
       <div class="prog-step" data-step="3">
         <div class="prog-dot">3</div>
+        <span class="prog-label">İlgiler</span>
+      </div>
+      <div class="prog-line"></div>
+      <div class="prog-step" data-step="4">
+        <div class="prog-dot">4</div>
         <span class="prog-label">Grup</span>
       </div>
     </div>
 
-    <!-- STEP 1: Duration -->
+    <!-- STEP 1: Mevsim -->
     <div id="step-1" class="wizard-step">
       <div style="text-align:center;margin-bottom:40px;">
-        <p class="section-label" style="margin-bottom:8px;">Adım 1 / 3</p>
+        <p class="section-label" style="margin-bottom:8px;">Adım 1 / 4</p>
+        <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.6rem,4vw,2.4rem);letter-spacing:-.03em;color:var(--navy);margin-bottom:12px;">Ne zaman gidiyorsun?</h2>
+        <p style="font-size:.9rem;color:var(--text-soft);">Mevsime göre sana en uygun aktiviteleri ve mekanları önerelim.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;">
+        <div class="pick-card" data-group="mevsim" data-val="ilkbahar" onclick="pickCard(this)">
+          <div class="pick-icon">🌸</div>
+          <div class="pick-title">İlkbahar</div>
+          <div class="pick-sub">Mart – Mayıs · Doğa canlanır</div>
+        </div>
+        <div class="pick-card" data-group="mevsim" data-val="yaz" onclick="pickCard(this)">
+          <div class="pick-icon">☀️</div>
+          <div class="pick-title">Yaz</div>
+          <div class="pick-sub">Haziran – Ağustos · Deniz sezonu</div>
+        </div>
+        <div class="pick-card" data-group="mevsim" data-val="sonbahar" onclick="pickCard(this)">
+          <div class="pick-icon">🍂</div>
+          <div class="pick-title">Sonbahar</div>
+          <div class="pick-sub">Eylül – Kasım · Sakin keşif</div>
+        </div>
+        <div class="pick-card" data-group="mevsim" data-val="kis" onclick="pickCard(this)">
+          <div class="pick-icon">❄️</div>
+          <div class="pick-title">Kış</div>
+          <div class="pick-sub">Aralık – Şubat · Huzur ve tarih</div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:36px;">
+        <button class="btn-next" onclick="goStep(2)" id="next-1" disabled>Devam Et →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Duration -->
+    <div id="step-2" class="wizard-step" style="display:none;">
+      <div style="text-align:center;margin-bottom:40px;">
+        <p class="section-label" style="margin-bottom:8px;">Adım 2 / 4</p>
         <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.6rem,4vw,2.4rem);letter-spacing:-.03em;color:var(--navy);margin-bottom:12px;">Ne kadar zamanın var?</h2>
         <p style="font-size:.9rem;color:var(--text-soft);">Gezin için ayırdığın süreye göre en uygun planı hazırlayalım.</p>
       </div>
@@ -119,65 +163,33 @@
           <div class="pick-sub">4+ gün, hiçbir şey kaçmaz</div>
         </div>
       </div>
-      <div style="text-align:center;margin-top:36px;">
-        <button class="btn-next" onclick="goStep(2)" id="next-1" disabled>Devam Et →</button>
-      </div>
-    </div>
-
-    <!-- STEP 2: Interests -->
-    <div id="step-2" class="wizard-step" style="display:none;">
-      <div style="text-align:center;margin-bottom:40px;">
-        <p class="section-label" style="margin-bottom:8px;">Adım 2 / 3</p>
-        <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.6rem,4vw,2.4rem);letter-spacing:-.03em;color:var(--navy);margin-bottom:12px;">Ne arıyorsun?</h2>
-        <p style="font-size:.9rem;color:var(--text-soft);">Birden fazla seçebilirsin — plan buna göre şekillenecek.</p>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;">
-        <div class="pick-card multi" data-group="ilgi" data-val="tarih" onclick="pickMulti(this)">
-          <div class="pick-icon">🏛</div>
-          <div class="pick-title">Tarih & Kültür</div>
-          <div class="pick-sub">Antik alanlar, tapınak</div>
-        </div>
-        <div class="pick-card multi" data-group="ilgi" data-val="deniz" onclick="pickMulti(this)">
-          <div class="pick-icon">🌊</div>
-          <div class="pick-title">Deniz & Koylar</div>
-          <div class="pick-sub">Yüzme, kristal su</div>
-        </div>
-        <div class="pick-card multi" data-group="ilgi" data-val="koy" onclick="pickMulti(this)">
-          <div class="pick-icon">🏘</div>
-          <div class="pick-title">Köy Gezisi</div>
-          <div class="pick-sub">Taş evler, yerel hayat</div>
-        </div>
-        <div class="pick-card multi" data-group="ilgi" data-val="yemek" onclick="pickMulti(this)">
-          <div class="pick-icon">🍽</div>
-          <div class="pick-title">Yeme & İçme</div>
-          <div class="pick-sub">Balık, kahvaltı, kafe</div>
-        </div>
-        <div class="pick-card multi" data-group="ilgi" data-val="fotograf" onclick="pickMulti(this)">
-          <div class="pick-icon">📷</div>
-          <div class="pick-title">Fotoğraf</div>
-          <div class="pick-sub">Gün batımı, manzara</div>
-        </div>
-        <div class="pick-card multi" data-group="ilgi" data-val="doga" onclick="pickMulti(this)">
-          <div class="pick-icon">🌿</div>
-          <div class="pick-title">Doğa & Yürüyüş</div>
-          <div class="pick-sub">Zeytinlikler, izler</div>
-        </div>
-        <div class="pick-card multi" data-group="ilgi" data-val="muze" onclick="pickMulti(this)">
-          <div class="pick-icon">🫒</div>
-          <div class="pick-title">Müze & Zeytin</div>
-          <div class="pick-sub">Zeytinyağı müzesi, kültür</div>
-        </div>
-      </div>
       <div style="display:flex;justify-content:center;gap:12px;margin-top:36px;">
         <button class="btn-back" onclick="goStep(1)">← Geri</button>
         <button class="btn-next" onclick="goStep(3)" id="next-2" disabled>Devam Et →</button>
       </div>
     </div>
 
-    <!-- STEP 3: Group type -->
+    <!-- STEP 3: Interests (mevsime göre filtrelenir) -->
     <div id="step-3" class="wizard-step" style="display:none;">
       <div style="text-align:center;margin-bottom:40px;">
-        <p class="section-label" style="margin-bottom:8px;">Adım 3 / 3</p>
+        <p class="section-label" style="margin-bottom:8px;">Adım 3 / 4</p>
+        <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.6rem,4vw,2.4rem);letter-spacing:-.03em;color:var(--navy);margin-bottom:12px;">Ne arıyorsun?</h2>
+        <p style="font-size:.9rem;color:var(--text-soft);">Birden fazla seçebilirsin — plan buna göre şekillenecek.</p>
+        <p id="mevsim-hint" style="font-size:.78rem;color:var(--terra);margin-top:8px;display:none"></p>
+      </div>
+      <div id="ilgi-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;">
+        <!-- JS ile doldurulacak -->
+      </div>
+      <div style="display:flex;justify-content:center;gap:12px;margin-top:36px;">
+        <button class="btn-back" onclick="goStep(2)">← Geri</button>
+        <button class="btn-next" onclick="goStep(4)" id="next-3" disabled>Devam Et →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Group type -->
+    <div id="step-4" class="wizard-step" style="display:none;">
+      <div style="text-align:center;margin-bottom:40px;">
+        <p class="section-label" style="margin-bottom:8px;">Adım 4 / 4</p>
         <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.6rem,4vw,2.4rem);letter-spacing:-.03em;color:var(--navy);margin-bottom:12px;">Kimlerle gidiyorsun?</h2>
         <p style="font-size:.9rem;color:var(--text-soft);">Son bir dokunuş — planını kişiselleştirelim.</p>
       </div>
@@ -204,8 +216,8 @@
         </div>
       </div>
       <div style="display:flex;justify-content:center;gap:12px;margin-top:36px;">
-        <button class="btn-back" onclick="goStep(2)">← Geri</button>
-        <button class="btn-next" onclick="buildPlan()" id="next-3" disabled>Planımı Oluştur ✨</button>
+        <button class="btn-back" onclick="goStep(3)">← Geri</button>
+        <button class="btn-next" onclick="buildPlan()" id="next-4" disabled>Planımı Oluştur ✨</button>
       </div>
     </div>
 
@@ -287,12 +299,57 @@ function pageInit() {
   renderFooter();
 
   /* ── State ── */
-  const sel = { sure: null, ilgi: new Set(), grup: null };
+  const sel = { mevsim: null, sure: null, ilgi: new Set(), grup: null };
+
+  /* ── İlgi alanları tanımları ── */
+  const ALL_INTERESTS = [
+    { val:'tarih',    icon:'🏛', title:'Tarih & Kültür',  sub:'Antik alanlar, tapınak',     seasons:['ilkbahar','yaz','sonbahar','kis'] },
+    { val:'deniz',    icon:'🌊', title:'Deniz & Koylar',  sub:'Yüzme, kristal su',           seasons:['yaz'] },
+    { val:'koy',      icon:'🏘', title:'Köy Gezisi',      sub:'Taş evler, yerel hayat',      seasons:['ilkbahar','yaz','sonbahar','kis'] },
+    { val:'yemek',    icon:'🍽', title:'Yeme & İçme',     sub:'Balık, kahvaltı, kafe',        seasons:['ilkbahar','yaz','sonbahar','kis'] },
+    { val:'fotograf', icon:'📷', title:'Fotoğraf',        sub:'Gün batımı, manzara',          seasons:['ilkbahar','yaz','sonbahar','kis'] },
+    { val:'doga',     icon:'🌿', title:'Doğa & Yürüyüş', sub:'Zeytinlikler, izler',          seasons:['ilkbahar','sonbahar','kis'] },
+    { val:'muze',     icon:'🫒', title:'Müze & Zeytin',   sub:'Zeytinyağı müzesi, kültür',    seasons:['ilkbahar','yaz','sonbahar','kis'] },
+    { val:'plaj',     icon:'🏖', title:'Plaj & Beach',    sub:'Güneşlenme, beach club',       seasons:['yaz','sonbahar'] },
+    { val:'gunbatimi',icon:'🌅', title:'Gün Batımı',      sub:'Assos\'un efsane gün batımı',  seasons:['ilkbahar','yaz','sonbahar'] },
+  ];
+
+  const SEASON_HINTS = {
+    yaz: '☀️ Yaz sezonu — deniz, plaj ve tüm aktiviteler açık!',
+    ilkbahar: '🌸 İlkbahar — doğa yürüyüşleri ve tarihi keşif için ideal.',
+    sonbahar: '🍂 Sonbahar — sakin, huzurlu ve fotoğraf için mükemmel.',
+    kis: '❄️ Kış — tarih, kültür ve yerel lezzetlere odaklan. Deniz/plaj kapalı.'
+  };
+
+  /* ── İlgi alanlarını mevsime göre render et ── */
+  function renderInterests() {
+    var mevsim = sel.mevsim || 'yaz';
+    var filtered = ALL_INTERESTS.filter(i => i.seasons.includes(mevsim));
+    var grid = document.getElementById('ilgi-grid');
+    grid.innerHTML = filtered.map(i =>
+      '<div class="pick-card multi" data-group="ilgi" data-val="' + i.val + '" onclick="pickMulti(this)">' +
+        '<div class="pick-icon">' + i.icon + '</div>' +
+        '<div class="pick-title">' + i.title + '</div>' +
+        '<div class="pick-sub">' + i.sub + '</div>' +
+      '</div>'
+    ).join('');
+    // Hint
+    var hintEl = document.getElementById('mevsim-hint');
+    if (hintEl && SEASON_HINTS[mevsim]) {
+      hintEl.textContent = SEASON_HINTS[mevsim];
+      hintEl.style.display = '';
+    }
+    // Önceki seçimleri temizle
+    sel.ilgi.clear();
+    document.getElementById('next-3').disabled = true;
+  }
 
   /* ── Step navigation ── */
   function goStep(n) {
     document.querySelectorAll('.wizard-step').forEach(s => s.style.display = 'none');
     document.getElementById('step-' + n).style.display = '';
+    // İlgi alanlarına geçerken mevsime göre render et
+    if (n === 3) renderInterests();
     // Progress
     document.querySelectorAll('.prog-step').forEach(s => {
       const sn = +s.dataset.step;
@@ -312,7 +369,8 @@ function pageInit() {
     document.querySelectorAll(`.pick-card[data-group="${group}"]`).forEach(c => c.classList.remove('selected'));
     el.classList.add('selected');
     sel[group] = el.dataset.val;
-    const nextBtn = document.getElementById('next-' + (group === 'sure' ? 1 : group === 'grup' ? 3 : 2));
+    var btnMap = { mevsim: 'next-1', sure: 'next-2', grup: 'next-4' };
+    var nextBtn = document.getElementById(btnMap[group]);
     if (nextBtn) nextBtn.disabled = false;
   }
 
@@ -322,7 +380,7 @@ function pageInit() {
     const val = el.dataset.val;
     if (el.classList.contains('selected')) sel.ilgi.add(val);
     else sel.ilgi.delete(val);
-    document.getElementById('next-2').disabled = sel.ilgi.size === 0;
+    document.getElementById('next-3').disabled = sel.ilgi.size === 0;
   }
 
   /* ── Recommendation logic ── */
@@ -375,13 +433,15 @@ function pageInit() {
 
     // Summary
     const sureLabel = { '1gun':'1 Gün', '2gun':'2 Gün', 'hafta-sonu':'Hafta Sonu', 'uzun':'Uzun Tatil' }[sel.sure];
-    const ilgiLabels = { tarih:'🏛 Tarih', deniz:'🌊 Deniz', koy:'🏘 Köy', yemek:'🍽 Yemek', fotograf:'📷 Fotoğraf', doga:'🌿 Doğa', muze:'🫒 Müze' };
+    const mevsimLabel = { ilkbahar:'🌸 İlkbahar', yaz:'☀️ Yaz', sonbahar:'🍂 Sonbahar', kis:'❄️ Kış' }[sel.mevsim] || '';
+    const ilgiLabels = { tarih:'🏛 Tarih', deniz:'🌊 Deniz', koy:'🏘 Köy', yemek:'🍽 Yemek', fotograf:'📷 Fotoğraf', doga:'🌿 Doğa', muze:'🫒 Müze', plaj:'🏖 Plaj', gunbatimi:'🌅 Gün Batımı' };
     const grupLabel = { yalniz:'🧳 Yalnız', cift:'💑 Çift', aile:'👨‍👩‍👧 Aile', arkadaslar:'🎉 Arkadaşlar' }[sel.grup];
 
     document.getElementById('plan-summary-content').innerHTML = `
       <p style="font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(245,237,224,.3);margin-bottom:16px;">Planın hazır</p>
-      <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.6rem,4vw,2.4rem);color:var(--cream);letter-spacing:-.03em;margin-bottom:20px;">Sana özel ${sureLabel} planı ✨</h2>
+      <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.6rem,4vw,2.4rem);color:var(--cream);letter-spacing:-.03em;margin-bottom:20px;">Sana özel ${mevsimLabel} ${sureLabel} planı ✨</h2>
       <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">
+        <span class="plan-pill">${mevsimLabel}</span>
         <span class="plan-pill">⏱ ${sureLabel}</span>
         ${[...sel.ilgi].map(i => `<span class="plan-pill">${ilgiLabels[i]||i}</span>`).join('')}
         <span class="plan-pill">${grupLabel}</span>
