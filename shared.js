@@ -2014,6 +2014,7 @@ function renderVenuePage(venueId) {
       /* ── VP Hero (compact 2-col) ── */
       .vp-hero{position:relative;min-height:520px;display:flex;align-items:center;padding:0 36px 48px;overflow:hidden;}
       .vp-hero-bg{position:absolute;inset:0;z-index:0;}
+      .vp-hero-parallax{position:absolute;inset:-20%;width:140%;height:140%;object-fit:cover;z-index:0;opacity:0;transition:opacity .6s ease;will-change:transform;}
       .vp-hblob{position:absolute;border-radius:50%;filter:blur(100px);will-change:transform;}
       .vp-hblob-1{animation:vpBlob1 16s ease-in-out infinite alternate;}
       .vp-hblob-2{animation:vpBlob2 13s ease-in-out infinite alternate;}
@@ -2286,7 +2287,7 @@ function renderVenuePage(venueId) {
   document.getElementById('vp-hero').innerHTML = `
     <div class="vp-hero">
       <div class="vp-hero-bg" style="background:${G};"></div>
-      ${v.images && v.images.length > 0 ? '<img src="' + v.images[0] + '" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0;transition:opacity .6s ease;" onload="this.style.opacity=\'0.2\'">' : ''}
+      ${v.images && v.images.length > 0 ? '<img src="' + v.images[0] + '" alt="" class="vp-hero-parallax" onload="this.style.opacity=\'0.3\'">' : ''}
       <div class="vp-hblob vp-hblob-1" style="width:480px;height:480px;background:${meta.accent};opacity:.22;top:-15%;left:8%;"></div>
       <div class="vp-hblob vp-hblob-2" style="width:360px;height:360px;background:${meta.accent};opacity:.16;bottom:8%;right:-4%;"></div>
       <div class="vp-hblob vp-hblob-3" style="width:280px;height:280px;background:${meta.accent};opacity:.12;top:40%;left:55%;"></div>
@@ -2872,6 +2873,17 @@ function renderVenuePage(venueId) {
   };
 
   scrollFadeIn();
+
+  // Parallax efekti
+  var parallaxImg = document.querySelector('.vp-hero-parallax');
+  if (parallaxImg) {
+    window.addEventListener('scroll', function() {
+      var scrollY = window.scrollY;
+      if (scrollY < 800) {
+        parallaxImg.style.transform = 'translateY(' + (scrollY * 0.3) + 'px) scale(1.1)';
+      }
+    }, { passive: true });
+  }
 }
 
 /* ═══════════════════
