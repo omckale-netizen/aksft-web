@@ -1453,6 +1453,8 @@ const ROUTE_PAL = {
   'koy-koy-assos':      { stop:'#5A7A56', stopBg:'rgba(90,122,86,.1)',  g1:'rgba(90,122,86,.35)', g2:'rgba(50,80,46,.2)',   bg:'linear-gradient(160deg,#050E04 0%,#0A160A 60%,#060F05 100%)' },
   'deniz-koy-rotasi':   { stop:'#1A6B8A', stopBg:'rgba(26,107,138,.1)', g1:'rgba(26,107,138,.4)', g2:'rgba(10,50,80,.22)',  bg:'linear-gradient(160deg,#020C18 0%,#061525 60%,#030D1A 100%)' },
   'kahve-molasi-rotasi':{ stop:'#D4935A', stopBg:'rgba(212,147,90,.12)',g1:'rgba(212,147,90,.3)', g2:'rgba(150,90,30,.18)', bg:'linear-gradient(160deg,#180D04 0%,#241508 60%,#180E04 100%)' },
+  'fotograf-rotasi':    { stop:'#8A5520', stopBg:'rgba(138,85,32,.1)',  g1:'rgba(138,85,32,.35)', g2:'rgba(196,82,26,.18)', bg:'linear-gradient(160deg,#140A02 0%,#221408 60%,#160B03 100%)' },
+  'lezzet-rotasi':      { stop:'#1A6B8A', stopBg:'rgba(26,107,138,.1)', g1:'rgba(26,107,138,.3)', g2:'rgba(90,122,86,.18)', bg:'linear-gradient(160deg,#040E14 0%,#081A22 60%,#050F16 100%)' },
 };
 const ROUTE_ZORLUK_ICO = {'Kolay':'🟢','Çok Kolay':'🟢','Orta':'🟡','Zor':'🔴'};
 const ROUTE_TEMPO_ICO  = {'Sakin':'🌿','Aktif':'⚡','Keşif':'🔍','Dinlendirici':'🛋','Yavaş':'🐢'};
