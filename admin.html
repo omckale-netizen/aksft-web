@@ -2011,16 +2011,25 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             <span style="font-size:.72rem;color:var(--text-muted);font-weight:400">(Rozet + üst sıralama + haritada altın pin)</span>
           </label>
           <div id="premium-dates" style="display:none;margin-top:8px">
+            <!-- Hızlı Paket Seçimi -->
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+              <button type="button" class="btn btn-sm" style="background:rgba(212,147,90,.1);color:#D4935A;border:1px solid rgba(212,147,90,.2);font-size:.72rem" onclick="setPremiumDuration(30)">1 Ay</button>
+              <button type="button" class="btn btn-sm" style="background:rgba(212,147,90,.1);color:#D4935A;border:1px solid rgba(212,147,90,.2);font-size:.72rem" onclick="setPremiumDuration(60)">2 Ay</button>
+              <button type="button" class="btn btn-sm" style="background:rgba(212,147,90,.1);color:#D4935A;border:1px solid rgba(212,147,90,.2);font-size:.72rem" onclick="setPremiumDuration(90)">3 Ay</button>
+              <button type="button" class="btn btn-sm" style="background:rgba(212,147,90,.1);color:#D4935A;border:1px solid rgba(212,147,90,.2);font-size:.72rem" onclick="setPremiumDuration(180)">6 Ay</button>
+              <button type="button" class="btn btn-sm" style="background:rgba(212,147,90,.1);color:#D4935A;border:1px solid rgba(212,147,90,.2);font-size:.72rem" onclick="setPremiumDuration(365)">1 Yıl</button>
+            </div>
             <div class="form-row">
               <div class="form-group" style="margin-bottom:0">
                 <label style="font-size:.72rem">Başlangıç Tarihi</label>
-                <input type="date" id="f-premium-start" style="padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit">
+                <input type="date" id="f-premium-start" style="padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit" onchange="validatePremiumDates()">
               </div>
               <div class="form-group" style="margin-bottom:0">
                 <label style="font-size:.72rem">Bitiş Tarihi</label>
-                <input type="date" id="f-premium-end" style="padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit">
+                <input type="date" id="f-premium-end" style="padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit" onchange="validatePremiumDates()">
               </div>
             </div>
+            <div id="premium-date-info" style="font-size:.72rem;margin-top:6px;min-height:18px"></div>
           </div>
         </div>
         <div class="form-group">
@@ -4472,7 +4481,75 @@ function toggleDarkMode() {
 
 function togglePremiumDates() {
   var el = document.getElementById('premium-dates');
-  if (el) el.style.display = document.getElementById('f-premium').checked ? '' : 'none';
+  var checked = document.getElementById('f-premium').checked;
+  if (el) el.style.display = checked ? '' : 'none';
+  // Premium seçildiğinde başlangıç bugün, bitiş 1 ay sonra otomatik doldur (boşsa)
+  if (checked) {
+    var startEl = document.getElementById('f-premium-start');
+    var endEl = document.getElementById('f-premium-end');
+    if (!startEl.value) {
+      var today = new Date();
+      startEl.value = today.toISOString().split('T')[0];
+      startEl.min = today.toISOString().split('T')[0];
+    }
+    if (!endEl.value) {
+      setPremiumDuration(30);
+    }
+    validatePremiumDates();
+  }
+}
+
+function setPremiumDuration(days) {
+  var today = new Date();
+  var startEl = document.getElementById('f-premium-start');
+  var endEl = document.getElementById('f-premium-end');
+  startEl.value = today.toISOString().split('T')[0];
+  startEl.min = today.toISOString().split('T')[0];
+  var end = new Date(today);
+  end.setDate(end.getDate() + days);
+  endEl.value = end.toISOString().split('T')[0];
+  endEl.min = new Date(today.getTime() + 86400000).toISOString().split('T')[0];
+  validatePremiumDates();
+}
+
+function validatePremiumDates() {
+  var startEl = document.getElementById('f-premium-start');
+  var endEl = document.getElementById('f-premium-end');
+  var infoEl = document.getElementById('premium-date-info');
+  if (!startEl || !endEl || !infoEl) return;
+
+  var today = new Date().toISOString().split('T')[0];
+  startEl.min = today;
+
+  if (startEl.value && startEl.value < today) {
+    startEl.value = today;
+  }
+
+  if (startEl.value) {
+    var nextDay = new Date(startEl.value);
+    nextDay.setDate(nextDay.getDate() + 1);
+    endEl.min = nextDay.toISOString().split('T')[0];
+  }
+
+  if (startEl.value && endEl.value) {
+    if (endEl.value <= startEl.value) {
+      infoEl.innerHTML = '<span style="color:var(--red)">⚠ Bitiş tarihi başlangıçtan sonra olmalıdır.</span>';
+      endEl.value = '';
+      return;
+    }
+    var d1 = new Date(startEl.value);
+    var d2 = new Date(endEl.value);
+    var diffDays = Math.round((d2 - d1) / 86400000);
+    var months = Math.floor(diffDays / 30);
+    var remainDays = diffDays % 30;
+    var durationText = '';
+    if (months > 0) durationText += months + ' ay ';
+    if (remainDays > 0) durationText += remainDays + ' gün';
+    if (!durationText) durationText = diffDays + ' gün';
+    infoEl.innerHTML = '<span style="color:var(--green)">✓ Premium süresi: ' + durationText.trim() + ' (' + diffDays + ' gün)</span>';
+  } else {
+    infoEl.innerHTML = '';
+  }
 }
 
 function isPremiumActive(v) {
