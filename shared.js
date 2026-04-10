@@ -2565,8 +2565,7 @@ function renderVenuePage(venueId) {
               const nHasImg = s.images && s.images.length > 0;
               return '<a class="vp-sim-card" href="' + base + 'mekanlar/mekan-detay.html?id=' + s.id + '">' +
                 '<div class="vp-sim-img" style="background:' + sm.g + ';">' +
-                  (nHasImg ? '<img src="' + s.images[0] + '" alt="' + s.title + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s;" onload="this.style.opacity=\'1\'">' : '') +
-                  '<span class="vp-sim-emoji" ' + (nHasImg ? 'style="position:relative;z-index:1;text-shadow:0 2px 8px rgba(0,0,0,.5)"' : '') + '>' + s.emoji + '</span>' +
+                  (nHasImg ? '<img src="' + s.images[0] + '" alt="' + s.title + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s;" onload="this.style.opacity=\'1\'">' : '<span class="vp-sim-emoji">' + s.emoji + '</span>') +
                 '</div>' +
                 '<div class="vp-sim-body">' +
                   '<span class="vp-sim-cat" style="background:' + scs.bg + ';color:' + scs.color + ';">' + scs.label + '</span>' +
@@ -2589,8 +2588,7 @@ function renderVenuePage(venueId) {
               const simHasImg = s.images && s.images.length > 0;
               return `<a class="vp-sim-card" href="${base}mekanlar/mekan-detay.html?id=${s.id}">
                 <div class="vp-sim-img" style="background:${sm.g};">
-                  ${simHasImg ? '<img src="' + s.images[0] + '" alt="' + s.title + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s;" onload="this.style.opacity=\'1\'">' : ''}
-                  <span class="vp-sim-emoji" ${simHasImg ? 'style="position:relative;z-index:1;text-shadow:0 2px 8px rgba(0,0,0,.5)"' : ''}>${s.emoji}</span>
+                  ${simHasImg ? '<img src="' + s.images[0] + '" alt="' + s.title + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s;" onload="this.style.opacity=\'1\'">' : '<span class="vp-sim-emoji">' + s.emoji + '</span>'}
                 </div>
                 <div class="vp-sim-body">
                   <span class="vp-sim-cat" style="background:${scs.bg};color:${scs.color};">${scs.label}</span>
