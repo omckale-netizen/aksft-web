@@ -2191,8 +2191,10 @@ function renderVenuePage(venueId) {
 
       /* ── Body wrapper ── */
       .vp-body-wrap{background:#FAF7F2;}
-      .vp-body-inner{max-width:1100px;margin:0 auto;padding:0 28px 100px;}
-      .vp-section{padding:52px 0;border-bottom:1px solid rgba(26,39,68,.07);}
+      .vp-body-inner{max-width:1100px;margin:0 auto;padding:0 28px 40px;}
+      .vp-section{padding:36px 0;border-bottom:1px solid rgba(26,39,68,.07);}
+      .vp-section:last-child{border-bottom:none;padding-bottom:20px;}
+      @media(max-width:768px){.vp-section{padding:28px 0;}.vp-body-inner{padding:0 20px 24px;}}
       .vp-section:last-child{border-bottom:none;}
       .vp-eyebrow{font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#C4521A;margin-bottom:8px;}
       .vp-stitle{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.35rem;color:#1A2744;margin:0 0 22px;}
