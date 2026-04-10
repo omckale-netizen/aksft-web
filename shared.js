@@ -2023,6 +2023,8 @@ function renderVenuePage(venueId) {
   }
 
   const openBadge = (() => {
+    // Konaklama mekanlarında açık/kapalı badge gösterme
+    if (v.category === 'konaklama') return '';
     if (isNowOpen === true) {
       const match = (todayHours || '').match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
       const closeText = match ? saatEki(match[3], match[4]) + ' kadar' : '';
