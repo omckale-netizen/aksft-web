@@ -2411,9 +2411,11 @@ function renderVenuePage(venueId) {
       <div class="vp-hero-2col">
         <div class="vp-hero-left">
           <span class="vp-hero-cat-pill" style="background:${cs.bg};color:${cs.color};">${cs.label}</span>
-          <span class="vp-hero-cat-pill" style="background:rgba(245,237,224,.1);color:rgba(245,237,224,.7);">📍 ${v.location}</span>
           <h1 class="vp-hero-title">${v.title}${isPremiumActive(v) ? ' <span style="font-size:.3em;font-weight:800;letter-spacing:.06em;margin-left:6px;padding:3px 8px;border-radius:3px;background:linear-gradient(135deg,#C9963A,#E8C46A);color:#5C3D0E;vertical-align:middle;text-transform:uppercase;">Premium İşletme</span>' : ''}</h1>
-          <div class="vp-hero-loc">📍 ${v.address || v.location + ', Ayvacık, Çanakkale'}</div>
+          <div class="vp-hero-loc" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span>📍 ${v.address || v.location + ', Ayvacık, Çanakkale'}</span>
+            <span style="font-size:.68rem;font-weight:600;padding:3px 10px;border-radius:999px;background:rgba(245,237,224,.1);color:rgba(245,237,224,.65);border:1px solid rgba(245,237,224,.12);">${v.location}</span>
+          </div>
           <div class="vp-hero-chips">
             ${openBadge}
             <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="vp-hero-map-btn">🗺 Yol Tarifi Al</a>
