@@ -2379,6 +2379,7 @@ function renderVenuePage(venueId) {
       <div class="vp-hero-2col">
         <div class="vp-hero-left">
           <span class="vp-hero-cat-pill" style="background:${cs.bg};color:${cs.color};">${cs.label}</span>
+          <span class="vp-hero-cat-pill" style="background:rgba(245,237,224,.1);color:rgba(245,237,224,.7);">📍 ${v.location}</span>
           <h1 class="vp-hero-title">${v.title}${isPremiumActive(v) ? ' <span style="font-size:.3em;font-weight:800;letter-spacing:.06em;margin-left:6px;padding:3px 8px;border-radius:3px;background:linear-gradient(135deg,#C9963A,#E8C46A);color:#5C3D0E;vertical-align:middle;text-transform:uppercase;">Premium İşletme</span>' : ''}</h1>
           <div class="vp-hero-loc">📍 ${v.address || v.location + ', Ayvacık, Çanakkale'}</div>
           <div class="vp-hero-chips">
