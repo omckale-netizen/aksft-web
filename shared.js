@@ -2000,11 +2000,64 @@ function renderVenuePage(venueId) {
     const close = parseInt(match[3]) * 60 + parseInt(match[4]);
     return mins >= open && mins < close;
   })();
-  const openBadge = isNowOpen === true
-    ? '<span class="vp-open-badge vp-open">Açık</span>'
-    : isNowOpen === false
-    ? '<span class="vp-open-badge vp-closed">Kapalı</span>'
-    : '';
+  const openBadge = (() => {
+    if (isNowOpen === true) {
+      // Açık — kapanış saatini göster
+      const match = (todayHours || '').match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
+      const closeTime = match ? match[3] + ':' + match[4] : '';
+      return '<span class="vp-open-badge vp-open">● Açık' + (closeTime ? ' · ' + closeTime + '\'e kadar' : '') + '</span>';
+    } else if (isNowOpen === false) {
+      // Kapalı — açılış saatini bul
+      if (todayHours && todayHours.toLowerCase().includes('kapal')) {
+        // Bugün tamamen kapalı — yarının saatini bul
+        const DAY_ORDER = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
+        const todayIdx = DAY_ORDER.findIndex(d => d.toLowerCase() === todayName.toLowerCase());
+        const DAY_ALIASES = {'pazartesi':0,'salı':1,'sali':1,'çarşamba':2,'carsamba':2,'perşembe':3,'persembe':3,'cuma':4,'cumartesi':5,'pazar':6};
+        const entries = (v.weeklyHours || []).filter(e => e.days);
+        // Sonraki açık günü bul
+        for (let offset = 1; offset <= 7; offset++) {
+          const checkIdx = (todayIdx + offset) % 7;
+          const checkDay = DAY_ORDER[checkIdx];
+          for (const entry of entries) {
+            const d = fixTR(entry.days || '').toLowerCase();
+            const h = fixTR(entry.hours || '');
+            if (h.toLowerCase().includes('kapal')) continue;
+            // Tek gün kontrolü
+            if (d.includes(checkDay.toLowerCase())) {
+              const m = h.match(/(\d{2}):(\d{2})/);
+              return '<span class="vp-open-badge vp-closed">● Kapalı · ' + checkDay + ' ' + (m ? m[0] : '') + '\'de açılacak</span>';
+            }
+            // Aralık kontrolü
+            const rangeMatch = d.match(/(\S+)\s*[–\-]\s*(\S+)/);
+            if (rangeMatch) {
+              const s = DAY_ALIASES[rangeMatch[1].toLowerCase()];
+              const e = DAY_ALIASES[rangeMatch[2].toLowerCase()];
+              if (s !== undefined && e !== undefined && checkIdx >= s && checkIdx <= e) {
+                const m = h.match(/(\d{2}):(\d{2})/);
+                return '<span class="vp-open-badge vp-closed">● Kapalı · ' + checkDay + ' ' + (m ? m[0] : '') + '\'de açılacak</span>';
+              }
+            }
+          }
+        }
+        return '<span class="vp-open-badge vp-closed">● Kapalı</span>';
+      } else {
+        // Bugün açık ama şu an kapalı (saat dışı) — açılış saatini göster
+        const match = (todayHours || '').match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
+        if (match) {
+          const now = new Date();
+          const mins = now.getHours() * 60 + now.getMinutes();
+          const openMins = parseInt(match[1]) * 60 + parseInt(match[2]);
+          if (mins < openMins) {
+            return '<span class="vp-open-badge vp-closed">● Kapalı · ' + match[1] + ':' + match[2] + '\'de açılacak</span>';
+          } else {
+            return '<span class="vp-open-badge vp-closed">● Kapalı · Yarın ' + match[1] + ':' + match[2] + '\'de açılacak</span>';
+          }
+        }
+        return '<span class="vp-open-badge vp-closed">● Kapalı</span>';
+      }
+    }
+    return '';
+  })();
 
   /* ── Inject CSS (once) ── */
   if (!document.getElementById('vp-styles')) {
