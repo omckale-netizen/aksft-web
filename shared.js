@@ -3,6 +3,27 @@
    Nav, Footer, Search, Utilities
 ═══════════════════════════════════════════ */
 
+// Türkçe bulunma eki (-da/-de/-ta/-te) — son ünlüye göre
+function bulunmaEki(s) {
+  if (!s) return "'da";
+  var lower = s.toLowerCase().replace(/\s+/g,'');
+  // Son ünlüyü bul
+  var kalin = 'aıou';
+  var ince = 'eiöü';
+  var sert = 'çfhkpstş';
+  var lastVowel = '';
+  for (var i = lower.length - 1; i >= 0; i--) {
+    if (kalin.includes(lower[i]) || ince.includes(lower[i])) { lastVowel = lower[i]; break; }
+  }
+  var lastChar = lower[lower.length - 1];
+  var isKalin = kalin.includes(lastVowel);
+  var isSert = sert.includes(lastChar);
+  if (isKalin && isSert) return "'ta";
+  if (isKalin) return "'da";
+  if (isSert) return "'te";
+  return "'de";
+}
+
 // Türkçe karakter düzeltme (Firebase'de eksik karakterler)
 function fixTR(s) {
   if (!s) return s;
@@ -2635,7 +2656,7 @@ function renderVenuePage(venueId) {
           if (neighbors.length === 0) return '';
           return '<div class="vp-section fade-up">' +
             '<div class="vp-eyebrow">Komşu Mekanlar</div>' +
-            '<h2 class="vp-stitle">' + v.location + '\'da Ayrıca</h2>' +
+            '<h2 class="vp-stitle">' + v.location + bulunmaEki(v.location) + ' Ayrıca</h2>' +
             '<div class="vp-sim-track">' +
             neighbors.map(s => {
               const sm = VMETA[s.id] || { g:'linear-gradient(160deg,#1A2744,#2A3A5A)' };
