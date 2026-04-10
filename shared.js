@@ -2000,26 +2000,33 @@ function renderVenuePage(venueId) {
     const close = parseInt(match[3]) * 60 + parseInt(match[4]);
     return mins >= open && mins < close;
   })();
-  // Türkçe saat eki: 10.00'da, 14.00'te, 15.30'da, 18.00'de, 20.00'de
+  // Türkçe saat eki — TDK kuralı: ek saatin okunuşuna göre belirlenir
+  // 1(bir-de), 2(iki-de), 3(üç-te), 4(dört-te), 5(beş-te), 6(altı-da)
+  // 7(yedi-de), 8(sekiz-de), 9(dokuz-da), 10(on-da), 11(on bir-de), 12(on iki-de)
+  // 13-19 aynı mantık, 20(yirmi-de), 21-23 aynı
   function saatEki(hh, mm) {
     var h = parseInt(hh); var m = parseInt(mm || '0');
     var saat = hh + '.' + (mm || '00');
     if (m > 0) {
-      // Dakikalı: son rakama göre (30'da, 45'te)
-      var last = m % 10;
-      if (last === 0) return saat + "'te";
-      if ([1,2,7,8].includes(last)) return saat + "'de";
-      if ([3,4,5].includes(last)) return saat + "'te";
-      if ([6,9].includes(last)) return saat + "'da";
+      // Dakikalı saatlerde okunuş dakikaya göre
+      // 10:30 = on buçukta → 'ta' ama TDK'ya göre buçuk-ta
+      // Genel kural: dakikanın okunuşuna göre
+      var lastTwo = m;
+      if (lastTwo === 30) return saat + "'da"; // buçuk-ta → da
+      if (lastTwo === 45) return saat + "'te"; // kırk beş-te
+      if (lastTwo === 15) return saat + "'te"; // on beş-te
+      if (lastTwo === 10) return saat + "'da"; // on-da
+      if (lastTwo === 20) return saat + "'de"; // yirmi-de
+      if (lastTwo === 40) return saat + "'ta"; // kırk-ta
+      if (lastTwo === 50) return saat + "'de"; // elli-de
       return saat + "'de";
     }
-    // Tam saat
-    if ([1,5,8,9,10,11,12].includes(h)) return saat + "'de";
-    if ([2,3,4,14,15].includes(h)) return saat + "'te";
-    if ([6,16].includes(h)) return saat + "'da";
-    if ([7,17].includes(h)) return saat + "'de";
-    if ([13,18,19,20,21,22,23,0].includes(h)) return saat + "'de";
-    return saat + "'de";
+    // Tam saat — saatin okunuşuna göre
+    // 0=on iki-de(gece), 1=bir-de, 2=iki-de, 3=üç-te, 4=dört-te, 5=beş-te
+    // 6=altı-da, 7=yedi-de, 8=sekiz-de, 9=dokuz-da, 10=on-da
+    // 11=on bir-de, 12=on iki-de, 13-23 aynı mantık
+    var ekler = {0:"'de",1:"'de",2:"'de",3:"'te",4:"'te",5:"'te",6:"'da",7:"'de",8:"'de",9:"'da",10:"'da",11:"'de",12:"'de",13:"'te",14:"'te",15:"'te",16:"'da",17:"'de",18:"'de",19:"'da",20:"'de",21:"'de",22:"'de",23:"'te"};
+    return saat + (ekler[h] || "'de");
   }
 
   const openBadge = (() => {
