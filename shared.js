@@ -2025,33 +2025,25 @@ function renderVenuePage(venueId) {
     if (close <= open) return mins >= open || mins < close;
     return mins >= open && mins < close;
   })();
-  // Türkçe saat eki — TDK kuralı: ek saatin okunuşuna göre belirlenir
-  // 1(bir-de), 2(iki-de), 3(üç-te), 4(dört-te), 5(beş-te), 6(altı-da)
-  // 7(yedi-de), 8(sekiz-de), 9(dokuz-da), 10(on-da), 11(on bir-de), 12(on iki-de)
-  // 13-19 aynı mantık, 20(yirmi-de), 21-23 aynı
-  function saatEki(hh, mm) {
+  // Türkçe saat ekleri — TDK kuralı: okunuşa göre
+  // Bulunma: -de/-da/-te/-ta | Yönelme: -e/-a/-ye/-ya
+  // Son okunan heceye bakılır, sert ünsüz varsa t/s versiyonu kullanılır
+  var SAAT_BULUNMA = {0:"'da",1:"'de",2:"'de",3:"'te",4:"'te",5:"'te",6:"'da",7:"'de",8:"'de",9:"'da",10:"'da",11:"'de",12:"'de",13:"'te",14:"'te",15:"'te",16:"'da",17:"'de",18:"'de",19:"'da",20:"'de",21:"'de",22:"'de",23:"'te"};
+  var SAAT_YONELME = {0:"'a",1:"'e",2:"'ye",3:"'e",4:"'e",5:"'e",6:"'ya",7:"'ye",8:"'e",9:"'a",10:"'a",11:"'e",12:"'ye",13:"'e",14:"'e",15:"'e",16:"'ya",17:"'ye",18:"'e",19:"'a",20:"'ye",21:"'e",22:"'ye",23:"'e"};
+  // Dakika ekleri (son okunan dakika heceye göre)
+  var DK_BULUNMA = {0:"'da",5:"'te",10:"'da",15:"'te",20:"'de",25:"'te",30:"'da",35:"'te",40:"'ta",45:"'te",50:"'de",55:"'te"};
+  var DK_YONELME = {0:"'a",5:"'e",10:"'a",15:"'e",20:"'ye",25:"'e",30:"'a",35:"'e",40:"'a",45:"'e",50:"'ye",55:"'e"};
+
+  function saatEki(hh, mm, tip) {
     var h = parseInt(hh); var m = parseInt(mm || '0');
     var saat = hh + '.' + (mm || '00');
-    if (m > 0) {
-      // Dakikalı saatlerde okunuş dakikaya göre
-      // 10:30 = on buçukta → 'ta' ama TDK'ya göre buçuk-ta
-      // Genel kural: dakikanın okunuşuna göre
-      var lastTwo = m;
-      if (lastTwo === 30) return saat + "'da"; // buçuk-ta → da
-      if (lastTwo === 45) return saat + "'te"; // kırk beş-te
-      if (lastTwo === 15) return saat + "'te"; // on beş-te
-      if (lastTwo === 10) return saat + "'da"; // on-da
-      if (lastTwo === 20) return saat + "'de"; // yirmi-de
-      if (lastTwo === 40) return saat + "'ta"; // kırk-ta
-      if (lastTwo === 50) return saat + "'de"; // elli-de
-      return saat + "'de";
+    if (tip === 'yonelme') {
+      if (m > 0) return saat + (DK_YONELME[m] || "'e");
+      return saat + (SAAT_YONELME[h] || "'e");
     }
-    // Tam saat — saatin okunuşuna göre
-    // 0=on iki-de(gece), 1=bir-de, 2=iki-de, 3=üç-te, 4=dört-te, 5=beş-te
-    // 6=altı-da, 7=yedi-de, 8=sekiz-de, 9=dokuz-da, 10=on-da
-    // 11=on bir-de, 12=on iki-de, 13-23 aynı mantık
-    var ekler = {0:"'de",1:"'de",2:"'de",3:"'te",4:"'te",5:"'te",6:"'da",7:"'de",8:"'de",9:"'da",10:"'da",11:"'de",12:"'de",13:"'te",14:"'te",15:"'te",16:"'da",17:"'de",18:"'de",19:"'da",20:"'de",21:"'de",22:"'de",23:"'te"};
-    return saat + (ekler[h] || "'de");
+    // Bulunma (varsayılan)
+    if (m > 0) return saat + (DK_BULUNMA[m] || "'de");
+    return saat + (SAAT_BULUNMA[h] || "'de");
   }
 
   const openBadge = (() => {
@@ -2059,7 +2051,7 @@ function renderVenuePage(venueId) {
     if (v.category === 'konaklama') return '';
     if (isNowOpen === true) {
       const match = (todayHours || '').match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
-      const closeText = match ? saatEki(match[3], match[4]) + ' kadar' : '';
+      const closeText = match ? saatEki(match[3], match[4], 'yonelme') + ' kadar' : '';
       return '<span class="vp-open-badge vp-open">Açık' + (closeText ? ' · ' + closeText : '') + '</span>';
     } else if (isNowOpen === false) {
       if (todayHours && todayHours.toLowerCase().includes('kapal')) {
