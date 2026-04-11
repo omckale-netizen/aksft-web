@@ -37,7 +37,7 @@ function buildOgHtml({ title, description, url, image }) {
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="tr_TR">
-  <meta property="og:site_name" content="Assos'u Kesfet">
+  <meta property="og:site_name" content="Assos'u Keşfet">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${escHtml(title)}">
   <meta name="twitter:description" content="${escHtml(description)}">
@@ -80,16 +80,16 @@ export async function onRequest(context) {
       const fields = await fetchFirestoreDoc('venues', id);
       if (!fields) return next();
 
-      const catLabels = {kafe:'Assos Kafeler',restoran:'Assos Restoranlar',kahvalti:'Assos Kahvalti Mekanlari',konaklama:'Assos Otelleri',beach:'Assos Beach Club',iskele:'Assos Iskeleler'};
-      const catSingular = {kafe:'kafe',restoran:'restoran',kahvalti:'kahvalti mekani',konaklama:'otel',beach:'beach club',iskele:'iskele'};
+      const catLabels = {kafe:'Assos Kafeler',restoran:'Assos Restoranlar',kahvalti:'Assos Kahvaltı Mekanları',konaklama:'Assos Otelleri',beach:'Assos Beach Club',iskele:'Assos İskeleler'};
+      const catSingular = {kafe:'kafe',restoran:'restoran',kahvalti:'kahvaltı mekanı',konaklama:'otel',beach:'beach club',iskele:'iskele'};
       const cat = fields.category?.stringValue || '';
       const catLabel = catLabels[cat] || 'Assos Mekanlar';
       const catSing = catSingular[cat] || 'mekan';
       const venueName = fields.title?.stringValue || 'Mekan';
       const loc = fields.location?.stringValue || 'Assos';
-      const title = venueName + ' \u2014 ' + catLabel + ' | Assos\'u Kesfet';
+      const title = venueName + ' \u2014 ' + catLabel + ' | Assos\'u Keşfet';
       const shortDesc = (fields.shortDesc?.stringValue || '').replace(/<[^>]*>/g, '').substring(0, 120);
-      const desc = venueName + '. ' + loc + ' bolgesinde ' + catSing + '. ' + shortDesc;
+      const desc = venueName + '. ' + loc + ' bölgesinde ' + catSing + '. ' + shortDesc;
       let image = DEFAULT_OG_IMAGE;
       if (fields.images?.arrayValue?.values?.length > 0) {
         image = fields.images.arrayValue.values[0].stringValue || image;
@@ -106,7 +106,7 @@ export async function onRequest(context) {
 
       const html = buildOgHtml({
         title,
-        description: desc || 'Assos ve Ayvacik\'ta mekan detayi.',
+        description: desc || 'Assos ve Ayvacık\'ta mekan detayı.',
         url: `https://assosukesfet.com/mekanlar/mekan-detay.html?id=${id}`,
         image
       }).replace('</head>', '<script type="application/ld+json">' + schema + '</script></head>');
@@ -124,12 +124,12 @@ export async function onRequest(context) {
       const fields = await fetchFirestoreDoc('routes', id);
       if (!fields) return next();
 
-      const title = (fields.title?.stringValue || 'Rota') + ' \u2014 Assos\'u Kesfet';
+      const title = (fields.title?.stringValue || 'Rota') + ' \u2014 Assos\'u Keşfet';
       const desc = (fields.shortDesc?.stringValue || fields.description?.stringValue || '').replace(/<[^>]*>/g, '').substring(0, 200);
 
       return new Response(buildOgHtml({
         title,
-        description: desc || 'Assos rota detaylari.',
+        description: desc || 'Assos rota detayları.',
         url: `https://assosukesfet.com/rotalar/rota-detay.html?id=${id}`,
         image: DEFAULT_OG_IMAGE
       }), { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
@@ -145,13 +145,13 @@ export async function onRequest(context) {
       const fields = await fetchFirestoreDoc('blog_posts', slug);
       if (!fields) return next();
 
-      const title = (fields.title?.stringValue || 'Blog') + ' \u2014 Assos\'u Kesfet';
+      const title = (fields.title?.stringValue || 'Blog') + ' \u2014 Assos\'u Keşfet';
       const desc = (fields.excerpt?.stringValue || '').substring(0, 200);
       const image = fields.coverImage?.stringValue || fields.image?.stringValue || DEFAULT_OG_IMAGE;
 
       return new Response(buildOgHtml({
         title,
-        description: desc || 'Assos hakkinda blog yazisi.',
+        description: desc || 'Assos hakkında blog yazısı.',
         url: `https://assosukesfet.com/blog?yazi=${slug}`,
         image
       }), { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });

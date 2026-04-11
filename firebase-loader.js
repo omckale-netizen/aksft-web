@@ -4,7 +4,7 @@
   // Loading göstergesi ekle
   var loader = document.createElement('div');
   loader.id = 'fb-loader';
-  loader.innerHTML = '<div style="position:fixed;inset:0;z-index:9990;background:var(--cream-light,#FAF7F2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;transition:opacity .3s;"><div style="width:28px;height:28px;border:3px solid rgba(26,39,68,.1);border-top-color:#C4521A;border-radius:50%;animation:fbspin .6s linear infinite"></div><span style="font-size:.78rem;color:#718096;">Yukleniyor...</span></div>';
+  loader.innerHTML = '<div style="position:fixed;inset:0;z-index:9990;background:var(--cream-light,#FAF7F2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;transition:opacity .3s;"><div style="width:28px;height:28px;border:3px solid rgba(26,39,68,.1);border-top-color:#C4521A;border-radius:50%;animation:fbspin .6s linear infinite"></div><span style="font-size:.78rem;color:#718096;">Yükleniyor...</span></div>';
   var style = document.createElement('style');
   style.textContent = '@keyframes fbspin{to{transform:rotate(360deg)}}';
   document.head.appendChild(style);
@@ -43,7 +43,7 @@
   s1.onerror = fallback;
   document.head.appendChild(s1);
 
-  // Timeout — 6 saniyede Firebase gelmezse data.js fallback
+  // Timeout — 4 saniyede Firebase gelmezse data.js fallback
   var timeout = setTimeout(function() {
     if (!window._firebaseReady) {
       fallback();

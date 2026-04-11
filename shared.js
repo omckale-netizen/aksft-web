@@ -965,9 +965,9 @@ function renderNav(opts = {}) {
     const statusEl = document.getElementById('sd-sync-status');
     const code = (input?.value || '').trim().toUpperCase();
     if (statusEl) statusEl.innerHTML = '';
-    if (!code || code.length < 4) { if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Gecerli bir kod girin.</span>'; return; }
+    if (!code || code.length < 4) { if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Geçerli bir kod girin.</span>'; return; }
     if (code === getFavCode()) { if (statusEl) statusEl.innerHTML = '<span style="color:#718096">Bu zaten sizin kodunuz.</span>'; return; }
-    if (typeof firebase === 'undefined' || !firebase.firestore) { if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Baglanti hatasi.</span>'; return; }
+    if (typeof firebase === 'undefined' || !firebase.firestore) { if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Bağlantı hatası.</span>'; return; }
     // Mevcut liste varsa onay iste
     let hasExisting = false;
     try { hasExisting = JSON.parse(localStorage.getItem(SD_KEY) || '[]').length > 0 || JSON.parse(localStorage.getItem(SD_PLACE_KEY) || '[]').length > 0; } catch {}
@@ -975,11 +975,11 @@ function renderNav(opts = {}) {
     if (statusEl) statusEl.innerHTML = '<span style="color:var(--text-muted)">Yükleniyor...</span>';
     try {
       const doc = await firebase.firestore().collection('favorites').doc(code).get();
-      if (!doc.exists) { if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Bu kodla eslesen liste bulunamadi.</span>'; return; }
+      if (!doc.exists) { if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Bu kodla eşleşen liste bulunamadı.</span>'; return; }
       const data = doc.data();
       const venueCount = (data.venues && Array.isArray(data.venues)) ? data.venues.length : 0;
       const placeCount = (data.places && Array.isArray(data.places)) ? data.places.length : 0;
-      if (venueCount === 0 && placeCount === 0) { if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Bu liste bos.</span>'; return; }
+      if (venueCount === 0 && placeCount === 0) { if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Bu liste boş.</span>'; return; }
       // Mevcut listeyi sıfırla, kodun listesini yükle
       localStorage.setItem(SD_KEY, JSON.stringify(data.venues || []));
       localStorage.setItem(SD_PLACE_KEY, JSON.stringify(data.places || []));
@@ -1007,7 +1007,7 @@ function renderNav(opts = {}) {
     const statusEl = document.getElementById('sd-sync-status');
     const code = getFavCode();
     if (typeof firebase === 'undefined' || !firebase.firestore) return;
-    if (statusEl) statusEl.innerHTML = '<span style="color:var(--text-muted)">Guncelleniyor...</span>';
+    if (statusEl) statusEl.innerHTML = '<span style="color:var(--text-muted)">Güncelleniyor...</span>';
     try {
       const doc = await firebase.firestore().collection('favorites').doc(code).get();
       if (doc.exists) {
@@ -1017,12 +1017,12 @@ function renderNav(opts = {}) {
         renderSaveDrawer();
         window.updateSaveNavCount();
         const total = (data.venues || []).length + (data.places || []).length;
-        if (statusEl) statusEl.innerHTML = '<span style="color:#38A169">✓ Liste güncellendi! ' + total + ' kayit.</span>';
+        if (statusEl) statusEl.innerHTML = '<span style="color:#38A169">✓ Liste güncellendi! ' + total + ' kayıt.</span>';
       } else {
-        if (statusEl) statusEl.innerHTML = '<span style="color:var(--text-muted)">Liste zaten guncel.</span>';
+        if (statusEl) statusEl.innerHTML = '<span style="color:var(--text-muted)">Liste zaten güncel.</span>';
       }
     } catch(err) {
-      if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Guncelleme hatasi.</span>';
+      if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Güncelleme hatası.</span>';
     }
   };
 
@@ -1319,7 +1319,7 @@ function initSearch(inputId, opts = {}) {
     if (!q || q.length < 2) { dropdown.classList.remove('open'); return; }
 
     if (results.length === 0) {
-      dropdown.innerHTML = '<div class="search-no-results">Sonuc bulunamadi: "<strong style="color:var(--cream)">' + q.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') + '</strong>"</div>';
+      dropdown.innerHTML = '<div class="search-no-results">Sonuç bulunamadı: "<strong style="color:var(--cream)">' + q.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') + '</strong>"</div>';
     } else {
       dropdown.innerHTML = results.map(r => {
         const lbl = getTypeLabel(r.type);
@@ -1985,7 +1985,7 @@ function renderVenuePage(venueId) {
 
   /* ── WhatsApp contact URL ── */
   const waNum = (v.phone || '').replace(/\D/g,'').replace(/^0/,'90');
-  const waContactMsg = encodeURIComponent('Merhaba! *Assos\'u Kesfet* (assosukesfet.com) uzerinden ulasiyorum.\n\n' + v.title + ' hakkinda bilgi almak istiyorum.');
+  const waContactMsg = encodeURIComponent('Merhaba! *Assos\'u Keşfet* (assosukesfet.com) üzerinden ulaşıyorum.\n\n' + v.title + ' hakkında bilgi almak istiyorum.');
   const waContactUrl = `https://wa.me/${waNum}?text=${waContactMsg}`;
 
   /* ── Today's hours helper ── */
@@ -2819,8 +2819,8 @@ function renderVenuePage(venueId) {
   /* ── Share dropdown ── */
   (function() {
     const url = window.location.origin + '/mekanlar/mekan-detay.html?id=' + v.id;
-    const text = v.title + ' - Assos\'u Kesfet';
-    const waText = v.title + ' - Assos\'u Kesfet\n' + v.location + '\n\n' + url;
+    const text = v.title + ' - Assos\'u Keşfet';
+    const waText = v.title + ' - Assos\'u Keşfet\n' + v.location + '\n\n' + url;
     const dd = document.getElementById('vp-share-dd');
     if (!dd) return;
     dd.innerHTML =
@@ -2954,21 +2954,21 @@ function renderVenuePage(venueId) {
     const fmt = d => { if (!d) return '—'; const [y,m,day]=d.split('-'); return `${day}.${m}.${y}`; };
     const lines = [
       '━━━━━━━━━━━━━━━━━━━━',
-      '*REZERVASYON TALEBI*',
+      '*REZERVASYON TALEBİ*',
       '━━━━━━━━━━━━━━━━━━━━',
       '',
       '*Mekan:* ' + v.title,
       '',
       '┌─────────────────────',
       '│ *Ad Soyad:* ' + name,
-      '│ *Giris:* ' + fmt(checkin),
-      '│ *Cikis:* ' + fmt(checkout),
-      '│ *Kisi Sayisi:* ' + guests + ' kisi',
+      '│ *Giriş:* ' + fmt(checkin),
+      '│ *Çıkış:* ' + fmt(checkout),
+      '│ *Kişi Sayısı:* ' + guests + ' kişi',
       '└─────────────────────',
       '',
-      'Musaitlik durumu hakkinda bilgi almak istiyorum.',
+      'Müsaitlik durumu hakkında bilgi almak istiyorum.',
       '',
-      '_Assos\'u Kesfet (assosukesfet.com) uzerinden gonderilmistir._'
+      '_Assos\'u Keşfet (assosukesfet.com) üzerinden gönderilmiştir._'
     ];
     const msg = encodeURIComponent(lines.join('\n'));
     const rezWaNum = (v.phone || '').replace(/\D/g,'').replace(/^0/,'90');
