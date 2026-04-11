@@ -282,14 +282,9 @@
 
     </div>
 
-    <!-- Diğer rotalar + CTA -->
-    <div class="fade-up" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-top:28px;padding:18px 24px;background:rgba(255,255,255,.04);border:1px solid rgba(245,237,224,.07);border-radius:16px;">
-      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;">
-        <span style="font-size:.78rem;color:rgba(245,237,224,.3);font-weight:500;margin-right:4px;">3 rota daha:</span>
-        <span style="background:rgba(90,122,86,.15);border:1px solid rgba(90,122,86,.2);border-radius:999px;padding:4px 12px;font-size:.72rem;font-weight:600;color:rgba(127,184,123,.8);">🏘 Köy Köy Assos</span>
-        <span style="background:rgba(26,107,138,.15);border:1px solid rgba(26,107,138,.2);border-radius:999px;padding:4px 12px;font-size:.72rem;font-weight:600;color:rgba(36,144,184,.8);">🌊 Deniz &amp; Koy</span>
-        <span style="background:rgba(212,147,90,.12);border:1px solid rgba(212,147,90,.2);border-radius:999px;padding:4px 12px;font-size:.72rem;font-weight:600;color:rgba(212,147,90,.8);">☕ Kahve Molası</span>
-      </div>
+    <!-- Diğer rotalar + CTA (dinamik) -->
+    <div class="fade-up" id="home-other-routes" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-top:28px;padding:18px 24px;background:rgba(255,255,255,.04);border:1px solid rgba(245,237,224,.07);border-radius:16px;">
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;" id="home-other-routes-pills"></div>
       <a href="rotalar.html" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#C4521A,#D4935A);color:#fff;text-decoration:none;padding:10px 22px;border-radius:999px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.82rem;white-space:nowrap;transition:transform .2s,filter .2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.filter='brightness(1.1)'" onmouseout="this.style.transform='';this.style.filter=''">
         Tüm Rotaları Gör
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -492,6 +487,20 @@ function pageInit() {
   scrollFadeIn();
   initSearch('hero-search-input');
   loadHomeBlog();
+
+  // Diğer rotaları dinamik doldur (anasayfada gösterilen 3 rota hariç)
+  (function() {
+    var shownIds = ['bir-gunde-assos','tarih-rotasi','gun-batimi-rotasi'];
+    var others = (DATA.routes || []).filter(function(r) { return !shownIds.includes(r.id); });
+    var pillsEl = document.getElementById('home-other-routes-pills');
+    var wrapEl = document.getElementById('home-other-routes');
+    if (!pillsEl || !wrapEl) return;
+    if (others.length === 0) { wrapEl.style.display = 'none'; return; }
+    pillsEl.innerHTML = '<span style="font-size:.78rem;color:rgba(245,237,224,.3);font-weight:500;margin-right:4px;">' + others.length + ' rota daha:</span>' +
+      others.map(function(r) {
+        return '<a href="rotalar/rota-detay.html?id=' + r.id + '" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:4px 12px;font-size:.72rem;font-weight:600;color:rgba(245,237,224,.7);text-decoration:none;transition:all .2s;" onmouseover="this.style.background=\'rgba(255,255,255,.15)\'" onmouseout="this.style.background=\'rgba(255,255,255,.08)\'">' + (r.emoji || '🗺') + ' ' + r.title + '</a>';
+      }).join('');
+  })();
 
   /* ── Hava Durumu — 3 günlük tahmin (Open-Meteo API) ── */
   (function() {
