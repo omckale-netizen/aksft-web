@@ -3904,7 +3904,9 @@ function getVenueStatus(v) {
     const m = v.hours.match(/(\d{2}):(\d{2})\s*[–\-]\s*(\d{2}):(\d{2})/);
     if (!m) return null;
     const open = parseInt(m[1]) * 60 + parseInt(m[2]);
-    const close = parseInt(m[3]) * 60 + parseInt(m[4]);
+    var close = parseInt(m[3]) * 60 + parseInt(m[4]);
+    if (close === 0) close = 1440;
+    if (close <= open) return mins >= open || mins < close;
     return mins >= open && mins < close;
   }
 
@@ -3932,7 +3934,9 @@ function getVenueStatus(v) {
   const m = todayHours.match(/(\d{2}):(\d{2})\s*[–\-]\s*(\d{2}):(\d{2})/);
   if (!m) return null;
   const open = parseInt(m[1]) * 60 + parseInt(m[2]);
-  const close = parseInt(m[3]) * 60 + parseInt(m[4]);
+  var close = parseInt(m[3]) * 60 + parseInt(m[4]);
+  if (close === 0) close = 1440;
+  if (close <= open) return mins >= open || mins < close;
   return mins >= open && mins < close;
 }
 

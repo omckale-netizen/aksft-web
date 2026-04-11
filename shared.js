@@ -2018,7 +2018,11 @@ function renderVenuePage(venueId) {
     const now = new Date();
     const mins = now.getHours() * 60 + now.getMinutes();
     const open = parseInt(match[1]) * 60 + parseInt(match[2]);
-    const close = parseInt(match[3]) * 60 + parseInt(match[4]);
+    var close = parseInt(match[3]) * 60 + parseInt(match[4]);
+    // 00:00 = gece yarısı, 1440 olarak hesapla
+    if (close === 0) close = 1440;
+    // Gece yarısını geçen saatler (ör: 20:00 - 02:00)
+    if (close <= open) return mins >= open || mins < close;
     return mins >= open && mins < close;
   })();
   // Türkçe saat eki — TDK kuralı: ek saatin okunuşuna göre belirlenir
