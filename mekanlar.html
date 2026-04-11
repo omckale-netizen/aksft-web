@@ -211,7 +211,17 @@ function pageInit() {
   let showingSaved = false;
 
   /* ── Açık / Kapalı durumu ── */
+  function checkHours(m, mins) {
+    var open = parseInt(m[1]) * 60 + parseInt(m[2]);
+    var close = parseInt(m[3]) * 60 + parseInt(m[4]);
+    if (close === 0) close = 1440;
+    if (close <= open) return mins >= open || mins < close;
+    return mins >= open && mins < close;
+  }
   function getVenueStatus(v) {
+    // Konaklama her zaman açık
+    if (v.category === 'konaklama') return { isOpen: true, badge: '' };
+
     const now = new Date();
     const dayNames = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
     const todayName = dayNames[now.getDay()];
@@ -221,9 +231,7 @@ function pageInit() {
       if (!v.hours) return { isOpen: null, badge: '' };
       const m = v.hours.match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
       if (!m) return { isOpen: null, badge: '' };
-      const open = parseInt(m[1]) * 60 + parseInt(m[2]);
-      const close = parseInt(m[3]) * 60 + parseInt(m[4]);
-      const isOpen = mins >= open && mins < close;
+      const isOpen = checkHours(m, mins);
       return { isOpen, badge: isOpen
         ? '<span class="mk-vc-status mk-vc-open">Açık</span>'
         : '<span class="mk-vc-status mk-vc-closed">Kapalı</span>' };
@@ -231,36 +239,26 @@ function pageInit() {
 
     let todayHours = null;
     for (const entry of v.weeklyHours) {
-      const d = entry.days.toLowerCase();
+      const d = (entry.days || '').toLowerCase();
       if (d.includes('24 saat')) return { isOpen: true, badge: '<span class="mk-vc-status mk-vc-open">Açık</span>' };
-      if (d.includes('her gün') || d.includes('resepsiyon')) { todayHours = entry.hours; break; }
-      if (d.includes('pazartesi') && d.includes('perşembe') && ['Pazartesi','Salı','Çarşamba','Perşembe'].includes(todayName)) { todayHours = entry.hours; break; }
-      if (d.includes('cuma') && d.includes('pazar') && ['Cuma','Cumartesi','Pazar'].includes(todayName)) { todayHours = entry.hours; break; }
-      if (d.includes('nisan') && d.includes('ekim')) {
-        const mo = now.getMonth();
-        if (mo >= 3 && mo <= 9) { todayHours = entry.hours; break; }
-        else { todayHours = 'Kapalı'; break; }
-      }
-      if (d.includes('kasım') && d.includes('mart')) {
-        const mo = now.getMonth();
-        if (mo <= 2 || mo >= 10) { todayHours = entry.hours; break; }
-      }
+      if (d.includes('her gün') || d.includes('her gun') || d.includes('resepsiyon')) { todayHours = entry.hours; break; }
+      if (d.includes('pazartesi') && d.includes('cuma') && ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma'].includes(todayName)) { todayHours = entry.hours; break; }
+      if (d.includes('cumartesi') && d.includes('pazar') && ['Cumartesi','Pazar'].includes(todayName)) { todayHours = entry.hours; break; }
+      // Tek gün kontrolü
+      if (d.includes(todayName.toLowerCase())) { todayHours = entry.hours; break; }
     }
 
-    if (!todayHours) todayHours = v.weeklyHours[0].hours;
-    if (!todayHours || todayHours.toLowerCase() === 'kapalı') {
+    if (!todayHours) todayHours = v.weeklyHours[0] ? v.weeklyHours[0].hours : null;
+    if (!todayHours || todayHours.toLowerCase().includes('kapal')) {
       return { isOpen: false, badge: '<span class="mk-vc-status mk-vc-closed">Kapalı</span>' };
     }
 
     const m = todayHours.match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
     if (!m) {
-      // "24 saat" or check-in style
       if (todayHours.includes('24')) return { isOpen: true, badge: '<span class="mk-vc-status mk-vc-open">Açık</span>' };
       return { isOpen: null, badge: '' };
     }
-    const open = parseInt(m[1]) * 60 + parseInt(m[2]);
-    const close = parseInt(m[3]) * 60 + parseInt(m[4]);
-    const isOpen = mins >= open && mins < close;
+    const isOpen = checkHours(m, mins);
     return { isOpen, badge: isOpen
       ? '<span class="mk-vc-status mk-vc-open">Açık</span>'
       : '<span class="mk-vc-status mk-vc-closed">Kapalı</span>' };
