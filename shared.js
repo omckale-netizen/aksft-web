@@ -2083,8 +2083,19 @@ function renderVenuePage(venueId) {
   const openBadge = (() => {
     // Sezon dışı mekan (konaklama dahil)
     if (isSeasonClosed) {
-      var months = ['','Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
-      return '<span class="vp-open-badge vp-closed">Sezon dışı · ' + months[v.seasonStart || 4] + bulunmaEki(months[v.seasonStart || 4]) + ' açılacak</span>';
+      var openDate;
+      if (v.seasonStart && typeof v.seasonStart === 'string' && v.seasonStart.includes('-')) {
+        openDate = new Date(v.seasonStart);
+        var now2 = new Date();
+        openDate.setFullYear(now2.getFullYear());
+        if (openDate <= now2) openDate.setFullYear(now2.getFullYear() + 1);
+      } else {
+        var sM = (typeof v.seasonStart === 'number' ? v.seasonStart : 4) - 1;
+        openDate = new Date(new Date().getFullYear(), sM, 1);
+        if (openDate <= new Date()) openDate.setFullYear(openDate.getFullYear() + 1);
+      }
+      var openLabel = openDate.toLocaleDateString('tr-TR', {day:'numeric', month:'long'});
+      return '<span class="vp-open-badge vp-closed">Sezon dışı · ' + openLabel + bulunmaEki(openLabel.split(' ').pop()) + ' açılacak</span>';
     }
     // Konaklama sezon içindeyse badge gösterme
     if (v.category === 'konaklama') return '';
@@ -2466,9 +2477,10 @@ function renderVenuePage(venueId) {
                 if (openDate <= now) openDate = new Date(now.getFullYear() + 1, sMonth, 1);
               }
               var diff = openDate - now;
-              var totalDays = Math.floor(diff / 86400000);
+              var totalDays = Math.max(1, Math.ceil(diff / 86400000));
               var months = Math.floor(totalDays / 30);
               var remDays = totalDays % 30;
+              if (months === 0 && remDays === 0) remDays = 1;
               var openStr = openDate.toLocaleDateString('tr-TR', {day:'numeric', month:'long'});
               return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 16px;text-align:center;">' +
                 '<div style="font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(245,237,224,.2);margin-bottom:16px;">Sezon açılışına</div>' +
