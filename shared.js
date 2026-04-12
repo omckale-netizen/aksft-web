@@ -838,15 +838,16 @@ function renderNav(opts = {}) {
     if (allVenues.length > 0) filterCats.add('mekanlar');
     if (allPlaces.length > 0) filterCats.add('yerler');
     allVenues.forEach(v => {
-      const m = SD_VMETA[v.id] || { cat: v.category || 'diger', catL: v.tagText || v.category || 'Diğer' };
-      filterCats.add('cat_' + m.cat);
+      filterCats.add('cat_' + (v.category || 'diger'));
     });
 
     const sdFilter = window._sdFilter || 'all';
+    const SD_CAT_MAP = {kafe:{label:'Kafeler',emoji:'☕'},restoran:{label:'Restoranlar',emoji:'🍽'},kahvalti:{label:'Kahvaltı',emoji:'🌞'},konaklama:{label:'Konaklama',emoji:'🏨'},beach:{label:'Beach',emoji:'🏖'},iskele:{label:'İskeleler',emoji:'⚓'}};
     const CAT_LABELS_SD = {};
     allVenues.forEach(v => {
-      const m = SD_VMETA[v.id] || { cat: v.category || 'diger', catL: v.tagText || v.category || 'Diğer' };
-      if (!CAT_LABELS_SD[m.cat]) CAT_LABELS_SD[m.cat] = m.catL;
+      var cat = v.category || 'diger';
+      var info = SD_CAT_MAP[cat] || {label:cat, emoji:'📍'};
+      if (!CAT_LABELS_SD[cat]) CAT_LABELS_SD[cat] = info;
     });
 
     let html = '<div style="display:flex;flex-wrap:wrap;gap:5px;padding:0 0 12px;border-bottom:1px solid rgba(26,39,68,.06);margin-bottom:8px;">';
@@ -854,7 +855,8 @@ function renderNav(opts = {}) {
     if (allVenues.length > 0) html += '<button class="sd-filter-btn' + (sdFilter === 'mekanlar' ? ' active' : '') + '" onclick="sdFilterBy(\'mekanlar\')">🏪 Mekanlar</button>';
     if (allPlaces.length > 0) html += '<button class="sd-filter-btn' + (sdFilter === 'yerler' ? ' active' : '') + '" onclick="sdFilterBy(\'yerler\')">📍 Yerler</button>';
     Object.keys(CAT_LABELS_SD).forEach(cat => {
-      html += '<button class="sd-filter-btn' + (sdFilter === 'cat_' + cat ? ' active' : '') + '" onclick="sdFilterBy(\'cat_' + cat + '\')">' + CAT_LABELS_SD[cat] + '</button>';
+      var info = CAT_LABELS_SD[cat];
+      html += '<button class="sd-filter-btn' + (sdFilter === 'cat_' + cat ? ' active' : '') + '" onclick="sdFilterBy(\'cat_' + cat + '\')">' + info.emoji + ' ' + info.label + '</button>';
     });
     html += '</div>';
 
@@ -869,7 +871,9 @@ function renderNav(opts = {}) {
         venues.sort(function(a,b) { return (isPremiumActive(b)?1:0) - (isPremiumActive(a)?1:0); });
         const groups = {};
         venues.forEach(v => {
-          const m = SD_VMETA[v.id] || { g:'linear-gradient(160deg,#1A2744,#2A3A5A)', cat:v.category||'diger', catBg:'rgba(26,39,68,.08)', catC:'#4A5568', catL:v.tagText||v.category||'Diğer' };
+          var catKey = v.category || 'diger';
+          var catInfo = SD_CAT_MAP[catKey] || {label:catKey, emoji:'📍'};
+          const m = SD_VMETA[v.id] || { g:'linear-gradient(160deg,#1A2744,#2A3A5A)', cat:catKey, catBg:'rgba(26,39,68,.08)', catC:'#4A5568', catL:catInfo.emoji + ' ' + catInfo.label };
           if (!groups[m.cat]) groups[m.cat] = { m, items:[] };
           groups[m.cat].items.push(v);
         });
