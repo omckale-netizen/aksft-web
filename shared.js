@@ -2071,13 +2071,13 @@ function renderVenuePage(venueId) {
   }
 
   const openBadge = (() => {
-    // Konaklama mekanlarında açık/kapalı badge gösterme
-    if (v.category === 'konaklama') return '';
-    // Sezon dışı mekan
+    // Sezon dışı mekan (konaklama dahil)
     if (isSeasonClosed) {
       var months = ['','Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
       return '<span class="vp-open-badge vp-closed">Sezon dışı · ' + months[v.seasonStart || 4] + bulunmaEki(months[v.seasonStart || 4]) + ' açılacak</span>';
     }
+    // Konaklama sezon içindeyse badge gösterme
+    if (v.category === 'konaklama') return '';
     if (isNowOpen === true) {
       const match = (todayHours || '').match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
       const closeText = match ? saatEki(match[3], match[4], 'yonelme') + ' kadar' : '';
@@ -2509,7 +2509,7 @@ function renderVenuePage(venueId) {
               }).join('');
             })()}
             </div>
-            <div class="vp-hero-card-footer"><span>${v.category === 'konaklama' ? 'Erken giriş/geç çıkış için iletişime geçin' : 'Saatler mevsime göre değişebilir'}</span></div>
+            <div class="vp-hero-card-footer"><span>${isSeasonClosed ? '📅 Sezon dışı · ' + (['','Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'][v.seasonStart||4]) + ' ayında açılacak' : v.category === 'konaklama' ? 'Erken giriş/geç çıkış için iletişime geçin' : 'Saatler mevsime göre değişebilir'}</span></div>
           </div>
         </div>
       </div>
