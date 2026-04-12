@@ -3158,12 +3158,13 @@ function renderVillagePage(villageId) {
   // Location
   heroHtml += '<p style="font-size:.85rem;color:rgba(245,237,224,.45);margin-bottom:20px;">Ayvacık, Çanakkale</p>';
 
-  // Info chips
-  heroHtml += '<div style="display:flex;flex-wrap:wrap;gap:8px;">';
+  // Yol tarifi butonları
   if (v.lat && v.lng) {
-    heroHtml += '<a href="https://www.google.com/maps?q=' + v.lat + ',' + v.lng + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:6px 14px;font-size:.72rem;font-weight:600;color:rgba(245,237,224,.6);text-decoration:none;">📍 Haritada Gör</a>';
+    heroHtml += '<div style="display:flex;flex-wrap:wrap;gap:8px;">';
+    heroHtml += '<a href="https://www.google.com/maps/dir/?api=1&destination=' + v.lat + ',' + v.lng + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:9px 16px;font-size:.75rem;font-weight:600;color:#F5EDE0;text-decoration:none;transition:all .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);" onmouseover="this.style.background=\'rgba(255,255,255,.18)\'" onmouseout="this.style.background=\'rgba(255,255,255,.1)\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#4285F4"/></svg>Google Maps</a>';
+    heroHtml += '<a href="https://maps.apple.com/?daddr=' + v.lat + ',' + v.lng + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:9px 16px;font-size:.75rem;font-weight:600;color:#F5EDE0;text-decoration:none;transition:all .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);" onmouseover="this.style.background=\'rgba(255,255,255,.18)\'" onmouseout="this.style.background=\'rgba(255,255,255,.1)\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#34C759"/></svg>Apple Haritalar</a>';
+    heroHtml += '</div>';
   }
-  heroHtml += '</div>';
 
   heroHtml += '</div>'; // inner
   heroHtml += '</div>'; // hero
@@ -3325,10 +3326,11 @@ function renderVillagePage(villageId) {
     bodyHtml += '</div></div>';
   }
 
-  // Harita CTA
+  // Yol tarifi CTA
   if (v.lat && v.lng) {
-    bodyHtml += '<div style="text-align:center;padding:32px 0;">';
-    bodyHtml += '<a href="https://www.google.com/maps?q=' + v.lat + ',' + v.lng + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:var(--navy);color:#fff;border-radius:12px;font-size:.85rem;font-weight:600;text-decoration:none;transition:all .2s;" onmouseover="this.style.background=\'#2A3A5A\'" onmouseout="this.style.background=\'var(--navy)\'">📍 Google Maps\'te Aç</a>';
+    bodyHtml += '<div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;padding:32px 0;">';
+    bodyHtml += '<a href="https://www.google.com/maps/dir/?api=1&destination=' + v.lat + ',' + v.lng + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:var(--navy);color:#fff;border-radius:12px;font-size:.85rem;font-weight:600;text-decoration:none;transition:all .2s;" onmouseover="this.style.background=\'#2A3A5A\'" onmouseout="this.style.background=\'var(--navy)\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#4285F4"/></svg>Google Maps ile Git</a>';
+    bodyHtml += '<a href="https://maps.apple.com/?daddr=' + v.lat + ',' + v.lng + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:#fff;color:var(--navy);border:1.5px solid rgba(26,39,68,.12);border-radius:12px;font-size:.85rem;font-weight:600;text-decoration:none;transition:all .2s;" onmouseover="this.style.borderColor=\'var(--terra)\';this.style.color=\'var(--terra)\'" onmouseout="this.style.borderColor=\'rgba(26,39,68,.12)\';this.style.color=\'var(--navy)\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#34C759"/></svg>Apple Haritalar ile Git</a>';
     bodyHtml += '</div>';
   }
 
