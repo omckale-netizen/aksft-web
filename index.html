@@ -186,6 +186,7 @@
 </section>
 
 <style>
+.search-dropdown.open ~ .hero-scroll-cta,.hero-section:has(.search-dropdown.open) .hero-scroll-cta{opacity:0 !important;pointer-events:none;}
 .hero-scroll-cta{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:3;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;animation:heroScrollFade 1.5s ease 2s both;}
 .hero-scroll-text{font-size:.62rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,237,224,.25);transition:color .3s;}
 .hero-scroll-cta:hover .hero-scroll-text{color:rgba(245,237,224,.6);}
