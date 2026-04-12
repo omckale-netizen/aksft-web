@@ -2108,6 +2108,7 @@ function renderVenuePage(venueId) {
       /* ── VP Hero (compact 2-col) ── */
       .vp-hero{position:relative;min-height:520px;display:flex;align-items:center;padding:0 36px 48px;overflow:hidden;}
       .vp-hero-bg{position:absolute;inset:0;z-index:0;}
+      .vp-topo{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.04;background-image:repeating-radial-gradient(circle at 50% 50%,transparent 0,transparent 18px,rgba(245,237,224,.3) 18px,rgba(245,237,224,.3) 19px,transparent 19px,transparent 38px,rgba(245,237,224,.2) 38px,rgba(245,237,224,.2) 39px,transparent 39px,transparent 58px,rgba(245,237,224,.15) 58px,rgba(245,237,224,.15) 59px),linear-gradient(rgba(245,237,224,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(245,237,224,.02) 1px,transparent 1px);background-size:120px 120px,40px 40px,40px 40px;}
       .vp-vignette{position:absolute;inset:0;z-index:2;background:radial-gradient(ellipse at 60% 40%,transparent 45%,rgba(0,0,0,.18) 100%);}
       .vp-text-overlay{position:absolute;inset:0;z-index:3;background:linear-gradient(to bottom,rgba(0,0,0,.14) 0%,transparent 40%,transparent 70%,rgba(0,0,0,.35) 100%);}
       .vp-hero-wrap{position:relative;z-index:10;width:100%;max-width:1100px;margin:0 auto;padding-top:90px;}
@@ -2376,6 +2377,7 @@ function renderVenuePage(venueId) {
     <div class="vp-hero">
       <div class="vp-hero-bg" style="background:${G};"></div>
       ${v.images && v.images.length > 0 ? '<img src="' + v.images[0] + '" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0;transition:opacity .7s ease;" onload="this.style.opacity=\'0.25\'">' : ''}
+      <div class="vp-topo"></div>
       <div class="vp-vignette"></div>
       <div class="vp-text-overlay"></div>
 
