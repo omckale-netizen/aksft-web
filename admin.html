@@ -5670,7 +5670,8 @@ async function saveVP(e) {
     item.imagePos = 50;
   } else if (vpPendingImg && vpPendingImg.blob) {
     const folder = isPlaces ? 'yerler' : 'koyler';
-    const imgPath = 'images/' + folder + '/' + item.id + '.' + vpPendingImg.ext;
+    var imgName = isPlaces ? item.id : (item.id + '-koyu-assos');
+    const imgPath = 'images/' + folder + '/' + imgName + '.' + vpPendingImg.ext;
     try {
       const url = await uploadImageToServer(vpPendingImg.blob, imgPath);
       item.image = url;
@@ -5869,7 +5870,8 @@ async function savePlaceImage() {
   if (pendingPlaceImage) {
     const folder = editingPlaceType === 'villages' ? 'koyler' : 'yerler';
     const placeExt = pendingPlaceImage.ext || 'webp';
-    const imgPath = 'images/' + folder + '/' + editingPlaceId + '.' + placeExt;
+    var placeImgName = editingPlaceType === 'villages' ? (editingPlaceId + '-koyu-assos') : editingPlaceId;
+    const imgPath = 'images/' + folder + '/' + placeImgName + '.' + placeExt;
     try {
       const url = await uploadImageToServer(pendingPlaceImage.blob, imgPath);
       p.image = url;
