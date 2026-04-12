@@ -172,7 +172,7 @@
   </div>
 
   <!-- Scroll ipucu -->
-  <div class="hero-scroll-cta" onclick="this.classList.add('hero-scroll-clicked');document.getElementById('hero').nextElementSibling.scrollIntoView({behavior:'smooth'})">
+  <div class="hero-scroll-cta" onclick="this.classList.add('hero-scroll-clicked');var nxt=document.getElementById('hero');while(nxt=nxt.nextElementSibling){if(nxt.tagName==='SECTION'){nxt.scrollIntoView({behavior:'smooth'});break;}}">
     <span class="hero-scroll-text">Keşfetmeye başla</span>
     <div class="hero-scroll-line"></div>
     <div class="hero-scroll-arrows">
