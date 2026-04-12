@@ -301,6 +301,19 @@
 
     </div>
 
+    <!-- Boğaz Geçişi -->
+    <div class="ulasim-bogaz fade-up">
+      <div class="ulasim-bogaz-icon">⛴️</div>
+      <div class="ulasim-bogaz-content">
+        <h4 class="ulasim-bogaz-title">Çanakkale Boğazı Geçişi</h4>
+        <p class="ulasim-bogaz-desc">İstanbul ve Tekirdağ yönünden gelenler Gelibolu–Lapseki veya Eceabat–Çanakkale feribotuyla ya da 1915 Çanakkale Köprüsü ile boğazı geçebilir.</p>
+      </div>
+      <div class="ulasim-bogaz-btns">
+        <a href="https://gdu.com.tr/ucret-tarifeleri" target="_blank" rel="noopener noreferrer" class="ulasim-bogaz-btn ulasim-bogaz-btn-ferry">⛴️ Feribot Ücretleri</a>
+        <a href="https://www.1915canakkale.com/online-islemler/gecis-ucreti-sorgulama" target="_blank" rel="noopener noreferrer" class="ulasim-bogaz-btn ulasim-bogaz-btn-bridge">🌉 Köprü Ücreti</a>
+      </div>
+    </div>
+
     <!-- Diğer Şehirler -->
     <div class="fade-up ulasim-other">
       <div class="rh-sec-header ulasim-other-header">
@@ -832,6 +845,19 @@
 .ulasim-card-row strong{color:var(--navy);font-weight:600}
 .ulasim-row-icon{font-size:.85rem;width:22px;text-align:center;flex-shrink:0}
 .ulasim-card-route{font-size:.7rem;color:var(--text-mid);font-weight:600;letter-spacing:.04em;padding:8px 12px;background:rgba(26,39,68,.03);border-radius:8px;text-align:center}
+.ulasim-bogaz{display:flex;align-items:center;gap:20px;margin-top:28px;padding:22px 28px;background:#fff;border:1px solid rgba(26,107,138,.12);border-radius:16px;transition:box-shadow .3s}
+.ulasim-bogaz:hover{box-shadow:0 8px 28px rgba(26,107,138,.08)}
+.ulasim-bogaz-icon{font-size:1.8rem;flex-shrink:0}
+.ulasim-bogaz-content{flex:1;min-width:0}
+.ulasim-bogaz-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);margin-bottom:4px}
+.ulasim-bogaz-desc{font-size:.75rem;color:var(--text-mid);line-height:1.6}
+.ulasim-bogaz-btns{display:flex;gap:8px;flex-shrink:0}
+.ulasim-bogaz-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:10px;font-size:.75rem;font-weight:600;text-decoration:none;transition:all .25s;white-space:nowrap}
+.ulasim-bogaz-btn-ferry{background:rgba(26,107,138,.08);color:#1A6B8A;border:1px solid rgba(26,107,138,.15)}
+.ulasim-bogaz-btn-ferry:hover{background:rgba(26,107,138,.15);border-color:rgba(26,107,138,.3)}
+.ulasim-bogaz-btn-bridge{background:rgba(196,82,26,.06);color:#C4521A;border:1px solid rgba(196,82,26,.12)}
+.ulasim-bogaz-btn-bridge:hover{background:rgba(196,82,26,.12);border-color:rgba(196,82,26,.25)}
+
 .ulasim-other{margin-top:48px}
 .ulasim-other-header{margin-bottom:28px}
 .ulasim-other-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:1.05rem;color:var(--navy);margin-bottom:6px}
@@ -955,6 +981,8 @@
 @media(max-width:768px){
   .ulasim-grid{grid-template-columns:1fr !important}
   .ulasim-tips{grid-template-columns:1fr !important}
+  .ulasim-bogaz{flex-direction:column;text-align:center;gap:14px}
+  .ulasim-bogaz-btns{justify-content:center}
   .ulasim-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .ulasim-table{min-width:520px}
 }
