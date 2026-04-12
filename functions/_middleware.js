@@ -177,7 +177,7 @@ async function generateDynamicSitemap() {
     { loc: '/yerler', priority: '0.9', freq: 'weekly' },
     { loc: '/koyler', priority: '0.9', freq: 'weekly' },
     { loc: '/harita', priority: '0.8', freq: 'weekly' },
-    { loc: '/rehber', priority: '0.8', freq: 'monthly' },
+    { loc: '/rehber', priority: '0.9', freq: 'weekly' },
     { loc: '/blog', priority: '0.8', freq: 'weekly' },
     { loc: '/planla', priority: '0.7', freq: 'monthly' },
     { loc: '/hakkimizda', priority: '0.4', freq: 'monthly' },

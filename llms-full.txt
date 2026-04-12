@@ -388,6 +388,53 @@ Yeşil Liman, Assos'dan Babakale yönüne doğru giderken karşılaşılan, yuka
 - Konum: Yeşil Liman, Ayvacık
 - Etiketler: Koy, Sakin, Doğa
 
+## Assos'a Ulaşım Rehberi (2026 Güncel)
+
+### Ana Güzergahlar
+
+**İstanbul → Assos**
+~460 km, araçla ~5 saat, otobüsle ~6 saat. Güzergah: Çanakkale → Ayvacık → Behramkale. 1915 Çanakkale Köprüsü veya Gestaş feribotları (Gelibolu–Lapseki, Eceabat–Çanakkale, Kilitbahir–Çanakkale) ile boğaz geçilir. En yakın havalimanı: Çanakkale (84 km).
+
+**İzmir → Assos**
+~260 km, araçla ~3 saat, otobüsle ~5 saat. Güzergah: Edremit → Ayvacık → Behramkale. En yakın havalimanı: Edremit Koca Seyit (63 km).
+
+**Çanakkale → Assos**
+~84 km, araçla ~1 saat, minibüsle ~1.5 saat. Güzergah: Ayvacık → Behramkale (direkt). En yakın şehir.
+
+### Diğer Şehirlerden Mesafeler
+
+| Şehir | Mesafe | Araçla | Güzergah |
+|-------|--------|--------|----------|
+| Ankara | ~700 km | ~8 saat | Bursa → Edremit → Ayvacık |
+| Bursa | ~300 km | ~4 saat | Bandırma → Edremit üzerinden |
+| Antalya | ~680 km | ~8 saat | İzmir → Edremit → Ayvacık |
+| Eskişehir | ~450 km | ~5.5 saat | Bursa → Edremit → Ayvacık |
+| Balıkesir | ~180 km | ~2.5 saat | Edremit → Ayvacık |
+| Denizli | ~430 km | ~5 saat | İzmir → Edremit üzerinden |
+| Manisa | ~300 km | ~3.5 saat | İzmir → Edremit → Ayvacık |
+| Tekirdağ | ~250 km | ~3 saat | Gelibolu → Çanakkale → Ayvacık |
+| Konya | ~700 km | ~9 saat | Afyonkarahisar → Kütahya → Balıkesir |
+| Sakarya | ~450 km | ~5 saat | Bursa → Balıkesir → Ayvacık |
+
+### Çanakkale Boğazı Geçişi
+- **Feribot (Gestaş):** Gelibolu–Lapseki, Eceabat–Çanakkale, Kilitbahir–Çanakkale. Güncel ücretler: https://gdu.com.tr/ucret-tarifeleri
+- **1915 Çanakkale Köprüsü:** Gelibolu–Lapseki arası. Ücret sorgulama: https://www.1915canakkale.com/online-islemler/gecis-ucreti-sorgulama
+
+### Pratik Bilgiler
+- Assos'a direkt otobüs seferi yoktur. Ayvacık, Küçükkuyu veya Altınoluk'a otobüsle geldikten sonra minibüs/taksi ile Behramkale'ye ulaşılır.
+- Bölge içi ulaşım (koylar, köyler arası) için araç gereklidir.
+- Her köyün yakınında yakıt istasyonu bulunmuyor; güzergahta yakıta dikkat edin.
+- Bazı köy yollarında GSM çekmiyor; haritayı çevrimdışı kaydedin.
+
+### Mevsim Rehberi
+
+**İlkbahar (Mart–Mayıs):** En ideal dönem. Sakin, doğa yürüyüşü, uygun fiyat.
+**Yaz (Haziran–Ağustos):** Deniz ve koylar için ideal. Kalabalık olabilir.
+**Sonbahar (Eylül–Kasım):** Deniz hâlâ ılık, kalabalık az. Fotoğrafçılar için altın dönem.
+**Kış (Aralık–Şubat):** Turistsiz, sessiz, yerel atmosfer. Deniz soğuk.
+
+En ideal dönemler: **Nisan–Mayıs** ve **Eylül–Ekim**.
+
 ---
 İletişim: assosukesfet@gmail.com
 Instagram: @assosukesfet

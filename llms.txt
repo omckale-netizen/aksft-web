@@ -92,7 +92,7 @@ Assos ve çevresi hakkında detaylı gezi yazıları:
 - `/harita` — İnteraktif harita
 - `/blog` — Blog yazıları listesi
 - `/blog?yazi={slug}` — Blog yazısı detayı
-- `/rehber` — Assos gezi rehberi (SSS, mevsim bilgileri)
+- `/rehber` — Assos gezi rehberi (13 şehirden ulaşım güzergahları, feribot/köprü bilgileri, 4 mevsim rehberi, 14 SSS)
 - `/planla` — Gezi planlama aracı
 - `/hakkimizda` — Hakkımızda sayfası
 - `/iletisim` — İletişim formu
@@ -111,10 +111,22 @@ Assos ve çevresi hakkında detaylı gezi yazıları:
 Assos, Çanakkale'nin Ayvacık ilçesine bağlı, Ege Denizi kıyısında antik bir yerleşim yeridir. Behramkale olarak da bilinir.
 
 **Assos'a nasıl gidilir?**
-İstanbul'dan yaklaşık 5-6 saat, Çanakkale merkezden yaklaşık 1.5 saat mesafededir. Karayolu ile ulaşım sağlanmaktadır.
+İstanbul'dan araçla ~5 saat (~460 km), otobüsle ~6 saat. İzmir'den araçla ~3 saat (~260 km). Ankara'dan ~8 saat (~700 km, Bursa→Edremit→Ayvacık). Çanakkale'den ~1 saat (~84 km). Boğaz geçişi: 1915 Çanakkale Köprüsü veya Gestaş feribotları (Gelibolu–Lapseki, Eceabat–Çanakkale, Kilitbahir–Çanakkale). En yakın havalimanları: Edremit Koca Seyit (63 km), Çanakkale (84 km). Assos'a direkt otobüs yoktur; Ayvacık veya Küçükkuyu'ya otobüs, sonra minibüsle Behramkale'ye.
 
-**Assos'ta en iyi ziyaret zamanı ne zaman?**
-Mayıs-Ekim arası en ideal dönemdir. Yazın deniz ve plaj, ilkbahar ve sonbaharda doğa yürüyüşleri ve tarihi geziler için uygundur.
+**Assos'a hangi şehirlerden nasıl gidilir?**
+- İstanbul: ~460 km, ~5 saat (Çanakkale→Ayvacık→Behramkale)
+- İzmir: ~260 km, ~3 saat (Edremit→Ayvacık→Behramkale)
+- Ankara: ~700 km, ~8 saat (Bursa→Edremit→Ayvacık)
+- Bursa: ~300 km, ~4 saat (Bandırma→Edremit)
+- Antalya: ~680 km, ~8 saat (İzmir→Edremit→Ayvacık)
+- Eskişehir: ~450 km, ~5.5 saat (Bursa→Edremit→Ayvacık)
+- Balıkesir: ~180 km, ~2.5 saat (Edremit→Ayvacık)
+- Tekirdağ: ~250 km, ~3 saat (Gelibolu→Çanakkale→Ayvacık)
+- Konya: ~700 km, ~9 saat (Afyonkarahisar→Kütahya→Balıkesir)
+- Sakarya: ~450 km, ~5 saat (Bursa→Balıkesir→Ayvacık)
+
+**Assos'a ne zaman gidilmeli?**
+En ideal dönemler Nisan–Mayıs ve Eylül–Ekim'dir. Sakin, güzel hava, uygun fiyat. Yaz (Haziran–Ağustos) deniz ve koylar için ideal ama kalabalık olabilir. Kış aylarında turistsiz, sessiz, yerel atmosfer.
 
 **Assos'ta neler yapılabilir?**
 Athena Tapınağı ziyareti, antik liman gezisi, Kadırga Koyu'nda deniz, köy keşifleri, zeytinyağı tadımı, gün batımı izleme, doğa yürüyüşleri ve yerel lezzetlerin tadılması.
