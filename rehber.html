@@ -229,24 +229,24 @@
   <div class="ulasim-inner">
 
     <!-- Section Header -->
-    <div class="fade-up" style="text-align:center;margin-bottom:56px;">
-      <div style="display:inline-flex;align-items:center;gap:10px;margin-bottom:14px;">
-        <div style="width:28px;height:1px;background:linear-gradient(90deg,transparent,var(--terra));"></div>
-        <p style="margin:0;font-size:.6rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--terra);">Ulaşım & Mesafe</p>
-        <div style="width:28px;height:1px;background:linear-gradient(90deg,var(--terra),transparent);"></div>
+    <div class="fade-up rh-sec-header">
+      <div class="rh-sec-label-row">
+        <div class="rh-sec-line rh-sec-line-l"></div>
+        <p class="rh-sec-label">Ulaşım & Mesafe</p>
+        <div class="rh-sec-line rh-sec-line-r"></div>
       </div>
-      <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.8rem,4vw,2.6rem);color:var(--navy);letter-spacing:-.03em;line-height:1.1;margin-bottom:14px;">Assos'a nasıl gidilir?</h2>
-      <p style="font-size:.88rem;color:var(--text-mid);max-width:520px;margin:0 auto;line-height:1.7;">İstanbul, İzmir ve Çanakkale'den farklı ulaşım seçenekleri ile Assos'a kolayca ulaşın.</p>
+      <h2 class="rh-sec-title">Assos'a nasıl gidilir?</h2>
+      <p class="rh-sec-desc">İstanbul, İzmir ve Çanakkale'den farklı ulaşım seçenekleri ile Assos'a kolayca ulaşın.</p>
     </div>
 
     <!-- Distance Cards -->
     <div class="ulasim-grid fade-up">
 
       <div class="ulasim-card">
-        <div class="ulasim-card-accent" style="background:linear-gradient(90deg,#C4521A,#D4935A);"></div>
+        <div class="ulasim-card-accent ulasim-accent-terra"></div>
         <div class="ulasim-card-body">
           <div class="ulasim-card-head">
-            <div class="ulasim-card-icon-wrap" style="background:rgba(196,82,26,.08);">🏙️</div>
+            <div class="ulasim-card-icon-wrap ulasim-icon-terra">🏙️</div>
             <div>
               <h3 class="ulasim-card-city">İstanbul</h3>
               <div class="ulasim-card-distance">~460 km</div>
@@ -262,13 +262,13 @@
       </div>
 
       <div class="ulasim-card">
-        <div class="ulasim-card-accent" style="background:linear-gradient(90deg,#1A6B8A,#2490B8);"></div>
+        <div class="ulasim-card-accent ulasim-accent-aegean"></div>
         <div class="ulasim-card-body">
           <div class="ulasim-card-head">
-            <div class="ulasim-card-icon-wrap" style="background:rgba(26,107,138,.08);">🌊</div>
+            <div class="ulasim-card-icon-wrap ulasim-icon-aegean">🌊</div>
             <div>
               <h3 class="ulasim-card-city">İzmir</h3>
-              <div class="ulasim-card-distance" style="color:#1A6B8A;">~260 km</div>
+              <div class="ulasim-card-distance ulasim-dist-aegean">~260 km</div>
             </div>
           </div>
           <div class="ulasim-card-info">
@@ -281,13 +281,13 @@
       </div>
 
       <div class="ulasim-card">
-        <div class="ulasim-card-accent" style="background:linear-gradient(90deg,#5A7A56,#7FB87B);"></div>
+        <div class="ulasim-card-accent ulasim-accent-sage"></div>
         <div class="ulasim-card-body">
           <div class="ulasim-card-head">
-            <div class="ulasim-card-icon-wrap" style="background:rgba(90,122,86,.08);">🏛️</div>
+            <div class="ulasim-card-icon-wrap ulasim-icon-sage">🏛️</div>
             <div>
               <h3 class="ulasim-card-city">Çanakkale</h3>
-              <div class="ulasim-card-distance" style="color:#5A7A56;">~84 km</div>
+              <div class="ulasim-card-distance ulasim-dist-sage">~84 km</div>
             </div>
           </div>
           <div class="ulasim-card-info">
@@ -302,10 +302,10 @@
     </div>
 
     <!-- Diğer Şehirler -->
-    <div class="fade-up" style="margin-top:48px;">
-      <div style="text-align:center;margin-bottom:28px;">
-        <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:1.05rem;color:var(--navy);margin-bottom:6px;">Şehrinden Assos'a</h3>
-        <p style="font-size:.78rem;color:var(--text-mid);">Türkiye'nin dört bir yanından tahmini mesafe ve güzergahlar</p>
+    <div class="fade-up ulasim-other">
+      <div class="rh-sec-header ulasim-other-header">
+        <h3 class="ulasim-other-title">Şehrinden Assos'a</h3>
+        <p class="ulasim-other-desc">Türkiye'nin dört bir yanından tahmini mesafe ve güzergahlar</p>
       </div>
       <div class="ulasim-table-wrap">
         <table class="ulasim-table">
@@ -381,9 +381,7 @@
           </tbody>
         </table>
       </div>
-      <div style="text-align:center;margin-top:14px;">
-        <p style="font-size:.7rem;color:var(--text-mid);opacity:.6;">* Süreler tahminidir, trafik ve güzergaha göre değişebilir.</p>
-      </div>
+      <p class="ulasim-disclaimer">* Süreler tahminidir, trafik ve güzergaha göre değişebilir.</p>
     </div>
 
     <!-- İpuçları -->
@@ -412,7 +410,7 @@
     </div>
 
     <!-- Blog Link -->
-    <div class="fade-up" style="text-align:center;margin-top:44px;">
+    <div class="fade-up ulasim-blog-wrap">
       <a href="blog?yazi=assosa-nasil-gidilir-ulasim-rehberi" class="ulasim-blog-link">
         📖 Detaylı ulaşım rehberimizi okuyun →
       </a>
@@ -422,102 +420,102 @@
 </section>
 
 <!-- SEASONS -->
-<section style="padding:80px 24px;background:var(--cream-light);">
-  <div style="max-width:1280px;margin:0 auto;">
-    <div class="fade-up" style="text-align:center;margin-bottom:56px;">
-      <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:14px;">
-        <div style="width:24px;height:1px;background:var(--terra);opacity:.5;"></div>
-        <p class="section-label" style="margin:0;">Zaman & Mevsim</p>
-        <div style="width:24px;height:1px;background:var(--terra);opacity:.5;"></div>
+<section class="rh-section rh-section-light">
+  <div class="rh-container-wide">
+    <div class="fade-up rh-sec-header">
+      <div class="rh-sec-label-row">
+        <div class="rh-sec-line rh-sec-line-l"></div>
+        <p class="rh-sec-label">Zaman & Mevsim</p>
+        <div class="rh-sec-line rh-sec-line-r"></div>
       </div>
-      <h2 class="section-title" style="font-size:clamp(1.8rem,4vw,2.4rem);margin-bottom:16px;">Assos'a ne zaman gitmeli?</h2>
-      <p style="font-size:.9rem;color:var(--text-mid);max-width:480px;margin:0 auto;line-height:1.7;">Her mevsim farklı bir Assos sunar. Planınıza ve beklentinize göre en doğru zamanı seçin.</p>
+      <h2 class="rh-sec-title">Assos'a ne zaman gitmeli?</h2>
+      <p class="rh-sec-desc">Her mevsim farklı bir Assos sunar. Planınıza ve beklentinize göre en doğru zamanı seçin.</p>
     </div>
 
-    <div class="season-card-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+    <div class="season-card-grid">
 
       <!-- İlkbahar -->
-      <div class="season-card fade-up" style="background:#fff;border:1px solid rgba(90,122,86,0.14);box-shadow:0 4px 24px rgba(90,122,86,0.07);padding:0;overflow:hidden;border-radius:20px;">
-        <div style="height:6px;background:linear-gradient(90deg,#5A7A56,#7FB87B);"></div>
-        <div style="padding:28px 24px;">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;">
-            <span style="font-size:2rem;line-height:1;">🌸</span>
-            <span style="font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:rgba(90,122,86,0.1);color:#5A7A56;">En İdeal</span>
+      <div class="season-card season-sage fade-up">
+        <div class="sc-accent sc-accent-sage"></div>
+        <div class="sc-body">
+          <div class="sc-top">
+            <span class="sc-emoji">🌸</span>
+            <span class="sc-badge sc-badge-sage">En İdeal</span>
           </div>
-          <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.05rem;color:#1A2744;margin-bottom:4px;">İlkbahar</h3>
-          <p style="font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#5A7A56;margin-bottom:16px;">Mart – Mayıs</p>
-          <p style="font-size:.82rem;color:var(--text-mid);line-height:1.7;margin-bottom:18px;">Doğa uyanır, kalabalık olmaz. Yürüyüş, köy rotaları ve keşif için en mükemmel dönem.</p>
-          <div style="display:flex;flex-direction:column;gap:6px;">
-            <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--text-mid);"><span style="color:#5A7A56;">✓</span> Sakin & sessiz</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--text-mid);"><span style="color:#5A7A56;">✓</span> Doğa yürüyüşü</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--text-mid);"><span style="color:#5A7A56;">✓</span> Uygun fiyat</div>
+          <h3 class="sc-name">İlkbahar</h3>
+          <p class="sc-period sc-period-sage">Mart – Mayıs</p>
+          <p class="sc-desc">Doğa uyanır, kalabalık olmaz. Yürüyüş, köy rotaları ve keşif için en mükemmel dönem.</p>
+          <div class="sc-features">
+            <div class="sc-feat"><span class="sc-check sc-check-sage">✓</span> Sakin & sessiz</div>
+            <div class="sc-feat"><span class="sc-check sc-check-sage">✓</span> Doğa yürüyüşü</div>
+            <div class="sc-feat"><span class="sc-check sc-check-sage">✓</span> Uygun fiyat</div>
           </div>
         </div>
       </div>
 
       <!-- Yaz -->
-      <div class="season-card fade-up" style="background:#fff;border:1px solid rgba(212,147,90,0.18);box-shadow:0 4px 24px rgba(212,147,90,0.08);padding:0;overflow:hidden;border-radius:20px;animation-delay:.08s;">
-        <div style="height:6px;background:linear-gradient(90deg,#D4935A,#E8A07A);"></div>
-        <div style="padding:28px 24px;">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;">
-            <span style="font-size:2rem;line-height:1;">☀️</span>
-            <span style="font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:rgba(212,147,90,0.12);color:#D4935A;">Deniz & Koy</span>
+      <div class="season-card season-amber fade-up">
+        <div class="sc-accent sc-accent-amber"></div>
+        <div class="sc-body">
+          <div class="sc-top">
+            <span class="sc-emoji">☀️</span>
+            <span class="sc-badge sc-badge-amber">Deniz & Koy</span>
           </div>
-          <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.05rem;color:#1A2744;margin-bottom:4px;">Yaz</h3>
-          <p style="font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#D4935A;margin-bottom:16px;">Haziran – Ağustos</p>
-          <p style="font-size:.82rem;color:var(--text-mid);line-height:1.7;margin-bottom:18px;">Koylar ve Ege akşamları için biçilmiş kaftan. Kalabalık olabilir ama atmosfer eşsiz.</p>
-          <div style="display:flex;flex-direction:column;gap:6px;">
-            <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--text-mid);"><span style="color:#D4935A;">✓</span> Deniz & yüzme</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--text-mid);"><span style="color:#D4935A;">✓</span> Gün batımı</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:#C4521A;">⚠ Kalabalık</div>
+          <h3 class="sc-name">Yaz</h3>
+          <p class="sc-period sc-period-amber">Haziran – Ağustos</p>
+          <p class="sc-desc">Koylar ve Ege akşamları için biçilmiş kaftan. Kalabalık olabilir ama atmosfer eşsiz.</p>
+          <div class="sc-features">
+            <div class="sc-feat"><span class="sc-check sc-check-amber">✓</span> Deniz & yüzme</div>
+            <div class="sc-feat"><span class="sc-check sc-check-amber">✓</span> Gün batımı</div>
+            <div class="sc-feat sc-feat-warn">⚠ Kalabalık</div>
           </div>
         </div>
       </div>
 
       <!-- Sonbahar -->
-      <div class="season-card fade-up" style="background:#fff;border:1px solid rgba(196,82,26,0.13);box-shadow:0 4px 24px rgba(196,82,26,0.07);padding:0;overflow:hidden;border-radius:20px;animation-delay:.16s;">
-        <div style="height:6px;background:linear-gradient(90deg,#C4521A,#D4935A);"></div>
-        <div style="padding:28px 24px;">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;">
-            <span style="font-size:2rem;line-height:1;">🍂</span>
-            <span style="font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:rgba(196,82,26,0.1);color:#C4521A;">Fotoğraf</span>
+      <div class="season-card season-terra fade-up">
+        <div class="sc-accent sc-accent-terra"></div>
+        <div class="sc-body">
+          <div class="sc-top">
+            <span class="sc-emoji">🍂</span>
+            <span class="sc-badge sc-badge-terra">Fotoğraf</span>
           </div>
-          <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.05rem;color:#1A2744;margin-bottom:4px;">Sonbahar</h3>
-          <p style="font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#C4521A;margin-bottom:16px;">Eylül – Kasım</p>
-          <p style="font-size:.82rem;color:var(--text-mid);line-height:1.7;margin-bottom:18px;">Deniz hâlâ sıcak, kalabalık geçmiş. Fotoğrafçılar ve sessizlik arayanlar için altın dönem.</p>
-          <div style="display:flex;flex-direction:column;gap:6px;">
-            <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--text-mid);"><span style="color:#C4521A;">✓</span> Sakin atmosfer</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--text-mid);"><span style="color:#C4521A;">✓</span> Deniz ılık</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--text-mid);"><span style="color:#C4521A;">✓</span> Altın ışık</div>
+          <h3 class="sc-name">Sonbahar</h3>
+          <p class="sc-period sc-period-terra">Eylül – Kasım</p>
+          <p class="sc-desc">Deniz hâlâ sıcak, kalabalık geçmiş. Fotoğrafçılar ve sessizlik arayanlar için altın dönem.</p>
+          <div class="sc-features">
+            <div class="sc-feat"><span class="sc-check sc-check-terra">✓</span> Sakin atmosfer</div>
+            <div class="sc-feat"><span class="sc-check sc-check-terra">✓</span> Deniz ılık</div>
+            <div class="sc-feat"><span class="sc-check sc-check-terra">✓</span> Altın ışık</div>
           </div>
         </div>
       </div>
 
       <!-- Kış -->
-      <div class="season-card fade-up" style="background:#fff;border:1px solid rgba(26,107,138,0.13);box-shadow:0 4px 24px rgba(26,107,138,0.07);padding:0;overflow:hidden;border-radius:20px;animation-delay:.24s;">
-        <div style="height:6px;background:linear-gradient(90deg,#1A6B8A,#2490B8);"></div>
-        <div style="padding:28px 24px;">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;">
-            <span style="font-size:2rem;line-height:1;">❄️</span>
-            <span style="font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:rgba(26,107,138,0.1);color:#1A6B8A;">Yerel & Gerçek</span>
+      <div class="season-card season-aegean fade-up">
+        <div class="sc-accent sc-accent-aegean"></div>
+        <div class="sc-body">
+          <div class="sc-top">
+            <span class="sc-emoji">❄️</span>
+            <span class="sc-badge sc-badge-aegean">Yerel & Gerçek</span>
           </div>
-          <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.05rem;color:#1A2744;margin-bottom:4px;">Kış</h3>
-          <p style="font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#1A6B8A;margin-bottom:16px;">Aralık – Şubat</p>
-          <p style="font-size:.82rem;color:var(--text-mid);line-height:1.7;margin-bottom:18px;">Turistsiz, sessiz ve gerçek Assos. Köy yaşamını içinden yaşamak isteyenler için eşsiz.</p>
-          <div style="display:flex;flex-direction:column;gap:6px;">
-            <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--text-mid);"><span style="color:#1A6B8A;">✓</span> Turistsiz</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--text-mid);"><span style="color:#1A6B8A;">✓</span> Yerel atmosfer</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:#8A9AB5;">– Deniz soğuk</div>
+          <h3 class="sc-name">Kış</h3>
+          <p class="sc-period sc-period-aegean">Aralık – Şubat</p>
+          <p class="sc-desc">Turistsiz, sessiz ve gerçek Assos. Köy yaşamını içinden yaşamak isteyenler için eşsiz.</p>
+          <div class="sc-features">
+            <div class="sc-feat"><span class="sc-check sc-check-aegean">✓</span> Turistsiz</div>
+            <div class="sc-feat"><span class="sc-check sc-check-aegean">✓</span> Yerel atmosfer</div>
+            <div class="sc-feat sc-feat-muted">– Deniz soğuk</div>
           </div>
         </div>
       </div>
 
     </div>
 
-    <div class="fade-up" style="margin-top:40px;text-align:center;">
-      <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(90,122,86,0.07);border:1px solid rgba(90,122,86,0.12);border-radius:999px;padding:10px 20px;">
-        <span style="font-size:.85rem;">🌿</span>
-        <span style="font-size:.78rem;color:var(--text-mid);">Assos için en ideal dönem <strong style="color:#5A7A56;">Nisan – Mayıs</strong> ve <strong style="color:#C4521A;">Eylül – Ekim</strong>'dir.</span>
+    <div class="fade-up sc-ideal-wrap">
+      <div class="sc-ideal-pill">
+        <span class="sc-ideal-icon">🌿</span>
+        <span class="sc-ideal-text">Assos için en ideal dönem <strong class="sc-ideal-spring">Nisan – Mayıs</strong> ve <strong class="sc-ideal-autumn">Eylül – Ekim</strong>'dir.</span>
       </div>
     </div>
 
@@ -525,37 +523,37 @@
 </section>
 
 <!-- FAQ -->
-<section style="padding:60px 24px 100px;background:var(--cream-mid);position:relative;overflow:hidden;">
-  <div style="position:absolute;top:-200px;right:-200px;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(196,82,26,.05) 0%,transparent 70%);pointer-events:none;"></div>
+<section class="rh-section rh-section-mid rh-faq-sec">
+  <div class="rh-faq-deco"></div>
 
-  <div style="max-width:1100px;margin:0 auto;">
+  <div class="rh-container">
 
-    <div class="fade-up" style="text-align:center;margin-bottom:56px;">
-      <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:14px;">
-        <div style="width:24px;height:1px;background:var(--terra);opacity:.5;"></div>
-        <p class="section-label" style="margin:0;">Sık Sorulan Sorular</p>
-        <div style="width:24px;height:1px;background:var(--terra);opacity:.5;"></div>
+    <div class="fade-up rh-sec-header">
+      <div class="rh-sec-label-row">
+        <div class="rh-sec-line rh-sec-line-l"></div>
+        <p class="rh-sec-label">Sık Sorulan Sorular</p>
+        <div class="rh-sec-line rh-sec-line-r"></div>
       </div>
-      <h2 class="section-title" style="font-size:clamp(1.8rem,4vw,2.4rem);margin-bottom:14px;">Assos'u keşfetmeden<br>önce bilmen gerekenler</h2>
-      <p style="font-size:.9rem;color:var(--text-mid);max-width:460px;margin:0 auto;line-height:1.7;">Sık sorulan sorular, pratik ipuçları ve yerel öneriler.</p>
+      <h2 class="rh-sec-title">Assos'u keşfetmeden<br>önce bilmen gerekenler</h2>
+      <p class="rh-sec-desc">Sık sorulan sorular, pratik ipuçları ve yerel öneriler.</p>
     </div>
 
     <!-- Quick tips -->
     <div class="rehber-tips fade-up">
       <div class="rehber-tip-card">
-        <div style="font-size:1.5rem;margin-bottom:10px;">🚗</div>
-        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);margin-bottom:6px;">En yakın büyük şehirler</div>
-        <p style="font-size:.78rem;color:var(--text-mid);line-height:1.65;">İstanbul ~5 saat · İzmir ~3 saat · Çanakkale ~1 saat araçla</p>
+        <div class="rtc-icon">🚗</div>
+        <div class="rtc-title">En yakın büyük şehirler</div>
+        <p class="rtc-text">İstanbul ~5 saat · İzmir ~3 saat · Çanakkale ~1 saat araçla</p>
       </div>
       <div class="rehber-tip-card">
-        <div style="font-size:1.5rem;margin-bottom:10px;">📅</div>
-        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);margin-bottom:6px;">En ideal dönem</div>
-        <p style="font-size:.78rem;color:var(--text-mid);line-height:1.65;">Nisan–Mayıs ve Eylül–Ekim. Sakin, güzel ve uygun fiyatlı.</p>
+        <div class="rtc-icon">📅</div>
+        <div class="rtc-title">En ideal dönem</div>
+        <p class="rtc-text">Nisan–Mayıs ve Eylül–Ekim. Sakin, güzel ve uygun fiyatlı.</p>
       </div>
       <div class="rehber-tip-card">
-        <div style="font-size:1.5rem;margin-bottom:10px;">🏨</div>
-        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);margin-bottom:6px;">Nerede kalınır?</div>
-        <p style="font-size:.78rem;color:var(--text-mid);line-height:1.65;">Behramkale ve Büyükhusun köyündeki tesisler. En az 2 gece kalın.</p>
+        <div class="rtc-icon">🏨</div>
+        <div class="rtc-title">Nerede kalınır?</div>
+        <p class="rtc-text">Behramkale ve Büyükhusun köyündeki tesisler. En az 2 gece kalın.</p>
       </div>
     </div>
 
@@ -566,7 +564,7 @@
         <div class="guide-question" onclick="toggleGuide(this)" tabindex="0" role="button" aria-expanded="false">
           <div class="guide-q-left">
             <span class="guide-q-icon">🧭</span>
-            <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.95rem;color:var(--navy);">Assos nerede ve nasıl gidilir?</h3>
+            <h3 class="guide-q-title">Assos nerede ve nasıl gidilir?</h3>
           </div>
           <span class="guide-icon">+</span>
         </div>
@@ -577,7 +575,7 @@
             <p>🚗 <strong>İzmir'den:</strong> ~3 saat. Edremit–Ayvacık güzergahı.</p>
             <p>🚌 <strong>Toplu taşıma:</strong> Çanakkale veya Edremit'e otobüs, oradan Ayvacık'a minibüs, son nokta Behramkale.</p>
             <div class="guide-tip">💡 Araç kiralamak en rahat seçenek — koylar ve köyler arası ulaşım için şart.</div>
-            <p style="margin-top:10px"><a href="blog?yazi=assosa-nasil-gidilir-ulasim-rehberi" style="color:#C4521A;font-weight:600;font-size:.82rem;">📖 Detaylı ulaşım rehberimizi okuyun →</a></p>
+            <p class="guide-blog-link"><a href="blog?yazi=assosa-nasil-gidilir-ulasim-rehberi" class="guide-blog-a">📖 Detaylı ulaşım rehberimizi okuyun →</a></p>
           </div>
         </div>
       </div>
@@ -586,7 +584,7 @@
         <div class="guide-question" onclick="toggleGuide(this)" tabindex="0" role="button" aria-expanded="false">
           <div class="guide-q-left">
             <span class="guide-q-icon">🌅</span>
-            <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.95rem;color:var(--navy);">Assos'ta gün batımı nerede izlenir?</h3>
+            <h3 class="guide-q-title">Assos'ta gün batımı nerede izlenir?</h3>
           </div>
           <span class="guide-icon">+</span>
         </div>
@@ -597,7 +595,7 @@
             <p>🌅 <strong>Babakale Kalesi çevresi</strong> — Daha az bilinen, daha sakin bir alternatif.</p>
             <p>🌅 <strong>Adatepe'nin yüksek noktaları</strong> — Zeytinlikler arasından körfeze bakış.</p>
             <div class="guide-tip">💡 Tapınak için en az 30 dakika önce tepede olun — batış öncesi altın saat vurgusu inanılmaz.</div>
-            <p style="margin-top:10px"><a href="blog?yazi=assos-gun-batimi-en-iyi-noktalar" style="color:#C4521A;font-weight:600;font-size:.82rem;">📖 En iyi gün batımı noktaları →</a></p>
+            <p class="guide-blog-link"><a href="blog?yazi=assos-gun-batimi-en-iyi-noktalar" class="guide-blog-a">📖 En iyi gün batımı noktaları →</a></p>
           </div>
         </div>
       </div>
@@ -606,7 +604,7 @@
         <div class="guide-question" onclick="toggleGuide(this)" tabindex="0" role="button" aria-expanded="false">
           <div class="guide-q-left">
             <span class="guide-q-icon">🍽</span>
-            <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.95rem;color:var(--navy);">Assos'ta ne yenir, nerede yenir?</h3>
+            <h3 class="guide-q-title">Assos'ta ne yenir, nerede yenir?</h3>
           </div>
           <span class="guide-icon">+</span>
         </div>
@@ -618,7 +616,7 @@
             <p>🥚 <strong>Köy kahvaltısı</strong> — Yerel peynir, zeytin, ev reçeli, taze sıkma zeytinyağı.</p>
             <p>🌿 <strong>Otlu çaylar</strong> — Kekik, ada çayı, ıhlamur; bölgenin aromasını taşır.</p>
             <div class="guide-tip">💡 Liman restoranları yaz aylarında kalabalık. Köy içindeki küçük mekanlar daha sakin ve otantik.</div>
-            <p style="margin-top:10px"><a href="blog?yazi=assos-yerel-lezzetler-ne-yenir" style="color:#C4521A;font-weight:600;font-size:.82rem;">📖 Yerel lezzetler rehberimiz →</a></p>
+            <p class="guide-blog-link"><a href="blog?yazi=assos-yerel-lezzetler-ne-yenir" class="guide-blog-a">📖 Yerel lezzetler rehberimiz →</a></p>
           </div>
         </div>
       </div>
@@ -627,7 +625,7 @@
         <div class="guide-question" onclick="toggleGuide(this)" tabindex="0" role="button" aria-expanded="false">
           <div class="guide-q-left">
             <span class="guide-q-icon">🌊</span>
-            <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.95rem;color:var(--navy);">Hangi koylar var, hangisine gidilmeli?</h3>
+            <h3 class="guide-q-title">Hangi koylar var, hangisine gidilmeli?</h3>
           </div>
           <span class="guide-icon">+</span>
         </div>
@@ -638,7 +636,7 @@
             <p>🌊 <strong>Sokakağzı Koyu</strong> — Küçük ahşap iskele, balıkçı tekneleri, sessiz sabahlar.</p>
             <p>🌊 <strong>Babakale çevresi</strong> — Kale altında, tekne koylarının arasında sakin sular.</p>
             <div class="guide-tip">💡 Yaz aylarında koylar sabah 8–9'da neredeyse boş. Öğleden sonra kalabalıklaşıyor.</div>
-            <p style="margin-top:10px"><a href="blog?yazi=assos-koy-plaj-rehberi" style="color:#C4521A;font-weight:600;font-size:.82rem;">📖 Koylar ve plajlar rehberimiz →</a></p>
+            <p class="guide-blog-link"><a href="blog?yazi=assos-koy-plaj-rehberi" class="guide-blog-a">📖 Koylar ve plajlar rehberimiz →</a></p>
           </div>
         </div>
       </div>
@@ -647,7 +645,7 @@
         <div class="guide-question" onclick="toggleGuide(this)" tabindex="0" role="button" aria-expanded="false">
           <div class="guide-q-left">
             <span class="guide-q-icon">🏘</span>
-            <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.95rem;color:var(--navy);">Hangi köyler gezilmeli?</h3>
+            <h3 class="guide-q-title">Hangi köyler gezilmeli?</h3>
           </div>
           <span class="guide-icon">+</span>
         </div>
@@ -658,8 +656,8 @@
             <p>🪨 <strong>Kayalar</strong> — Konaklama için en huzurlu köy. Sakin, ıssız ve gerçek.</p>
             <p>⚓ <strong>Babakale</strong> — Anadolu'nun en batı noktası. Osmanlı kalesi ve balıkçı iskelesi.</p>
             <p>🏔 <strong>Büyükhusun</strong> — Kaz Dağları eteklerinde serin bir yayla köyü. Yürüyüş başlangıcı.</p>
-            <div class="guide-tip">💡 Köyleri tek bir rotada gezmek için <a href="rotalar/rota-detay.html?id=koy-koy-assos" style="color:var(--terra);font-weight:600;">Köy Köy Assos rotasına</a> göz atın.</div>
-            <p style="margin-top:10px"><a href="blog?yazi=assos-koylari-rehberi" style="color:#C4521A;font-weight:600;font-size:.82rem;">📖 Köy köy Assos rehberimiz →</a></p>
+            <div class="guide-tip">💡 Köyleri tek bir rotada gezmek için <a href="rotalar/rota-detay.html?id=koy-koy-assos" class="guide-blog-a">Köy Köy Assos rotasına</a> göz atın.</div>
+            <p class="guide-blog-link"><a href="blog?yazi=assos-koylari-rehberi" class="guide-blog-a">📖 Köy köy Assos rehberimiz →</a></p>
           </div>
         </div>
       </div>
@@ -668,7 +666,7 @@
         <div class="guide-question" onclick="toggleGuide(this)" tabindex="0" role="button" aria-expanded="false">
           <div class="guide-q-left">
             <span class="guide-q-icon">⏱</span>
-            <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.95rem;color:var(--navy);">Assos'u gezmek için ne kadar süre gerekli?</h3>
+            <h3 class="guide-q-title">Assos'u gezmek için ne kadar süre gerekli?</h3>
           </div>
           <span class="guide-icon">+</span>
         </div>
@@ -679,7 +677,7 @@
             <p>⏱ <strong>2 gün:</strong> Köy kahvaltısı, ikinci bir koy, Adatepe gezisi. İdeal ritim.</p>
             <p>⏱ <strong>3+ gün:</strong> Babakale, Apollon Smintheion, yürüyüş rotaları, yerel mekanlar. Derinlemesine keşif.</p>
             <div class="guide-tip">💡 En az 2 gece kalın — sabah sisi ve akşam sessizliği Assos'u başka bir yere dönüştürür.</div>
-            <p style="margin-top:10px"><a href="blog?yazi=assos-1-gunluk-gezi-plani" style="color:#C4521A;font-weight:600;font-size:.82rem;">📖 1 günlük gezi planı →</a></p>
+            <p class="guide-blog-link"><a href="blog?yazi=assos-1-gunluk-gezi-plani" class="guide-blog-a">📖 1 günlük gezi planı →</a></p>
           </div>
         </div>
       </div>
@@ -688,7 +686,7 @@
         <div class="guide-question" onclick="toggleGuide(this)" tabindex="0" role="button" aria-expanded="false">
           <div class="guide-q-left">
             <span class="guide-q-icon">🏡</span>
-            <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.95rem;color:var(--navy);">Assos'ta nerede kalınır?</h3>
+            <h3 class="guide-q-title">Assos'ta nerede kalınır?</h3>
           </div>
           <span class="guide-icon">+</span>
         </div>
@@ -698,7 +696,7 @@
             <p>🏨 <strong>Küçük oteller</strong> — Ayvacık merkezi ve Assos Liman çevresinde. Daha konforlu seçenekler.</p>
             <p>⛺ <strong>Kamp</strong> — Kadırga Koyu çevresinde doğada kamp imkânı. Yaz aylarında popüler.</p>
             <div class="guide-tip">💡 Temmuz–Ağustos için en az 1–2 hafta önceden rezervasyon yapın — taş pansiyonlar hızlı dolar.</div>
-            <p style="margin-top:10px"><a href="blog?yazi=assos-nerede-kalinir-konaklama" style="color:#C4521A;font-weight:600;font-size:.82rem;">📖 Konaklama rehberimiz →</a></p>
+            <p class="guide-blog-link"><a href="blog?yazi=assos-nerede-kalinir-konaklama" class="guide-blog-a">📖 Konaklama rehberimiz →</a></p>
           </div>
         </div>
       </div>
@@ -707,7 +705,7 @@
         <div class="guide-question" onclick="toggleGuide(this)" tabindex="0" role="button" aria-expanded="false">
           <div class="guide-q-left">
             <span class="guide-q-icon">🎒</span>
-            <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.95rem;color:var(--navy);">Gitmeden önce ne bilinmeli?</h3>
+            <h3 class="guide-q-title">Gitmeden önce ne bilinmeli?</h3>
           </div>
           <span class="guide-icon">+</span>
         </div>
@@ -728,49 +726,108 @@
 </section>
 
 <!-- BLOG CTA -->
-<section style="padding:64px 24px;background:var(--navy-deep);text-align:center;">
-  <div style="max-width:600px;margin:0 auto;" class="fade-up">
-    <p class="section-label" style="color:var(--amber);margin-bottom:10px;">Blog</p>
-    <div class="section-rule" style="margin:0 auto 20px;background:linear-gradient(90deg,var(--terra),var(--amber));"></div>
-    <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.4rem,3vw,2rem);color:var(--cream);letter-spacing:-.02em;line-height:1.15;margin-bottom:12px;">Daha fazla bilgi için yazılarımızı okuyun</h2>
-    <p style="font-size:.85rem;color:rgba(245,237,224,.4);margin-bottom:28px;line-height:1.6;">Assos hakkında gezi rehberleri, mekan önerileri ve rota ipuçları.</p>
-    <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;">
-      <a href="blog.html" class="btn-terra" style="padding:12px 26px;">✍️ Blog Yazıları →</a>
-      <a href="planla.html" class="btn-outline-cream" style="padding:12px 26px;">🗓 Gezimi Planla</a>
+<section class="rh-cta">
+  <div class="rh-cta-inner fade-up">
+    <p class="rh-cta-label">Blog</p>
+    <div class="rh-cta-rule"></div>
+    <h2 class="rh-cta-title">Daha fazla bilgi için yazılarımızı okuyun</h2>
+    <p class="rh-cta-desc">Assos hakkında gezi rehberleri, mekan önerileri ve rota ipuçları.</p>
+    <div class="rh-cta-btns">
+      <a href="blog.html" class="btn-terra rh-cta-btn">✍️ Blog Yazıları →</a>
+      <a href="planla.html" class="btn-outline-cream rh-cta-btn">🗓 Gezimi Planla</a>
     </div>
   </div>
 </section>
 
+<div id="footer-placeholder"></div>
+
 <style>
-/* Ulaşım Section — Light Theme */
+/* ═══ Animations ═══ */
+@keyframes rhHeroOrb{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-20px) scale(1.06)}}
+@keyframes rhFadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes rhPulse{0%,100%{box-shadow:0 0 0 0 rgba(196,82,26,.4)}50%{box-shadow:0 0 0 8px rgba(196,82,26,0)}}
+@keyframes rhLineGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+
+/* ═══ Shared Section Utilities ═══ */
+.rh-section{padding:80px 24px}
+.rh-section-light{background:var(--cream-light)}
+.rh-section-mid{background:var(--cream-mid)}
+.rh-container{max-width:1100px;margin:0 auto}
+.rh-container-wide{max-width:1280px;margin:0 auto}
+.rh-sec-header{text-align:center;margin-bottom:56px}
+.rh-sec-label-row{display:inline-flex;align-items:center;gap:8px;margin-bottom:14px}
+.rh-sec-line{width:24px;height:1px;background:var(--terra);opacity:.5}
+.rh-sec-line-l{background:linear-gradient(90deg,transparent,var(--terra))}
+.rh-sec-line-r{background:linear-gradient(90deg,var(--terra),transparent)}
+.rh-sec-label{margin:0;font-size:.6rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--terra)}
+.rh-sec-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.8rem,4vw,2.4rem);color:var(--navy);letter-spacing:-.03em;line-height:1.1;margin-bottom:14px}
+.rh-sec-desc{font-size:.88rem;color:var(--text-mid);max-width:520px;margin:0 auto;line-height:1.7}
+
+/* ═══ Hero ═══ */
+.rh-hero{position:relative;overflow:hidden;background:linear-gradient(150deg,#06101E 0%,#0C1A30 55%,#091420 100%);display:flex;align-items:center;justify-content:center;padding:0 24px}
+.rh-hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(245,237,224,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(245,237,224,.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+.rh-hero-orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
+.rh-hero-orb-1{width:460px;height:460px;background:rgba(196,82,26,.15);top:-120px;left:-60px;animation:rhHeroOrb 17s ease-in-out infinite}
+.rh-hero-orb-2{width:360px;height:360px;background:rgba(26,107,138,.14);bottom:-100px;right:-80px;animation:rhHeroOrb 14s ease-in-out infinite reverse 1s}
+.rh-hero-orb-3{width:220px;height:220px;background:rgba(212,147,90,.12);top:35%;left:55%;animation:rhHeroOrb 19s ease-in-out infinite 2s}
+.rh-hero-inner{position:relative;z-index:2;max-width:900px;width:100%;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center;padding:110px 0 80px}
+.rh-hero-eyebrow{display:inline-flex;align-items:center;gap:10px;background:rgba(196,82,26,.1);border:1px solid rgba(196,82,26,.25);border-radius:999px;padding:6px 16px;margin-bottom:22px;animation:rhFadeUp .7s both}
+.rh-hero-eyebrow-dot{width:7px;height:7px;border-radius:50%;background:#C4521A;animation:rhPulse 2.4s ease-in-out infinite;flex-shrink:0}
+.rh-hero-eyebrow span{font-size:.65rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#D4935A}
+.rh-hero-h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(2.4rem,5.5vw,3.8rem);letter-spacing:-.03em;line-height:1.0;color:#F5EDE0;margin-bottom:16px;animation:rhFadeUp .8s .1s both}
+.rh-hero-h1 em{font-style:italic;font-family:'Lora',serif;font-weight:500;font-size:.88em;background:linear-gradient(135deg,#D4935A,#E8A07A);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.rh-hero-divider{width:52px;height:2px;background:linear-gradient(90deg,#C4521A,transparent);margin-bottom:16px;transform-origin:left;animation:rhLineGrow .9s .3s cubic-bezier(.16,1,.3,1) both}
+.rh-hero-sub{font-size:.95rem;color:rgba(245,237,224,.6);line-height:1.75;max-width:440px;animation:rhFadeUp .8s .22s both}
+.rh-hero-cats{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px;animation:rhFadeUp .8s .45s both}
+.rh-hero-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:6px 14px;font-size:.72rem;font-weight:600;color:rgba(245,237,224,.55);backdrop-filter:blur(8px)}
+.rh-hero-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px 32px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);display:flex;flex-direction:column;gap:20px;min-width:180px;animation:rhFadeUp .8s .35s both}
+.rh-hstat{text-align:center}
+.rh-hstat-num{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.9rem;color:#F5EDE0;letter-spacing:-.03em;line-height:1;margin-bottom:4px}
+.rh-hstat-label{font-size:.65rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,237,224,.4)}
+.rh-hstat-sep{height:1px;background:rgba(255,255,255,.08)}
+
+/* ═══ Ulaşım Section ═══ */
 .ulasim-sec{position:relative;overflow:hidden;background:var(--cream-mid);padding:80px 24px}
 .ulasim-deco-circle{position:absolute;border-radius:50%;pointer-events:none}
 .ulasim-deco-1{width:500px;height:500px;top:-200px;right:-120px;background:radial-gradient(circle,rgba(196,82,26,.06) 0%,transparent 70%)}
 .ulasim-deco-2{width:400px;height:400px;bottom:-160px;left:-100px;background:radial-gradient(circle,rgba(26,107,138,.05) 0%,transparent 70%)}
 .ulasim-inner{position:relative;z-index:2;max-width:1100px;margin:0 auto}
-
 .ulasim-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
 .ulasim-card{position:relative;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:20px;overflow:hidden;transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s}
 .ulasim-card:hover{transform:translateY(-6px);box-shadow:0 16px 48px rgba(26,39,68,.1)}
 .ulasim-card-accent{height:5px;width:100%}
+.ulasim-accent-terra{background:linear-gradient(90deg,#C4521A,#D4935A)}
+.ulasim-accent-aegean{background:linear-gradient(90deg,#1A6B8A,#2490B8)}
+.ulasim-accent-sage{background:linear-gradient(90deg,#5A7A56,#7FB87B)}
 .ulasim-card-body{padding:28px 24px}
 .ulasim-card-head{display:flex;align-items:center;gap:16px;margin-bottom:20px}
 .ulasim-card-icon-wrap{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
+.ulasim-icon-terra{background:rgba(196,82,26,.08)}
+.ulasim-icon-aegean{background:rgba(26,107,138,.08)}
+.ulasim-icon-sage{background:rgba(90,122,86,.08)}
 .ulasim-card-city{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.15rem;color:var(--navy);margin-bottom:2px}
 .ulasim-card-distance{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C4521A}
+.ulasim-dist-aegean{color:#1A6B8A}
+.ulasim-dist-sage{color:#5A7A56}
 .ulasim-card-info{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
 .ulasim-card-row{display:flex;align-items:center;gap:10px;font-size:.82rem;color:var(--text-mid)}
 .ulasim-card-row strong{color:var(--navy);font-weight:600}
 .ulasim-row-icon{font-size:.85rem;width:22px;text-align:center;flex-shrink:0}
 .ulasim-card-route{font-size:.7rem;color:var(--text-mid);font-weight:600;letter-spacing:.04em;padding:8px 12px;background:rgba(26,39,68,.03);border-radius:8px;text-align:center}
-
+.ulasim-other{margin-top:48px}
+.ulasim-other-header{margin-bottom:28px}
+.ulasim-other-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:1.05rem;color:var(--navy);margin-bottom:6px}
+.ulasim-other-desc{font-size:.78rem;color:var(--text-mid)}
+.ulasim-disclaimer{text-align:center;margin-top:14px;font-size:.7rem;color:var(--text-mid);opacity:.6}
 .ulasim-tips{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px}
 .ulasim-tip{display:flex;gap:14px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;padding:20px 18px;transition:all .25s}
 .ulasim-tip:hover{box-shadow:0 8px 28px rgba(26,39,68,.07);transform:translateY(-2px)}
 .ulasim-tip-icon{font-size:1.3rem;flex-shrink:0;margin-top:2px}
 .ulasim-tip strong{display:block;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.82rem;color:var(--navy);margin-bottom:4px}
 .ulasim-tip p{font-size:.75rem;color:var(--text-mid);line-height:1.65;margin:0}
-
+.ulasim-blog-wrap{text-align:center;margin-top:44px}
+.ulasim-blog-link{display:inline-flex;align-items:center;gap:8px;font-size:.82rem;font-weight:600;color:#C4521A;border:1px solid rgba(196,82,26,.2);border-radius:999px;padding:10px 22px;transition:all .3s;text-decoration:none}
+.ulasim-blog-link:hover{background:rgba(196,82,26,.06);border-color:rgba(196,82,26,.4);color:#a8431a}
 .ulasim-table-wrap{background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:16px;overflow:hidden}
 .ulasim-table{width:100%;border-collapse:collapse;font-size:.82rem}
 .ulasim-table thead{background:rgba(26,39,68,.03)}
@@ -784,20 +841,103 @@
 .ulasim-rt-izmir{background:rgba(26,107,138,.07);color:#1A6B8A}
 .ulasim-rt-edremit{background:rgba(90,122,86,.07);color:#5A7A56}
 
-.ulasim-blog-link{display:inline-flex;align-items:center;gap:8px;font-size:.82rem;font-weight:600;color:#C4521A;border:1px solid rgba(196,82,26,.2);border-radius:999px;padding:10px 22px;transition:all .3s;text-decoration:none}
-.ulasim-blog-link:hover{background:rgba(196,82,26,.06);border-color:rgba(196,82,26,.4);color:#a8431a}
+/* ═══ Season Cards ═══ */
+.season-card-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.season-card{background:#fff;padding:0;overflow:hidden;border-radius:20px;cursor:default;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s}
+.season-card:hover{transform:translateY(-6px);box-shadow:0 16px 48px rgba(26,39,68,.1) !important}
+.season-sage{border:1px solid rgba(90,122,86,.14);box-shadow:0 4px 24px rgba(90,122,86,.07)}
+.season-amber{border:1px solid rgba(212,147,90,.18);box-shadow:0 4px 24px rgba(212,147,90,.08)}
+.season-terra{border:1px solid rgba(196,82,26,.13);box-shadow:0 4px 24px rgba(196,82,26,.07)}
+.season-aegean{border:1px solid rgba(26,107,138,.13);box-shadow:0 4px 24px rgba(26,107,138,.07)}
+.sc-accent{height:6px}
+.sc-accent-sage{background:linear-gradient(90deg,#5A7A56,#7FB87B)}
+.sc-accent-amber{background:linear-gradient(90deg,#D4935A,#E8A07A)}
+.sc-accent-terra{background:linear-gradient(90deg,#C4521A,#D4935A)}
+.sc-accent-aegean{background:linear-gradient(90deg,#1A6B8A,#2490B8)}
+.sc-body{padding:28px 24px}
+.sc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px}
+.sc-emoji{font-size:2rem;line-height:1}
+.sc-badge{font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:999px}
+.sc-badge-sage{background:rgba(90,122,86,.1);color:#5A7A56}
+.sc-badge-amber{background:rgba(212,147,90,.12);color:#D4935A}
+.sc-badge-terra{background:rgba(196,82,26,.1);color:#C4521A}
+.sc-badge-aegean{background:rgba(26,107,138,.1);color:#1A6B8A}
+.sc-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.05rem;color:#1A2744;margin-bottom:4px}
+.sc-period{font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px}
+.sc-period-sage{color:#5A7A56}
+.sc-period-amber{color:#D4935A}
+.sc-period-terra{color:#C4521A}
+.sc-period-aegean{color:#1A6B8A}
+.sc-desc{font-size:.82rem;color:var(--text-mid);line-height:1.7;margin-bottom:18px}
+.sc-features{display:flex;flex-direction:column;gap:6px}
+.sc-feat{display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--text-mid)}
+.sc-feat-warn{color:#C4521A}
+.sc-feat-muted{color:#8A9AB5}
+.sc-check{flex-shrink:0}
+.sc-check-sage{color:#5A7A56}
+.sc-check-amber{color:#D4935A}
+.sc-check-terra{color:#C4521A}
+.sc-check-aegean{color:#1A6B8A}
+.sc-ideal-wrap{margin-top:40px;text-align:center}
+.sc-ideal-pill{display:inline-flex;align-items:center;gap:10px;background:rgba(90,122,86,.07);border:1px solid rgba(90,122,86,.12);border-radius:999px;padding:10px 20px}
+.sc-ideal-icon{font-size:.85rem}
+.sc-ideal-text{font-size:.78rem;color:var(--text-mid)}
+.sc-ideal-spring{color:#5A7A56}
+.sc-ideal-autumn{color:#C4521A}
 
+/* ═══ FAQ Section ═══ */
+.rh-faq-sec{padding:60px 24px 100px;position:relative;overflow:hidden}
+.rh-faq-deco{position:absolute;top:-200px;right:-200px;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(196,82,26,.05) 0%,transparent 70%);pointer-events:none}
+.guide-item{border-bottom:1px solid rgba(26,39,68,.08)}
+.guide-question{cursor:pointer;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;transition:color .2s}
+.guide-question:hover{color:var(--terra)}
+.guide-question:focus-visible{outline:2px solid var(--terra);outline-offset:2px;border-radius:4px}
+.guide-icon{width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(26,39,68,.15);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;transition:transform .3s cubic-bezier(.16,1,.3,1),border-color .2s}
+.guide-item.open .guide-icon{transform:rotate(45deg);border-color:var(--terra);color:var(--terra)}
+.guide-q-left{display:flex;align-items:center;gap:14px}
+.guide-q-icon{width:36px;height:36px;border-radius:10px;background:rgba(26,39,68,.05);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;transition:background .25s}
+.guide-item.open .guide-q-icon{background:rgba(196,82,26,.1)}
+.guide-q-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.95rem;color:var(--navy)}
+.guide-answer{max-height:0;overflow:hidden;transition:max-height .45s cubic-bezier(.16,1,.3,1)}
+.guide-item.open .guide-answer{max-height:600px}
+.guide-answer-inner{padding:0 24px 24px 74px;font-size:.88rem;color:var(--text-mid);line-height:1.8}
+.guide-answer-inner p{margin-bottom:10px}
+.guide-answer-inner p:last-child{margin-bottom:0}
+.guide-tip{display:inline-flex;align-items:center;gap:6px;background:rgba(196,82,26,.06);border:1px solid rgba(196,82,26,.12);border-radius:8px;padding:8px 12px;font-size:.78rem;color:#C4521A;margin-top:12px}
+.guide-blog-link{margin-top:10px}
+.guide-blog-a{color:#C4521A;font-weight:600;font-size:.82rem}
+.rehber-tips{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:48px}
+.rehber-tip-card{background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:16px;padding:22px 20px;transition:all .25s}
+.rehber-tip-card:hover{box-shadow:0 8px 28px rgba(26,39,68,.08);transform:translateY(-2px)}
+.rtc-icon{font-size:1.5rem;margin-bottom:10px}
+.rtc-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);margin-bottom:6px}
+.rtc-text{font-size:.78rem;color:var(--text-mid);line-height:1.65}
+
+/* ═══ Blog CTA ═══ */
+.rh-cta{padding:64px 24px;background:var(--navy-deep);text-align:center}
+.rh-cta-inner{max-width:600px;margin:0 auto}
+.rh-cta-label{font-size:.6rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--amber);margin-bottom:10px}
+.rh-cta-rule{width:40px;height:2px;margin:0 auto 20px;background:linear-gradient(90deg,var(--terra),var(--amber))}
+.rh-cta-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.4rem,3vw,2rem);color:var(--cream);letter-spacing:-.02em;line-height:1.15;margin-bottom:12px}
+.rh-cta-desc{font-size:.85rem;color:rgba(245,237,224,.4);margin-bottom:28px;line-height:1.6}
+.rh-cta-btns{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.rh-cta-btn{padding:12px 26px}
+
+/* ═══ Responsive ═══ */
+@media(max-width:860px){.season-card-grid{grid-template-columns:repeat(2,1fr) !important}}
 @media(max-width:768px){
   .ulasim-grid{grid-template-columns:1fr !important}
   .ulasim-tips{grid-template-columns:1fr !important}
   .ulasim-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .ulasim-table{min-width:520px}
 }
+@media(max-width:700px){
+  .rh-hero-inner{grid-template-columns:1fr;padding:100px 0 60px}
+  .rh-hero-card{flex-direction:row;flex-wrap:wrap;justify-content:center;min-width:unset}
+}
+@media(max-width:520px){.season-card-grid{grid-template-columns:repeat(2,1fr) !important;gap:10px !important}}
+@media(max-width:760px){.rehber-tips{grid-template-columns:1fr}.guide-answer-inner{padding-left:24px}}
 </style>
-
-<div id="footer-placeholder"></div>
-
-<style>@keyframes rhHeroOrb{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-20px) scale(1.06)}}@keyframes rhFadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}@keyframes rhPulse{0%,100%{box-shadow:0 0 0 0 rgba(196,82,26,.4)}50%{box-shadow:0 0 0 8px rgba(196,82,26,0)}}@keyframes rhLineGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}.rh-hero{position:relative;overflow:hidden;background:linear-gradient(150deg,#06101E 0%,#0C1A30 55%,#091420 100%);display:flex;align-items:center;justify-content:center;padding:0 24px}.rh-hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(245,237,224,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(245,237,224,.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}.rh-hero-orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}.rh-hero-orb-1{width:460px;height:460px;background:rgba(196,82,26,.15);top:-120px;left:-60px;animation:rhHeroOrb 17s ease-in-out infinite}.rh-hero-orb-2{width:360px;height:360px;background:rgba(26,107,138,.14);bottom:-100px;right:-80px;animation:rhHeroOrb 14s ease-in-out infinite reverse 1s}.rh-hero-orb-3{width:220px;height:220px;background:rgba(212,147,90,.12);top:35%;left:55%;animation:rhHeroOrb 19s ease-in-out infinite 2s}.rh-hero-inner{position:relative;z-index:2;max-width:900px;width:100%;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center;padding:110px 0 80px}.rh-hero-eyebrow{display:inline-flex;align-items:center;gap:10px;background:rgba(196,82,26,.1);border:1px solid rgba(196,82,26,.25);border-radius:999px;padding:6px 16px;margin-bottom:22px;animation:rhFadeUp .7s both}.rh-hero-eyebrow-dot{width:7px;height:7px;border-radius:50%;background:#C4521A;animation:rhPulse 2.4s ease-in-out infinite;flex-shrink:0}.rh-hero-eyebrow span{font-size:.65rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#D4935A}.rh-hero-h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(2.4rem,5.5vw,3.8rem);letter-spacing:-.03em;line-height:1.0;color:#F5EDE0;margin-bottom:16px;animation:rhFadeUp .8s .1s both}.rh-hero-h1 em{font-style:italic;font-family:'Lora',serif;font-weight:500;font-size:.88em;background:linear-gradient(135deg,#D4935A,#E8A07A);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.rh-hero-divider{width:52px;height:2px;background:linear-gradient(90deg,#C4521A,transparent);margin-bottom:16px;transform-origin:left;animation:rhLineGrow .9s .3s cubic-bezier(.16,1,.3,1) both}.rh-hero-sub{font-size:.95rem;color:rgba(245,237,224,.6);line-height:1.75;max-width:440px;animation:rhFadeUp .8s .22s both}.rh-hero-cats{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px;animation:rhFadeUp .8s .45s both}.rh-hero-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:6px 14px;font-size:.72rem;font-weight:600;color:rgba(245,237,224,.55);backdrop-filter:blur(8px)}.rh-hero-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px 32px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);display:flex;flex-direction:column;gap:20px;min-width:180px;animation:rhFadeUp .8s .35s both}.rh-hstat{text-align:center}.rh-hstat-num{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.9rem;color:#F5EDE0;letter-spacing:-.03em;line-height:1;margin-bottom:4px}.rh-hstat-label{font-size:.65rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,237,224,.4)}.rh-hstat-sep{height:1px;background:rgba(255,255,255,.08)}@media(max-width:700px){.rh-hero-inner{grid-template-columns:1fr;padding:100px 0 60px}.rh-hero-card{flex-direction:row;flex-wrap:wrap;justify-content:center;min-width:unset}}.guide-item{border-bottom:1px solid rgba(26,39,68,.08)}.guide-question{cursor:pointer;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;transition:color .2s}.guide-question:hover{color:var(--terra)}.guide-question:focus-visible{outline:2px solid var(--terra);outline-offset:2px;border-radius:4px}.guide-icon{width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(26,39,68,.15);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;transition:transform .3s cubic-bezier(.16,1,.3,1),border-color .2s}.guide-item.open .guide-icon{transform:rotate(45deg);border-color:var(--terra);color:var(--terra)}.guide-q-left{display:flex;align-items:center;gap:14px}.guide-q-icon{width:36px;height:36px;border-radius:10px;background:rgba(26,39,68,.05);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;transition:background .25s}.guide-item.open .guide-q-icon{background:rgba(196,82,26,.1)}.guide-answer{max-height:0;overflow:hidden;transition:max-height .45s cubic-bezier(.16,1,.3,1)}.guide-item.open .guide-answer{max-height:600px}.guide-answer-inner{padding:0 24px 24px 74px;font-size:.88rem;color:var(--text-mid);line-height:1.8}.guide-answer-inner p{margin-bottom:10px}.guide-answer-inner p:last-child{margin-bottom:0}.guide-tip{display:inline-flex;align-items:center;gap:6px;background:rgba(196,82,26,.06);border:1px solid rgba(196,82,26,.12);border-radius:8px;padding:8px 12px;font-size:.78rem;color:#C4521A;margin-top:12px}.rehber-tips{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:48px}.rehber-tip-card{background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:16px;padding:22px 20px}.rehber-tip-card:hover{box-shadow:0 8px 28px rgba(26,39,68,.08);transform:translateY(-2px);transition:all .25s}.season-card{cursor:default;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s}.season-card:hover{transform:translateY(-6px);box-shadow:0 16px 48px rgba(26,39,68,.1) !important}@media(max-width:860px){.season-card-grid{grid-template-columns:repeat(2,1fr) !important}}@media(max-width:520px){.season-card-grid{grid-template-columns:repeat(2,1fr) !important;gap:10px !important}}@media(max-width:760px){.rehber-tips{grid-template-columns:1fr}.guide-answer-inner{padding-left:24px}}</style>
 
 <script src="firebase-loader.js"></script>
 <script src="data.js"></script>
