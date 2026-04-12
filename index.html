@@ -569,13 +569,17 @@ function pageInit() {
     if (!heroImg) return;
     // Önce localStorage cache kontrol
     var cached = localStorage.getItem('site_hero_image');
-    if (cached) heroImg.src = cached;
-    // Firebase'den güncel URL
+    var cachedPos = localStorage.getItem('site_hero_pos') || '50';
+    if (cached) { heroImg.src = cached; heroImg.style.objectPosition = 'center ' + cachedPos + '%'; }
+    // Firebase'den güncel URL + konum
     if (typeof firebase !== 'undefined' && firebase.firestore) {
       firebase.firestore().collection('settings').doc('site').get().then(function(doc) {
         if (doc.exists && doc.data().heroImageUrl) {
           heroImg.src = doc.data().heroImageUrl;
+          var posY = doc.data().heroImagePosY != null ? doc.data().heroImagePosY : 50;
+          heroImg.style.objectPosition = 'center ' + posY + '%';
           localStorage.setItem('site_hero_image', doc.data().heroImageUrl);
+          localStorage.setItem('site_hero_pos', posY);
         }
       }).catch(function(){});
     }

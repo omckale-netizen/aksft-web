@@ -1761,10 +1761,20 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <div class="panel-card">
             <div class="panel-card-head"><h3>🏞 Anasayfa Hero Görseli</h3></div>
             <div style="padding:20px">
-              <div id="hero-img-preview" style="margin-bottom:14px;border-radius:10px;overflow:hidden;background:linear-gradient(160deg,#0D1829,#1A2744);aspect-ratio:21/9;position:relative">
+              <div id="hero-img-preview" style="margin-bottom:10px;border-radius:10px;overflow:hidden;background:linear-gradient(160deg,#0D1829,#1A2744);aspect-ratio:21/9;position:relative">
                 <img id="hero-img-preview-img" src="" alt="Hero" style="width:100%;height:100%;object-fit:cover;display:none;opacity:.2">
                 <div id="hero-img-preview-empty" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center">
                   <div style="font-size:.78rem;color:rgba(245,237,224,.3)">Hero görseli yüklenmemiş<br><span style="font-size:.65rem">Gradient arka plan kullanılıyor</span></div>
+                </div>
+              </div>
+              <div id="hero-pos-wrap" style="display:none;margin-bottom:14px">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <span style="font-size:.68rem;font-weight:600;color:var(--text-light);white-space:nowrap">Dikey konum:</span>
+                  <input type="range" id="hero-pos-slider" min="0" max="100" value="50" style="flex:1;accent-color:var(--terra)" oninput="previewHeroPosition(this.value)">
+                  <span id="hero-pos-val" style="font-size:.68rem;font-weight:700;color:var(--navy);min-width:30px;text-align:right">50%</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:.58rem;color:var(--text-muted);margin-top:2px">
+                  <span>Üst</span><span>Orta</span><span>Alt</span>
                 </div>
               </div>
               <div style="background:rgba(49,130,206,.05);border:1px solid rgba(49,130,206,.12);border-radius:8px;padding:10px 12px;margin-bottom:14px">
@@ -2795,7 +2805,7 @@ async function loadLogoPreview() {
       if (doc.data().logoUrl) showLogoPreview(doc.data().logoUrl);
       if (doc.data().faviconUrl) showFavPreview(doc.data().faviconUrl);
       if (doc.data().ogImageUrl) showOgPreview(doc.data().ogImageUrl);
-      if (doc.data().heroImageUrl) showHeroPreview(doc.data().heroImageUrl);
+      if (doc.data().heroImageUrl) showHeroPreview(doc.data().heroImageUrl, doc.data().heroImagePosY);
     }
   } catch(e) {}
   // Profil bilgilerini doldur
@@ -2918,17 +2928,38 @@ async function uploadHeroImage(file) {
   }
 }
 
-function showHeroPreview(url) {
+function showHeroPreview(url, posY) {
   var img = document.getElementById('hero-img-preview-img');
   var empty = document.getElementById('hero-img-preview-empty');
   var removeBtn = document.getElementById('hero-img-remove-btn');
+  var posWrap = document.getElementById('hero-pos-wrap');
+  var slider = document.getElementById('hero-pos-slider');
   if (url) {
     img.src = url; img.style.display = ''; empty.style.display = 'none';
+    var pos = posY != null ? posY : 50;
+    img.style.objectPosition = 'center ' + pos + '%';
     if (removeBtn) removeBtn.style.display = '';
+    if (posWrap) posWrap.style.display = '';
+    if (slider) { slider.value = pos; document.getElementById('hero-pos-val').textContent = pos + '%'; }
   } else {
     img.style.display = 'none'; empty.style.display = '';
     if (removeBtn) removeBtn.style.display = 'none';
+    if (posWrap) posWrap.style.display = 'none';
   }
+}
+
+function previewHeroPosition(val) {
+  var img = document.getElementById('hero-img-preview-img');
+  if (img) img.style.objectPosition = 'center ' + val + '%';
+  var valEl = document.getElementById('hero-pos-val');
+  if (valEl) valEl.textContent = val + '%';
+  // Otomatik kaydet (debounce)
+  clearTimeout(window._heroPosTimer);
+  window._heroPosTimer = setTimeout(function() {
+    db.collection('settings').doc('site').set({ heroImagePosY: parseInt(val) }, { merge: true }).then(function() {
+      showToast('Konum kaydedildi', 'success');
+    });
+  }, 800);
 }
 
 async function loadHeroHistory() {
