@@ -31,9 +31,9 @@ export async function onRequestPost(context) {
   }
 
   const TOKEN = String(env.TELEGRAM_BOT_TOKEN || '').trim();
-  const CHAT_ID = String(env.TELEGRAM_CHAT_ID || '564543310').trim();
+  const CHAT_ID = String(env.TELEGRAM_CHAT_ID || '').trim();
 
-  if (!TOKEN) {
+  if (!TOKEN || !CHAT_ID) {
     return new Response(JSON.stringify({ error: 'Config missing' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 
