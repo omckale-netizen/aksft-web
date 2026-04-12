@@ -4622,6 +4622,12 @@ function updateSeasonalPreview() {
   if (!startEl.value || !endEl.value) { previewEl.innerHTML = ''; return; }
   var sDate = new Date(startEl.value);
   var eDate = new Date(endEl.value);
+  // Kapanış, açılıştan önce olamaz
+  if (eDate <= sDate) {
+    previewEl.innerHTML = '<span style="color:var(--red);font-weight:700">⚠ Kapanış tarihi açılıştan sonra olmalıdır.</span>';
+    endEl.value = '';
+    return;
+  }
   var now = new Date();
   var isOpen = now >= sDate && now <= eDate;
   var fmt = function(d) { return d.toLocaleDateString('tr-TR', {day:'numeric',month:'long'}); };
