@@ -4546,8 +4546,17 @@ function renderVenueTable() {
     ? '<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--text-muted)">Mekan bulunamadi.</td></tr>'
     : venues.map(v => {
       const s = getVenueStatus(v);
-      const sBadge = s === true ? '<span class="badge badge-open">Acik</span>'
-                    : s === false ? '<span class="badge badge-closed">Kapali</span>'
+      // Sezon dışı kontrolü
+      var isSeasonOff = false;
+      if (v.seasonal && v.seasonStart && v.seasonEnd) {
+        var now = new Date();
+        var sD = new Date(v.seasonStart); sD.setFullYear(now.getFullYear());
+        var eD = new Date(v.seasonEnd); eD.setFullYear(now.getFullYear());
+        isSeasonOff = now < sD || now > eD;
+      }
+      const sBadge = isSeasonOff ? '<span class="badge" style="background:rgba(49,130,206,.08);color:#3182CE">Sezon dışı</span>'
+                    : s === true ? '<span class="badge badge-open">Açık</span>'
+                    : s === false ? '<span class="badge badge-closed">Kapalı</span>'
                     : '<span class="badge" style="color:var(--text-muted)">-</span>';
       const starStyle = v.featured ? 'color:#D4935A;font-size:1.1rem;cursor:pointer' : 'color:var(--text-muted);font-size:1.1rem;cursor:pointer;opacity:.4';
       const statusKey = getVenueStatusKey(v);
