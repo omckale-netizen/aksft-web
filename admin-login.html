@@ -151,19 +151,21 @@ async function checkAuth() {
     errEl.style.color = '#38A169';
     errEl.textContent = '✓ Giriş başarılı! Yönlendiriliyorsunuz...';
     // Telegram bildirim
-    const device = getDeviceInfo();
-    const ip = await getClientIP();
-    fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      type:'login',
-      data:{
-        date: new Date().toLocaleString('tr-TR'),
-        email: email,
-        ip: ip,
-        device: device.platform
-      }
-    })}).catch(()=>{});
     localStorage.setItem('lastActivity', Date.now().toString());
-    setTimeout(() => { window.location.href = 'admin.html'; }, 800);
+    try {
+      const device = getDeviceInfo();
+      const ip = await getClientIP();
+      await fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+        type:'login',
+        data:{
+          date: new Date().toLocaleString('tr-TR'),
+          email: email,
+          ip: ip,
+          device: device.platform
+        }
+      })});
+    } catch(e) {}
+    window.location.href = 'admin.html';
   } catch(err) {
     const updated = recordFailedLogin();
     if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
