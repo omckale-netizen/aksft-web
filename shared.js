@@ -2449,7 +2449,27 @@ function renderVenuePage(venueId) {
               </div>
             </div>
             <div class="vp-hero-card-body">
-            ${v.category === 'konaklama' ?
+            ${isSeasonClosed ? (() => {
+              var sStart = v.seasonStart || 4;
+              var now = new Date();
+              var openDate = new Date(now.getFullYear(), sStart - 1, 1);
+              if (openDate <= now) openDate = new Date(now.getFullYear() + 1, sStart - 1, 1);
+              var diff = openDate - now;
+              var totalDays = Math.floor(diff / 86400000);
+              var months = Math.floor(totalDays / 30);
+              var remDays = totalDays % 30;
+              return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 0;text-align:center;">' +
+                '<div style="font-size:2rem;margin-bottom:12px;">⏳</div>' +
+                '<div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,237,224,.3);margin-bottom:8px;">Açılmasına</div>' +
+                '<div style="display:flex;align-items:center;gap:12px;">' +
+                  (months > 0 ? '<div style="text-align:center;"><div style="font-size:1.6rem;font-weight:800;color:#E8A07A;">' + months + '</div><div style="font-size:.58rem;font-weight:600;color:rgba(245,237,224,.3);text-transform:uppercase;letter-spacing:.08em;">Ay</div></div>' : '') +
+                  (months > 0 && remDays > 0 ? '<div style="width:1px;height:28px;background:rgba(245,237,224,.1);"></div>' : '') +
+                  '<div style="text-align:center;"><div style="font-size:1.6rem;font-weight:800;color:#E8A07A;">' + (months > 0 ? remDays : totalDays) + '</div><div style="font-size:.58rem;font-weight:600;color:rgba(245,237,224,.3);text-transform:uppercase;letter-spacing:.08em;">Gün</div></div>' +
+                '</div>' +
+                '<div style="font-size:.65rem;color:rgba(245,237,224,.2);margin-top:12px;">Rezervasyon için iletişime geçebilirsiniz</div>' +
+              '</div>';
+            })()
+            : v.category === 'konaklama' ?
               '<div class="vp-hero-card-row"><span class="vp-hero-card-label">🔑 Check-in</span><span class="vp-hero-card-val">' + (v.checkin || '14:00') + '</span></div>' +
               '<div class="vp-hero-card-row"><span class="vp-hero-card-label">🚪 Check-out</span><span class="vp-hero-card-val">' + (v.checkout || '11:00') + '</span></div>'
             :
@@ -2457,15 +2477,11 @@ function renderVenuePage(venueId) {
               const DAY_ORDER = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
               const DAY_ALIASES = {'pazartesi':0,'sali':1,'salı':1,'carsamba':2,'çarşamba':2,'persembe':3,'perşembe':3,'cuma':4,'cumartesi':5,'pazar':6};
               const entries = (v.weeklyHours || []).filter(e => e.days);
-
-              // Her günün saatini çıkar
-              var dayMap = {}; // {0:'10:00–18:00', 1:'Kapalı', ...}
+              var dayMap = {};
               entries.forEach(entry => {
                 var d = fixTR(entry.days || '').toLowerCase();
                 var h = fixTR(entry.hours || '');
-                // "Her gün" kontrolü
                 if (d.includes('her gün')) { for(var i=0;i<7;i++) if(!dayMap[i]) dayMap[i]=h; return; }
-                // Aralık: "Pazartesi – Cuma" veya "Cumartesi – Pazar"
                 var rangeMatch = d.match(/(\S+)\s*[–\-]\s*(\S+)/);
                 if (rangeMatch) {
                   var s = DAY_ALIASES[rangeMatch[1].toLowerCase()];
@@ -2476,13 +2492,10 @@ function renderVenuePage(venueId) {
                     return;
                   }
                 }
-                // Tek gün
                 Object.keys(DAY_ALIASES).forEach(alias => {
                   if (d.includes(alias)) { var idx = DAY_ALIASES[alias]; if(!dayMap[idx]) dayMap[idx]=h; }
                 });
               });
-
-              // Aynı saatleri grupla (Pazartesi-Cuma aynıysa birleştir)
               var groups = [];
               var i = 0;
               while (i < 7) {
@@ -2494,10 +2507,7 @@ function renderVenuePage(venueId) {
                 var label = start === end ? DAY_ORDER[start] : DAY_ORDER[start] + ' – ' + DAY_ORDER[end];
                 groups.push({ label: label, hours: hours, startIdx: start, endIdx: end });
               }
-
-              // Bugünün indeksini bul
               var todayDayIdx = DAY_ORDER.findIndex(x => x.toLowerCase() === todayName.toLowerCase());
-
               return groups.map(g => {
                 var isClosed = g.hours.toLowerCase().includes('kapal');
                 var isToday = todayDayIdx >= g.startIdx && todayDayIdx <= g.endIdx;
@@ -2509,18 +2519,7 @@ function renderVenuePage(venueId) {
               }).join('');
             })()}
             </div>
-            <div class="vp-hero-card-footer"><span>${isSeasonClosed ? (() => {
-              var sStart = v.seasonStart || 4;
-              var now = new Date();
-              var openDate = new Date(now.getFullYear(), sStart - 1, 1);
-              if (openDate <= now) openDate = new Date(now.getFullYear() + 1, sStart - 1, 1);
-              var diff = openDate - now;
-              var days = Math.floor(diff / 86400000);
-              var months = Math.floor(days / 30);
-              var remDays = days % 30;
-              var countdown = months > 0 ? months + ' ay ' + (remDays > 0 ? remDays + ' gün' : '') : days + ' gün';
-              return '⏳ Açılmasına ' + countdown.trim() + ' · Rezervasyon için iletişime geçebilirsiniz';
-            })() : v.category === 'konaklama' ? 'Erken giriş/geç çıkış için iletişime geçin' : 'Saatler mevsime göre değişebilir'}</span></div>
+            <div class="vp-hero-card-footer"><span>${isSeasonClosed ? 'Sezon dışında da iletişime geçebilirsiniz' : v.category === 'konaklama' ? 'Erken giriş/geç çıkış için iletişime geçin' : 'Saatler mevsime göre değişebilir'}</span></div>
           </div>
         </div>
       </div>
