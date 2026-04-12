@@ -2510,7 +2510,6 @@ function renderVenuePage(venueId) {
             })()}
             </div>
             <div class="vp-hero-card-footer"><span>${isSeasonClosed ? (() => {
-              var ms = ['','Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
               var sStart = v.seasonStart || 4;
               var now = new Date();
               var openDate = new Date(now.getFullYear(), sStart - 1, 1);
@@ -2520,7 +2519,7 @@ function renderVenuePage(venueId) {
               var months = Math.floor(days / 30);
               var remDays = days % 30;
               var countdown = months > 0 ? months + ' ay ' + (remDays > 0 ? remDays + ' gün' : '') : days + ' gün';
-              return '📅 Sezon dışı · Açılmasına ' + countdown.trim();
+              return '⏳ Açılmasına ' + countdown.trim() + ' · Rezervasyon için iletişime geçebilirsiniz';
             })() : v.category === 'konaklama' ? 'Erken giriş/geç çıkış için iletişime geçin' : 'Saatler mevsime göre değişebilir'}</span></div>
           </div>
         </div>
