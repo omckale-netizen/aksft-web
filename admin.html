@@ -1780,6 +1780,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                 <span id="hero-img-status" style="font-size:.72rem;color:var(--text-muted)"></span>
               </div>
               <input type="file" id="hero-img-input" accept="image/jpeg,image/png" style="display:none" onchange="uploadHeroImage(this.files[0])">
+              <!-- Geçmiş görseller -->
+              <div style="margin-top:14px">
+                <div style="font-size:.72rem;font-weight:600;color:var(--navy);margin-bottom:8px">Geçmiş Görseller</div>
+                <div id="hero-img-history" style="display:flex;gap:8px;flex-wrap:wrap;max-height:160px;overflow-y:auto"></div>
+              </div>
             </div>
           </div>
 
@@ -2893,12 +2898,19 @@ async function uploadHeroImage(file) {
     });
 
     statusEl.textContent = 'Yükleniyor...';
-    var ref = firebase.storage().ref('site/hero-bg.jpg');
+    var ts = Date.now();
+    var ref = firebase.storage().ref('site/hero-bg-' + ts + '.jpg');
     await ref.put(resized, { contentType: 'image/jpeg' });
     var url = await ref.getDownloadURL();
-    await db.collection('settings').doc('site').set({ heroImageUrl: url, heroImageUpdatedAt: new Date().toISOString() }, { merge: true });
+    // Geçmişe ekle
+    var doc = await db.collection('settings').doc('site').get();
+    var history = (doc.exists && doc.data().heroImageHistory) ? doc.data().heroImageHistory : [];
+    history.unshift({ url: url, date: new Date().toISOString() });
+    if (history.length > 10) history = history.slice(0, 10);
+    await db.collection('settings').doc('site').set({ heroImageUrl: url, heroImageUpdatedAt: new Date().toISOString(), heroImageHistory: history }, { merge: true });
     statusEl.textContent = 'Yüklendi! (' + Math.round(resized.size / 1024) + ' KB)';
     showHeroPreview(url);
+    loadHeroHistory();
     showToast('Hero görseli güncellendi!', 'success');
   } catch(err) {
     statusEl.textContent = 'Hata!';
@@ -2916,6 +2928,41 @@ function showHeroPreview(url) {
   } else {
     img.style.display = 'none'; empty.style.display = '';
     if (removeBtn) removeBtn.style.display = 'none';
+  }
+}
+
+async function loadHeroHistory() {
+  var container = document.getElementById('hero-img-history');
+  if (!container) return;
+  try {
+    var doc = await db.collection('settings').doc('site').get();
+    var history = (doc.exists && doc.data().heroImageHistory) ? doc.data().heroImageHistory : [];
+    var currentUrl = doc.exists ? doc.data().heroImageUrl : '';
+    if (history.length === 0) {
+      container.innerHTML = '<div style="font-size:.72rem;color:var(--text-muted)">Henüz görsel yok.</div>';
+      return;
+    }
+    container.innerHTML = history.map(function(h) {
+      var isCurrent = h.url === currentUrl;
+      var date = new Date(h.date).toLocaleDateString('tr-TR', {day:'numeric',month:'short'});
+      return '<div style="position:relative;cursor:pointer;border-radius:8px;overflow:hidden;border:2px solid ' + (isCurrent ? 'var(--terra)' : 'transparent') + ';width:80px;height:36px;flex-shrink:0;" onclick="selectHeroImage(\'' + h.url.replace(/'/g,"\\'") + '\')" title="' + date + '">' +
+        '<img src="' + h.url + '" style="width:100%;height:100%;object-fit:cover;">' +
+        (isCurrent ? '<div style="position:absolute;bottom:1px;right:1px;width:12px;height:12px;border-radius:50%;background:var(--terra);display:flex;align-items:center;justify-content:center;font-size:7px;color:#fff;">✓</div>' : '') +
+      '</div>';
+    }).join('');
+  } catch(e) {
+    container.innerHTML = '<div style="font-size:.72rem;color:var(--text-muted)">Yüklenemedi.</div>';
+  }
+}
+
+async function selectHeroImage(url) {
+  try {
+    await db.collection('settings').doc('site').set({ heroImageUrl: url, heroImageUpdatedAt: new Date().toISOString() }, { merge: true });
+    showHeroPreview(url);
+    loadHeroHistory();
+    showToast('Hero görseli değiştirildi!', 'success');
+  } catch(e) {
+    showToast('Hata: ' + e.message, 'error');
   }
 }
 
@@ -3569,7 +3616,7 @@ showPage = function(page) {
   _origShowPage(page);
   if (page === 'gallery' && galItems.length === 0) galLoadItems();
   if (page === 'categories') renderCatList();
-  if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); }
+  if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); loadHeroHistory(); }
   if (page === 'security') runSecurityCheck();
   if (page === 'export') { loadBackupList(); updateAutoBackupUI(); }
 };
