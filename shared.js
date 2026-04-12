@@ -209,9 +209,8 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     .search-no-results{padding:24px 16px;text-align:center;color:rgba(245,237,224,.3);font-size:.82rem;}
     .search-group-label{padding:10px 16px 6px;font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,237,224,.2);}
     @media(max-width:640px){
-      .search-dropdown{position:fixed;top:60px;bottom:auto;left:0;right:0;max-height:70vh;border-radius:0 0 20px 20px;box-shadow:0 8px 40px rgba(0,0,0,.5);}
-      .search-dropdown.open{animation:sdSlideDown .25s ease;}
-      @keyframes sdSlideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+      .search-dropdown{position:absolute;top:calc(100% + 8px);bottom:auto;left:-8px;right:-8px;max-height:55vh;border-radius:16px;box-shadow:0 12px 48px rgba(0,0,0,.6);}
+      .search-dropdown.open{animation:sdFadeIn .2s ease;}
       .search-result-item{padding:14px 18px;gap:12px;}
       .search-result-emoji{width:42px;height:42px;font-size:1.15rem;}
       .search-result-title{font-size:.88rem;}
@@ -1321,18 +1320,29 @@ function initSearch(inputId, opts = {}) {
     if (results.length === 0) {
       dropdown.innerHTML = '<div class="search-no-results">Sonuç bulunamadı: "<strong style="color:var(--cream)">' + q.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') + '</strong>"</div>';
     } else {
-      dropdown.innerHTML = results.map(r => {
-        const lbl = getTypeLabel(r.type);
-        const url = getUrl(r.type, r.id);
-        return `<a class="search-result-item" href="${url}">
-          <div class="search-result-emoji">${r.emoji}</div>
-          <div style="flex:1;min-width:0;">
-            <div class="search-result-title">${r.title}</div>
-            <div class="search-result-sub">${r.sub || ''}</div>
-          </div>
-          <span class="search-result-type" style="background:${lbl.bg};color:${lbl.color};">${lbl.text}</span>
-        </a>`;
-      }).join('');
+      // Kategoriye göre grupla
+      var groups = {};
+      var groupOrder = ['venue','route','place','village'];
+      var groupNames = {venue:'Mekanlar',route:'Rotalar',place:'Gezilecek Yerler',village:'Köyler'};
+      results.forEach(function(r) { if (!groups[r.type]) groups[r.type] = []; groups[r.type].push(r); });
+      var html = '';
+      groupOrder.forEach(function(type) {
+        if (!groups[type]) return;
+        html += '<div class="search-group-label">' + (groupNames[type] || type) + '</div>';
+        html += groups[type].map(function(r) {
+          var lbl = getTypeLabel(r.type);
+          var url = getUrl(r.type, r.id);
+          return '<a class="search-result-item" href="' + url + '">' +
+            '<div class="search-result-emoji">' + r.emoji + '</div>' +
+            '<div style="flex:1;min-width:0;">' +
+              '<div class="search-result-title">' + r.title + '</div>' +
+              '<div class="search-result-sub">' + (r.sub || '') + '</div>' +
+            '</div>' +
+            '<span class="search-result-type" style="background:' + lbl.bg + ';color:' + lbl.color + ';">' + lbl.text + '</span>' +
+          '</a>';
+        }).join('');
+      });
+      dropdown.innerHTML = html;
     }
     dropdown.classList.add('open');
   }
