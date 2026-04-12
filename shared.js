@@ -3219,7 +3219,8 @@ function renderVillagePage(villageId) {
 
   if (villageVenues.length > 0) {
     bodyHtml += '<div style="margin-bottom:40px;">';
-    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">📍 ' + v.title + '\'deki İşletmeler</h2>';
+    var bulunmaKi = bulunmaEki(v.title).replace("'","'") + 'ki';
+    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">📍 ' + v.title + bulunmaKi + ' İşletmeler</h2>';
     bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">';
     villageVenues.forEach(function(venue) {
       var CAT_LABEL = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskele'};
