@@ -3156,12 +3156,6 @@ function renderVillagePage(villageId) {
 
   // Info chips
   heroHtml += '<div style="display:flex;flex-wrap:wrap;gap:8px;">';
-  if (v.altitude) {
-    heroHtml += '<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:6px 14px;font-size:.72rem;font-weight:600;color:rgba(245,237,224,.55);">🏔 ' + v.altitude + '</span>';
-  }
-  if (v.population) {
-    heroHtml += '<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:6px 14px;font-size:.72rem;font-weight:600;color:rgba(245,237,224,.55);">👥 ' + v.population + '</span>';
-  }
   if (v.lat && v.lng) {
     heroHtml += '<a href="https://www.google.com/maps?q=' + v.lat + ',' + v.lng + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:6px 14px;font-size:.72rem;font-weight:600;color:rgba(245,237,224,.55);text-decoration:none;">📍 Haritada Gör</a>';
   }
@@ -3171,7 +3165,7 @@ function renderVillagePage(villageId) {
   // Hero image (if exists)
   if (hasImage) {
     heroHtml += '<div style="width:280px;height:200px;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.1);flex-shrink:0;">';
-    heroHtml += '<img src="' + v.image + '" alt="' + (v.title || '') + '" style="width:100%;height:100%;object-fit:cover;" loading="lazy">';
+    heroHtml += '<img src="' + v.image + '" alt="' + (v.title || '') + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1">';
     heroHtml += '</div>';
   }
 
@@ -3219,8 +3213,9 @@ function renderVillagePage(villageId) {
 
   if (villageVenues.length > 0) {
     bodyHtml += '<div style="margin-bottom:40px;">';
-    var bulunmaKi = bulunmaEki(v.title).replace("'","'") + 'ki';
-    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">📍 ' + v.title + bulunmaKi + ' İşletmeler</h2>';
+    var ek = bulunmaEki(v.title);
+    var ekKi = ek.replace(/'/g, "\u2019") + 'ki';
+    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">📍 ' + v.title + ekKi + ' İşletmeler</h2>';
     bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">';
     villageVenues.forEach(function(venue) {
       var CAT_LABEL = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskele'};
@@ -3231,7 +3226,7 @@ function renderVillagePage(villageId) {
 
       bodyHtml += '<a href="../mekanlar/mekan-detay.html?id=' + venue.id + '" style="display:flex;align-items:center;gap:14px;padding:16px 18px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 8px 28px rgba(26,39,68,.08)\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
       if (venue.images && venue.images[0]) {
-        bodyHtml += '<div style="width:52px;height:52px;border-radius:12px;overflow:hidden;flex-shrink:0;"><img src="' + venue.images[0] + '" alt="' + venue.title + '" style="width:100%;height:100%;object-fit:cover;" loading="lazy"></div>';
+        bodyHtml += '<div style="width:52px;height:52px;border-radius:12px;overflow:hidden;flex-shrink:0;background:rgba(26,39,68,.05);"><img src="' + venue.images[0] + '" alt="' + venue.title + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s ease;" loading="lazy" onload="this.style.opacity=1"></div>';
       } else {
         bodyHtml += '<div style="width:52px;height:52px;border-radius:12px;background:rgba(26,39,68,.05);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;">' + (venue.emoji || '📍') + '</div>';
       }
