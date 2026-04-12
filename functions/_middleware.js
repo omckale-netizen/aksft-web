@@ -56,10 +56,42 @@ async function fetchFirestoreDoc(collection, docId) {
 }
 
 export async function onRequest(context) {
-  const { request, next } = context;
+  const { request, next, env } = context;
   const ua = request.headers.get('user-agent') || '';
   const url = new URL(request.url);
   const path = url.pathname;
+
+  // ═══ Admin Gate Koruması ═══
+  const adminPaths = ['/admin', '/admin.html', '/admin-login', '/admin-login.html'];
+  if (adminPaths.includes(path)) {
+    const GATE_KEY = (env.ADMIN_GATE_KEY || '').trim();
+    if (!GATE_KEY) return next(); // env yoksa gate devre disi
+
+    const gateParam = url.searchParams.get('gate');
+    const cookies = request.headers.get('cookie') || '';
+    const hasGateCookie = cookies.includes('admin_gate=' + GATE_KEY);
+
+    if (gateParam === GATE_KEY) {
+      // Dogru anahtar — cookie set et ve parametresiz URL'ye yonlendir
+      const cleanUrl = url.origin + path;
+      return new Response(null, {
+        status: 302,
+        headers: {
+          'Location': cleanUrl,
+          'Set-Cookie': `admin_gate=${GATE_KEY}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=2592000`,
+        }
+      });
+    }
+
+    if (!hasGateCookie) {
+      // Cookie yok — 404 dondur
+      return new Response('<!DOCTYPE html><html><head><title>404</title></head><body><h1>404 — Sayfa bulunamadı</h1></body></html>', {
+        status: 404,
+        headers: { 'Content-Type': 'text/html;charset=UTF-8' }
+      });
+    }
+    // Cookie var — devam et
+  }
 
   // Dinamik Sitemap
   if (path === '/sitemap.xml') {
