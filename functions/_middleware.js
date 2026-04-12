@@ -165,6 +165,39 @@ export async function onRequest(context) {
     } catch (e) { return next(); }
   }
 
+  // Koy detay sayfasi
+  if (path.includes('/koyler/koy-detay')) {
+    const id = url.searchParams.get('id');
+    if (!id) return next();
+
+    try {
+      const fields = await fetchFirestoreDoc('villages', id);
+      if (!fields) return next();
+
+      const villageName = fields.title?.stringValue || 'Köy';
+      const title = villageName + ' Köyü \u2014 Assos Köyleri | Assos\'u Keşfet';
+      const shortDesc = (fields.shortDesc?.stringValue || fields.description?.stringValue || '').replace(/<[^>]*>/g, '').substring(0, 160);
+      const desc = villageName + ', Ayvacık bölgesinde. ' + shortDesc;
+      const image = fields.image?.stringValue || DEFAULT_OG_IMAGE;
+
+      const schema = JSON.stringify({
+        '@context':'https://schema.org','@type':'Place',
+        'name':villageName,'description':shortDesc,
+        'address':{'@type':'PostalAddress','addressLocality':villageName,'addressRegion':'Ayvacık, Çanakkale','addressCountry':'TR'},
+        'image':image
+      });
+
+      const html = buildOgHtml({
+        title,
+        description: desc || 'Assos ve Ayvacık bölgesinde köy detayı.',
+        url: `https://assosukesfet.com/koyler/koy-detay?id=${id}`,
+        image
+      }).replace('</head>', '<script type="application/ld+json">' + schema + '</script></head>');
+
+      return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
+    } catch (e) { return next(); }
+  }
+
   // Blog detay sayfasi (?yazi=slug)
   if ((path === '/blog' || path === '/blog.html') && url.searchParams.get('yazi')) {
     const slug = url.searchParams.get('yazi');
@@ -279,6 +312,27 @@ async function generateDynamicSitemap() {
         if (imgUrl) {
           const title = f.title?.stringValue || id;
           xml += `    <image:image><image:loc>${escHtml(imgUrl)}</image:loc><image:title>${escHtml(title)} - Assos</image:title></image:image>\n`;
+        }
+        xml += '  </url>\n';
+      }
+    }
+  } catch(e) {}
+
+  // Koyler — Firebase'den cek
+  try {
+    const villagesUrl = 'https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents/villages?pageSize=500';
+    const vResp = await fetch(villagesUrl);
+    if (vResp.ok) {
+      const vData = await vResp.json();
+      const docs = vData.documents || [];
+      for (const doc of docs) {
+        const f = doc.fields || {};
+        const id = doc.name.split('/').pop();
+        xml += `  <url>\n    <loc>${BASE}/koyler/koy-detay?id=${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n`;
+        const imgUrl = f.image?.stringValue;
+        if (imgUrl) {
+          const title = f.title?.stringValue || id;
+          xml += `    <image:image><image:loc>${escHtml(imgUrl)}</image:loc><image:title>${escHtml(title)} Köyü - Assos</image:title></image:image>\n`;
         }
         xml += '  </url>\n';
       }

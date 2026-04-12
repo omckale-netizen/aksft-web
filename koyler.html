@@ -187,7 +187,7 @@
 
 <script src="firebase-loader.js"></script>
 <script src="data.js"></script>
-<script src="shared.min.js?v=117"></script>
+<script src="shared.min.js?v=118"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
@@ -211,24 +211,7 @@ function pageInit() {
   };
 
   function openVillage(id) {
-    const v = DATA.villages.find(x => x.id === id);
-    if (!v) return;
-    const badge = CAT_BADGE[v.category || ''];
-    document.getElementById('village-modal-body').innerHTML = `
-      <div style="background:${v.bg};padding:48px 32px 32px;text-align:center;border-radius:24px 24px 0 0;">
-        <div style="font-size:3.5rem;margin-bottom:12px;">${v.emoji}</div>
-        <span style="display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.15);color:rgba(255,255,255,.8);margin-bottom:10px;">${badge.label}</span>
-        <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.6rem;color:var(--cream);">${v.title}</h2>
-      </div>
-      <div style="padding:28px 32px 32px;">
-        <p style="color:var(--text-mid);font-size:.9rem;line-height:1.8;margin-bottom:18px;">${v.description || v.shortDesc}</p>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;">
-          ${(v.tags||[]).map(t=>`<span style="font-size:.65rem;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(26,39,68,.06);color:var(--text-mid);">${t}</span>`).join('')}
-        </div>
-      </div>
-    `;
-    document.getElementById('village-modal').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
+    window.location.href = 'koyler/koy-detay.html?id=' + id;
   }
 
   function closeModal() {

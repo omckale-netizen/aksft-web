@@ -1288,7 +1288,7 @@ function initSearch(inputId, opts = {}) {
     if (type === 'route')   return `${base}rotalar/rota-detay.html?id=${id}`;
     if (type === 'place')   return `${base}yerler.html#${id}`;
     if (type === 'venue')   return `${base}mekanlar/mekan-detay.html?id=${id}`;
-    if (type === 'village') return `${base}koyler.html#${id}`;
+    if (type === 'village') return `${base}koyler/koy-detay.html?id=${id}`;
     return '#';
   }
 
@@ -3112,3 +3112,190 @@ function renderVenuePage(venueId) {
   }
   initAnalytics();
 })();
+
+/* ═══════════════════════════════════════════════
+   renderVillagePage — Köy detay sayfası
+   ═══════════════════════════════════════════════ */
+function renderVillagePage(villageId) {
+  var v = (DATA.villages || []).find(function(x) { return x.id === villageId; });
+  if (!v) {
+    document.getElementById('village-hero').innerHTML = '';
+    document.getElementById('village-body').innerHTML = '<p style="padding:80px 24px;text-align:center;color:#718096;">Köy bulunamadı.</p>';
+    return;
+  }
+
+  var gradient = v.bg || 'linear-gradient(160deg,#1A2744,#243255)';
+  var hasImage = !!(v.image);
+
+  /* ── HERO ── */
+  var heroHtml = '<div style="position:relative;overflow:hidden;background:' + gradient + ';padding:0 24px;">';
+  // Topo pattern
+  heroHtml += '<div style="position:absolute;inset:0;background-image:url(\'data:image/svg+xml;utf8,<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"200\\\" height=\\\"200\\\"><path d=\\\"M0 80c30-10 60 15 100 0s70-20 100-5\\\" fill=\\\"none\\\" stroke=\\\"rgba(245,237,224,.04)\\\" stroke-width=\\\"1\\\"/><path d=\\\"M0 120c40 10 60-10 100 5s60 15 100-5\\\" fill=\\\"none\\\" stroke=\\\"rgba(245,237,224,.03)\\\" stroke-width=\\\"1\\\"/><path d=\\\"M0 160c30-15 70 10 100-5s70 10 100 0\\\" fill=\\\"none\\\" stroke=\\\"rgba(245,237,224,.025)\\\" stroke-width=\\\"1\\\"/></svg>\');pointer-events:none;opacity:.6;"></div>';
+
+  heroHtml += '<div style="position:relative;z-index:2;max-width:900px;margin:0 auto;padding:100px 0 60px;">';
+  // Back button
+  heroHtml += '<a href="../koyler.html" style="display:inline-flex;align-items:center;gap:6px;color:rgba(245,237,224,.5);font-size:.78rem;font-weight:600;text-decoration:none;margin-bottom:24px;transition:color .2s;" onmouseover="this.style.color=\'#F5EDE0\'" onmouseout="this.style.color=\'rgba(245,237,224,.5)\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Köylere Dön</a>';
+
+  heroHtml += '<div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;">';
+  heroHtml += '<div style="flex:1;min-width:280px;">';
+
+  // Emoji + Category badge
+  heroHtml += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">';
+  heroHtml += '<span style="font-size:2.5rem;">' + (v.emoji || '📍') + '</span>';
+  if (v.category && v.category !== 'one-cikan') {
+    var catLabels = { 'sahil': 'Sahil Köyü', 'sik-gezilen': 'Sık Gezilen' };
+    heroHtml += '<span style="font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 12px;border-radius:999px;background:rgba(196,82,26,.15);color:#D4935A;">' + (catLabels[v.category] || '') + '</span>';
+  }
+  heroHtml += '</div>';
+
+  // Title
+  heroHtml += '<h1 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;font-size:clamp(1.8rem,4.5vw,2.8rem);color:#F5EDE0;letter-spacing:-.03em;line-height:1.05;margin-bottom:10px;">' + (v.title || '') + '</h1>';
+
+  // Location
+  heroHtml += '<p style="font-size:.85rem;color:rgba(245,237,224,.45);margin-bottom:20px;">Ayvacık, Çanakkale</p>';
+
+  // Info chips
+  heroHtml += '<div style="display:flex;flex-wrap:wrap;gap:8px;">';
+  if (v.altitude) {
+    heroHtml += '<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:6px 14px;font-size:.72rem;font-weight:600;color:rgba(245,237,224,.55);">🏔 ' + v.altitude + '</span>';
+  }
+  if (v.population) {
+    heroHtml += '<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:6px 14px;font-size:.72rem;font-weight:600;color:rgba(245,237,224,.55);">👥 ' + v.population + '</span>';
+  }
+  if (v.lat && v.lng) {
+    heroHtml += '<a href="https://www.google.com/maps?q=' + v.lat + ',' + v.lng + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:6px 14px;font-size:.72rem;font-weight:600;color:rgba(245,237,224,.55);text-decoration:none;">📍 Haritada Gör</a>';
+  }
+  heroHtml += '</div>';
+  heroHtml += '</div>'; // flex:1
+
+  // Hero image (if exists)
+  if (hasImage) {
+    heroHtml += '<div style="width:280px;height:200px;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.1);flex-shrink:0;">';
+    heroHtml += '<img src="' + v.image + '" alt="' + (v.title || '') + '" style="width:100%;height:100%;object-fit:cover;" loading="lazy">';
+    heroHtml += '</div>';
+  }
+
+  heroHtml += '</div>'; // flex row
+  heroHtml += '</div>'; // inner
+  heroHtml += '</div>'; // hero
+
+  document.getElementById('village-hero').innerHTML = heroHtml;
+
+  /* ── BODY ── */
+  var bodyHtml = '<div style="max-width:900px;margin:0 auto;padding:48px 24px 80px;">';
+
+  // Highlights
+  if (v.highlights && v.highlights.length) {
+    bodyHtml += '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:40px;">';
+    v.highlights.forEach(function(h) {
+      bodyHtml += '<span style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(196,82,26,.06);border:1px solid rgba(196,82,26,.1);border-radius:12px;font-size:.8rem;font-weight:600;color:#C4521A;">✦ ' + h + '</span>';
+    });
+    bodyHtml += '</div>';
+  }
+
+  // Description
+  if (v.description) {
+    bodyHtml += '<div style="margin-bottom:40px;">';
+    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:14px;">' + (v.title || '') + ' Hakkında</h2>';
+    bodyHtml += '<p style="font-size:.9rem;color:var(--text-mid);line-height:1.85;">' + v.description + '</p>';
+    bodyHtml += '</div>';
+  }
+
+  // Tags
+  if (v.tags && v.tags.length) {
+    bodyHtml += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:40px;">';
+    v.tags.forEach(function(tag) {
+      bodyHtml += '<span style="padding:5px 12px;background:rgba(26,39,68,.04);border:1px solid rgba(26,39,68,.08);border-radius:999px;font-size:.72rem;font-weight:600;color:var(--text-mid);">' + tag + '</span>';
+    });
+    bodyHtml += '</div>';
+  }
+
+  // Bu köydeki işletmeler
+  var villageVenues = (DATA.venues || []).filter(function(venue) {
+    if (!venue.location || !v.title) return false;
+    return venue.location.toLowerCase().includes(v.title.toLowerCase()) ||
+           v.title.toLowerCase().includes(venue.location.toLowerCase().split(',')[0].trim());
+  });
+
+  if (villageVenues.length > 0) {
+    bodyHtml += '<div style="margin-bottom:40px;">';
+    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">📍 ' + v.title + '\'deki İşletmeler</h2>';
+    bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">';
+    villageVenues.forEach(function(venue) {
+      var CAT_LABEL = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskele'};
+      var isOpen = typeof isVenueOpen === 'function' ? isVenueOpen(venue) : null;
+      var openBadge = '';
+      if (isOpen === true) openBadge = '<span style="display:inline-flex;align-items:center;gap:4px;font-size:.65rem;font-weight:700;color:#22C55E;"><span style="width:6px;height:6px;border-radius:50%;background:#22C55E;"></span>Açık</span>';
+      else if (isOpen === false) openBadge = '<span style="display:inline-flex;align-items:center;gap:4px;font-size:.65rem;font-weight:700;color:#EF4444;"><span style="width:6px;height:6px;border-radius:50%;background:#EF4444;"></span>Kapalı</span>';
+
+      bodyHtml += '<a href="../mekanlar/mekan-detay.html?id=' + venue.id + '" style="display:flex;align-items:center;gap:14px;padding:16px 18px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 8px 28px rgba(26,39,68,.08)\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+      if (venue.images && venue.images[0]) {
+        bodyHtml += '<div style="width:52px;height:52px;border-radius:12px;overflow:hidden;flex-shrink:0;"><img src="' + venue.images[0] + '" alt="' + venue.title + '" style="width:100%;height:100%;object-fit:cover;" loading="lazy"></div>';
+      } else {
+        bodyHtml += '<div style="width:52px;height:52px;border-radius:12px;background:rgba(26,39,68,.05);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;">' + (venue.emoji || '📍') + '</div>';
+      }
+      bodyHtml += '<div style="flex:1;min-width:0;">';
+      bodyHtml += '<div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.85rem;color:var(--navy);margin-bottom:3px;">' + venue.title + '</div>';
+      bodyHtml += '<div style="display:flex;align-items:center;gap:8px;">';
+      bodyHtml += '<span style="font-size:.7rem;color:var(--text-mid);">' + (CAT_LABEL[venue.category] || venue.category) + '</span>';
+      if (openBadge) bodyHtml += openBadge;
+      bodyHtml += '</div></div></a>';
+    });
+    bodyHtml += '</div></div>';
+  }
+
+  // Bu köyden geçen rotalar
+  var villageRoutes = (DATA.routes || []).filter(function(route) {
+    if (!route.stops || !route.stops.length) return false;
+    return route.stops.some(function(stop) {
+      var stopName = (typeof stop === 'string' ? stop : stop.title || '').toLowerCase();
+      return stopName.includes(v.title.toLowerCase());
+    });
+  });
+
+  if (villageRoutes.length > 0) {
+    bodyHtml += '<div style="margin-bottom:40px;">';
+    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">🗺 Bu Köyden Geçen Rotalar</h2>';
+    villageRoutes.forEach(function(route) {
+      bodyHtml += '<a href="../rotalar/rota-detay.html?id=' + route.id + '" style="display:flex;align-items:center;gap:14px;padding:14px 18px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;margin-bottom:10px;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 8px 28px rgba(26,39,68,.08)\'" onmouseout="this.style.boxShadow=\'none\'">';
+      bodyHtml += '<span style="font-size:1.5rem;">' + (route.emoji || '🗺') + '</span>';
+      bodyHtml += '<div><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.85rem;color:var(--navy);margin-bottom:2px;">' + route.title + '</div>';
+      bodyHtml += '<span style="font-size:.7rem;color:var(--text-mid);">' + (route.sure || '') + (route.stops ? ' · ' + route.stops.length + ' durak' : '') + '</span>';
+      bodyHtml += '</div></a>';
+    });
+    bodyHtml += '</div>';
+  }
+
+  // Yakın köyler
+  var otherVillages = (DATA.villages || []).filter(function(vl) {
+    return vl.id !== v.id && vl.description;
+  }).slice(0, 6);
+
+  if (otherVillages.length > 0) {
+    bodyHtml += '<div style="margin-bottom:40px;">';
+    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">🏘 Diğer Köyler</h2>';
+    bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">';
+    otherVillages.forEach(function(vl) {
+      bodyHtml += '<a href="koy-detay.html?id=' + vl.id + '" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 6px 20px rgba(26,39,68,.07)\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+      bodyHtml += '<span style="font-size:1.4rem;">' + (vl.emoji || '📍') + '</span>';
+      bodyHtml += '<div><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.82rem;color:var(--navy);">' + vl.title + '</div>';
+      if (vl.shortDesc) bodyHtml += '<div style="font-size:.68rem;color:var(--text-mid);margin-top:2px;">' + vl.shortDesc.substring(0, 50) + '</div>';
+      bodyHtml += '</div></a>';
+    });
+    bodyHtml += '</div></div>';
+  }
+
+  // Harita CTA
+  if (v.lat && v.lng) {
+    bodyHtml += '<div style="text-align:center;padding:32px 0;">';
+    bodyHtml += '<a href="https://www.google.com/maps?q=' + v.lat + ',' + v.lng + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:var(--navy);color:#fff;border-radius:12px;font-size:.85rem;font-weight:600;text-decoration:none;transition:all .2s;" onmouseover="this.style.background=\'#2A3A5A\'" onmouseout="this.style.background=\'var(--navy)\'">📍 Google Maps\'te Aç</a>';
+    bodyHtml += '</div>';
+  }
+
+  bodyHtml += '</div>'; // container
+
+  document.getElementById('village-body').innerHTML = bodyHtml;
+
+  // Analytics
+  if (typeof trackPageView === 'function') trackPageView('village_' + villageId);
+}

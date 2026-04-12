@@ -1040,7 +1040,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                 <option value="muze">Müze</option>
               </select>
             </div>
-            <!-- Location — only for places -->
+            <!-- Location — places + villages -->
             <div class="form-group" id="vpf-loc-group">
               <label>Konum</label>
               <input type="text" id="vpf-location" placeholder="Konum">
@@ -1050,6 +1050,32 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <input type="text" id="vpf-coords" placeholder="39.4907, 26.3380" oninput="parseVPCoords(this.value)">
               <input type="hidden" id="vpf-lat">
               <input type="hidden" id="vpf-lng">
+            </div>
+            <!-- Village extra fields -->
+            <div id="vpf-village-extras" style="display:none">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Rakım</label>
+                  <input type="text" id="vpf-altitude" placeholder="235m">
+                </div>
+                <div class="form-group">
+                  <label>Nüfus (tahmini)</label>
+                  <input type="text" id="vpf-population" placeholder="~150">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Öne Çıkanlar <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(virgülle ayırın)</span></label>
+                <input type="text" id="vpf-highlights" placeholder="Athena Tapınağı, Taş sokaklar, Gün batımı">
+              </div>
+              <div class="form-group">
+                <label>Köy Kategorisi</label>
+                <select id="vpf-village-cat">
+                  <option value="one-cikan">Öne Çıkan</option>
+                  <option value="sahil">Sahil</option>
+                  <option value="sik-gezilen">Sık Gezilen</option>
+                  <option value="">Diğer</option>
+                </select>
+              </div>
             </div>
             <div class="form-group">
               <label>Kisa Aciklama</label>
@@ -5495,26 +5521,32 @@ function openVPModal(id) {
   form.reset();
 
   document.getElementById('vpf-cat-group').style.display = isPlaces ? '' : 'none';
-  document.getElementById('vpf-loc-group').style.display = isPlaces ? '' : 'none';
-  document.getElementById('vpf-coords-group').style.display = isPlaces ? '' : 'none';
+  document.getElementById('vpf-loc-group').style.display = '';
+  document.getElementById('vpf-coords-group').style.display = '';
+  document.getElementById('vpf-village-extras').style.display = isPlaces ? 'none' : '';
 
   if (id) {
     const arr = isPlaces ? draftData.places : draftData.villages;
     const item = arr.find(x => x.id === id);
     if (!item) return;
-    document.getElementById('vp-modal-title').textContent = isPlaces ? 'Yer Duzenle' : 'Koy Duzenle';
+    document.getElementById('vp-modal-title').textContent = isPlaces ? 'Yer Düzenle' : 'Köy Düzenle';
     document.getElementById('vpf-id').value = item.id;
     document.getElementById('vpf-title').value = item.title || '';
     document.getElementById('vpf-emoji').value = item.emoji || '';
     document.getElementById('vpf-shortDesc').value = item.shortDesc || '';
     document.getElementById('vpf-description').value = item.description || '';
     document.getElementById('vpf-tags').value = (item.tags || []).join(', ');
+    document.getElementById('vpf-location').value = item.location || '';
+    document.getElementById('vpf-lat').value = item.lat || '';
+    document.getElementById('vpf-lng').value = item.lng || '';
+    document.getElementById('vpf-coords').value = (item.lat && item.lng) ? item.lat + ', ' + item.lng : '';
     if (isPlaces) {
       document.getElementById('vpf-category').value = item.category || '';
-      document.getElementById('vpf-location').value = item.location || '';
-      document.getElementById('vpf-lat').value = item.lat || '';
-      document.getElementById('vpf-lng').value = item.lng || '';
-      document.getElementById('vpf-coords').value = (item.lat && item.lng) ? item.lat + ', ' + item.lng : '';
+    } else {
+      document.getElementById('vpf-altitude').value = item.altitude || '';
+      document.getElementById('vpf-population').value = item.population || '';
+      document.getElementById('vpf-highlights').value = (item.highlights || []).join(', ');
+      document.getElementById('vpf-village-cat').value = item.category || 'one-cikan';
     }
     // Fotoğraf preview
     vpShowImgPreview(item.image || '');
@@ -5607,9 +5639,16 @@ async function saveVP(e) {
     if (!editingVPId) { placePatch.image = ''; placePatch.imagePos = 50; }
     Object.assign(item, placePatch);
   } else {
+    const highlightsStr = document.getElementById('vpf-highlights').value;
     const villagePatch = {
-      category: 'one-cikan',
+      category: document.getElementById('vpf-village-cat').value || 'one-cikan',
       bg: 'linear-gradient(160deg,#1A2744,#243255)',
+      location: document.getElementById('vpf-location').value.trim(),
+      lat: parseFloat(document.getElementById('vpf-lat').value) || null,
+      lng: parseFloat(document.getElementById('vpf-lng').value) || null,
+      altitude: document.getElementById('vpf-altitude').value.trim(),
+      population: document.getElementById('vpf-population').value.trim(),
+      highlights: highlightsStr ? highlightsStr.split(',').map(h => h.trim()).filter(Boolean) : [],
     };
     if (!editingVPId) { villagePatch.image = ''; }
     Object.assign(item, villagePatch);
