@@ -172,7 +172,7 @@
   </div>
 
   <!-- Scroll ipucu -->
-  <div class="hero-scroll-cta" onclick="document.getElementById('hero').nextElementSibling.scrollIntoView({behavior:'smooth'})">
+  <div class="hero-scroll-cta" onclick="this.classList.add('hero-scroll-clicked');document.getElementById('hero').nextElementSibling.scrollIntoView({behavior:'smooth'})">
     <span class="hero-scroll-text">Keşfetmeye başla</span>
     <div class="hero-scroll-line"></div>
     <div class="hero-scroll-arrows">
@@ -192,6 +192,10 @@
 @keyframes heroScrollFade{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 @keyframes heroLinePulse{0%,100%{opacity:.3;transform:scaleY(.6)}50%{opacity:.8;transform:scaleY(1)}}
 @keyframes heroArrowBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+.hero-scroll-clicked{animation:heroScrollClick .6s ease forwards !important;}
+.hero-scroll-clicked .hero-scroll-arrows{animation:heroArrowShoot .5s ease forwards !important;}
+@keyframes heroScrollClick{0%{opacity:1;transform:translateX(-50%) translateY(0)}100%{opacity:0;transform:translateX(-50%) translateY(30px)}}
+@keyframes heroArrowShoot{0%{transform:translateY(0)}100%{transform:translateY(20px);opacity:0}}
 @media(max-width:640px){.hero-scroll-cta{bottom:16px;}.hero-scroll-line{height:16px;}}
 </style>
 
