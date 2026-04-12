@@ -2005,11 +2005,21 @@ function renderVenuePage(venueId) {
   /* ── Sezonluk mekan kontrolü ── */
   const isSeasonClosed = (() => {
     if (!v.seasonal) return false;
-    var now = new Date().getMonth() + 1;
-    var s = v.seasonStart || 4;
-    var e = v.seasonEnd || 10;
-    if (s <= e) return now < s || now > e;
-    return now < s && now > e;
+    var now = new Date();
+    if (v.seasonStart && v.seasonEnd) {
+      var s = new Date(v.seasonStart);
+      var e = new Date(v.seasonEnd);
+      // Yıl düzeltmesi — bu yılın sezon tarihlerini kullan
+      s.setFullYear(now.getFullYear());
+      e.setFullYear(now.getFullYear());
+      return now < s || now > e;
+    }
+    // Eski format (ay bazlı) fallback
+    var sMonth = typeof v.seasonStart === 'number' ? v.seasonStart : 4;
+    var eMonth = typeof v.seasonEnd === 'number' ? v.seasonEnd : 10;
+    var nowMonth = now.getMonth() + 1;
+    if (sMonth <= eMonth) return nowMonth < sMonth || nowMonth > eMonth;
+    return nowMonth < sMonth && nowMonth > eMonth;
   })();
 
   /* ── Today's hours helper ── */
@@ -2440,26 +2450,33 @@ function renderVenuePage(venueId) {
           </div>
         </div>
         <div class="vp-hero-right">
-          <div class="vp-hero-card">
+          <div class="vp-hero-card" ${isSeasonClosed ? 'style="background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;border-color:rgba(255,255,255,.06);"' : ''}>
             ${isSeasonClosed ? '' : '<div class="vp-hero-card-header"><div class="vp-hc-icon">' + (v.category === 'konaklama' ? '🏨' : '🕐') + '</div><div><div class="vp-hc-title">' + (v.category === 'konaklama' ? 'Giriş / Çıkış' : 'Çalışma Saatleri') + '</div><div class="vp-hc-subtitle">' + (v.category === 'konaklama' ? 'Resepsiyon 24 saat' : 'Bugün: ' + todayName + ' · Saat: ' + new Date().getHours().toString().padStart(2,'0') + ':' + new Date().getMinutes().toString().padStart(2,'0')) + '</div></div></div>'}
-            <div class="vp-hero-card-body">
+            <div class="${isSeasonClosed ? '' : 'vp-hero-card-body'}">
             ${isSeasonClosed ? (() => {
-              var sStart = v.seasonStart || 4;
-              var ms = ['','Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
               var now = new Date();
-              var openDate = new Date(now.getFullYear(), sStart - 1, 1);
-              if (openDate <= now) openDate = new Date(now.getFullYear() + 1, sStart - 1, 1);
+              var openDate;
+              if (v.seasonStart && typeof v.seasonStart === 'string') {
+                openDate = new Date(v.seasonStart);
+                openDate.setFullYear(now.getFullYear());
+                if (openDate <= now) openDate.setFullYear(now.getFullYear() + 1);
+              } else {
+                var sMonth = (typeof v.seasonStart === 'number' ? v.seasonStart : 4) - 1;
+                openDate = new Date(now.getFullYear(), sMonth, 1);
+                if (openDate <= now) openDate = new Date(now.getFullYear() + 1, sMonth, 1);
+              }
               var diff = openDate - now;
               var totalDays = Math.floor(diff / 86400000);
               var months = Math.floor(totalDays / 30);
               var remDays = totalDays % 30;
-              return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 0;text-align:center;">' +
-                '<div style="font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,237,224,.25);margin-bottom:14px;">Açılmasına</div>' +
-                '<div style="display:flex;align-items:stretch;gap:10px;">' +
-                  (months > 0 ? '<div style="background:rgba(232,160,122,.08);border:1px solid rgba(232,160,122,.15);border-radius:12px;padding:12px 18px;text-align:center;min-width:60px;"><div style="font-size:1.8rem;font-weight:800;color:#E8A07A;line-height:1;">' + months + '</div><div style="font-size:.55rem;font-weight:700;color:rgba(245,237,224,.3);text-transform:uppercase;letter-spacing:.08em;margin-top:4px;">Ay</div></div>' : '') +
-                  '<div style="background:rgba(232,160,122,.08);border:1px solid rgba(232,160,122,.15);border-radius:12px;padding:12px 18px;text-align:center;min-width:60px;"><div style="font-size:1.8rem;font-weight:800;color:#E8A07A;line-height:1;">' + (months > 0 ? remDays : totalDays) + '</div><div style="font-size:.55rem;font-weight:700;color:rgba(245,237,224,.3);text-transform:uppercase;letter-spacing:.08em;margin-top:4px;">Gün</div></div>' +
+              var openStr = openDate.toLocaleDateString('tr-TR', {day:'numeric', month:'long'});
+              return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 16px;text-align:center;">' +
+                '<div style="font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(245,237,224,.2);margin-bottom:16px;">Sezon açılışına</div>' +
+                '<div style="display:flex;align-items:center;gap:8px;">' +
+                  (months > 0 ? '<div style="position:relative;overflow:hidden;border-radius:14px;min-width:68px;"><div style="background:rgba(232,160,122,.15);padding:6px;text-align:center;"><span style="font-size:.5rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(232,160,122,.8);">Ay</span></div><div style="background:rgba(255,255,255,.04);padding:10px 14px;text-align:center;"><span style="font-size:2rem;font-weight:800;color:#E8A07A;line-height:1;">' + months + '</span></div></div>' : '') +
+                  '<div style="position:relative;overflow:hidden;border-radius:14px;min-width:68px;"><div style="background:rgba(232,160,122,.15);padding:6px;text-align:center;"><span style="font-size:.5rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(232,160,122,.8);">Gün</span></div><div style="background:rgba(255,255,255,.04);padding:10px 14px;text-align:center;"><span style="font-size:2rem;font-weight:800;color:#E8A07A;line-height:1;">' + (months > 0 ? remDays : totalDays) + '</span></div></div>' +
                 '</div>' +
-                '<div style="font-size:.62rem;color:rgba(245,237,224,.2);margin-top:14px;">' + ms[sStart] + ' ayında açılacak</div>' +
+                '<div style="font-size:.65rem;color:rgba(245,237,224,.25);margin-top:16px;">' + openStr + ' tarihinde açılacak</div>' +
               '</div>';
             })()
             : v.category === 'konaklama' ?

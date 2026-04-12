@@ -2078,22 +2078,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             <div id="seasonal-fields" style="display:none;margin-top:12px">
               <div class="form-row">
                 <div class="form-group" style="margin-bottom:0">
-                  <label style="font-size:.72rem">Açılış Ayı</label>
-                  <select id="f-season-start" style="padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit">
-                    <option value="1">Ocak</option><option value="2">Şubat</option><option value="3">Mart</option>
-                    <option value="4" selected>Nisan</option><option value="5">Mayıs</option><option value="6">Haziran</option>
-                    <option value="7">Temmuz</option><option value="8">Ağustos</option><option value="9">Eylül</option>
-                    <option value="10">Ekim</option><option value="11">Kasım</option><option value="12">Aralık</option>
-                  </select>
+                  <label style="font-size:.72rem">Sezon Açılış Tarihi</label>
+                  <input type="date" id="f-season-start" style="padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit" onchange="updateSeasonalPreview()">
                 </div>
                 <div class="form-group" style="margin-bottom:0">
-                  <label style="font-size:.72rem">Kapanış Ayı</label>
-                  <select id="f-season-end" style="padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit">
-                    <option value="1">Ocak</option><option value="2">Şubat</option><option value="3">Mart</option>
-                    <option value="4">Nisan</option><option value="5">Mayıs</option><option value="6">Haziran</option>
-                    <option value="7">Temmuz</option><option value="8">Ağustos</option><option value="9">Eylül</option>
-                    <option value="10" selected>Ekim</option><option value="11">Kasım</option><option value="12">Aralık</option>
-                  </select>
+                  <label style="font-size:.72rem">Sezon Kapanış Tarihi</label>
+                  <input type="date" id="f-season-end" style="padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit" onchange="updateSeasonalPreview()">
                 </div>
               </div>
               <div id="seasonal-preview" style="font-size:.72rem;color:var(--text-muted);margin-top:8px"></div>
@@ -4629,18 +4619,15 @@ function updateSeasonalPreview() {
   var endEl = document.getElementById('f-season-end');
   var previewEl = document.getElementById('seasonal-preview');
   if (!startEl || !endEl || !previewEl) return;
-  var months = ['','Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
-  var s = parseInt(startEl.value);
-  var e = parseInt(endEl.value);
-  var now = new Date().getMonth() + 1;
-  var isOpen = s <= e ? (now >= s && now <= e) : (now >= s || now <= e);
-  previewEl.innerHTML = '📅 ' + months[s] + ' – ' + months[e] + ' arası açık · ' +
+  if (!startEl.value || !endEl.value) { previewEl.innerHTML = ''; return; }
+  var sDate = new Date(startEl.value);
+  var eDate = new Date(endEl.value);
+  var now = new Date();
+  var isOpen = now >= sDate && now <= eDate;
+  var fmt = function(d) { return d.toLocaleDateString('tr-TR', {day:'numeric',month:'long'}); };
+  previewEl.innerHTML = '📅 ' + fmt(sDate) + ' – ' + fmt(eDate) + ' arası açık · ' +
     (isOpen ? '<span style="color:var(--green);font-weight:700">Şu an sezon içinde ✓</span>' : '<span style="color:var(--red);font-weight:700">Şu an sezon dışında ✗</span>');
 }
-
-// Sezon dropdown değişikliğinde preview güncelle
-document.getElementById('f-season-start')?.addEventListener('change', updateSeasonalPreview);
-document.getElementById('f-season-end')?.addEventListener('change', updateSeasonalPreview);
 
 function togglePremiumDates() {
   var el = document.getElementById('premium-dates');
@@ -5130,8 +5117,8 @@ async function saveVenue(e) {
     lat: parseFloat(document.getElementById('f-lat').value) || null,
     lng: parseFloat(document.getElementById('f-lng').value) || null,
     seasonal: document.getElementById('f-seasonal').checked,
-    seasonStart: document.getElementById('f-seasonal').checked ? parseInt(document.getElementById('f-season-start').value) : null,
-    seasonEnd: document.getElementById('f-seasonal').checked ? parseInt(document.getElementById('f-season-end').value) : null
+    seasonStart: document.getElementById('f-seasonal').checked ? document.getElementById('f-season-start').value : null,
+    seasonEnd: document.getElementById('f-seasonal').checked ? document.getElementById('f-season-end').value : null
   };
 
   // Generate keywords from title + tags
