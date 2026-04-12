@@ -18,7 +18,7 @@ export async function onRequest(context) {
     const doc = await resp.json();
     const f = doc.fields || {};
 
-    const catLabels = {kafe:'Assos Kafeler',restoran:'Assos Restoranlar',kahvalti:'Assos Kahvaltı',konaklama:'Assos Otelleri',beach:'Assos Beach',iskele:'Assos İskeleler'};
+    const catLabels = {kafe:'Assos Kafeler',restoran:'Assos Restoranlar',kahvalti:'Assos Kahvaltı Mekanları',konaklama:'Assos Otelleri',beach:'Assos Beach Club',iskele:'Assos İskeleler'};
     const cat = f.category?.stringValue || '';
     const name = f.title?.stringValue || 'Mekan';
     const loc = f.location?.stringValue || 'Assos';
