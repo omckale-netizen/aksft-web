@@ -2108,13 +2108,6 @@ function renderVenuePage(venueId) {
       /* ── VP Hero (compact 2-col) ── */
       .vp-hero{position:relative;min-height:520px;display:flex;align-items:center;padding:0 36px 48px;overflow:hidden;}
       .vp-hero-bg{position:absolute;inset:0;z-index:0;}
-      .vp-hblob{position:absolute;border-radius:50%;filter:blur(100px);will-change:transform;}
-      .vp-hblob-1{animation:vpBlob1 16s ease-in-out infinite alternate;}
-      .vp-hblob-2{animation:vpBlob2 13s ease-in-out infinite alternate;}
-      .vp-hblob-3{animation:vpBlob3 19s ease-in-out infinite alternate;}
-      @keyframes vpBlob1{0%{transform:translate(0,0) scale(1);}100%{transform:translate(60px,-50px) scale(1.18);}}
-      @keyframes vpBlob2{0%{transform:translate(0,0) scale(1);}100%{transform:translate(-50px,40px) scale(1.22);}}
-      @keyframes vpBlob3{0%{transform:translate(0,0) scale(1);}100%{transform:translate(30px,60px) scale(0.88);}}
       .vp-vignette{position:absolute;inset:0;z-index:2;background:radial-gradient(ellipse at 60% 40%,transparent 45%,rgba(0,0,0,.18) 100%);}
       .vp-text-overlay{position:absolute;inset:0;z-index:3;background:linear-gradient(to bottom,rgba(0,0,0,.14) 0%,transparent 40%,transparent 70%,rgba(0,0,0,.35) 100%);}
       .vp-hero-wrap{position:relative;z-index:10;width:100%;max-width:1100px;margin:0 auto;padding-top:90px;}
@@ -2382,10 +2375,7 @@ function renderVenuePage(venueId) {
   document.getElementById('vp-hero').innerHTML = `
     <div class="vp-hero">
       <div class="vp-hero-bg" style="background:${G};"></div>
-      ${v.images && v.images.length > 0 ? '<img src="' + v.images[0] + '" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0;transition:opacity .7s ease;" onload="this.style.opacity=\'0.2\'">' : ''}
-      <div class="vp-hblob vp-hblob-1" style="width:480px;height:480px;background:${meta.accent};opacity:.22;top:-15%;left:8%;"></div>
-      <div class="vp-hblob vp-hblob-2" style="width:360px;height:360px;background:${meta.accent};opacity:.16;bottom:8%;right:-4%;"></div>
-      <div class="vp-hblob vp-hblob-3" style="width:280px;height:280px;background:${meta.accent};opacity:.12;top:40%;left:55%;"></div>
+      ${v.images && v.images.length > 0 ? '<img src="' + v.images[0] + '" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0;transition:opacity .7s ease;" onload="this.style.opacity=\'0.25\'">' : ''}
       <div class="vp-vignette"></div>
       <div class="vp-text-overlay"></div>
 
