@@ -194,7 +194,7 @@ async function generateDynamicSitemap() {
 
   // Mekanlar — Firebase'den cek
   try {
-    const venuesUrl = 'https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents/venues?pageSize=100';
+    const venuesUrl = 'https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents/venues?pageSize=5000';
     const vResp = await fetch(venuesUrl);
     if (vResp.ok) {
       const vData = await vResp.json();
@@ -223,7 +223,7 @@ async function generateDynamicSitemap() {
 
   // Rotalar — Firebase'den cek
   try {
-    const routesUrl = 'https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents/routes?pageSize=50';
+    const routesUrl = 'https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents/routes?pageSize=500';
     const rResp = await fetch(routesUrl);
     if (rResp.ok) {
       const rData = await rResp.json();
@@ -237,7 +237,7 @@ async function generateDynamicSitemap() {
 
   // Yerler — Firebase'den cek
   try {
-    const placesUrl = 'https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents/places?pageSize=50';
+    const placesUrl = 'https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents/places?pageSize=500';
     const pResp = await fetch(placesUrl);
     if (pResp.ok) {
       const pData = await pResp.json();
@@ -258,7 +258,7 @@ async function generateDynamicSitemap() {
 
   // Blog yazilari — Firebase'den cek
   try {
-    const blogUrl = 'https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents/blog_posts?pageSize=100';
+    const blogUrl = 'https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents/blog_posts?pageSize=5000';
     const bResp = await fetch(blogUrl);
     if (bResp.ok) {
       const bData = await bResp.json();
