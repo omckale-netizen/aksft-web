@@ -209,9 +209,9 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     .search-no-results{padding:24px 16px;text-align:center;color:rgba(245,237,224,.3);font-size:.82rem;}
     .search-group-label{padding:10px 16px 6px;font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,237,224,.2);}
     @media(max-width:640px){
-      .search-dropdown{position:fixed;top:auto;bottom:0;left:0;right:0;max-height:55vh;border-radius:20px 20px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.5);}
-      .search-dropdown.open{animation:sdSlideUp .25s ease;}
-      @keyframes sdSlideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+      .search-dropdown{position:fixed;top:60px;bottom:auto;left:0;right:0;max-height:70vh;border-radius:0 0 20px 20px;box-shadow:0 8px 40px rgba(0,0,0,.5);}
+      .search-dropdown.open{animation:sdSlideDown .25s ease;}
+      @keyframes sdSlideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
       .search-result-item{padding:14px 18px;gap:12px;}
       .search-result-emoji{width:42px;height:42px;font-size:1.15rem;}
       .search-result-title{font-size:.88rem;}
