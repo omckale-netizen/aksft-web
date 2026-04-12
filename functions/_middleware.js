@@ -84,11 +84,8 @@ export async function onRequest(context) {
     }
 
     if (!hasGateCookie) {
-      // Cookie yok — 404 dondur
-      return new Response('<!DOCTYPE html><html><head><title>404</title></head><body><h1>404 — Sayfa bulunamadı</h1></body></html>', {
-        status: 404,
-        headers: { 'Content-Type': 'text/html;charset=UTF-8' }
-      });
+      // Cookie yok — 404 sayfasina yonlendir
+      return Response.redirect(url.origin + '/404.html', 302);
     }
     // Cookie var — devam et
   }
