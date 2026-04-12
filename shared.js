@@ -3128,16 +3128,20 @@ function renderVillagePage(villageId) {
   var hasImage = !!(v.image);
 
   /* ── HERO ── */
-  var heroHtml = '<div style="position:relative;overflow:hidden;background:' + gradient + ';padding:0 24px;">';
-  // Topo pattern
-  heroHtml += '<div style="position:absolute;inset:0;background-image:url(\'data:image/svg+xml;utf8,<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"200\\\" height=\\\"200\\\"><path d=\\\"M0 80c30-10 60 15 100 0s70-20 100-5\\\" fill=\\\"none\\\" stroke=\\\"rgba(245,237,224,.04)\\\" stroke-width=\\\"1\\\"/><path d=\\\"M0 120c40 10 60-10 100 5s60 15 100-5\\\" fill=\\\"none\\\" stroke=\\\"rgba(245,237,224,.03)\\\" stroke-width=\\\"1\\\"/><path d=\\\"M0 160c30-15 70 10 100-5s70 10 100 0\\\" fill=\\\"none\\\" stroke=\\\"rgba(245,237,224,.025)\\\" stroke-width=\\\"1\\\"/></svg>\');pointer-events:none;opacity:.6;"></div>';
+  var heroHtml = '<div style="position:relative;overflow:hidden;background:' + gradient + ';padding:0 24px;min-height:340px;">';
+
+  // Arka plan görsel (varsa)
+  if (hasImage) {
+    heroHtml += '<div style="position:absolute;inset:0;"><img src="' + v.image + '" alt="" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s ease;" loading="eager" onload="this.style.opacity=0.25"></div>';
+    heroHtml += '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,16,30,.6) 0%,rgba(6,16,30,.85) 100%);pointer-events:none;"></div>';
+  } else {
+    // Topo pattern (görsel yoksa)
+    heroHtml += '<div style="position:absolute;inset:0;background-image:url(\'data:image/svg+xml;utf8,<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"200\\\" height=\\\"200\\\"><path d=\\\"M0 80c30-10 60 15 100 0s70-20 100-5\\\" fill=\\\"none\\\" stroke=\\\"rgba(245,237,224,.04)\\\" stroke-width=\\\"1\\\"/><path d=\\\"M0 120c40 10 60-10 100 5s60 15 100-5\\\" fill=\\\"none\\\" stroke=\\\"rgba(245,237,224,.03)\\\" stroke-width=\\\"1\\\"/><path d=\\\"M0 160c30-15 70 10 100-5s70 10 100 0\\\" fill=\\\"none\\\" stroke=\\\"rgba(245,237,224,.025)\\\" stroke-width=\\\"1\\\"/></svg>\');pointer-events:none;opacity:.6;"></div>';
+  }
 
   heroHtml += '<div style="position:relative;z-index:2;max-width:900px;margin:0 auto;padding:100px 0 60px;">';
   // Back button
   heroHtml += '<a href="../koyler.html" style="display:inline-flex;align-items:center;gap:6px;color:rgba(245,237,224,.5);font-size:.78rem;font-weight:600;text-decoration:none;margin-bottom:24px;transition:color .2s;" onmouseover="this.style.color=\'#F5EDE0\'" onmouseout="this.style.color=\'rgba(245,237,224,.5)\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Köylere Dön</a>';
-
-  heroHtml += '<div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;">';
-  heroHtml += '<div style="flex:1;min-width:280px;">';
 
   // Emoji + Category badge
   heroHtml += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">';
@@ -3157,19 +3161,10 @@ function renderVillagePage(villageId) {
   // Info chips
   heroHtml += '<div style="display:flex;flex-wrap:wrap;gap:8px;">';
   if (v.lat && v.lng) {
-    heroHtml += '<a href="https://www.google.com/maps?q=' + v.lat + ',' + v.lng + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:6px 14px;font-size:.72rem;font-weight:600;color:rgba(245,237,224,.55);text-decoration:none;">📍 Haritada Gör</a>';
+    heroHtml += '<a href="https://www.google.com/maps?q=' + v.lat + ',' + v.lng + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:6px 14px;font-size:.72rem;font-weight:600;color:rgba(245,237,224,.6);text-decoration:none;">📍 Haritada Gör</a>';
   }
   heroHtml += '</div>';
-  heroHtml += '</div>'; // flex:1
 
-  // Hero image (if exists)
-  if (hasImage) {
-    heroHtml += '<div style="width:280px;height:200px;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.1);flex-shrink:0;">';
-    heroHtml += '<img src="' + v.image + '" alt="' + (v.title || '') + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1">';
-    heroHtml += '</div>';
-  }
-
-  heroHtml += '</div>'; // flex row
   heroHtml += '</div>'; // inner
   heroHtml += '</div>'; // hero
 

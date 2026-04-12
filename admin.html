@@ -5472,7 +5472,6 @@ function switchVillageTab(tab) {
   document.querySelector(`#page-villages .tab[onclick*="${tab}"]`).classList.add('active');
   const isPlaces = tab === 'places';
   document.getElementById('vp-th-cat').style.display = isPlaces ? '' : 'none';
-  document.getElementById('vp-th-img').style.display = isPlaces ? '' : 'none';
   document.getElementById('vp-add-btn').textContent = isPlaces ? '+ Yeni Yer Ekle' : '+ Yeni Koy Ekle';
   renderVPTable();
 }
@@ -5489,9 +5488,9 @@ function renderVPTable() {
         '<td class="emoji-col">' + (x.emoji || '') + '</td>' +
         '<td><strong>' + x.title + '</strong></td>' +
         '<td style="' + (isPlaces ? '' : 'display:none') + '"><span class="badge badge-cat">' + (x.category || '-') + '</span></td>' +
-        '<td style="' + (isPlaces ? '' : 'display:none') + '">' + (x.image ? '<span class="badge badge-open" style="font-size:.65rem">Var</span>' : '<span class="badge" style="color:var(--text-muted);font-size:.65rem">Yok</span>') + '</td>' +
+        '<td>' + (x.image ? '<span class="badge badge-open" style="font-size:.65rem">Var</span>' : '<span class="badge" style="color:var(--text-muted);font-size:.65rem">Yok</span>') + '</td>' +
         '<td>' +
-          (isPlaces ? '<button class="btn-icon" title="Gorsel" onclick="openPlaceImgModal(\'' + x.id + '\',\'' + (isPlaces ? 'places' : 'villages') + '\')">&#128247;</button>' : '') +
+          '<button class="btn-icon" title="Görsel" onclick="openPlaceImgModal(\'' + x.id + '\',\'' + (isPlaces ? 'places' : 'villages') + '\')">&#128247;</button>' +
           '<button class="btn-icon" title="Düzenle" onclick="openVPModal(\'' + x.id + '\')" style="margin-left:4px">&#9998;</button>' +
           '<button class="btn-icon" title="Sil" onclick="confirmDeleteVP(\'' + x.id + '\')" style="margin-left:4px;color:var(--red)">&#128465;</button>' +
         '</td>' +
@@ -5573,13 +5572,39 @@ function vpShowImgPreview(url) {
 
 function vpHandleImage(file) {
   if (!file) return;
-  if (!ALLOWED_TYPES.includes(file.type)) { showToast('JPG, PNG veya WebP kullanin.', 'error'); return; }
-  if (file.size > MAX_FILE_SIZE) { showToast('Dosya cok buyuk. Maks 5MB.', 'error'); return; }
-  compressImage(file, function(blob, dataUrl, ext) {
-    vpPendingImg = { blob, dataUrl, ext: ext || 'webp' };
-    vpShowImgPreview(dataUrl);
-    showToast('Gorsel hazir. Kaydet butonuna basin.', 'success');
-  });
+  if (!ALLOWED_TYPES.includes(file.type)) { showToast('JPG, PNG veya WebP kullanın.', 'error'); return; }
+  if (file.size > MAX_FILE_SIZE) { showToast('Dosya çok büyük. Maks 5MB.', 'error'); return; }
+  var isVillage = currentVPTab !== 'places';
+  var maxW = isVillage ? 1600 : 1200;
+  var quality = isVillage ? 0.78 : 0.72;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      if (img.width < 600 || img.height < 300) {
+        showToast('Görsel çok küçük. En az 600x300 piksel olmalı.', 'error');
+        return;
+      }
+      var canvas = document.createElement('canvas');
+      var w = img.width, h = img.height;
+      if (w > maxW) { h = h * maxW / w; w = maxW; }
+      canvas.width = w;
+      canvas.height = h;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      var useWebP = canvas.toDataURL('image/webp').startsWith('data:image/webp');
+      var format = useWebP ? 'image/webp' : 'image/jpeg';
+      canvas.toBlob(function(blob) {
+        var dataUrl = canvas.toDataURL(format, quality);
+        vpPendingImg = { blob: blob, dataUrl: dataUrl, ext: useWebP ? 'webp' : 'jpg' };
+        vpShowImgPreview(dataUrl);
+        var sizeKB = Math.round(blob.size / 1024);
+        showToast('Görsel hazır (' + Math.round(w) + 'x' + Math.round(h) + ', ' + sizeKB + 'KB). Kaydet butonuna basın.', 'success');
+      }, format, quality);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
 }
 
 function vpRemoveImage() {
