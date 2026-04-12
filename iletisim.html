@@ -75,7 +75,7 @@
               <label>Ad Soyad *</label>
               <div class="ct-input-wrap">
                 <span class="ct-input-icon">👤</span>
-                <input type="text" id="ct-name" required placeholder="Adınız ve soyadınız">
+                <input type="text" id="ct-name" required maxlength="100" placeholder="Adınız ve soyadınız">
               </div>
             </div>
             <div class="ct-field">
@@ -130,7 +130,8 @@
           </div>
           <div class="ct-field">
             <label>Mesajınız *</label>
-            <textarea id="ct-message" required rows="5" placeholder="Mesajınızı buraya yazın..."></textarea>
+            <textarea id="ct-message" required rows="5" maxlength="2000" placeholder="Mesajınızı buraya yazın..."></textarea>
+            <div class="ct-char-count"><span id="ct-msg-count">0</span> / 2000</div>
           </div>
           <div class="ct-consent">
             <label class="ct-checkbox-label" id="ct-consent-label">
@@ -306,6 +307,7 @@
 .ct-field input:focus,.ct-field select:focus,.ct-field textarea:focus{border-color:var(--terra);box-shadow:0 0 0 3px rgba(196,82,26,.08),0 4px 12px rgba(196,82,26,.06);background:rgba(255,255,255,.9)}
 .ct-field input::placeholder,.ct-field textarea::placeholder{color:rgba(74,88,112,.35)}
 .ct-field textarea{resize:vertical;line-height:1.7}
+.ct-char-count{text-align:right;font-size:.7rem;color:var(--text-mid);opacity:.6;margin-top:4px}
 .ct-field select{cursor:pointer;color:var(--navy);-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%234A5870' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
 
 /* ── CONSENT ── */
@@ -377,6 +379,11 @@ function pageInit() {
 }
 document.addEventListener('dataReady', pageInit);
 
+// Mesaj karakter sayacı
+document.getElementById('ct-message').addEventListener('input', function() {
+  document.getElementById('ct-msg-count').textContent = this.value.length;
+});
+
 // Telefon formatla — sadece rakam, boşluk ile grupla
 function formatPhoneInput(el) {
   var raw = el.value.replace(/\D/g, '');
@@ -435,6 +442,10 @@ async function submitContact(e) {
   var message = document.getElementById('ct-message').value.trim();
   if (!name || !email || !phoneRaw || !message) {
     status.innerHTML = '<span style="color:#E53E3E">Lütfen tüm zorunlu alanları doldurun.</span>';
+    return;
+  }
+  if (message.length > 2000) {
+    status.innerHTML = '<span style="color:#E53E3E">Mesaj en fazla 2000 karakter olabilir.</span>';
     return;
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
