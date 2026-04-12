@@ -2002,6 +2002,16 @@ function renderVenuePage(venueId) {
   const waContactMsg = encodeURIComponent('Merhaba! *Assos\'u Keşfet* (assosukesfet.com) üzerinden ulaşıyorum.\n\n' + v.title + ' hakkında bilgi almak istiyorum.');
   const waContactUrl = `https://wa.me/${waNum}?text=${waContactMsg}`;
 
+  /* ── Sezonluk mekan kontrolü ── */
+  const isSeasonClosed = (() => {
+    if (!v.seasonal) return false;
+    var now = new Date().getMonth() + 1;
+    var s = v.seasonStart || 4;
+    var e = v.seasonEnd || 10;
+    if (s <= e) return now < s || now > e;
+    return now < s && now > e;
+  })();
+
   /* ── Today's hours helper ── */
   /* ── Open/closed logic ── */
   const dayNames = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
@@ -2063,6 +2073,11 @@ function renderVenuePage(venueId) {
   const openBadge = (() => {
     // Konaklama mekanlarında açık/kapalı badge gösterme
     if (v.category === 'konaklama') return '';
+    // Sezon dışı mekan
+    if (isSeasonClosed) {
+      var months = ['','Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+      return '<span class="vp-open-badge vp-closed">Sezon dışı · ' + months[v.seasonStart || 4] + bulunmaEki(months[v.seasonStart || 4]) + ' açılacak</span>';
+    }
     if (isNowOpen === true) {
       const match = (todayHours || '').match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
       const closeText = match ? saatEki(match[3], match[4], 'yonelme') + ' kadar' : '';

@@ -2068,6 +2068,38 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <div class="tag-selected-list" id="f-tag-selected"></div>
           <input type="hidden" id="f-tags">
         </div>
+        <div class="form-group">
+          <div style="background:rgba(26,107,138,.04);border:1px solid rgba(26,107,138,.12);border-radius:12px;padding:16px">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:0">
+              <input type="checkbox" id="f-seasonal" style="width:18px;height:18px;accent-color:#1A6B8A;cursor:pointer" onchange="toggleSeasonalFields()">
+              <span>📅 Sezonluk Mekan</span>
+              <span style="font-size:.72rem;color:var(--text-muted);font-weight:400">(Belirli aylarda açık)</span>
+            </label>
+            <div id="seasonal-fields" style="display:none;margin-top:12px">
+              <div class="form-row">
+                <div class="form-group" style="margin-bottom:0">
+                  <label style="font-size:.72rem">Açılış Ayı</label>
+                  <select id="f-season-start" style="padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit">
+                    <option value="1">Ocak</option><option value="2">Şubat</option><option value="3">Mart</option>
+                    <option value="4" selected>Nisan</option><option value="5">Mayıs</option><option value="6">Haziran</option>
+                    <option value="7">Temmuz</option><option value="8">Ağustos</option><option value="9">Eylül</option>
+                    <option value="10">Ekim</option><option value="11">Kasım</option><option value="12">Aralık</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                  <label style="font-size:.72rem">Kapanış Ayı</label>
+                  <select id="f-season-end" style="padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit">
+                    <option value="1">Ocak</option><option value="2">Şubat</option><option value="3">Mart</option>
+                    <option value="4">Nisan</option><option value="5">Mayıs</option><option value="6">Haziran</option>
+                    <option value="7">Temmuz</option><option value="8">Ağustos</option><option value="9">Eylül</option>
+                    <option value="10" selected>Ekim</option><option value="11">Kasım</option><option value="12">Aralık</option>
+                  </select>
+                </div>
+              </div>
+              <div id="seasonal-preview" style="font-size:.72rem;color:var(--text-muted);margin-top:8px"></div>
+            </div>
+          </div>
+        </div>
         <div class="form-group" id="f-hours-group">
           <label>Calisma Saatleri</label>
           <div id="f-hours-normal">
@@ -4585,6 +4617,31 @@ function toggleDarkMode() {
   }
 })();
 
+function toggleSeasonalFields() {
+  var el = document.getElementById('seasonal-fields');
+  var checked = document.getElementById('f-seasonal').checked;
+  if (el) el.style.display = checked ? '' : 'none';
+  if (checked) updateSeasonalPreview();
+}
+
+function updateSeasonalPreview() {
+  var startEl = document.getElementById('f-season-start');
+  var endEl = document.getElementById('f-season-end');
+  var previewEl = document.getElementById('seasonal-preview');
+  if (!startEl || !endEl || !previewEl) return;
+  var months = ['','Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  var s = parseInt(startEl.value);
+  var e = parseInt(endEl.value);
+  var now = new Date().getMonth() + 1;
+  var isOpen = s <= e ? (now >= s && now <= e) : (now >= s || now <= e);
+  previewEl.innerHTML = '📅 ' + months[s] + ' – ' + months[e] + ' arası açık · ' +
+    (isOpen ? '<span style="color:var(--green);font-weight:700">Şu an sezon içinde ✓</span>' : '<span style="color:var(--red);font-weight:700">Şu an sezon dışında ✗</span>');
+}
+
+// Sezon dropdown değişikliğinde preview güncelle
+document.getElementById('f-season-start')?.addEventListener('change', updateSeasonalPreview);
+document.getElementById('f-season-end')?.addEventListener('change', updateSeasonalPreview);
+
 function togglePremiumDates() {
   var el = document.getElementById('premium-dates');
   var checked = document.getElementById('f-premium').checked;
@@ -4803,6 +4860,10 @@ function openVenueModal(id) {
         showToast('⚠️ "' + v.title + '" premium süresi dolmuş, otomatik kapatıldı.', 'error');
       }
     }
+    document.getElementById('f-seasonal').checked = !!v.seasonal;
+    if (v.seasonStart) document.getElementById('f-season-start').value = v.seasonStart;
+    if (v.seasonEnd) document.getElementById('f-season-end').value = v.seasonEnd;
+    toggleSeasonalFields();
     document.getElementById('f-premium').checked = premActive;
     document.getElementById('f-premium-start').value = v.premiumStart || '';
     document.getElementById('f-premium-end').value = v.premiumEnd || '';
@@ -5067,7 +5128,10 @@ async function saveVenue(e) {
     checkin: checkin,
     checkout: checkout,
     lat: parseFloat(document.getElementById('f-lat').value) || null,
-    lng: parseFloat(document.getElementById('f-lng').value) || null
+    lng: parseFloat(document.getElementById('f-lng').value) || null,
+    seasonal: document.getElementById('f-seasonal').checked,
+    seasonStart: document.getElementById('f-seasonal').checked ? parseInt(document.getElementById('f-season-start').value) : null,
+    seasonEnd: document.getElementById('f-seasonal').checked ? parseInt(document.getElementById('f-season-end').value) : null
   };
 
   // Generate keywords from title + tags
