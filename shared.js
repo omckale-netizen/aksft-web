@@ -3132,7 +3132,7 @@ function renderVillagePage(villageId) {
 
   // Arka plan görsel (varsa)
   if (hasImage) {
-    heroHtml += '<div style="position:absolute;inset:0;"><img src="' + v.image + '" alt="' + (v.title || '') + ' Köyü Assos Ayvacık" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s ease;" loading="eager" onload="this.style.opacity=0.25"></div>';
+    heroHtml += '<div style="position:absolute;inset:0;"><img src="' + v.image + '" alt="' + (v.title || '') + ' Köyü Assos Ayvacık" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s ease;" loading="eager" onload="this.style.opacity=0.45"></div>';
     heroHtml += '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,16,30,.6) 0%,rgba(6,16,30,.85) 100%);pointer-events:none;"></div>';
   } else {
     // Topo pattern (görsel yoksa)
