@@ -193,7 +193,7 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     #mobile-menu .btn-terra:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(196,82,26,.35);}
 
     /* SEARCH OVERLAY */
-    .search-dropdown{position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:500;background:rgba(13,20,35,.96);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(255,255,255,.08);border-radius:18px;overflow:hidden;overflow-y:auto;max-height:380px;box-shadow:0 16px 48px rgba(0,0,0,.45);display:none;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent;}
+    .search-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:500;background:rgba(13,20,35,.96);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(255,255,255,.08);border-radius:18px;overflow:hidden;overflow-y:auto;max-height:380px;box-shadow:0 16px 48px rgba(0,0,0,.45);display:none;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent;}
     .search-dropdown.open{display:block;animation:sdFadeIn .2s ease;}
     @keyframes sdFadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
     .search-dropdown::-webkit-scrollbar{width:4px;}
