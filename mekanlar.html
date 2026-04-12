@@ -220,6 +220,17 @@ function pageInit() {
     return mins >= open && mins < close;
   }
   function getVenueStatus(v) {
+    // Sezon dışı kontrolü (güvenli)
+    if (v.seasonal === true && v.seasonStart && v.seasonEnd && typeof v.seasonStart === 'string' && v.seasonStart.includes('-')) {
+      try {
+        var nowS = new Date();
+        var sD = new Date(v.seasonStart); sD.setFullYear(nowS.getFullYear());
+        var eD = new Date(v.seasonEnd); eD.setFullYear(nowS.getFullYear());
+        if (!isNaN(sD.getTime()) && !isNaN(eD.getTime()) && (nowS < sD || nowS > eD)) {
+          return { isOpen: false, badge: '<span class="mk-vc-status" style="background:rgba(49,130,206,.15);color:#63B3ED;border:1px solid rgba(49,130,206,.3);">Sezon dışı</span>' };
+        }
+      } catch(e) {}
+    }
     // Konaklama her zaman açık
     if (v.category === 'konaklama') return { isOpen: true, badge: '' };
 
