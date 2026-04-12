@@ -152,9 +152,16 @@ async function checkAuth() {
     errEl.textContent = '✓ Giriş başarılı! Yönlendiriliyorsunuz...';
     // Telegram bildirim
     localStorage.setItem('lastActivity', Date.now().toString());
-    var notifyData = {type:'login',data:{date:new Date().toLocaleString('tr-TR'),email:email,device:getDeviceInfo().platform,ip:''}};
-    try { var ipResp = await fetch('https://api.ipify.org?format=json'); var ipData = await ipResp.json(); notifyData.data.ip = ipData.ip || ''; } catch(e) {}
-    try { await fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(notifyData)}); } catch(e) { console.error('Notify error:', e); }
+    var device = getDeviceInfo().platform;
+    var ip = '';
+    try { var ipR = await fetch('https://api.ipify.org?format=json'); var ipJ = await ipR.json(); ip = ipJ.ip || ''; } catch(e) {}
+    var body = JSON.stringify({type:'login',data:{date:new Date().toLocaleString('tr-TR'),email:email,device:device,ip:ip}});
+    // sendBeacon sayfa kapansa bile gonderir
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon('/api/notify', new Blob([body], {type:'application/json'}));
+    } else {
+      try { await fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:body}); } catch(e) {}
+    }
     window.location.href = 'admin.html';
   } catch(err) {
     const updated = recordFailedLogin();
