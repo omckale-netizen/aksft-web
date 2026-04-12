@@ -227,7 +227,7 @@ function pageInit() {
         var sD = new Date(v.seasonStart); sD.setFullYear(nowS.getFullYear());
         var eD = new Date(v.seasonEnd); eD.setFullYear(nowS.getFullYear());
         if (!isNaN(sD.getTime()) && !isNaN(eD.getTime()) && (nowS < sD || nowS > eD)) {
-          return { isOpen: false, badge: '<span class="mk-vc-status" style="background:rgba(49,130,206,.15);color:#63B3ED;border:1px solid rgba(49,130,206,.3);">Sezon dışı</span>' };
+          return { isOpen: false, badge: '<span class="mk-vc-status" style="background:rgba(49,130,206,.15);color:#63B3ED;border:1px solid rgba(49,130,206,.3);"><span style="width:5px;height:5px;border-radius:50%;background:#63B3ED;box-shadow:0 0 4px rgba(49,130,206,.5);flex-shrink:0;"></span>Sezon dışı</span>' };
         }
       } catch(e) {}
     }
