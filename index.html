@@ -170,7 +170,30 @@
 
 
   </div>
+
+  <!-- Scroll ipucu -->
+  <div class="hero-scroll-cta" onclick="document.getElementById('hero').nextElementSibling.scrollIntoView({behavior:'smooth'})">
+    <span class="hero-scroll-text">Keşfetmeye başla</span>
+    <div class="hero-scroll-line"></div>
+    <div class="hero-scroll-arrows">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 13l5 5 5-5"/></svg>
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="opacity:.4;margin-top:-8px"><path d="M7 13l5 5 5-5"/></svg>
+    </div>
+  </div>
 </section>
+
+<style>
+.hero-scroll-cta{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:10;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;animation:heroScrollFade 1.5s ease 2s both;}
+.hero-scroll-text{font-size:.62rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,237,224,.25);transition:color .3s;}
+.hero-scroll-cta:hover .hero-scroll-text{color:rgba(245,237,224,.6);}
+.hero-scroll-line{width:1px;height:24px;background:linear-gradient(to bottom,rgba(196,82,26,.4),transparent);animation:heroLinePulse 2s ease-in-out infinite;}
+.hero-scroll-arrows{display:flex;flex-direction:column;align-items:center;color:rgba(196,82,26,.5);animation:heroArrowBounce 2s ease-in-out infinite;}
+.hero-scroll-cta:hover .hero-scroll-arrows{color:rgba(196,82,26,.8);}
+@keyframes heroScrollFade{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes heroLinePulse{0%,100%{opacity:.3;transform:scaleY(.6)}50%{opacity:.8;transform:scaleY(1)}}
+@keyframes heroArrowBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+@media(max-width:640px){.hero-scroll-cta{bottom:16px;}.hero-scroll-line{height:16px;}}
+</style>
 
 
 <!-- ══════════════════════════════════════
