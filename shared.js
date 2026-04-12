@@ -3283,21 +3283,44 @@ function renderVillagePage(villageId) {
     bodyHtml += '</div>';
   }
 
-  // Yakın köyler
-  var otherVillages = (DATA.villages || []).filter(function(vl) {
-    return vl.id !== v.id && vl.description;
-  }).slice(0, 6);
+  // Yakındaki köyler (koordinat bazlı mesafe)
+  var nearbyVillages = [];
+  if (v.lat && v.lng) {
+    var R = 6371;
+    nearbyVillages = (DATA.villages || []).filter(function(vl) {
+      return vl.id !== v.id && vl.lat && vl.lng;
+    }).map(function(vl) {
+      var dLat = (vl.lat - v.lat) * Math.PI / 180;
+      var dLon = (vl.lng - v.lng) * Math.PI / 180;
+      var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(v.lat * Math.PI / 180) * Math.cos(vl.lat * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      vl._dist = R * c;
+      return vl;
+    }).sort(function(a, b) { return a._dist - b._dist; }).slice(0, 6);
+  } else {
+    nearbyVillages = (DATA.villages || []).filter(function(vl) {
+      return vl.id !== v.id && vl.description;
+    }).slice(0, 6);
+  }
 
-  if (otherVillages.length > 0) {
+  if (nearbyVillages.length > 0) {
     bodyHtml += '<div style="margin-bottom:40px;">';
-    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">🏘 Diğer Köyler</h2>';
+    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">🏘 Yakındaki Köyler</h2>';
     bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">';
-    otherVillages.forEach(function(vl) {
+    nearbyVillages.forEach(function(vl) {
+      var distText = '';
+      if (vl._dist != null) {
+        distText = vl._dist < 1 ? Math.round(vl._dist * 1000) + ' m' : vl._dist.toFixed(1) + ' km';
+      }
       bodyHtml += '<a href="koy-detay.html?id=' + vl.id + '" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 6px 20px rgba(26,39,68,.07)\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
       bodyHtml += '<span style="font-size:1.4rem;">' + (vl.emoji || '📍') + '</span>';
-      bodyHtml += '<div><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.82rem;color:var(--navy);">' + vl.title + '</div>';
-      if (vl.shortDesc) bodyHtml += '<div style="font-size:.68rem;color:var(--text-mid);margin-top:2px;">' + vl.shortDesc.substring(0, 50) + '</div>';
-      bodyHtml += '</div></a>';
+      bodyHtml += '<div style="flex:1;min-width:0;"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.82rem;color:var(--navy);">' + vl.title + '</div>';
+      if (vl.shortDesc) bodyHtml += '<div style="font-size:.68rem;color:var(--text-mid);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + vl.shortDesc.substring(0, 50) + '</div>';
+      bodyHtml += '</div>';
+      if (distText) bodyHtml += '<span style="font-size:.65rem;font-weight:600;color:var(--terra);white-space:nowrap;">' + distText + '</span>';
+      bodyHtml += '</a>';
     });
     bodyHtml += '</div></div>';
   }
