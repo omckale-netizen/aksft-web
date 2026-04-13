@@ -1060,13 +1060,22 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             </div>
             <!-- Village extra fields -->
             <div id="vpf-village-extras" style="display:none">
-              <div class="form-group">
-                <label>Yerleşim Türü</label>
-                <select id="vpf-village-type">
-                  <option value="koy">Köy</option>
-                  <option value="belde">Belde</option>
-                  <option value="mahalle">Mahalle</option>
-                </select>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Yerleşim Türü</label>
+                  <select id="vpf-village-type" onchange="onVillageTypeChange()">
+                    <option value="koy">Köy</option>
+                    <option value="belde">Belde</option>
+                    <option value="mahalle">Mahalle</option>
+                  </select>
+                </div>
+                <div class="form-group" id="vpf-parent-group" style="display:none">
+                  <label>Bağlı Yerleşim</label>
+                  <select id="vpf-parent">
+                    <option value="ayvacik">Ayvacık Merkez</option>
+                    <option value="kucukkuyu">Küçükkuyu</option>
+                  </select>
+                </div>
               </div>
               <div class="form-group">
                 <label>Öne Çıkanlar <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(virgülle ayırın)</span></label>
@@ -5509,6 +5518,11 @@ function renderVPTable() {
       '</tr>').join('');
 }
 
+function onVillageTypeChange() {
+  var t = document.getElementById('vpf-village-type').value;
+  document.getElementById('vpf-parent-group').style.display = t === 'mahalle' ? '' : 'none';
+}
+
 function onVillageSelect() {
   var sel = document.getElementById('vpf-villageId');
   var locGroup = document.getElementById('vpf-loc-group');
@@ -5572,6 +5586,8 @@ function openVPModal(id) {
       onVillageSelect();
     } else {
       document.getElementById('vpf-village-type').value = item.type || 'koy';
+      document.getElementById('vpf-parent').value = item.parent || 'ayvacik';
+      onVillageTypeChange();
       document.getElementById('vpf-highlights').value = (item.highlights || []).join(', ');
       document.getElementById('vpf-showInPlaces').checked = !!item.showInPlaces;
     }
@@ -5699,6 +5715,7 @@ async function saveVP(e) {
       lat: parseFloat(document.getElementById('vpf-lat').value) || null,
       lng: parseFloat(document.getElementById('vpf-lng').value) || null,
       type: document.getElementById('vpf-village-type').value || 'koy',
+      parent: document.getElementById('vpf-village-type').value === 'mahalle' ? (document.getElementById('vpf-parent').value || 'ayvacik') : '',
       highlights: highlightsStr ? highlightsStr.split(',').map(h => h.trim()).filter(Boolean) : [],
       showInPlaces: document.getElementById('vpf-showInPlaces').checked,
     };

@@ -3158,8 +3158,9 @@ function renderVillagePage(villageId) {
   if (vType === 'belde') {
     if (!titleLower.includes('belde')) heroTitle += ' Beldesi';
   } else if (vType === 'mahalle') {
-    if (!titleLower.includes('mahalle')) heroTitle = 'Ayvacık ' + heroTitle + ' Mahallesi';
-    else heroTitle = 'Ayvacık ' + heroTitle;
+    var parentLabel = v.parent === 'kucukkuyu' ? 'Küçükkuyu' : 'Ayvacık';
+    if (!titleLower.includes('mahalle')) heroTitle = parentLabel + ' ' + heroTitle + ' Mahallesi';
+    else heroTitle = parentLabel + ' ' + heroTitle;
   } else {
     if (!titleLower.includes('köy') && !titleLower.includes('koy')) heroTitle += ' Köyü';
   }
