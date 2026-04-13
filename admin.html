@@ -826,7 +826,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <div class="form-group" style="flex:2">
                 <label>Seçim</label>
                 <select id="sg-item" onchange="sgGenerate()" style="padding:8px 12px">
-                  <option value="">Önce tür seçin</option>
+                  <option value="">Seçin...</option>
                 </select>
               </div>
             </div>
@@ -3104,6 +3104,7 @@ function showPage(page) {
   if (page === 'routes') renderRoutesTable();
   if (page === 'villages') { switchVillageTab(currentVPTab); }
   if (page === 'export') renderExport();
+  if (page === 'socialgen') sgUpdateList();
   if (page === 'analytics') renderAnalytics();
   if (page === 'messages') renderMessages();
   if (page === 'activity') renderActivityLog();
