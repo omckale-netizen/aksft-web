@@ -1095,12 +1095,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             <div class="form-group" id="vpf-cat-group">
               <label>Kategori</label>
               <select id="vpf-category">
-                <option value="">Secin</option>
-                <option value="tarihi">Tarihi Alan</option>
-                <option value="koy">Koy</option>
-                <option value="koyu">Köy</option>
-                <option value="iskele">İskele</option>
-                <option value="muze">Müze</option>
+                <option value="">Seçin</option>
               </select>
             </div>
             <!-- Village link — only for places -->
@@ -1186,14 +1181,16 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
     <!-- ══════ CATEGORIES ══════ -->
     <div class="admin-page" id="page-categories">
-      <h2>Mekan Kategorileri</h2>
-      <p class="page-sub">Mekan turlerini yonetin. Yeni kategori ekleyin, mevcut kategorileri duzenleyin veya silin.</p>
-      <div class="panel-card" style="max-width:700px">
-        <div class="panel-card-head"><h3>Mevcut Kategoriler</h3></div>
+      <h2>Kategoriler</h2>
+      <p class="page-sub">Mekan ve yer kategorilerini yönetin.</p>
+
+      <!-- Mekan Kategorileri -->
+      <div class="panel-card" style="max-width:700px;margin-bottom:24px">
+        <div class="panel-card-head"><h3>🏪 Mekan Kategorileri</h3></div>
         <div style="padding:20px">
           <div id="cat-list" style="margin-bottom:20px"></div>
           <div style="border-top:1px solid rgba(0,0,0,.06);padding-top:18px">
-            <h4 style="font-size:.85rem;color:var(--navy);margin-bottom:12px">Yeni Kategori Ekle</h4>
+            <h4 style="font-size:.85rem;color:var(--navy);margin-bottom:12px">Yeni Mekan Kategorisi Ekle</h4>
             <div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap">
               <div style="flex:1;min-width:140px">
                 <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Görünen Ad</label>
@@ -1212,6 +1209,36 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                 <input type="color" id="cat-new-color" value="#C4521A" style="width:100%;height:34px;border:1px solid rgba(0,0,0,.1);border-radius:8px;cursor:pointer;padding:2px">
               </div>
               <button class="btn btn-primary btn-sm" onclick="addCategory()" style="height:34px">Ekle</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Yer Kategorileri -->
+      <div class="panel-card" style="max-width:700px">
+        <div class="panel-card-head"><h3>📍 Yer Kategorileri</h3></div>
+        <div style="padding:20px">
+          <div id="pcat-list" style="margin-bottom:20px"></div>
+          <div style="border-top:1px solid rgba(0,0,0,.06);padding-top:18px">
+            <h4 style="font-size:.85rem;color:var(--navy);margin-bottom:12px">Yeni Yer Kategorisi Ekle</h4>
+            <div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap">
+              <div style="flex:1;min-width:140px">
+                <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Görünen Ad</label>
+                <input type="text" id="pcat-new-label" placeholder="Örn: Ören Yeri, Şelale..." style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.8rem;font-family:inherit;width:100%" oninput="pcatAutoId(this.value)">
+              </div>
+              <div style="min-width:100px">
+                <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">ID <span style="color:var(--text-muted);font-weight:400">(otomatik)</span></label>
+                <input type="text" id="pcat-new-id" placeholder="otomatik" style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.8rem;font-family:inherit;width:100%;color:var(--text-muted)" readonly>
+              </div>
+              <div style="min-width:60px">
+                <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Emoji</label>
+                <input type="text" id="pcat-new-emoji" placeholder="🏛" style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.8rem;font-family:inherit;width:100%;max-width:60px">
+              </div>
+              <div style="min-width:80px">
+                <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Renk</label>
+                <input type="color" id="pcat-new-color" value="#1A6B8A" style="width:100%;height:34px;border:1px solid rgba(0,0,0,.1);border-radius:8px;cursor:pointer;padding:2px">
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="addPlaceCategory()" style="height:34px">Ekle</button>
             </div>
           </div>
         </div>
@@ -2644,6 +2671,16 @@ const DEFAULT_CATS = [
   { id:'iskele', label:'Iskele', emoji:'⚓', color:'#3A5A8A' }
 ];
 
+let placeCategories = [];
+const DEFAULT_PLACE_CATS = [
+  { id:'tarihi', label:'Ören Yeri', emoji:'🏛', color:'#1A2744' },
+  { id:'koy', label:'Koy', emoji:'🌊', color:'#1A6B8A' },
+  { id:'koyu', label:'Köy', emoji:'🏘', color:'#C4521A' },
+  { id:'iskele', label:'İskele', emoji:'⚓', color:'#3A5A8A' },
+  { id:'muze', label:'Müze', emoji:'📜', color:'#5A7A56' },
+  { id:'doga', label:'Doğa', emoji:'🌿', color:'#2D8A4E' }
+];
+
 async function loadCategories() {
   try {
     const doc = await db.collection('settings').doc('venue_categories').get();
@@ -2654,8 +2691,20 @@ async function loadCategories() {
       await db.collection('settings').doc('venue_categories').set({ list: venueCategories }, { merge: true });
     }
   } catch(e) { venueCategories = DEFAULT_CATS; }
+  // Yer kategorileri
+  try {
+    const pdoc = await db.collection('settings').doc('place_categories').get();
+    if (pdoc.exists && pdoc.data().list) {
+      placeCategories = pdoc.data().list;
+    } else {
+      placeCategories = DEFAULT_PLACE_CATS;
+      await db.collection('settings').doc('place_categories').set({ list: placeCategories }, { merge: true });
+    }
+  } catch(e) { placeCategories = DEFAULT_PLACE_CATS; }
   renderCatList();
+  renderPlaceCatList();
   updateCatSelects();
+  updatePlaceCatSelects();
 }
 
 function catAutoId(val) {
@@ -2791,6 +2840,118 @@ async function deleteCategory(idx) {
   renderCatList();
   updateCatSelects();
   showToast('Kategori silindi.', 'success');
+}
+
+// ── Yer Kategorileri Yönetimi ──
+function pcatAutoId(val) {
+  var trMap = {'ç':'c','ğ':'g','ı':'i','ö':'o','ş':'s','ü':'u','Ç':'c','Ğ':'g','İ':'i','Ö':'o','Ş':'s','Ü':'u'};
+  var id = val.toLowerCase().replace(/[çğışöüÇĞİŞÖÜ]/g, function(ch){ return trMap[ch] || ch; }).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'').replace(/-+/g,'-').replace(/^-|-$/g,'');
+  document.getElementById('pcat-new-id').value = id;
+  pcatAutoColor();
+}
+
+function pcatAutoColor() {
+  var palette = ['#1A2744','#1A6B8A','#C4521A','#5A7A56','#3A5A8A','#2D8A4E','#8B5CF6','#D94A8C','#B45309','#0891B2','#7C3AED','#059669','#D97706','#DC2626'];
+  var usedColors = placeCategories.map(function(c){ return c.color; });
+  var available = palette.filter(function(p){ return usedColors.indexOf(p) === -1; });
+  var pick = available.length > 0 ? available[0] : palette[Math.floor(Math.random() * palette.length)];
+  document.getElementById('pcat-new-color').value = pick;
+}
+
+function renderPlaceCatList() {
+  var el = document.getElementById('pcat-list');
+  if (!el) return;
+  if (placeCategories.length === 0) { el.innerHTML = '<div style="color:var(--text-muted);font-size:.82rem">Kategori yok.</div>'; return; }
+  var places = draftData.places || [];
+  el.innerHTML = '<div style="display:grid;gap:6px">' + placeCategories.map(function(c, i) {
+    var count = places.filter(function(p){ return p.category === c.id; }).length;
+    return '<div class="pcat-edit-row" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(0,0,0,.02);border-radius:8px">' +
+      '<span style="font-size:1.1rem">' + c.emoji + '</span>' +
+      '<span style="flex:1;font-size:.82rem;font-weight:600;color:var(--navy)">' + c.label + '</span>' +
+      '<span style="font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:999px;background:' + c.color + '18;color:' + c.color + '">' + count + ' yer</span>' +
+      '<span style="font-size:.65rem;color:var(--text-muted);font-family:monospace">' + c.id + '</span>' +
+      '<span style="width:16px;height:16px;border-radius:4px;background:' + c.color + ';flex-shrink:0;border:1px solid rgba(0,0,0,.1)"></span>' +
+      '<button class="btn-icon" onclick="editPlaceCategory(' + i + ')" title="Düzenle" style="font-size:.8rem">✏</button>' +
+      '<button class="btn-icon" onclick="deletePlaceCategory(' + i + ')" title="Sil" style="color:var(--red);font-size:.8rem">✕</button>' +
+    '</div>';
+  }).join('') + '</div>';
+  pcatAutoColor();
+}
+
+function updatePlaceCatSelects() {
+  var sel = document.getElementById('vpf-category');
+  if (!sel) return;
+  var cur = sel.value;
+  sel.innerHTML = '<option value="">Seçin</option>' + placeCategories.map(function(c) {
+    return '<option value="' + c.id + '">' + c.emoji + ' ' + c.label + '</option>';
+  }).join('');
+  sel.value = cur;
+}
+
+async function addPlaceCategory() {
+  var id = document.getElementById('pcat-new-id').value.trim();
+  var label = document.getElementById('pcat-new-label').value.trim();
+  var emoji = document.getElementById('pcat-new-emoji').value.trim() || '📍';
+  var color = document.getElementById('pcat-new-color').value || '#1A6B8A';
+  if (!id || !label) { showToast('ID ve ad gerekli.', 'error'); return; }
+  if (placeCategories.some(function(c){ return c.id === id; })) { showToast('Bu ID zaten var.', 'error'); return; }
+  placeCategories.push({ id:id, label:label, emoji:emoji, color:color });
+  await db.collection('settings').doc('place_categories').set({ list: placeCategories }, { merge: true });
+  document.getElementById('pcat-new-id').value = '';
+  document.getElementById('pcat-new-label').value = '';
+  document.getElementById('pcat-new-emoji').value = '';
+  renderPlaceCatList();
+  updatePlaceCatSelects();
+  showToast('"' + label + '" yer kategorisi eklendi.', 'success');
+}
+
+function editPlaceCategory(idx) {
+  var c = placeCategories[idx];
+  if (!c) return;
+  var el = document.querySelectorAll('#pcat-list .pcat-edit-row')[idx];
+  if (!el) return;
+  el.innerHTML =
+    '<input type="text" class="pcat-edit-emoji" value="' + c.emoji + '" style="width:40px;padding:5px;border:1px solid rgba(0,0,0,.15);border-radius:6px;font-size:1.1rem;text-align:center">' +
+    '<input type="text" class="pcat-edit-label" value="' + c.label + '" style="flex:1;padding:5px 10px;border:1px solid rgba(0,0,0,.15);border-radius:6px;font-size:.82rem">' +
+    '<input type="color" class="pcat-edit-color" value="' + c.color + '" style="width:34px;height:30px;border:1px solid rgba(0,0,0,.1);border-radius:6px;cursor:pointer;padding:1px">' +
+    '<button class="btn btn-primary btn-sm" onclick="savePlaceCategoryEdit(' + idx + ')" style="font-size:.72rem;padding:5px 12px">Kaydet</button>' +
+    '<button class="btn btn-secondary btn-sm" onclick="renderPlaceCatList()" style="font-size:.72rem;padding:5px 8px">İptal</button>';
+}
+
+async function savePlaceCategoryEdit(idx) {
+  var el = document.querySelectorAll('#pcat-list .pcat-edit-row')[idx];
+  if (!el) return;
+  var c = placeCategories[idx];
+  c.emoji = el.querySelector('.pcat-edit-emoji').value.trim() || c.emoji;
+  c.label = el.querySelector('.pcat-edit-label').value.trim() || c.label;
+  c.color = el.querySelector('.pcat-edit-color').value || c.color;
+  await db.collection('settings').doc('place_categories').set({ list: placeCategories }, { merge: true });
+  // Bu kategorideki tüm yerlerin badge bilgilerini güncelle
+  var catPlaces = (draftData.places || []).filter(function(p){ return p.category === c.id; });
+  if (catPlaces.length > 0) {
+    for (var i = 0; i < catPlaces.length; i++) {
+      var p = catPlaces[i];
+      p.badgeText = c.label;
+      await db.collection('places').doc(p.id).set({ badgeText: c.label, emoji: c.emoji }, { merge: true });
+    }
+    showToast(catPlaces.length + ' yer güncellendi.', 'success');
+  }
+  renderPlaceCatList();
+  updatePlaceCatSelects();
+  showToast('Yer kategorisi güncellendi.', 'success');
+}
+
+async function deletePlaceCategory(idx) {
+  var c = placeCategories[idx];
+  if (!c) return;
+  var inUse = (draftData.places || []).filter(function(p){ return p.category === c.id; }).length;
+  if (inUse > 0) { showToast('"' + c.label + '" kategorisi ' + inUse + ' yerde kullanılıyor. Önce yerlerin kategorisini değiştirin.', 'error'); return; }
+  if (!confirm('"' + c.label + '" kategorisini silmek istediğinize emin misiniz?')) return;
+  placeCategories.splice(idx, 1);
+  await db.collection('settings').doc('place_categories').set({ list: placeCategories }, { merge: true });
+  renderPlaceCatList();
+  updatePlaceCatSelects();
+  showToast('Yer kategorisi silindi.', 'success');
 }
 
 // Logo yükleme
@@ -3716,7 +3877,7 @@ const _origShowPage = showPage;
 showPage = function(page) {
   _origShowPage(page);
   if (page === 'gallery' && galItems.length === 0) galLoadItems();
-  if (page === 'categories') renderCatList();
+  if (page === 'categories') { renderCatList(); renderPlaceCatList(); }
   if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); loadHeroHistory(); }
   if (page === 'security') runSecurityCheck();
   if (page === 'export') { loadBackupList(); updateAutoBackupUI(); }
