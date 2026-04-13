@@ -1064,6 +1064,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                 <label>Öne Çıkanlar <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(virgülle ayırın)</span></label>
                 <input type="text" id="vpf-highlights" placeholder="Athena Tapınağı, Taş sokaklar, Gün batımı">
               </div>
+              <div class="form-group">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                  <input type="checkbox" id="vpf-showInPlaces" style="width:18px;height:18px;accent-color:var(--terra);">
+                  <span>Yerler sayfasında da göster</span>
+                </label>
+              </div>
             </div>
             <div class="form-group">
               <label>Kisa Aciklama</label>
@@ -5544,6 +5550,7 @@ function openVPModal(id) {
       document.getElementById('vpf-villageId').value = item.villageId || '';
     } else {
       document.getElementById('vpf-highlights').value = (item.highlights || []).join(', ');
+      document.getElementById('vpf-showInPlaces').checked = !!item.showInPlaces;
     }
     // Fotoğraf preview
     vpShowImgPreview(item.image || '');
@@ -5669,6 +5676,7 @@ async function saveVP(e) {
       lat: parseFloat(document.getElementById('vpf-lat').value) || null,
       lng: parseFloat(document.getElementById('vpf-lng').value) || null,
       highlights: highlightsStr ? highlightsStr.split(',').map(h => h.trim()).filter(Boolean) : [],
+      showInPlaces: document.getElementById('vpf-showInPlaces').checked,
     };
     if (!editingVPId) { villagePatch.image = ''; }
     Object.assign(item, villagePatch);

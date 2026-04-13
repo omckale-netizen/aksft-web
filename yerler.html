@@ -145,16 +145,27 @@ function pageInit() {
   function renderGrid() {
     const grid = document.getElementById('places-grid');
     const noRes = document.getElementById('no-places');
-    const places = activeFilter === 'all' ? DATA.places : DATA.places.filter(p => p.category === activeFilter);
+
+    // Köylerden showInPlaces olanları places formatına çevir
+    const villageAsPlaces = (DATA.villages || []).filter(v => v.showInPlaces).map(v => ({
+      id: v.id, title: v.title, emoji: v.emoji || '🏘', shortDesc: v.shortDesc || '',
+      description: v.description || '', tags: v.tags || [], image: v.image || '',
+      imagePos: v.imagePos || 50, category: 'koyu', location: 'Ayvacık',
+      _isVillage: true
+    }));
+
+    const allPlaces = DATA.places.concat(villageAsPlaces);
+    const places = activeFilter === 'all' ? allPlaces : allPlaces.filter(p => p.category === activeFilter);
     if (places.length === 0) { grid.innerHTML = ''; noRes.style.display = 'block'; return; }
     noRes.style.display = 'none';
     grid.innerHTML = places.map((p, i) => {
       const cat = CAT_COLORS[p.category] || CAT_COLORS.tarihi;
+      const clickAction = p._isVillage ? "window.location.href='koyler/koy-detay.html?id=" + p.id + "'" : "openPlace('" + p.id + "')";
       return `
-      <div class="place-card-wrap fade-up" data-delay="${i * 0.06}" onclick="openPlace('${p.id}')">
+      <div class="place-card-wrap fade-up" data-delay="${i * 0.06}" onclick="${clickAction}">
         <div class="place-img-box${p.image ? ' has-img' : ''}" style="background-color:${p.image ? '' : 'transparent'};${p.image ? '' : 'background:linear-gradient(135deg,'+cat.bg[0]+','+cat.bg[1]+');'}">
           ${p.image ? '<img src="' + p.image + '" alt="' + p.title + '" style="object-position:center ' + (p.imagePos != null ? p.imagePos : 50) + '%" onload="this.classList.add(\'loaded\')">' : p.emoji}
-          <span style="position:absolute;top:12px;left:12px;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:${cat.badge};color:#fff;backdrop-filter:blur(8px);z-index:1;">${cat.label}</span>
+          <span style="position:absolute;top:12px;left:12px;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:${cat.badge};color:#fff;backdrop-filter:blur(8px);z-index:1;">${p._isVillage ? '🏘 Köy' : cat.label}</span>
           <button class="place-save-btn${window.isPlaceSaved && isPlaceSaved(p.id) ? ' saved' : ''}" data-id="${p.id}" onclick="event.stopPropagation();togglePlaceSave('${p.id}')" style="position:absolute;top:10px;right:10px;z-index:2;width:32px;height:32px;border-radius:50%;border:none;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);color:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;">${window.isPlaceSaved && isPlaceSaved(p.id) ? '♥' : '♡'}</button>
         </div>
         <div style="padding:18px 20px 20px;">
