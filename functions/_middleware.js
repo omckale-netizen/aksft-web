@@ -198,6 +198,40 @@ export async function onRequest(context) {
     } catch (e) { return next(); }
   }
 
+  // Yer detay sayfasi
+  if (path.includes('/yerler/yer-detay')) {
+    const id = url.searchParams.get('id');
+    if (!id) return next();
+
+    try {
+      const fields = await fetchFirestoreDoc('places', id);
+      if (!fields) return next();
+
+      const placeName = fields.title?.stringValue || 'Gezilecek Yer';
+      const title = placeName + ' \u2014 Assos Bölgesi | Assos\'u Keşfet';
+      const shortDesc = (fields.shortDesc?.stringValue || fields.description?.stringValue || '').replace(/<[^>]*>/g, '').substring(0, 160);
+      const location = fields.location?.stringValue || 'Ayvacık';
+      const desc = placeName + ', ' + location + '. ' + shortDesc;
+      const image = fields.image?.stringValue || DEFAULT_OG_IMAGE;
+
+      const schema = JSON.stringify({
+        '@context':'https://schema.org','@type':'Place',
+        'name':placeName,'description':shortDesc,
+        'address':{'@type':'PostalAddress','addressLocality':location,'addressRegion':'Ayvacık, Çanakkale','addressCountry':'TR'},
+        'image':image
+      });
+
+      const html = buildOgHtml({
+        title,
+        description: desc || 'Assos ve Ayvacık bölgesinde gezilecek yer detayı.',
+        url: `https://assosukesfet.com/yerler/yer-detay?id=${id}`,
+        image
+      }).replace('</head>', '<script type="application/ld+json">' + schema + '</script></head>');
+
+      return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
+    } catch (e) { return next(); }
+  }
+
   // Blog detay sayfasi (?yazi=slug)
   if ((path === '/blog' || path === '/blog.html') && url.searchParams.get('yazi')) {
     const slug = url.searchParams.get('yazi');
@@ -307,7 +341,7 @@ async function generateDynamicSitemap() {
       for (const doc of docs) {
         const f = doc.fields || {};
         const id = doc.name.split('/').pop();
-        xml += `  <url>\n    <loc>${BASE}/yerler#${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n`;
+        xml += `  <url>\n    <loc>${BASE}/yerler/yer-detay?id=${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n`;
         const imgUrl = f.image?.stringValue;
         if (imgUrl) {
           const title = f.title?.stringValue || id;

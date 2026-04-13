@@ -628,7 +628,7 @@ function renderNav(opts = {}) {
 
   function getBasePath() {
     const p = window.location.pathname;
-    if (p.includes('/mekanlar/') || p.includes('/rotalar/') || p.includes('/koyler/')) return '../';
+    if (p.includes('/mekanlar/') || p.includes('/rotalar/') || p.includes('/koyler/') || p.includes('/yerler/')) return '../';
     return '';
   }
   function getMekanPath(id) {
@@ -770,7 +770,7 @@ function renderNav(opts = {}) {
   };
 
   function getYerPath(id) {
-    return getBasePath() + 'yerler.html?id=' + id;
+    return getBasePath() + 'yerler/yer-detay.html?id=' + id;
   }
   function getKoyPath(id) {
     return getBasePath() + 'koyler/koy-detay.html?id=' + id;
@@ -1317,7 +1317,7 @@ function initSearch(inputId, opts = {}) {
   function getUrl(type, id) {
     const base = window.location.pathname.includes('/mekanlar/') || window.location.pathname.includes('/rotalar/') ? '../' : '';
     if (type === 'route')   return `${base}rotalar/rota-detay.html?id=${id}`;
-    if (type === 'place')   return `${base}yerler.html#${id}`;
+    if (type === 'place')   return `${base}yerler/yer-detay.html?id=${id}`;
     if (type === 'venue')   return `${base}mekanlar/mekan-detay.html?id=${id}`;
     if (type === 'village') return `${base}koyler/koy-detay.html?id=${id}`;
     return '#';
@@ -3373,7 +3373,7 @@ function renderVillagePage(villageId) {
     bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">🏛 ' + v.title + '\u2019' + ekPlaceSuffix + ' Gezilecek Yerler</h2>';
     bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">';
     villagePlaces.forEach(function(place) {
-      bodyHtml += '<a href="../yerler#' + place.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+      bodyHtml += '<a href="../yerler/yer-detay.html?id=' + place.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
       if (place.image) {
         bodyHtml += '<div style="height:120px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + place.image + '" alt="' + (place.title || '') + ' Assos" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1"></div>';
       } else {
@@ -3632,4 +3632,254 @@ function renderVillagePage(villageId) {
 
   // Analytics
   if (typeof trackPageView === 'function') trackPageView('village_' + villageId);
+}
+
+/* ═══════════════════
+   renderPlacePage — Gezilecek yer detay sayfası
+═══════════════════ */
+function renderPlacePage(placeId) {
+  var p = (DATA.places || []).find(function(x) { return x.id === placeId; });
+  if (!p) {
+    document.getElementById('place-hero').innerHTML = '';
+    document.getElementById('place-body').innerHTML = '<p style="padding:80px 24px;text-align:center;color:#718096;">Yer bulunamadı.</p>';
+    return;
+  }
+
+  // CSS inject
+  if (!document.getElementById('vp-styles')) {
+    var vpS = document.createElement('style');
+    vpS.id = 'vp-styles';
+    vpS.textContent = '.vp-hero-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}.vp-back-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.16);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,.25);color:rgba(255,255,255,.9);font-size:.76rem;font-weight:600;text-decoration:none;transition:background .2s;font-family:inherit;}.vp-back-btn:hover{background:rgba(255,255,255,.26);}.vp-hero-acts{display:flex;gap:8px;}.vp-act-btn{display:inline-flex;align-items:center;gap:5px;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.16);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,.25);color:rgba(255,255,255,.9);font-size:.74rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;}.vp-act-btn:hover{background:rgba(255,255,255,.28);}.vp-act-btn.saved{background:rgba(196,82,26,.82);border-color:rgba(196,82,26,.5);}.vp-share-wrap{position:relative;display:inline-block;}.vp-share-btn{display:inline-flex;align-items:center;gap:5px;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.16);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,.25);color:rgba(255,255,255,.9);font-size:.74rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;white-space:nowrap;}.vp-share-btn:hover{background:rgba(255,255,255,.28);}.vp-share-dd{position:absolute;top:calc(100% + 8px);right:0;min-width:180px;background:rgba(255,255,255,.12);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:6px;opacity:0;visibility:hidden;transform:translateY(-4px);transition:all .2s;z-index:20;}.vp-share-dd.open{opacity:1;visibility:visible;transform:translateY(0);}.vp-share-opt{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;border:none;background:none;cursor:pointer;transition:background .15s;text-decoration:none;font-family:inherit;font-size:.78rem;font-weight:600;color:#fff;width:100%;text-align:left;white-space:nowrap;}.vp-share-opt:hover{background:rgba(255,255,255,.12);}.vp-share-opt-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}';
+    document.head.appendChild(vpS);
+  }
+
+  var gradient = 'linear-gradient(160deg,#1A2744,#243255)';
+  var hasImage = !!(p.image);
+
+  /* ── HERO ── */
+  var heroHtml = '<div style="position:relative;overflow:hidden;background:' + gradient + ';padding:0 24px;min-height:380px;">';
+  if (hasImage) {
+    heroHtml += '<div style="position:absolute;inset:0;"><img src="' + p.image + '" alt="' + (p.title || '') + ' Assos Ayvacık" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s ease;" loading="eager" onload="this.style.opacity=0.45"></div>';
+    heroHtml += '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,16,30,.4) 0%,rgba(6,16,30,.88) 100%);pointer-events:none;"></div>';
+  } else {
+    heroHtml += '<div style="position:absolute;inset:0;background-image:url(\'data:image/svg+xml;utf8,<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"200\\\" height=\\\"200\\\"><path d=\\\"M0 80c30-10 60 15 100 0s70-20 100-5\\\" fill=\\\"none\\\" stroke=\\\"rgba(245,237,224,.04)\\\" stroke-width=\\\"1\\\"/></svg>\');pointer-events:none;opacity:.6;"></div>';
+  }
+  heroHtml += '<div style="position:absolute;width:300px;height:300px;border-radius:50%;background:rgba(196,82,26,.08);filter:blur(80px);top:-80px;right:-60px;pointer-events:none;"></div>';
+
+  heroHtml += '<div style="position:relative;z-index:2;max-width:900px;margin:0 auto;padding:110px 0 56px;">';
+
+  // Top bar
+  heroHtml += '<div class="vp-hero-top">';
+  heroHtml += '<a href="../yerler.html" class="vp-back-btn">← Gezilecek Yerler</a>';
+  heroHtml += '<div class="vp-hero-acts">';
+  heroHtml += '<button id="pl-save-btn" class="vp-act-btn" onclick="plToggleSave()"><span id="pl-save-icon">♡</span> <span id="pl-save-label">Kaydet</span></button>';
+  heroHtml += '<div class="vp-share-wrap" id="pl-share-wrap"><button class="vp-share-btn" onclick="plToggleShare()">↑ Paylaş</button><div class="vp-share-dd" id="pl-share-dd"></div></div>';
+  heroHtml += '</div></div>';
+
+  // Emoji
+  heroHtml += '<div style="margin-bottom:18px;"><span style="font-size:2.2rem;">' + (p.emoji || '🏛') + '</span></div>';
+
+  // Title
+  heroHtml += '<h1 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;font-size:clamp(2rem,5vw,3.2rem);color:#F5EDE0;letter-spacing:-.03em;line-height:1.05;margin-bottom:8px;">' + (p.title || '') + '</h1>';
+
+  // Location
+  if (p.location) {
+    heroHtml += '<p style="font-size:.82rem;color:rgba(245,237,224,.4);margin-bottom:16px;display:flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(245,237,224,.4)" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>' + p.location + '</p>';
+  }
+
+  // Short description
+  if (p.shortDesc) {
+    heroHtml += '<p style="font-size:.88rem;color:rgba(245,237,224,.55);line-height:1.7;max-width:560px;margin-bottom:22px;">' + p.shortDesc + '</p>';
+  }
+
+  // Tags
+  if (p.tags && p.tags.length) {
+    heroHtml += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:22px;">';
+    p.tags.forEach(function(tag) {
+      heroHtml += '<span style="padding:4px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:999px;font-size:.65rem;font-weight:600;color:rgba(245,237,224,.5);">' + tag + '</span>';
+    });
+    heroHtml += '</div>';
+  }
+
+  // Yol tarifi butonları
+  if (p.lat && p.lng) {
+    heroHtml += '<div style="display:flex;flex-wrap:wrap;gap:10px;">';
+    heroHtml += '<a href="https://www.google.com/maps/dir/?api=1&destination=' + p.lat + ',' + p.lng + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:rgba(66,133,244,.15);border:1px solid rgba(66,133,244,.3);border-radius:12px;padding:10px 20px;font-size:.78rem;font-weight:600;color:#F5EDE0;text-decoration:none;transition:all .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);" onmouseover="this.style.background=\'rgba(66,133,244,.25)\'" onmouseout="this.style.background=\'rgba(66,133,244,.15)\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#4285F4"/></svg>Google Maps</a>';
+    heroHtml += '<a href="https://maps.apple.com/?daddr=' + p.lat + ',' + p.lng + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:rgba(52,199,89,.1);border:1px solid rgba(52,199,89,.25);border-radius:12px;padding:10px 20px;font-size:.78rem;font-weight:600;color:#F5EDE0;text-decoration:none;transition:all .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);" onmouseover="this.style.background=\'rgba(52,199,89,.2)\'" onmouseout="this.style.background=\'rgba(52,199,89,.1)\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#34C759"/></svg>Apple Haritalar</a>';
+    heroHtml += '</div>';
+  }
+
+  heroHtml += '</div></div>';
+  document.getElementById('place-hero').innerHTML = heroHtml;
+
+  /* ── BODY ── */
+  var bodyHtml = '<div style="max-width:900px;margin:0 auto;padding:48px 24px 80px;">';
+
+  // Description
+  if (p.description) {
+    bodyHtml += '<div style="margin-bottom:40px;">';
+    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:14px;">' + (p.title || '') + ' Hakkında</h2>';
+    bodyHtml += '<p style="font-size:.9rem;color:var(--text-mid);line-height:1.85;">' + p.description + '</p>';
+    bodyHtml += '</div>';
+  }
+
+  // Bağlı köy
+  if (p.villageId) {
+    var village = (DATA.villages || []).find(function(v) { return v.id === p.villageId; });
+    if (village) {
+      bodyHtml += '<div style="margin-bottom:40px;">';
+      bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:14px;">📍 Bağlı Olduğu Yerleşim</h2>';
+      bodyHtml += '<a href="../koyler/koy-detay.html?id=' + village.id + '" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 6px 20px rgba(26,39,68,.07)\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+      bodyHtml += '<span style="font-size:1.4rem;">' + (village.emoji || '🏘') + '</span>';
+      bodyHtml += '<div><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.85rem;color:var(--navy);">' + village.title + '</div>';
+      if (village.shortDesc) bodyHtml += '<div style="font-size:.68rem;color:var(--text-mid);margin-top:2px;">' + village.shortDesc.substring(0, 60) + '</div>';
+      bodyHtml += '</div></a></div>';
+    }
+  }
+
+  // Yakındaki mekanlar
+  var nearbyVenues = [];
+  if (p.location) {
+    nearbyVenues = (DATA.venues || []).filter(function(v) {
+      return v.location && v.location.toLowerCase().includes(p.location.toLowerCase().split(',')[0].trim().toLowerCase());
+    }).slice(0, 6);
+  }
+  if (p.villageId && nearbyVenues.length === 0) {
+    nearbyVenues = (DATA.venues || []).filter(function(v) {
+      return v.villageId && v.villageId === p.villageId;
+    }).slice(0, 6);
+  }
+
+  if (nearbyVenues.length > 0) {
+    bodyHtml += '<div style="margin-bottom:40px;">';
+    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">🏪 Yakındaki İşletmeler</h2>';
+    bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">';
+    var CAT_STYLE_P = { kafe:{bg:'rgba(196,82,26,.08)',color:'#C4521A',label:'Kafe',emoji:'☕'}, restoran:{bg:'rgba(26,107,138,.08)',color:'#1A6B8A',label:'Restoran',emoji:'🍽'}, kahvalti:{bg:'rgba(212,147,90,.08)',color:'#8A5520',label:'Kahvaltı',emoji:'🌞'}, konaklama:{bg:'rgba(90,122,86,.08)',color:'#5A7A56',label:'Konaklama',emoji:'🏡'}, beach:{bg:'rgba(26,158,138,.08)',color:'#1A9A8A',label:'Beach',emoji:'🏖'}, iskele:{bg:'rgba(26,39,68,.06)',color:'#3A5A8A',label:'İskele',emoji:'⚓'} };
+    nearbyVenues.forEach(function(venue) {
+      var cs = CAT_STYLE_P[venue.category] || { bg:'rgba(26,39,68,.06)', color:'#4A5568', label:venue.category || '', emoji:'📍' };
+      bodyHtml += '<a href="../mekanlar/mekan-detay.html?id=' + venue.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+      if (venue.images && venue.images[0]) {
+        bodyHtml += '<div style="position:relative;height:140px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + venue.images[0] + '" alt="' + venue.title + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1">';
+        bodyHtml += '<span style="position:absolute;top:10px;left:10px;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);font-size:.62rem;font-weight:700;color:#fff;">' + cs.emoji + ' ' + cs.label + '</span></div>';
+      } else {
+        bodyHtml += '<div style="height:100px;background:' + cs.bg + ';display:flex;align-items:center;justify-content:center;font-size:2.5rem;">' + cs.emoji + '</div>';
+      }
+      bodyHtml += '<div style="padding:14px 16px 16px;"><h4 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);margin:0;">' + venue.title + '</h4></div></a>';
+    });
+    bodyHtml += '</div></div>';
+  }
+
+  // Bu konumdaki diğer yerler
+  var otherPlaces = (DATA.places || []).filter(function(op) {
+    if (op.id === p.id) return false;
+    if (p.location && op.location && op.location.toLowerCase().includes(p.location.toLowerCase().split(',')[0].trim().toLowerCase())) return true;
+    if (p.villageId && op.villageId && op.villageId === p.villageId) return true;
+    return false;
+  }).slice(0, 6);
+
+  if (otherPlaces.length > 0) {
+    bodyHtml += '<div style="margin-bottom:40px;">';
+    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">🏛 Yakındaki Diğer Yerler</h2>';
+    bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">';
+    otherPlaces.forEach(function(op) {
+      bodyHtml += '<a href="yer-detay.html?id=' + op.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+      if (op.image) {
+        bodyHtml += '<div style="height:120px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + op.image + '" alt="' + (op.title || '') + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1"></div>';
+      } else {
+        bodyHtml += '<div style="height:80px;background:linear-gradient(135deg,rgba(26,39,68,.06),rgba(26,39,68,.02));display:flex;align-items:center;justify-content:center;font-size:2rem;">' + (op.emoji || '🏛') + '</div>';
+      }
+      bodyHtml += '<div style="padding:14px 16px;"><h4 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.85rem;color:var(--navy);margin:0 0 4px;">' + (op.title || '') + '</h4>';
+      if (op.shortDesc) bodyHtml += '<p style="font-size:.72rem;color:var(--text-mid);line-height:1.5;margin:0;">' + op.shortDesc.substring(0, 80) + (op.shortDesc.length > 80 ? '…' : '') + '</p>';
+      bodyHtml += '</div></a>';
+    });
+    bodyHtml += '</div></div>';
+  }
+
+  // Bu yerden geçen rotalar
+  var placeRoutes = (DATA.routes || []).filter(function(route) {
+    if (!route.stops || !route.stops.length) return false;
+    return route.stops.some(function(stop) {
+      var stopName = (typeof stop === 'string' ? stop : stop.title || '').toLowerCase();
+      return stopName.includes(p.title.toLowerCase());
+    });
+  });
+
+  if (placeRoutes.length > 0) {
+    bodyHtml += '<div style="margin-bottom:40px;">';
+    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">🗺 Bu Yerin Dahil Olduğu Rotalar</h2>';
+    placeRoutes.forEach(function(route) {
+      bodyHtml += '<a href="../rotalar/rota-detay.html?id=' + route.id + '" style="display:flex;align-items:center;gap:14px;padding:14px 18px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;margin-bottom:10px;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 8px 28px rgba(26,39,68,.08)\'" onmouseout="this.style.boxShadow=\'none\'">';
+      bodyHtml += '<span style="font-size:1.5rem;">' + (route.emoji || '🗺') + '</span>';
+      bodyHtml += '<div><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.85rem;color:var(--navy);margin-bottom:2px;">' + route.title + '</div>';
+      bodyHtml += '<span style="font-size:.7rem;color:var(--text-mid);">' + (route.sure || '') + (route.stops ? ' · ' + route.stops.length + ' durak' : '') + '</span>';
+      bodyHtml += '</div></a>';
+    });
+    bodyHtml += '</div>';
+  }
+
+  bodyHtml += '</div>';
+  document.getElementById('place-body').innerHTML = bodyHtml;
+
+  // Favori
+  var plIsSaved = window.isPlaceSaved && isPlaceSaved(p.id);
+  if (plIsSaved) {
+    var sb = document.getElementById('pl-save-btn');
+    if (sb) { sb.classList.add('saved'); document.getElementById('pl-save-icon').textContent = '♥'; document.getElementById('pl-save-label').textContent = 'Kaydedildi'; }
+  }
+  window.plToggleSave = function() {
+    if (window.togglePlaceSave) togglePlaceSave(p.id);
+    var now = window.isPlaceSaved && isPlaceSaved(p.id);
+    var sb = document.getElementById('pl-save-btn');
+    if (sb) {
+      sb.classList.toggle('saved', now);
+      document.getElementById('pl-save-icon').textContent = now ? '♥' : '♡';
+      document.getElementById('pl-save-label').textContent = now ? 'Kaydedildi' : 'Kaydet';
+    }
+  };
+
+  // Paylaş
+  var plUrl = window.location.origin + '/yerler/yer-detay.html?id=' + p.id;
+  var plText = p.title + ' - Assos\'u Keşfet';
+  var plWaText = p.title + '\n' + (p.location || 'Assos Bölgesi') + '\n\n' + plUrl;
+  var dd = document.getElementById('pl-share-dd');
+  if (dd) {
+    dd.innerHTML =
+      '<a href="https://wa.me/?text=' + encodeURIComponent(plWaText) + '" target="_blank" rel="noopener" class="vp-share-opt"><span class="vp-share-opt-icon" style="background:#25D366"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.528 5.855L0 24l6.335-1.52C8.034 23.46 9.98 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.846 0-3.584-.479-5.104-1.32l-.369-.21-3.76.902.948-3.668-.223-.374A9.944 9.944 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg></span><span>WhatsApp</span></a>' +
+      '<a href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(plUrl) + '" target="_blank" rel="noopener" class="vp-share-opt"><span class="vp-share-opt-icon" style="background:#1877F2"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></span><span>Facebook</span></a>' +
+      '<a href="https://twitter.com/intent/tweet?text=' + encodeURIComponent(plText) + '&url=' + encodeURIComponent(plUrl) + '" target="_blank" rel="noopener" class="vp-share-opt"><span class="vp-share-opt-icon" style="background:#000"><svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span><span>X (Twitter)</span></a>' +
+      '<button class="vp-share-opt" onclick="navigator.clipboard.writeText(\'' + plUrl + '\');this.querySelector(\'#pl-copy-lbl\').textContent=\'Kopyalandı!\';setTimeout(function(){document.getElementById(\'pl-copy-lbl\').textContent=\'Kopyala\'},2000)"><span class="vp-share-opt-icon" style="background:rgba(255,255,255,.15)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></span><span id="pl-copy-lbl">Kopyala</span></button>';
+  }
+  window.plToggleShare = function() {
+    var d = document.getElementById('pl-share-dd');
+    d.classList.toggle('open');
+  };
+  document.addEventListener('click', function(e) {
+    var wrap = document.getElementById('pl-share-wrap');
+    var d = document.getElementById('pl-share-dd');
+    if (wrap && d && !wrap.contains(e.target)) d.classList.remove('open');
+  });
+
+  // FAQ Schema
+  var faqItems = [];
+  if (p.location) {
+    faqItems.push({ q: p.title + ' nerede?', a: p.title + ', ' + p.location + ' bölgesinde, Çanakkale\'nin Ayvacık ilçesine bağlı Assos bölgesinde yer almaktadır.' });
+  }
+  if (p.description || p.shortDesc) {
+    faqItems.push({ q: p.title + ' nedir?', a: p.description || p.shortDesc });
+  }
+  if (p.lat && p.lng) {
+    faqItems.push({ q: p.title + '\'e nasıl gidilir?', a: p.title + '\'e Google Maps veya Apple Haritalar üzerinden yol tarifi alabilirsiniz. Koordinatlar: ' + p.lat + ', ' + p.lng });
+  }
+  if (nearbyVenues.length > 0) {
+    faqItems.push({ q: p.title + ' yakınında yeme içme var mı?', a: p.title + ' yakınında ' + nearbyVenues.length + ' işletme bulunmaktadır: ' + nearbyVenues.slice(0,4).map(function(v){ return v.title; }).join(', ') + '.' });
+  }
+  if (faqItems.length > 0) {
+    var faqSchema = { '@context':'https://schema.org', '@type':'FAQPage', 'mainEntity': faqItems.map(function(item) { return { '@type':'Question', 'name':item.q, 'acceptedAnswer':{ '@type':'Answer', 'text':item.a } }; }) };
+    var faqEl = document.createElement('script');
+    faqEl.type = 'application/ld+json';
+    faqEl.textContent = JSON.stringify(faqSchema);
+    document.head.appendChild(faqEl);
+  }
+
+  if (typeof trackPageView === 'function') trackPageView('place_' + placeId);
 }

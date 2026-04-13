@@ -9,27 +9,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <title>Köy — Assos'u Keşfet</title>
-  <meta name="description" content="Assos ve Ayvacık bölgesinde köy detayı.">
-  <meta property="og:title" content="Köy — Assos'u Keşfet">
-  <meta property="og:description" content="Assos ve Ayvacık bölgesinde köy detayı.">
+  <title>Gezilecek Yer — Assos'u Keşfet</title>
+  <meta name="description" content="Assos ve Ayvacık bölgesinde gezilecek yer detayı.">
+  <meta property="og:title" content="Gezilecek Yer — Assos'u Keşfet">
+  <meta property="og:description" content="Assos ve Ayvacık bölgesinde gezilecek yer detayı.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://assosukesfet.com/koyler/koy-detay">
+  <meta property="og:url" content="https://assosukesfet.com/yerler/yer-detay">
   <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/assosu-kesfet.firebasestorage.app/o/site%2Fog-image.jpg?alt=media&token=70d62a44-9142-43d8-aee4-de790f5c7dcd">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="tr_TR">
   <meta property="og:site_name" content="Assos'u Keşfet">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Köy — Assos'u Keşfet">
-  <meta name="twitter:description" content="Assos ve Ayvacık bölgesinde köy detayı.">
+  <meta name="twitter:title" content="Gezilecek Yer — Assos'u Keşfet">
+  <meta name="twitter:description" content="Assos ve Ayvacık bölgesinde gezilecek yer detayı.">
   <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/assosu-kesfet.firebasestorage.app/o/site%2Fog-image.jpg?alt=media&token=70d62a44-9142-43d8-aee4-de790f5c7dcd">
 <script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','1703800084126190');fbq('track','PageView');</script><noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1703800084126190&ev=PageView&noscript=1"/></noscript>
 </head>
 <body>
 <div id="nav-placeholder"></div>
-<div id="village-hero"></div>
-<div id="village-body"></div>
+<div id="place-hero"></div>
+<div id="place-body"></div>
 <div id="footer-placeholder"></div>
 <script src="../firebase-loader.js"></script>
 <script src="../data.js"></script>
@@ -40,28 +40,23 @@ function pageInit() {
   renderFooter({ basePath: '../' });
 
   var params = new URLSearchParams(window.location.search);
-  var villageId = params.get('id');
-  if (!villageId) villageId = window.location.hash.replace('#', '');
-  if (!villageId) {
-    document.getElementById('village-hero').innerHTML = '';
-    document.getElementById('village-body').innerHTML = '<div style="padding:120px 24px;text-align:center;"><h2 style="font-family:Plus Jakarta Sans,sans-serif;color:#1A2744;margin-bottom:12px;">Köy bulunamadı</h2><p style="color:#718096;margin-bottom:24px;">Lütfen geçerli bir köy seçin.</p><a href="../koyler.html" style="color:#C4521A;font-weight:600;">← Köylere Dön</a></div>';
+  var placeId = params.get('id');
+  if (!placeId) placeId = window.location.hash.replace('#', '');
+  if (!placeId) {
+    document.getElementById('place-hero').innerHTML = '';
+    document.getElementById('place-body').innerHTML = '<div style="padding:120px 24px;text-align:center;"><h2 style="font-family:Plus Jakarta Sans,sans-serif;color:#1A2744;margin-bottom:12px;">Yer bulunamadı</h2><p style="color:#718096;margin-bottom:24px;">Lütfen geçerli bir yer seçin.</p><a href="../yerler.html" style="color:#C4521A;font-weight:600;">← Gezilecek Yerlere Dön</a></div>';
     return;
   }
 
-  renderVillagePage(villageId);
+  renderPlacePage(placeId);
 
-  var village = (window.DATA?.villages || []).find(function(v) { return v.id === villageId; });
-  if (village) {
-    var vt = village.type || 'koy';
-    var tl = village.title.toLowerCase();
-    var seoName = village.title;
-    if (vt === 'belde') { if (!tl.includes('belde')) seoName += ' Beldesi'; }
-    else if (vt === 'mahalle') { var parentLbl = village.parent === 'kucukkuyu' ? 'Küçükkuyu' : 'Ayvacık'; seoName = parentLbl + ' ' + (tl.includes('mahalle') ? village.title : village.title + ' Mahallesi'); }
-    else { if (!tl.includes('köy') && !tl.includes('koy')) seoName += ' Köyü'; }
-    var seoTitle = seoName + ' — Assos Bölgesi | Assos\'u Keşfet';
-    var seoDesc = village.title + ', Ayvacık bölgesinde';
-    if (village.shortDesc) seoDesc += '. ' + village.shortDesc;
-    if (village.tags && village.tags.length) seoDesc += '. ' + village.tags.join(', ');
+  var place = (window.DATA?.places || []).find(function(p) { return p.id === placeId; });
+  if (place) {
+    var seoTitle = place.title + ' — Assos Bölgesi | Assos\'u Keşfet';
+    var seoDesc = place.title;
+    if (place.location) seoDesc += ', ' + place.location;
+    if (place.shortDesc) seoDesc += '. ' + place.shortDesc;
+    if (place.tags && place.tags.length) seoDesc += '. ' + place.tags.join(', ');
     seoDesc = seoDesc.substring(0, 160);
 
     document.title = seoTitle;
@@ -76,16 +71,16 @@ function pageInit() {
     var twI = document.querySelector('meta[name="twitter:image"]');
     if (ogT) ogT.content = seoTitle;
     if (ogD) ogD.content = seoDesc;
-    if (ogU) ogU.content = 'https://assosukesfet.com/koyler/koy-detay?id=' + villageId;
-    if (village.image) {
-      if (ogI) ogI.content = village.image;
-      if (twI) twI.content = village.image;
+    if (ogU) ogU.content = 'https://assosukesfet.com/yerler/yer-detay?id=' + placeId;
+    if (place.image) {
+      if (ogI) ogI.content = place.image;
+      if (twI) twI.content = place.image;
     }
     if (twT) twT.content = seoTitle;
     if (twD) twD.content = seoDesc;
 
     // Canonical URL
-    var canonicalUrl = 'https://assosukesfet.com/koyler/koy-detay?id=' + villageId;
+    var canonicalUrl = 'https://assosukesfet.com/yerler/yer-detay?id=' + placeId;
     var canonicalEl = document.querySelector('link[rel="canonical"]');
     if (!canonicalEl) { canonicalEl = document.createElement('link'); canonicalEl.rel = 'canonical'; document.head.appendChild(canonicalEl); }
     canonicalEl.href = canonicalUrl;
@@ -97,8 +92,8 @@ function pageInit() {
       '@context':'https://schema.org','@type':'BreadcrumbList',
       'itemListElement':[
         {'@type':'ListItem','position':1,'name':'Anasayfa','item':'https://assosukesfet.com'},
-        {'@type':'ListItem','position':2,'name':'Köyler','item':'https://assosukesfet.com/koyler'},
-        {'@type':'ListItem','position':3,'name':village.title,'item':'https://assosukesfet.com/koyler/koy-detay?id='+villageId}
+        {'@type':'ListItem','position':2,'name':'Gezilecek Yerler','item':'https://assosukesfet.com/yerler'},
+        {'@type':'ListItem','position':3,'name':place.title,'item':'https://assosukesfet.com/yerler/yer-detay?id='+placeId}
       ]
     });
     document.head.appendChild(bcSchema);
@@ -107,19 +102,19 @@ function pageInit() {
     var placeSchema = {
       '@context': 'https://schema.org',
       '@type': 'Place',
-      'name': village.title,
-      'description': village.description || village.shortDesc || '',
-      'url': 'https://assosukesfet.com/koyler/koy-detay?id=' + villageId,
+      'name': place.title,
+      'description': place.description || place.shortDesc || '',
+      'url': 'https://assosukesfet.com/yerler/yer-detay?id=' + placeId,
       'address': {
         '@type': 'PostalAddress',
-        'addressLocality': village.title,
+        'addressLocality': place.location || 'Ayvacık',
         'addressRegion': 'Ayvacık, Çanakkale',
         'addressCountry': 'TR'
       }
     };
-    if (village.image) placeSchema.image = village.image;
-    if (village.lat && village.lng) {
-      placeSchema.geo = { '@type': 'GeoCoordinates', 'latitude': village.lat, 'longitude': village.lng };
+    if (place.image) placeSchema.image = place.image;
+    if (place.lat && place.lng) {
+      placeSchema.geo = { '@type': 'GeoCoordinates', 'latitude': place.lat, 'longitude': place.lng };
     }
     var ps = document.createElement('script');
     ps.type = 'application/ld+json';
