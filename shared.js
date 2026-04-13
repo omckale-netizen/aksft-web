@@ -1387,6 +1387,10 @@ function initSearch(inputId, opts = {}) {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => renderDropdown(e.target.value.trim()), 150);
   });
+  input.addEventListener('focus', () => {
+    const q = input.value.trim();
+    if (q.length >= 2 && dropdown.innerHTML) dropdown.classList.add('open');
+  });
   input.addEventListener('keydown', e => {
     const items = dropdown.querySelectorAll('.search-result-item');
     if (e.key === 'Escape') { dropdown.classList.remove('open'); activeIdx = -1; }
