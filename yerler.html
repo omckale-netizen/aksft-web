@@ -173,7 +173,7 @@ function pageInit() {
     noRes.style.display = 'none';
     grid.innerHTML = places.map((p, i) => {
       const cat = CAT_COLORS[p.category] || CAT_COLORS.tarihi;
-      const clickAction = p._isVillage ? "window.location.href='koyler/koy-detay.html?id=" + p.id + "'" : "openPlace('" + p.id + "')";
+      const clickAction = p._isVillage ? "window.location.href='koyler/koy-detay.html?id=" + p.id + "'" : "window.location.href='yerler/yer-detay.html?id=" + p.id + "'";
       return `
       <div class="place-card-wrap fade-up" data-delay="${i * 0.06}" onclick="${clickAction}">
         <div class="place-img-box${p.image ? ' has-img' : ''}" style="background-color:${p.image ? '' : 'transparent'};${p.image ? '' : 'background:linear-gradient(135deg,'+cat.bg[0]+','+cat.bg[1]+');'}">
@@ -192,7 +192,7 @@ function pageInit() {
     }).join('');
     scrollFadeIn();
     const paramId = getParam('id');
-    if (paramId) setTimeout(() => openPlace(paramId), 200);
+    if (paramId) { window.location.href = 'yerler/yer-detay.html?id=' + paramId; return; }
   }
 
   function openPlace(id) {
