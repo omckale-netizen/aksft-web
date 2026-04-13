@@ -46,6 +46,21 @@
 [data-theme="dark"] .dash-action-btn:hover{background:var(--cream-dark)}
 [data-theme="dark"] .panel-card-head{border-bottom-color:var(--card-border)}
 [data-theme="dark"] .panel-card-head h3{color:var(--text)}
+[data-theme="dark"] .form-group input,[data-theme="dark"] .form-group select,[data-theme="dark"] .form-group textarea{background:var(--input-bg);border-color:var(--input-border);color:var(--text)}
+[data-theme="dark"] .backup-stat,[data-theme="dark"] .backup-card,[data-theme="dark"] .export-info{background:var(--card-bg);border-color:var(--card-border);color:var(--text)}
+[data-theme="dark"] .tag-chip{background:var(--card-bg);color:var(--text);border-color:var(--card-border)}
+[data-theme="dark"] .img-preview-item{background:var(--cream-dark)}
+[data-theme="dark"] .gal-card{background:var(--card-bg);border-color:var(--card-border)}
+[data-theme="dark"] .msg-search,[data-theme="dark"] .msg-cat-filter{background:var(--input-bg);border-color:var(--input-border);color:var(--text)}
+[data-theme="dark"] .btn-secondary{background:var(--card-bg);color:var(--text);border-color:var(--card-border)}
+[data-theme="dark"] .search-bar{background:var(--input-bg);border-color:var(--input-border);color:var(--text)}
+[data-theme="dark"] .recent-emoji{background:var(--card-bg)}
+[data-theme="dark"] .sortable-ghost{background:var(--card-bg) !important}
+[data-theme="dark"] .admin-filter-select{background:var(--input-bg) !important;border-color:var(--input-border) !important;color:var(--text) !important}
+[data-theme="dark"] .panel-table td{border-bottom-color:var(--card-border)}
+[data-theme="dark"] .backup-changes-table td{border-bottom-color:var(--card-border)}
+[data-theme="dark"] .modal-head{border-bottom-color:var(--card-border)}
+[data-theme="dark"] .panel-card-head{border-bottom-color:var(--card-border)}
 html{font-size:15px}
 body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
 
@@ -641,7 +656,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <span>&#128269;</span>
               <input type="text" id="venue-search" placeholder="Mekan ara..." oninput="renderVenueTable()">
             </div>
-            <select id="venue-cat-filter" onchange="renderVenueTable()" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:#fff;color:var(--text);cursor:pointer">
+            <select id="venue-cat-filter" onchange="renderVenueTable()" class="admin-filter-select" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:#fff;color:var(--text);cursor:pointer">
               <option value="all">Tüm Kategoriler</option>
               <option value="kafe">☕ Kafeler</option>
               <option value="restoran">🍽 Restoranlar</option>
@@ -651,7 +666,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <option value="iskele">⚓ İskeleler</option>
             </select>
             <button class="btn btn-secondary btn-sm" id="venue-featured-filter" onclick="toggleFeaturedFilter()" style="white-space:nowrap">⭐ Öne Çıkanlar</button>
-            <select id="venue-active-filter" onchange="renderVenueTable()" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:#fff;color:var(--text);cursor:pointer">
+            <select id="venue-active-filter" onchange="renderVenueTable()" class="admin-filter-select" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:#fff;color:var(--text);cursor:pointer">
               <option value="all" selected>Tüm Durumlar</option>
               <option value="published">🟢 Yayında</option>
               <option value="draft">📝 Taslak</option>
@@ -1555,7 +1570,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       <h2>Aktivite Logu</h2>
       <p class="page-sub">Tum islemler ve degisiklikler burada kayit altinda.</p>
       <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
-        <select id="activity-filter" onchange="renderActivityLog()" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:#fff;color:var(--text);cursor:pointer">
+        <select id="activity-filter" onchange="renderActivityLog()" class="admin-filter-select" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:#fff;color:var(--text);cursor:pointer">
           <option value="all">Tüm İşlemler</option>
           <option value="giris">🔐 Giris</option>
           <option value="mekan">🏪 Mekan</option>
