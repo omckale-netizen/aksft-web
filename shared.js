@@ -3405,6 +3405,27 @@ function renderVillagePage(villageId) {
     bodyHtml += '</div></div>';
   }
 
+  // Diğer mahalleler (mahalle detayındaysa)
+  if (vType === 'mahalle' && v.parent) {
+    var PARENT_NAMES = { ayvacik: 'Ayvacık', kucukkuyu: 'Küçükkuyu' };
+    var parentName = PARENT_NAMES[v.parent] || v.parent;
+    var digerMahalleler = (DATA.villages || []).filter(function(vl) {
+      return vl.id !== v.id && vl.type === 'mahalle' && vl.parent === v.parent;
+    }).sort(function(a, b) { return (a.title || '').localeCompare(b.title || '', 'tr'); });
+
+    if (digerMahalleler.length > 0) {
+      bodyHtml += '<div style="margin-bottom:40px;">';
+      bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">📍 ' + parentName + '\'ın Diğer Mahalleleri</h2>';
+      bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;">';
+      digerMahalleler.forEach(function(vl) {
+        bodyHtml += '<a href="koy-detay.html?id=' + vl.id + '" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 6px 20px rgba(26,39,68,.07)\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+        bodyHtml += '<span style="font-size:1.4rem;">' + (vl.emoji || '📍') + '</span>';
+        bodyHtml += '<div><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.82rem;color:var(--navy);">' + vl.title + '</div></div></a>';
+      });
+      bodyHtml += '</div></div>';
+    }
+  }
+
   bodyHtml += '</div>'; // container
 
   document.getElementById('village-body').innerHTML = bodyHtml;
