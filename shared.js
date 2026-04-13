@@ -3250,10 +3250,10 @@ function renderVillagePage(villageId) {
     var roadKm = Math.round(crowKm * 1.4);
     var driveMin = Math.max(5, Math.round(roadKm / 0.7));
     if (roadKm >= 1) {
-      heroHtml += '<div style="display:flex;align-items:center;gap:14px;margin-top:16px;padding:10px 18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:fit-content;">';
-      heroHtml += '<span style="display:flex;align-items:center;gap:5px;font-size:.74rem;font-weight:600;color:rgba(245,237,224,.55);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(245,237,224,.45)" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>Ayvacık\u2019a ' + roadKm + ' km</span>';
-      heroHtml += '<span style="width:1px;height:14px;background:rgba(245,237,224,.12);"></span>';
-      heroHtml += '<span style="display:flex;align-items:center;gap:5px;font-size:.74rem;font-weight:600;color:rgba(245,237,224,.55);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(245,237,224,.45)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>~' + driveMin + ' dk</span>';
+      heroHtml += '<div style="display:flex;align-items:center;gap:16px;margin-top:16px;">';
+      heroHtml += '<span style="display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;color:rgba(245,237,224,.7);">📍 Ayvacık\u2019a ' + roadKm + ' km</span>';
+      heroHtml += '<span style="font-size:.78rem;color:rgba(245,237,224,.2);">·</span>';
+      heroHtml += '<span style="display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;color:rgba(245,237,224,.7);">🚗 ~' + driveMin + ' dk</span>';
       heroHtml += '</div>';
     }
   }
