@@ -3732,29 +3732,58 @@ function renderPlacePage(placeId) {
       bodyHtml += '<a href="../koyler/koy-detay.html?id=' + village.id + '" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 6px 20px rgba(26,39,68,.07)\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
       bodyHtml += '<span style="font-size:1.4rem;">' + (village.emoji || '🏘') + '</span>';
       bodyHtml += '<div><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.85rem;color:var(--navy);">' + village.title + '</div>';
-      if (village.shortDesc) bodyHtml += '<div style="font-size:.68rem;color:var(--text-mid);margin-top:2px;">' + village.shortDesc.substring(0, 60) + '</div>';
+      if (village.shortDesc) bodyHtml += '<div style="font-size:.68rem;color:var(--text-mid);margin-top:2px;">' + village.shortDesc + '</div>';
       bodyHtml += '</div></a></div>';
     }
   }
 
-  // Yakındaki mekanlar
+  // Bu yerdeki işletmeler (placeId eşleşmesi)
+  var placeVenues = (DATA.venues || []).filter(function(v) {
+    return v.placeId && v.placeId === p.id;
+  });
+
+  // Yakındaki mekanlar (location veya villageId eşleşmesi, placeId olanları hariç tut)
   var nearbyVenues = [];
   if (p.location) {
     nearbyVenues = (DATA.venues || []).filter(function(v) {
+      if (v.placeId === p.id) return false;
       return v.location && v.location.toLowerCase().includes(p.location.toLowerCase().split(',')[0].trim().toLowerCase());
     }).slice(0, 6);
   }
   if (p.villageId && nearbyVenues.length === 0) {
     nearbyVenues = (DATA.venues || []).filter(function(v) {
+      if (v.placeId === p.id) return false;
       return v.villageId && v.villageId === p.villageId;
     }).slice(0, 6);
+  }
+
+  var CAT_STYLE_P = { kafe:{bg:'rgba(196,82,26,.08)',color:'#C4521A',label:'Kafe',emoji:'☕'}, restoran:{bg:'rgba(26,107,138,.08)',color:'#1A6B8A',label:'Restoran',emoji:'🍽'}, kahvalti:{bg:'rgba(212,147,90,.08)',color:'#8A5520',label:'Kahvaltı',emoji:'🌞'}, konaklama:{bg:'rgba(90,122,86,.08)',color:'#5A7A56',label:'Konaklama',emoji:'🏡'}, beach:{bg:'rgba(26,158,138,.08)',color:'#1A9A8A',label:'Beach',emoji:'🏖'}, iskele:{bg:'rgba(26,39,68,.06)',color:'#3A5A8A',label:'İskele',emoji:'⚓'} };
+
+  // Bu yerdeki işletmeler
+  if (placeVenues.length > 0) {
+    bodyHtml += '<div style="margin-bottom:40px;">';
+    var plEk = typeof bulunmaEki === 'function' ? bulunmaEki(p.title) : '\'daki';
+    var plEkSuffix = plEk.substring(1);
+    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">📍 ' + p.title + '\u2019' + plEkSuffix + ' İşletmeler</h2>';
+    bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">';
+    placeVenues.forEach(function(venue) {
+      var cs = CAT_STYLE_P[venue.category] || { bg:'rgba(26,39,68,.06)', color:'#4A5568', label:venue.category || '', emoji:'📍' };
+      bodyHtml += '<a href="../mekanlar/mekan-detay.html?id=' + venue.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+      if (venue.images && venue.images[0]) {
+        bodyHtml += '<div style="position:relative;height:140px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + venue.images[0] + '" alt="' + venue.title + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1">';
+        bodyHtml += '<span style="position:absolute;top:10px;left:10px;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);font-size:.62rem;font-weight:700;color:#fff;">' + cs.emoji + ' ' + cs.label + '</span></div>';
+      } else {
+        bodyHtml += '<div style="height:100px;background:' + cs.bg + ';display:flex;align-items:center;justify-content:center;font-size:2.5rem;">' + cs.emoji + '</div>';
+      }
+      bodyHtml += '<div style="padding:14px 16px 16px;"><h4 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);margin:0;">' + venue.title + '</h4></div></a>';
+    });
+    bodyHtml += '</div></div>';
   }
 
   if (nearbyVenues.length > 0) {
     bodyHtml += '<div style="margin-bottom:40px;">';
     bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">🏪 Yakındaki İşletmeler</h2>';
     bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">';
-    var CAT_STYLE_P = { kafe:{bg:'rgba(196,82,26,.08)',color:'#C4521A',label:'Kafe',emoji:'☕'}, restoran:{bg:'rgba(26,107,138,.08)',color:'#1A6B8A',label:'Restoran',emoji:'🍽'}, kahvalti:{bg:'rgba(212,147,90,.08)',color:'#8A5520',label:'Kahvaltı',emoji:'🌞'}, konaklama:{bg:'rgba(90,122,86,.08)',color:'#5A7A56',label:'Konaklama',emoji:'🏡'}, beach:{bg:'rgba(26,158,138,.08)',color:'#1A9A8A',label:'Beach',emoji:'🏖'}, iskele:{bg:'rgba(26,39,68,.06)',color:'#3A5A8A',label:'İskele',emoji:'⚓'} };
     nearbyVenues.forEach(function(venue) {
       var cs = CAT_STYLE_P[venue.category] || { bg:'rgba(26,39,68,.06)', color:'#4A5568', label:venue.category || '', emoji:'📍' };
       bodyHtml += '<a href="../mekanlar/mekan-detay.html?id=' + venue.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
