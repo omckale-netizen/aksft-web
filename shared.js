@@ -3248,7 +3248,7 @@ function renderVillagePage(villageId) {
     var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(ayvLat * Math.PI / 180) * Math.cos(v.lat * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
     var crowKm = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     var roadKm = Math.round(crowKm * 1.4);
-    var driveMin = Math.max(5, Math.round(roadKm / 0.7));
+    var driveMin = Math.max(5, Math.round(roadKm * 1));
     if (roadKm >= 1) {
       heroHtml += '<div style="display:flex;align-items:center;gap:16px;margin-top:16px;">';
       heroHtml += '<span style="display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;color:rgba(245,237,224,.7);">📍 Ayvacık\u2019a ' + roadKm + ' km</span>';
