@@ -3149,11 +3149,11 @@ function renderVillagePage(villageId) {
   heroHtml += '<a href="../koyler.html" style="display:inline-flex;align-items:center;gap:6px;color:rgba(245,237,224,.45);font-size:.75rem;font-weight:600;text-decoration:none;transition:color .2s;" onmouseover="this.style.color=\'#F5EDE0\'" onmouseout="this.style.color=\'rgba(245,237,224,.45)\'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Köylere Dön</a>';
   heroHtml += '<div style="display:flex;gap:8px;">';
   // Favori butonu
-  heroHtml += '<button id="vg-save-btn" onclick="vgToggleSave()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:#F5EDE0;font-size:.72rem;font-weight:600;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all .25s;" onmouseover="this.style.background=\'rgba(255,255,255,.18)\'" onmouseout="this.style.background=\'rgba(255,255,255,.1)\'"><span id="vg-save-icon">♡</span> <span id="vg-save-label">Kaydet</span></button>';
+  heroHtml += '<button id="vg-save-btn" onclick="vgToggleSave()" class="vg-act-btn"><span id="vg-save-icon">♡</span> <span id="vg-save-label">Kaydet</span></button>';
   // Paylaş butonu
   heroHtml += '<div style="position:relative;" id="vg-share-wrap">';
-  heroHtml += '<button onclick="vgToggleShare()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:#F5EDE0;font-size:.72rem;font-weight:600;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all .25s;" onmouseover="this.style.background=\'rgba(255,255,255,.18)\'" onmouseout="this.style.background=\'rgba(255,255,255,.1)\'">↑ Paylaş</button>';
-  heroHtml += '<div id="vg-share-dd" style="display:none;position:absolute;right:0;top:calc(100% + 8px);background:rgba(26,39,68,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:8px;min-width:180px;z-index:50;"></div>';
+  heroHtml += '<button onclick="vgToggleShare()" class="vg-act-btn">↑ Paylaş</button>';
+  heroHtml += '<div id="vg-share-dd" class="vg-share-dropdown"></div>';
   heroHtml += '</div>';
   heroHtml += '</div>';
   heroHtml += '</div>';
@@ -3442,25 +3442,20 @@ function renderVillagePage(villageId) {
 
   document.getElementById('village-body').innerHTML = bodyHtml;
 
-  // Favori
-  var VG_SAVE_KEY = 'assos_saved_villages';
-  function getVgSaved() { try { return new Set(JSON.parse(localStorage.getItem(VG_SAVE_KEY) || '[]')); } catch(e) { return new Set(); } }
-  var vgSaved = getVgSaved();
-  if (vgSaved.has(v.id)) {
+  // Favori — place favori sistemiyle entegre
+  var vgIsSaved = window.isPlaceSaved && isPlaceSaved(v.id);
+  if (vgIsSaved) {
     var sb = document.getElementById('vg-save-btn');
-    if (sb) { document.getElementById('vg-save-icon').textContent = '♥'; document.getElementById('vg-save-label').textContent = 'Kaydedildi'; sb.style.background = 'rgba(196,82,26,.3)'; sb.style.borderColor = 'rgba(196,82,26,.5)'; }
+    if (sb) { sb.classList.add('vg-saved'); document.getElementById('vg-save-icon').textContent = '♥'; document.getElementById('vg-save-label').textContent = 'Kaydedildi'; }
   }
   window.vgToggleSave = function() {
-    var saved = getVgSaved();
-    if (saved.has(v.id)) saved.delete(v.id); else saved.add(v.id);
-    localStorage.setItem(VG_SAVE_KEY, JSON.stringify([...saved]));
-    var now = saved.has(v.id);
+    if (window.togglePlaceSave) togglePlaceSave(v.id);
+    var now = window.isPlaceSaved && isPlaceSaved(v.id);
     var sb = document.getElementById('vg-save-btn');
     if (sb) {
+      sb.classList.toggle('vg-saved', now);
       document.getElementById('vg-save-icon').textContent = now ? '♥' : '♡';
       document.getElementById('vg-save-label').textContent = now ? 'Kaydedildi' : 'Kaydet';
-      sb.style.background = now ? 'rgba(196,82,26,.3)' : 'rgba(255,255,255,.1)';
-      sb.style.borderColor = now ? 'rgba(196,82,26,.5)' : 'rgba(255,255,255,.15)';
     }
   };
 
@@ -3471,10 +3466,10 @@ function renderVillagePage(villageId) {
   var dd = document.getElementById('vg-share-dd');
   if (dd) {
     dd.innerHTML =
-      '<a href="https://wa.me/?text=' + encodeURIComponent(vgWaText) + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;text-decoration:none;color:#F5EDE0;font-size:.78rem;transition:background .2s;" onmouseover="this.style.background=\'rgba(255,255,255,.08)\'" onmouseout="this.style.background=\'none\'"><span style="width:28px;height:28px;border-radius:8px;background:#25D366;display:flex;align-items:center;justify-content:center;">💬</span>WhatsApp</a>' +
-      '<a href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(vgUrl) + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;text-decoration:none;color:#F5EDE0;font-size:.78rem;transition:background .2s;" onmouseover="this.style.background=\'rgba(255,255,255,.08)\'" onmouseout="this.style.background=\'none\'"><span style="width:28px;height:28px;border-radius:8px;background:#1877F2;display:flex;align-items:center;justify-content:center;">📘</span>Facebook</a>' +
-      '<a href="https://x.com/intent/tweet?text=' + encodeURIComponent(vgText) + '&url=' + encodeURIComponent(vgUrl) + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;text-decoration:none;color:#F5EDE0;font-size:.78rem;transition:background .2s;" onmouseover="this.style.background=\'rgba(255,255,255,.08)\'" onmouseout="this.style.background=\'none\'"><span style="width:28px;height:28px;border-radius:8px;background:#000;display:flex;align-items:center;justify-content:center;">𝕏</span>X</a>' +
-      '<button onclick="navigator.clipboard.writeText(\'' + vgUrl.replace(/'/g,"\\'") + '\').then(function(){document.querySelector(\'#vg-share-dd button span:last-child\').textContent=\'Kopyalandı!\';setTimeout(function(){document.querySelector(\'#vg-share-dd button span:last-child\').textContent=\'Kopyala\'},1500)})" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;background:none;border:none;color:#F5EDE0;font-size:.78rem;cursor:pointer;width:100%;transition:background .2s;" onmouseover="this.style.background=\'rgba(255,255,255,.08)\'" onmouseout="this.style.background=\'none\'"><span style="width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;">📋</span><span>Kopyala</span></button>';
+      '<a href="https://wa.me/?text=' + encodeURIComponent(vgWaText) + '" target="_blank" rel="noopener" class="vg-sh-opt"><svg width="18" height="18" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.528 5.855L0 24l6.335-1.52C8.034 23.46 9.98 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.846 0-3.584-.479-5.104-1.32l-.369-.21-3.76.902.948-3.668-.223-.374A9.944 9.944 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>WhatsApp</a>' +
+      '<a href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(vgUrl) + '" target="_blank" rel="noopener" class="vg-sh-opt"><svg width="16" height="16" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>Facebook</a>' +
+      '<a href="https://x.com/intent/tweet?text=' + encodeURIComponent(vgText) + '&url=' + encodeURIComponent(vgUrl) + '" target="_blank" rel="noopener" class="vg-sh-opt"><svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>X</a>' +
+      '<button onclick="navigator.clipboard.writeText(\'' + vgUrl.replace(/'/g,"\\'") + '\').then(function(){var el=document.getElementById(\'vg-copy-lbl\');el.textContent=\'Kopyalandı!\';setTimeout(function(){el.textContent=\'Linki Kopyala\'},1500)})" class="vg-sh-opt" style="border:none;background:none;width:100%;cursor:pointer;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(245,237,224,.7)" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg><span id="vg-copy-lbl">Linki Kopyala</span></button>';
   }
   window.vgToggleShare = function() {
     var d = document.getElementById('vg-share-dd');
