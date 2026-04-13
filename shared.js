@@ -3227,6 +3227,9 @@ function renderVillagePage(villageId) {
 
   // Bu köydeki işletmeler
   var villageVenues = (DATA.venues || []).filter(function(venue) {
+    // villageId eşleşmesi (admin panelden bağlanan mekanlar - places üzerinden değil venues için de)
+    if (venue.villageId && venue.villageId === v.id) return true;
+    // location text eşleşmesi
     if (!venue.location || !v.title) return false;
     return venue.location.toLowerCase().includes(v.title.toLowerCase()) ||
            v.title.toLowerCase().includes(venue.location.toLowerCase().split(',')[0].trim());
@@ -3289,7 +3292,9 @@ function renderVillagePage(villageId) {
 
   // Bu köydeki gezilecek yerler
   var villagePlaces = (DATA.places || []).filter(function(place) {
-    return place.villageId === v.id;
+    if (place.villageId && place.villageId === v.id) return true;
+    if (!place.location || !v.title) return false;
+    return place.location.toLowerCase().includes(v.title.toLowerCase());
   });
 
   if (villagePlaces.length > 0) {
