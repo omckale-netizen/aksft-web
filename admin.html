@@ -953,6 +953,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         <button class="tab active" onclick="switchVillageTab('villages')">Yerleşimler</button>
         <button class="tab" onclick="switchVillageTab('places')">Yerler</button>
       </div>
+      <div id="vp-type-filters" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+        <button class="tab active" onclick="filterVPType(this,'all')">Tümü</button>
+        <button class="tab" onclick="filterVPType(this,'koy')">🏘 Köyler</button>
+        <button class="tab" onclick="filterVPType(this,'belde')">🏙 Beldeler</button>
+        <button class="tab" onclick="filterVPType(this,'mahalle')">📍 Mahalleler</button>
+      </div>
       <div class="panel-card">
         <div class="panel-card-head">
           <div class="search-bar" style="flex:1;min-width:160px">
@@ -960,12 +966,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             <input type="text" id="vp-search" placeholder="Ara..." oninput="renderVPTable()">
           </div>
           <button class="btn btn-primary" onclick="openVPModal()" style="white-space:nowrap" id="vp-add-btn">+ Yeni Yerleşim Ekle</button>
-        </div>
-        <div id="vp-type-filters" style="display:flex;gap:6px;padding:0 16px 12px;flex-wrap:wrap;">
-          <button class="btn btn-sm active" onclick="filterVPType(this,'all')" style="font-size:.72rem;padding:4px 12px;border-radius:999px;">Tümü</button>
-          <button class="btn btn-sm" onclick="filterVPType(this,'koy')" style="font-size:.72rem;padding:4px 12px;border-radius:999px;">🏘 Köyler</button>
-          <button class="btn btn-sm" onclick="filterVPType(this,'belde')" style="font-size:.72rem;padding:4px 12px;border-radius:999px;">🏙 Beldeler</button>
-          <button class="btn btn-sm" onclick="filterVPType(this,'mahalle')" style="font-size:.72rem;padding:4px 12px;border-radius:999px;">📍 Mahalleler</button>
         </div>
         <div class="panel-table-wrap">
           <table class="panel-table">
@@ -5496,7 +5496,7 @@ let vpTypeFilter = 'all';
 
 function filterVPType(btn, type) {
   vpTypeFilter = type;
-  document.querySelectorAll('#vp-type-filters .btn').forEach(function(b) { b.classList.remove('active'); });
+  document.querySelectorAll('#vp-type-filters .tab').forEach(function(b) { b.classList.remove('active'); });
   btn.classList.add('active');
   renderVPTable();
 }
@@ -5509,8 +5509,8 @@ function switchVillageTab(tab) {
   const isPlaces = tab === 'places';
   document.getElementById('vp-th-cat').style.display = isPlaces ? '' : 'none';
   document.getElementById('vp-type-filters').style.display = isPlaces ? 'none' : 'flex';
-  document.querySelectorAll('#vp-type-filters .btn').forEach(function(b) { b.classList.remove('active'); });
-  document.querySelector('#vp-type-filters .btn').classList.add('active');
+  document.querySelectorAll('#vp-type-filters .tab').forEach(function(b) { b.classList.remove('active'); });
+  document.querySelector('#vp-type-filters .tab').classList.add('active');
   document.getElementById('vp-add-btn').textContent = isPlaces ? '+ Yeni Yer Ekle' : '+ Yeni Yerleşim Ekle';
   renderVPTable();
 }
