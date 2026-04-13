@@ -3152,8 +3152,11 @@ function renderVillagePage(villageId) {
   }
   heroHtml += '</div>';
 
-  // Title
-  heroHtml += '<h1 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;font-size:clamp(1.8rem,4.5vw,2.8rem);color:#F5EDE0;letter-spacing:-.03em;line-height:1.05;margin-bottom:10px;">' + (v.title || '') + '</h1>';
+  // Title — "köy" geçmiyorsa "Köyü" ekle
+  var titleLower = (v.title || '').toLowerCase();
+  var hasKoy = titleLower.includes('köy') || titleLower.includes('koy');
+  var heroTitle = (v.title || '') + (hasKoy ? '' : ' Köyü');
+  heroHtml += '<h1 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;font-size:clamp(1.8rem,4.5vw,2.8rem);color:#F5EDE0;letter-spacing:-.03em;line-height:1.05;margin-bottom:10px;">' + heroTitle + '</h1>';
 
   // Location
   heroHtml += '<p style="font-size:.85rem;color:rgba(245,237,224,.45);margin-bottom:20px;">Ayvacık, Çanakkale</p>';
