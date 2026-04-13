@@ -3764,7 +3764,7 @@ function renderPlacePage(placeId) {
     bodyHtml += '<div style="margin-bottom:40px;">';
     var plEk = typeof bulunmaEki === 'function' ? bulunmaEki(p.title) : '\'daki';
     var plEkSuffix = plEk.substring(1);
-    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">📍 ' + p.title + '\u2019' + plEkSuffix + ' İşletmeler</h2>';
+    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">' + (p.emoji || '📍') + ' ' + p.title + '\u2019' + plEkSuffix + ' Keşfedilecek Mekanlar</h2>';
     bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">';
     placeVenues.forEach(function(venue) {
       var cs = CAT_STYLE_P[venue.category] || { bg:'rgba(26,39,68,.06)', color:'#4A5568', label:venue.category || '', emoji:'📍' };
