@@ -3144,8 +3144,19 @@ function renderVillagePage(villageId) {
 
   heroHtml += '<div style="position:relative;z-index:2;max-width:900px;margin:0 auto;padding:110px 0 56px;">';
 
-  // Back button
-  heroHtml += '<a href="../koyler.html" style="display:inline-flex;align-items:center;gap:6px;color:rgba(245,237,224,.45);font-size:.75rem;font-weight:600;text-decoration:none;margin-bottom:28px;transition:color .2s;" onmouseover="this.style.color=\'#F5EDE0\'" onmouseout="this.style.color=\'rgba(245,237,224,.45)\'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Köylere Dön</a>';
+  // Top bar — back + actions
+  heroHtml += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;">';
+  heroHtml += '<a href="../koyler.html" style="display:inline-flex;align-items:center;gap:6px;color:rgba(245,237,224,.45);font-size:.75rem;font-weight:600;text-decoration:none;transition:color .2s;" onmouseover="this.style.color=\'#F5EDE0\'" onmouseout="this.style.color=\'rgba(245,237,224,.45)\'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Köylere Dön</a>';
+  heroHtml += '<div style="display:flex;gap:8px;">';
+  // Favori butonu
+  heroHtml += '<button id="vg-save-btn" onclick="vgToggleSave()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:#F5EDE0;font-size:.72rem;font-weight:600;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all .25s;" onmouseover="this.style.background=\'rgba(255,255,255,.18)\'" onmouseout="this.style.background=\'rgba(255,255,255,.1)\'"><span id="vg-save-icon">♡</span> <span id="vg-save-label">Kaydet</span></button>';
+  // Paylaş butonu
+  heroHtml += '<div style="position:relative;" id="vg-share-wrap">';
+  heroHtml += '<button onclick="vgToggleShare()" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:#F5EDE0;font-size:.72rem;font-weight:600;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all .25s;" onmouseover="this.style.background=\'rgba(255,255,255,.18)\'" onmouseout="this.style.background=\'rgba(255,255,255,.1)\'">↑ Paylaş</button>';
+  heroHtml += '<div id="vg-share-dd" style="display:none;position:absolute;right:0;top:calc(100% + 8px);background:rgba(26,39,68,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:8px;min-width:180px;z-index:50;"></div>';
+  heroHtml += '</div>';
+  heroHtml += '</div>';
+  heroHtml += '</div>';
 
   // Emoji
   heroHtml += '<div style="margin-bottom:18px;">';
@@ -3430,6 +3441,50 @@ function renderVillagePage(villageId) {
   bodyHtml += '</div>'; // container
 
   document.getElementById('village-body').innerHTML = bodyHtml;
+
+  // Favori
+  var VG_SAVE_KEY = 'assos_saved_villages';
+  function getVgSaved() { try { return new Set(JSON.parse(localStorage.getItem(VG_SAVE_KEY) || '[]')); } catch(e) { return new Set(); } }
+  var vgSaved = getVgSaved();
+  if (vgSaved.has(v.id)) {
+    var sb = document.getElementById('vg-save-btn');
+    if (sb) { document.getElementById('vg-save-icon').textContent = '♥'; document.getElementById('vg-save-label').textContent = 'Kaydedildi'; sb.style.background = 'rgba(196,82,26,.3)'; sb.style.borderColor = 'rgba(196,82,26,.5)'; }
+  }
+  window.vgToggleSave = function() {
+    var saved = getVgSaved();
+    if (saved.has(v.id)) saved.delete(v.id); else saved.add(v.id);
+    localStorage.setItem(VG_SAVE_KEY, JSON.stringify([...saved]));
+    var now = saved.has(v.id);
+    var sb = document.getElementById('vg-save-btn');
+    if (sb) {
+      document.getElementById('vg-save-icon').textContent = now ? '♥' : '♡';
+      document.getElementById('vg-save-label').textContent = now ? 'Kaydedildi' : 'Kaydet';
+      sb.style.background = now ? 'rgba(196,82,26,.3)' : 'rgba(255,255,255,.1)';
+      sb.style.borderColor = now ? 'rgba(196,82,26,.5)' : 'rgba(255,255,255,.15)';
+    }
+  };
+
+  // Paylaş
+  var vgUrl = window.location.origin + '/koyler/koy-detay.html?id=' + v.id;
+  var vgText = heroTitle + ' - Assos\'u Keşfet';
+  var vgWaText = heroTitle + '\nAyvacık, Çanakkale\n\n' + vgUrl;
+  var dd = document.getElementById('vg-share-dd');
+  if (dd) {
+    dd.innerHTML =
+      '<a href="https://wa.me/?text=' + encodeURIComponent(vgWaText) + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;text-decoration:none;color:#F5EDE0;font-size:.78rem;transition:background .2s;" onmouseover="this.style.background=\'rgba(255,255,255,.08)\'" onmouseout="this.style.background=\'none\'"><span style="width:28px;height:28px;border-radius:8px;background:#25D366;display:flex;align-items:center;justify-content:center;">💬</span>WhatsApp</a>' +
+      '<a href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(vgUrl) + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;text-decoration:none;color:#F5EDE0;font-size:.78rem;transition:background .2s;" onmouseover="this.style.background=\'rgba(255,255,255,.08)\'" onmouseout="this.style.background=\'none\'"><span style="width:28px;height:28px;border-radius:8px;background:#1877F2;display:flex;align-items:center;justify-content:center;">📘</span>Facebook</a>' +
+      '<a href="https://x.com/intent/tweet?text=' + encodeURIComponent(vgText) + '&url=' + encodeURIComponent(vgUrl) + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;text-decoration:none;color:#F5EDE0;font-size:.78rem;transition:background .2s;" onmouseover="this.style.background=\'rgba(255,255,255,.08)\'" onmouseout="this.style.background=\'none\'"><span style="width:28px;height:28px;border-radius:8px;background:#000;display:flex;align-items:center;justify-content:center;">𝕏</span>X</a>' +
+      '<button onclick="navigator.clipboard.writeText(\'' + vgUrl.replace(/'/g,"\\'") + '\').then(function(){document.querySelector(\'#vg-share-dd button span:last-child\').textContent=\'Kopyalandı!\';setTimeout(function(){document.querySelector(\'#vg-share-dd button span:last-child\').textContent=\'Kopyala\'},1500)})" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;background:none;border:none;color:#F5EDE0;font-size:.78rem;cursor:pointer;width:100%;transition:background .2s;" onmouseover="this.style.background=\'rgba(255,255,255,.08)\'" onmouseout="this.style.background=\'none\'"><span style="width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;">📋</span><span>Kopyala</span></button>';
+  }
+  window.vgToggleShare = function() {
+    var d = document.getElementById('vg-share-dd');
+    d.style.display = d.style.display === 'none' ? 'block' : 'none';
+  };
+  document.addEventListener('click', function(e) {
+    var wrap = document.getElementById('vg-share-wrap');
+    var d = document.getElementById('vg-share-dd');
+    if (wrap && d && !wrap.contains(e.target)) d.style.display = 'none';
+  });
 
   // Analytics
   if (typeof trackPageView === 'function') trackPageView('village_' + villageId);
