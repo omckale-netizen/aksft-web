@@ -3278,6 +3278,30 @@ function renderVillagePage(villageId) {
     bodyHtml += '</div></div>';
   }
 
+  // Bu köydeki gezilecek yerler
+  var villagePlaces = (DATA.places || []).filter(function(place) {
+    return place.villageId === v.id;
+  });
+
+  if (villagePlaces.length > 0) {
+    bodyHtml += '<div style="margin-bottom:40px;">';
+    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">🏛 Gezilecek Yerler</h2>';
+    bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">';
+    villagePlaces.forEach(function(place) {
+      bodyHtml += '<a href="../yerler#' + place.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+      if (place.image) {
+        bodyHtml += '<div style="height:120px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + place.image + '" alt="' + (place.title || '') + ' Assos" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1"></div>';
+      } else {
+        bodyHtml += '<div style="height:80px;background:linear-gradient(135deg,rgba(26,39,68,.06),rgba(26,39,68,.02));display:flex;align-items:center;justify-content:center;font-size:2rem;">' + (place.emoji || '🏛') + '</div>';
+      }
+      bodyHtml += '<div style="padding:14px 16px;">';
+      bodyHtml += '<h4 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.85rem;color:var(--navy);margin:0 0 4px;">' + (place.title || '') + '</h4>';
+      if (place.shortDesc) bodyHtml += '<p style="font-size:.72rem;color:var(--text-mid);line-height:1.5;margin:0;">' + place.shortDesc.substring(0, 80) + (place.shortDesc.length > 80 ? '…' : '') + '</p>';
+      bodyHtml += '</div></a>';
+    });
+    bodyHtml += '</div></div>';
+  }
+
   // Bu köyden geçen rotalar
   var villageRoutes = (DATA.routes || []).filter(function(route) {
     if (!route.stops || !route.stops.length) return false;

@@ -1040,6 +1040,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                 <option value="muze">Müze</option>
               </select>
             </div>
+            <!-- Village link — only for places -->
+            <div class="form-group" id="vpf-village-group">
+              <label>Bağlı Köy <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(bu yer hangi köyde?)</span></label>
+              <select id="vpf-villageId">
+                <option value="">Seçin (opsiyonel)</option>
+              </select>
+            </div>
             <!-- Location — places + villages -->
             <div class="form-group" id="vpf-loc-group">
               <label>Konum</label>
@@ -5501,9 +5508,21 @@ function openVPModal(id) {
   form.reset();
 
   document.getElementById('vpf-cat-group').style.display = isPlaces ? '' : 'none';
+  document.getElementById('vpf-village-group').style.display = isPlaces ? '' : 'none';
   document.getElementById('vpf-loc-group').style.display = isPlaces ? '' : 'none';
   document.getElementById('vpf-coords-group').style.display = '';
   document.getElementById('vpf-village-extras').style.display = isPlaces ? 'none' : '';
+
+  // Köy dropdown'unu doldur (places için)
+  if (isPlaces) {
+    var villageSelect = document.getElementById('vpf-villageId');
+    var currentVal = villageSelect.value;
+    villageSelect.innerHTML = '<option value="">Seçin (opsiyonel)</option>';
+    (draftData.villages || []).slice().sort(function(a, b) { return (a.title || '').localeCompare(b.title || '', 'tr'); }).forEach(function(vl) {
+      villageSelect.innerHTML += '<option value="' + vl.id + '">' + (vl.emoji || '📍') + ' ' + vl.title + '</option>';
+    });
+    villageSelect.value = currentVal;
+  }
 
   if (id) {
     const arr = isPlaces ? draftData.places : draftData.villages;
@@ -5522,6 +5541,7 @@ function openVPModal(id) {
     document.getElementById('vpf-coords').value = (item.lat && item.lng) ? item.lat + ', ' + item.lng : '';
     if (isPlaces) {
       document.getElementById('vpf-category').value = item.category || '';
+      document.getElementById('vpf-villageId').value = item.villageId || '';
     } else {
       document.getElementById('vpf-highlights').value = (item.highlights || []).join(', ');
     }
@@ -5638,6 +5658,7 @@ async function saveVP(e) {
       location: document.getElementById('vpf-location').value.trim(),
       lat: parseFloat(document.getElementById('vpf-lat').value) || null,
       lng: parseFloat(document.getElementById('vpf-lng').value) || null,
+      villageId: document.getElementById('vpf-villageId').value || '',
     };
     if (!editingVPId) { placePatch.image = ''; placePatch.imagePos = 50; }
     Object.assign(item, placePatch);
