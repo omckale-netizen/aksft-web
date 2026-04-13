@@ -3241,14 +3241,16 @@ function renderVillagePage(villageId) {
     heroHtml += '<a href="https://maps.apple.com/?daddr=' + v.lat + ',' + v.lng + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:rgba(52,199,89,.1);border:1px solid rgba(52,199,89,.25);border-radius:12px;padding:10px 20px;font-size:.78rem;font-weight:600;color:#F5EDE0;text-decoration:none;transition:all .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);" onmouseover="this.style.background=\'rgba(52,199,89,.2)\';this.style.borderColor=\'rgba(52,199,89,.45)\'" onmouseout="this.style.background=\'rgba(52,199,89,.1)\';this.style.borderColor=\'rgba(52,199,89,.25)\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#34C759"/></svg>Apple Haritalar ile Yol Tarifi</a>';
     heroHtml += '</div>';
 
-    // Ayvacık merkeze mesafe + süre bandı
+    // Ayvacık merkeze mesafe + süre hesapla (FAQ schema'da da kullanılacak)
     var ayvLat = 39.6128, ayvLng = 26.3997;
     var dLat = (v.lat - ayvLat) * Math.PI / 180;
     var dLon = (v.lng - ayvLng) * Math.PI / 180;
     var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(ayvLat * Math.PI / 180) * Math.cos(v.lat * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
     var crowKm = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    var roadKm = Math.round(crowKm * 1.4);
-    var driveMin = Math.max(5, Math.round(roadKm * 1.07));
+    window._vpRoadKm = Math.round(crowKm * 1.4);
+    window._vpDriveMin = Math.max(5, Math.round(window._vpRoadKm * 1.07));
+    var roadKm = window._vpRoadKm;
+    var driveMin = window._vpDriveMin;
     if (roadKm >= 1) {
       heroHtml += '<div style="display:flex;align-items:center;gap:16px;margin-top:16px;">';
       heroHtml += '<span style="display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;color:rgba(245,237,224,.7);">📍 Ayvacık\u2019a ' + roadKm + ' km</span>';
@@ -3496,6 +3498,90 @@ function renderVillagePage(villageId) {
   bodyHtml += '</div>'; // container
 
   document.getElementById('village-body').innerHTML = bodyHtml;
+
+  // FAQ Schema (SEO — sayfada görsel yok, sadece head'e eklenir)
+  var faqItems = [];
+  var vName = heroTitle;
+
+  // 1. Nasıl gidilir?
+  if (window._vpRoadKm && window._vpRoadKm >= 1) {
+    faqItems.push({
+      q: vName + '\'e nasıl gidilir?',
+      a: vName + ', Çanakkale\'nin Ayvacık ilçesine bağlıdır. Ayvacık merkeze yaklaşık ' + window._vpRoadKm + ' km uzaklıkta olup, araçla ortalama ' + window._vpDriveMin + ' dakikada ulaşılabilir. Google Maps veya Apple Haritalar üzerinden yol tarifi alabilirsiniz.'
+    });
+  }
+
+  // 2. Ne yapılır?
+  if ((v.tags && v.tags.length) || (v.highlights && v.highlights.length)) {
+    var yapilacaklar = [];
+    if (v.highlights) yapilacaklar = yapilacaklar.concat(v.highlights);
+    if (v.tags) yapilacaklar = yapilacaklar.concat(v.tags);
+    var uniqueYap = yapilacaklar.filter(function(item, idx) { return yapilacaklar.indexOf(item) === idx; });
+    faqItems.push({
+      q: vName + '\'de ne yapılır?',
+      a: vName + ' ziyaretçilerine birçok deneyim sunmaktadır: ' + uniqueYap.join(', ') + '.'
+    });
+  }
+
+  // 3. Konaklama var mı? (sadece varsa)
+  var konaklamaVenues = villageVenues.filter(function(vn) { return vn.category === 'konaklama'; });
+  if (konaklamaVenues.length > 0) {
+    faqItems.push({
+      q: vName + '\'de konaklama var mı?',
+      a: 'Evet, ' + vName + '\'de ' + konaklamaVenues.length + ' adet konaklama seçeneği bulunmaktadır: ' + konaklamaVenues.map(function(k) { return k.title; }).join(', ') + '.'
+    });
+  }
+
+  // 4. Yeme-içme (sadece varsa)
+  var yemeIcmeVenues = villageVenues.filter(function(vn) { return vn.category === 'restoran' || vn.category === 'kafe' || vn.category === 'kahvalti'; });
+  if (yemeIcmeVenues.length > 0) {
+    faqItems.push({
+      q: vName + '\'de yeme içme seçenekleri neler?',
+      a: vName + '\'de ' + yemeIcmeVenues.length + ' adet yeme-içme mekanı bulunmaktadır: ' + yemeIcmeVenues.map(function(k) { return k.title; }).join(', ') + '.'
+    });
+  }
+
+  // 5. Gezilecek yerler (sadece varsa)
+  if (villagePlaces.length > 0) {
+    faqItems.push({
+      q: vName + '\'de gezilecek yerler nereler?',
+      a: vName + ' ve çevresinde gezebileceğiniz ' + villagePlaces.length + ' önemli nokta bulunmaktadır: ' + villagePlaces.map(function(p) { return p.title; }).join(', ') + '.'
+    });
+  }
+
+  // 6. Yakındaki köyler
+  if (nearbyVillages.length > 0) {
+    var yakinIsimler = nearbyVillages.slice(0, 4).map(function(vl) {
+      var d = vl._dist ? ' (' + vl._dist.toFixed(1) + ' km)' : '';
+      return vl.title + d;
+    });
+    faqItems.push({
+      q: vName + ' yakınında hangi köyler var?',
+      a: vName + ' yakınındaki köyler: ' + yakinIsimler.join(', ') + '. Bu köylere de kısa bir yolculukla ulaşabilirsiniz.'
+    });
+  }
+
+  // Schema'yı head'e ekle
+  if (faqItems.length > 0) {
+    var faqSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      'mainEntity': faqItems.map(function(item) {
+        return {
+          '@type': 'Question',
+          'name': item.q,
+          'acceptedAnswer': {
+            '@type': 'Answer',
+            'text': item.a
+          }
+        };
+      })
+    };
+    var faqEl = document.createElement('script');
+    faqEl.type = 'application/ld+json';
+    faqEl.textContent = JSON.stringify(faqSchema);
+    document.head.appendChild(faqEl);
+  }
 
   // Favori — mekan detaydaki ile aynı class yapısı (vp-act-btn.saved)
   var vgIsSaved = window.isPlaceSaved && isPlaceSaved(v.id);
