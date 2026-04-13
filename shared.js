@@ -3299,7 +3299,9 @@ function renderVillagePage(villageId) {
 
   if (villagePlaces.length > 0) {
     bodyHtml += '<div style="margin-bottom:40px;">';
-    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">🏛 Gezilecek Yerler</h2>';
+    var ekPlace = bulunmaEki(v.title);
+    var ekPlaceSuffix = ekPlace.substring(1);
+    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">🏛 ' + v.title + '\u2019' + ekPlaceSuffix + ' Gezilecek Yerler</h2>';
     bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">';
     villagePlaces.forEach(function(place) {
       bodyHtml += '<a href="../yerler#' + place.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
