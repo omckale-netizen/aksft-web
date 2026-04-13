@@ -155,7 +155,20 @@ function pageInit() {
     }));
 
     const allPlaces = DATA.places.concat(villageAsPlaces);
-    const places = activeFilter === 'all' ? allPlaces : allPlaces.filter(p => p.category === activeFilter);
+    // Günlük değişen karma sıralama (seed: günün tarihi)
+    var daySeed = Math.floor(Date.now() / 86400000);
+    function seededShuffle(arr) {
+      var a = arr.slice();
+      var s = daySeed;
+      for (var i = a.length - 1; i > 0; i--) {
+        s = (s * 16807 + 0) % 2147483647;
+        var j = s % (i + 1);
+        var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+      }
+      return a;
+    }
+    const filtered = activeFilter === 'all' ? allPlaces : allPlaces.filter(p => p.category === activeFilter);
+    const places = seededShuffle(filtered);
     if (places.length === 0) { grid.innerHTML = ''; noRes.style.display = 'block'; return; }
     noRes.style.display = 'none';
     grid.innerHTML = places.map((p, i) => {
