@@ -3128,44 +3128,62 @@ function renderVillagePage(villageId) {
   var hasImage = !!(v.image);
 
   /* ── HERO ── */
-  var heroHtml = '<div style="position:relative;overflow:hidden;background:' + gradient + ';padding:0 24px;min-height:340px;">';
+  var heroHtml = '<div style="position:relative;overflow:hidden;background:' + gradient + ';padding:0 24px;min-height:380px;">';
 
   // Arka plan görsel (varsa)
   if (hasImage) {
     heroHtml += '<div style="position:absolute;inset:0;"><img src="' + v.image + '" alt="' + (v.title || '') + ' Köyü Assos Ayvacık" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s ease;" loading="eager" onload="this.style.opacity=0.45"></div>';
-    heroHtml += '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,16,30,.6) 0%,rgba(6,16,30,.85) 100%);pointer-events:none;"></div>';
+    heroHtml += '<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,16,30,.4) 0%,rgba(6,16,30,.88) 100%);pointer-events:none;"></div>';
   } else {
-    // Topo pattern (görsel yoksa)
     heroHtml += '<div style="position:absolute;inset:0;background-image:url(\'data:image/svg+xml;utf8,<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"200\\\" height=\\\"200\\\"><path d=\\\"M0 80c30-10 60 15 100 0s70-20 100-5\\\" fill=\\\"none\\\" stroke=\\\"rgba(245,237,224,.04)\\\" stroke-width=\\\"1\\\"/><path d=\\\"M0 120c40 10 60-10 100 5s60 15 100-5\\\" fill=\\\"none\\\" stroke=\\\"rgba(245,237,224,.03)\\\" stroke-width=\\\"1\\\"/><path d=\\\"M0 160c30-15 70 10 100-5s70 10 100 0\\\" fill=\\\"none\\\" stroke=\\\"rgba(245,237,224,.025)\\\" stroke-width=\\\"1\\\"/></svg>\');pointer-events:none;opacity:.6;"></div>';
   }
+  // Decorative orbs
+  heroHtml += '<div style="position:absolute;width:300px;height:300px;border-radius:50%;background:rgba(196,82,26,.08);filter:blur(80px);top:-80px;right:-60px;pointer-events:none;"></div>';
+  heroHtml += '<div style="position:absolute;width:200px;height:200px;border-radius:50%;background:rgba(26,107,138,.06);filter:blur(60px);bottom:-40px;left:-40px;pointer-events:none;"></div>';
 
-  heroHtml += '<div style="position:relative;z-index:2;max-width:900px;margin:0 auto;padding:100px 0 60px;">';
+  heroHtml += '<div style="position:relative;z-index:2;max-width:900px;margin:0 auto;padding:110px 0 56px;">';
+
   // Back button
-  heroHtml += '<a href="../koyler.html" style="display:inline-flex;align-items:center;gap:6px;color:rgba(245,237,224,.5);font-size:.78rem;font-weight:600;text-decoration:none;margin-bottom:24px;transition:color .2s;" onmouseover="this.style.color=\'#F5EDE0\'" onmouseout="this.style.color=\'rgba(245,237,224,.5)\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Köylere Dön</a>';
+  heroHtml += '<a href="../koyler.html" style="display:inline-flex;align-items:center;gap:6px;color:rgba(245,237,224,.45);font-size:.75rem;font-weight:600;text-decoration:none;margin-bottom:28px;transition:color .2s;" onmouseover="this.style.color=\'#F5EDE0\'" onmouseout="this.style.color=\'rgba(245,237,224,.45)\'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Köylere Dön</a>';
 
-  // Emoji + Category badge
-  heroHtml += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">';
-  heroHtml += '<span style="font-size:2.5rem;">' + (v.emoji || '📍') + '</span>';
-  if (v.category && v.category !== 'one-cikan') {
-    var catLabels = { 'sahil': 'Sahil Köyü', 'sik-gezilen': 'Sık Gezilen' };
-    heroHtml += '<span style="font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 12px;border-radius:999px;background:rgba(196,82,26,.15);color:#D4935A;">' + (catLabels[v.category] || '') + '</span>';
+  // Eyebrow badge
+  heroHtml += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">';
+  heroHtml += '<span style="font-size:2.2rem;">' + (v.emoji || '📍') + '</span>';
+  var catLabels = { 'sahil': 'Sahil Köyü', 'sik-gezilen': 'Sık Gezilen', 'one-cikan': 'Öne Çıkan' };
+  var catLabel = catLabels[v.category || ''] || '';
+  if (catLabel) {
+    heroHtml += '<span style="font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 14px;border-radius:999px;background:rgba(212,147,90,.15);border:1px solid rgba(212,147,90,.25);color:#D4935A;">' + catLabel + '</span>';
   }
   heroHtml += '</div>';
 
-  // Title — "köy" geçmiyorsa "Köyü" ekle
+  // Title
   var titleLower = (v.title || '').toLowerCase();
   var hasKoy = titleLower.includes('köy') || titleLower.includes('koy');
   var heroTitle = (v.title || '') + (hasKoy ? '' : ' Köyü');
-  heroHtml += '<h1 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;font-size:clamp(1.8rem,4.5vw,2.8rem);color:#F5EDE0;letter-spacing:-.03em;line-height:1.05;margin-bottom:10px;">' + heroTitle + '</h1>';
+  heroHtml += '<h1 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;font-size:clamp(2rem,5vw,3.2rem);color:#F5EDE0;letter-spacing:-.03em;line-height:1.05;margin-bottom:8px;">' + heroTitle + '</h1>';
 
   // Location
-  heroHtml += '<p style="font-size:.85rem;color:rgba(245,237,224,.45);margin-bottom:20px;">Ayvacık, Çanakkale</p>';
+  heroHtml += '<p style="font-size:.82rem;color:rgba(245,237,224,.4);margin-bottom:16px;display:flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(245,237,224,.4)" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>Ayvacık, Çanakkale</p>';
+
+  // Short description
+  if (v.shortDesc) {
+    heroHtml += '<p style="font-size:.88rem;color:rgba(245,237,224,.55);line-height:1.7;max-width:560px;margin-bottom:22px;">' + v.shortDesc + '</p>';
+  }
+
+  // Tags
+  if (v.tags && v.tags.length) {
+    heroHtml += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:22px;">';
+    v.tags.forEach(function(tag) {
+      heroHtml += '<span style="padding:4px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:999px;font-size:.65rem;font-weight:600;color:rgba(245,237,224,.5);">' + tag + '</span>';
+    });
+    heroHtml += '</div>';
+  }
 
   // Yol tarifi butonları
   if (v.lat && v.lng) {
-    heroHtml += '<div style="display:flex;flex-wrap:wrap;gap:8px;">';
-    heroHtml += '<a href="https://www.google.com/maps/dir/?api=1&destination=' + v.lat + ',' + v.lng + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:9px 16px;font-size:.75rem;font-weight:600;color:#F5EDE0;text-decoration:none;transition:all .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);" onmouseover="this.style.background=\'rgba(255,255,255,.18)\'" onmouseout="this.style.background=\'rgba(255,255,255,.1)\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#4285F4"/></svg>Google Maps</a>';
-    heroHtml += '<a href="https://maps.apple.com/?daddr=' + v.lat + ',' + v.lng + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:9px 16px;font-size:.75rem;font-weight:600;color:#F5EDE0;text-decoration:none;transition:all .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);" onmouseover="this.style.background=\'rgba(255,255,255,.18)\'" onmouseout="this.style.background=\'rgba(255,255,255,.1)\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#34C759"/></svg>Apple Haritalar</a>';
+    heroHtml += '<div style="display:flex;flex-wrap:wrap;gap:10px;">';
+    heroHtml += '<a href="https://www.google.com/maps/dir/?api=1&destination=' + v.lat + ',' + v.lng + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:rgba(66,133,244,.15);border:1px solid rgba(66,133,244,.3);border-radius:12px;padding:10px 20px;font-size:.78rem;font-weight:600;color:#F5EDE0;text-decoration:none;transition:all .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);" onmouseover="this.style.background=\'rgba(66,133,244,.25)\';this.style.borderColor=\'rgba(66,133,244,.5)\'" onmouseout="this.style.background=\'rgba(66,133,244,.15)\';this.style.borderColor=\'rgba(66,133,244,.3)\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#4285F4"/></svg>Google Maps ile Yol Tarifi</a>';
+    heroHtml += '<a href="https://maps.apple.com/?daddr=' + v.lat + ',' + v.lng + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:rgba(52,199,89,.1);border:1px solid rgba(52,199,89,.25);border-radius:12px;padding:10px 20px;font-size:.78rem;font-weight:600;color:#F5EDE0;text-decoration:none;transition:all .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);" onmouseover="this.style.background=\'rgba(52,199,89,.2)\';this.style.borderColor=\'rgba(52,199,89,.45)\'" onmouseout="this.style.background=\'rgba(52,199,89,.1)\';this.style.borderColor=\'rgba(52,199,89,.25)\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#34C759"/></svg>Apple Haritalar ile Yol Tarifi</a>';
     heroHtml += '</div>';
   }
 
@@ -3327,14 +3345,6 @@ function renderVillagePage(villageId) {
       bodyHtml += '</a>';
     });
     bodyHtml += '</div></div>';
-  }
-
-  // Yol tarifi CTA
-  if (v.lat && v.lng) {
-    bodyHtml += '<div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;padding:32px 0;">';
-    bodyHtml += '<a href="https://www.google.com/maps/dir/?api=1&destination=' + v.lat + ',' + v.lng + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:var(--navy);color:#fff;border-radius:12px;font-size:.85rem;font-weight:600;text-decoration:none;transition:all .2s;" onmouseover="this.style.background=\'#2A3A5A\'" onmouseout="this.style.background=\'var(--navy)\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#4285F4"/></svg>Google Maps ile Git</a>';
-    bodyHtml += '<a href="https://maps.apple.com/?daddr=' + v.lat + ',' + v.lng + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:#fff;color:var(--navy);border:1.5px solid rgba(26,39,68,.12);border-radius:12px;font-size:.85rem;font-weight:600;text-decoration:none;transition:all .2s;" onmouseover="this.style.borderColor=\'var(--terra)\';this.style.color=\'var(--terra)\'" onmouseout="this.style.borderColor=\'rgba(26,39,68,.12)\';this.style.color=\'var(--navy)\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#34C759"/></svg>Apple Haritalar ile Git</a>';
-    bodyHtml += '</div>';
   }
 
   bodyHtml += '</div>'; // container
