@@ -3240,6 +3240,22 @@ function renderVillagePage(villageId) {
     heroHtml += '<a href="https://www.google.com/maps/dir/?api=1&destination=' + v.lat + ',' + v.lng + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:rgba(66,133,244,.15);border:1px solid rgba(66,133,244,.3);border-radius:12px;padding:10px 20px;font-size:.78rem;font-weight:600;color:#F5EDE0;text-decoration:none;transition:all .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);" onmouseover="this.style.background=\'rgba(66,133,244,.25)\';this.style.borderColor=\'rgba(66,133,244,.5)\'" onmouseout="this.style.background=\'rgba(66,133,244,.15)\';this.style.borderColor=\'rgba(66,133,244,.3)\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#4285F4"/></svg>Google Maps ile Yol Tarifi</a>';
     heroHtml += '<a href="https://maps.apple.com/?daddr=' + v.lat + ',' + v.lng + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:rgba(52,199,89,.1);border:1px solid rgba(52,199,89,.25);border-radius:12px;padding:10px 20px;font-size:.78rem;font-weight:600;color:#F5EDE0;text-decoration:none;transition:all .25s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);" onmouseover="this.style.background=\'rgba(52,199,89,.2)\';this.style.borderColor=\'rgba(52,199,89,.45)\'" onmouseout="this.style.background=\'rgba(52,199,89,.1)\';this.style.borderColor=\'rgba(52,199,89,.25)\'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#34C759"/></svg>Apple Haritalar ile Yol Tarifi</a>';
     heroHtml += '</div>';
+
+    // Ayvacık merkeze mesafe + süre bandı
+    var ayvLat = 39.6128, ayvLng = 26.3997;
+    var dLat = (v.lat - ayvLat) * Math.PI / 180;
+    var dLon = (v.lng - ayvLng) * Math.PI / 180;
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(ayvLat * Math.PI / 180) * Math.cos(v.lat * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+    var crowKm = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    var roadKm = Math.round(crowKm * 1.4);
+    var driveMin = Math.max(5, Math.round(roadKm / 0.7));
+    if (roadKm >= 1) {
+      heroHtml += '<div style="display:flex;align-items:center;gap:14px;margin-top:16px;padding:10px 18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);width:fit-content;">';
+      heroHtml += '<span style="display:flex;align-items:center;gap:5px;font-size:.74rem;font-weight:600;color:rgba(245,237,224,.55);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(245,237,224,.45)" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>Ayvacık\u2019a ' + roadKm + ' km</span>';
+      heroHtml += '<span style="width:1px;height:14px;background:rgba(245,237,224,.12);"></span>';
+      heroHtml += '<span style="display:flex;align-items:center;gap:5px;font-size:.74rem;font-weight:600;color:rgba(245,237,224,.55);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(245,237,224,.45)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>~' + driveMin + ' dk</span>';
+      heroHtml += '</div>';
+    }
   }
 
   heroHtml += '</div>'; // inner
