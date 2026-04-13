@@ -975,7 +975,10 @@ function renderNav(opts = {}) {
         places: places,
         updatedAt: new Date().toISOString()
       }, { merge: true }).then(() => {
-        console.log('Favoriler senkronlandi:', code, venues.length, 'mekan,', places.length, 'yer');
+        var vIds = new Set((typeof DATA !== 'undefined' ? DATA.villages : []).map(function(v){ return v.id; }));
+        var pOnlyCount = places.filter(function(id){ return !vIds.has(id); }).length;
+        var vOnlyCount = places.length - pOnlyCount;
+        console.log('Favoriler senkronlandi:', code, venues.length, 'mekan,', pOnlyCount, 'yer,', vOnlyCount, 'köy');
       }).catch(err => console.warn('Favori sync hatasi:', err));
     }
     doSync();
@@ -1015,10 +1018,17 @@ function renderNav(opts = {}) {
       if (input) input.value = '';
       const codeEl = document.getElementById('sd-sync-code');
       if (codeEl) codeEl.textContent = code;
+      // places dizisindeki köy ve yer sayısını ayır
+      var loadedPlaceIds = data.places || [];
+      var villageIds = new Set((typeof DATA !== 'undefined' ? DATA.villages : []).map(function(v){ return v.id; }));
+      var loadedVillageCount = loadedPlaceIds.filter(function(id){ return villageIds.has(id); }).length;
+      var loadedPlaceOnlyCount = placeCount - loadedVillageCount;
       let msg = '✓ ';
-      if (venueCount > 0) msg += venueCount + ' mekan';
-      if (venueCount > 0 && placeCount > 0) msg += ' ve ';
-      if (placeCount > 0) msg += placeCount + ' yer';
+      var parts = [];
+      if (venueCount > 0) parts.push(venueCount + ' mekan');
+      if (loadedPlaceOnlyCount > 0) parts.push(loadedPlaceOnlyCount + ' yer');
+      if (loadedVillageCount > 0) parts.push(loadedVillageCount + ' köy');
+      msg += parts.join(', ');
       msg += ' başarıyla yüklendi!';
       if (statusEl) statusEl.innerHTML = '<span style="color:#38A169">' + msg + '</span>';
     } catch(err) {
