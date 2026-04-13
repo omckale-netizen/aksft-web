@@ -3364,7 +3364,9 @@ function renderVillagePage(villageId) {
   if (v.lat && v.lng) {
     var R = 6371;
     nearbyVillages = (DATA.villages || []).filter(function(vl) {
-      return vl.id !== v.id && vl.lat && vl.lng;
+      if (vl.id === v.id || !vl.lat || !vl.lng) return false;
+      if (vl.type === 'mahalle' || vl.type === 'belde') return false;
+      return true;
     }).map(function(vl) {
       var dLat = (vl.lat - v.lat) * Math.PI / 180;
       var dLon = (vl.lng - v.lng) * Math.PI / 180;
