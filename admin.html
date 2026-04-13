@@ -830,10 +830,24 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                 </select>
               </div>
             </div>
-            <div class="form-group" style="margin-bottom:0">
-              <label>Ekstra Not (opsiyonel)</label>
-              <input type="text" id="sg-extra" placeholder="Örn: Bu hafta sonu açık, yeni menü var..." oninput="sgGenerate()">
+            <div class="form-row">
+              <div class="form-group" style="flex:1">
+                <label>Yazım Tonu</label>
+                <select id="sg-tone" onchange="sgGenerate()" style="padding:8px 12px">
+                  <option value="warm">🌅 Sıcak & Davetkar</option>
+                  <option value="explore">🧭 Keşif & Macera</option>
+                  <option value="poetic">✨ Şiirsel & Duygusal</option>
+                  <option value="fomo">🔥 FOMO / Kaçırma</option>
+                  <option value="minimal">🤍 Minimal & Şık</option>
+                  <option value="fun">😄 Eğlenceli & Samimi</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex:1">
+                <label>Ekstra Not (opsiyonel)</label>
+                <input type="text" id="sg-extra" placeholder="Örn: Bu hafta sonu açık, yeni menü..." oninput="sgGenerate()">
+              </div>
             </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="sgGenerate()" style="margin-top:4px">🔄 Yeni Varyasyon Oluştur</button>
           </div>
         </div>
 
@@ -7413,25 +7427,28 @@ function sgUpdateList() {
   document.getElementById('sg-outputs').style.display = 'none';
 }
 
+function sgPick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
 function sgGenerate() {
   var type = document.getElementById('sg-type').value;
   var id = document.getElementById('sg-item').value;
   var extra = (document.getElementById('sg-extra').value || '').trim();
+  var tone = document.getElementById('sg-tone').value;
   if (!id) { document.getElementById('sg-outputs').style.display = 'none'; return; }
 
-  var item = null, url = '', location = '', tags = [], desc = '', category = '';
+  var item = null, url = '', location = '', tags = [], desc = '', category = '', longDesc = '';
   if (type === 'venue') {
     item = (draftData.venues || []).find(function(v){ return v.id === id; });
-    if (item) { url = 'https://assosukesfet.com/mekanlar/mekan-detay?id=' + id; location = item.location || ''; tags = item.keywords || []; desc = item.shortDesc || ''; category = item.category || ''; }
+    if (item) { url = 'https://assosukesfet.com/mekanlar/mekan-detay?id=' + id; location = item.location || ''; tags = item.keywords || []; desc = item.shortDesc || ''; category = item.category || ''; longDesc = item.description || ''; }
   } else if (type === 'place') {
     item = (draftData.places || []).find(function(p){ return p.id === id; });
-    if (item) { url = 'https://assosukesfet.com/yerler#' + id; location = item.location || ''; tags = item.keywords || []; desc = item.shortDesc || ''; }
+    if (item) { url = 'https://assosukesfet.com/yerler#' + id; location = item.location || ''; tags = item.keywords || []; desc = item.shortDesc || ''; longDesc = item.description || ''; }
   } else if (type === 'village') {
     item = (draftData.villages || []).find(function(v){ return v.id === id; });
-    if (item) { url = 'https://assosukesfet.com/koyler/koy-detay?id=' + id; location = 'Ayvacık, Çanakkale'; tags = item.tags || []; desc = item.shortDesc || ''; }
+    if (item) { url = 'https://assosukesfet.com/koyler/koy-detay?id=' + id; location = 'Ayvacık, Çanakkale'; tags = item.tags || []; desc = item.shortDesc || ''; longDesc = item.description || ''; }
   } else if (type === 'route') {
     item = (draftData.routes || []).find(function(r){ return r.id === id; });
-    if (item) { url = 'https://assosukesfet.com/rotalar/rota-detay?id=' + id; tags = item.keywords || []; desc = item.shortDesc || ''; }
+    if (item) { url = 'https://assosukesfet.com/rotalar/rota-detay?id=' + id; tags = item.keywords || []; desc = item.shortDesc || ''; longDesc = item.description || ''; }
   }
   if (!item) return;
 
@@ -7439,46 +7456,101 @@ function sgGenerate() {
   var emoji = item.emoji || '📍';
   var catEmojis = {kafe:'☕',restoran:'🍽',kahvalti:'🌞',konaklama:'🏡',beach:'🏖',iskele:'⚓'};
   var catEmoji = catEmojis[category] || emoji;
+  var loc = location || 'Assos Bölgesi';
 
   // Hashtag oluştur
   var hashtags = ['#Assos','#Ayvacık','#Çanakkale','#AssosuKesfet'];
-  if (category) {
-    var catTags = {kafe:'#Kafe',restoran:'#Restoran',kahvalti:'#Kahvaltı',konaklama:'#Konaklama',beach:'#Beach',iskele:'#İskele'};
-    if (catTags[category]) hashtags.push(catTags[category]);
-  }
-  if (location && !location.includes('Ayvacık')) hashtags.push('#' + location.replace(/[^a-zA-ZğüşıöçĞÜŞİÖÇ]/g,''));
-  tags.slice(0,3).forEach(function(t){ hashtags.push('#' + t.replace(/\s+/g,'')); });
-  var uniqueTags = hashtags.filter(function(h,i){ return hashtags.indexOf(h) === i; });
+  var catHashtags = {kafe:['#Kafe','#KahveKeyfi','#CoffeeLovers'],restoran:['#Restoran','#Lezzet','#YemekKeyfi'],kahvalti:['#Kahvaltı','#SerpmeKahvaltı','#KöyKahvaltısı'],konaklama:['#Konaklama','#TatilKöyü','#BoutiqueHotel'],beach:['#Beach','#Deniz','#YazTatili'],iskele:['#İskele','#Sahil','#DenizManzarası']};
+  if (catHashtags[category]) hashtags = hashtags.concat(sgPick([catHashtags[category][0]], catHashtags[category]));
+  if (location && !location.includes('Ayvacık')) hashtags.push('#' + location.replace(/[^a-zA-ZğüşıöçĞÜŞİÖÇ0-9]/g,''));
+  tags.slice(0,4).forEach(function(t){ hashtags.push('#' + t.replace(/\s+/g,'')); });
+  hashtags.push('#GezilecekyerlerTürkiye','#KesfedenlerKulübü');
+  var uniqueTags = hashtags.filter(function(h,i){ return hashtags.indexOf(h) === i && h.length > 1; });
+
+  // Kategori bazlı yaratıcı açılış cümleleri
+  var openers = {
+    kafe: {
+      warm: ['Bir fincan kahvenin en güzel hâli, ' + loc + '\'da seni bekliyor ☕','Kahvenin kokusunu rüzgârla karıştır, ' + title + '\'da zamanı durdur.','Bazen tek ihtiyacın bir koltuk, bir manzara ve iyi bir kahve.'],
+      explore: ['Assos\'un gizli kahve durağını bulduk: ' + title + ' ☕','Keşfetmek için bir sebep daha — ' + loc + '\'ın en özel kafesi.','Haritada işaretlenmesi gereken kafe 📍'],
+      poetic: ['Denizin mavisiyle buluşan bir yudum huzur...','Her yudumda Ege\'nin fısıltısı, her bakışta sonsuzluk.','Zaman burada farklı akar; kahve soğumaz, güneş batmaz.'],
+      fomo: ['Bu kafeyi görmeden Assos\'tan dönme! 🔥','Herkes buradan paylaşıyor — sıra sende!','Assos\'un en çok konuşulan kafesi, ve sebepsiz değil.'],
+      minimal: [title + '.\nKahve. Manzara. Sessizlik.','Sade güzellik, ' + loc + '.','Fazlasına gerek yok.'],
+      fun: ['Kahve mi manzara mı diye sorma, ikisi de var 😍','Bu kafeye gidince "bir tane daha" dememek imkânsız ☕','Arkadaşlarına haber ver, çünkü burası o yer!']
+    },
+    restoran: {
+      warm: ['Lezzetin adresi ' + loc + '\'da, ' + title + ' seni sofrasına bekliyor 🍽','Deniz kenarında bir akşam yemeği hayalin varsa, doğru yerdesin.','Her tabakta bir hikâye, her lokmada Ege\'nin tadı.'],
+      explore: ['Ege mutfağının en otantik hâlini keşfet: ' + title,'Bu lezzet durağı Assos\'un en iyi sırrı 🤫','Yeni rotalarda yeni tatlar — ' + title + ' tam bir keşif.'],
+      poetic: ['Sofranın üstüne güneş batar, tabağında deniz kokar.','Lezzet bir sanattır; ' + title + ' bunu kanıtlıyor.','Ege\'nin rüzgârıyla çeşnilenen bir sofra...'],
+      fomo: ['Bu mekanın rezervasyonları hızla doluyor, erken davran! 🔥','Assos\'a gelip burada yemek yemeyen pişman oluyor.','Herkesin listesinde olması gereken restoran.'],
+      minimal: [title + '.\nEge. Lezzet. Deniz.','Sofranız hazır.','Bir tabak, bin anlam.'],
+      fun: ['Menüye bakarken "hepsinden istiyorum" dediğin yer 😋','Kalori saymak yasak, keyfine bak! 🍴','Mideni ve gözlerini aynı anda doyuracak yer.']
+    },
+    kahvalti: {
+      warm: ['Güne ' + loc + '\'da, ' + title + '\'nin serpme kahvaltısıyla başla 🌞','Kahvaltının en güzel hâli; kuş sesleri, taze ekmek, zeytinyağı.','Sabahları güzel yapan şey: doğru masa, doğru manzara.'],
+      explore: ['Assos sabahlarının en güzel adresi: ' + title,'Serpme kahvaltı nereye gidilir diye soranlara cevap 📍','Sabah keşfi — ' + loc + '\'ın kahvaltı cennet.'],
+      poetic: ['Sabahın ilk ışığında, bir sofranın başında, Ege\'yle baş başa...','Zeytinin, peynirin, zamanın yavaşladığı yer.','Her sabah yeni bir başlangıç — ama bazı masalar özeldir.'],
+      fomo: ['Bu kahvaltıyı kaçırma — hafta sonu masalar çabuk doluyor! 🌞','Assos\'un en meşhur kahvaltı sofrası, deneyimle.','Bir kere giden tekrar gelmeden edemiyor.'],
+      minimal: [title + '.\nSerpme. Köy. Huzur.','Sabahın ritüeli.','Doğanın ortasında kahvaltı.'],
+      fun: ['Kahvaltı yapmak değil, kahvaltı yaşamak 🍳','Bu sofrayı görünce "daha dün yedim" bahanesi geçersiz 😄','Kalkmak istemeyeceğin tek masa burası!']
+    },
+    konaklama: {
+      warm: ['Assos\'ta bir gece, ' + title + '\'de bir ömür... 🏡','Doğayla iç içe, huzurun tam ortasında bir konaklama deneyimi.','Gözlerini açtığında denizi görmeye ne dersin?'],
+      explore: [loc + '\'da keşfettiğimiz butik cennet: ' + title,'Konaklamanın ötesinde bir deneyim — ' + title,'Assos\'un en özel kaçamak noktası 📍'],
+      poetic: ['Yıldızların altında uyumak, kuş sesleriyle uyanmak...','Burada zaman durur, sadece sen ve doğa kalır.','Taş duvarların ardında saklı bir huzur...'],
+      fomo: ['Bu yeri keşfedenler bir daha bırakamıyor 🔥','Assos\'un en çok tercih edilen konaklama noktası.','Erken rezervasyon şart — sezonda yer bulmak zor!'],
+      minimal: [title + '.\nDoğa. Sessizlik. Uyandığında deniz.','Kaçış planın hazır.','Az ama öz.'],
+      fun: ['Check-in yaptığında stresi kapıda bırakıyorsun 🧳','Buradan "bir gece daha kalayım" demeden çıkan yok 😴','Tatil modunu burası açıyor!']
+    },
+    beach: {
+      warm: ['Turkuaz sularıyla ' + loc + ', ' + title + '\'de yazın tadını çıkar 🏖','Kumun sıcaklığı, denizin serinliği — hepsi burada.','Bir şezlong, bir deniz, sonsuz huzur.'],
+      explore: ['Assos\'un gizli plajını bulduk: ' + title + ' 🏖','Bu koy henüz keşfedilmemiş bir cennet.','Haritanızda mutlaka olması gereken sahil 📍'],
+      poetic: ['Dalga sesinin müzik olduğu, güneşin sanatçı olduğu yer...','Deniz burada farklı konuşur; dinleyene huzur verir.','Mavinin her tonu, tek bir sahilde.'],
+      fomo: ['Yaz bitmeden bu sahili görmezsen çok şey kaçırırsın! 🔥','En çok paylaşılan sahil ve bunda şaşılacak bir şey yok.','Assos\'un viral sahili — sıra sende!'],
+      minimal: [title + '.\nKum. Deniz. Sessizlik.','Mavi yeter.','Fazla söze gerek yok.'],
+      fun: ['Denize atlamak için 3... 2... 1... 🏊','Bu sahilde telefonu eline almayı unutacaksın 📵','Güneş kremi ve mutluluk — başka bir şeye gerek yok!']
+    }
+  };
+
+  // Genel açılış cümleleri (kategori yoksa veya place/village/route için)
+  var genericOpeners = {
+    warm: ['Assos\'un büyüsünü bir de buradan keşfet ✨','Her köşesinde bir hikâye saklı — ' + title,'Doğanın ve tarihin buluştuğu nokta: ' + loc],
+    explore: ['Keşfedilmeyi bekleyen bir hazine: ' + title + ' 📍','Assos bölgesinin saklı güzelliği','Rotanıza ekleyin — pişman olmayacaksınız.'],
+    poetic: ['Zamanın durduğu, rüzgârın hikâye anlattığı yer...','Antik taşların arasında, Ege\'nin nefesi...','Burada her adım bir keşif, her an bir anı.'],
+    fomo: ['Bu yeri görmeden dönme! 🔥','Assos listenizde bu yer yoksa eksik kalır.','Herkesin konuştuğu yer — sebepsiz değil.'],
+    minimal: [title + '.\n' + loc + '.','Keşfet.','Az söz, çok anlam.'],
+    fun: ['Buraya gitmek için bahane aramayı bırak, git! 😄','GPS\'e yaz, kafanı dinle 🧭','Keşif modu: açık 🔓']
+  };
+
+  var catOpeners = openers[category] || genericOpeners;
+  var opener = sgPick(catOpeners[tone] || catOpeners.warm);
+
+  // Kapanış cümleleri
+  var closers = {
+    warm: ['Assos seni bekliyor 💛','Gel, keşfet, hisset.','Huzurun adresi burada.'],
+    explore: ['Keşfe çık, Assos\'u yaşa! 🧭','Daha fazlası için assosukesfet.com','Rotanı çiz, maceraya başla.'],
+    poetic: ['Ve bazı yerler, kelimelerle anlatılamaz...','Gel de gör.','Ege seni çağırıyor.'],
+    fomo: ['Yerini ayır, pişman olma! 🔥','Son birkaç yer kaldı.','Geç kalma.'],
+    minimal: ['↗ assosukesfet.com','Detaylar linkte.',''],
+    fun: ['Hadi, ne bekliyorsun? 🚀','Bavulu hazırla! 🧳','Arkadaşını etiketle, planı yap! 👇']
+  };
+  var closer = sgPick(closers[tone] || closers.warm);
 
   var extraLine = extra ? '\n\n💡 ' + extra : '';
+  var descLine = desc ? '\n\n' + desc : '';
 
-  // Instagram
-  var igText = catEmoji + ' ' + title + '\n📍 ' + (location || 'Assos Bölgesi') + '\n\n';
-  if (desc) igText += desc + '\n';
-  igText += extraLine;
-  igText += '\n\n' + uniqueTags.join(' ');
-  igText += '\n\n🔗 Detay için bio\'daki linke tıklayın!';
+  // ── INSTAGRAM ──
+  var igText = opener + '\n\n📍 ' + loc + (descLine ? descLine : '') + extraLine + '\n\n' + closer + '\n\n.\n.\n.\n' + uniqueTags.join(' ');
 
-  // Twitter
-  var twText = catEmoji + ' ' + title;
-  if (location) twText += ' 📍 ' + location;
-  twText += '\n\n' + (desc ? desc.substring(0,120) : '');
-  twText += extraLine;
-  twText += '\n\n' + url;
-  twText += '\n\n' + uniqueTags.slice(0,5).join(' ');
+  // ── TWITTER ──
+  var twOpener = sgPick(catOpeners[tone] || catOpeners.warm);
+  if (twOpener.length > 180) twOpener = twOpener.substring(0, 177) + '...';
+  var twText = twOpener + '\n\n📍 ' + loc + extraLine + '\n\n' + url + '\n\n' + uniqueTags.slice(0,4).join(' ');
 
-  // Facebook
-  var fbText = catEmoji + ' ' + title + '\n📍 ' + (location || 'Assos Bölgesi') + '\n\n';
-  if (desc) fbText += desc + '\n';
-  fbText += extraLine;
-  fbText += '\n\n👉 ' + url;
-  fbText += '\n\n' + uniqueTags.slice(0,6).join(' ');
+  // ── FACEBOOK ──
+  var fbText = opener + '\n\n📍 ' + loc + (descLine ? descLine : '') + extraLine + '\n\n' + closer + '\n\n👉 ' + url + '\n\n' + uniqueTags.slice(0,8).join(' ');
 
-  // WhatsApp
-  var waText = catEmoji + ' *' + title + '*\n📍 ' + (location || 'Assos Bölgesi') + '\n\n';
-  if (desc) waText += desc + '\n';
-  waText += extraLine;
-  waText += '\n\n🔗 ' + url;
+  // ── WHATSAPP ──
+  var waText = catEmoji + ' *' + title + '*\n📍 ' + loc + '\n\n' + (desc || opener) + extraLine + '\n\n' + closer + '\n\n🔗 ' + url;
 
   document.getElementById('sg-instagram').textContent = igText.trim();
   document.getElementById('sg-twitter').textContent = twText.trim();
