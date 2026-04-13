@@ -479,7 +479,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         <span class="nav-icon">🗺</span> Rotalar
       </a>
       <a class="admin-nav-item" data-page="villages" onclick="showPage('villages')">
-        <span class="nav-icon">🏘</span> Köyler & Yerler
+        <span class="nav-icon">🏘</span> Yerleşimler & Yerler
       </a>
 
       <div class="nav-group-label">Botlar</div>
@@ -947,10 +947,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
     <!-- ══════ VILLAGES ══════ -->
     <div class="admin-page" id="page-villages">
-      <h2>Köyler & Yerler</h2>
-      <p class="page-sub">Koyleri ve yerleri yonetin.</p>
+      <h2>Yerleşimler & Yerler</h2>
+      <p class="page-sub">Yerleşimleri ve gezilecek yerleri yönetin.</p>
       <div class="tabs">
-        <button class="tab active" onclick="switchVillageTab('villages')">Koyler</button>
+        <button class="tab active" onclick="switchVillageTab('villages')">Yerleşimler</button>
         <button class="tab" onclick="switchVillageTab('places')">Yerler</button>
       </div>
       <div class="panel-card">
@@ -959,7 +959,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             <span>&#128269;</span>
             <input type="text" id="vp-search" placeholder="Ara..." oninput="renderVPTable()">
           </div>
-          <button class="btn btn-primary" onclick="openVPModal()" style="white-space:nowrap" id="vp-add-btn">+ Yeni Koy Ekle</button>
+          <button class="btn btn-primary" onclick="openVPModal()" style="white-space:nowrap" id="vp-add-btn">+ Yeni Yerleşim Ekle</button>
         </div>
         <div class="panel-table-wrap">
           <table class="panel-table">
@@ -5493,7 +5493,7 @@ function switchVillageTab(tab) {
   document.querySelector(`#page-villages .tab[onclick*="${tab}"]`).classList.add('active');
   const isPlaces = tab === 'places';
   document.getElementById('vp-th-cat').style.display = isPlaces ? '' : 'none';
-  document.getElementById('vp-add-btn').textContent = isPlaces ? '+ Yeni Yer Ekle' : '+ Yeni Koy Ekle';
+  document.getElementById('vp-add-btn').textContent = isPlaces ? '+ Yeni Yer Ekle' : '+ Yeni Yerleşim Ekle';
   renderVPTable();
 }
 
@@ -5569,7 +5569,7 @@ function openVPModal(id) {
     const arr = isPlaces ? draftData.places : draftData.villages;
     const item = arr.find(x => x.id === id);
     if (!item) return;
-    document.getElementById('vp-modal-title').textContent = isPlaces ? 'Yer Düzenle' : 'Köy Düzenle';
+    document.getElementById('vp-modal-title').textContent = isPlaces ? 'Yer Düzenle' : 'Yerleşim Düzenle';
     document.getElementById('vpf-id').value = item.id;
     document.getElementById('vpf-title').value = item.title || '';
     document.getElementById('vpf-emoji').value = item.emoji || '';
@@ -5594,7 +5594,7 @@ function openVPModal(id) {
     // Fotoğraf preview
     vpShowImgPreview(item.image || '');
   } else {
-    document.getElementById('vp-modal-title').textContent = isPlaces ? 'Yeni Yer Ekle' : 'Yeni Koy Ekle';
+    document.getElementById('vp-modal-title').textContent = isPlaces ? 'Yeni Yer Ekle' : 'Yeni Yerleşim Ekle';
     document.getElementById('vpf-id').value = '';
     document.getElementById('vpf-lat').value = '';
     document.getElementById('vpf-lng').value = '';
