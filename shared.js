@@ -3170,7 +3170,7 @@ function renderVillagePage(villageId) {
   heroHtml += '<a href="../koyler.html" style="display:inline-flex;align-items:center;gap:6px;color:rgba(245,237,224,.45);font-size:.75rem;font-weight:600;text-decoration:none;transition:color .2s;" onmouseover="this.style.color=\'#F5EDE0\'" onmouseout="this.style.color=\'rgba(245,237,224,.45)\'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Köylere Dön</a>';
   heroHtml += '<div style="display:flex;gap:8px;">';
   // Favori butonu
-  heroHtml += '<button id="vg-save-btn" onclick="vgToggleSave()" class="vg-act-btn"><span id="vg-save-icon">♡</span> <span id="vg-save-label">Favorile</span></button>';
+  heroHtml += '<button id="vg-save-btn" onclick="vgToggleSave()" class="vg-act-btn vg-save-only"><span id="vg-save-icon">♡</span></button>';
   // Paylaş butonu
   heroHtml += '<div style="position:relative;" id="vg-share-wrap">';
   heroHtml += '<button onclick="vgToggleShare()" class="vg-act-btn">↑ Paylaş</button>';
@@ -3467,7 +3467,7 @@ function renderVillagePage(villageId) {
   var vgIsSaved = window.isPlaceSaved && isPlaceSaved(v.id);
   if (vgIsSaved) {
     var sb = document.getElementById('vg-save-btn');
-    if (sb) { sb.classList.add('vg-saved'); document.getElementById('vg-save-icon').textContent = '♥'; document.getElementById('vg-save-label').textContent = 'Favoride'; }
+    if (sb) { sb.classList.add('vg-saved'); document.getElementById('vg-save-icon').textContent = '♥'; }
   }
   window.vgToggleSave = function() {
     if (window.togglePlaceSave) togglePlaceSave(v.id);
@@ -3476,7 +3476,6 @@ function renderVillagePage(villageId) {
     if (sb) {
       sb.classList.toggle('vg-saved', now);
       document.getElementById('vg-save-icon').textContent = now ? '♥' : '♡';
-      document.getElementById('vg-save-label').textContent = now ? 'Favoride' : 'Favorile';
     }
   };
 
