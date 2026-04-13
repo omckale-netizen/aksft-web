@@ -33,7 +33,7 @@
 <div id="footer-placeholder"></div>
 <script src="../firebase-loader.js"></script>
 <script src="../data.js"></script>
-<script src="../shared.min.js?v=146"></script>
+<script src="../shared.min.js?v=148"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false, basePath: '../' });
@@ -83,6 +83,12 @@ function pageInit() {
     }
     if (twT) twT.content = seoTitle;
     if (twD) twD.content = seoDesc;
+
+    // Canonical URL
+    var canonicalUrl = 'https://assosukesfet.com/koyler/koy-detay?id=' + villageId;
+    var canonicalEl = document.querySelector('link[rel="canonical"]');
+    if (!canonicalEl) { canonicalEl = document.createElement('link'); canonicalEl.rel = 'canonical'; document.head.appendChild(canonicalEl); }
+    canonicalEl.href = canonicalUrl;
 
     // Breadcrumb Schema
     var bcSchema = document.createElement('script');
