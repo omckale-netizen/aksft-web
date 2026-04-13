@@ -3146,14 +3146,9 @@ function renderVillagePage(villageId) {
   // Back button
   heroHtml += '<a href="../koyler.html" style="display:inline-flex;align-items:center;gap:6px;color:rgba(245,237,224,.45);font-size:.75rem;font-weight:600;text-decoration:none;margin-bottom:28px;transition:color .2s;" onmouseover="this.style.color=\'#F5EDE0\'" onmouseout="this.style.color=\'rgba(245,237,224,.45)\'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Köylere Dön</a>';
 
-  // Eyebrow badge
-  heroHtml += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">';
+  // Emoji
+  heroHtml += '<div style="margin-bottom:18px;">';
   heroHtml += '<span style="font-size:2.2rem;">' + (v.emoji || '📍') + '</span>';
-  var catLabels = { 'sahil': 'Sahil Köyü', 'sik-gezilen': 'Sık Gezilen', 'one-cikan': 'Öne Çıkan' };
-  var catLabel = catLabels[v.category || ''] || '';
-  if (catLabel) {
-    heroHtml += '<span style="font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 14px;border-radius:999px;background:rgba(212,147,90,.15);border:1px solid rgba(212,147,90,.25);color:#D4935A;">' + catLabel + '</span>';
-  }
   heroHtml += '</div>';
 
   // Title
