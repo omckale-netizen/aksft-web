@@ -200,7 +200,7 @@
 
 <script src="firebase-loader.js"></script>
 <script src="data.js"></script>
-<script src="shared.min.js?v=125"></script>
+<script src="shared.min.js?v=126"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
@@ -258,12 +258,11 @@ function pageInit() {
     const SAHIL_IDS = ['behram', 'sivrice', 'babakale', 'ahmetce', 'kucukcetmi', 'arıklı'];
     const map = Object.fromEntries(DATA.villages.map(v => [v.id, v]));
     const villages = SAHIL_IDS.map(id => map[id]).filter(Boolean);
-    const SAHIL_LABELS = { 'behram': 'Behramkale (Assos Antik Liman)' };
     document.getElementById('grid-sahil').innerHTML = villages.map((v, i) => `
       <div class="kv-pcard fade-up" data-delay="${i * 0.07}" onclick="openVillage('${v.id}')">
         <div class="kv-pcard-icon" style="background:${v.bg};">${v.emoji}</div>
         <div class="kv-pcard-body">
-          <div class="kv-pcard-name">${SAHIL_LABELS[v.id] || v.title}</div>
+          <div class="kv-pcard-name">${v.title}</div>
           <div class="kv-pcard-desc">${v.shortDesc}</div>
         </div>
         <span class="kv-pcard-arrow">→</span>

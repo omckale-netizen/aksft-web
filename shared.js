@@ -3340,6 +3340,25 @@ function renderVillagePage(villageId) {
     bodyHtml += '</div>';
   }
 
+  // Bağlı mahalleler (belde veya merkez için)
+  var bagliMahalleler = (DATA.villages || []).filter(function(vl) {
+    return vl.type === 'mahalle' && vl.parent === v.id;
+  }).sort(function(a, b) { return (a.title || '').localeCompare(b.title || '', 'tr'); });
+
+  if (bagliMahalleler.length > 0) {
+    bodyHtml += '<div style="margin-bottom:40px;">';
+    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">📍 Bağlı Mahalleler</h2>';
+    bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;">';
+    bagliMahalleler.forEach(function(vl) {
+      bodyHtml += '<a href="koy-detay.html?id=' + vl.id + '" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 6px 20px rgba(26,39,68,.07)\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+      bodyHtml += '<span style="font-size:1.4rem;">' + (vl.emoji || '📍') + '</span>';
+      bodyHtml += '<div style="flex:1;min-width:0;"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.82rem;color:var(--navy);">' + vl.title + '</div>';
+      if (vl.shortDesc) bodyHtml += '<div style="font-size:.68rem;color:var(--text-mid);margin-top:2px;">' + vl.shortDesc.substring(0, 50) + '</div>';
+      bodyHtml += '</div></a>';
+    });
+    bodyHtml += '</div></div>';
+  }
+
   // Yakındaki köyler (koordinat bazlı mesafe)
   var nearbyVillages = [];
   if (v.lat && v.lng) {
