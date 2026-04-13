@@ -57,17 +57,17 @@
     <div class="kv-hero-card">
       <div class="kv-hstat">
         <div class="kv-hstat-num" id="kv-stat-toplam"><span></span></div>
-        <div class="kv-hstat-label">Toplam Köy</div>
+        <div class="kv-hstat-label">Köy</div>
       </div>
       <div class="kv-hstat-sep"></div>
       <div class="kv-hstat">
         <div class="kv-hstat-num" id="kv-stat-one"><span></span></div>
-        <div class="kv-hstat-label">Öne Çıkan</div>
+        <div class="kv-hstat-label">Belde</div>
       </div>
       <div class="kv-hstat-sep"></div>
       <div class="kv-hstat">
         <div class="kv-hstat-num" id="kv-stat-sahil"><span></span></div>
-        <div class="kv-hstat-label">Sahil Köyü</div>
+        <div class="kv-hstat-label">Mahalle</div>
       </div>
     </div>
   </div>
@@ -137,6 +137,19 @@
   </div>
 </section>
 
+<!-- ═══ BELDE & MAHALLELER ═══ -->
+<section style="padding:60px 24px 80px;background:var(--cream-mid);">
+  <div style="max-width:1280px;margin:0 auto;">
+    <div class="fade-up" style="margin-bottom:32px;">
+      <p class="section-label" style="margin-bottom:10px;">Belde & Mahalleler</p>
+      <div class="section-rule" style="margin-bottom:16px;"></div>
+      <h2 class="section-title" style="font-size:clamp(1.6rem,3.5vw,2rem);">Beldeler ve Mahalleler</h2>
+      <p style="color:var(--text-mid);font-size:.85rem;margin-top:10px;">Ayvacık merkez ve Küçükkuyu'ya bağlı yerleşim yerleri.</p>
+    </div>
+    <div id="grid-belde-mahalle" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;"></div>
+  </div>
+</section>
+
 <!-- CTA — Köy Rotası -->
 <section class="kv-cta-sec">
   <div class="kv-cta-orb kv-cta-orb-1"></div>
@@ -193,14 +206,17 @@ function pageInit() {
   renderNav({ heroMode: false });
   renderFooter();
 
-  /* Hero stats */
+  /* Hero stats — sadece köyler (belde/mahalle hariç) */
   (function() {
     if (typeof DATA === 'undefined') return;
-    const v = DATA.villages || [];
+    const all = DATA.villages || [];
+    const koyler = all.filter(x => !x.type || x.type === 'koy');
+    const beldeler = all.filter(x => x.type === 'belde');
+    const mahalleler = all.filter(x => x.type === 'mahalle');
     const set = (id, val) => { const el = document.querySelector('#' + id + ' span'); if (el) el.textContent = val; };
-    set('kv-stat-toplam', (v.length - 1) + '+');
-    set('kv-stat-one',    v.filter(x => x.category === 'one-cikan').length);
-    set('kv-stat-sahil',  v.filter(x => x.category === 'sahil').length);
+    set('kv-stat-toplam', koyler.length);
+    set('kv-stat-one', beldeler.length);
+    set('kv-stat-sahil', mahalleler.length);
   })();
 
   const CAT_BADGE = {
@@ -288,14 +304,45 @@ function pageInit() {
     renderAll(query);
   }
 
+  /* ── Render belde & mahalleler ── */
+  function renderBeldeMahalle() {
+    const items = (DATA.villages || []).filter(v => v.type === 'belde' || v.type === 'mahalle').sort((a, b) => {
+      if (a.type !== b.type) return a.type === 'belde' ? -1 : 1;
+      return a.title.localeCompare(b.title, 'tr');
+    });
+    const grid = document.getElementById('grid-belde-mahalle');
+    if (!grid || items.length === 0) return;
+    const TYPE_BADGE = {
+      belde: { icon: '🏙', label: 'Belde', bg: 'rgba(26,107,138,.08)', color: '#1A6B8A' },
+      mahalle: { icon: '📍', label: 'Mahalle', bg: 'rgba(196,82,26,.06)', color: '#C4521A' }
+    };
+    const PARENT_LABEL = { ayvacik: 'Ayvacık', kucukkuyu: 'Küçükkuyu' };
+    grid.innerHTML = items.map((v, i) => {
+      const tb = TYPE_BADGE[v.type] || TYPE_BADGE.mahalle;
+      const parentText = v.parent ? PARENT_LABEL[v.parent] || '' : '';
+      return `<div class="village-card-compact fade-up" data-delay="${Math.min(i * 0.04, 0.5)}" onclick="openVillage('${v.id}')" style="padding:14px 16px;">
+        <span style="font-size:1.3rem;flex-shrink:0;">${v.emoji || tb.icon}</span>
+        <div style="min-width:0;flex:1;">
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.8rem;color:var(--navy);">${v.title}</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:3px;">
+            <span style="font-size:.58rem;font-weight:700;padding:2px 7px;border-radius:999px;background:${tb.bg};color:${tb.color};">${tb.label}</span>
+            ${parentText ? '<span style="font-size:.6rem;color:var(--text-mid);">' + parentText + '</span>' : ''}
+          </div>
+        </div>
+        <span style="font-size:.8rem;color:var(--text-soft);">→</span>
+      </div>`;
+    }).join('');
+  }
+
   /* ── Init ── */
   function init() {
-    allVillagesSorted = [...DATA.villages].sort((a, b) => a.title.localeCompare(b.title, 'tr'));
-    document.getElementById('village-count').textContent = DATA.villages.length;
+    allVillagesSorted = [...DATA.villages].filter(v => !v.type || v.type === 'koy').sort((a, b) => a.title.localeCompare(b.title, 'tr'));
+    document.getElementById('village-count').textContent = allVillagesSorted.length;
 
     renderFeatured();
     renderSahil();
     renderAll();
+    renderBeldeMahalle();
     scrollFadeIn();
 
     const paramId = getParam('id');
