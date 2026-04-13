@@ -961,6 +961,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
           <button class="btn btn-primary" onclick="openVPModal()" style="white-space:nowrap" id="vp-add-btn">+ Yeni Yerleşim Ekle</button>
         </div>
+        <div id="vp-type-filters" style="display:flex;gap:6px;padding:0 16px 12px;flex-wrap:wrap;">
+          <button class="btn btn-sm active" onclick="filterVPType(this,'all')" style="font-size:.72rem;padding:4px 12px;border-radius:999px;">Tümü</button>
+          <button class="btn btn-sm" onclick="filterVPType(this,'koy')" style="font-size:.72rem;padding:4px 12px;border-radius:999px;">🏘 Köyler</button>
+          <button class="btn btn-sm" onclick="filterVPType(this,'belde')" style="font-size:.72rem;padding:4px 12px;border-radius:999px;">🏙 Beldeler</button>
+          <button class="btn btn-sm" onclick="filterVPType(this,'mahalle')" style="font-size:.72rem;padding:4px 12px;border-radius:999px;">📍 Mahalleler</button>
+        </div>
         <div class="panel-table-wrap">
           <table class="panel-table">
             <thead><tr>
@@ -5486,13 +5492,25 @@ function confirmDeleteRoute(id) {
 ══════════════════════════════════════════════════ */
 let currentVPTab = 'villages';
 let editingVPId = null;
+let vpTypeFilter = 'all';
+
+function filterVPType(btn, type) {
+  vpTypeFilter = type;
+  document.querySelectorAll('#vp-type-filters .btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderVPTable();
+}
 
 function switchVillageTab(tab) {
   currentVPTab = tab;
+  vpTypeFilter = 'all';
   document.querySelectorAll('#page-villages .tab').forEach(t => t.classList.remove('active'));
   document.querySelector(`#page-villages .tab[onclick*="${tab}"]`).classList.add('active');
   const isPlaces = tab === 'places';
   document.getElementById('vp-th-cat').style.display = isPlaces ? '' : 'none';
+  document.getElementById('vp-type-filters').style.display = isPlaces ? 'none' : 'flex';
+  document.querySelectorAll('#vp-type-filters .btn').forEach(function(b) { b.classList.remove('active'); });
+  document.querySelector('#vp-type-filters .btn').classList.add('active');
   document.getElementById('vp-add-btn').textContent = isPlaces ? '+ Yeni Yer Ekle' : '+ Yeni Yerleşim Ekle';
   renderVPTable();
 }
@@ -5501,13 +5519,14 @@ function renderVPTable() {
   const isPlaces = currentVPTab === 'places';
   const q = (document.getElementById('vp-search')?.value || '').toLowerCase();
   let items = isPlaces ? (draftData.places || []) : (draftData.villages || []);
+  if (!isPlaces && vpTypeFilter !== 'all') items = items.filter(function(x) { return (x.type || 'koy') === vpTypeFilter; });
   if (q) items = items.filter(x => x.title.toLowerCase().includes(q) || (x.shortDesc||'').toLowerCase().includes(q));
 
   document.getElementById('vp-tbody').innerHTML = items.length === 0
     ? '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted)">Veri yok.</td></tr>'
     : items.map(x => '<tr>' +
         '<td class="emoji-col">' + (x.emoji || '') + '</td>' +
-        '<td><strong>' + x.title + '</strong></td>' +
+        '<td><strong>' + x.title + '</strong>' + (!isPlaces && x.type && x.type !== 'koy' ? ' <span class="badge" style="font-size:.55rem;padding:2px 6px;background:' + (x.type === 'belde' ? 'rgba(26,107,138,.1);color:#1A6B8A' : 'rgba(196,82,26,.08);color:#C4521A') + '">' + (x.type === 'belde' ? 'Belde' : 'Mahalle') + '</span>' : '') + '</td>' +
         '<td style="' + (isPlaces ? '' : 'display:none') + '"><span class="badge badge-cat">' + (x.category || '-') + '</span></td>' +
         '<td>' + (x.image ? '<span class="badge badge-open" style="font-size:.65rem">Var</span>' : '<span class="badge" style="color:var(--text-muted);font-size:.65rem">Yok</span>') + '</td>' +
         '<td>' +
