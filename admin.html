@@ -526,6 +526,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       <a class="admin-nav-item" data-page="imgcompress" onclick="showPage('imgcompress')">
         <span class="nav-icon">🖼</span> Görsel Sıkıştır
       </a>
+      <a class="admin-nav-item" data-page="socialgen" onclick="showPage('socialgen')">
+        <span class="nav-icon">📱</span> Sosyal Medya
+      </a>
 
       <div class="nav-group-label">İletişim & Analiz</div>
       <a class="admin-nav-item" data-page="messages" onclick="showPage('messages')">
@@ -772,6 +775,89 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       <div id="ic-results" style="max-width:800px;margin-top:16px"></div>
     </div>
 
+    <!-- ══════ SOSYAL MEDYA ══════ -->
+    <div class="admin-page" id="page-socialgen">
+      <h2>Sosyal Medya Paylaşım Metni</h2>
+      <p class="page-sub">Mekan, yer veya köy seçin — Instagram, Twitter ve Facebook için hazır paylaşım metni oluşturun.</p>
+
+      <div style="max-width:800px">
+        <div class="panel-card" style="margin-bottom:16px">
+          <div class="panel-card-head"><h3>İçerik Seç</h3></div>
+          <div style="padding:20px">
+            <div class="form-row">
+              <div class="form-group" style="flex:1">
+                <label>Tür</label>
+                <select id="sg-type" onchange="sgUpdateList()" style="padding:8px 12px">
+                  <option value="venue">Mekan</option>
+                  <option value="place">Gezilecek Yer</option>
+                  <option value="village">Köy / Yerleşim</option>
+                  <option value="route">Rota</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex:2">
+                <label>Seçim</label>
+                <select id="sg-item" onchange="sgGenerate()" style="padding:8px 12px">
+                  <option value="">Önce tür seçin</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label>Ekstra Not (opsiyonel)</label>
+              <input type="text" id="sg-extra" placeholder="Örn: Bu hafta sonu açık, yeni menü var..." oninput="sgGenerate()">
+            </div>
+          </div>
+        </div>
+
+        <div id="sg-outputs" style="display:none">
+          <!-- Instagram -->
+          <div class="panel-card" style="margin-bottom:12px">
+            <div class="panel-card-head" style="justify-content:space-between">
+              <h3>📸 Instagram</h3>
+              <button class="btn btn-secondary btn-sm" onclick="sgCopy('sg-instagram')">📋 Kopyala</button>
+            </div>
+            <div style="padding:16px 20px">
+              <pre id="sg-instagram" style="white-space:pre-wrap;font-family:inherit;font-size:.82rem;line-height:1.7;color:var(--text);margin:0;cursor:text;user-select:all"></pre>
+            </div>
+          </div>
+
+          <!-- Twitter -->
+          <div class="panel-card" style="margin-bottom:12px">
+            <div class="panel-card-head" style="justify-content:space-between">
+              <h3>🐦 Twitter / X</h3>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span id="sg-tw-count" style="font-size:.68rem;font-weight:700;color:var(--text-muted)"></span>
+                <button class="btn btn-secondary btn-sm" onclick="sgCopy('sg-twitter')">📋 Kopyala</button>
+              </div>
+            </div>
+            <div style="padding:16px 20px">
+              <pre id="sg-twitter" style="white-space:pre-wrap;font-family:inherit;font-size:.82rem;line-height:1.7;color:var(--text);margin:0;cursor:text;user-select:all"></pre>
+            </div>
+          </div>
+
+          <!-- Facebook -->
+          <div class="panel-card" style="margin-bottom:12px">
+            <div class="panel-card-head" style="justify-content:space-between">
+              <h3>📘 Facebook</h3>
+              <button class="btn btn-secondary btn-sm" onclick="sgCopy('sg-facebook')">📋 Kopyala</button>
+            </div>
+            <div style="padding:16px 20px">
+              <pre id="sg-facebook" style="white-space:pre-wrap;font-family:inherit;font-size:.82rem;line-height:1.7;color:var(--text);margin:0;cursor:text;user-select:all"></pre>
+            </div>
+          </div>
+
+          <!-- WhatsApp -->
+          <div class="panel-card">
+            <div class="panel-card-head" style="justify-content:space-between">
+              <h3>💬 WhatsApp</h3>
+              <button class="btn btn-secondary btn-sm" onclick="sgCopy('sg-whatsapp')">📋 Kopyala</button>
+            </div>
+            <div style="padding:16px 20px">
+              <pre id="sg-whatsapp" style="white-space:pre-wrap;font-family:inherit;font-size:.82rem;line-height:1.7;color:var(--text);margin:0;cursor:text;user-select:all"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- ══════ ROUTES ══════ -->
     <div class="admin-page" id="page-routes">
@@ -7142,6 +7228,120 @@ function icFormatSize(bytes) {
   if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
   return (bytes / 1048576).toFixed(2) + ' MB';
 }
+
+/* ══════════════════════════════════════════════════
+   SOSYAL MEDYA PAYLAŞİM METNİ
+══════════════════════════════════════════════════ */
+function sgUpdateList() {
+  var type = document.getElementById('sg-type').value;
+  var sel = document.getElementById('sg-item');
+  var items = [];
+  if (type === 'venue') items = (draftData.venues || []).map(function(v){ return { id:v.id, title:v.title, emoji:v.emoji||'📍' }; });
+  else if (type === 'place') items = (draftData.places || []).map(function(p){ return { id:p.id, title:p.title, emoji:p.emoji||'🏛' }; });
+  else if (type === 'village') items = (draftData.villages || []).map(function(v){ return { id:v.id, title:v.title, emoji:v.emoji||'🏘' }; });
+  else if (type === 'route') items = (draftData.routes || []).map(function(r){ return { id:r.id, title:r.title, emoji:r.emoji||'🗺' }; });
+  items.sort(function(a,b){ return (a.title||'').localeCompare(b.title||'','tr'); });
+  sel.innerHTML = '<option value="">Seçin...</option>' + items.map(function(it){ return '<option value="' + it.id + '">' + it.emoji + ' ' + it.title + '</option>'; }).join('');
+  document.getElementById('sg-outputs').style.display = 'none';
+}
+
+function sgGenerate() {
+  var type = document.getElementById('sg-type').value;
+  var id = document.getElementById('sg-item').value;
+  var extra = (document.getElementById('sg-extra').value || '').trim();
+  if (!id) { document.getElementById('sg-outputs').style.display = 'none'; return; }
+
+  var item = null, url = '', location = '', tags = [], desc = '', category = '';
+  if (type === 'venue') {
+    item = (draftData.venues || []).find(function(v){ return v.id === id; });
+    if (item) { url = 'https://assosukesfet.com/mekanlar/mekan-detay?id=' + id; location = item.location || ''; tags = item.keywords || []; desc = item.shortDesc || ''; category = item.category || ''; }
+  } else if (type === 'place') {
+    item = (draftData.places || []).find(function(p){ return p.id === id; });
+    if (item) { url = 'https://assosukesfet.com/yerler#' + id; location = item.location || ''; tags = item.keywords || []; desc = item.shortDesc || ''; }
+  } else if (type === 'village') {
+    item = (draftData.villages || []).find(function(v){ return v.id === id; });
+    if (item) { url = 'https://assosukesfet.com/koyler/koy-detay?id=' + id; location = 'Ayvacık, Çanakkale'; tags = item.tags || []; desc = item.shortDesc || ''; }
+  } else if (type === 'route') {
+    item = (draftData.routes || []).find(function(r){ return r.id === id; });
+    if (item) { url = 'https://assosukesfet.com/rotalar/rota-detay?id=' + id; tags = item.keywords || []; desc = item.shortDesc || ''; }
+  }
+  if (!item) return;
+
+  var title = item.title || '';
+  var emoji = item.emoji || '📍';
+  var catEmojis = {kafe:'☕',restoran:'🍽',kahvalti:'🌞',konaklama:'🏡',beach:'🏖',iskele:'⚓'};
+  var catEmoji = catEmojis[category] || emoji;
+
+  // Hashtag oluştur
+  var hashtags = ['#Assos','#Ayvacık','#Çanakkale','#AssosuKesfet'];
+  if (category) {
+    var catTags = {kafe:'#Kafe',restoran:'#Restoran',kahvalti:'#Kahvaltı',konaklama:'#Konaklama',beach:'#Beach',iskele:'#İskele'};
+    if (catTags[category]) hashtags.push(catTags[category]);
+  }
+  if (location && !location.includes('Ayvacık')) hashtags.push('#' + location.replace(/[^a-zA-ZğüşıöçĞÜŞİÖÇ]/g,''));
+  tags.slice(0,3).forEach(function(t){ hashtags.push('#' + t.replace(/\s+/g,'')); });
+  var uniqueTags = hashtags.filter(function(h,i){ return hashtags.indexOf(h) === i; });
+
+  var extraLine = extra ? '\n\n💡 ' + extra : '';
+
+  // Instagram
+  var igText = catEmoji + ' ' + title + '\n📍 ' + (location || 'Assos Bölgesi') + '\n\n';
+  if (desc) igText += desc + '\n';
+  igText += extraLine;
+  igText += '\n\n' + uniqueTags.join(' ');
+  igText += '\n\n🔗 Detay için bio\'daki linke tıklayın!';
+
+  // Twitter
+  var twText = catEmoji + ' ' + title;
+  if (location) twText += ' 📍 ' + location;
+  twText += '\n\n' + (desc ? desc.substring(0,120) : '');
+  twText += extraLine;
+  twText += '\n\n' + url;
+  twText += '\n\n' + uniqueTags.slice(0,5).join(' ');
+
+  // Facebook
+  var fbText = catEmoji + ' ' + title + '\n📍 ' + (location || 'Assos Bölgesi') + '\n\n';
+  if (desc) fbText += desc + '\n';
+  fbText += extraLine;
+  fbText += '\n\n👉 ' + url;
+  fbText += '\n\n' + uniqueTags.slice(0,6).join(' ');
+
+  // WhatsApp
+  var waText = catEmoji + ' *' + title + '*\n📍 ' + (location || 'Assos Bölgesi') + '\n\n';
+  if (desc) waText += desc + '\n';
+  waText += extraLine;
+  waText += '\n\n🔗 ' + url;
+
+  document.getElementById('sg-instagram').textContent = igText.trim();
+  document.getElementById('sg-twitter').textContent = twText.trim();
+  document.getElementById('sg-facebook').textContent = fbText.trim();
+  document.getElementById('sg-whatsapp').textContent = waText.trim();
+
+  // Twitter karakter sayacı
+  var twLen = twText.trim().length;
+  var twCountEl = document.getElementById('sg-tw-count');
+  twCountEl.textContent = twLen + '/280';
+  twCountEl.style.color = twLen > 280 ? 'var(--red)' : 'var(--text-muted)';
+
+  document.getElementById('sg-outputs').style.display = 'block';
+}
+
+function sgCopy(elId) {
+  var text = document.getElementById(elId).textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    showToast('Panoya kopyalandı!', 'success');
+  }).catch(function() {
+    // Fallback
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('Panoya kopyalandı!', 'success');
+  });
+}
+
 /* ══════════════════════════════════════════════════
    GÜVENLİK SAYFASI
 ══════════════════════════════════════════════════ */
