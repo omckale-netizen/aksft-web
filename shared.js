@@ -1497,7 +1497,7 @@ function placeCardHTML(p, delay = 0) {
   const catLabels = { tarihi: 'Antik Alan', koy: 'Koy', koyu: 'Köy', iskele: 'İskele' };
   const catColors = { tarihi: 'rgba(26,39,68,.7)', koy: 'rgba(26,107,138,.75)', koyu: 'rgba(196,82,26,.75)', iskele: 'rgba(26,39,68,.75)' };
   return `
-    <a class="place-card fade-up" href="yerler.html?id=${p.id}" data-delay="${delay}" aria-label="${p.title}">
+    <a class="place-card fade-up" href="yerler/yer-detay.html?id=${p.id}" data-delay="${delay}" aria-label="${p.title}">
       <div class="place-img" style="background:linear-gradient(135deg,${c1},${c2});">
         ${p.image ? '<img src="' + p.image + '" alt="' + p.title + '" loading="lazy" onload="this.classList.add(\'loaded\')" style="object-position:center ' + (p.imagePos != null ? p.imagePos : 50) + '%">' : '<span class="place-emoji-fallback">' + p.emoji + '</span>'}
       </div>

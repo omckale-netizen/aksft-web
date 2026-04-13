@@ -137,7 +137,7 @@
 
 <script src="firebase-loader.js"></script>
 <script src="data.js"></script>
-<script src="shared.min.js?v=150"></script>
+<script src="shared.min.js?v=151"></script>
 <script>
 const FALLBACK_COORDS = {
   'athena-tapinagi':[39.4907,26.3380],'assos-antik-liman':[39.4862,26.3365],
@@ -202,7 +202,7 @@ function buildItems() {
     const c = getCoords(p); if (!c) return;
     allItems.push({ id:p.id, type:'place', lat:c[0], lng:c[1], title:p.title, emoji:p.emoji,
       shortDesc:p.shortDesc, category:p.badgeText||p.category, location:p.location, tags:p.tags,
-      link:'yerler.html#'+p.id });
+      link:'yerler/yer-detay.html?id='+p.id });
   });
 }
 

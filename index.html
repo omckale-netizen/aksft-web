@@ -516,7 +516,7 @@
 
 <script src="firebase-loader.js"></script>
 <script src="data.js"></script>
-<script src="shared.min.js?v=150"></script>
+<script src="shared.min.js?v=151"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: true });
@@ -728,7 +728,7 @@ function pageInit() {
       const imgHtml = p.image
         ? '<img src="' + p.image + '" alt="' + p.title + '" loading="lazy" onload="this.classList.add(\'loaded\')" style="object-position:center ' + (p.imagePos != null ? p.imagePos : 50) + '%">'
         : '<span class="hp-place-emoji">' + p.emoji + '</span>';
-      var placeHref = p._isVillage ? 'koyler/koy-detay.html?id=' + p.id : 'yerler.html?id=' + p.id;
+      var placeHref = p._isVillage ? 'koyler/koy-detay.html?id=' + p.id : 'yerler/yer-detay.html?id=' + p.id;
       return '<a class="hp-place-card fade-up" href="' + placeHref + '" data-cat="' + catKey + '" style="animation-delay:' + (i * 0.05) + 's;">' +
         '<div class="hp-place-img" style="background:' + bg + ';">' + imgHtml +
           '<span class="hp-place-badge" style="background:' + cat.badge + ';color:' + cat.badgeColor + ';">' + (p.badgeText || cat.label) + '</span>' +

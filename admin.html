@@ -7534,7 +7534,7 @@ function sgGenerate() {
     if (item) { url = 'https://assosukesfet.com/mekanlar/mekan-detay?id=' + id; location = item.location || ''; tags = item.keywords || []; desc = item.shortDesc || ''; category = item.category || ''; longDesc = item.description || ''; }
   } else if (type === 'place') {
     item = (draftData.places || []).find(function(p){ return p.id === id; });
-    if (item) { url = 'https://assosukesfet.com/yerler#' + id; location = item.location || ''; tags = item.keywords || []; desc = item.shortDesc || ''; longDesc = item.description || ''; }
+    if (item) { url = 'https://assosukesfet.com/yerler/yer-detay?id=' + id; location = item.location || ''; tags = item.keywords || []; desc = item.shortDesc || ''; longDesc = item.description || ''; }
   } else if (type === 'village') {
     item = (draftData.villages || []).find(function(v){ return v.id === id; });
     if (item) { url = 'https://assosukesfet.com/koyler/koy-detay?id=' + id; location = 'Ayvacık, Çanakkale'; tags = item.tags || []; desc = item.shortDesc || ''; longDesc = item.description || ''; }
