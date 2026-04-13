@@ -740,6 +740,18 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
           <input type="file" id="ic-file-input" multiple accept="image/jpeg,image/png,image/webp" style="display:none" onchange="icHandleFiles(this.files)">
 
+          <!-- Preset'ler -->
+          <div style="margin-top:16px">
+            <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:6px;display:block">Hazır Ayarlar</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="icPreset(1600,78,'webp','')">📍 Mekan Görseli</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="icPreset(1200,80,'webp','')">✍️ Blog Kapak</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="icPreset(1200,85,'jpeg','1200x630')">🔗 OG Image</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="icPreset(800,75,'webp','')">📱 Mobil</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="icPreset(0,90,'webp','1:1')">⬛ Kare (1:1)</button>
+            </div>
+          </div>
+
           <div style="display:flex;gap:16px;margin-top:16px;flex-wrap:wrap;align-items:end">
             <div class="form-group" style="flex:1;min-width:140px;margin:0">
               <label>Kalite</label>
@@ -767,8 +779,26 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                 <option value="png">PNG</option>
               </select>
             </div>
+            <div class="form-group" style="min-width:120px;margin:0">
+              <label>Kırpma Oranı</label>
+              <select id="ic-crop" style="padding:8px 12px">
+                <option value="" selected>Yok</option>
+                <option value="16:9">16:9</option>
+                <option value="4:3">4:3</option>
+                <option value="3:2">3:2</option>
+                <option value="1:1">1:1 Kare</option>
+                <option value="1200x630">1200×630 (OG)</option>
+              </select>
+            </div>
           </div>
         </div>
+      </div>
+
+      <!-- Toplu İndir butonu -->
+      <div id="ic-bulk-bar" style="max-width:800px;margin-top:12px;display:none">
+        <button class="btn btn-primary" onclick="icDownloadAll()" id="ic-bulk-btn">📦 Tümünü ZIP Olarak İndir</button>
+        <button class="btn btn-secondary" onclick="icClearAll()" style="margin-left:8px">🗑 Temizle</button>
+        <span id="ic-bulk-info" style="margin-left:12px;font-size:.75rem;color:var(--text-muted)"></span>
       </div>
 
       <div id="ic-results" style="max-width:800px;margin-top:16px"></div>
@@ -7163,6 +7193,17 @@ async function exportImages() {
 /* ══════════════════════════════════════════════════
    GORSEL SIKISTIRMA
 ══════════════════════════════════════════════════ */
+var icCompressedFiles = [];
+
+function icPreset(maxW, quality, format, crop) {
+  document.getElementById('ic-max-width').value = maxW;
+  document.getElementById('ic-quality').value = quality;
+  document.getElementById('ic-quality-val').textContent = quality + '%';
+  document.getElementById('ic-format').value = format;
+  document.getElementById('ic-crop').value = crop;
+  showToast('Ayar uygulandı — şimdi görsel yükleyin', 'success');
+}
+
 function icHandleFiles(files) {
   if (!files || !files.length) return;
   var resultsEl = document.getElementById('ic-results');
@@ -7182,44 +7223,172 @@ function icCompressFile(file, card) {
   var quality = parseInt(document.getElementById('ic-quality').value) / 100;
   var maxW = parseInt(document.getElementById('ic-max-width').value);
   var format = document.getElementById('ic-format').value;
+  var cropVal = document.getElementById('ic-crop').value;
   var mimeType = format === 'webp' ? 'image/webp' : format === 'png' ? 'image/png' : 'image/jpeg';
   var ext = format === 'webp' ? '.webp' : format === 'png' ? '.png' : '.jpg';
 
   var reader = new FileReader();
   reader.onload = function(e) {
+    var origDataUrl = e.target.result;
     var img = new Image();
     img.onload = function() {
-      var w = img.width, h = img.height;
-      if (maxW > 0 && w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+      var sw = img.width, sh = img.height;
+      // Crop hesapla
+      var sx = 0, sy = 0, sW = sw, sH = sh;
+      if (cropVal === '1200x630') {
+        var targetR = 1200 / 630;
+        if (sw / sh > targetR) { sW = Math.round(sh * targetR); sx = Math.round((sw - sW) / 2); }
+        else { sH = Math.round(sw / targetR); sy = Math.round((sh - sH) / 2); }
+      } else if (cropVal) {
+        var parts = cropVal.split(':');
+        var targetR2 = parseInt(parts[0]) / parseInt(parts[1]);
+        if (sw / sh > targetR2) { sW = Math.round(sh * targetR2); sx = Math.round((sw - sW) / 2); }
+        else { sH = Math.round(sw / targetR2); sy = Math.round((sh - sH) / 2); }
+      }
+      var w = sW, h = sH;
+      if (cropVal === '1200x630') { w = 1200; h = 630; }
+      else if (maxW > 0 && w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+
       var canvas = document.createElement('canvas');
       canvas.width = w; canvas.height = h;
       var ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
+      ctx.drawImage(img, sx, sy, sW, sH, 0, 0, w, h);
       canvas.toBlob(function(blob) {
         var origSize = file.size;
         var newSize = blob.size;
         var pct = Math.round((1 - newSize / origSize) * 100);
         var color = pct > 0 ? '#38A169' : '#E53E3E';
         var outName = file.name.replace(/\.[^.]+$/, '') + ext;
-        var url = URL.createObjectURL(blob);
+        var newUrl = URL.createObjectURL(blob);
 
-        card.innerHTML = '<div style="display:flex;gap:16px;padding:16px;align-items:center;flex-wrap:wrap">' +
-          '<img src="' + url + '" style="width:80px;height:80px;object-fit:cover;border-radius:10px;flex-shrink:0">' +
-          '<div style="flex:1;min-width:180px">' +
-            '<div style="font-weight:700;font-size:.88rem;color:var(--text);margin-bottom:6px">' + outName + '</div>' +
-            '<div style="font-size:.75rem;color:var(--text-muted);line-height:1.7">' +
-              'Orijinal: <strong>' + icFormatSize(origSize) + '</strong> → Yeni: <strong>' + icFormatSize(newSize) + '</strong><br>' +
-              'Boyut: ' + w + ' x ' + h + 'px | Format: ' + format.toUpperCase() + '<br>' +
-              '<span style="color:' + color + ';font-weight:700">' + (pct > 0 ? '↓ %' + pct + ' küçüldü' : '↑ %' + Math.abs(pct) + ' büyüdü') + '</span>' +
+        // Toplu indirme listesine ekle
+        icCompressedFiles.push({ name: outName, url: newUrl, blob: blob });
+        icUpdateBulkBar();
+
+        // Kart içeriği — önizleme + karşılaştırma
+        var uid = 'ic_' + Date.now() + '_' + Math.random().toString(36).substr(2,4);
+        card.innerHTML =
+          '<div style="padding:16px">' +
+            // Önce/Sonra karşılaştırma
+            '<div style="position:relative;width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;margin-bottom:12px;cursor:col-resize;user-select:none;background:#111" id="' + uid + '-compare" onmousedown="icCompareStart(event,\'' + uid + '\')" ontouchstart="icCompareStart(event,\'' + uid + '\')">' +
+              '<img src="' + origDataUrl + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">' +
+              '<div style="position:absolute;top:0;right:0;bottom:0;overflow:hidden" id="' + uid + '-after">' +
+                '<img src="' + newUrl + '" style="position:absolute;top:0;right:0;height:100%;object-fit:cover">' +
+              '</div>' +
+              '<div style="position:absolute;top:0;bottom:0;width:3px;background:#fff;box-shadow:0 0 6px rgba(0,0,0,.5);cursor:col-resize;z-index:2" id="' + uid + '-line"></div>' +
+              '<span style="position:absolute;top:8px;left:8px;font-size:.6rem;font-weight:700;background:rgba(0,0,0,.6);color:#fff;padding:2px 8px;border-radius:6px;z-index:3">Önce</span>' +
+              '<span style="position:absolute;top:8px;right:8px;font-size:.6rem;font-weight:700;background:rgba(0,0,0,.6);color:#fff;padding:2px 8px;border-radius:6px;z-index:3">Sonra</span>' +
             '</div>' +
-          '</div>' +
-          '<a href="' + url + '" download="' + outName + '" class="btn btn-primary btn-sm" style="white-space:nowrap">⬇ İndir</a>' +
-        '</div>';
+            // Bilgi satırı
+            '<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">' +
+              '<div style="flex:1;min-width:180px">' +
+                '<div style="font-weight:700;font-size:.88rem;color:var(--text);margin-bottom:6px">' + outName + '</div>' +
+                '<div style="font-size:.75rem;color:var(--text-muted);line-height:1.7">' +
+                  'Orijinal: <strong>' + icFormatSize(origSize) + '</strong> (' + sw + '×' + sh + ') → Yeni: <strong>' + icFormatSize(newSize) + '</strong> (' + w + '×' + h + ')<br>' +
+                  'Format: ' + format.toUpperCase() + ' | Kalite: ' + Math.round(quality * 100) + '%' + (cropVal ? ' | Kırpma: ' + cropVal : '') + '<br>' +
+                  '<span style="color:' + color + ';font-weight:700">' + (pct > 0 ? '↓ %' + pct + ' küçüldü' : '↑ %' + Math.abs(pct) + ' büyüdü') + '</span>' +
+                '</div>' +
+              '</div>' +
+              '<a href="' + newUrl + '" download="' + outName + '" class="btn btn-primary btn-sm" style="white-space:nowrap">⬇ İndir</a>' +
+            '</div>' +
+          '</div>';
+
+        // Karşılaştırma slider'ı başlat
+        setTimeout(function() { icCompareInit(uid); }, 50);
       }, mimeType, quality);
     };
-    img.src = e.target.result;
+    img.src = origDataUrl;
   };
   reader.readAsDataURL(file);
+}
+
+// Önce/Sonra slider
+function icCompareInit(uid) {
+  var container = document.getElementById(uid + '-compare');
+  var afterDiv = document.getElementById(uid + '-after');
+  var line = document.getElementById(uid + '-line');
+  if (!container || !afterDiv || !line) return;
+  var w = container.offsetWidth;
+  var pos = 50;
+  afterDiv.style.width = '50%';
+  line.style.left = '50%';
+  // After içindeki img genişliğini container'a eşitle
+  var afterImg = afterDiv.querySelector('img');
+  if (afterImg) afterImg.style.width = w + 'px';
+}
+
+var _icCompareEl = null;
+function icCompareStart(e, uid) {
+  e.preventDefault();
+  _icCompareEl = uid;
+  var moveHandler = function(ev) {
+    var container = document.getElementById(_icCompareEl + '-compare');
+    if (!container) return;
+    var rect = container.getBoundingClientRect();
+    var clientX = ev.touches ? ev.touches[0].clientX : ev.clientX;
+    var pct = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+    document.getElementById(_icCompareEl + '-after').style.width = (100 - pct) + '%';
+    document.getElementById(_icCompareEl + '-line').style.left = pct + '%';
+  };
+  var upHandler = function() {
+    document.removeEventListener('mousemove', moveHandler);
+    document.removeEventListener('mouseup', upHandler);
+    document.removeEventListener('touchmove', moveHandler);
+    document.removeEventListener('touchend', upHandler);
+    _icCompareEl = null;
+  };
+  document.addEventListener('mousemove', moveHandler);
+  document.addEventListener('mouseup', upHandler);
+  document.addEventListener('touchmove', moveHandler);
+  document.addEventListener('touchend', upHandler);
+}
+
+function icUpdateBulkBar() {
+  var bar = document.getElementById('ic-bulk-bar');
+  var info = document.getElementById('ic-bulk-info');
+  if (icCompressedFiles.length > 1) {
+    bar.style.display = 'flex';
+    bar.style.alignItems = 'center';
+    var totalSize = icCompressedFiles.reduce(function(s, f) { return s + f.blob.size; }, 0);
+    info.textContent = icCompressedFiles.length + ' görsel · Toplam: ' + icFormatSize(totalSize);
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+async function icDownloadAll() {
+  if (icCompressedFiles.length === 0) return;
+  var btn = document.getElementById('ic-bulk-btn');
+  btn.disabled = true; btn.textContent = '⏳ Hazırlanıyor...';
+  try {
+    // JSZip yükle (yoksa CDN'den)
+    if (typeof JSZip === 'undefined') {
+      await new Promise(function(resolve, reject) {
+        var s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/jszip@3/dist/jszip.min.js';
+        s.onload = resolve; s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+    var zip = new JSZip();
+    icCompressedFiles.forEach(function(f) { zip.file(f.name, f.blob); });
+    var content = await zip.generateAsync({ type: 'blob' });
+    var url = URL.createObjectURL(content);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'gorseller-sikistirilmis.zip';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(icCompressedFiles.length + ' görsel ZIP olarak indirildi!', 'success');
+  } catch(err) {
+    showToast('ZIP oluşturulamadı: ' + err.message, 'error');
+  }
+  btn.disabled = false; btn.textContent = '📦 Tümünü ZIP Olarak İndir';
+}
+
+function icClearAll() {
+  icCompressedFiles = [];
+  document.getElementById('ic-results').innerHTML = '';
+  document.getElementById('ic-bulk-bar').style.display = 'none';
 }
 
 function icFormatSize(bytes) {
