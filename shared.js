@@ -3362,7 +3362,9 @@ function renderVillagePage(villageId) {
     nearbyVillages.forEach(function(vl) {
       var distText = '';
       if (vl._dist != null) {
-        distText = vl._dist < 1 ? Math.round(vl._dist * 1000) + ' m' : vl._dist.toFixed(1) + ' km';
+        var distM = Math.round(vl._dist * 1000);
+        if (distM < 200) distM = 200;
+        distText = vl._dist < 1 ? distM + ' m' : vl._dist.toFixed(1) + ' km';
       }
       bodyHtml += '<a href="koy-detay.html?id=' + vl.id + '" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 6px 20px rgba(26,39,68,.07)\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
       bodyHtml += '<span style="font-size:1.4rem;">' + (vl.emoji || '📍') + '</span>';
