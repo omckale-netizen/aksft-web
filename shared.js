@@ -625,17 +625,16 @@ function renderNav(opts = {}) {
     'sivrice-beach':        { g:'linear-gradient(160deg,#041420,#0A2C3C)',   cat:'beach',     catBg:'rgba(26,158,138,.1)', catC:'#1A9A8A',  catL:'Beach' },
   };
 
-  function getMekanPath(id) {
+  function getBasePath() {
     const p = window.location.pathname;
-    if (p.includes('/mekanlar/')) return 'detay.html?id=' + id;
-    if (p.includes('/rotalar/'))  return '../mekanlar/mekan-detay.html?id=' + id;
-    return 'mekanlar/mekan-detay.html?id=' + id;
+    if (p.includes('/mekanlar/') || p.includes('/rotalar/') || p.includes('/koyler/')) return '../';
+    return '';
+  }
+  function getMekanPath(id) {
+    return getBasePath() + 'mekanlar/mekan-detay.html?id=' + id;
   }
   function getMekanListPath() {
-    const p = window.location.pathname;
-    if (p.includes('/mekanlar/')) return '../mekanlar.html';
-    if (p.includes('/rotalar/'))  return '../mekanlar.html';
-    return 'mekanlar.html';
+    return getBasePath() + 'mekanlar.html';
   }
 
   window.updateSaveNavCount = function () {
@@ -770,10 +769,10 @@ function renderNav(opts = {}) {
   };
 
   function getYerPath(id) {
-    const p = window.location.pathname;
-    if (p.includes('/mekanlar/')) return '../yerler.html?id=' + id;
-    if (p.includes('/rotalar/'))  return '../yerler.html?id=' + id;
-    return 'yerler.html?id=' + id;
+    return getBasePath() + 'yerler.html?id=' + id;
+  }
+  function getKoyPath(id) {
+    return getBasePath() + 'koyler/koy-detay.html?id=' + id;
   }
 
   window.removePlaceSave = function (id, e) {
@@ -837,11 +836,16 @@ function renderNav(opts = {}) {
     });
     const allPlaces = placesFromData.concat(villagesAsSaved);
 
+    // Köyler ve yerler ayır
+    const onlyPlaces = allPlaces.filter(function(p) { return !p._isVillage; });
+    const onlyVillages = allPlaces.filter(function(p) { return p._isVillage; });
+
     // Filtre butonları oluştur
     const filterCats = new Set();
     filterCats.add('all');
     if (allVenues.length > 0) filterCats.add('mekanlar');
-    if (allPlaces.length > 0) filterCats.add('yerler');
+    if (onlyPlaces.length > 0) filterCats.add('yerler');
+    if (onlyVillages.length > 0) filterCats.add('koyler');
     allVenues.forEach(v => {
       filterCats.add('cat_' + (v.category || 'diger'));
     });
@@ -858,7 +862,8 @@ function renderNav(opts = {}) {
     let html = '<div style="display:flex;flex-wrap:wrap;gap:5px;padding:0 0 12px;border-bottom:1px solid rgba(26,39,68,.06);margin-bottom:8px;">';
     html += '<button class="sd-filter-btn' + (sdFilter === 'all' ? ' active' : '') + '" onclick="sdFilterBy(\'all\')">Tümü</button>';
     if (allVenues.length > 0) html += '<button class="sd-filter-btn' + (sdFilter === 'mekanlar' ? ' active' : '') + '" onclick="sdFilterBy(\'mekanlar\')">🏪 Mekanlar</button>';
-    if (allPlaces.length > 0) html += '<button class="sd-filter-btn' + (sdFilter === 'yerler' ? ' active' : '') + '" onclick="sdFilterBy(\'yerler\')">📍 Yerler</button>';
+    if (onlyPlaces.length > 0) html += '<button class="sd-filter-btn' + (sdFilter === 'yerler' ? ' active' : '') + '" onclick="sdFilterBy(\'yerler\')">📍 Yerler</button>';
+    if (onlyVillages.length > 0) html += '<button class="sd-filter-btn' + (sdFilter === 'koyler' ? ' active' : '') + '" onclick="sdFilterBy(\'koyler\')">🏘 Köyler</button>';
     Object.keys(CAT_LABELS_SD).forEach(cat => {
       var info = CAT_LABELS_SD[cat];
       html += '<button class="sd-filter-btn' + (sdFilter === 'cat_' + cat ? ' active' : '') + '" onclick="sdFilterBy(\'cat_' + cat + '\')">' + info.emoji + ' ' + info.label + '</button>';
@@ -901,16 +906,25 @@ function renderNav(opts = {}) {
       }
     }
 
-    // Yerler
+    // Yerler (köyler hariç)
     const showPlaces = sdFilter === 'all' || sdFilter === 'yerler';
-    if (showPlaces && allPlaces.length > 0) {
-      const places = allPlaces;
-      html += '<div style="display:flex;align-items:center;gap:7px;padding:16px 2px 8px;"><span style="font-size:.7rem;font-weight:800;color:var(--navy);">📍 Yerler</span><span style="font-size:.6rem;font-weight:700;padding:1px 7px;border-radius:999px;background:rgba(26,39,68,.08);color:var(--navy);">' + savedPlaces.size + '</span><div style="flex:1;height:1px;background:rgba(26,39,68,.08);"></div></div>';
-      html += places.map(p => {
+    if (showPlaces && onlyPlaces.length > 0) {
+      html += '<div style="display:flex;align-items:center;gap:7px;padding:16px 2px 8px;"><span style="font-size:.7rem;font-weight:800;color:var(--navy);">📍 Yerler</span><span style="font-size:.6rem;font-weight:700;padding:1px 7px;border-radius:999px;background:rgba(26,39,68,.08);color:var(--navy);">' + onlyPlaces.length + '</span><div style="flex:1;height:1px;background:rgba(26,39,68,.08);"></div></div>';
+      html += onlyPlaces.map(p => {
         const hasPhoto = p.image && p.image.length > 0;
         const imgContent = hasPhoto ? '<img src="' + p.image + '" onload="this.classList.add(\'sd-loaded\')">' : p.emoji;
-        var pHref = p._isVillage ? (base + 'koyler/koy-detay.html?id=' + p.id) : getYerPath(p.id);
-        return '<a class="sd-venue" href="' + pHref + '"><div class="sd-venue-img" style="background:linear-gradient(135deg,#2A3F6A,#1A2744);">' + imgContent + '</div><div class="sd-venue-info"><div class="sd-venue-name">' + p.title + (p._isVillage ? ' <span style="font-size:.5rem;padding:1px 6px;border-radius:999px;background:rgba(90,122,86,.1);color:#5A7A56;font-weight:700;">Köy</span>' : '') + '</div><div class="sd-venue-loc">📍 ' + (p.location || '') + '</div></div><button class="sd-venue-remove" onclick="removePlaceSave(\'' + escAttr(p.id) + '\',event)" aria-label="Kaldır">✕</button></a>';
+        return '<a class="sd-venue" href="' + getYerPath(p.id) + '"><div class="sd-venue-img" style="background:linear-gradient(135deg,#2A3F6A,#1A2744);">' + imgContent + '</div><div class="sd-venue-info"><div class="sd-venue-name">' + p.title + '</div><div class="sd-venue-loc">📍 ' + (p.location || '') + '</div></div><button class="sd-venue-remove" onclick="removePlaceSave(\'' + escAttr(p.id) + '\',event)" aria-label="Kaldır">✕</button></a>';
+      }).join('');
+    }
+
+    // Köyler
+    const showVillages = sdFilter === 'all' || sdFilter === 'koyler';
+    if (showVillages && onlyVillages.length > 0) {
+      html += '<div style="display:flex;align-items:center;gap:7px;padding:16px 2px 8px;"><span style="font-size:.7rem;font-weight:800;color:var(--navy);">🏘 Köyler</span><span style="font-size:.6rem;font-weight:700;padding:1px 7px;border-radius:999px;background:rgba(90,122,86,.1);color:#5A7A56;">' + onlyVillages.length + '</span><div style="flex:1;height:1px;background:rgba(26,39,68,.08);"></div></div>';
+      html += onlyVillages.map(p => {
+        const hasPhoto = p.image && p.image.length > 0;
+        const imgContent = hasPhoto ? '<img src="' + p.image + '" onload="this.classList.add(\'sd-loaded\')">' : p.emoji;
+        return '<a class="sd-venue" href="' + getKoyPath(p.id) + '"><div class="sd-venue-img" style="background:linear-gradient(135deg,#1A2744,#243255);">' + imgContent + '</div><div class="sd-venue-info"><div class="sd-venue-name">' + p.title + '</div><div class="sd-venue-loc">📍 Ayvacık, Çanakkale</div></div><button class="sd-venue-remove" onclick="removePlaceSave(\'' + escAttr(p.id) + '\',event)" aria-label="Kaldır">✕</button></a>';
       }).join('');
     }
 
