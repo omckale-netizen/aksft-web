@@ -1975,78 +1975,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
           <div class="form-group">
             <label>Konum</label>
-            <input type="text" id="f-location" list="konum-list" placeholder="Konum secin veya yazin">
-            <datalist id="konum-list">
-              <option value="Adatepe">
-              <option value="Ahmetçe">
-              <option value="Ahmetler">
-              <option value="Akçin">
-              <option value="Arıklı">
-              <option value="Babadere">
-              <option value="Babakale">
-              <option value="Bademli">
-              <option value="Baharlar">
-              <option value="Bahçedere">
-              <option value="Balabanlı">
-              <option value="Behramkale">
-              <option value="Bektaş">
-              <option value="Bilaller">
-              <option value="Budaklar">
-              <option value="Büyükhusun">
-              <option value="Cemaller">
-              <option value="Demirciköy">
-              <option value="Dibekli">
-              <option value="Erecek">
-              <option value="Gülpınar">
-              <option value="Güzelköy">
-              <option value="Hüseyinfakı">
-              <option value="Kayalar">
-              <option value="Keçikaya">
-              <option value="Kestanelik">
-              <option value="Kocaköy">
-              <option value="Korubaşı">
-              <option value="Koyunevi">
-              <option value="Kozlu">
-              <option value="Kulfal">
-              <option value="Kuruoba">
-              <option value="Kösedere">
-              <option value="Küçükhusun">
-              <option value="Küçükçetmi">
-              <option value="Kırca">
-              <option value="Kısacık">
-              <option value="Misvak">
-              <option value="Naldöken">
-              <option value="Nusratlı">
-              <option value="Paşaköy">
-              <option value="Pınardere">
-              <option value="Sapanca">
-              <option value="Sazlı">
-              <option value="Söğütlü">
-              <option value="Süleymanköy">
-              <option value="Tabaklar">
-              <option value="Tamış">
-              <option value="Tartaşık">
-              <option value="Taşağıl">
-              <option value="Taşboğaz">
-              <option value="Tuzla">
-              <option value="Tuztaşı">
-              <option value="Uzunalan">
-              <option value="Yeniçam">
-              <option value="Yeşilyurt">
-              <option value="Yukarıköy">
-              <option value="Çakmaklar">
-              <option value="Çaltı">
-              <option value="Çamkalabak">
-              <option value="Çamköy">
-              <option value="Çınarpınar">
-              <option value="İlyasfakı">
-              <option value="Şapköy">
-              <option value="Assos Antik Liman">
-              <option value="Kadırga Koyu">
-              <option value="Sivrice Koyu">
-              <option value="Ayvacık Merkez">
-              <option value="Küçükkuyu">
-            </datalist>
+            <select id="f-location">
+              <option value="">Seçin</option>
+            </select>
           </div>
         </div>
         <div class="form-group">
@@ -3202,6 +3133,7 @@ function initApp() {
   }
   setupDragDrop();
   setupBackupDragDrop();
+  populateLocationDropdown();
   try { initNotifBadge(); } catch(e) {}
   // Süresi dolan premium mekanları otomatik temizle
   cleanExpiredPremiums();
@@ -4947,11 +4879,56 @@ function autoId() {
   }
 }
 
+function populateLocationDropdown() {
+  var sel = document.getElementById('f-location');
+  var currentVal = sel.value;
+  var all = (draftData.villages || []).slice().sort(function(a, b) { return (a.title || '').localeCompare(b.title || '', 'tr'); });
+  var koyler = all.filter(function(v) { return !v.type || v.type === 'koy'; });
+  var beldeler = all.filter(function(v) { return v.type === 'belde'; });
+  var ayvacikMah = all.filter(function(v) { return v.type === 'mahalle' && v.parent === 'ayvacik'; });
+  var kucukkuyuMah = all.filter(function(v) { return v.type === 'mahalle' && v.parent === 'kucukkuyu'; });
+  var html = '<option value="">Seçin</option>';
+  if (koyler.length) {
+    html += '<optgroup label="🏘 Köyler">';
+    koyler.forEach(function(vl) { html += '<option value="' + vl.title + '">' + (vl.emoji || '📍') + ' ' + vl.title + '</option>'; });
+    html += '</optgroup>';
+  }
+  if (beldeler.length) {
+    html += '<optgroup label="🏙 Beldeler">';
+    beldeler.forEach(function(vl) { html += '<option value="' + vl.title + '">' + (vl.emoji || '🏙') + ' ' + vl.title + '</option>'; });
+    html += '</optgroup>';
+  }
+  if (ayvacikMah.length) {
+    html += '<optgroup label="📍 Ayvacık Mahalleleri">';
+    ayvacikMah.forEach(function(vl) { html += '<option value="' + vl.title + '">' + (vl.emoji || '📍') + ' ' + vl.title + '</option>'; });
+    html += '</optgroup>';
+  }
+  if (kucukkuyuMah.length) {
+    html += '<optgroup label="📍 Küçükkuyu Mahalleleri">';
+    kucukkuyuMah.forEach(function(vl) { html += '<option value="' + vl.title + '">' + (vl.emoji || '📍') + ' ' + vl.title + '</option>'; });
+    html += '</optgroup>';
+  }
+  html += '<optgroup label="📌 Diğer">';
+  html += '<option value="Assos Antik Liman">⚓ Assos Antik Liman</option>';
+  html += '<option value="Kadırga Koyu">🌊 Kadırga Koyu</option>';
+  html += '<option value="Sivrice Koyu">🌊 Sivrice Koyu</option>';
+  html += '<option value="Ayvacık Merkez">🏙 Ayvacık Merkez</option>';
+  html += '</optgroup>';
+  sel.innerHTML = html;
+  sel.value = currentVal;
+  // Bot formları için datalist güncelle
+  var dl = document.getElementById('konum-list');
+  if (!dl) { dl = document.createElement('datalist'); dl.id = 'konum-list'; document.body.appendChild(dl); }
+  dl.innerHTML = all.map(function(vl) { return '<option value="' + vl.title + '">'; }).join('') +
+    '<option value="Assos Antik Liman"><option value="Kadırga Koyu"><option value="Sivrice Koyu"><option value="Ayvacık Merkez">';
+}
+
 function openVenueModal(id) {
   editingVenueId = id || null;
   pendingImages = [];
   const form = document.getElementById('venue-form');
   form.reset();
+  populateLocationDropdown();
 
   if (id) {
     const v = draftData.venues.find(x => x.id === id);
