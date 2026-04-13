@@ -5577,10 +5577,33 @@ function openVPModal(id) {
   if (isPlaces) {
     var villageSelect = document.getElementById('vpf-villageId');
     var currentVal = villageSelect.value;
-    villageSelect.innerHTML = '<option value="">Seçin (opsiyonel)</option>';
-    (draftData.villages || []).slice().sort(function(a, b) { return (a.title || '').localeCompare(b.title || '', 'tr'); }).forEach(function(vl) {
-      villageSelect.innerHTML += '<option value="' + vl.id + '">' + (vl.emoji || '📍') + ' ' + vl.title + '</option>';
-    });
+    var all = (draftData.villages || []).slice().sort(function(a, b) { return (a.title || '').localeCompare(b.title || '', 'tr'); });
+    var koyler = all.filter(function(v) { return !v.type || v.type === 'koy'; });
+    var beldeler = all.filter(function(v) { return v.type === 'belde'; });
+    var ayvacikMah = all.filter(function(v) { return v.type === 'mahalle' && v.parent === 'ayvacik'; });
+    var kucukkuyuMah = all.filter(function(v) { return v.type === 'mahalle' && v.parent === 'kucukkuyu'; });
+    var html = '<option value="">Seçin (opsiyonel)</option>';
+    if (koyler.length) {
+      html += '<optgroup label="🏘 Köyler">';
+      koyler.forEach(function(vl) { html += '<option value="' + vl.id + '">' + (vl.emoji || '📍') + ' ' + vl.title + '</option>'; });
+      html += '</optgroup>';
+    }
+    if (beldeler.length) {
+      html += '<optgroup label="🏙 Beldeler">';
+      beldeler.forEach(function(vl) { html += '<option value="' + vl.id + '">' + (vl.emoji || '🏙') + ' ' + vl.title + '</option>'; });
+      html += '</optgroup>';
+    }
+    if (ayvacikMah.length) {
+      html += '<optgroup label="📍 Ayvacık Mahalleleri">';
+      ayvacikMah.forEach(function(vl) { html += '<option value="' + vl.id + '">' + (vl.emoji || '📍') + ' ' + vl.title + '</option>'; });
+      html += '</optgroup>';
+    }
+    if (kucukkuyuMah.length) {
+      html += '<optgroup label="📍 Küçükkuyu Mahalleleri">';
+      kucukkuyuMah.forEach(function(vl) { html += '<option value="' + vl.id + '">' + (vl.emoji || '📍') + ' ' + vl.title + '</option>'; });
+      html += '</optgroup>';
+    }
+    villageSelect.innerHTML = html;
     villageSelect.value = currentVal;
   }
 
