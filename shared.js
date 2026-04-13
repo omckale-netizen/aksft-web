@@ -830,7 +830,12 @@ function renderNav(opts = {}) {
 
     // Tüm kaydedilenleri hazırla
     const allVenues = (typeof DATA !== 'undefined' ? DATA.venues : []).filter(v => savedVenues.has(v.id));
-    const allPlaces = (typeof DATA !== 'undefined' ? DATA.places : []).filter(p => savedPlaces.has(p.id));
+    // Places + kaydedilen köyler birleştir
+    const placesFromData = (typeof DATA !== 'undefined' ? DATA.places : []).filter(p => savedPlaces.has(p.id));
+    const villagesAsSaved = (typeof DATA !== 'undefined' ? DATA.villages : []).filter(function(vl) { return savedPlaces.has(vl.id); }).map(function(vl) {
+      return { id: vl.id, title: vl.title, emoji: vl.emoji || '🏘', shortDesc: vl.shortDesc || '', image: vl.image || '', location: 'Ayvacık', _isVillage: true };
+    });
+    const allPlaces = placesFromData.concat(villagesAsSaved);
 
     // Filtre butonları oluştur
     const filterCats = new Set();
@@ -904,7 +909,8 @@ function renderNav(opts = {}) {
       html += places.map(p => {
         const hasPhoto = p.image && p.image.length > 0;
         const imgContent = hasPhoto ? '<img src="' + p.image + '" onload="this.classList.add(\'sd-loaded\')">' : p.emoji;
-        return '<a class="sd-venue" href="' + getYerPath(p.id) + '"><div class="sd-venue-img" style="background:linear-gradient(135deg,#2A3F6A,#1A2744);">' + imgContent + '</div><div class="sd-venue-info"><div class="sd-venue-name">' + p.title + '</div><div class="sd-venue-loc">📍 ' + (p.location || '') + '</div></div><button class="sd-venue-remove" onclick="removePlaceSave(\'' + escAttr(p.id) + '\',event)" aria-label="Kaldır">✕</button></a>';
+        var pHref = p._isVillage ? (base + 'koyler/koy-detay.html?id=' + p.id) : getYerPath(p.id);
+        return '<a class="sd-venue" href="' + pHref + '"><div class="sd-venue-img" style="background:linear-gradient(135deg,#2A3F6A,#1A2744);">' + imgContent + '</div><div class="sd-venue-info"><div class="sd-venue-name">' + p.title + (p._isVillage ? ' <span style="font-size:.5rem;padding:1px 6px;border-radius:999px;background:rgba(90,122,86,.1);color:#5A7A56;font-weight:700;">Köy</span>' : '') + '</div><div class="sd-venue-loc">📍 ' + (p.location || '') + '</div></div><button class="sd-venue-remove" onclick="removePlaceSave(\'' + escAttr(p.id) + '\',event)" aria-label="Kaldır">✕</button></a>';
       }).join('');
     }
 
