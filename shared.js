@@ -3151,10 +3151,18 @@ function renderVillagePage(villageId) {
   heroHtml += '<span style="font-size:2.2rem;">' + (v.emoji || '📍') + '</span>';
   heroHtml += '</div>';
 
-  // Title
+  // Title — türe göre ek
   var titleLower = (v.title || '').toLowerCase();
-  var hasKoy = titleLower.includes('köy') || titleLower.includes('koy');
-  var heroTitle = (v.title || '') + (hasKoy ? '' : ' Köyü');
+  var vType = v.type || 'koy';
+  var heroTitle = v.title || '';
+  if (vType === 'belde') {
+    if (!titleLower.includes('belde')) heroTitle += ' Beldesi';
+  } else if (vType === 'mahalle') {
+    if (!titleLower.includes('mahalle')) heroTitle = 'Ayvacık ' + heroTitle + ' Mahallesi';
+    else heroTitle = 'Ayvacık ' + heroTitle;
+  } else {
+    if (!titleLower.includes('köy') && !titleLower.includes('koy')) heroTitle += ' Köyü';
+  }
   heroHtml += '<h1 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;font-size:clamp(2rem,5vw,3.2rem);color:#F5EDE0;letter-spacing:-.03em;line-height:1.05;margin-bottom:8px;">' + heroTitle + '</h1>';
 
   // Location

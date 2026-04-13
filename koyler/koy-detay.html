@@ -52,7 +52,13 @@ function pageInit() {
 
   var village = (window.DATA?.villages || []).find(function(v) { return v.id === villageId; });
   if (village) {
-    var seoTitle = village.title + ' Köyü — Assos Köyleri | Assos\'u Keşfet';
+    var vt = village.type || 'koy';
+    var tl = village.title.toLowerCase();
+    var seoName = village.title;
+    if (vt === 'belde') { if (!tl.includes('belde')) seoName += ' Beldesi'; }
+    else if (vt === 'mahalle') { seoName = 'Ayvacık ' + (tl.includes('mahalle') ? village.title : village.title + ' Mahallesi'); }
+    else { if (!tl.includes('köy') && !tl.includes('koy')) seoName += ' Köyü'; }
+    var seoTitle = seoName + ' — Assos Bölgesi | Assos\'u Keşfet';
     var seoDesc = village.title + ', Ayvacık bölgesinde';
     if (village.shortDesc) seoDesc += '. ' + village.shortDesc;
     if (village.tags && village.tags.length) seoDesc += '. ' + village.tags.join(', ');

@@ -1061,6 +1061,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             <!-- Village extra fields -->
             <div id="vpf-village-extras" style="display:none">
               <div class="form-group">
+                <label>Yerleşim Türü</label>
+                <select id="vpf-village-type">
+                  <option value="koy">Köy</option>
+                  <option value="belde">Belde</option>
+                  <option value="mahalle">Mahalle</option>
+                </select>
+              </div>
+              <div class="form-group">
                 <label>Öne Çıkanlar <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(virgülle ayırın)</span></label>
                 <input type="text" id="vpf-highlights" placeholder="Athena Tapınağı, Taş sokaklar, Gün batımı">
               </div>
@@ -5563,6 +5571,7 @@ function openVPModal(id) {
       document.getElementById('vpf-villageId').value = item.villageId || '';
       onVillageSelect();
     } else {
+      document.getElementById('vpf-village-type').value = item.type || 'koy';
       document.getElementById('vpf-highlights').value = (item.highlights || []).join(', ');
       document.getElementById('vpf-showInPlaces').checked = !!item.showInPlaces;
     }
@@ -5689,6 +5698,7 @@ async function saveVP(e) {
       bg: 'linear-gradient(160deg,#1A2744,#243255)',
       lat: parseFloat(document.getElementById('vpf-lat').value) || null,
       lng: parseFloat(document.getElementById('vpf-lng').value) || null,
+      type: document.getElementById('vpf-village-type').value || 'koy',
       highlights: highlightsStr ? highlightsStr.split(',').map(h => h.trim()).filter(Boolean) : [],
       showInPlaces: document.getElementById('vpf-showInPlaces').checked,
     };
