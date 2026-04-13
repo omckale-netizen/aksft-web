@@ -2452,7 +2452,7 @@ function renderVenuePage(venueId) {
           <h1 class="vp-hero-title">${v.title}${isPremiumActive(v) ? ' <span style="font-size:.3em;font-weight:800;letter-spacing:.06em;margin-left:6px;padding:3px 8px;border-radius:3px;background:linear-gradient(135deg,#C9963A,#E8C46A);color:#5C3D0E;vertical-align:middle;text-transform:uppercase;">Premium İşletme</span>' : ''}</h1>
           <div class="vp-hero-loc" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <span>📍 ${v.address || v.location + ', Ayvacık, Çanakkale'}</span>
-            <span style="font-size:.68rem;font-weight:600;padding:3px 10px;border-radius:999px;background:rgba(245,237,224,.1);color:rgba(245,237,224,.65);border:1px solid rgba(245,237,224,.12);">${v.location}</span>
+            <span style="font-size:.68rem;font-weight:600;padding:3px 10px;border-radius:999px;background:rgba(245,237,224,.1);color:rgba(245,237,224,.65);border:1px solid rgba(245,237,224,.12);">${(function(){var vl=(DATA.villages||[]).find(function(x){return x.title===v.location;});if(vl&&vl.type==='mahalle'){var pn=vl.parent==='kucukkuyu'?'Küçükkuyu':'Ayvacık';var tl=vl.title.toLowerCase();return tl.includes('mahalle')?pn+' '+vl.title:pn+' '+vl.title+' Mah.';}return v.location;})()}</span>
           </div>
           <div class="vp-hero-chips">
             ${openBadge}
