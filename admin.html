@@ -1043,7 +1043,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             <!-- Village link — only for places -->
             <div class="form-group" id="vpf-village-group">
               <label>Bağlı Köy <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(bu yer hangi köyde?)</span></label>
-              <select id="vpf-villageId">
+              <select id="vpf-villageId" onchange="onVillageSelect()">
                 <option value="">Seçin (opsiyonel)</option>
               </select>
             </div>
@@ -5501,6 +5501,19 @@ function renderVPTable() {
       '</tr>').join('');
 }
 
+function onVillageSelect() {
+  var sel = document.getElementById('vpf-villageId');
+  var locGroup = document.getElementById('vpf-loc-group');
+  var locInput = document.getElementById('vpf-location');
+  if (sel.value) {
+    var vl = (draftData.villages || []).find(function(v) { return v.id === sel.value; });
+    if (vl) locInput.value = vl.title;
+    locGroup.style.display = 'none';
+  } else {
+    locGroup.style.display = '';
+  }
+}
+
 function autoVPId() {
   if (!editingVPId) {
     document.getElementById('vpf-id').value = generateId(document.getElementById('vpf-title').value);
@@ -5548,6 +5561,7 @@ function openVPModal(id) {
     if (isPlaces) {
       document.getElementById('vpf-category').value = item.category || '';
       document.getElementById('vpf-villageId').value = item.villageId || '';
+      onVillageSelect();
     } else {
       document.getElementById('vpf-highlights').value = (item.highlights || []).join(', ');
       document.getElementById('vpf-showInPlaces').checked = !!item.showInPlaces;
