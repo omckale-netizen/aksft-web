@@ -306,32 +306,42 @@ function pageInit() {
 
   /* ── Render belde & mahalleler ── */
   function renderBeldeMahalle() {
-    const items = (DATA.villages || []).filter(v => v.type === 'belde' || v.type === 'mahalle').sort((a, b) => {
-      if (a.type !== b.type) return a.type === 'belde' ? -1 : 1;
-      return a.title.localeCompare(b.title, 'tr');
-    });
+    const all = DATA.villages || [];
     const grid = document.getElementById('grid-belde-mahalle');
-    if (!grid || items.length === 0) return;
-    const TYPE_BADGE = {
-      belde: { icon: '🏙', label: 'Belde', bg: 'rgba(26,107,138,.08)', color: '#1A6B8A' },
-      mahalle: { icon: '📍', label: 'Mahalle', bg: 'rgba(196,82,26,.06)', color: '#C4521A' }
-    };
-    const PARENT_LABEL = { ayvacik: 'Ayvacık', kucukkuyu: 'Küçükkuyu' };
-    grid.innerHTML = items.map((v, i) => {
-      const tb = TYPE_BADGE[v.type] || TYPE_BADGE.mahalle;
-      const parentText = v.parent ? PARENT_LABEL[v.parent] || '' : '';
+    if (!grid) return;
+
+    const beldeler = all.filter(v => v.type === 'belde').sort((a, b) => a.title.localeCompare(b.title, 'tr'));
+    const ayvacikMah = all.filter(v => v.type === 'mahalle' && v.parent === 'ayvacik').sort((a, b) => a.title.localeCompare(b.title, 'tr'));
+    const kucukkuyuMah = all.filter(v => v.type === 'mahalle' && v.parent === 'kucukkuyu').sort((a, b) => a.title.localeCompare(b.title, 'tr'));
+
+    function cardHtml(v, i) {
       return `<div class="village-card-compact fade-up" data-delay="${Math.min(i * 0.04, 0.5)}" onclick="openVillage('${v.id}')" style="padding:14px 16px;">
-        <span style="font-size:1.3rem;flex-shrink:0;">${v.emoji || tb.icon}</span>
+        <span style="font-size:1.3rem;flex-shrink:0;">${v.emoji || '📍'}</span>
         <div style="min-width:0;flex:1;">
           <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.8rem;color:var(--navy);">${v.title}</div>
-          <div style="display:flex;align-items:center;gap:6px;margin-top:3px;">
-            <span style="font-size:.58rem;font-weight:700;padding:2px 7px;border-radius:999px;background:${tb.bg};color:${tb.color};">${tb.label}</span>
-            ${parentText ? '<span style="font-size:.6rem;color:var(--text-mid);">' + parentText + '</span>' : ''}
-          </div>
         </div>
         <span style="font-size:.8rem;color:var(--text-soft);">→</span>
       </div>`;
-    }).join('');
+    }
+
+    var html = '';
+
+    if (beldeler.length > 0) {
+      html += '<div style="grid-column:1/-1;margin-bottom:4px;margin-top:8px;"><h3 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.9rem;color:var(--navy);display:flex;align-items:center;gap:8px;">🏙 Beldeler</h3></div>';
+      html += beldeler.map(cardHtml).join('');
+    }
+
+    if (ayvacikMah.length > 0) {
+      html += '<div style="grid-column:1/-1;margin-bottom:4px;margin-top:20px;"><h3 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.9rem;color:var(--navy);display:flex;align-items:center;gap:8px;">📍 Ayvacık Merkez Mahalleleri</h3></div>';
+      html += ayvacikMah.map(cardHtml).join('');
+    }
+
+    if (kucukkuyuMah.length > 0) {
+      html += '<div style="grid-column:1/-1;margin-bottom:4px;margin-top:20px;"><h3 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.9rem;color:var(--navy);display:flex;align-items:center;gap:8px;">📍 Küçükkuyu Beldesi Mahalleleri</h3></div>';
+      html += kucukkuyuMah.map(cardHtml).join('');
+    }
+
+    grid.innerHTML = html;
   }
 
   /* ── Init ── */
