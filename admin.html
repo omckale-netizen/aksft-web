@@ -573,14 +573,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <h2 style="margin:0;font-size:1.5rem;" id="dash-greeting">Hoş Geldiniz</h2>
           <p class="page-sub" style="margin:0;margin-top:4px;" id="dash-date"></p>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="dash-action-btn" onclick="showPage('venues');openVenueModal()" style="min-width:auto">
-            <span class="da-icon" style="background:var(--terra)">+</span><span>Yeni Mekan</span>
-          </button>
-          <button class="dash-action-btn" onclick="showPage('routes');openRouteModal()" style="min-width:auto">
-            <span class="da-icon" style="background:#1A6B8A">🗺</span><span>Yeni Rota</span>
-          </button>
-        </div>
       </div>
 
       <!-- Uyarılar -->
@@ -591,42 +583,54 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
       <!-- Hızlı İşlemler -->
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;">
-        <button class="dash-action-btn" onclick="showPage('imgcompress')" style="flex:1;min-width:120px">
-          <span class="da-icon" style="background:var(--blue)">🖼</span><span>Görsel Sıkıştır</span>
+        <button class="dash-action-btn" onclick="showPage('venues');openVenueModal()" style="flex:1;min-width:120px">
+          <span class="da-icon" style="background:var(--terra)">+</span><span>Yeni Mekan</span>
+        </button>
+        <button class="dash-action-btn" onclick="showPage('villages');openVillageModal()" style="flex:1;min-width:120px">
+          <span class="da-icon" style="background:var(--green)">🏘</span><span>Yeni Yerleşim</span>
         </button>
         <button class="dash-action-btn" onclick="showPage('blog');openBlogModal()" style="flex:1;min-width:120px">
           <span class="da-icon" style="background:#8B5CF6">✍️</span><span>Yeni Yazı</span>
         </button>
-        <button class="dash-action-btn" onclick="showPage('security')" style="flex:1;min-width:120px">
-          <span class="da-icon" style="background:#1A2744">🛡️</span><span>Güvenlik</span>
+        <button class="dash-action-btn" onclick="showPage('imgcompress')" style="flex:1;min-width:120px">
+          <span class="da-icon" style="background:var(--blue)">🖼</span><span>Görsel Sıkıştır</span>
         </button>
       </div>
 
-      <!-- Üst grid: Mesajlar + Güvenlik + Blog -->
+      <!-- Üst grid: Son Mesajlar + Son Eklenenler + Blog -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;" class="dash-3col">
-        <!-- Son Mesajlar -->
         <div class="panel-card" style="margin:0">
           <div class="panel-card-head" style="justify-content:space-between"><h3>✉️ Son Mesajlar</h3><a onclick="showPage('messages')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Tümü →</a></div>
           <div id="dash-messages"></div>
         </div>
-        <!-- Güvenlik Özeti -->
         <div class="panel-card" style="margin:0">
-          <div class="panel-card-head" style="justify-content:space-between"><h3>🛡️ Güvenlik</h3><a onclick="showPage('security')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Detay →</a></div>
-          <div id="dash-security"></div>
+          <div class="panel-card-head" style="justify-content:space-between"><h3>🕐 Son Eklenenler</h3><a onclick="showPage('venues')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Tümü →</a></div>
+          <div id="recent-venues"></div>
         </div>
-        <!-- Blog Özeti -->
         <div class="panel-card" style="margin:0">
           <div class="panel-card-head" style="justify-content:space-between"><h3>✍️ Blog</h3><a onclick="showPage('blog')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Tümü →</a></div>
           <div id="dash-blog"></div>
         </div>
       </div>
 
-      <!-- Orta grid: Kategori + Öne Çıkanlar + Premium -->
+      <!-- Orta grid: Kategori + Güvenlik + Görselsiz -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;" class="dash-3col">
         <div class="panel-card" style="margin:0">
           <div class="panel-card-head"><h3>📊 Kategori Dağılımı</h3></div>
           <div id="dash-categories"></div>
         </div>
+        <div class="panel-card" style="margin:0">
+          <div class="panel-card-head" style="justify-content:space-between"><h3>🛡️ Güvenlik</h3><a onclick="showPage('security')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Detay →</a></div>
+          <div id="dash-security"></div>
+        </div>
+        <div class="panel-card" style="margin:0">
+          <div class="panel-card-head"><h3>📷 Görselsiz Mekanlar</h3></div>
+          <div id="dash-no-images"></div>
+        </div>
+      </div>
+
+      <!-- Alt grid: Öne Çıkanlar + Premium + Favori İstatistik -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;" class="dash-3col">
         <div class="panel-card" style="margin:0">
           <div class="panel-card-head"><h3>⭐ Öne Çıkanlar</h3></div>
           <div id="dash-featured"></div>
@@ -635,17 +639,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <div class="panel-card-head"><h3>👑 Premium Mekanlar</h3></div>
           <div id="dash-premium"></div>
         </div>
-      </div>
-
-      <!-- Alt grid: Son Eklenenler + Görselsiz + Onay Bekleyenler -->
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;" class="dash-3col">
         <div class="panel-card" style="margin:0">
-          <div class="panel-card-head"><h3>🕐 Son Eklenenler</h3></div>
-          <div id="recent-venues"></div>
-        </div>
-        <div class="panel-card" style="margin:0">
-          <div class="panel-card-head"><h3>📷 Görselsiz Mekanlar</h3></div>
-          <div id="dash-no-images"></div>
+          <div class="panel-card-head"><h3>📈 İçerik Özeti</h3></div>
+          <div id="dash-content-summary"></div>
         </div>
       </div>
 
@@ -729,16 +725,16 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
     <!-- ══════ GORSEL SIKISTIRMA ══════ -->
     <div class="admin-page" id="page-imgcompress">
-      <h2>Gorsel Sikistir</h2>
-      <p class="page-sub">Gorselleri yukleyin, kalite ve boyut ayarlayip sikistirilmis halini indirin.</p>
+      <h2>Görsel Sıkıştır</h2>
+      <p class="page-sub">Görselleri yükleyin, kalite ve boyut ayarlayıp sıkıştırılmış halini indirin.</p>
 
       <div class="panel-card" style="max-width:800px">
-        <div class="panel-card-head"><h3>Gorsel Yukle</h3></div>
+        <div class="panel-card-head"><h3>Görsel Yükle</h3></div>
         <div style="padding:20px">
           <div id="ic-drop-zone" style="border:2px dashed var(--input-border,rgba(26,39,68,.15));border-radius:14px;padding:40px 24px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(26,39,68,.02)" onclick="document.getElementById('ic-file-input').click()" ondragover="event.preventDefault();this.style.borderColor='var(--terra)';this.style.background='rgba(196,82,26,.04)'" ondragleave="this.style.borderColor='';this.style.background=''" ondrop="event.preventDefault();this.style.borderColor='';this.style.background='';icHandleFiles(event.dataTransfer.files)">
             <span style="font-size:2.5rem;display:block;margin-bottom:8px">📷</span>
-            <p style="font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:4px">Gorselleri surukleyin veya tiklayin</p>
-            <p style="font-size:.72rem;color:var(--text-muted)">JPG, PNG, WebP - Coklu secim desteklenir</p>
+            <p style="font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:4px">Görselleri sürükleyin veya tıklayın</p>
+            <p style="font-size:.72rem;color:var(--text-muted)">JPG, PNG, WebP · Çoklu seçim desteklenir</p>
           </div>
           <input type="file" id="ic-file-input" multiple accept="image/jpeg,image/png,image/webp" style="display:none" onchange="icHandleFiles(this.files)">
 
@@ -751,7 +747,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               </div>
             </div>
             <div class="form-group" style="min-width:120px;margin:0">
-              <label>Maks Genislik (px)</label>
+              <label>Maks Genişlik (px)</label>
               <select id="ic-max-width" style="padding:8px 12px">
                 <option value="0">Orijinal</option>
                 <option value="800">800px</option>
@@ -4045,12 +4041,14 @@ function renderDashboard() {
   const premiumCount = v.filter(x => isPremiumActive && isPremiumActive(x)).length;
   const totalContent = v.length + r.length + vi.length + p.length;
 
+  var blogCount = (typeof blogPosts !== 'undefined' ? blogPosts.length : 0);
   document.getElementById('stats-grid').innerHTML =
     '<div class="stat-card"><div class="stat-label">Toplam İçerik</div><div class="stat-val">' + totalContent + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Mekanlar</div><div class="stat-val">' + v.length + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Rotalar</div><div class="stat-val">' + r.length + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Köyler</div><div class="stat-val">' + vi.length + '</div></div>' +
     '<div class="stat-card"><div class="stat-label">Yerler</div><div class="stat-val">' + p.length + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Blog</div><div class="stat-val">' + blogCount + '</div></div>' +
     '<div class="stat-card green"><div class="stat-label">Açık</div><div class="stat-val">' + openCount + '</div></div>' +
     '<div class="stat-card terra"><div class="stat-label">Öne Çıkan</div><div class="stat-val">' + featured + '</div></div>' +
     (premiumCount > 0 ? '<div class="stat-card" style=""><div class="stat-label">👑 Premium</div><div class="stat-val" style="color:#D4935A">' + premiumCount + '</div></div>' : '') +
@@ -4218,6 +4216,35 @@ function renderDashboard() {
           '<div class="ri-meta">' + (catLabels[x.category] || x.category) + (endDate ? ' · Bitiş: ' + endDate : '') + '</div></div>' +
         '</div>';
       }).join('');
+  })();
+
+  // ── İçerik Özeti ──
+  (function() {
+    var sumEl = document.getElementById('dash-content-summary');
+    if (!sumEl) return;
+    var koyCount = vi.filter(function(x){ return (x.type || 'koy') === 'koy'; }).length;
+    var beldeCount = vi.filter(function(x){ return x.type === 'belde'; }).length;
+    var mahalleCount = vi.filter(function(x){ return x.type === 'mahalle'; }).length;
+    var kafeCount = v.filter(function(x){ return x.category === 'kafe'; }).length;
+    var restoranCount = v.filter(function(x){ return x.category === 'restoran'; }).length;
+    var konaklamaCount = v.filter(function(x){ return x.category === 'konaklama'; }).length;
+    var items = [
+      { emoji:'🏘', label:'Köy', val: koyCount },
+      { emoji:'🏛', label:'Belde', val: beldeCount },
+      { emoji:'📍', label:'Mahalle', val: mahalleCount },
+      { emoji:'☕', label:'Kafe', val: kafeCount },
+      { emoji:'🍽', label:'Restoran', val: restoranCount },
+      { emoji:'🏡', label:'Konaklama', val: konaklamaCount },
+      { emoji:'🗺', label:'Rota', val: r.length },
+      { emoji:'📝', label:'Blog', val: blogCount }
+    ];
+    sumEl.innerHTML = '<div style="padding:12px 16px">' + items.map(function(it) {
+      return '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--card-border,rgba(0,0,0,.03))">' +
+        '<span style="font-size:.95rem">' + it.emoji + '</span>' +
+        '<span style="flex:1;font-size:.78rem;font-weight:500;color:var(--text-light)">' + it.label + '</span>' +
+        '<span style="font-size:.85rem;font-weight:800;color:var(--navy)">' + it.val + '</span>' +
+      '</div>';
+    }).join('') + '</div>';
   })();
 }
 
@@ -7059,7 +7086,7 @@ function icHandleFiles(files) {
     var card = document.createElement('div');
     card.className = 'panel-card';
     card.style.marginBottom = '12px';
-    card.innerHTML = '<div class="panel-card-head"><h3>' + file.name + '</h3><span style="font-size:.72rem;color:var(--text-muted)">Isleniyor...</span></div><div style="padding:16px;text-align:center"><div class="ld-spinner" style="margin:0 auto"></div></div>';
+    card.innerHTML = '<div class="panel-card-head"><h3>' + file.name + '</h3><span style="font-size:.72rem;color:var(--text-muted)">İşleniyor...</span></div><div style="padding:16px;text-align:center"><div class="ld-spinner" style="margin:0 auto"></div></div>';
     resultsEl.prepend(card);
     icCompressFile(file, card);
   });
@@ -7098,10 +7125,10 @@ function icCompressFile(file, card) {
             '<div style="font-size:.75rem;color:var(--text-muted);line-height:1.7">' +
               'Orijinal: <strong>' + icFormatSize(origSize) + '</strong> → Yeni: <strong>' + icFormatSize(newSize) + '</strong><br>' +
               'Boyut: ' + w + ' x ' + h + 'px | Format: ' + format.toUpperCase() + '<br>' +
-              '<span style="color:' + color + ';font-weight:700">' + (pct > 0 ? '↓ %' + pct + ' kuculdü' : '↑ %' + Math.abs(pct) + ' buyudu') + '</span>' +
+              '<span style="color:' + color + ';font-weight:700">' + (pct > 0 ? '↓ %' + pct + ' küçüldü' : '↑ %' + Math.abs(pct) + ' büyüdü') + '</span>' +
             '</div>' +
           '</div>' +
-          '<a href="' + url + '" download="' + outName + '" class="btn btn-primary btn-sm" style="white-space:nowrap">⬇ Indir</a>' +
+          '<a href="' + url + '" download="' + outName + '" class="btn btn-primary btn-sm" style="white-space:nowrap">⬇ İndir</a>' +
         '</div>';
       }, mimeType, quality);
     };
