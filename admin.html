@@ -6828,6 +6828,10 @@ function removeBlogImage() {
 }
 
 function closeBlogModal() {
+  var title = (document.getElementById('bf-title').value || '').trim();
+  var content = window._rteSourceMode ? (document.getElementById('bf-content').value || '').trim() : (document.getElementById('bf-content-editor').innerHTML || '').trim();
+  var hasContent = title || (content && content !== '<br>' && content !== '<p><br></p>');
+  if (hasContent && !confirm('Yazıyı kaydetmeden çıkmak istediğinize emin misiniz?')) return;
   document.getElementById('blog-modal').classList.remove('show');
   editingBlogId = null;
 }
