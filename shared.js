@@ -585,7 +585,7 @@ function renderNav(opts = {}) {
               <span style="font-size:1.1rem;">🔗</span>
               <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);">Keşif Listenizi Paylaşın</span>
             </div>
-            <div class="sd-sync-hint" style="margin-bottom:12px;">Bu kod sizin Assos rotaniz! Arkadaslariniza gonderin, ayni listeyi gorsunler. Baska cihaziniza aktarmak icin de kullanabilirsiniz.</div>
+            <div class="sd-sync-hint" style="margin-bottom:12px;">Bu kod sizin Assos rotanız! Arkadaşlarınıza gönderin, aynı listeyi görsünler. Başka cihazınıza aktarmak için de kullanabilirsiniz.</div>
             <div class="sd-sync-row" style="margin-bottom:10px;">
               <span class="sd-sync-label">Kodunuz</span>
               <span class="sd-sync-code" id="sd-sync-code" onclick="navigator.clipboard.writeText(this.textContent).then(()=>{this.dataset.tip='Kopyalandı!';setTimeout(()=>this.dataset.tip='',1500)})">—</span>
