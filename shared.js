@@ -1534,6 +1534,70 @@ function getVenueCatInfo(catId) {
 }
 
 /* ═══════════════════
+   VENUE OPEN/CLOSED HELPER
+═══════════════════ */
+function isVenueOpen(v) {
+  if (!v) return null;
+  // Sezon dışı
+  if (v.seasonal && v.seasonStart && v.seasonEnd) {
+    try {
+      var nowS = new Date();
+      var sD = new Date(v.seasonStart); sD.setFullYear(nowS.getFullYear());
+      var eD = new Date(v.seasonEnd); eD.setFullYear(nowS.getFullYear());
+      if (!isNaN(sD.getTime()) && !isNaN(eD.getTime()) && (nowS < sD || nowS > eD)) return false;
+    } catch(e) {}
+  }
+  // Konaklama — resepsiyon saatleri 08-24
+  if (v.category === 'konaklama') {
+    var kh = new Date().getHours();
+    return kh >= 8 && kh < 24;
+  }
+  if (!v.weeklyHours || v.weeklyHours.length === 0) {
+    if (!v.hours) return null;
+    var hm = v.hours.match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
+    if (!hm) return null;
+    var now = new Date();
+    var mins = now.getHours() * 60 + now.getMinutes();
+    var op = parseInt(hm[1]) * 60 + parseInt(hm[2]);
+    var cl = parseInt(hm[3]) * 60 + parseInt(hm[4]);
+    if (cl === 0) cl = 1440;
+    if (cl <= op) return mins >= op || mins < cl;
+    return mins >= op && mins < cl;
+  }
+  function trN2(s) { return (s||'').toLowerCase().replace(/ş/g,'s').replace(/ç/g,'c').replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ö/g,'o').replace(/ı/g,'i'); }
+  var dayNames2 = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
+  var tName = dayNames2[new Date().getDay()];
+  var tNorm = trN2(tName);
+  var tHours = null;
+  // Tam gün eşleşmesi
+  for (var i = 0; i < v.weeklyHours.length; i++) {
+    if (trN2(v.weeklyHours[i].days) === tNorm) { tHours = v.weeklyHours[i].hours; break; }
+  }
+  // Aralık eşleşmeleri
+  if (!tHours) {
+    for (var i = 0; i < v.weeklyHours.length; i++) {
+      var d = trN2(v.weeklyHours[i].days);
+      if (d.includes('her gun') || d.includes('resepsiyon') || d.includes('24 saat')) { tHours = v.weeklyHours[i].hours; break; }
+      if (d.includes('pazartesi') && d.includes('cuma') && ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma'].indexOf(tName) > -1) { tHours = v.weeklyHours[i].hours; break; }
+      if (d.includes('cumartesi') && d.includes('pazar') && ['Cumartesi','Pazar'].indexOf(tName) > -1) { tHours = v.weeklyHours[i].hours; break; }
+      if (d.includes(tNorm)) { tHours = v.weeklyHours[i].hours; break; }
+    }
+  }
+  if (!tHours) tHours = v.weeklyHours[0] ? v.weeklyHours[0].hours : null;
+  if (!tHours || tHours.toLowerCase().indexOf('kapal') > -1) return false;
+  if (tHours.indexOf('24') > -1) return true;
+  var hm2 = tHours.match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
+  if (!hm2) return null;
+  var now2 = new Date();
+  var mins2 = now2.getHours() * 60 + now2.getMinutes();
+  var op2 = parseInt(hm2[1]) * 60 + parseInt(hm2[2]);
+  var cl2 = parseInt(hm2[3]) * 60 + parseInt(hm2[4]);
+  if (cl2 === 0) cl2 = 1440;
+  if (cl2 <= op2) return mins2 >= op2 || mins2 < cl2;
+  return mins2 >= op2 && mins2 < cl2;
+}
+
+/* ═══════════════════
    PLACE CATEGORY HELPER
 ═══════════════════ */
 var PLACE_CAT_FALLBACK = {
@@ -2157,7 +2221,7 @@ function renderVenuePage(venueId) {
       const hour = now.getHours();
       return hour >= 8 && hour < 24;
     }
-    if (!todayHours || todayHours === '—' || todayHours.toLowerCase() === 'kapalı') return false;
+    if (!todayHours || todayHours === '—' || todayHours.toLowerCase().indexOf('kapal') > -1) return false;
     const match = todayHours.match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
     if (!match) return null;
     const now = new Date();
