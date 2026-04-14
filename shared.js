@@ -3777,7 +3777,20 @@ function renderPlacePage(placeId) {
     bodyHtml += '</div>';
     bodyHtml += '</div>';
 
-    // Alt bilgiler
+    // Telefon + Alt bilgiler
+    if (oy.tel1 || oy.tel2) {
+      bodyHtml += '<div style="padding:0 24px 16px;display:flex;flex-wrap:wrap;gap:8px;">';
+      if (oy.tel1) {
+        var tel1Clean = oy.tel1.replace(/[^0-9+]/g, '');
+        bodyHtml += '<a href="tel:' + tel1Clean + '" style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:12px;background:rgba(26,107,138,.08);border:1px solid rgba(26,107,138,.15);font-size:.78rem;font-weight:600;color:#1A6B8A;text-decoration:none;transition:all .2s;" onmouseover="this.style.background=\'rgba(26,107,138,.15)\'" onmouseout="this.style.background=\'rgba(26,107,138,.08)\'">📞 ' + oy.tel1 + '</a>';
+      }
+      if (oy.tel2) {
+        var tel2Clean = oy.tel2.replace(/[^0-9+]/g, '');
+        bodyHtml += '<a href="tel:' + tel2Clean + '" style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:12px;background:rgba(26,107,138,.08);border:1px solid rgba(26,107,138,.15);font-size:.78rem;font-weight:600;color:#1A6B8A;text-decoration:none;transition:all .2s;" onmouseover="this.style.background=\'rgba(26,107,138,.15)\'" onmouseout="this.style.background=\'rgba(26,107,138,.08)\'">📞 ' + oy.tel2 + '</a>';
+      }
+      bodyHtml += '</div>';
+    }
+
     bodyHtml += '<div style="padding:0 24px 20px;display:flex;flex-wrap:wrap;gap:10px;">';
     if (oy.ucret) {
       bodyHtml += '<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:10px;background:rgba(26,39,68,.05);font-size:.72rem;font-weight:600;color:var(--navy);">🎟 ' + oy.ucret + '</span>';

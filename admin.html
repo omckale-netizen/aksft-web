@@ -1123,6 +1123,16 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               </div>
               <div class="form-row">
                 <div class="form-group" style="flex:1">
+                  <label>Telefon 1</label>
+                  <input type="text" id="vpf-oy-tel1" placeholder="Örn: 0286 217 67 40">
+                </div>
+                <div class="form-group" style="flex:1">
+                  <label>Telefon 2 <span style="font-weight:400;color:var(--text-muted)">(opsiyonel)</span></label>
+                  <input type="text" id="vpf-oy-tel2" placeholder="">
+                </div>
+              </div>
+              <div class="form-row">
+              <div class="form-group" style="flex:1">
                   <label>Giriş Ücreti</label>
                   <input type="text" id="vpf-oy-ucret" placeholder="Örn: 200 TL, Ücretsiz">
                 </div>
@@ -5927,6 +5937,8 @@ function openVPModal(id) {
         document.getElementById('vpf-oy-yaz-kapanis').value = item.orenYeri.yazKapanis || '20:00';
         document.getElementById('vpf-oy-kis-acilis').value = item.orenYeri.kisAcilis || '08:30';
         document.getElementById('vpf-oy-kis-kapanis').value = item.orenYeri.kisKapanis || '17:30';
+        document.getElementById('vpf-oy-tel1').value = item.orenYeri.tel1 || '';
+        document.getElementById('vpf-oy-tel2').value = item.orenYeri.tel2 || '';
         document.getElementById('vpf-oy-ucret').value = item.orenYeri.ucret || '';
         document.getElementById('vpf-oy-muzekart').checked = item.orenYeri.muzekart !== false;
       } else {
@@ -5934,6 +5946,8 @@ function openVPModal(id) {
         document.getElementById('vpf-oy-yaz-kapanis').value = '20:00';
         document.getElementById('vpf-oy-kis-acilis').value = '08:30';
         document.getElementById('vpf-oy-kis-kapanis').value = '17:30';
+        document.getElementById('vpf-oy-tel1').value = '';
+        document.getElementById('vpf-oy-tel2').value = '';
         document.getElementById('vpf-oy-ucret').value = '';
         document.getElementById('vpf-oy-muzekart').checked = true;
       }
@@ -6066,6 +6080,8 @@ async function saveVP(e) {
         yazKapanis: document.getElementById('vpf-oy-yaz-kapanis').value || '20:00',
         kisAcilis: document.getElementById('vpf-oy-kis-acilis').value || '08:30',
         kisKapanis: document.getElementById('vpf-oy-kis-kapanis').value || '17:30',
+        tel1: document.getElementById('vpf-oy-tel1').value.trim() || '',
+        tel2: document.getElementById('vpf-oy-tel2').value.trim() || '',
         ucret: document.getElementById('vpf-oy-ucret').value.trim() || '',
         muzekart: document.getElementById('vpf-oy-muzekart').checked
       };
