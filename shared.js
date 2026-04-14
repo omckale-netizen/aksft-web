@@ -4330,7 +4330,9 @@ function renderPlacePage(placeId) {
     panel.classList.toggle('open');
     fab.classList.toggle('open');
     fab.textContent = panel.classList.contains('open') ? '✕' : '🧭';
-    if (panel.classList.contains('open')) document.getElementById('ai-chat-input').focus();
+    var sttBtn = document.getElementById('scroll-top-btn');
+    if (sttBtn) sttBtn.style.display = panel.classList.contains('open') ? 'none' : '';
+    if (panel.classList.contains('open') && window.innerWidth > 768) document.getElementById('ai-chat-input').focus();
   };
 
   // Send
@@ -4387,11 +4389,16 @@ function renderPlacePage(placeId) {
       .replace(/^### (.+)$/gm, '<strong style="font-size:.85rem">$1</strong>')
       .replace(/^## (.+)$/gm, '<strong style="font-size:.9rem">$1</strong>')
       .replace(/^# (.+)$/gm, '<strong style="font-size:.95rem">$1</strong>')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" style="color:var(--terra);font-weight:600;text-decoration:underline;">$1</a>')
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
       .replace(/\n\n/g, '<br><br>')
       .replace(/\n/g, '<br>')
-      .replace(/- (.+?)(?=<br>|$)/g, '• $1');
+      .replace(/- (.+?)(?=<br>|$)/g, '• $1')
+      .replace(/(https?:\/\/assosukesfet\.com[^\s<]+)/g, function(url) {
+        if (url.indexOf('href=') > -1) return url;
+        return '<a href="' + url + '" target="_blank" rel="noopener" style="color:var(--terra);font-weight:600;text-decoration:underline;">Detayı Gör →</a>';
+      });
   }
   function addMsg(text, type) {
     var body = document.getElementById('ai-chat-body');
