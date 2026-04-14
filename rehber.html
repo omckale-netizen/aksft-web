@@ -278,6 +278,25 @@
     <div class="ulasim-grid fade-up">
 
       <div class="ulasim-card">
+        <div class="ulasim-card-accent ulasim-accent-aegean"></div>
+        <div class="ulasim-card-body">
+          <div class="ulasim-card-head">
+            <div class="ulasim-card-icon-wrap ulasim-icon-aegean">🌊</div>
+            <div>
+              <h3 class="ulasim-card-city">İzmir</h3>
+              <div class="ulasim-card-distance ulasim-dist-aegean">~260 km</div>
+            </div>
+          </div>
+          <div class="ulasim-card-info">
+            <div class="ulasim-card-row"><span class="ulasim-row-icon">🚗</span><span>Araçla <strong>~3 saat</strong></span></div>
+            <div class="ulasim-card-row"><span class="ulasim-row-icon">🚌</span><span>Otobüsle <strong>~5 saat</strong></span></div>
+            <div class="ulasim-card-row"><span class="ulasim-row-icon">✈️</span><span>Edremit Havalimanı <strong>63 km</strong></span></div>
+          </div>
+          <div class="ulasim-card-route">Edremit → Ayvacık → Behramkale</div>
+        </div>
+      </div>
+
+      <div class="ulasim-card">
         <div class="ulasim-card-accent ulasim-accent-terra"></div>
         <div class="ulasim-card-body">
           <div class="ulasim-card-head">
@@ -297,25 +316,6 @@
             <div class="ulasim-card-route" style="margin-bottom:6px;">🅰️ Trakya: Tekirdağ → Keşan → Feribot/Köprü → Çanakkale → Ayvacık <span style="font-size:.62rem;color:var(--text-muted);">(~390 km)</span></div>
             <div class="ulasim-card-route">🅱️ Güney: Bursa → Balıkesir → Edremit → Küçükkuyu → Ayvacık <span style="font-size:.62rem;color:var(--text-muted);">(~430 km)</span></div>
           </div>
-        </div>
-      </div>
-
-      <div class="ulasim-card">
-        <div class="ulasim-card-accent ulasim-accent-aegean"></div>
-        <div class="ulasim-card-body">
-          <div class="ulasim-card-head">
-            <div class="ulasim-card-icon-wrap ulasim-icon-aegean">🌊</div>
-            <div>
-              <h3 class="ulasim-card-city">İzmir</h3>
-              <div class="ulasim-card-distance ulasim-dist-aegean">~260 km</div>
-            </div>
-          </div>
-          <div class="ulasim-card-info">
-            <div class="ulasim-card-row"><span class="ulasim-row-icon">🚗</span><span>Araçla <strong>~3 saat</strong></span></div>
-            <div class="ulasim-card-row"><span class="ulasim-row-icon">🚌</span><span>Otobüsle <strong>~5 saat</strong></span></div>
-            <div class="ulasim-card-row"><span class="ulasim-row-icon">✈️</span><span>Edremit Havalimanı <strong>63 km</strong></span></div>
-          </div>
-          <div class="ulasim-card-route">Edremit → Ayvacık → Behramkale</div>
         </div>
       </div>
 
@@ -862,7 +862,7 @@
 .ulasim-deco-1{width:500px;height:500px;top:-200px;right:-120px;background:radial-gradient(circle,rgba(196,82,26,.06) 0%,transparent 70%)}
 .ulasim-deco-2{width:400px;height:400px;bottom:-160px;left:-100px;background:radial-gradient(circle,rgba(26,107,138,.05) 0%,transparent 70%)}
 .ulasim-inner{position:relative;z-index:2;max-width:1100px;margin:0 auto}
-.ulasim-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.ulasim-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start}
 .ulasim-card{position:relative;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:20px;overflow:hidden;transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s}
 .ulasim-card:hover{transform:translateY(-6px);box-shadow:0 16px 48px rgba(26,39,68,.1)}
 .ulasim-card-accent{height:5px;width:100%}
