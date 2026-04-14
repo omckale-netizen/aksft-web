@@ -78,9 +78,7 @@
   <div style="max-width:1280px;margin:0 auto;">
 
     <!-- Filter -->
-    <div class="scroll-x" style="display:flex;gap:8px;padding-bottom:4px;margin-bottom:40px;" role="group" id="yl-filters">
-      <button class="filter-btn active" onclick="filterPlaces(this,'all')">Tümü</button>
-    </div>
+    <div class="scroll-x" style="display:none;gap:8px;padding-bottom:4px;margin-bottom:40px;" role="group" id="yl-filters"></div>
 
     <div id="places-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;"></div>
     <div id="no-places" style="display:none;text-align:center;padding:60px 0;">
@@ -146,6 +144,7 @@ function pageInit() {
         }
       });
       filtersEl.innerHTML = filterHtml;
+      filtersEl.style.display = 'flex';
     }
   })();
 
