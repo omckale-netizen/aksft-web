@@ -516,7 +516,7 @@
 
 <script src="firebase-loader.js"></script>
 <script src="data.js"></script>
-<script src="shared.min.js?v=159"></script>
+<script src="shared.min.js?v=160"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: true });
@@ -726,7 +726,7 @@ function pageInit() {
       var placeHref = p._isVillage ? 'koyler/koy-detay.html?id=' + p.id : 'yerler/yer-detay.html?id=' + p.id;
       return '<a class="hp-place-card fade-up" href="' + placeHref + '" data-cat="' + catKey + '" style="animation-delay:' + (i * 0.05) + 's;">' +
         '<div class="hp-place-img" style="background:' + bg + ';">' + imgHtml +
-          '<span class="hp-place-badge" style="background:' + cat.color + 'b3;color:#fff;">' + (p.badgeText || cat.label) + '</span>' +
+          '<span class="hp-place-badge" style="background:' + cat.color + 'b3;color:#fff;">' + cat.label + '</span>' +
           (p.location && !p._isVillage ? '<span class="hp-place-loc">📍 ' + p.location + '</span>' : '') +
           '<button class="place-save-btn' + (window.isPlaceSaved && isPlaceSaved(p.id) ? ' saved' : '') + '" data-id="' + p.id + '" onclick="event.preventDefault();event.stopPropagation();togglePlaceSave(\'' + p.id + '\')" style="position:absolute;top:10px;right:10px;z-index:2;width:30px;height:30px;border-radius:50%;border:none;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);color:#fff;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;">' + (window.isPlaceSaved && isPlaceSaved(p.id) ? '♥' : '♡') + '</button>' +
         '</div>' +

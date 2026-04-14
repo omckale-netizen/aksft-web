@@ -1505,7 +1505,10 @@ function getPlaceCatInfo(catId) {
     var found = DATA.placeCategories.find(function(c){ return c.id === catId; });
     if (found) return { label: found.label, emoji: found.emoji || '📍', color: found.color || '#1A2744', bg: [found.color || '#243255', '#1A2744'] };
   }
-  return PLACE_CAT_FALLBACK[catId] || { label: catId || 'Yer', emoji:'📍', color:'#1A2744', bg:['#243255','#1A2744'] };
+  if (PLACE_CAT_FALLBACK[catId]) return PLACE_CAT_FALLBACK[catId];
+  // Bilinmeyen kategori — ID'yi okunabilir hale çevir (tire→boşluk, baş harfler büyük)
+  var readableLabel = (catId || 'Yer').replace(/-/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+  return { label: readableLabel, emoji:'📍', color:'#1A2744', bg:['#243255','#1A2744'] };
 }
 
 /* ═══════════════════
@@ -3797,6 +3800,7 @@ function renderPlacePage(placeId) {
     }
     if (oy.muzekart !== false) {
       bodyHtml += '<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:10px;background:rgba(56,161,105,.08);font-size:.72rem;font-weight:600;color:#276749;">✅ T.C. Vatandaşları İçin Müzekart Geçerlidir</span>';
+      bodyHtml += '<a href="https://muze.gov.tr/MuseumPass" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:10px;background:rgba(196,82,26,.08);border:1px solid rgba(196,82,26,.15);font-size:.72rem;font-weight:700;color:#C4521A;text-decoration:none;transition:all .2s;" onmouseover="this.style.background=\'rgba(196,82,26,.15)\'" onmouseout="this.style.background=\'rgba(196,82,26,.08)\'">🎫 Müze Kartı Satın Al →</a>';
     }
     bodyHtml += '<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:10px;background:rgba(26,39,68,.05);font-size:.72rem;font-weight:600;color:var(--text-muted);">📅 Haftanın Her Günü Açık</span>';
     bodyHtml += '</div>';
