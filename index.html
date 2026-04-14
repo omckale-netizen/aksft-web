@@ -516,7 +516,7 @@
 
 <script src="firebase-loader.js?v=2"></script>
 <script src="data.js?v=2"></script>
-<script src="shared.min.js?v=164"></script>
+<script src="shared.min.js?v=165"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: true });
@@ -693,10 +693,14 @@ function pageInit() {
         category: 'koyu', location: 'Ayvacık', _isVillage: true };
     });
     const allPlaces = (DATA.places || []).concat(villageAsPlaces);
-    // Gün bazlı sıralama (her gün farklı sıra)
+    // Ören yerleri her zaman göster, geri kalanı günlük rotasyonla
+    var orenYerleri = allPlaces.filter(function(p) { return p.category === 'tarihi' || p.category === 'orenyeri'; });
+    var digerYerler = allPlaces.filter(function(p) { return p.category !== 'tarihi' && p.category !== 'orenyeri'; });
     const daySeed = Math.floor(Date.now() / 86400000);
     function placeHash(str) { let h = daySeed; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) & 0xFFFFFF; return h; }
-    const places = [...allPlaces].sort((a, b) => placeHash(a.id) - placeHash(b.id)).slice(0, 8);
+    var kalanSlot = Math.max(0, 8 - orenYerleri.length);
+    var digerShuffle = [...digerYerler].sort((a, b) => placeHash(a.id) - placeHash(b.id)).slice(0, kalanSlot);
+    const places = orenYerleri.concat(digerShuffle);
     // Gerçek kategoriyi belirle
     function resolveCat(p) {
       if (p.category === 'muze') return 'muze';
