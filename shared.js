@@ -852,12 +852,11 @@ function renderNav(opts = {}) {
     });
 
     const sdFilter = window._sdFilter || 'all';
-    const SD_CAT_MAP = {kafe:{label:'Kafeler',emoji:'☕'},restoran:{label:'Restoranlar',emoji:'🍽'},kahvalti:{label:'Kahvaltı',emoji:'🌞'},konaklama:{label:'Konaklama',emoji:'🏨'},beach:{label:'Beach',emoji:'🏖'},iskele:{label:'İskeleler',emoji:'⚓'}};
     const CAT_LABELS_SD = {};
     allVenues.forEach(v => {
       var cat = v.category || 'diger';
-      var info = SD_CAT_MAP[cat] || {label:cat, emoji:'📍'};
-      if (!CAT_LABELS_SD[cat]) CAT_LABELS_SD[cat] = info;
+      var ci = getVenueCatInfo(cat);
+      if (!CAT_LABELS_SD[cat]) CAT_LABELS_SD[cat] = { label: ci.label, emoji: ci.emoji };
     });
 
     let html = '<div style="display:flex;flex-wrap:wrap;gap:5px;padding:0 0 12px;border-bottom:1px solid rgba(26,39,68,.06);margin-bottom:8px;">';
@@ -1486,6 +1485,27 @@ function routeCardHTML(r, delay = 0) {
         </div>
       </div>
     </a>`;
+}
+
+/* ═══════════════════
+   VENUE CATEGORY HELPER
+═══════════════════ */
+var VENUE_CAT_FALLBACK = {
+  kafe:      { label:'Kafe', emoji:'☕', color:'#C4521A' },
+  restoran:  { label:'Restoran', emoji:'🍽', color:'#1A6B8A' },
+  kahvalti:  { label:'Kahvaltı', emoji:'🌞', color:'#8A5520' },
+  konaklama: { label:'Konaklama', emoji:'🏨', color:'#5A7A56' },
+  beach:     { label:'Beach', emoji:'🏖', color:'#1A9A8A' },
+  iskele:    { label:'İskele', emoji:'⚓', color:'#3A5A8A' }
+};
+function getVenueCatInfo(catId) {
+  if (window.DATA && DATA.venueCategories) {
+    var found = DATA.venueCategories.find(function(c){ return c.id === catId; });
+    if (found) return { label: found.label, emoji: found.emoji || '📍', color: found.color || '#C4521A' };
+  }
+  if (VENUE_CAT_FALLBACK[catId]) return VENUE_CAT_FALLBACK[catId];
+  var readableLabel = (catId || 'Mekan').replace(/-/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+  return { label: readableLabel, emoji:'📍', color:'#C4521A' };
 }
 
 /* ═══════════════════
@@ -3331,16 +3351,9 @@ function renderVillagePage(villageId) {
     var ekSuffix = ek.substring(1);
     bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">📍 ' + v.title + '\u2019' + ekSuffix + 'ki İşletmeler</h2>';
     bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">';
-    var CAT_STYLE_V = {
-      kafe:      { bg:'rgba(196,82,26,.08)', color:'#C4521A', label:'Kafe', emoji:'☕' },
-      restoran:  { bg:'rgba(26,107,138,.08)', color:'#1A6B8A', label:'Restoran', emoji:'🍽' },
-      kahvalti:  { bg:'rgba(212,147,90,.08)', color:'#8A5520', label:'Kahvaltı', emoji:'🌞' },
-      konaklama: { bg:'rgba(90,122,86,.08)', color:'#5A7A56', label:'Konaklama', emoji:'🏡' },
-      beach:     { bg:'rgba(26,158,138,.08)', color:'#1A9A8A', label:'Beach', emoji:'🏖' },
-      iskele:    { bg:'rgba(26,39,68,.06)', color:'#3A5A8A', label:'İskele', emoji:'⚓' }
-    };
     villageVenues.forEach(function(venue) {
-      var cs = CAT_STYLE_V[venue.category] || { bg:'rgba(26,39,68,.06)', color:'#4A5568', label:venue.category || '', emoji:'📍' };
+      var vci = getVenueCatInfo(venue.category);
+      var cs = { bg: vci.color + '14', color: vci.color, label: vci.label, emoji: vci.emoji };
       var isOpen = typeof isVenueOpen === 'function' ? isVenueOpen(venue) : null;
       var statusDot = '', statusText = '';
       if (isOpen === true) { statusDot = '#22C55E'; statusText = 'Açık'; }
@@ -3877,8 +3890,6 @@ function renderPlacePage(placeId) {
     }).slice(0, 6);
   }
 
-  var CAT_STYLE_P = { kafe:{bg:'rgba(196,82,26,.08)',color:'#C4521A',label:'Kafe',emoji:'☕'}, restoran:{bg:'rgba(26,107,138,.08)',color:'#1A6B8A',label:'Restoran',emoji:'🍽'}, kahvalti:{bg:'rgba(212,147,90,.08)',color:'#8A5520',label:'Kahvaltı',emoji:'🌞'}, konaklama:{bg:'rgba(90,122,86,.08)',color:'#5A7A56',label:'Konaklama',emoji:'🏡'}, beach:{bg:'rgba(26,158,138,.08)',color:'#1A9A8A',label:'Beach',emoji:'🏖'}, iskele:{bg:'rgba(26,39,68,.06)',color:'#3A5A8A',label:'İskele',emoji:'⚓'} };
-
   // Bu yerdeki işletmeler
   if (placeVenues.length > 0) {
     bodyHtml += '<div style="margin-bottom:40px;">';
@@ -3887,7 +3898,7 @@ function renderPlacePage(placeId) {
     bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">' + (p.emoji || '📍') + ' ' + p.title + '\u2019' + plEkSuffix + ' Keşfedilecek Mekanlar</h2>';
     bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">';
     placeVenues.forEach(function(venue) {
-      var cs = CAT_STYLE_P[venue.category] || { bg:'rgba(26,39,68,.06)', color:'#4A5568', label:venue.category || '', emoji:'📍' };
+      var vci = getVenueCatInfo(venue.category); var cs = { bg: vci.color + '14', color: vci.color, label: vci.label, emoji: vci.emoji };
       bodyHtml += '<a href="../mekanlar/mekan-detay.html?id=' + venue.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
       if (venue.images && venue.images[0]) {
         bodyHtml += '<div style="position:relative;height:140px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + venue.images[0] + '" alt="' + venue.title + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1">';
@@ -3905,7 +3916,7 @@ function renderPlacePage(placeId) {
     bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">🏪 Yakındaki İşletmeler</h2>';
     bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">';
     nearbyVenues.forEach(function(venue) {
-      var cs = CAT_STYLE_P[venue.category] || { bg:'rgba(26,39,68,.06)', color:'#4A5568', label:venue.category || '', emoji:'📍' };
+      var vci = getVenueCatInfo(venue.category); var cs = { bg: vci.color + '14', color: vci.color, label: vci.label, emoji: vci.emoji };
       bodyHtml += '<a href="../mekanlar/mekan-detay.html?id=' + venue.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
       if (venue.images && venue.images[0]) {
         bodyHtml += '<div style="position:relative;height:140px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + venue.images[0] + '" alt="' + venue.title + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1">';

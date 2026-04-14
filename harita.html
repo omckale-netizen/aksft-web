@@ -135,9 +135,9 @@
 
 <div id="footer-placeholder"></div>
 
-<script src="firebase-loader.js?v=2"></script>
+<script src="firebase-loader.js?v=3"></script>
 <script src="data.js?v=2"></script>
-<script src="shared.min.js?v=167"></script>
+<script src="shared.min.js?v=168"></script>
 <script>
 const FALLBACK_COORDS = {
   'athena-tapinagi':[39.4907,26.3380],'assos-antik-liman':[39.4862,26.3365],
@@ -157,7 +157,7 @@ const CAT_CONFIG = {
   venue: { color:'#C4521A', bg:'rgba(196,82,26,.1)', label:'Mekan' },
   place: { color:'#1A6B8A', bg:'rgba(26,107,138,.1)', label:'Yer' }
 };
-const VENUE_CATS = { kafe:'Kafe', restoran:'Restoran', kahvalti:'Kahvalti', konaklama:'Konaklama', beach:'Beach', iskele:'Iskele' };
+function getVenueCatLabel(catId) { return typeof getVenueCatInfo === 'function' ? getVenueCatInfo(catId).label : catId; }
 
 let map, markers=[], allItems=[], activeFilter='all', mapInited=false, firebaseLoaded=false;
 
@@ -193,7 +193,7 @@ function buildItems() {
   (D.venues||[]).forEach(v => {
     const c = getCoords(v); if (!c) return;
     allItems.push({ id:v.id, type:'venue', lat:c[0], lng:c[1], title:v.title, emoji:v.emoji,
-      shortDesc:v.shortDesc, category:VENUE_CATS[v.category]||v.category, location:v.location,
+      shortDesc:v.shortDesc, category:getVenueCatLabel(v.category), location:v.location,
       hours:v.hours, phone:v.phone, images:v.images, tags:v.tags,
       link:'mekanlar/mekan-detay.html?id='+v.id,
       isPremium: v.premium && (!v.premiumStart || new Date().toISOString().split('T')[0] >= v.premiumStart) && (!v.premiumEnd || new Date().toISOString().split('T')[0] <= v.premiumEnd) });

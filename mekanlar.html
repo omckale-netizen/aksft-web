@@ -47,13 +47,7 @@
       <h1 class="mk-hero-h1">Assos Mekanları<br><em>Kafeler, Restoranlar, Oteller</em></h1>
       <div class="mk-hero-divider"></div>
       <p class="mk-hero-sub">Kahve molasından balık yemeğine, köy kahvaltısından butik konaklamaya — Assos'un tüm özel adresleri.</p>
-      <div class="mk-hero-cats">
-        <span class="mk-hero-chip">☕ Kafeler</span>
-        <span class="mk-hero-chip">🍽 Restoranlar</span>
-        <span class="mk-hero-chip">🌞 Kahvaltı</span>
-        <span class="mk-hero-chip">🏨 Konaklama</span>
-        <span class="mk-hero-chip">🏖 Beach</span>
-      </div>
+      <div class="mk-hero-cats" id="mk-hero-cats"></div>
     </div>
     <div class="mk-hero-card">
       <div class="mk-hstat">
@@ -135,13 +129,24 @@
 
 <div id="footer-placeholder"></div>
 
-<script src="firebase-loader.js?v=2"></script>
+<script src="firebase-loader.js?v=3"></script>
 <script src="data.js?v=2"></script>
-<script src="shared.min.js?v=167"></script>
+<script src="shared.min.js?v=168"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
   renderFooter();
+
+  // Dinamik kategori chip'leri
+  var chipsEl = document.getElementById('mk-hero-cats');
+  if (chipsEl && window.DATA && DATA.venueCategories && DATA.venueCategories.length > 0) {
+    chipsEl.innerHTML = DATA.venueCategories.map(function(c) {
+      return '<span class="mk-hero-chip">' + (c.emoji || '📍') + ' ' + c.label + '</span>';
+    }).join('');
+  } else if (chipsEl && typeof getVenueCatInfo === 'function') {
+    var defaultCats = ['kafe','restoran','kahvalti','konaklama','beach'];
+    chipsEl.innerHTML = defaultCats.map(function(id) { var ci = getVenueCatInfo(id); return '<span class="mk-hero-chip">' + ci.emoji + ' ' + ci.label + '</span>'; }).join('');
+  }
 
   /* ══════════════════════════════════════════
      METADATA — featured / popular / gradient

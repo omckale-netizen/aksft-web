@@ -109,11 +109,29 @@ export async function onRequest(context) {
       const fields = await fetchFirestoreDoc('venues', id);
       if (!fields) return next();
 
-      const catLabels = {kafe:'Assos Kafeler',restoran:'Assos Restoranlar',kahvalti:'Assos Kahvaltı Mekanları',konaklama:'Assos Otelleri',beach:'Assos Beach Club',iskele:'Assos İskeleler'};
-      const catSingular = {kafe:'kafe',restoran:'restoran',kahvalti:'kahvaltı mekanı',konaklama:'otel',beach:'beach club',iskele:'iskele'};
+      // Kategori bilgisini Firebase'den çekmeye çalış, yoksa fallback
+      let catLabel = 'Assos Mekanlar';
+      let catSing = 'mekan';
       const cat = fields.category?.stringValue || '';
-      const catLabel = catLabels[cat] || 'Assos Mekanlar';
-      const catSing = catSingular[cat] || 'mekan';
+      try {
+        const catDoc = await fetch('https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents/settings/venue_categories');
+        if (catDoc.ok) {
+          const catData = await catDoc.json();
+          const list = catData.fields?.list?.arrayValue?.values || [];
+          const found = list.find(c => c.mapValue?.fields?.id?.stringValue === cat);
+          if (found) {
+            const fLabel = found.mapValue.fields.label?.stringValue || cat;
+            catLabel = 'Assos ' + fLabel;
+            catSing = fLabel.toLowerCase();
+          }
+        }
+      } catch(e) {}
+      if (catLabel === 'Assos Mekanlar') {
+        const fallbackLabels = {kafe:'Assos Kafeler',restoran:'Assos Restoranlar',kahvalti:'Assos Kahvaltı Mekanları',konaklama:'Assos Otelleri',beach:'Assos Beach Club',iskele:'Assos İskeleler'};
+        const fallbackSing = {kafe:'kafe',restoran:'restoran',kahvalti:'kahvaltı mekanı',konaklama:'otel',beach:'beach club',iskele:'iskele'};
+        catLabel = fallbackLabels[cat] || 'Assos Mekanlar';
+        catSing = fallbackSing[cat] || 'mekan';
+      }
       const venueName = fields.title?.stringValue || 'Mekan';
       const loc = fields.location?.stringValue || 'Assos';
       const title = venueName + ' \u2014 ' + catLabel + ' | Assos\'u Keşfet';
