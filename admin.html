@@ -1094,9 +1094,45 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             <!-- Category — only for places -->
             <div class="form-group" id="vpf-cat-group">
               <label>Kategori</label>
-              <select id="vpf-category">
+              <select id="vpf-category" onchange="onPlaceCatChange()">
                 <option value="">Seçin</option>
               </select>
+            </div>
+            <!-- Ören Yeri ayarları -->
+            <div id="vpf-orenyeri-fields" style="display:none;background:rgba(26,39,68,.03);border:1px solid rgba(26,39,68,.07);border-radius:12px;padding:16px;margin-bottom:16px;">
+              <div style="font-size:.78rem;font-weight:700;color:var(--navy);margin-bottom:12px;">🏛 Ören Yeri Ayarları</div>
+              <div class="form-row">
+                <div class="form-group" style="flex:1">
+                  <label>Yaz Sezonu Saatleri</label>
+                  <div style="display:flex;gap:6px;align-items:center">
+                    <input type="text" id="vpf-oy-yaz-acilis" value="08:30" style="width:70px;text-align:center" placeholder="08:30">
+                    <span style="color:var(--text-muted)">—</span>
+                    <input type="text" id="vpf-oy-yaz-kapanis" value="20:00" style="width:70px;text-align:center" placeholder="20:00">
+                  </div>
+                  <span style="font-size:.65rem;color:var(--text-muted)">1 Mayıs – 1 Ekim</span>
+                </div>
+                <div class="form-group" style="flex:1">
+                  <label>Kış Sezonu Saatleri</label>
+                  <div style="display:flex;gap:6px;align-items:center">
+                    <input type="text" id="vpf-oy-kis-acilis" value="08:30" style="width:70px;text-align:center" placeholder="08:30">
+                    <span style="color:var(--text-muted)">—</span>
+                    <input type="text" id="vpf-oy-kis-kapanis" value="17:30" style="width:70px;text-align:center" placeholder="17:30">
+                  </div>
+                  <span style="font-size:.65rem;color:var(--text-muted)">Ekim – Mayıs</span>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group" style="flex:1">
+                  <label>Giriş Ücreti</label>
+                  <input type="text" id="vpf-oy-ucret" placeholder="Örn: 200 TL, Ücretsiz">
+                </div>
+                <div class="form-group" style="flex:1">
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:20px">
+                    <input type="checkbox" id="vpf-oy-muzekart" checked style="width:18px;height:18px;accent-color:var(--terra);">
+                    <span>Müzekart Geçerli</span>
+                  </label>
+                </div>
+              </div>
             </div>
             <!-- Village link — only for places -->
             <div class="form-group" id="vpf-village-group">
@@ -5794,6 +5830,12 @@ function onVillageTypeChange() {
   document.getElementById('vpf-parent-group').style.display = t === 'mahalle' ? '' : 'none';
 }
 
+function onPlaceCatChange() {
+  var cat = document.getElementById('vpf-category').value;
+  var oyFields = document.getElementById('vpf-orenyeri-fields');
+  if (oyFields) oyFields.style.display = (cat === 'tarihi' || cat === 'orenyeri') ? 'block' : 'none';
+}
+
 function onVillageSelect() {
   var sel = document.getElementById('vpf-villageId');
   var locGroup = document.getElementById('vpf-loc-group');
@@ -5878,6 +5920,23 @@ function openVPModal(id) {
       document.getElementById('vpf-category').value = item.category || '';
       document.getElementById('vpf-villageId').value = item.villageId || '';
       onVillageSelect();
+      onPlaceCatChange();
+      // Ören yeri verileri yükle
+      if (item.orenYeri) {
+        document.getElementById('vpf-oy-yaz-acilis').value = item.orenYeri.yazAcilis || '08:30';
+        document.getElementById('vpf-oy-yaz-kapanis').value = item.orenYeri.yazKapanis || '20:00';
+        document.getElementById('vpf-oy-kis-acilis').value = item.orenYeri.kisAcilis || '08:30';
+        document.getElementById('vpf-oy-kis-kapanis').value = item.orenYeri.kisKapanis || '17:30';
+        document.getElementById('vpf-oy-ucret').value = item.orenYeri.ucret || '';
+        document.getElementById('vpf-oy-muzekart').checked = item.orenYeri.muzekart !== false;
+      } else {
+        document.getElementById('vpf-oy-yaz-acilis').value = '08:30';
+        document.getElementById('vpf-oy-yaz-kapanis').value = '20:00';
+        document.getElementById('vpf-oy-kis-acilis').value = '08:30';
+        document.getElementById('vpf-oy-kis-kapanis').value = '17:30';
+        document.getElementById('vpf-oy-ucret').value = '';
+        document.getElementById('vpf-oy-muzekart').checked = true;
+      }
     } else {
       document.getElementById('vpf-village-type').value = item.type || 'koy';
       document.getElementById('vpf-parent').value = item.parent || 'ayvacik';
@@ -6000,6 +6059,17 @@ async function saveVP(e) {
       lng: parseFloat(document.getElementById('vpf-lng').value) || null,
       villageId: document.getElementById('vpf-villageId').value || '',
     };
+    // Ören yeri verileri
+    if (category === 'tarihi' || category === 'orenyeri') {
+      placePatch.orenYeri = {
+        yazAcilis: document.getElementById('vpf-oy-yaz-acilis').value || '08:30',
+        yazKapanis: document.getElementById('vpf-oy-yaz-kapanis').value || '20:00',
+        kisAcilis: document.getElementById('vpf-oy-kis-acilis').value || '08:30',
+        kisKapanis: document.getElementById('vpf-oy-kis-kapanis').value || '17:30',
+        ucret: document.getElementById('vpf-oy-ucret').value.trim() || '',
+        muzekart: document.getElementById('vpf-oy-muzekart').checked
+      };
+    }
     if (!editingVPId) { placePatch.image = ''; placePatch.imagePos = 50; }
     Object.assign(item, placePatch);
   } else {

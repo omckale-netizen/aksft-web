@@ -3733,6 +3733,68 @@ function renderPlacePage(placeId) {
   /* ── BODY ── */
   var bodyHtml = '<div style="max-width:900px;margin:0 auto;padding:48px 24px 80px;">';
 
+  // Ören Yeri Ziyaret Saatleri
+  if ((p.category === 'tarihi' || p.category === 'orenyeri') && p.orenYeri) {
+    var oy = p.orenYeri;
+    var now = new Date();
+    var trNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Istanbul' }));
+    var month = trNow.getMonth() + 1; // 1-12
+    var isYaz = month >= 5 && month < 10; // Mayıs-Eylül arası yaz
+    var currentHour = trNow.getHours();
+    var currentMin = trNow.getMinutes();
+    var currentTime = currentHour * 60 + currentMin;
+    var acilis = isYaz ? (oy.yazAcilis || '08:30') : (oy.kisAcilis || '08:30');
+    var kapanis = isYaz ? (oy.yazKapanis || '20:00') : (oy.kisKapanis || '17:30');
+    var acilisParts = acilis.split(':'); var acilisMin = parseInt(acilisParts[0]) * 60 + parseInt(acilisParts[1] || 0);
+    var kapanisParts = kapanis.split(':'); var kapanisMin = parseInt(kapanisParts[0]) * 60 + parseInt(kapanisParts[1] || 0);
+    var isOpen = currentTime >= acilisMin && currentTime < kapanisMin;
+    var giseKapanis = isYaz ? '19:30' : '17:00';
+
+    bodyHtml += '<div style="margin-bottom:40px;background:linear-gradient(135deg,rgba(26,39,68,.04),rgba(196,82,26,.03));border:1px solid rgba(26,39,68,.08);border-radius:18px;overflow:hidden;">';
+    // Başlık + Durum
+    bodyHtml += '<div style="padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">';
+    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1rem;color:var(--navy);margin:0;">🏛 Ziyaret Bilgileri</h2>';
+    bodyHtml += '<span style="display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:999px;font-size:.72rem;font-weight:700;background:' + (isOpen ? 'rgba(34,197,94,.1)' : 'rgba(239,68,68,.1)') + ';color:' + (isOpen ? '#16A34A' : '#DC2626') + ';"><span style="width:7px;height:7px;border-radius:50%;background:' + (isOpen ? '#22C55E' : '#EF4444') + ';"></span>' + (isOpen ? 'Şu An Açık' : 'Şu An Kapalı') + '</span>';
+    bodyHtml += '</div>';
+
+    // Sezon kartları
+    bodyHtml += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 24px 20px;">';
+    // Yaz
+    bodyHtml += '<div style="padding:16px;border-radius:14px;background:' + (isYaz ? 'rgba(196,82,26,.06)' : 'rgba(0,0,0,.02)') + ';border:1.5px solid ' + (isYaz ? 'rgba(196,82,26,.2)' : 'rgba(0,0,0,.05)') + ';position:relative;">';
+    if (isYaz) bodyHtml += '<span style="position:absolute;top:10px;right:10px;font-size:.55rem;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--terra);color:#fff;letter-spacing:.05em;">AKTİF</span>';
+    bodyHtml += '<div style="font-size:.72rem;font-weight:700;color:' + (isYaz ? 'var(--terra)' : 'var(--text-muted)') + ';margin-bottom:8px;">☀️ Yaz Sezonu</div>';
+    bodyHtml += '<div style="font-size:.65rem;color:var(--text-muted);margin-bottom:6px;">1 Mayıs – 1 Ekim</div>';
+    bodyHtml += '<div style="font-size:1rem;font-weight:800;color:var(--navy);">' + (oy.yazAcilis || '08:30') + ' – ' + (oy.yazKapanis || '20:00') + '</div>';
+    bodyHtml += '<div style="font-size:.65rem;color:var(--text-muted);margin-top:4px;">Gişe Kapanışı: 19:30</div>';
+    bodyHtml += '</div>';
+    // Kış
+    bodyHtml += '<div style="padding:16px;border-radius:14px;background:' + (!isYaz ? 'rgba(26,107,138,.06)' : 'rgba(0,0,0,.02)') + ';border:1.5px solid ' + (!isYaz ? 'rgba(26,107,138,.2)' : 'rgba(0,0,0,.05)') + ';position:relative;">';
+    if (!isYaz) bodyHtml += '<span style="position:absolute;top:10px;right:10px;font-size:.55rem;font-weight:800;padding:2px 8px;border-radius:999px;background:#1A6B8A;color:#fff;letter-spacing:.05em;">AKTİF</span>';
+    bodyHtml += '<div style="font-size:.72rem;font-weight:700;color:' + (!isYaz ? '#1A6B8A' : 'var(--text-muted)') + ';margin-bottom:8px;">❄️ Kış Sezonu</div>';
+    bodyHtml += '<div style="font-size:.65rem;color:var(--text-muted);margin-bottom:6px;">Ekim – Mayıs</div>';
+    bodyHtml += '<div style="font-size:1rem;font-weight:800;color:var(--navy);">' + (oy.kisAcilis || '08:30') + ' – ' + (oy.kisKapanis || '17:30') + '</div>';
+    bodyHtml += '<div style="font-size:.65rem;color:var(--text-muted);margin-top:4px;">Gişe Kapanışı: 17:00</div>';
+    bodyHtml += '</div>';
+    bodyHtml += '</div>';
+
+    // Alt bilgiler
+    bodyHtml += '<div style="padding:0 24px 20px;display:flex;flex-wrap:wrap;gap:10px;">';
+    if (oy.ucret) {
+      bodyHtml += '<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:10px;background:rgba(26,39,68,.05);font-size:.72rem;font-weight:600;color:var(--navy);">🎟 ' + oy.ucret + '</span>';
+    }
+    if (oy.muzekart !== false) {
+      bodyHtml += '<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:10px;background:rgba(56,161,105,.08);font-size:.72rem;font-weight:600;color:#276749;">✅ Müzekart Geçerlidir</span>';
+    }
+    bodyHtml += '<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:10px;background:rgba(26,39,68,.05);font-size:.72rem;font-weight:600;color:var(--text-muted);">📅 Haftanın Her Günü Açık</span>';
+    bodyHtml += '</div>';
+
+    // Uyarı
+    bodyHtml += '<div style="padding:12px 24px 16px;border-top:1px solid rgba(26,39,68,.06);font-size:.68rem;color:var(--text-muted);line-height:1.6;">';
+    bodyHtml += '⚠️ Yaz sezonunda yoğun talep durumunda Valilik kararıyla kapanış saati 21:30\'a uzatılabilir. Gişe, kapanıştan 30 dk önce bilet satışını durdurur. Çıkış saatine uyulması rica olunur.';
+    bodyHtml += '</div>';
+    bodyHtml += '</div>';
+  }
+
   // Description
   if (p.description) {
     bodyHtml += '<div style="margin-bottom:40px;">';
