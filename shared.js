@@ -3757,7 +3757,10 @@ function renderPlacePage(placeId) {
     // Başlık + Durum
     bodyHtml += '<div style="padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">';
     bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1rem;color:var(--navy);margin:0;">🏛 Ziyaret Bilgileri</h2>';
+    bodyHtml += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">';
     bodyHtml += '<span style="display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:999px;font-size:.72rem;font-weight:700;background:' + (isOpen ? 'rgba(34,197,94,.1)' : 'rgba(239,68,68,.1)') + ';color:' + (isOpen ? '#16A34A' : '#DC2626') + ';"><span style="width:7px;height:7px;border-radius:50%;background:' + (isOpen ? '#22C55E' : '#EF4444') + ';"></span>' + (isOpen ? 'Şu An Açık' : 'Şu An Kapalı') + '</span>';
+    bodyHtml += '<span style="font-size:.68rem;color:var(--text-muted);font-weight:500;">📅 Haftanın her günü açık</span>';
+    bodyHtml += '</div>';
     bodyHtml += '</div>';
 
     // Sezon kartları
@@ -3802,7 +3805,6 @@ function renderPlacePage(placeId) {
       bodyHtml += '<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:10px;background:rgba(56,161,105,.08);font-size:.72rem;font-weight:600;color:#276749;">✅ T.C. Vatandaşları İçin Müzekart Geçerlidir</span>';
       bodyHtml += '<a href="https://muze.gov.tr/MuseumPass" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:10px;background:rgba(196,82,26,.08);border:1px solid rgba(196,82,26,.15);font-size:.72rem;font-weight:700;color:#C4521A;text-decoration:none;transition:all .2s;" onmouseover="this.style.background=\'rgba(196,82,26,.15)\'" onmouseout="this.style.background=\'rgba(196,82,26,.08)\'">🎫 Müze Kartı Satın Al →</a>';
     }
-    bodyHtml += '<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:10px;background:rgba(26,39,68,.05);font-size:.72rem;font-weight:600;color:var(--text-muted);">📅 Haftanın Her Günü Açık</span>';
     bodyHtml += '</div>';
 
     // Uyarı
