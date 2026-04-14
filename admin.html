@@ -5011,7 +5011,7 @@ function renderVenueTable() {
         </select></td>
         <td>${sBadge}</td>
         <td>
-          <a class="btn-icon" href="mekanlar/mekan-detay.html?id=${v.id}" target="_blank" title="Mekani Gor" style="text-decoration:none">&#128065;</a>
+          <a class="btn-icon" href="https://assosukesfet.com/mekanlar/mekan-detay?id=${v.id}" target="_blank" title="Sayfayı Görüntüle" style="text-decoration:none;color:var(--terra)">↗</a>
           <button class="btn-icon" title="Düzenle" onclick="openVenueModal('${v.id}')" style="margin-left:4px">&#9998;</button>
           <button class="btn-icon" title="QR Kod" onclick="openQRModal('${v.id}')" style="margin-left:4px">📱</button>
           <button class="btn-icon" title="Sil" onclick="confirmDeleteVenue('${v.id}')" style="margin-left:4px;color:var(--red)">&#128465;</button>
@@ -6033,6 +6033,7 @@ function renderVPTable() {
         '<td style="' + (isPlaces ? '' : 'display:none') + '"><span class="badge badge-cat">' + (x.category || '-') + '</span></td>' +
         '<td>' + (x.image ? '<span class="badge badge-open" style="font-size:.65rem">Var</span>' : '<span class="badge" style="color:var(--text-muted);font-size:.65rem">Yok</span>') + '</td>' +
         '<td>' +
+          '<a href="https://assosukesfet.com/' + (isPlaces ? 'yerler/yer-detay?id=' : 'koyler/koy-detay?id=') + x.id + '" target="_blank" class="btn-icon" title="Sayfayı Görüntüle" style="text-decoration:none;color:var(--terra)">↗</a>' +
           '<button class="btn-icon" title="Görsel" onclick="openPlaceImgModal(\'' + x.id + '\',\'' + (isPlaces ? 'places' : 'villages') + '\')">&#128247;</button>' +
           '<button class="btn-icon" title="Düzenle" onclick="openVPModal(\'' + x.id + '\')" style="margin-left:4px">&#9998;</button>' +
           '<button class="btn-icon" title="Sil" onclick="confirmDeleteVP(\'' + x.id + '\')" style="margin-left:4px;color:var(--red)">&#128465;</button>' +
