@@ -708,7 +708,7 @@ function renderNav(opts = {}) {
 
   var _sdJustOpened = false;
   window.openSaveDrawer = function () {
-    renderSaveDrawer();
+    try { renderSaveDrawer(); } catch(e) { console.error('Favori render hatası:', e); }
     _sdJustOpened = true;
     document.getElementById('save-drawer').classList.add('open');
     document.getElementById('save-overlay').classList.add('open');
@@ -899,7 +899,7 @@ function renderNav(opts = {}) {
         const groups = {};
         venues.forEach(v => {
           var catKey = v.category || 'diger';
-          var catInfo = SD_CAT_MAP[catKey] || {label:catKey, emoji:'📍'};
+          var catInfo = CAT_LABELS_SD[catKey] || (typeof getVenueCatInfo === 'function' ? getVenueCatInfo(catKey) : {label:catKey, emoji:'📍'});
           const m = SD_VMETA[v.id] || { g:'linear-gradient(160deg,#1A2744,#2A3A5A)', cat:catKey, catBg:'rgba(26,39,68,.08)', catC:'#4A5568', catL:catInfo.emoji + ' ' + catInfo.label };
           if (!groups[m.cat]) groups[m.cat] = { m, items:[] };
           groups[m.cat].items.push(v);
