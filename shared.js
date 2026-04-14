@@ -453,7 +453,7 @@ function renderNav(opts = {}) {
         </div>
         <div class="nav-right">
           <div class="nav-divider"></div>
-          <button id="nav-save-btn" class="nav-save-btn" onclick="openSaveDrawer()" aria-label="Kaydedilenler">
+          <button id="nav-save-btn" class="nav-save-btn" aria-label="Kaydedilenler">
             <span class="nav-save-icon">♡</span>
             <span id="nav-save-count" class="nav-save-count" style="display:none;">0</span>
           </button>
@@ -712,6 +712,12 @@ function renderNav(opts = {}) {
     document.getElementById('save-overlay').classList.add('open');
     document.body.style.overflow = 'hidden';
   };
+  // Favori butonuna addEventListener ile bağla (mobil uyumluluk)
+  var navSaveBtn = document.getElementById('nav-save-btn');
+  if (navSaveBtn) {
+    navSaveBtn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); openSaveDrawer(); });
+    navSaveBtn.addEventListener('touchend', function(e) { e.preventDefault(); openSaveDrawer(); });
+  }
 
   window.closeSaveDrawer = function () {
     document.getElementById('save-drawer').classList.remove('open');
