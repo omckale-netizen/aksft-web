@@ -3796,7 +3796,7 @@ function renderPlacePage(placeId) {
       bodyHtml += '<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:10px;background:rgba(26,39,68,.05);font-size:.72rem;font-weight:600;color:var(--navy);">🎟 ' + oy.ucret + '</span>';
     }
     if (oy.muzekart !== false) {
-      bodyHtml += '<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:10px;background:rgba(56,161,105,.08);font-size:.72rem;font-weight:600;color:#276749;">✅ Müzekart Geçerlidir</span>';
+      bodyHtml += '<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:10px;background:rgba(56,161,105,.08);font-size:.72rem;font-weight:600;color:#276749;">✅ T.C. Vatandaşları İçin Müzekart Geçerlidir</span>';
     }
     bodyHtml += '<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:10px;background:rgba(26,39,68,.05);font-size:.72rem;font-weight:600;color:var(--text-muted);">📅 Haftanın Her Günü Açık</span>';
     bodyHtml += '</div>';
