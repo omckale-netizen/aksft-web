@@ -4218,16 +4218,18 @@ function renderPlacePage(placeId) {
   // CSS
   var chatCSS = document.createElement('style');
   chatCSS.textContent = `
-    .ai-chat-fab{position:fixed;bottom:24px;right:24px;z-index:400;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--terra),#D96B2E);color:#fff;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(196,82,26,.35);display:flex;align-items:center;justify-content:center;font-size:1.4rem;transition:all .3s cubic-bezier(.16,1,.3,1);}
-    .ai-chat-fab:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(196,82,26,.45);}
-    .ai-chat-fab.open{transform:rotate(45deg) scale(1);}
-    .ai-chat-panel{position:fixed;bottom:92px;right:24px;z-index:399;width:370px;max-width:calc(100vw - 32px);max-height:500px;background:var(--cream-light,#FAF7F2);border:1px solid rgba(26,39,68,.08);border-radius:20px;box-shadow:0 16px 56px rgba(26,39,68,.18);display:none;flex-direction:column;overflow:hidden;}
-    .ai-chat-panel.open{display:flex;animation:aiChatIn .3s ease;}
-    @keyframes aiChatIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-    .ai-chat-head{padding:18px 20px 14px;background:var(--navy,#1A2744);color:#F5EDE0;display:flex;align-items:center;gap:12px;}
-    .ai-chat-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--terra),#D96B2E);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
-    .ai-chat-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.9rem;}
-    .ai-chat-sub{font-size:.65rem;color:rgba(245,237,224,.45);margin-top:1px;}
+    .ai-chat-fab{position:fixed;bottom:24px;right:24px;z-index:400;width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#1A2744,#2A3A5A);color:#fff;border:2px solid rgba(212,147,90,.3);cursor:pointer;box-shadow:0 4px 24px rgba(26,39,68,.3),0 0 0 0 rgba(212,147,90,.2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;transition:all .3s cubic-bezier(.16,1,.3,1);animation:aiFabPulse 3s ease-in-out infinite;}
+    @keyframes aiFabPulse{0%,100%{box-shadow:0 4px 24px rgba(26,39,68,.3),0 0 0 0 rgba(212,147,90,.2)}50%{box-shadow:0 4px 24px rgba(26,39,68,.3),0 0 0 8px rgba(212,147,90,0)}}
+    .ai-chat-fab:hover{transform:scale(1.1);border-color:rgba(212,147,90,.5);box-shadow:0 6px 32px rgba(26,39,68,.4);}
+    .ai-chat-fab.open{animation:none;transform:rotate(0) scale(1);background:linear-gradient(135deg,#1A2744,#2A3A5A);font-size:1.1rem;}
+    .ai-chat-panel{position:fixed;bottom:96px;right:24px;z-index:399;width:380px;max-width:calc(100vw - 32px);max-height:520px;background:var(--cream-light,#FAF7F2);border:1px solid rgba(26,39,68,.1);border-radius:24px;box-shadow:0 20px 64px rgba(26,39,68,.2);display:none;flex-direction:column;overflow:hidden;}
+    .ai-chat-panel.open{display:flex;animation:aiChatIn .35s cubic-bezier(.16,1,.3,1);}
+    @keyframes aiChatIn{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+    .ai-chat-head{padding:20px 22px 16px;background:linear-gradient(135deg,#1A2744,#243255);color:#F5EDE0;display:flex;align-items:center;gap:14px;position:relative;overflow:hidden;}
+    .ai-chat-head::before{content:'';position:absolute;width:120px;height:120px;border-radius:50%;background:rgba(212,147,90,.08);top:-40px;right:-20px;pointer-events:none;}
+    .ai-chat-avatar{width:40px;height:40px;border-radius:14px;background:linear-gradient(135deg,rgba(212,147,90,.2),rgba(196,82,26,.15));border:1.5px solid rgba(212,147,90,.3);display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;}
+    .ai-chat-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:.92rem;letter-spacing:-.01em;}
+    .ai-chat-sub{font-size:.64rem;color:rgba(245,237,224,.4);margin-top:2px;font-weight:500;}
     .ai-chat-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;max-height:320px;}
     .ai-msg{max-width:85%;padding:10px 14px;border-radius:14px;font-size:.82rem;line-height:1.6;animation:aiMsgIn .3s ease;}
     @keyframes aiMsgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -4252,17 +4254,17 @@ function renderPlacePage(placeId) {
 
   // HTML
   var chatHTML = `
-    <button class="ai-chat-fab" id="ai-chat-fab" onclick="aiChatToggle()" aria-label="AI Asistan">🤖</button>
+    <button class="ai-chat-fab" id="ai-chat-fab" onclick="aiChatToggle()" aria-label="Assos Asistan">🧭</button>
     <div class="ai-chat-panel" id="ai-chat-panel">
       <div class="ai-chat-head">
-        <div class="ai-chat-avatar">🤖</div>
+        <div class="ai-chat-avatar">🧭</div>
         <div>
-          <div class="ai-chat-title">Assos Asistan</div>
-          <div class="ai-chat-sub">Assos hakkında her şeyi sorun</div>
+          <div class="ai-chat-title">Assos Rehberiniz</div>
+          <div class="ai-chat-sub">Yapay zeka destekli seyahat asistanı</div>
         </div>
       </div>
       <div class="ai-chat-body" id="ai-chat-body">
-        <div class="ai-msg bot">Merhaba! 👋 Assos, Ayvacık ve çevresi hakkında sorularınızı yanıtlayabilirim. Nerede kalmalıyım, ne yemeliyim, hangi koyları görmeliyim — ne isterseniz sorun!</div>
+        <div class="ai-msg bot">Merhaba! 🌊 Ben Assos bölgesinin dijital rehberiyim. Nerede kalmalıyım, hangi koyda yüzmeliyim, ne yemeliyim, nasıl gidilir — aklınıza takılan her şeyi sorun, size özel öneriler sunayım!</div>
       </div>
       <div class="ai-chat-limit" id="ai-chat-limit"></div>
       <div class="ai-chat-input">
@@ -4302,14 +4304,22 @@ function renderPlacePage(placeId) {
   function buildContext() {
     if (!window.DATA) return '';
     var ctx = '';
-    var venues = (DATA.venues || []).slice(0, 30);
-    if (venues.length) ctx += 'MEKANLAR:\n' + venues.map(function(v) { return '- ' + v.title + ' (' + (v.category||'') + ', ' + (v.location||'') + '): ' + (v.shortDesc||''); }).join('\n') + '\n\n';
+    var venues = (DATA.venues || []).slice(0, 40);
+    if (venues.length) ctx += 'MEKANLAR (id | ad | kategori | konum | açıklama):\n' + venues.map(function(v) {
+      return '- ' + v.id + ' | ' + v.title + ' | ' + (v.category||'') + ' | ' + (v.location||'') + ' | ' + (v.shortDesc||'') + (v.phone ? ' | Tel: ' + v.phone : '');
+    }).join('\n') + '\n\n';
     var places = (DATA.places || []).slice(0, 20);
-    if (places.length) ctx += 'GEZİLECEK YERLER:\n' + places.map(function(p) { return '- ' + p.title + ' (' + (p.location||'') + '): ' + (p.shortDesc||''); }).join('\n') + '\n\n';
-    var villages = (DATA.villages || []).slice(0, 15);
-    if (villages.length) ctx += 'KÖYLER:\n' + villages.map(function(v) { return '- ' + v.title + ': ' + (v.shortDesc||''); }).join('\n') + '\n\n';
+    if (places.length) ctx += 'GEZİLECEK YERLER (id | ad | kategori | konum | açıklama):\n' + places.map(function(p) {
+      return '- ' + p.id + ' | ' + p.title + ' | ' + (p.category||'') + ' | ' + (p.location||'') + ' | ' + (p.shortDesc||'');
+    }).join('\n') + '\n\n';
+    var villages = (DATA.villages || []).slice(0, 20);
+    if (villages.length) ctx += 'KÖYLER (id | ad | tür | açıklama):\n' + villages.map(function(v) {
+      return '- ' + v.id + ' | ' + v.title + ' | ' + (v.type||'koy') + ' | ' + (v.shortDesc||'');
+    }).join('\n') + '\n\n';
     var routes = (DATA.routes || []).slice(0, 10);
-    if (routes.length) ctx += 'ROTALAR:\n' + routes.map(function(r) { return '- ' + r.title + ' (' + (r.sure||'') + '): ' + (r.shortDesc||''); }).join('\n');
+    if (routes.length) ctx += 'ROTALAR (id | ad | süre | açıklama):\n' + routes.map(function(r) {
+      return '- ' + r.id + ' | ' + r.title + ' | ' + (r.sure||'') + ' | ' + (r.shortDesc||'');
+    }).join('\n');
     return ctx;
   }
 
@@ -4319,7 +4329,7 @@ function renderPlacePage(placeId) {
     var fab = document.getElementById('ai-chat-fab');
     panel.classList.toggle('open');
     fab.classList.toggle('open');
-    fab.textContent = panel.classList.contains('open') ? '✕' : '🤖';
+    fab.textContent = panel.classList.contains('open') ? '✕' : '🧭';
     if (panel.classList.contains('open')) document.getElementById('ai-chat-input').focus();
   };
 
@@ -4372,11 +4382,23 @@ function renderPlacePage(placeId) {
     sendBtn.disabled = false;
   };
 
+  function mdToHtml(text) {
+    return text
+      .replace(/^### (.+)$/gm, '<strong style="font-size:.85rem">$1</strong>')
+      .replace(/^## (.+)$/gm, '<strong style="font-size:.9rem">$1</strong>')
+      .replace(/^# (.+)$/gm, '<strong style="font-size:.95rem">$1</strong>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/\n\n/g, '<br><br>')
+      .replace(/\n/g, '<br>')
+      .replace(/- (.+?)(?=<br>|$)/g, '• $1');
+  }
   function addMsg(text, type) {
     var body = document.getElementById('ai-chat-body');
     var div = document.createElement('div');
     div.className = 'ai-msg ' + type;
-    div.textContent = text;
+    if (type === 'bot') div.innerHTML = mdToHtml(text);
+    else div.textContent = text;
     body.appendChild(div);
     body.scrollTop = body.scrollHeight;
   }
