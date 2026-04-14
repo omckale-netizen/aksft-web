@@ -227,6 +227,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .wh-checkin-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .wh-checkin-row label{font-size:.78rem;font-weight:600;color:var(--navy);min-width:70px}
 .wh-checkin-row input[type="time"]{padding:5px 8px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.78rem;font-family:inherit;width:110px}
+.fac-check{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border:1px solid rgba(0,0,0,.08);border-radius:8px;font-size:.75rem;font-weight:500;cursor:pointer;transition:all .15s;user-select:none}
+.fac-check:has(input:checked){background:rgba(90,122,86,.1);border-color:rgba(90,122,86,.3);color:#5A7A56;font-weight:600}
+.fac-check input{width:0;height:0;opacity:0;position:absolute}
+.room-row{display:flex;gap:8px;align-items:center;padding:10px;background:rgba(0,0,0,.02);border-radius:10px;margin-bottom:8px;flex-wrap:wrap}
+.room-row input{padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.78rem;font-family:inherit}
 .wh-copy-btn{font-size:.65rem;padding:3px 8px;border:1px solid rgba(0,0,0,.1);border-radius:6px;background:rgba(196,82,26,.05);color:var(--terra);cursor:pointer;font-family:inherit;font-weight:600;transition:all .15s;white-space:nowrap}
 .wh-copy-btn:hover{background:rgba(196,82,26,.12)}
 /* Tag chips */
@@ -2279,6 +2284,32 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             <div class="wh-checkin-row">
               <label>Check-out</label>
               <input type="time" id="f-checkout" value="11:00">
+            </div>
+          </div>
+          <!-- Oda Tipleri — sadece konaklama -->
+          <div id="f-rooms-section" style="display:none;margin-top:16px;background:rgba(90,122,86,.04);border:1px solid rgba(90,122,86,.12);border-radius:12px;padding:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <span style="font-size:.78rem;font-weight:700;color:var(--navy);">🛏 Oda Tipleri</span>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="addRoomRow()">+ Oda Ekle</button>
+            </div>
+            <div id="f-rooms-list"></div>
+          </div>
+          <!-- Tesis Olanakları — sadece konaklama -->
+          <div id="f-facilities-section" style="display:none;margin-top:16px;">
+            <label>Tesis Olanakları</label>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;" id="f-facilities-grid">
+              <label class="fac-check"><input type="checkbox" value="Havuz"> 🏊 Havuz</label>
+              <label class="fac-check"><input type="checkbox" value="Otopark"> 🅿️ Otopark</label>
+              <label class="fac-check"><input type="checkbox" value="WiFi"> 📶 WiFi</label>
+              <label class="fac-check"><input type="checkbox" value="Kahvaltı Dahil"> ☕ Kahvaltı Dahil</label>
+              <label class="fac-check"><input type="checkbox" value="Restoran"> 🍽 Restoran</label>
+              <label class="fac-check"><input type="checkbox" value="Spa"> 💆 Spa</label>
+              <label class="fac-check"><input type="checkbox" value="Klima"> ❄️ Klima</label>
+              <label class="fac-check"><input type="checkbox" value="Deniz Manzarası"> 🌊 Deniz Manzarası</label>
+              <label class="fac-check"><input type="checkbox" value="Bahçe"> 🌿 Bahçe</label>
+              <label class="fac-check"><input type="checkbox" value="Barbekü"> 🔥 Barbekü</label>
+              <label class="fac-check"><input type="checkbox" value="Bisiklet"> 🚲 Bisiklet</label>
+              <label class="fac-check"><input type="checkbox" value="Evcil Hayvan"> 🐾 Evcil Hayvan</label>
             </div>
           </div>
         </div>
@@ -5325,6 +5356,8 @@ function openVenueModal(id) {
     if (v.category === 'konaklama') {
       document.getElementById('f-checkin').value = v.checkin || '14:00';
       document.getElementById('f-checkout').value = v.checkout || '11:00';
+      loadRoomsData(v.rooms || []);
+      loadFacilitiesData(v.facilities || []);
     }
     // Eski weeklyHours -> dayHours migration
     if (!v.dayHours && v.weeklyHours) {
@@ -5337,6 +5370,8 @@ function openVenueModal(id) {
     document.getElementById('f-featured').disabled = false;
     renderWhGrid(null);
     setTagsFromString('');
+    loadRoomsData([]);
+    loadFacilitiesData([]);
   }
   updateHoursVisibility();
 
@@ -5466,6 +5501,56 @@ function updateHoursVisibility() {
   const isKonaklama = cat === 'konaklama';
   document.getElementById('f-hours-normal').style.display = isKonaklama ? 'none' : '';
   document.getElementById('f-hours-konaklama').style.display = isKonaklama ? '' : 'none';
+  document.getElementById('f-rooms-section').style.display = isKonaklama ? 'block' : 'none';
+  document.getElementById('f-facilities-section').style.display = isKonaklama ? 'block' : 'none';
+}
+
+function addRoomRow(data) {
+  var list = document.getElementById('f-rooms-list');
+  var row = document.createElement('div');
+  row.className = 'room-row';
+  var d = data || {};
+  row.innerHTML =
+    '<input type="text" class="room-name" value="' + (d.name || '') + '" placeholder="Oda adı" style="flex:1;min-width:120px">' +
+    '<input type="text" class="room-capacity" value="' + (d.capacity || '') + '" placeholder="Kapasite" style="width:70px">' +
+    '<input type="text" class="room-bed" value="' + (d.bed || '') + '" placeholder="Yatak tipi" style="width:100px">' +
+    '<input type="text" class="room-size" value="' + (d.size || '') + '" placeholder="m²" style="width:60px">' +
+    '<button type="button" class="btn-icon" onclick="this.parentElement.remove()" style="color:var(--red);font-size:.85rem" title="Sil">✕</button>';
+  list.appendChild(row);
+}
+
+function getRoomsData() {
+  var rooms = [];
+  document.querySelectorAll('#f-rooms-list .room-row').forEach(function(row) {
+    var name = row.querySelector('.room-name').value.trim();
+    if (!name) return;
+    rooms.push({
+      name: name,
+      capacity: row.querySelector('.room-capacity').value.trim(),
+      bed: row.querySelector('.room-bed').value.trim(),
+      size: row.querySelector('.room-size').value.trim()
+    });
+  });
+  return rooms;
+}
+
+function getFacilitiesData() {
+  var facilities = [];
+  document.querySelectorAll('#f-facilities-grid input[type="checkbox"]:checked').forEach(function(cb) {
+    facilities.push(cb.value);
+  });
+  return facilities;
+}
+
+function loadRoomsData(rooms) {
+  document.getElementById('f-rooms-list').innerHTML = '';
+  if (rooms && rooms.length) rooms.forEach(function(r) { addRoomRow(r); });
+}
+
+function loadFacilitiesData(facilities) {
+  document.querySelectorAll('#f-facilities-grid input[type="checkbox"]').forEach(function(cb) {
+    cb.checked = facilities && facilities.indexOf(cb.value) > -1;
+  });
 }
 
 /* Category style defaults */
@@ -5491,6 +5576,8 @@ async function saveVenue(e) {
   const dayHours = category === 'konaklama' ? null : getWhData();
   const checkin = category === 'konaklama' ? document.getElementById('f-checkin').value : '';
   const checkout = category === 'konaklama' ? document.getElementById('f-checkout').value : '';
+  const rooms = category === 'konaklama' ? getRoomsData() : [];
+  const facilities = category === 'konaklama' ? getFacilitiesData() : [];
 
   // weeklyHours oluştur (geriye uyumlu + detay sayfası)
   const weeklyHours = [];
@@ -5578,6 +5665,8 @@ async function saveVenue(e) {
     dayHours: dayHours,
     checkin: checkin,
     checkout: checkout,
+    rooms: rooms,
+    facilities: facilities,
     lat: parseFloat(document.getElementById('f-lat').value) || null,
     lng: parseFloat(document.getElementById('f-lng').value) || null,
     seasonal: document.getElementById('f-seasonal').checked,

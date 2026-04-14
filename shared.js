@@ -2676,11 +2676,15 @@ function renderVenuePage(venueId) {
           </div>
         </div>
 
+        ${isPremiumActive(v) && v.rooms && v.rooms.length > 0 ? '<div class="vp-section fade-up"><div class="vp-eyebrow">Konaklama</div><h2 class="vp-stitle">Oda Tipleri</h2><div style="display:grid;gap:12px;">' + v.rooms.map(function(r) { return '<div style="display:flex;align-items:center;gap:14px;padding:14px 18px;background:rgba(90,122,86,.04);border:1px solid rgba(90,122,86,.1);border-radius:14px;"><span style="font-size:1.4rem;">🛏</span><div style="flex:1"><div style="font-weight:700;font-size:.88rem;color:#1A2744;">' + r.name + '</div><div style="font-size:.72rem;color:#718096;margin-top:2px;">' + [r.capacity ? r.capacity + ' Kişi' : '', r.bed || '', r.size ? r.size + ' m²' : ''].filter(Boolean).join(' · ') + '</div></div></div>'; }).join('') + '</div></div>' : ''}
+
+        ${isPremiumActive(v) && v.facilities && v.facilities.length > 0 ? '<div class="vp-section fade-up"><div class="vp-eyebrow">Olanaklar</div><h2 class="vp-stitle">Tesis Olanakları</h2><div style="display:flex;flex-wrap:wrap;gap:8px;">' + v.facilities.map(function(f) { var icons = {"Havuz":"🏊","Otopark":"🅿️","WiFi":"📶","Kahvaltı Dahil":"☕","Restoran":"🍽","Spa":"💆","Klima":"❄️","Deniz Manzarası":"🌊","Bahçe":"🌿","Barbekü":"🔥","Bisiklet":"🚲","Evcil Hayvan":"🐾"}; return '<span style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:10px;background:rgba(26,39,68,.04);font-size:.78rem;font-weight:600;color:#4A5870;">' + (icons[f] || '✓') + ' ' + f + '</span>'; }).join('') + '</div></div>' : ''}
+
         <!-- İletişim -->
         <div class="vp-section fade-up">
           <div class="vp-eyebrow">İletişim</div>
           <h2 class="vp-stitle">Ulaşın</h2>
-          <div class="vp-contact-grid${v.category === 'konaklama' ? ' vp-contact-grid-1col' : ''}">
+          <div class="vp-contact-grid${v.category === 'konaklama' ? ' vp-contact-grid-1col' : ''}"
             <div class="vp-contact-card">
               <div class="vp-contact-icon">📞</div>
               <div>
