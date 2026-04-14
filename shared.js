@@ -2292,13 +2292,14 @@ function renderVenuePage(venueId) {
         for (let offset = 1; offset <= 7; offset++) {
           const checkIdx = (todayIdx + offset) % 7;
           const checkDay = DAY_ORDER[checkIdx];
+          const dayLabel = offset === 1 ? 'Yarın' : checkDay;
           for (const entry of entries) {
             const d = fixTR(entry.days || '').toLowerCase();
             const h = fixTR(entry.hours || '');
             if (h.toLowerCase().includes('kapal')) continue;
             if (d.includes(checkDay.toLowerCase())) {
               const m = h.match(/(\d{2}):(\d{2})/);
-              return '<span class="vp-open-badge vp-closed">Kapalı · ' + checkDay + ' ' + (m ? saatEki(m[1], m[2]) : '') + ' açılacak</span>';
+              return '<span class="vp-open-badge vp-closed">Kapalı · ' + dayLabel + ' ' + (m ? saatEki(m[1], m[2]) : '') + ' açılacak</span>';
             }
             const rangeMatch = d.match(/(\S+)\s*[–\-]\s*(\S+)/);
             if (rangeMatch) {
@@ -2306,7 +2307,7 @@ function renderVenuePage(venueId) {
               const e = DAY_ALIASES[rangeMatch[2].toLowerCase()];
               if (s !== undefined && e !== undefined && checkIdx >= s && checkIdx <= e) {
                 const m = h.match(/(\d{2}):(\d{2})/);
-                return '<span class="vp-open-badge vp-closed">Kapalı · ' + checkDay + ' ' + (m ? saatEki(m[1], m[2]) : '') + ' açılacak</span>';
+                return '<span class="vp-open-badge vp-closed">Kapalı · ' + dayLabel + ' ' + (m ? saatEki(m[1], m[2]) : '') + ' açılacak</span>';
               }
             }
           }
@@ -2319,7 +2320,7 @@ function renderVenuePage(venueId) {
           const mins = now.getHours() * 60 + now.getMinutes();
           const openMins = parseInt(match[1]) * 60 + parseInt(match[2]);
           if (mins < openMins) {
-            return '<span class="vp-open-badge vp-closed">Kapalı · ' + saatEki(match[1], match[2]) + ' açılacak</span>';
+            return '<span class="vp-open-badge vp-closed">Kapalı · Bugün ' + saatEki(match[1], match[2]) + ' açılacak</span>';
           } else {
             return '<span class="vp-open-badge vp-closed">Kapalı · Yarın ' + saatEki(match[1], match[2]) + ' açılacak</span>';
           }
