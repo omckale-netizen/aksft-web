@@ -372,6 +372,10 @@ document.addEventListener('dataReady', _fetchSiteLogo);
       .nav-links{display:none;}
       .nav-hamburger{display:flex;align-items:center;justify-content:center;}
       .mm-link .mm-label{font-size:1.35rem;}
+      .nav-right{gap:6px;}
+      .nav-right .btn-terra{padding:6px 10px;font-size:.68rem;}
+      .nav-save-btn{padding:6px 8px;}
+      .nav-divider{display:none;}
     }
     @media(max-width:640px){
       #site-footer .footer-glass{padding:28px 20px 24px;}
