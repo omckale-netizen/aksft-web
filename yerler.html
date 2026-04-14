@@ -69,7 +69,7 @@
       <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.6rem,4vw,2.4rem);color:var(--navy);margin-top:8px;letter-spacing:-.02em;">Mutlaka Görülmesi Gereken Yerler</h2>
       <div style="width:40px;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--terra),var(--amber));margin:14px auto 0;"></div>
     </div>
-    <div id="yl-must-see-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-bottom:48px;"></div>
+    <div id="yl-must-see-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:48px;max-width:700px;margin-left:auto;margin-right:auto;"></div>
   </div>
 </section>
 
@@ -92,11 +92,11 @@
 
 <div id="footer-placeholder"></div>
 
-<style>.place-card-wrap{background:#fff;border-radius:18px;overflow:hidden;border:1px solid rgba(26,39,68,.06);cursor:pointer;transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s cubic-bezier(.16,1,.3,1);position:relative}.place-card-wrap:hover{transform:translateY(-5px);box-shadow:0 20px 50px rgba(26,39,68,.1)}@keyframes imgShimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}.place-img-box{aspect-ratio:4/3;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:2.5rem}.place-img-box.has-img{background:linear-gradient(90deg,#e8e4de 25%,#f0ece6 50%,#e8e4de 75%);background-size:800px 100%;animation:imgShimmer 1.5s infinite linear}.place-img-box img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s ease}.place-img-box img.loaded{opacity:1}.place-save-btn.saved{background:rgba(196,82,26,.85) !important;color:#fff !important}.place-save-btn:hover{transform:scale(1.1)}</style>
+<style>.place-card-wrap{background:#fff;border-radius:18px;overflow:hidden;border:1px solid rgba(26,39,68,.06);cursor:pointer;transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s cubic-bezier(.16,1,.3,1);position:relative}.place-card-wrap:hover{transform:translateY(-5px);box-shadow:0 20px 50px rgba(26,39,68,.1)}@keyframes imgShimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}.place-img-box{aspect-ratio:4/3;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:2.5rem}.place-img-box.has-img{background:linear-gradient(90deg,#e8e4de 25%,#f0ece6 50%,#e8e4de 75%);background-size:800px 100%;animation:imgShimmer 1.5s infinite linear}.place-img-box img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s ease}.place-img-box img.loaded{opacity:1}.place-save-btn.saved{background:rgba(196,82,26,.85) !important;color:#fff !important}.place-save-btn:hover{transform:scale(1.1)}@media(max-width:640px){#places-grid{grid-template-columns:repeat(2,1fr) !important;gap:10px !important}.place-card-wrap .place-img-box{aspect-ratio:3/2}.place-card-wrap h3{font-size:.82rem !important}.place-card-wrap p{font-size:.68rem !important;-webkit-line-clamp:2}.place-save-btn{width:28px !important;height:28px !important;font-size:.85rem !important}#yl-must-see-grid{gap:10px !important}}</style>
 
 <script src="firebase-loader.js?v=3"></script>
 <script src="data.js?v=2"></script>
-<script src="shared.min.js?v=169"></script>
+<script src="shared.min.js?v=171"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
@@ -130,11 +130,15 @@ function pageInit() {
       statsEl.innerHTML = statsHtml;
     }
 
-    // Filtre butonları
+    // Filtre butonları — sadece alttaki grid'de sonucu olan kategoriler
     var filtersEl = document.getElementById('yl-filters');
     if (filtersEl && cats.length > 0) {
+      var gridPlaces = places.filter(function(p) { return !p.mustSee && p.category !== 'tarihi' && p.category !== 'orenyeri'; });
       var usedCats = {};
-      places.forEach(function(p) { if (p.category) usedCats[p.category] = true; });
+      gridPlaces.forEach(function(p) { if (p.category) usedCats[p.category] = true; });
+      // showInPlaces köyler için de 'koyu' ekle
+      var hasVillagePlaces = (DATA.villages || []).some(function(v) { return v.showInPlaces; });
+      if (hasVillagePlaces) usedCats['koyu'] = true;
       var filterHtml = '<button class="filter-btn active" onclick="filterPlaces(this,\'all\')">Tümü</button>';
       cats.forEach(function(c) {
         if (usedCats[c.id]) {
@@ -157,17 +161,25 @@ function pageInit() {
     var grid = document.getElementById('yl-must-see-grid');
     if (!section || !grid) return;
     section.style.display = 'block';
+    // Müzekart bilgisi — ören yerlerinde göster
+    var hasOren = orenYerleri.some(function(p) { return p.category === 'tarihi' || p.category === 'orenyeri'; });
+    if (hasOren) {
+      var muzekartEl = document.createElement('div');
+      muzekartEl.style.cssText = 'text-align:center;margin-bottom:20px;';
+      muzekartEl.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:999px;background:rgba(56,161,105,.08);border:1px solid rgba(56,161,105,.15);font-size:.75rem;font-weight:600;color:#276749;">✅ T.C. Vatandaşları İçin Müzekart Geçerlidir</span>';
+      grid.parentNode.insertBefore(muzekartEl, grid);
+    }
     grid.innerHTML = orenYerleri.map(function(p, i) {
       var cat = getCatInfo(p.category);
       return '<a href="yerler/yer-detay.html?id=' + p.id + '" class="fade-up" data-delay="' + (i * 0.08) + '" style="display:block;background:#fff;border-radius:20px;overflow:hidden;border:1px solid rgba(26,39,68,.06);text-decoration:none;transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s;cursor:pointer" onmouseover="this.style.transform=\'translateY(-6px)\';this.style.boxShadow=\'0 20px 50px rgba(26,39,68,.12)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'">' +
-        '<div style="position:relative;aspect-ratio:16/9;overflow:hidden;' + (p.image ? 'background:linear-gradient(90deg,#e8e4de 25%,#f0ece6 50%,#e8e4de 75%)' : 'background:linear-gradient(135deg,' + cat.bg[0] + ',' + cat.bg[1] + ');display:flex;align-items:center;justify-content:center;font-size:3rem') + '">' +
+        '<div style="position:relative;aspect-ratio:4/3;overflow:hidden;' + (p.image ? 'background:linear-gradient(90deg,#e8e4de 25%,#f0ece6 50%,#e8e4de 75%)' : 'background:linear-gradient(135deg,' + cat.bg[0] + ',' + cat.bg[1] + ');display:flex;align-items:center;justify-content:center;font-size:3rem') + '">' +
           (p.image ? '<img src="' + p.image + '" alt="' + p.title + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s" loading="lazy" onload="this.style.opacity=1">' : (p.emoji || '🏛')) +
-          '<span style="position:absolute;top:12px;left:12px;font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:999px;background:rgba(196,82,26,.85);color:#fff;backdrop-filter:blur(8px);">Mutlaka Görülmeli</span>' +
+          '<span style="position:absolute;top:12px;left:12px;font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:999px;background:' + cat.color + 'cc;color:#fff;backdrop-filter:blur(8px);">' + cat.label + '</span>' +
+          (p.location ? '<span style="position:absolute;bottom:10px;left:12px;font-size:.65rem;color:rgba(255,255,255,.85);font-weight:500;display:flex;align-items:center;gap:3px;text-shadow:0 1px 3px rgba(0,0,0,.5)">📍 ' + p.location + '</span>' : '') +
         '</div>' +
-        '<div style="padding:18px 20px 20px">' +
-          '<h3 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.05rem;color:var(--navy);margin-bottom:6px">' + p.title + '</h3>' +
-          '<p style="font-size:.8rem;color:var(--text-mid);line-height:1.6;margin-bottom:10px">' + (p.shortDesc || '') + '</p>' +
-          (p.location ? '<span style="font-size:.7rem;color:var(--text-muted);display:flex;align-items:center;gap:4px">📍 ' + p.location + '</span>' : '') +
+        '<div style="padding:14px 16px 16px">' +
+          '<h3 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.92rem;color:var(--navy);margin-bottom:4px">' + p.title + '</h3>' +
+          '<p style="font-size:.72rem;color:var(--text-mid);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + (p.shortDesc || '') + '</p>' +
         '</div></a>';
     }).join('');
     if (typeof scrollFadeIn === 'function') scrollFadeIn();
