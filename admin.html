@@ -2288,10 +2288,22 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
           <!-- Oda Tipleri — sadece konaklama -->
           <div id="f-rooms-section" style="display:none;margin-top:16px;background:rgba(90,122,86,.04);border:1px solid rgba(90,122,86,.12);border-radius:12px;padding:16px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
               <span style="font-size:.78rem;font-weight:700;color:var(--navy);">🛏 Oda Tipleri</span>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="addRoomRow()">+ Oda Ekle</button>
+              <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                <select id="f-rooms-sort" onchange="sortRooms()" style="padding:4px 8px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.68rem;font-family:inherit;color:var(--text-muted)">
+                  <option value="">Sıralama</option>
+                  <option value="name-asc">A → Z</option>
+                  <option value="name-desc">Z → A</option>
+                  <option value="size-asc">m² ↑ Küçükten</option>
+                  <option value="size-desc">m² ↓ Büyükten</option>
+                  <option value="capacity-asc">Kişi ↑ Azdan</option>
+                  <option value="capacity-desc">Kişi ↓ Çoktan</option>
+                </select>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="addRoomRow()">+ Oda Ekle</button>
+              </div>
             </div>
+            <div style="font-size:.62rem;color:var(--text-muted);margin-bottom:10px;">↕ Odaları sürükleyerek manuel sıralayabilirsiniz</div>
             <div id="f-rooms-list"></div>
           </div>
           <!-- Tesis Olanakları — sadece konaklama -->
@@ -5512,8 +5524,10 @@ function addRoomRow(data) {
   row.style.cssText = 'flex-direction:column;gap:10px;';
   var d = data || {};
   var uid = 'room_' + Date.now() + '_' + Math.random().toString(36).substr(2,4);
+  row.style.cursor = 'grab';
   row.innerHTML =
     '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;width:100%">' +
+      '<span style="cursor:grab;color:var(--text-muted);font-size:.8rem;user-select:none;" title="Sürükle">☰</span>' +
       '<input type="text" class="room-name" value="' + (d.name || '') + '" placeholder="Oda adı" style="flex:1;min-width:120px">' +
       '<select class="room-capacity" style="width:80px;padding:6px 8px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.75rem;font-family:inherit"><option value="">Kişi</option><option value="1"' + (d.capacity === '1' ? ' selected' : '') + '>1 Kişi</option><option value="2"' + (d.capacity === '2' ? ' selected' : '') + '>2 Kişi</option><option value="3"' + (d.capacity === '3' ? ' selected' : '') + '>3 Kişi</option><option value="4"' + (d.capacity === '4' ? ' selected' : '') + '>4 Kişi</option><option value="5"' + (d.capacity === '5' ? ' selected' : '') + '>5 Kişi</option><option value="6"' + (d.capacity === '6' ? ' selected' : '') + '>6 Kişi</option><option value="6+"' + (d.capacity === '6+' ? ' selected' : '') + '>6+ Kişi</option></select>' +
       '<select class="room-bed" style="width:130px;padding:6px 8px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.75rem;font-family:inherit"><option value="">Yatak Tipi</option><option value="Tek Kişilik"' + (d.bed === 'Tek Kişilik' ? ' selected' : '') + '>Tek Kişilik</option><option value="Çift Kişilik"' + (d.bed === 'Çift Kişilik' ? ' selected' : '') + '>Çift Kişilik</option><option value="King Size"' + (d.bed === 'King Size' ? ' selected' : '') + '>King Size</option><option value="2 Ayrı Tek Yatak"' + (d.bed === '2 Ayrı Tek Yatak' ? ' selected' : '') + '>2 Ayrı Tek Yatak</option><option value="Çift Kişilik + Tek"' + (d.bed === 'Çift Kişilik + Tek' ? ' selected' : '') + '>Çift Kişilik + Tek</option><option value="Çift Kişilik + 2 Tek"' + (d.bed === 'Çift Kişilik + 2 Tek' ? ' selected' : '') + '>Çift Kişilik + 2 Tek</option><option value="Ranza"' + (d.bed === 'Ranza' ? ' selected' : '') + '>Ranza</option><option value="Suit (Çift Kişilik + Salon)"' + (d.bed === 'Suit (Çift Kişilik + Salon)' ? ' selected' : '') + '>Suit (Çift Kişilik + Salon)</option></select>' +
@@ -5553,6 +5567,30 @@ function handleRoomImage(input) {
   });
 }
 
+function sortRooms() {
+  var sortBy = document.getElementById('f-rooms-sort').value;
+  if (!sortBy) return;
+  var rooms = getRoomsData();
+  rooms.sort(function(a, b) {
+    if (sortBy === 'name-asc') return (a.name || '').localeCompare(b.name || '', 'tr');
+    if (sortBy === 'name-desc') return (b.name || '').localeCompare(a.name || '', 'tr');
+    if (sortBy === 'size-asc') return (parseInt(a.size) || 0) - (parseInt(b.size) || 0);
+    if (sortBy === 'size-desc') return (parseInt(b.size) || 0) - (parseInt(a.size) || 0);
+    if (sortBy === 'capacity-asc') return (parseInt(a.capacity) || 0) - (parseInt(b.capacity) || 0);
+    if (sortBy === 'capacity-desc') return (parseInt(b.capacity) || 0) - (parseInt(a.capacity) || 0);
+    return 0;
+  });
+  loadRoomsData(rooms);
+  initRoomSortable();
+}
+
+function initRoomSortable() {
+  var list = document.getElementById('f-rooms-list');
+  if (list && typeof Sortable !== 'undefined') {
+    Sortable.create(list, { animation: 150, handle: '.room-row', ghostClass: 'sortable-ghost' });
+  }
+}
+
 function getRoomsData() {
   var rooms = [];
   document.querySelectorAll('#f-rooms-list .room-row').forEach(function(row) {
@@ -5581,6 +5619,7 @@ function getFacilitiesData() {
 function loadRoomsData(rooms) {
   document.getElementById('f-rooms-list').innerHTML = '';
   if (rooms && rooms.length) rooms.forEach(function(r) { addRoomRow(r); });
+  initRoomSortable();
 }
 
 function loadFacilitiesData(facilities) {
