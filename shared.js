@@ -574,7 +574,7 @@ function renderNav(opts = {}) {
   /* ── Save drawer HTML (once per session) ── */
   if (!document.getElementById('save-drawer')) {
     document.body.insertAdjacentHTML('beforeend', `
-      <div id="save-overlay" onclick="closeSaveDrawer()"></div>
+      <div id="save-overlay"></div>
       <div id="save-drawer" role="dialog" aria-label="Kaydedilen Mekanlar">
         <div class="sd-head">
           <div class="sd-title">
@@ -706,17 +706,24 @@ function renderNav(opts = {}) {
     if (window.syncFavToFirebase) window.syncFavToFirebase();
   };
 
+  var _sdJustOpened = false;
   window.openSaveDrawer = function () {
     renderSaveDrawer();
+    _sdJustOpened = true;
     document.getElementById('save-drawer').classList.add('open');
     document.getElementById('save-overlay').classList.add('open');
     document.body.style.overflow = 'hidden';
+    setTimeout(function() { _sdJustOpened = false; }, 400);
   };
-  // Favori butonuna addEventListener ile bağla (mobil uyumluluk)
+  // Overlay click — kapatma (açılış anını atla)
+  var saveOverlay = document.getElementById('save-overlay');
+  if (saveOverlay) {
+    saveOverlay.addEventListener('click', function() { if (!_sdJustOpened) closeSaveDrawer(); });
+  }
+  // Favori butonuna bağla
   var navSaveBtn = document.getElementById('nav-save-btn');
   if (navSaveBtn) {
     navSaveBtn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); openSaveDrawer(); });
-    navSaveBtn.addEventListener('touchend', function(e) { e.preventDefault(); openSaveDrawer(); });
   }
 
   window.closeSaveDrawer = function () {
