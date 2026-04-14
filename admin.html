@@ -124,7 +124,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .admin-main .page-sub{color:var(--text-light);font-size:.88rem;margin-bottom:28px}
 
 /* ── HAMBURGER ── */
-.hamburger{display:none;position:fixed;top:14px;left:14px;z-index:200;background:var(--navy);border:none;color:#fff;width:42px;height:42px;border-radius:var(--radius-sm);font-size:1.3rem;cursor:pointer;align-items:center;justify-content:center}
+.hamburger{display:none;position:fixed;top:14px;left:14px;z-index:200;background:var(--navy);border:none;color:#fff;width:38px;height:38px;border-radius:10px;font-size:1.1rem;cursor:pointer;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+[data-theme="dark"] .hamburger{background:var(--card-bg);color:var(--text);border:1px solid var(--card-border)}
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99}
 
 /* ── STATS CARDS ── */
@@ -139,14 +140,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .notif-bell{display:none}
 .sidebar-notif-bell:hover{background:rgba(255,255,255,.15) !important}
 .notif-bell-badge{position:absolute;top:-2px;right:-2px;min-width:18px;height:18px;border-radius:9px;background:var(--red);color:#fff;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--page-bg)}
-.notif-dropdown{position:fixed;top:auto;left:var(--sidebar-w);z-index:160;width:380px;max-height:520px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;box-shadow:0 12px 48px rgba(0,0,0,.12);display:none;flex-direction:column;overflow:hidden}
+.notif-dropdown{position:fixed;top:80px;left:var(--sidebar-w);z-index:500;width:380px;max-height:520px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;box-shadow:0 12px 48px rgba(0,0,0,.12);display:none;flex-direction:column;overflow:hidden;margin-left:12px}
 .notif-dropdown.open{display:flex}
 .notif-dd-head{padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,0,0,.06)}
 .notif-dd-tabs{display:flex;gap:4px;padding:10px 16px 8px}
 .notif-dd-tab{padding:5px 12px;border:none;border-radius:8px;background:transparent;font-family:inherit;font-size:.72rem;font-weight:600;color:var(--text-muted);cursor:pointer;transition:all .15s}
 .notif-dd-tab:hover{background:rgba(0,0,0,.04)}
 .notif-dd-tab.active{background:var(--navy);color:#fff}
-@media(max-width:768px){.notif-dropdown{right:12px;left:12px;width:auto}.notif-bell{right:100px}}
+@media(max-width:768px){.notif-dropdown{left:12px !important;right:12px;width:auto;margin-left:0 !important}}
 
 /* ── TABLE ── */
 .panel-card{background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--card-shadow);border:1px solid var(--card-border);overflow:hidden;margin-bottom:24px;transition:background .3s}
@@ -481,6 +482,18 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
 <!-- HAMBURGER -->
 <button class="hamburger" id="hamburger" onclick="toggleSidebar()">&#9776;</button>
+<!-- Bildirim dropdown — body seviyesinde (sidebar overflow sorunu için) -->
+<div class="notif-dropdown" id="notif-dropdown">
+  <div class="notif-dd-head">
+    <span style="font-weight:700;font-size:.88rem;color:var(--navy)">Bildirimler</span>
+    <button style="background:none;border:none;font-size:.72rem;color:var(--terra);cursor:pointer;font-weight:600" onclick="markAllNotifsRead()">Tümünü okundu işaretle</button>
+  </div>
+  <div class="notif-dd-tabs">
+    <button class="notif-dd-tab active" onclick="filterNotifs('all',this)">Tümü</button>
+    <button class="notif-dd-tab" onclick="filterNotifs('message',this)">Mesajlar</button>
+  </div>
+  <div id="notif-list" style="max-height:400px;overflow-y:auto"></div>
+</div>
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <!-- APP -->
@@ -498,17 +511,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         <span id="dark-mode-label" style="font-size:.75rem;">🌙</span>
         <div class="dm-track" style="width:30px;height:16px;border-radius:8px;position:relative;transition:background .3s;"><div class="dm-thumb" style="width:12px;height:12px;top:2px;left:2px;"></div></div>
       </div>
-    </div>
-    <div class="notif-dropdown" id="notif-dropdown">
-      <div class="notif-dd-head">
-        <span style="font-weight:700;font-size:.88rem;color:var(--navy)">Bildirimler</span>
-        <button style="background:none;border:none;font-size:.72rem;color:var(--terra);cursor:pointer;font-weight:600" onclick="markAllNotifsRead()">Tümünü okundu işaretle</button>
-      </div>
-      <div class="notif-dd-tabs">
-        <button class="notif-dd-tab active" onclick="filterNotifs('all',this)">Tümü</button>
-        <button class="notif-dd-tab" onclick="filterNotifs('message',this)">Mesajlar</button>
-      </div>
-      <div id="notif-list" style="max-height:400px;overflow-y:auto"></div>
     </div>
     <div class="admin-nav">
 
@@ -3513,8 +3515,12 @@ function showPage(page) {
 }
 
 function toggleSidebar() {
-  document.getElementById('admin-sidebar').classList.toggle('open');
-  document.getElementById('sidebar-overlay').classList.toggle('show');
+  var sb = document.getElementById('admin-sidebar');
+  var ov = document.getElementById('sidebar-overlay');
+  var hb = document.getElementById('hamburger');
+  sb.classList.toggle('open');
+  ov.classList.toggle('show');
+  if (hb) hb.style.display = sb.classList.contains('open') ? 'none' : 'flex';
 }
 
 /* ══════════════════════════════════════════════════
