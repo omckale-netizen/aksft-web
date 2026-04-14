@@ -663,12 +663,20 @@ function renderNav(opts = {}) {
     } catch {}
   };
 
-  const MAX_PLACE_SAVES = 10;
+  const MAX_PLACE_SAVES = 15;
+  const MAX_VILLAGE_SAVES = 15;
   window.togglePlaceSave = function (id, e) {
     if (e) { e.preventDefault(); e.stopPropagation(); }
     try {
       const saved = new Set(JSON.parse(localStorage.getItem(SD_PLACE_KEY) || '[]'));
-      if (!saved.has(id) && saved.size >= MAX_PLACE_SAVES) { alert('En fazla ' + MAX_PLACE_SAVES + ' yer kaydedebilirsiniz.'); return; }
+      if (!saved.has(id)) {
+        var villageIds = new Set((typeof DATA !== 'undefined' && DATA.villages ? DATA.villages : []).map(function(v){ return v.id; }));
+        var isVillage = villageIds.has(id);
+        var savedVillageCount = [...saved].filter(function(s){ return villageIds.has(s); }).length;
+        var savedPlaceCount = saved.size - savedVillageCount;
+        if (isVillage && savedVillageCount >= MAX_VILLAGE_SAVES) { alert('En fazla ' + MAX_VILLAGE_SAVES + ' köy kaydedebilirsiniz.'); return; }
+        if (!isVillage && savedPlaceCount >= MAX_PLACE_SAVES) { alert('En fazla ' + MAX_PLACE_SAVES + ' yer kaydedebilirsiniz.'); return; }
+      }
       if (saved.has(id)) saved.delete(id); else saved.add(id);
       localStorage.setItem(SD_PLACE_KEY, JSON.stringify([...saved]));
       // Buton güncelle
@@ -689,7 +697,7 @@ function renderNav(opts = {}) {
     try { return new Set(JSON.parse(localStorage.getItem(SD_KEY) || '[]')).has(id); } catch { return false; }
   };
 
-  const MAX_VENUE_SAVES = 20;
+  const MAX_VENUE_SAVES = 15;
   window.toggleVenueSave = function (id, e) {
     if (e) { e.preventDefault(); e.stopPropagation(); }
     try {
