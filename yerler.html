@@ -47,29 +47,9 @@
       <h1 class="yl-hero-h1">Assos Gezilecek<br><em>Yerler</em></h1>
       <div class="yl-hero-divider"></div>
       <p class="yl-hero-sub">Antik tapınaklardan kristal koylara, taş köylerden tarihi iskeleler — Assos'un her özel noktası bir arada.</p>
-      <div class="yl-hero-cats">
-        <span class="yl-cat-chip">🏛 Tarihi Alanlar</span>
-        <span class="yl-cat-chip">🌊 Koylar</span>
-        <span class="yl-cat-chip">🏘 Köyler</span>
-        <span class="yl-cat-chip">⚓ İskeleler</span>
-      </div>
+      <div class="yl-hero-cats" id="yl-hero-cats"></div>
     </div>
-    <div class="yl-hero-card">
-      <div class="yl-stat-item">
-        <div class="yl-stat-num" id="yl-stat-toplam"><span></span></div>
-        <div class="yl-stat-label">Toplam Yer</div>
-      </div>
-      <div class="yl-stat-sep"></div>
-      <div class="yl-stat-item">
-        <div class="yl-stat-num" id="yl-stat-tarihi"><span></span></div>
-        <div class="yl-stat-label">Tarihi Alan</div>
-      </div>
-      <div class="yl-stat-sep"></div>
-      <div class="yl-stat-item">
-        <div class="yl-stat-num" id="yl-stat-koy"><span></span></div>
-        <div class="yl-stat-label">Koy</div>
-      </div>
-    </div>
+    <div class="yl-hero-card" id="yl-hero-stats"></div>
   </div>
 </div>
 
@@ -86,13 +66,8 @@
   <div style="max-width:1280px;margin:0 auto;">
 
     <!-- Filter -->
-    <div class="scroll-x" style="display:flex;gap:8px;padding-bottom:4px;margin-bottom:40px;" role="group">
+    <div class="scroll-x" style="display:flex;gap:8px;padding-bottom:4px;margin-bottom:40px;" role="group" id="yl-filters">
       <button class="filter-btn active" onclick="filterPlaces(this,'all')">Tümü</button>
-      <button class="filter-btn" onclick="filterPlaces(this,'tarihi')">🏛 Tarihi Alan</button>
-      <button class="filter-btn" onclick="filterPlaces(this,'koy')">🌊 Koy</button>
-      <button class="filter-btn" onclick="filterPlaces(this,'koyu')">🏘 Köy</button>
-      <button class="filter-btn" onclick="filterPlaces(this,'iskele')">⚓ İskele</button>
-      <button class="filter-btn" onclick="filterPlaces(this,'muze')">📜 Müze</button>
     </div>
 
     <div id="places-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;"></div>
@@ -109,29 +84,58 @@
 
 <script src="firebase-loader.js"></script>
 <script src="data.js"></script>
-<script src="shared.min.js?v=155"></script>
+<script src="shared.min.js?v=156"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
   renderFooter();
 
-  /* Hero stats */
+  /* Hero — dinamik kategori chip'leri, stats ve filtreler */
   (function() {
     if (typeof DATA === 'undefined') return;
-    const places = DATA.places || [];
-    const set = (id, val) => { const el = document.querySelector('#' + id + ' span'); if (el) el.textContent = val; };
-    set('yl-stat-toplam', places.length + '+');
-    set('yl-stat-tarihi', places.filter(p => p.category === 'tarihi').length + '+');
-    set('yl-stat-koy',    places.filter(p => p.category === 'koy').length + '+');
+    var places = DATA.places || [];
+    var cats = (DATA.placeCategories && DATA.placeCategories.length > 0) ? DATA.placeCategories : [];
+
+    // Hero chip'leri
+    var chipsEl = document.getElementById('yl-hero-cats');
+    if (chipsEl && cats.length > 0) {
+      chipsEl.innerHTML = cats.map(function(c) {
+        return '<span class="yl-cat-chip">' + (c.emoji || '📍') + ' ' + c.label + '</span>';
+      }).join('');
+    }
+
+    // Hero stats — toplam + en çok kullanılan 2 kategori
+    var statsEl = document.getElementById('yl-hero-stats');
+    if (statsEl) {
+      var statsHtml = '<div class="yl-stat-item"><div class="yl-stat-num"><span>' + places.length + '+</span></div><div class="yl-stat-label">Toplam Yer</div></div>';
+      var catCounts = {};
+      places.forEach(function(p) { catCounts[p.category] = (catCounts[p.category] || 0) + 1; });
+      var sortedCats = Object.keys(catCounts).sort(function(a, b) { return catCounts[b] - catCounts[a]; }).slice(0, 2);
+      sortedCats.forEach(function(catId) {
+        var ci = typeof getPlaceCatInfo === 'function' ? getPlaceCatInfo(catId) : { label: catId };
+        statsHtml += '<div class="yl-stat-sep"></div><div class="yl-stat-item"><div class="yl-stat-num"><span>' + catCounts[catId] + '+</span></div><div class="yl-stat-label">' + ci.label + '</div></div>';
+      });
+      statsEl.innerHTML = statsHtml;
+    }
+
+    // Filtre butonları
+    var filtersEl = document.getElementById('yl-filters');
+    if (filtersEl && cats.length > 0) {
+      var usedCats = {};
+      places.forEach(function(p) { if (p.category) usedCats[p.category] = true; });
+      var filterHtml = '<button class="filter-btn active" onclick="filterPlaces(this,\'all\')">Tümü</button>';
+      cats.forEach(function(c) {
+        if (usedCats[c.id]) {
+          filterHtml += '<button class="filter-btn" onclick="filterPlaces(this,\'' + c.id + '\')">' + (c.emoji || '📍') + ' ' + c.label + '</button>';
+        }
+      });
+      filtersEl.innerHTML = filterHtml;
+    }
   })();
 
-  const CAT_COLORS = {
-    tarihi: { bg: ['#2A3F6A','#1A2744'], badge: 'rgba(26,39,68,.7)', label: 'Antik Alan' },
-    koy:    { bg: ['#1A5060','#0D3040'], badge: 'rgba(26,107,138,.75)', label: 'Koy' },
-    koyu:   { bg: ['#3A2A1A','#5A3C20'], badge: 'rgba(196,82,26,.75)', label: 'Köy' },
-    iskele: { bg: ['#1A3050','#0D2040'], badge: 'rgba(26,39,68,.75)', label: 'İskele' },
-    muze:   { bg: ['#3A4A20','#2A3818'], badge: 'rgba(90,122,86,.75)', label: 'Müze' },
-  };
+  function getCatInfo(catId) {
+    return typeof getPlaceCatInfo === 'function' ? getPlaceCatInfo(catId) : { label: catId || 'Yer', emoji: '📍', color: '#1A2744', bg: ['#243255','#1A2744'] };
+  }
 
   let activeFilter = 'all';
 
@@ -172,13 +176,13 @@ function pageInit() {
     if (places.length === 0) { grid.innerHTML = ''; noRes.style.display = 'block'; return; }
     noRes.style.display = 'none';
     grid.innerHTML = places.map((p, i) => {
-      const cat = CAT_COLORS[p.category] || CAT_COLORS.tarihi;
+      const cat = getCatInfo(p.category);
       const clickAction = p._isVillage ? "window.location.href='koyler/koy-detay.html?id=" + p.id + "'" : "window.location.href='yerler/yer-detay.html?id=" + p.id + "'";
       return `
       <div class="place-card-wrap fade-up" data-delay="${i * 0.06}" onclick="${clickAction}">
         <div class="place-img-box${p.image ? ' has-img' : ''}" style="background-color:${p.image ? '' : 'transparent'};${p.image ? '' : 'background:linear-gradient(135deg,'+cat.bg[0]+','+cat.bg[1]+');'}">
           ${p.image ? '<img src="' + p.image + '" alt="' + p.title + '" style="object-position:center ' + (p.imagePos != null ? p.imagePos : 50) + '%" onload="this.classList.add(\'loaded\')">' : p.emoji}
-          <span style="position:absolute;top:12px;left:12px;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:${cat.badge};color:#fff;backdrop-filter:blur(8px);z-index:1;">${p._isVillage ? '🏘 Köy' : cat.label}</span>
+          <span style="position:absolute;top:12px;left:12px;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:${cat.color}b3;color:#fff;backdrop-filter:blur(8px);z-index:1;">${p._isVillage ? '🏘 Köy' : cat.label}</span>
           <button class="place-save-btn${window.isPlaceSaved && isPlaceSaved(p.id) ? ' saved' : ''}" data-id="${p.id}" onclick="event.stopPropagation();togglePlaceSave('${p.id}')" style="position:absolute;top:10px;right:10px;z-index:2;width:32px;height:32px;border-radius:50%;border:none;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);color:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;">${window.isPlaceSaved && isPlaceSaved(p.id) ? '♥' : '♡'}</button>
         </div>
         <div style="padding:18px 20px 20px;">

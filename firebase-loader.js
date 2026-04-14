@@ -97,7 +97,8 @@
         db.collection('venues').get(),
         db.collection('places').get(),
         db.collection('villages').get(),
-        db.collection('routes').get()
+        db.collection('routes').get(),
+        db.collection('settings').doc('place_categories').get()
       ]).then(function(results) {
         clearTimeout(timeout);
 
@@ -105,6 +106,7 @@
         var places = results[1].status === 'fulfilled' ? results[1].value.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); }) : [];
         var villages = results[2].status === 'fulfilled' ? results[2].value.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); }) : [];
         var routes = results[3].status === 'fulfilled' ? results[3].value.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); }) : [];
+        var placeCats = (results[4].status === 'fulfilled' && results[4].value.exists && results[4].value.data().list) ? results[4].value.data().list : [];
 
         var failed = results.filter(function(r) { return r.status === 'rejected'; });
 
@@ -125,7 +127,7 @@
           return (a.sortOrder || 999) - (b.sortOrder || 999);
         });
         places.sort(function(a, b) { return (a.sortOrder || 999) - (b.sortOrder || 999); });
-        window.DATA = { routes: routes, places: places, venues: venues, villages: villages };
+        window.DATA = { routes: routes, places: places, venues: venues, villages: villages, placeCategories: placeCats };
         window._firebaseReady = true;
 
         // Cache guncelle

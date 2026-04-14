@@ -516,7 +516,7 @@
 
 <script src="firebase-loader.js"></script>
 <script src="data.js"></script>
-<script src="shared.min.js?v=155"></script>
+<script src="shared.min.js?v=156"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: true });
@@ -681,13 +681,9 @@ function pageInit() {
 
   /* ── RENDER PLACES ── */
   window.renderHomePlaces = function() {
-    const CAT_MAP = {
-      tarihi: { badge:'rgba(26,39,68,0.7)',  badgeColor:'var(--cream)', label:'Antik Alan', bg:['#2A3F6A','#1A2744'] },
-      koy:    { badge:'rgba(26,107,138,0.75)', badgeColor:'#fff',        label:'Koy',        bg:['#1A5060','#0D3040'] },
-      koyu:   { badge:'rgba(196,82,26,0.75)',  badgeColor:'#fff',        label:'Köy',        bg:['#3A2A1A','#5A3C20'] },
-      iskele: { badge:'rgba(26,39,68,0.75)',   badgeColor:'var(--cream)', label:'İskele',     bg:['#1A3050','#0D2040'] },
-      muze:   { badge:'rgba(90,122,86,0.75)',  badgeColor:'#fff',        label:'Müze',       bg:['#3A4A20','#2A3818'] },
-    };
+    function getHomeCatInfo(catId) {
+      return typeof getPlaceCatInfo === 'function' ? getPlaceCatInfo(catId) : { label: catId || 'Yer', emoji: '📍', color: '#1A2744', bg: ['#243255','#1A2744'] };
+    }
     const grid = document.getElementById('places-grid');
     if (!grid || typeof DATA === 'undefined') return;
     // showInPlaces köyleri de dahil et
@@ -709,12 +705,11 @@ function pageInit() {
     }
 
     // Dinamik filtre butonları
-    const CAT_LABELS = { tarihi:'🏛 Tarihi', koy:'🌿 Koy', koyu:'🏘 Köy', iskele:'⚓ İskele', muze:'📜 Müze' };
-    const activeCats = [...new Set(places.map(p => resolveCat(p)))].filter(c => CAT_LABELS[c]);
+    const activeCats = [...new Set(places.map(p => resolveCat(p)))];
     const filterBar = document.getElementById('places-filter-bar');
     if (filterBar && activeCats.length > 0) {
       filterBar.innerHTML = '<button class="hp-filter-pill active" onclick="filterPlaces(this,\'all\')">Tümü</button>' +
-        activeCats.map(c => '<button class="hp-filter-pill" onclick="filterPlaces(this,\'' + c + '\')">' + CAT_LABELS[c] + '</button>').join('');
+        activeCats.map(function(c) { var ci = getHomeCatInfo(c); return '<button class="hp-filter-pill" onclick="filterPlaces(this,\'' + c + '\')">' + ci.emoji + ' ' + ci.label + '</button>'; }).join('');
     }
 
     // Yer sayısını göster
@@ -723,7 +718,7 @@ function pageInit() {
 
     grid.innerHTML = places.map(function(p, i) {
       const catKey = resolveCat(p);
-      const cat = CAT_MAP[catKey] || CAT_MAP.tarihi;
+      const cat = getHomeCatInfo(catKey);
       const bg = p.bgGradient || 'linear-gradient(135deg,' + cat.bg[0] + ',' + cat.bg[1] + ')';
       const imgHtml = p.image
         ? '<img src="' + p.image + '" alt="' + p.title + '" loading="lazy" onload="this.classList.add(\'loaded\')" style="object-position:center ' + (p.imagePos != null ? p.imagePos : 50) + '%">'
@@ -731,7 +726,7 @@ function pageInit() {
       var placeHref = p._isVillage ? 'koyler/koy-detay.html?id=' + p.id : 'yerler/yer-detay.html?id=' + p.id;
       return '<a class="hp-place-card fade-up" href="' + placeHref + '" data-cat="' + catKey + '" style="animation-delay:' + (i * 0.05) + 's;">' +
         '<div class="hp-place-img" style="background:' + bg + ';">' + imgHtml +
-          '<span class="hp-place-badge" style="background:' + cat.badge + ';color:' + cat.badgeColor + ';">' + (p.badgeText || cat.label) + '</span>' +
+          '<span class="hp-place-badge" style="background:' + cat.color + 'b3;color:#fff;">' + (p.badgeText || cat.label) + '</span>' +
           (p.location && !p._isVillage ? '<span class="hp-place-loc">📍 ' + p.location + '</span>' : '') +
           '<button class="place-save-btn' + (window.isPlaceSaved && isPlaceSaved(p.id) ? ' saved' : '') + '" data-id="' + p.id + '" onclick="event.preventDefault();event.stopPropagation();togglePlaceSave(\'' + p.id + '\')" style="position:absolute;top:10px;right:10px;z-index:2;width:30px;height:30px;border-radius:50%;border:none;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);color:#fff;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;">' + (window.isPlaceSaved && isPlaceSaved(p.id) ? '♥' : '♡') + '</button>' +
         '</div>' +

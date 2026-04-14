@@ -1489,19 +1489,37 @@ function routeCardHTML(r, delay = 0) {
 }
 
 /* ═══════════════════
+   PLACE CATEGORY HELPER
+═══════════════════ */
+var PLACE_CAT_FALLBACK = {
+  tarihi: { label:'Ören Yeri', emoji:'🏛', color:'#1A2744', bg:['#2A3F6A','#1A2744'] },
+  koy:    { label:'Koy', emoji:'🌊', color:'#1A6B8A', bg:['#1A5060','#0D3040'] },
+  koyu:   { label:'Köy', emoji:'🏘', color:'#C4521A', bg:['#3A2A1A','#5A3C20'] },
+  iskele: { label:'İskele', emoji:'⚓', color:'#3A5A8A', bg:['#1A3050','#0D2040'] },
+  muze:   { label:'Müze', emoji:'📜', color:'#5A7A56', bg:['#3A4A20','#2A3818'] },
+  doga:   { label:'Doğa', emoji:'🌿', color:'#2D8A4E', bg:['#1A4030','#0D3020'] }
+};
+function getPlaceCatInfo(catId) {
+  // Önce DATA'daki dinamik kategorilerden oku
+  if (window.DATA && DATA.placeCategories) {
+    var found = DATA.placeCategories.find(function(c){ return c.id === catId; });
+    if (found) return { label: found.label, emoji: found.emoji || '📍', color: found.color || '#1A2744', bg: [found.color || '#243255', '#1A2744'] };
+  }
+  return PLACE_CAT_FALLBACK[catId] || { label: catId || 'Yer', emoji:'📍', color:'#1A2744', bg:['#243255','#1A2744'] };
+}
+
+/* ═══════════════════
    PLACE CARD RENDERER
 ═══════════════════ */
-const PLACE_COLORS = { tarihi: ['#2A3F6A','#1A2744'], koy: ['#1A5060','#0D3040'], koyu: ['#3A2A1A','#5A3C20'], iskele: ['#1A3050','#0D2040'] };
 function placeCardHTML(p, delay = 0) {
-  const [c1, c2] = PLACE_COLORS[p.category] || ['#243255','#1A2744'];
-  const catLabels = { tarihi: 'Antik Alan', koy: 'Koy', koyu: 'Köy', iskele: 'İskele' };
-  const catColors = { tarihi: 'rgba(26,39,68,.7)', koy: 'rgba(26,107,138,.75)', koyu: 'rgba(196,82,26,.75)', iskele: 'rgba(26,39,68,.75)' };
+  var catInfo = getPlaceCatInfo(p.category);
+  const [c1, c2] = catInfo.bg;
   return `
     <a class="place-card fade-up" href="yerler/yer-detay.html?id=${p.id}" data-delay="${delay}" aria-label="${p.title}">
       <div class="place-img" style="background:linear-gradient(135deg,${c1},${c2});">
         ${p.image ? '<img src="' + p.image + '" alt="' + p.title + '" loading="lazy" onload="this.classList.add(\'loaded\')" style="object-position:center ' + (p.imagePos != null ? p.imagePos : 50) + '%">' : '<span class="place-emoji-fallback">' + p.emoji + '</span>'}
       </div>
-      <span class="place-cat-badge" style="position:absolute;top:12px;left:12px;background:${catColors[p.category] || catColors.tarihi};color:#fff;backdrop-filter:blur(8px);">${catLabels[p.category] || p.category}</span>
+      <span class="place-cat-badge" style="position:absolute;top:12px;left:12px;background:${catInfo.color}b3;color:#fff;backdrop-filter:blur(8px);">${catInfo.label}</span>
       <div style="padding:18px 20px 20px;">
         <h3>${p.title}</h3>
         <p style="margin-bottom:12px;">${p.shortDesc}</p>
