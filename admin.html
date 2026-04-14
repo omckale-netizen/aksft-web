@@ -113,7 +113,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 /* ── MAIN ── */
 .admin-main{margin-left:var(--sidebar-w);flex:1;padding:32px 36px;min-height:100vh}
 /* Dark mode switch */
-.dm-switch{position:fixed;top:16px;right:20px;z-index:150;display:flex;align-items:center;gap:8px;padding:6px 14px 6px 10px;border-radius:999px;background:var(--card-bg);border:1px solid var(--card-border);box-shadow:var(--card-shadow);cursor:pointer;transition:all .3s;user-select:none;height:40px}
+.dm-switch{display:none}
 .dm-switch:hover{box-shadow:0 4px 16px rgba(0,0,0,.1)}
 .dm-track{width:36px;height:20px;border-radius:10px;background:var(--cream-dark);position:relative;transition:background .3s}
 [data-theme="dark"] .dm-track{background:var(--terra)}
@@ -136,10 +136,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .stat-card.green .stat-val{color:var(--green)}
 
 /* ── NOTIF BELL ── */
-.notif-bell{position:fixed;top:16px;right:110px;z-index:150;width:40px;height:40px;border-radius:50%;background:var(--card-bg);border:1px solid var(--card-border);box-shadow:var(--card-shadow);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.05rem;transition:all .2s;user-select:none}
-.notif-bell:hover{box-shadow:0 4px 16px rgba(0,0,0,.1);transform:scale(1.05)}
+.notif-bell{display:none}
+.sidebar-notif-bell:hover{background:rgba(255,255,255,.15) !important}
 .notif-bell-badge{position:absolute;top:-2px;right:-2px;min-width:18px;height:18px;border-radius:9px;background:var(--red);color:#fff;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--page-bg)}
-.notif-dropdown{position:fixed;top:62px;right:60px;z-index:160;width:380px;max-height:520px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;box-shadow:0 12px 48px rgba(0,0,0,.12);display:none;flex-direction:column;overflow:hidden}
+.notif-dropdown{position:fixed;top:auto;left:var(--sidebar-w);z-index:160;width:380px;max-height:520px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;box-shadow:0 12px 48px rgba(0,0,0,.12);display:none;flex-direction:column;overflow:hidden}
 .notif-dropdown.open{display:flex}
 .notif-dd-head{padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,0,0,.06)}
 .notif-dd-tabs{display:flex;gap:4px;padding:10px 16px 8px}
@@ -484,31 +484,32 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <!-- APP -->
-<!-- Bildirim ikonu -->
-<div class="notif-bell" id="notif-bell" onclick="toggleNotifDropdown()" title="Bildirimler">
-  🔔
-  <span class="notif-bell-badge" id="notif-badge" style="display:none"></span>
-</div>
-<div class="notif-dropdown" id="notif-dropdown">
-  <div class="notif-dd-head">
-    <span style="font-weight:700;font-size:.88rem;color:var(--navy)">Bildirimler</span>
-    <button style="background:none;border:none;font-size:.72rem;color:var(--terra);cursor:pointer;font-weight:600" onclick="markAllNotifsRead()">Tümünü okundu işaretle</button>
-  </div>
-  <div class="notif-dd-tabs">
-    <button class="notif-dd-tab active" onclick="filterNotifs('all',this)">Tümü</button>
-    <button class="notif-dd-tab" onclick="filterNotifs('message',this)">Mesajlar</button>
-  </div>
-  <div id="notif-list" style="max-height:400px;overflow-y:auto"></div>
-</div>
-<div class="dm-switch" onclick="toggleDarkMode()" title="Tema değiştir">
-  <span class="dm-label" id="dark-mode-label">🌙</span>
-  <div class="dm-track"><div class="dm-thumb"></div></div>
-</div>
 <div class="admin-wrap" id="admin-wrap" style="display:none">
 
   <!-- SIDEBAR -->
   <nav class="admin-sidebar" id="admin-sidebar">
     <div class="admin-logo">Assos'u Keşfet<br><small>Yönetim Paneli</small></div>
+    <div style="display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.08);">
+      <div class="sidebar-notif-bell" id="notif-bell" onclick="toggleNotifDropdown()" title="Bildirimler" style="position:relative;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.9rem;transition:background .2s;">
+        🔔
+        <span class="notif-bell-badge" id="notif-badge" style="display:none"></span>
+      </div>
+      <div class="sidebar-notif-bell" onclick="toggleDarkMode()" title="Tema değiştir" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);cursor:pointer;transition:background .2s;">
+        <span id="dark-mode-label" style="font-size:.75rem;">🌙</span>
+        <div class="dm-track" style="width:30px;height:16px;border-radius:8px;position:relative;transition:background .3s;"><div class="dm-thumb" style="width:12px;height:12px;top:2px;left:2px;"></div></div>
+      </div>
+    </div>
+    <div class="notif-dropdown" id="notif-dropdown">
+      <div class="notif-dd-head">
+        <span style="font-weight:700;font-size:.88rem;color:var(--navy)">Bildirimler</span>
+        <button style="background:none;border:none;font-size:.72rem;color:var(--terra);cursor:pointer;font-weight:600" onclick="markAllNotifsRead()">Tümünü okundu işaretle</button>
+      </div>
+      <div class="notif-dd-tabs">
+        <button class="notif-dd-tab active" onclick="filterNotifs('all',this)">Tümü</button>
+        <button class="notif-dd-tab" onclick="filterNotifs('message',this)">Mesajlar</button>
+      </div>
+      <div id="notif-list" style="max-height:400px;overflow-y:auto"></div>
+    </div>
     <div class="admin-nav">
 
       <a class="admin-nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
