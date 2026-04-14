@@ -4207,3 +4207,177 @@ function renderPlacePage(placeId) {
 
   if (typeof trackPageView === 'function') trackPageView('place_' + placeId);
 }
+
+/* ═══════════════════
+   AI CHAT WIDGET
+═══════════════════ */
+(function() {
+  // Admin panelinde gösterme
+  if (window.location.pathname.includes('/admin')) return;
+
+  // CSS
+  var chatCSS = document.createElement('style');
+  chatCSS.textContent = `
+    .ai-chat-fab{position:fixed;bottom:24px;right:24px;z-index:400;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--terra),#D96B2E);color:#fff;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(196,82,26,.35);display:flex;align-items:center;justify-content:center;font-size:1.4rem;transition:all .3s cubic-bezier(.16,1,.3,1);}
+    .ai-chat-fab:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(196,82,26,.45);}
+    .ai-chat-fab.open{transform:rotate(45deg) scale(1);}
+    .ai-chat-panel{position:fixed;bottom:92px;right:24px;z-index:399;width:370px;max-width:calc(100vw - 32px);max-height:500px;background:var(--cream-light,#FAF7F2);border:1px solid rgba(26,39,68,.08);border-radius:20px;box-shadow:0 16px 56px rgba(26,39,68,.18);display:none;flex-direction:column;overflow:hidden;}
+    .ai-chat-panel.open{display:flex;animation:aiChatIn .3s ease;}
+    @keyframes aiChatIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .ai-chat-head{padding:18px 20px 14px;background:var(--navy,#1A2744);color:#F5EDE0;display:flex;align-items:center;gap:12px;}
+    .ai-chat-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--terra),#D96B2E);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+    .ai-chat-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.9rem;}
+    .ai-chat-sub{font-size:.65rem;color:rgba(245,237,224,.45);margin-top:1px;}
+    .ai-chat-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;max-height:320px;}
+    .ai-msg{max-width:85%;padding:10px 14px;border-radius:14px;font-size:.82rem;line-height:1.6;animation:aiMsgIn .3s ease;}
+    @keyframes aiMsgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    .ai-msg.bot{background:#fff;color:#1A2744;border:1px solid rgba(26,39,68,.06);align-self:flex-start;border-bottom-left-radius:4px;}
+    .ai-msg.user{background:var(--navy,#1A2744);color:#F5EDE0;align-self:flex-end;border-bottom-right-radius:4px;}
+    .ai-msg.typing{background:#fff;border:1px solid rgba(26,39,68,.06);align-self:flex-start;padding:12px 18px;}
+    .ai-typing-dots{display:flex;gap:4px;align-items:center;}
+    .ai-typing-dots span{width:6px;height:6px;border-radius:50%;background:rgba(26,39,68,.25);animation:aiDot 1.2s infinite;}
+    .ai-typing-dots span:nth-child(2){animation-delay:.2s}
+    .ai-typing-dots span:nth-child(3){animation-delay:.4s}
+    @keyframes aiDot{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.1)}}
+    .ai-chat-input{display:flex;gap:8px;padding:12px 16px;border-top:1px solid rgba(26,39,68,.06);background:var(--cream-light,#FAF7F2);}
+    .ai-chat-input input{flex:1;padding:10px 14px;border:1.5px solid rgba(26,39,68,.1);border-radius:12px;font-size:.82rem;font-family:inherit;outline:none;background:#fff;transition:border-color .2s;}
+    .ai-chat-input input:focus{border-color:var(--terra);}
+    .ai-chat-input button{width:38px;height:38px;border-radius:12px;background:var(--terra,#C4521A);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:background .2s;flex-shrink:0;}
+    .ai-chat-input button:hover{background:#D96B2E;}
+    .ai-chat-input button:disabled{opacity:.4;cursor:default;}
+    .ai-chat-limit{text-align:center;font-size:.65rem;color:rgba(26,39,68,.3);padding:4px 16px 8px;}
+    @media(max-width:480px){.ai-chat-panel{bottom:0;right:0;left:0;width:100%;max-width:100%;max-height:70vh;border-radius:20px 20px 0 0;}.ai-chat-fab{bottom:16px;right:16px;width:50px;height:50px;font-size:1.2rem;}}
+  `;
+  document.head.appendChild(chatCSS);
+
+  // HTML
+  var chatHTML = `
+    <button class="ai-chat-fab" id="ai-chat-fab" onclick="aiChatToggle()" aria-label="AI Asistan">🤖</button>
+    <div class="ai-chat-panel" id="ai-chat-panel">
+      <div class="ai-chat-head">
+        <div class="ai-chat-avatar">🤖</div>
+        <div>
+          <div class="ai-chat-title">Assos Asistan</div>
+          <div class="ai-chat-sub">Assos hakkında her şeyi sorun</div>
+        </div>
+      </div>
+      <div class="ai-chat-body" id="ai-chat-body">
+        <div class="ai-msg bot">Merhaba! 👋 Assos, Ayvacık ve çevresi hakkında sorularınızı yanıtlayabilirim. Nerede kalmalıyım, ne yemeliyim, hangi koyları görmeliyim — ne isterseniz sorun!</div>
+      </div>
+      <div class="ai-chat-limit" id="ai-chat-limit"></div>
+      <div class="ai-chat-input">
+        <input type="text" id="ai-chat-input" placeholder="Sorunuzu yazın..." maxlength="500" autocomplete="off">
+        <button id="ai-chat-send" onclick="aiChatSend()">➤</button>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', chatHTML);
+
+  // Enter tuşu
+  document.getElementById('ai-chat-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); aiChatSend(); }
+  });
+
+  // State
+  var AI_DAILY_LIMIT = 10;
+  var AI_STORAGE_KEY = 'assos_ai_chat';
+
+  function getAiState() {
+    try {
+      var s = JSON.parse(localStorage.getItem(AI_STORAGE_KEY) || '{}');
+      var today = new Date().toISOString().split('T')[0];
+      if (s.date !== today) return { date: today, count: 0 };
+      return s;
+    } catch { return { date: new Date().toISOString().split('T')[0], count: 0 }; }
+  }
+  function saveAiState(state) { try { localStorage.setItem(AI_STORAGE_KEY, JSON.stringify(state)); } catch {} }
+  function updateLimit() {
+    var s = getAiState();
+    var el = document.getElementById('ai-chat-limit');
+    if (el) el.textContent = (AI_DAILY_LIMIT - s.count) + '/' + AI_DAILY_LIMIT + ' soru kaldı';
+  }
+  updateLimit();
+
+  // Site context oluştur
+  function buildContext() {
+    if (!window.DATA) return '';
+    var ctx = '';
+    var venues = (DATA.venues || []).slice(0, 30);
+    if (venues.length) ctx += 'MEKANLAR:\n' + venues.map(function(v) { return '- ' + v.title + ' (' + (v.category||'') + ', ' + (v.location||'') + '): ' + (v.shortDesc||''); }).join('\n') + '\n\n';
+    var places = (DATA.places || []).slice(0, 20);
+    if (places.length) ctx += 'GEZİLECEK YERLER:\n' + places.map(function(p) { return '- ' + p.title + ' (' + (p.location||'') + '): ' + (p.shortDesc||''); }).join('\n') + '\n\n';
+    var villages = (DATA.villages || []).slice(0, 15);
+    if (villages.length) ctx += 'KÖYLER:\n' + villages.map(function(v) { return '- ' + v.title + ': ' + (v.shortDesc||''); }).join('\n') + '\n\n';
+    var routes = (DATA.routes || []).slice(0, 10);
+    if (routes.length) ctx += 'ROTALAR:\n' + routes.map(function(r) { return '- ' + r.title + ' (' + (r.sure||'') + '): ' + (r.shortDesc||''); }).join('\n');
+    return ctx;
+  }
+
+  // Toggle
+  window.aiChatToggle = function() {
+    var panel = document.getElementById('ai-chat-panel');
+    var fab = document.getElementById('ai-chat-fab');
+    panel.classList.toggle('open');
+    fab.classList.toggle('open');
+    fab.textContent = panel.classList.contains('open') ? '✕' : '🤖';
+    if (panel.classList.contains('open')) document.getElementById('ai-chat-input').focus();
+  };
+
+  // Send
+  window.aiChatSend = async function() {
+    var input = document.getElementById('ai-chat-input');
+    var msg = (input.value || '').trim();
+    if (!msg) return;
+
+    var state = getAiState();
+    if (state.count >= AI_DAILY_LIMIT) {
+      addMsg('Günlük soru limitinize ulaştınız. Yarın tekrar sorabilirsiniz 🙏', 'bot');
+      return;
+    }
+
+    input.value = '';
+    addMsg(msg, 'user');
+
+    // Typing indicator
+    var body = document.getElementById('ai-chat-body');
+    var typing = document.createElement('div');
+    typing.className = 'ai-msg typing';
+    typing.innerHTML = '<div class="ai-typing-dots"><span></span><span></span><span></span></div>';
+    body.appendChild(typing);
+    body.scrollTop = body.scrollHeight;
+
+    var sendBtn = document.getElementById('ai-chat-send');
+    sendBtn.disabled = true;
+
+    try {
+      var resp = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg, context: buildContext() })
+      });
+      var data = await resp.json();
+      typing.remove();
+      if (data.reply) {
+        addMsg(data.reply, 'bot');
+        state.count++;
+        saveAiState(state);
+        updateLimit();
+      } else {
+        addMsg(data.error || 'Bir hata oluştu, tekrar deneyin.', 'bot');
+      }
+    } catch(err) {
+      typing.remove();
+      addMsg('Bağlantı hatası. Lütfen tekrar deneyin.', 'bot');
+    }
+    sendBtn.disabled = false;
+  };
+
+  function addMsg(text, type) {
+    var body = document.getElementById('ai-chat-body');
+    var div = document.createElement('div');
+    div.className = 'ai-msg ' + type;
+    div.textContent = text;
+    body.appendChild(div);
+    body.scrollTop = body.scrollHeight;
+  }
+})();
