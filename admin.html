@@ -5518,6 +5518,7 @@ function addRoomRow(data) {
       '<input type="text" class="room-capacity" value="' + (d.capacity || '') + '" placeholder="Kapasite" style="width:70px">' +
       '<input type="text" class="room-bed" value="' + (d.bed || '') + '" placeholder="Yatak tipi" style="width:100px">' +
       '<input type="text" class="room-size" value="' + (d.size || '') + '" placeholder="m²" style="width:60px">' +
+      '<select class="room-view" style="width:110px;padding:6px 8px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.75rem;font-family:inherit"><option value="">Manzara</option><option value="Deniz Manzarası"' + (d.view === 'Deniz Manzarası' ? ' selected' : '') + '>🌊 Deniz</option><option value="Kara Manzarası"' + (d.view === 'Kara Manzarası' ? ' selected' : '') + '>🏔 Kara</option><option value="Bahçe Manzarası"' + (d.view === 'Bahçe Manzarası' ? ' selected' : '') + '>🌿 Bahçe</option><option value="Havuz Manzarası"' + (d.view === 'Havuz Manzarası' ? ' selected' : '') + '>🏊 Havuz</option></select>' +
       '<button type="button" class="btn-icon" onclick="this.closest(\'.room-row\').remove()" style="color:var(--red);font-size:.85rem" title="Sil">✕</button>' +
     '</div>' +
     '<div style="display:flex;gap:8px;align-items:center">' +
@@ -5530,25 +5531,26 @@ function addRoomRow(data) {
   list.appendChild(row);
 }
 
-async function handleRoomImage(input) {
+function handleRoomImage(input) {
   var file = input.files[0];
   if (!file) return;
   var row = input.closest('.room-row');
   var preview = row.querySelector('.room-img-preview');
   var hiddenInput = row.querySelector('.room-image');
   preview.innerHTML = '<div class="ld-spinner" style="width:16px;height:16px;border-width:2px"></div>';
-  try {
-    var resized = await resizeImage(file, 800, 0.78);
-    var roomName = row.querySelector('.room-name').value.trim() || 'oda';
-    var venueId = editingVenueId || 'new';
-    var path = 'images/venues/' + venueId + '/rooms/' + roomName.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'') + '.webp';
-    var url = await uploadImageToServer(resized, path);
-    hiddenInput.value = url;
-    preview.innerHTML = '<img src="' + url + '" style="width:100%;height:100%;object-fit:cover">';
-  } catch(err) {
-    preview.innerHTML = '❌';
-    showToast('Görsel yüklenemedi: ' + err.message, 'error');
-  }
+  compressImage(file, async function(blob) {
+    try {
+      var roomName = row.querySelector('.room-name').value.trim() || 'oda';
+      var venueId = editingVenueId || 'new';
+      var path = 'images/venues/' + venueId + '/rooms/' + roomName.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'') + '.webp';
+      var url = await uploadImageToServer(blob, path);
+      hiddenInput.value = url;
+      preview.innerHTML = '<img src="' + url + '" style="width:100%;height:100%;object-fit:cover">';
+    } catch(err) {
+      preview.innerHTML = '❌';
+      showToast('Görsel yüklenemedi: ' + err.message, 'error');
+    }
+  });
 }
 
 function getRoomsData() {
@@ -5561,6 +5563,7 @@ function getRoomsData() {
       capacity: row.querySelector('.room-capacity').value.trim(),
       bed: row.querySelector('.room-bed').value.trim(),
       size: row.querySelector('.room-size').value.trim(),
+      view: row.querySelector('.room-view').value,
       image: row.querySelector('.room-image').value.trim()
     });
   });
