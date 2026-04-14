@@ -1098,6 +1098,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                 <option value="">Seçin</option>
               </select>
             </div>
+            <!-- Mutlaka Görülmesi Gereken -->
+            <div class="form-group" id="vpf-mustsee-group" style="display:none">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                <input type="checkbox" id="vpf-mustSee" style="width:18px;height:18px;accent-color:var(--terra);">
+                <span>⭐ Mutlaka Görülmesi Gereken Yer</span>
+              </label>
+              <span id="vpf-mustsee-hint" style="font-size:.65rem;color:var(--text-muted);display:none;margin-top:4px;">Ören yerleri otomatik olarak bu listeye dahildir.</span>
+            </div>
             <!-- Ören Yeri ayarları -->
             <div id="vpf-orenyeri-fields" style="display:none;background:rgba(26,39,68,.03);border:1px solid rgba(26,39,68,.07);border-radius:12px;padding:16px;margin-bottom:16px;">
               <div style="font-size:.78rem;font-weight:700;color:var(--navy);margin-bottom:12px;">🏛 Ören Yeri Ayarları</div>
@@ -5866,8 +5874,17 @@ function onPlaceCatChange() {
   var cat = document.getElementById('vpf-category').value;
   var oyFields = document.getElementById('vpf-orenyeri-fields');
   var mzFields = document.getElementById('vpf-muze-fields');
+  var msGroup = document.getElementById('vpf-mustsee-group');
+  var msCheck = document.getElementById('vpf-mustSee');
+  var msHint = document.getElementById('vpf-mustsee-hint');
   if (oyFields) oyFields.style.display = (cat === 'tarihi' || cat === 'orenyeri') ? 'block' : 'none';
   if (mzFields) mzFields.style.display = (cat === 'muze') ? 'block' : 'none';
+  // Mutlaka görülmesi gereken — tüm kategorilerde göster
+  if (msGroup) msGroup.style.display = cat ? '' : 'none';
+  // Ören yerlerinde otomatik seçili ve değiştirilemez
+  var isOren = (cat === 'tarihi' || cat === 'orenyeri');
+  if (msCheck) { if (isOren) { msCheck.checked = true; msCheck.disabled = true; } else { msCheck.disabled = false; } }
+  if (msHint) msHint.style.display = isOren ? 'block' : 'none';
 }
 
 function onVillageSelect() {
@@ -5955,6 +5972,8 @@ function openVPModal(id) {
       document.getElementById('vpf-villageId').value = item.villageId || '';
       onVillageSelect();
       onPlaceCatChange();
+      // Mutlaka görülmesi gereken yükle
+      document.getElementById('vpf-mustSee').checked = item.mustSee || (item.category === 'tarihi' || item.category === 'orenyeri');
       // Ören yeri verileri yükle
       if (item.orenYeri) {
         document.getElementById('vpf-oy-yaz-acilis').value = item.orenYeri.yazAcilis || '08:30';
@@ -6109,6 +6128,9 @@ async function saveVP(e) {
       lng: parseFloat(document.getElementById('vpf-lng').value) || null,
       villageId: document.getElementById('vpf-villageId').value || '',
     };
+    // Mutlaka görülmesi gereken
+    var isOrenCat = (category === 'tarihi' || category === 'orenyeri');
+    placePatch.mustSee = isOrenCat ? true : document.getElementById('vpf-mustSee').checked;
     // Ören yeri verileri
     if (category === 'tarihi' || category === 'orenyeri') {
       placePatch.orenYeri = {

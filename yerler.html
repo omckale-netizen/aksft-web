@@ -61,6 +61,18 @@
   </div>
 </div>
 
+<!-- Mutlaka Görülmesi Gereken Yerler -->
+<section id="yl-must-see" style="padding:64px 24px 0;background:var(--cream-light);display:none;">
+  <div style="max-width:1280px;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:40px;">
+      <span style="font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--terra);">Kaçırılmaması Gereken</span>
+      <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.6rem,4vw,2.4rem);color:var(--navy);margin-top:8px;letter-spacing:-.02em;">Mutlaka Görülmesi Gereken Yerler</h2>
+      <div style="width:40px;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--terra),var(--amber));margin:14px auto 0;"></div>
+    </div>
+    <div id="yl-must-see-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-bottom:48px;"></div>
+  </div>
+</section>
+
 <!-- MAIN -->
 <section style="padding:64px 24px 100px;background:var(--cream-light);">
   <div style="max-width:1280px;margin:0 auto;">
@@ -84,7 +96,7 @@
 
 <script src="firebase-loader.js?v=3"></script>
 <script src="data.js?v=2"></script>
-<script src="shared.min.js?v=168"></script>
+<script src="shared.min.js?v=169"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
@@ -137,6 +149,30 @@ function pageInit() {
     return typeof getPlaceCatInfo === 'function' ? getPlaceCatInfo(catId) : { label: catId || 'Yer', emoji: '📍', color: '#1A2744', bg: ['#243255','#1A2744'] };
   }
 
+  // Mutlaka Görülmesi Gereken Yerler (ören yerleri)
+  (function() {
+    var orenYerleri = (DATA.places || []).filter(function(p) { return p.mustSee || p.category === 'tarihi' || p.category === 'orenyeri'; });
+    if (orenYerleri.length === 0) return;
+    var section = document.getElementById('yl-must-see');
+    var grid = document.getElementById('yl-must-see-grid');
+    if (!section || !grid) return;
+    section.style.display = 'block';
+    grid.innerHTML = orenYerleri.map(function(p, i) {
+      var cat = getCatInfo(p.category);
+      return '<a href="yerler/yer-detay.html?id=' + p.id + '" class="fade-up" data-delay="' + (i * 0.08) + '" style="display:block;background:#fff;border-radius:20px;overflow:hidden;border:1px solid rgba(26,39,68,.06);text-decoration:none;transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s;cursor:pointer" onmouseover="this.style.transform=\'translateY(-6px)\';this.style.boxShadow=\'0 20px 50px rgba(26,39,68,.12)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'">' +
+        '<div style="position:relative;aspect-ratio:16/9;overflow:hidden;' + (p.image ? 'background:linear-gradient(90deg,#e8e4de 25%,#f0ece6 50%,#e8e4de 75%)' : 'background:linear-gradient(135deg,' + cat.bg[0] + ',' + cat.bg[1] + ');display:flex;align-items:center;justify-content:center;font-size:3rem') + '">' +
+          (p.image ? '<img src="' + p.image + '" alt="' + p.title + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s" loading="lazy" onload="this.style.opacity=1">' : (p.emoji || '🏛')) +
+          '<span style="position:absolute;top:12px;left:12px;font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:999px;background:rgba(196,82,26,.85);color:#fff;backdrop-filter:blur(8px);">Mutlaka Görülmeli</span>' +
+        '</div>' +
+        '<div style="padding:18px 20px 20px">' +
+          '<h3 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.05rem;color:var(--navy);margin-bottom:6px">' + p.title + '</h3>' +
+          '<p style="font-size:.8rem;color:var(--text-mid);line-height:1.6;margin-bottom:10px">' + (p.shortDesc || '') + '</p>' +
+          (p.location ? '<span style="font-size:.7rem;color:var(--text-muted);display:flex;align-items:center;gap:4px">📍 ' + p.location + '</span>' : '') +
+        '</div></a>';
+    }).join('');
+    if (typeof scrollFadeIn === 'function') scrollFadeIn();
+  })();
+
   let activeFilter = 'all';
 
   function filterPlaces(btn, cat) {
@@ -158,7 +194,8 @@ function pageInit() {
       _isVillage: true
     }));
 
-    const allPlaces = DATA.places.concat(villageAsPlaces);
+    // Mutlaka görülmesi gerekenleri hariç tut (üstte ayrı bölümde gösteriliyorlar)
+    var allPlaces = DATA.places.filter(function(p) { return !p.mustSee && p.category !== 'tarihi' && p.category !== 'orenyeri'; }).concat(villageAsPlaces);
     // Günlük değişen karma sıralama (seed: günün tarihi)
     var daySeed = Math.floor(Date.now() / 86400000);
     function seededShuffle(arr) {
