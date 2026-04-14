@@ -4242,13 +4242,15 @@ function renderPlacePage(placeId) {
     .ai-typing-dots span:nth-child(3){animation-delay:.4s}
     @keyframes aiDot{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.1)}}
     .ai-chat-input{display:flex;gap:8px;padding:12px 16px;border-top:1px solid rgba(26,39,68,.06);background:var(--cream-light,#FAF7F2);}
-    .ai-chat-input input{flex:1;padding:10px 14px;border:1.5px solid rgba(26,39,68,.1);border-radius:12px;font-size:.82rem;font-family:inherit;outline:none;background:#fff;transition:border-color .2s;}
+    .ai-chat-input input{flex:1;padding:10px 14px;border:1.5px solid rgba(26,39,68,.1);border-radius:12px;font-size:16px;font-family:inherit;outline:none;background:#fff;transition:border-color .2s;}
     .ai-chat-input input:focus{border-color:var(--terra);}
     .ai-chat-input button{width:38px;height:38px;border-radius:12px;background:var(--terra,#C4521A);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:background .2s;flex-shrink:0;}
     .ai-chat-input button:hover{background:#D96B2E;}
     .ai-chat-input button:disabled{opacity:.4;cursor:default;}
     .ai-chat-limit{text-align:center;font-size:.65rem;color:rgba(26,39,68,.3);padding:4px 16px 8px;}
-    @media(max-width:480px){.ai-chat-panel{bottom:0;right:0;left:0;width:100%;max-width:100%;max-height:70vh;border-radius:20px 20px 0 0;}.ai-chat-fab{bottom:16px;right:16px;width:50px;height:50px;font-size:1.2rem;}}
+    .ai-chat-close{display:none;width:32px;height:32px;border-radius:50%;background:rgba(245,237,224,.12);border:none;color:rgba(245,237,224,.7);font-size:.9rem;cursor:pointer;align-items:center;justify-content:center;margin-left:auto;flex-shrink:0;transition:background .2s;}
+    .ai-chat-close:hover{background:rgba(245,237,224,.2);}
+    @media(max-width:480px){.ai-chat-panel{bottom:0;right:0;left:0;width:100%;max-width:100%;max-height:75vh;border-radius:20px 20px 0 0;}.ai-chat-fab{bottom:16px;right:16px;width:50px;height:50px;font-size:1.2rem;}.ai-chat-fab.open{display:none;}.ai-chat-close{display:flex;}}
   `;
   document.head.appendChild(chatCSS);
 
@@ -4262,6 +4264,7 @@ function renderPlacePage(placeId) {
           <div class="ai-chat-title">Assos Rehberiniz</div>
           <div class="ai-chat-sub">Yapay zeka destekli seyahat asistanı</div>
         </div>
+        <button class="ai-chat-close" onclick="aiChatToggle()">✕</button>
       </div>
       <div class="ai-chat-body" id="ai-chat-body">
         <div class="ai-msg bot">Merhaba! 🌊 Ben Assos bölgesinin dijital rehberiyim. Nerede kalmalıyım, hangi koyda yüzmeliyim, ne yemeliyim, nasıl gidilir — aklınıza takılan her şeyi sorun, size özel öneriler sunayım!</div>
@@ -4385,20 +4388,31 @@ function renderPlacePage(placeId) {
   };
 
   function mdToHtml(text) {
-    return text
+    var linkStyle = 'color:var(--terra);font-weight:600;text-decoration:underline;';
+    // 1. Markdown linkleri [text](url)
+    var result = text.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" style="' + linkStyle + '">$1</a>');
+    // 2. Düz URL'leri tıklanabilir yap (henüz <a> içinde olmayanlar)
+    result = result.replace(/(?<!["=])(https?:\/\/assosukesfet\.com\/[^\s<,)]+)/g, function(url) {
+      // Sondaki noktalama temizle
+      var clean = url.replace(/[.)]+$/, '');
+      var name = 'Detayı Gör →';
+      if (clean.indexOf('mekan-detay') > -1) name = '🏪 Mekana Git →';
+      else if (clean.indexOf('yer-detay') > -1) name = '📍 Yeri Gör →';
+      else if (clean.indexOf('koy-detay') > -1) name = '🏘 Köyü Gör →';
+      else if (clean.indexOf('rota-detay') > -1) name = '🗺 Rotayı Gör →';
+      return '<a href="' + clean + '" target="_blank" rel="noopener" style="' + linkStyle + '">' + name + '</a>';
+    });
+    // 3. Markdown formatları
+    result = result
       .replace(/^### (.+)$/gm, '<strong style="font-size:.85rem">$1</strong>')
       .replace(/^## (.+)$/gm, '<strong style="font-size:.9rem">$1</strong>')
       .replace(/^# (.+)$/gm, '<strong style="font-size:.95rem">$1</strong>')
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" style="color:var(--terra);font-weight:600;text-decoration:underline;">$1</a>')
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
       .replace(/\n\n/g, '<br><br>')
       .replace(/\n/g, '<br>')
-      .replace(/- (.+?)(?=<br>|$)/g, '• $1')
-      .replace(/(https?:\/\/assosukesfet\.com[^\s<]+)/g, function(url) {
-        if (url.indexOf('href=') > -1) return url;
-        return '<a href="' + url + '" target="_blank" rel="noopener" style="color:var(--terra);font-weight:600;text-decoration:underline;">Detayı Gör →</a>';
-      });
+      .replace(/- (.+?)(?=<br>|$)/g, '• $1');
+    return result;
   }
   function addMsg(text, type) {
     var body = document.getElementById('ai-chat-body');
