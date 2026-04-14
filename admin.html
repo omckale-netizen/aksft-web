@@ -1144,6 +1144,28 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                 </div>
               </div>
             </div>
+            <!-- Müze ayarları -->
+            <div id="vpf-muze-fields" style="display:none;background:rgba(90,122,86,.04);border:1px solid rgba(90,122,86,.12);border-radius:12px;padding:16px;margin-bottom:16px;">
+              <div style="font-size:.78rem;font-weight:700;color:var(--navy);margin-bottom:12px;">📜 Müze / Ziyaret Yeri Ayarları</div>
+              <div class="form-row">
+                <div class="form-group" style="flex:1">
+                  <label>Açılış Saati</label>
+                  <input type="text" id="vpf-mz-acilis" value="09:00" style="width:80px;text-align:center" placeholder="09:00">
+                </div>
+                <div class="form-group" style="flex:1">
+                  <label>Kapanış Saati</label>
+                  <input type="text" id="vpf-mz-kapanis" value="17:00" style="width:80px;text-align:center" placeholder="17:00">
+                </div>
+                <div class="form-group" style="flex:1">
+                  <label>Açık Günler</label>
+                  <input type="text" id="vpf-mz-gunler" value="Haftanın 7 günü açık" placeholder="Haftanın 7 günü açık">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Giriş Ücreti</label>
+                <input type="text" id="vpf-mz-ucret" placeholder="Örn: Ücretsiz, 100 TL">
+              </div>
+            </div>
             <!-- Village link — only for places -->
             <div class="form-group" id="vpf-village-group">
               <label>Bağlı Yerleşim <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(bu yer hangi yerleşimde?)</span></label>
@@ -5843,7 +5865,9 @@ function onVillageTypeChange() {
 function onPlaceCatChange() {
   var cat = document.getElementById('vpf-category').value;
   var oyFields = document.getElementById('vpf-orenyeri-fields');
+  var mzFields = document.getElementById('vpf-muze-fields');
   if (oyFields) oyFields.style.display = (cat === 'tarihi' || cat === 'orenyeri') ? 'block' : 'none';
+  if (mzFields) mzFields.style.display = (cat === 'muze') ? 'block' : 'none';
 }
 
 function onVillageSelect() {
@@ -5950,6 +5974,18 @@ function openVPModal(id) {
         document.getElementById('vpf-oy-tel2').value = '';
         document.getElementById('vpf-oy-ucret').value = '';
         document.getElementById('vpf-oy-muzekart').checked = true;
+      }
+      // Müze verileri yükle
+      if (item.museHours) {
+        document.getElementById('vpf-mz-acilis').value = item.museHours.acilis || '09:00';
+        document.getElementById('vpf-mz-kapanis').value = item.museHours.kapanis || '17:00';
+        document.getElementById('vpf-mz-gunler').value = item.museHours.gunler || '';
+        document.getElementById('vpf-mz-ucret').value = item.museHours.ucret || '';
+      } else {
+        document.getElementById('vpf-mz-acilis').value = '09:00';
+        document.getElementById('vpf-mz-kapanis').value = '17:00';
+        document.getElementById('vpf-mz-gunler').value = 'Haftanın 7 günü açık';
+        document.getElementById('vpf-mz-ucret').value = '';
       }
     } else {
       document.getElementById('vpf-village-type').value = item.type || 'koy';
@@ -6084,6 +6120,15 @@ async function saveVP(e) {
         tel2: document.getElementById('vpf-oy-tel2').value.trim() || '',
         ucret: document.getElementById('vpf-oy-ucret').value.trim() || '',
         muzekart: document.getElementById('vpf-oy-muzekart').checked
+      };
+    }
+    // Müze verileri
+    if (category === 'muze') {
+      placePatch.museHours = {
+        acilis: document.getElementById('vpf-mz-acilis').value.trim() || '09:00',
+        kapanis: document.getElementById('vpf-mz-kapanis').value.trim() || '17:00',
+        gunler: document.getElementById('vpf-mz-gunler').value.trim() || '',
+        ucret: document.getElementById('vpf-mz-ucret').value.trim() || ''
       };
     }
     if (!editingVPId) { placePatch.image = ''; placePatch.imagePos = 50; }
