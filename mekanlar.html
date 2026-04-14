@@ -322,6 +322,9 @@ function pageInit() {
   ══════════════════════════════════════════ */
   function renderFeatured() {
     const featured = getActiveVenues().filter(v => v.featured || isPremiumActive(v)).sort((a,b) => (isPremiumActive(b)?1:0) - (isPremiumActive(a)?1:0));
+    var featSection = document.querySelector('.mk-featured');
+    if (featured.length === 0) { if (featSection) featSection.style.display = 'none'; return; }
+    if (featSection) featSection.style.display = '';
     const saved    = getSaved();
     document.getElementById('mk-ftrack').innerHTML = featured.map((v) => {
       const cs = CAT_STYLE[v.category] || { bg:'rgba(26,39,68,.08)', color:'#4A5568', label:v.category };
