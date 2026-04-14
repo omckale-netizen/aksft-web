@@ -3814,6 +3814,27 @@ function renderPlacePage(placeId) {
     bodyHtml += '</div>';
   }
 
+  // Müze / Özel mekan saatleri (ören yeri olmayanlar için)
+  if (p.museHours && !(p.category === 'tarihi' || p.category === 'orenyeri')) {
+    var mh = p.museHours;
+    var mNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Istanbul' }));
+    var mTime = mNow.getHours() * 60 + mNow.getMinutes();
+    var mAcParts = (mh.acilis || '09:00').split(':'); var mAcMin = parseInt(mAcParts[0]) * 60 + parseInt(mAcParts[1] || 0);
+    var mKpParts = (mh.kapanis || '17:00').split(':'); var mKpMin = parseInt(mKpParts[0]) * 60 + parseInt(mKpParts[1] || 0);
+    var mIsOpen = mTime >= mAcMin && mTime < mKpMin;
+
+    bodyHtml += '<div style="margin-bottom:40px;background:rgba(26,39,68,.03);border:1px solid rgba(26,39,68,.08);border-radius:16px;padding:20px 24px;">';
+    bodyHtml += '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">';
+    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1rem;color:var(--navy);margin:0;">🕐 Ziyaret Bilgileri</h2>';
+    bodyHtml += '<span style="display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:999px;font-size:.72rem;font-weight:700;background:' + (mIsOpen ? 'rgba(34,197,94,.1)' : 'rgba(239,68,68,.1)') + ';color:' + (mIsOpen ? '#16A34A' : '#DC2626') + ';"><span style="width:7px;height:7px;border-radius:50%;background:' + (mIsOpen ? '#22C55E' : '#EF4444') + ';"></span>' + (mIsOpen ? 'Şu An Açık' : 'Şu An Kapalı') + '</span>';
+    bodyHtml += '</div>';
+    bodyHtml += '<div style="display:flex;flex-wrap:wrap;gap:10px;">';
+    bodyHtml += '<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:10px;background:rgba(26,39,68,.05);font-size:.78rem;font-weight:700;color:var(--navy);">🕐 ' + (mh.acilis || '09:00') + ' – ' + (mh.kapanis || '17:00') + '</span>';
+    if (mh.gunler) bodyHtml += '<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:10px;background:rgba(26,39,68,.05);font-size:.72rem;font-weight:600;color:var(--text-muted);">📅 ' + mh.gunler + '</span>';
+    if (mh.ucret) bodyHtml += '<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:10px;background:rgba(56,161,105,.08);font-size:.72rem;font-weight:600;color:#276749;">🎟 ' + mh.ucret + '</span>';
+    bodyHtml += '</div></div>';
+  }
+
   // Description
   if (p.description) {
     bodyHtml += '<div style="margin-bottom:40px;">';
