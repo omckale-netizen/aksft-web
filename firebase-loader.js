@@ -54,7 +54,7 @@
   var DATA_CACHE_KEY = 'assos_data_cache';
   var cached = null;
   try { cached = JSON.parse(localStorage.getItem(DATA_CACHE_KEY)); } catch(e) {}
-  if (cached && cached.venues && cached.venues.length > 0) {
+  if (cached && cached.venues && cached.venues.length > 0 && cached.placeCategories) {
     window.DATA = cached;
     hideLoader();
     document.dispatchEvent(new Event('dataReady'));
@@ -65,6 +65,7 @@
     clearTimeout(timeout);
     if (window._firebaseReady) return;
     if (window.DATA) {
+      if (!window.DATA.placeCategories) window.DATA.placeCategories = [];
       window._firebaseReady = false;
       if (!window._cacheUsed) { hideLoader(); document.dispatchEvent(new Event('dataReady')); }
     }
