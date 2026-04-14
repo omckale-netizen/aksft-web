@@ -3443,7 +3443,9 @@ function renderVillagePage(villageId) {
   if (v.description) {
     bodyHtml += '<div style="margin-bottom:40px;">';
     bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:14px;">' + (v.title || '') + ' Hakkında</h2>';
-    bodyHtml += '<p style="font-size:.9rem;color:var(--text-mid);line-height:1.85;">' + v.description + '</p>';
+    var vDescRaw = v.description;
+    var vDescHtml = vDescRaw.indexOf('<') > -1 ? vDescRaw : '<p>' + vDescRaw.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>') + '</p>';
+    bodyHtml += '<div style="font-size:.9rem;color:var(--text-mid);line-height:1.85;">' + vDescHtml + '</div>';
     bodyHtml += '</div>';
   }
 
@@ -3973,7 +3975,9 @@ function renderPlacePage(placeId) {
   if (p.description) {
     bodyHtml += '<div style="margin-bottom:40px;">';
     bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:14px;">' + (p.title || '') + ' Hakkında</h2>';
-    bodyHtml += '<p style="font-size:.9rem;color:var(--text-mid);line-height:1.85;">' + p.description + '</p>';
+    var descRaw = p.description;
+    var descHtml = descRaw.indexOf('<') > -1 ? descRaw : '<p>' + descRaw.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>') + '</p>';
+    bodyHtml += '<div style="font-size:.9rem;color:var(--text-mid);line-height:1.85;">' + descHtml + '</div>';
     bodyHtml += '</div>';
   }
 

@@ -1242,7 +1242,21 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             </div>
             <div class="form-group">
               <label>Detayli Aciklama</label>
-              <textarea id="vpf-description" rows="3" placeholder="Detayli bilgi"></textarea>
+              <div class="rte-wrap">
+                <div class="rte-toolbar">
+                  <button type="button" class="rte-btn" onclick="vpRteCmd('bold')" title="Kalın"><b>B</b></button>
+                  <button type="button" class="rte-btn" onclick="vpRteCmd('italic')" title="İtalik"><i>I</i></button>
+                  <span class="rte-sep"></span>
+                  <button type="button" class="rte-btn" onclick="vpRteHeading('h3')" title="Alt Başlık">H3</button>
+                  <button type="button" class="rte-btn" onclick="vpRteCmd('insertUnorderedList')" title="Liste">• Liste</button>
+                  <span class="rte-sep"></span>
+                  <button type="button" class="rte-btn" onclick="vpRteLink()" title="Link">🔗</button>
+                  <button type="button" class="rte-btn" onclick="vpRteCmd('removeFormat')" title="Temizle">✕</button>
+                  <button type="button" class="rte-btn rte-btn-code" onclick="vpRteToggleSource()" title="HTML Kaynak">‹/›</button>
+                </div>
+                <div id="vpf-desc-editor" class="rte-editor" contenteditable="true" data-placeholder="Detaylı bilgi yazın..." style="min-height:160px;"></div>
+                <textarea id="vpf-description" class="rte-source" style="display:none;min-height:160px;"></textarea>
+              </div>
             </div>
             <div class="form-group">
               <label>Etiketler (virgul ile)</label>
@@ -6087,6 +6101,10 @@ function openVPModal(id) {
   const isPlaces = currentVPTab === 'places';
   const form = document.getElementById('vp-form');
   form.reset();
+  document.getElementById('vpf-desc-editor').innerHTML = '';
+  window._vpRteSourceMode = false;
+  document.getElementById('vpf-desc-editor').style.display = 'block';
+  document.getElementById('vpf-description').style.display = 'none';
 
   document.getElementById('vpf-cat-group').style.display = isPlaces ? '' : 'none';
   document.getElementById('vpf-village-group').style.display = isPlaces ? '' : 'none';
@@ -6138,6 +6156,10 @@ function openVPModal(id) {
     document.getElementById('vpf-emoji').value = item.emoji || '';
     document.getElementById('vpf-shortDesc').value = item.shortDesc || '';
     document.getElementById('vpf-description').value = item.description || '';
+    document.getElementById('vpf-desc-editor').innerHTML = item.description || '';
+    window._vpRteSourceMode = false;
+    document.getElementById('vpf-desc-editor').style.display = 'block';
+    document.getElementById('vpf-description').style.display = 'none';
     document.getElementById('vpf-tags').value = (item.tags || []).join(', ');
     document.getElementById('vpf-location').value = item.location || '';
     document.getElementById('vpf-lat').value = item.lat || '';
@@ -6278,7 +6300,7 @@ async function saveVP(e) {
     title: document.getElementById('vpf-title').value.trim(),
     emoji: document.getElementById('vpf-emoji').value.trim() || '📍',
     shortDesc: document.getElementById('vpf-shortDesc').value.trim(),
-    description: document.getElementById('vpf-description').value.trim(),
+    description: (typeof vpRteGetContent === 'function' ? vpRteGetContent() : document.getElementById('vpf-description').value).trim(),
     tags: tags,
     keywords: [...document.getElementById('vpf-title').value.toLowerCase().split(/\s+/), ...tags.map(t => t.toLowerCase())].filter(Boolean)
   };
@@ -9329,6 +9351,42 @@ async function generateReport(type) {
    RICH TEXT EDITOR
 ═══════════════════ */
 window._rteSourceMode = false;
+window._vpRteSourceMode = false;
+
+// VP (Yerler/Köyler) RTE fonksiyonları
+function vpRteCmd(cmd, val) {
+  document.getElementById('vpf-desc-editor').focus();
+  document.execCommand(cmd, false, val || null);
+}
+function vpRteHeading(tag) {
+  var editor = document.getElementById('vpf-desc-editor');
+  editor.focus();
+  var sel = window.getSelection();
+  if (!sel.rangeCount) return;
+  var parent = sel.startContainer.nodeType === 3 ? sel.startContainer.parentElement : sel.startContainer;
+  if (parent.tagName && parent.tagName.toLowerCase() === tag) document.execCommand('formatBlock', false, 'p');
+  else document.execCommand('formatBlock', false, tag);
+}
+function vpRteLink() {
+  var url = prompt('Link URL:', 'https://');
+  if (url) { document.getElementById('vpf-desc-editor').focus(); document.execCommand('createLink', false, url); }
+}
+function vpRteToggleSource() {
+  var editor = document.getElementById('vpf-desc-editor');
+  var source = document.getElementById('vpf-description');
+  if (window._vpRteSourceMode) {
+    editor.innerHTML = source.value;
+    source.style.display = 'none'; editor.style.display = 'block';
+    window._vpRteSourceMode = false;
+  } else {
+    source.value = editor.innerHTML;
+    editor.style.display = 'none'; source.style.display = 'block';
+    window._vpRteSourceMode = true;
+  }
+}
+function vpRteGetContent() {
+  return window._vpRteSourceMode ? document.getElementById('vpf-description').value : document.getElementById('vpf-desc-editor').innerHTML;
+}
 
 function rteCmd(cmd, val) {
   document.getElementById('bf-content-editor').focus();
