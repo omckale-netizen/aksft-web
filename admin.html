@@ -4463,19 +4463,21 @@ function getVenueStatus(v) {
   }
 
   let todayHours = null;
+  function trN(s) { return (s||'').toLowerCase().replace(/ş/g,'s').replace(/ç/g,'c').replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ö/g,'o').replace(/ı/g,'i'); }
+  var todayN = trN(todayName);
   // Önce bugünün adıyla tam eşleşme ara
   for (const entry of v.weeklyHours) {
     if (!entry.days) continue;
-    if (entry.days.toLowerCase() === todayName.toLowerCase()) { todayHours = entry.hours; break; }
+    if (trN(entry.days) === todayN) { todayHours = entry.hours; break; }
   }
   // Sonra aralık ve özel eşleşmeler
   if (!todayHours) {
     for (const entry of v.weeklyHours) {
-      const d = entry.days.toLowerCase();
+      var d = trN(entry.days);
       if (d.includes('24 saat')) return true;
-      if (d.includes('her g\u00FCn') || d.includes('resepsiyon')) { todayHours = entry.hours; break; }
-      if (d.includes('pazartesi') && d.includes('cuma') && ['Pazartesi','Sali','Carsamba','Persembe','Cuma'].includes(todayName)) { todayHours = entry.hours; break; }
-      if (d.includes('pazartesi') && d.includes('per\u015Fembe') && ['Pazartesi','Sali','Carsamba','Persembe'].includes(todayName)) { todayHours = entry.hours; break; }
+      if (d.includes('her gun') || d.includes('resepsiyon')) { todayHours = entry.hours; break; }
+      if (d.includes('pazartesi') && d.includes('cuma') && ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma'].includes(todayName)) { todayHours = entry.hours; break; }
+      if (d.includes('pazartesi') && d.includes('persembe') && ['Pazartesi','Salı','Çarşamba','Perşembe'].includes(todayName)) { todayHours = entry.hours; break; }
       if (d.includes('cuma') && d.includes('pazar') && ['Cuma','Cumartesi','Pazar'].includes(todayName)) { todayHours = entry.hours; break; }
       if (d.includes('cumartesi') && d.includes('pazar') && ['Cumartesi','Pazar'].includes(todayName)) { todayHours = entry.hours; break; }
       if (d.includes('nisan') && d.includes('ekim')) {
@@ -4483,7 +4485,7 @@ function getVenueStatus(v) {
         if (mo >= 3 && mo <= 9) { todayHours = entry.hours; break; }
         else { todayHours = 'Kapali'; break; }
       }
-      if (d.includes('kas\u0131m') && d.includes('mart')) {
+      if (d.includes('kasim') && d.includes('mart')) {
         const mo = now.getMonth();
         if (mo <= 2 || mo >= 10) { todayHours = entry.hours; break; }
       }
@@ -5447,7 +5449,7 @@ function closeVenueModal() {
   pendingImages = [];
 }
 
-const WH_DAYS = ['Pazartesi','Sali','Carsamba','Persembe','Cuma','Cumartesi','Pazar'];
+const WH_DAYS = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
 
 function renderWhGrid(dayHours) {
   const grid = document.getElementById('wh-grid');

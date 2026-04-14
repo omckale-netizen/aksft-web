@@ -131,7 +131,7 @@
 
 <script src="firebase-loader.js?v=3"></script>
 <script src="data.js?v=2"></script>
-<script src="shared.min.js?v=193"></script>
+<script src="shared.min.js?v=194"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
@@ -254,21 +254,22 @@ function pageInit() {
         : '<span class="mk-vc-status mk-vc-closed">Kapalı</span>' };
     }
 
+    function trNorm(s) { return (s||'').toLowerCase().replace(/ş/g,'s').replace(/ç/g,'c').replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ö/g,'o').replace(/ı/g,'i'); }
+    var todayNorm = trNorm(todayName);
     let todayHours = null;
-    // Önce tam gün adı eşleşmesi (Salı: Kapalı gibi)
+    // Önce tam gün adı eşleşmesi (Salı: Kapalı gibi — eski Sali verisiyle de uyumlu)
     for (const entry of v.weeklyHours) {
-      const d = (entry.days || '').toLowerCase();
-      if (d === todayName.toLowerCase()) { todayHours = entry.hours; break; }
+      if (trNorm(entry.days) === todayNorm) { todayHours = entry.hours; break; }
     }
     // Sonra aralık ve özel eşleşmeler
     if (!todayHours) {
       for (const entry of v.weeklyHours) {
-        const d = (entry.days || '').toLowerCase();
+        const d = trNorm(entry.days);
         if (d.includes('24 saat')) return { isOpen: true, badge: '<span class="mk-vc-status mk-vc-open">Açık</span>' };
-        if (d.includes('her gün') || d.includes('her gun') || d.includes('resepsiyon')) { todayHours = entry.hours; break; }
+        if (d.includes('her gun') || d.includes('resepsiyon')) { todayHours = entry.hours; break; }
         if (d.includes('pazartesi') && d.includes('cuma') && ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma'].includes(todayName)) { todayHours = entry.hours; break; }
         if (d.includes('cumartesi') && d.includes('pazar') && ['Cumartesi','Pazar'].includes(todayName)) { todayHours = entry.hours; break; }
-        if (d.includes(todayName.toLowerCase())) { todayHours = entry.hours; break; }
+        if (d.includes(todayNorm)) { todayHours = entry.hours; break; }
       }
     }
 
