@@ -2129,12 +2129,28 @@ function renderVenuePage(venueId) {
   const todayName = dayNames[new Date().getDay()];
   const todayHours = (() => {
     if (!v.weeklyHours || v.weeklyHours.length === 0) return v.hours || '—';
+    // Önce bugünün adıyla tam eşleşme ara
     for (const entry of v.weeklyHours) {
       if (!entry.days) continue;
-      const d = entry.days.toLowerCase();
+      var d = entry.days.toLowerCase();
+      var tn = todayName.toLowerCase();
+      // Tam gün adı eşleşmesi (Salı, Çarşamba vs.)
+      if (d === tn) return entry.hours;
+    }
+    // Sonra aralık ve özel eşleşmeler
+    for (const entry of v.weeklyHours) {
+      if (!entry.days) continue;
+      var d = entry.days.toLowerCase();
       if (d.includes('her gün') || d.includes('resepsiyon')) return entry.hours;
+      // Pazartesi - Cuma aralığı
+      if (d.includes('pazartesi') && d.includes('cuma') && ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma'].includes(todayName)) return entry.hours;
+      // Pazartesi - Perşembe aralığı
       if (d.includes('pazartesi') && d.includes('perşembe') && ['Pazartesi','Salı','Çarşamba','Perşembe'].includes(todayName)) return entry.hours;
+      // Cuma - Pazar aralığı
       if (d.includes('cuma') && d.includes('pazar') && ['Cuma','Cumartesi','Pazar'].includes(todayName)) return entry.hours;
+      // Cumartesi - Pazar aralığı
+      if (d.includes('cumartesi') && d.includes('pazar') && ['Cumartesi','Pazar'].includes(todayName)) return entry.hours;
+      // Sezon bazlı
       if (d.includes('nisan') && d.includes('ekim')) { const m = new Date().getMonth(); return (m >= 3 && m <= 9) ? entry.hours : null; }
       if (d.includes('kasım') && d.includes('mart')) { const m = new Date().getMonth(); return (m <= 2 || m >= 10) ? entry.hours : null; }
     }

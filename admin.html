@@ -4463,20 +4463,30 @@ function getVenueStatus(v) {
   }
 
   let todayHours = null;
+  // Önce bugünün adıyla tam eşleşme ara
   for (const entry of v.weeklyHours) {
-    const d = entry.days.toLowerCase();
-    if (d.includes('24 saat')) return true;
-    if (d.includes('her g\u00FCn') || d.includes('resepsiyon')) { todayHours = entry.hours; break; }
-    if (d.includes('pazartesi') && d.includes('per\u015Fembe') && ['Pazartesi','Sali','Carsamba','Persembe'].includes(todayName)) { todayHours = entry.hours; break; }
-    if (d.includes('cuma') && d.includes('pazar') && ['Cuma','Cumartesi','Pazar'].includes(todayName)) { todayHours = entry.hours; break; }
-    if (d.includes('nisan') && d.includes('ekim')) {
-      const mo = now.getMonth();
-      if (mo >= 3 && mo <= 9) { todayHours = entry.hours; break; }
-      else { todayHours = 'Kapali'; break; }
-    }
-    if (d.includes('kas\u0131m') && d.includes('mart')) {
-      const mo = now.getMonth();
-      if (mo <= 2 || mo >= 10) { todayHours = entry.hours; break; }
+    if (!entry.days) continue;
+    if (entry.days.toLowerCase() === todayName.toLowerCase()) { todayHours = entry.hours; break; }
+  }
+  // Sonra aralık ve özel eşleşmeler
+  if (!todayHours) {
+    for (const entry of v.weeklyHours) {
+      const d = entry.days.toLowerCase();
+      if (d.includes('24 saat')) return true;
+      if (d.includes('her g\u00FCn') || d.includes('resepsiyon')) { todayHours = entry.hours; break; }
+      if (d.includes('pazartesi') && d.includes('cuma') && ['Pazartesi','Sali','Carsamba','Persembe','Cuma'].includes(todayName)) { todayHours = entry.hours; break; }
+      if (d.includes('pazartesi') && d.includes('per\u015Fembe') && ['Pazartesi','Sali','Carsamba','Persembe'].includes(todayName)) { todayHours = entry.hours; break; }
+      if (d.includes('cuma') && d.includes('pazar') && ['Cuma','Cumartesi','Pazar'].includes(todayName)) { todayHours = entry.hours; break; }
+      if (d.includes('cumartesi') && d.includes('pazar') && ['Cumartesi','Pazar'].includes(todayName)) { todayHours = entry.hours; break; }
+      if (d.includes('nisan') && d.includes('ekim')) {
+        const mo = now.getMonth();
+        if (mo >= 3 && mo <= 9) { todayHours = entry.hours; break; }
+        else { todayHours = 'Kapali'; break; }
+      }
+      if (d.includes('kas\u0131m') && d.includes('mart')) {
+        const mo = now.getMonth();
+        if (mo <= 2 || mo >= 10) { todayHours = entry.hours; break; }
+      }
     }
   }
 

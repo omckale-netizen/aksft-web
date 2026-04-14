@@ -131,7 +131,7 @@
 
 <script src="firebase-loader.js?v=3"></script>
 <script src="data.js?v=2"></script>
-<script src="shared.min.js?v=191"></script>
+<script src="shared.min.js?v=193"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
@@ -255,14 +255,21 @@ function pageInit() {
     }
 
     let todayHours = null;
+    // Önce tam gün adı eşleşmesi (Salı: Kapalı gibi)
     for (const entry of v.weeklyHours) {
       const d = (entry.days || '').toLowerCase();
-      if (d.includes('24 saat')) return { isOpen: true, badge: '<span class="mk-vc-status mk-vc-open">Açık</span>' };
-      if (d.includes('her gün') || d.includes('her gun') || d.includes('resepsiyon')) { todayHours = entry.hours; break; }
-      if (d.includes('pazartesi') && d.includes('cuma') && ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma'].includes(todayName)) { todayHours = entry.hours; break; }
-      if (d.includes('cumartesi') && d.includes('pazar') && ['Cumartesi','Pazar'].includes(todayName)) { todayHours = entry.hours; break; }
-      // Tek gün kontrolü
-      if (d.includes(todayName.toLowerCase())) { todayHours = entry.hours; break; }
+      if (d === todayName.toLowerCase()) { todayHours = entry.hours; break; }
+    }
+    // Sonra aralık ve özel eşleşmeler
+    if (!todayHours) {
+      for (const entry of v.weeklyHours) {
+        const d = (entry.days || '').toLowerCase();
+        if (d.includes('24 saat')) return { isOpen: true, badge: '<span class="mk-vc-status mk-vc-open">Açık</span>' };
+        if (d.includes('her gün') || d.includes('her gun') || d.includes('resepsiyon')) { todayHours = entry.hours; break; }
+        if (d.includes('pazartesi') && d.includes('cuma') && ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma'].includes(todayName)) { todayHours = entry.hours; break; }
+        if (d.includes('cumartesi') && d.includes('pazar') && ['Cumartesi','Pazar'].includes(todayName)) { todayHours = entry.hours; break; }
+        if (d.includes(todayName.toLowerCase())) { todayHours = entry.hours; break; }
+      }
     }
 
     if (!todayHours) todayHours = v.weeklyHours[0] ? v.weeklyHours[0].hours : null;
