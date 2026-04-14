@@ -2694,7 +2694,7 @@ function renderVenuePage(venueId) {
         <div class="vp-section fade-up">
           <div class="vp-eyebrow">İletişim</div>
           <h2 class="vp-stitle">Ulaşın</h2>
-          <div class="vp-contact-grid${v.category === 'konaklama' ? ' vp-contact-grid-1col' : ''}"
+          <div class="vp-contact-grid${v.category === 'konaklama' ? ' vp-contact-grid-1col' : ''}">
             <div class="vp-contact-card">
               <div class="vp-contact-icon">📞</div>
               <div>
