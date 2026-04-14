@@ -3945,6 +3945,45 @@ function renderPlacePage(placeId) {
     bodyHtml += '</div>';
   }
 
+  // Diğer ören yerleri (aynı kategoridekiler + mesafe)
+  if (p.category === 'tarihi' || p.category === 'orenyeri') {
+    var otherOrenYeri = (DATA.places || []).filter(function(op) {
+      return op.id !== p.id && (op.category === 'tarihi' || op.category === 'orenyeri');
+    });
+    // Mesafe hesapla
+    if (p.lat && p.lng) {
+      otherOrenYeri.forEach(function(op) {
+        if (op.lat && op.lng) {
+          var dLat = (op.lat - p.lat) * Math.PI / 180;
+          var dLon = (op.lng - p.lng) * Math.PI / 180;
+          var a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(p.lat*Math.PI/180)*Math.cos(op.lat*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+          op._dist = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+          op._roadKm = Math.round(op._dist * 1.4);
+        }
+      });
+      otherOrenYeri.sort(function(a, b) { return (a._dist || 999) - (b._dist || 999); });
+    }
+    if (otherOrenYeri.length > 0) {
+      var oyBaslik = otherOrenYeri.length === 1 ? '🏛 Diğer Ören Yeri' : '🏛 Diğer Ören Yerleri';
+      bodyHtml += '<div style="margin-bottom:40px;">';
+      bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">' + oyBaslik + '</h2>';
+      bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">';
+      otherOrenYeri.forEach(function(op) {
+        var distBadge = op._roadKm ? '<span style="position:absolute;bottom:10px;right:10px;font-size:.62rem;font-weight:700;padding:3px 10px;border-radius:999px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);color:#fff;z-index:1;">~' + op._roadKm + ' km</span>' : '';
+        bodyHtml += '<a href="yer-detay.html?id=' + op.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+        if (op.image) {
+          bodyHtml += '<div style="position:relative;height:120px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + op.image + '" alt="' + (op.title || '') + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1">' + distBadge + '</div>';
+        } else {
+          bodyHtml += '<div style="position:relative;height:80px;background:linear-gradient(135deg,rgba(26,39,68,.06),rgba(26,39,68,.02));display:flex;align-items:center;justify-content:center;font-size:2rem;">' + (op.emoji || '🏛') + distBadge + '</div>';
+        }
+        bodyHtml += '<div style="padding:14px 16px;"><h4 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.85rem;color:var(--navy);margin:0 0 4px;">' + (op.title || '') + '</h4>';
+        if (op.shortDesc) bodyHtml += '<p style="font-size:.72rem;color:var(--text-mid);line-height:1.5;margin:0;">' + op.shortDesc.substring(0, 80) + (op.shortDesc.length > 80 ? '…' : '') + '</p>';
+        bodyHtml += '</div></a>';
+      });
+      bodyHtml += '</div></div>';
+    }
+  }
+
   bodyHtml += '</div>';
   document.getElementById('place-body').innerHTML = bodyHtml;
 
