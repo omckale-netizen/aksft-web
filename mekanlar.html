@@ -131,7 +131,7 @@
 
 <script src="firebase-loader.js?v=3"></script>
 <script src="data.js?v=2"></script>
-<script src="shared.min.js?v=196"></script>
+<script src="shared.min.js?v=197"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
@@ -216,77 +216,20 @@ function pageInit() {
   let activeStatus = 'all'; // 'all' | 'open' | 'closed'
   let showingSaved = false;
 
-  /* ── Açık / Kapalı durumu ── */
-  function checkHours(m, mins) {
-    var open = parseInt(m[1]) * 60 + parseInt(m[2]);
-    var close = parseInt(m[3]) * 60 + parseInt(m[4]);
-    if (close === 0) close = 1440;
-    if (close <= open) return mins >= open || mins < close;
-    return mins >= open && mins < close;
-  }
+  /* ── Açık / Kapalı durumu — shared.js isVenueOpen() kullanır ── */
   function getVenueStatus(v) {
-    // Sezon dışı kontrolü (güvenli)
-    if (v.seasonal === true && v.seasonStart && v.seasonEnd && typeof v.seasonStart === 'string' && v.seasonStart.includes('-')) {
-      try {
-        var nowS = new Date();
-        var sD = new Date(v.seasonStart); sD.setFullYear(nowS.getFullYear());
-        var eD = new Date(v.seasonEnd); eD.setFullYear(nowS.getFullYear());
-        if (!isNaN(sD.getTime()) && !isNaN(eD.getTime()) && (nowS < sD || nowS > eD)) {
-          return { isOpen: false, badge: '<span class="mk-vc-status" style="background:rgba(49,130,206,.15);color:#63B3ED;border:1px solid rgba(49,130,206,.3);"><span style="width:5px;height:5px;border-radius:50%;background:#63B3ED;box-shadow:0 0 4px rgba(49,130,206,.5);flex-shrink:0;"></span>Sezon dışı</span>' };
-        }
-      } catch(e) {}
-    }
-    // Konaklama her zaman açık
-    if (v.category === 'konaklama') return { isOpen: true, badge: '' };
-
-    const now = new Date();
-    const dayNames = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
-    const todayName = dayNames[now.getDay()];
-    const mins = now.getHours() * 60 + now.getMinutes();
-
-    if (!v.weeklyHours || v.weeklyHours.length === 0) {
-      if (!v.hours) return { isOpen: null, badge: '' };
-      const m = v.hours.match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
-      if (!m) return { isOpen: null, badge: '' };
-      const isOpen = checkHours(m, mins);
-      return { isOpen, badge: isOpen
-        ? '<span class="mk-vc-status mk-vc-open">Açık</span>'
-        : '<span class="mk-vc-status mk-vc-closed">Kapalı</span>' };
-    }
-
-    function trNorm(s) { return (s||'').toLowerCase().replace(/ş/g,'s').replace(/ç/g,'c').replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ö/g,'o').replace(/ı/g,'i'); }
-    var todayNorm = trNorm(todayName);
-    let todayHours = null;
-    // Önce tam gün adı eşleşmesi (Salı: Kapalı gibi — eski Sali verisiyle de uyumlu)
-    for (const entry of v.weeklyHours) {
-      if (trNorm(entry.days) === todayNorm) { todayHours = entry.hours; break; }
-    }
-    // Sonra aralık ve özel eşleşmeler
-    if (!todayHours) {
-      for (const entry of v.weeklyHours) {
-        const d = trNorm(entry.days);
-        if (d.includes('24 saat')) return { isOpen: true, badge: '<span class="mk-vc-status mk-vc-open">Açık</span>' };
-        if (d.includes('her gun') || d.includes('resepsiyon')) { todayHours = entry.hours; break; }
-        if (d.includes('pazartesi') && d.includes('cuma') && ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma'].includes(todayName)) { todayHours = entry.hours; break; }
-        if (d.includes('cumartesi') && d.includes('pazar') && ['Cumartesi','Pazar'].includes(todayName)) { todayHours = entry.hours; break; }
-        if (d.includes(todayNorm)) { todayHours = entry.hours; break; }
+    // Sezon dışı
+    if (v.seasonal && v.seasonStart && v.seasonEnd) {
+      var result = isVenueOpen(v);
+      if (result === false && v.seasonStart) {
+        return { isOpen: false, badge: '<span class="mk-vc-status" style="background:rgba(49,130,206,.15);color:#63B3ED;border:1px solid rgba(49,130,206,.3);"><span style="width:5px;height:5px;border-radius:50%;background:#63B3ED;box-shadow:0 0 4px rgba(49,130,206,.5);flex-shrink:0;"></span>Sezon dışı</span>' };
       }
     }
-
-    if (!todayHours) todayHours = v.weeklyHours[0] ? v.weeklyHours[0].hours : null;
-    if (!todayHours || todayHours.toLowerCase().includes('kapal')) {
-      return { isOpen: false, badge: '<span class="mk-vc-status mk-vc-closed">Kapalı</span>' };
-    }
-
-    const m = todayHours.match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
-    if (!m) {
-      if (todayHours.includes('24')) return { isOpen: true, badge: '<span class="mk-vc-status mk-vc-open">Açık</span>' };
-      return { isOpen: null, badge: '' };
-    }
-    const isOpen = checkHours(m, mins);
-    return { isOpen, badge: isOpen
-      ? '<span class="mk-vc-status mk-vc-open">Açık</span>'
-      : '<span class="mk-vc-status mk-vc-closed">Kapalı</span>' };
+    if (v.category === 'konaklama') return { isOpen: true, badge: '' };
+    var open = isVenueOpen(v);
+    if (open === true) return { isOpen: true, badge: '<span class="mk-vc-status mk-vc-open">Açık</span>' };
+    if (open === false) return { isOpen: false, badge: '<span class="mk-vc-status mk-vc-closed">Kapalı</span>' };
+    return { isOpen: null, badge: '' };
   }
 
   /* ══════════════════════════════════════════
