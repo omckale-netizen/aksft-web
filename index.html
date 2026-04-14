@@ -174,18 +174,6 @@
 
   </div>
 
-  <!-- Scroll ipucu -->
-  <div class="hero-scroll-cta" onclick="this.classList.add('hero-scroll-clicked');var nxt=document.getElementById('hero');while(nxt=nxt.nextElementSibling){if(nxt.tagName==='SECTION'){nxt.scrollIntoView({behavior:'smooth'});break;}}">
-    <div class="hero-mouse">
-      <div class="hero-mouse-body">
-        <div class="hero-mouse-wheel"></div>
-      </div>
-      <div class="hero-mouse-arrows">
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 13l5 5 5-5"/></svg>
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="opacity:.3;margin-top:-6px"><path d="M7 13l5 5 5-5"/></svg>
-      </div>
-    </div>
-  </div>
 </section>
 
 <style>
@@ -615,7 +603,7 @@ function pageInit() {
   (function() {
     const el = document.getElementById('hero-weather');
     if (!el) return;
-    const lat = 39.49, lon = 26.34;
+    const lat = 39.4887, lon = 26.3393;
     const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon +
       '&current=temperature_2m,weather_code' +
       '&daily=temperature_2m_max,temperature_2m_min,weather_code' +
@@ -645,7 +633,7 @@ function pageInit() {
       });
 
       el.innerHTML =
-        '<span style="font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(245,237,224,.25);padding:0 10px 0 6px;white-space:nowrap;">Ayvacık</span>' +
+        '<span style="font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(245,237,224,.25);padding:0 10px 0 6px;white-space:nowrap;">Assos</span>' +
         '<div class="hw-day hw-today">' +
           '<span class="hw-icon">' + todayEmoji + '</span>' +
           '<span class="hw-temp">' + todayTemp + '°C</span>' +
