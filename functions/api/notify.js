@@ -128,6 +128,7 @@ export async function onRequestPost(context) {
     text += '\u{1F464} Yetkili: ' + sanitize(data.name, 100) + '\n';
     text += '\u{1F4E7} ' + sanitize(data.email, 100) + '\n';
     if (data.phone) text += '\u{1F4DE} ' + sanitize(data.phone, 30) + '\n';
+    if (data.refNo) text += '\n\u{1F4CB} Ref: ' + sanitize(data.refNo, 20);
     text += '\n\u{1F449} Admin panelden inceleyin: Mekan Talepleri';
 
   } else if (type === 'venue_update') {
@@ -258,7 +259,7 @@ export async function onRequestPost(context) {
       try {
         const venueName = sanitize(data.venueTitle, 100) || 'Mekan\u0131n\u0131z';
         const ownerName = sanitize(data.name, 50) || 'De\u011ferli \u0130\u015fletme Sahibi';
-        const refNo = 'A-' + Date.now().toString(36).toUpperCase().slice(-6);
+        const refNo = data.refNo || ('A-' + Date.now().toString(36).toUpperCase().slice(-6));
         await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: { 'Authorization': 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' },

@@ -4002,6 +4002,7 @@ async function renderPendingVenues() {
             '<span style="font-size:.65rem;font-weight:700;padding:3px 10px;border-radius:6px;background:' + st.bg + ';color:' + st.color + '">' + st.icon + ' ' + st.label + '</span>' +
             '<span style="font-size:1rem;font-weight:800;color:var(--navy)">' + (item.title || 'İsimsiz') + '</span>' +
             '<span class="badge badge-cat" style="font-size:.65rem">' + (catLabels[item.category] || item.category || '') + '</span>' +
+            (item.refNo ? '<span style="font-size:.6rem;font-weight:600;color:var(--text-muted);letter-spacing:.05em">' + item.refNo + '</span>' : '') +
           '</div>' +
           '<span style="font-size:.72rem;color:var(--text-muted)">' + date + '</span>' +
         '</div>' +

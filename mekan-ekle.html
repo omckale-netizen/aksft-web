@@ -589,9 +589,10 @@ async function submit(){
     }else{
       data.submittedAt=new Date().toISOString();
       data.status='pending';
+      data.refNo='A-'+Date.now().toString(36).toUpperCase().slice(-6);
       await db.collection('pending_venues').add(data);
       // Yeni başvuru bildirimi
-      try{fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'venue_request',data:{name:data.ownerName,email:data.ownerEmail,phone:data.ownerPhone,venueTitle:data.title,category:CAT_LABELS[data.category]||data.category,location:data.location}})});}catch(e){}
+      try{fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'venue_request',data:{name:data.ownerName,email:data.ownerEmail,phone:data.ownerPhone,venueTitle:data.title,category:CAT_LABELS[data.category]||data.category,location:data.location,refNo:data.refNo}})});}catch(e){}
     }
     localStorage.setItem(rlKey,String(rlC+1));
     // Farklı success mesajları
