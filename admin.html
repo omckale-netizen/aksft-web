@@ -4150,13 +4150,29 @@ function closeMsgDetail() {
 }
 
 // Çöp kutusuna gönder (soft delete)
+var REPLY_TEMPLATES = {
+  tesekkur: { label: 'Teşekkür', body: 'Merhaba {name},\n\nBize ulaştığınız için teşekkür ederiz. Geri bildiriminiz bizim için çok değerli.\n\nİyi günler dileriz.' },
+  bilgi: { label: 'Bilgi Verildi', body: 'Merhaba {name},\n\nSorduğunuz konu hakkında bilgi vermek isteriz:\n\n\n\nBaşka sorularınız olursa bizimle iletişime geçebilirsiniz.' },
+  mekan_yon: { label: 'Mekan Yönlendirme', body: 'Merhaba {name},\n\nSorduğunuz mekan hakkında detaylı bilgiyi assosukesfet.com üzerinden inceleyebilirsiniz.\n\nMekanın çalışma saatleri, iletişim bilgileri ve konumu detay sayfasında mevcuttur.\n\nİyi tatiller dileriz.' },
+  oneri_tesekkur: { label: 'Öneri Teşekkürü', body: 'Merhaba {name},\n\nÖneriniz için teşekkür ederiz! Platformumuzu geliştirmek için geri bildirimlerinizi dikkate alıyoruz.\n\nÖnerinizi değerlendireceğiz.' },
+  mekan_talep: { label: 'Mekan Ekleme Talebi', body: 'Merhaba {name},\n\nMekan ekleme talebinizi aldık. Ekibimiz mekanı inceleyip en kısa sürede platformumuza eklemeyi değerlendirecektir.\n\nSüreç hakkında sizi bilgilendireceğiz.' },
+  hata_bildirim: { label: 'Hata Düzeltildi', body: 'Merhaba {name},\n\nBildirdiğiniz hata düzeltilmiştir. Platformumuzun kalitesini artırmamıza yardımcı olduğunuz için teşekkür ederiz.\n\nBaşka bir sorunla karşılaşırsanız lütfen bize bildirin.' }
+};
 function openReplyMail(docId) {
   var m = allMessages.find(x => x._id === docId);
   if (!m || !m.email) { showToast('E-posta adresi bulunamadı', 'error'); return; }
+  var tplOptions = Object.entries(REPLY_TEMPLATES).map(function(e) {
+    return '<option value="' + e[0] + '">' + e[1].label + '</option>';
+  }).join('');
   var replyArea = document.getElementById('msg-detail-consent');
   replyArea.innerHTML =
     '<div style="margin-top:12px;padding:16px;background:var(--cream-dark,var(--cream));border-radius:12px;border:1px solid var(--card-border,rgba(0,0,0,.06))">' +
-      '<div style="font-size:.72rem;font-weight:700;color:var(--text);margin-bottom:8px">✉️ Yanıt Gönder — ' + m.email + '</div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">' +
+        '<div style="font-size:.72rem;font-weight:700;color:var(--text)">✉️ Yanıt Gönder — ' + m.email + '</div>' +
+        '<select onchange="applyReplyTemplate(this.value,\'' + (m.name || '').replace(/'/g,"\\'") + '\')" style="padding:5px 10px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:6px;font-size:.72rem;background:var(--input-bg,#fff);color:var(--text);cursor:pointer">' +
+          '<option value="">Hazır yanıt seç...</option>' + tplOptions +
+        '</select>' +
+      '</div>' +
       '<textarea id="reply-mail-body" rows="5" placeholder="Yanıtınızı yazın..." style="width:100%;padding:10px 14px;border:1px solid var(--input-border,var(--border));border-radius:8px;font-size:.85rem;font-family:inherit;resize:vertical;background:var(--input-bg,#fff);color:var(--text)"></textarea>' +
       '<div style="display:flex;gap:8px;margin-top:10px;align-items:center">' +
         '<button class="btn btn-primary btn-sm" onclick="sendReplyMail(\'' + docId + '\')">Gönder</button>' +
@@ -4164,6 +4180,13 @@ function openReplyMail(docId) {
         '<span id="reply-mail-status" style="font-size:.72rem;color:var(--text-muted);margin-left:auto"></span>' +
       '</div>' +
     '</div>';
+  document.getElementById('reply-mail-body').focus();
+}
+function applyReplyTemplate(key, name) {
+  var tpl = REPLY_TEMPLATES[key];
+  if (!tpl) return;
+  var body = tpl.body.replace(/\{name\}/g, name || '');
+  document.getElementById('reply-mail-body').value = body;
   document.getElementById('reply-mail-body').focus();
 }
 async function sendReplyMail(docId) {
@@ -4319,14 +4342,12 @@ function showRecentEmails(query) {
 function selectRecentEmail(email) {
   var input = document.getElementById('compose-to');
   var current = input.value.trim();
-  // Virgülle ayırarak mevcut adresleri al
-  var existing = current ? current.split(',').map(function(e) { return e.trim(); }).filter(Boolean) : [];
-  // Son girilen kısmi metni çıkar (henüz virgülden sonrası)
   var lastComma = current.lastIndexOf(',');
-  if (lastComma >= 0) {
-    existing = current.substring(0, lastComma).split(',').map(function(e) { return e.trim(); }).filter(Boolean);
-  }
-  // Zaten varsa ekleme
+  // Virgülden önceki tamamlanmış adresleri al, son kısmi metni çıkar
+  var existing = lastComma >= 0
+    ? current.substring(0, lastComma).split(',').map(function(e) { return e.trim(); }).filter(Boolean)
+    : [];
+  // Seçilen maili ekle (zaten varsa ekleme)
   if (!existing.includes(email)) existing.push(email);
   input.value = existing.join(', ');
   document.getElementById('compose-recent-emails').style.display = 'none';
