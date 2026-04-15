@@ -158,7 +158,7 @@ export async function onRequestPost(context) {
 
   <!-- Header -->
   <div style="background:linear-gradient(135deg,#1A2744 0%,#243352 50%,#2D3E5F 100%);border-radius:16px 16px 0 0;padding:36px 32px 32px;text-align:center;">
-    <div style="display:inline-block;width:48px;height:48px;border-radius:14px;background:rgba(196,82,26,.9);color:#fff;font-size:1.1rem;font-weight:800;line-height:48px;text-align:center;margin-bottom:14px;">AK</div>
+    <div style="display:inline-block;width:48px;height:48px;border-radius:14px;background:rgba(196,82,26,.9);color:#fff;font-size:1.5rem;line-height:48px;text-align:center;margin-bottom:14px;">&#x1F9ED;</div>
     <h1 style="margin:0;font-size:1.45rem;color:#ffffff;font-weight:800;letter-spacing:-.03em;">Assos'u Ke\u015ffet</h1>
     <p style="margin:6px 0 0;font-size:.78rem;color:rgba(255,255,255,.5);font-weight:500;">Assos'un Dijital Ke\u015fif Rehberi</p>
     <div style="width:40px;height:3px;background:rgba(196,82,26,.7);border-radius:2px;margin:16px auto 0;"></div>
@@ -193,22 +193,13 @@ export async function onRequestPost(context) {
 
   <!-- Signature -->
   <div style="background:#FAFAF8;padding:24px 32px;border-left:1px solid #EBE7E1;border-right:1px solid #EBE7E1;border-top:2px solid #C4521A;">
-    <table style="width:100%;border-collapse:collapse;"><tr>
-      <td style="vertical-align:middle;width:50px;padding-right:16px;">
-        <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#1A2744,#2D3E5F);color:#fff;font-size:.9rem;font-weight:800;line-height:44px;text-align:center;">AK</div>
-      </td>
-      <td style="vertical-align:middle;">
-        <p style="margin:0 0 1px;font-size:.9rem;font-weight:700;color:#1A2744;">Assos'u Ke\u015ffet</p>
-        <p style="margin:0 0 8px;font-size:.68rem;color:#A0AEC0;">Assos'un Dijital Ke\u015fif Rehberi</p>
-        <table style="border-collapse:collapse;">
-          <tr><td style="font-size:.73rem;color:#A0AEC0;padding:2px 8px 2px 0;line-height:1;">&#x2709;</td><td style="font-size:.73rem;line-height:1;"><a href="mailto:info@assosukesfet.com" style="color:#C4521A;text-decoration:none;font-weight:500;">info@assosukesfet.com</a></td>
-          <td style="font-size:.73rem;color:#D4D0CA;padding:2px 8px;line-height:1;">|</td>
-          <td style="font-size:.73rem;color:#A0AEC0;padding:2px 8px 2px 0;line-height:1;">&#x1F310;</td><td style="font-size:.73rem;line-height:1;"><a href="https://assosukesfet.com" style="color:#C4521A;text-decoration:none;font-weight:500;">assosukesfet.com</a></td>
-          <td style="font-size:.73rem;color:#D4D0CA;padding:2px 8px;line-height:1;">|</td>
-          <td style="font-size:.73rem;color:#A0AEC0;padding:2px 8px 2px 0;line-height:1;">&#x1F4F8;</td><td style="font-size:.73rem;line-height:1;"><a href="https://instagram.com/assosukesfet" style="color:#C4521A;text-decoration:none;font-weight:500;">@assosukesfet</a></td></tr>
-        </table>
-      </td>
-    </tr></table>
+    <p style="margin:0 0 2px;font-size:.92rem;font-weight:700;color:#1A2744;">&#x1F9ED; Assos'u Ke\u015ffet</p>
+    <p style="margin:0 0 10px;font-size:.7rem;color:#A0AEC0;">Assos'un Dijital Ke\u015fif Rehberi</p>
+    <table style="border-collapse:collapse;">
+      <tr><td style="font-size:.75rem;color:#A0AEC0;padding:3px 8px 3px 0;">&#x2709;</td><td style="font-size:.75rem;"><a href="mailto:info@assosukesfet.com" style="color:#C4521A;text-decoration:none;font-weight:500;">info@assosukesfet.com</a></td></tr>
+      <tr><td style="font-size:.75rem;color:#A0AEC0;padding:3px 8px 3px 0;">&#x1F310;</td><td style="font-size:.75rem;"><a href="https://assosukesfet.com" style="color:#C4521A;text-decoration:none;font-weight:500;">assosukesfet.com</a></td></tr>
+      <tr><td style="font-size:.75rem;color:#A0AEC0;padding:3px 8px 3px 0;">&#x1F4F8;</td><td style="font-size:.75rem;"><a href="https://instagram.com/assosukesfet" style="color:#C4521A;text-decoration:none;font-weight:500;">@assosukesfet</a></td></tr>
+    </table>
   </div>
 
   <!-- Footer -->
