@@ -584,8 +584,8 @@ async function submit(){
       data.updatedAt=new Date().toISOString();
       data.status='pending';
       await db.collection('pending_venues').doc(editDocId).update(data);
-      // Düzenleme bildirimi
-      try{fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'venue_request',data:{name:data.ownerName,email:data.ownerEmail,phone:data.ownerPhone,venueTitle:'[GÜNCELLEME] '+data.title,category:CAT_LABELS[data.category]||data.category,location:data.location}})});}catch(e){}
+      // Düzenleme bildirimi — mail göndermeden sadece Telegram
+      try{fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'venue_update',data:{name:data.ownerName,email:data.ownerEmail,phone:data.ownerPhone,venueTitle:data.title,category:CAT_LABELS[data.category]||data.category,location:data.location}})});}catch(e){}
     }else{
       data.submittedAt=new Date().toISOString();
       data.status='pending';

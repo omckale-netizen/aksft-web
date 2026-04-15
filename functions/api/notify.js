@@ -55,7 +55,7 @@ export async function onRequestPost(context) {
     } catch(e) {}
   }
 
-  const allowedTypes = ['login', 'login_blocked', 'message', 'venue_request', 'backup', 'premium', 'security', 'password'];
+  const allowedTypes = ['login', 'login_blocked', 'message', 'venue_request', 'venue_update', 'backup', 'premium', 'security', 'password'];
   if (!allowedTypes.includes(type)) {
     return new Response(JSON.stringify({ error: 'Unknown type' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
   }
@@ -129,6 +129,17 @@ export async function onRequestPost(context) {
     text += '\u{1F4E7} ' + sanitize(data.email, 100) + '\n';
     if (data.phone) text += '\u{1F4DE} ' + sanitize(data.phone, 30) + '\n';
     text += '\n\u{1F449} Admin panelden inceleyin: Mekan Talepleri';
+
+  } else if (type === 'venue_update') {
+    text = '━━━━━━━━━━━━━━━━━━━━\n';
+    text += '\u{1F504} MEKAN DUZENLEME GONDERILDI\n';
+    text += '━━━━━━━━━━━━━━━━━━━━\n\n';
+    text += '\u{1F3E0} Mekan: ' + sanitize(data.venueTitle, 100) + '\n';
+    text += '\u{1F4CD} Konum: ' + sanitize(data.location, 100) + '\n';
+    text += '\u{1F4C2} Kategori: ' + sanitize(data.category, 50) + '\n\n';
+    text += '\u{1F464} Yetkili: ' + sanitize(data.name, 100) + '\n';
+    text += '\u{1F4E7} ' + sanitize(data.email, 100) + '\n';
+    text += '\n\u{1F449} Revizyon tamamlandi — Admin panelden inceleyin';
 
   } else if (type === 'backup') {
     text = '━━━━━━━━━━━━━━━━━━━━\n';
@@ -303,6 +314,58 @@ export async function onRequestPost(context) {
   </div>
   <div style="background:linear-gradient(135deg,#1A2744,#243352);border-radius:0 0 16px 16px;padding:22px 32px;text-align:center;">
     <p style="margin:0 0 4px;font-size:.68rem;color:rgba(255,255,255,.4);">Bu mail otomatik olarak g\u00f6nderilmi\u015ftir.</p>
+    <p style="margin:0;font-size:.65rem;color:rgba(255,255,255,.3);">&copy; ${new Date().getFullYear()} Assos'u Ke\u015ffet &bull; <a href="https://assosukesfet.com" style="color:rgba(255,255,255,.45);text-decoration:none;">assosukesfet.com</a></p>
+  </div>
+</div></body></html>`
+          })
+        });
+      } catch(mailErr) {}
+    }
+
+    // Mekan düzenleme gönderildi — kullanıcıya bilgilendirme maili
+    if (type === 'venue_update' && data.email && env.RESEND_API_KEY) {
+      try {
+        const venueName = sanitize(data.venueTitle, 100) || 'Mekan\u0131n\u0131z';
+        const ownerName = sanitize(data.name, 50) || 'De\u011ferli \u0130\u015fletme Sahibi';
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: "Assos'u Ke\u015ffet <info@assosukesfet.com>",
+            to: [data.email],
+            subject: 'D\u00fczenlemeniz Al\u0131nd\u0131 \u2014 ' + venueName + ' | Assos\'u Ke\u015ffet',
+            reply_to: 'info@assosukesfet.com',
+            html: `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body style="margin:0;padding:0;background:#F0EDE8;font-family:'Segoe UI',Tahoma,Arial,sans-serif;">
+<div style="max-width:600px;margin:0 auto;padding:24px 16px;">
+  <div style="background:linear-gradient(135deg,#1A2744 0%,#243352 50%,#2D3E5F 100%);border-radius:16px 16px 0 0;padding:36px 32px 32px;text-align:center;">
+    <div style="display:inline-block;width:48px;height:48px;border-radius:14px;background:rgba(196,82,26,.9);color:#fff;font-size:1.5rem;line-height:48px;text-align:center;margin-bottom:14px;">&#x1F3DB;</div>
+    <h1 style="margin:0;font-size:1.45rem;color:#ffffff;font-weight:800;">Assos'u Ke\u015ffet</h1>
+    <p style="margin:6px 0 0;font-size:.78rem;color:rgba(255,255,255,.5);">Assos'un Dijital Ke\u015fif Rehberi</p>
+    <div style="width:40px;height:3px;background:rgba(196,82,26,.7);border-radius:2px;margin:16px auto 0;"></div>
+  </div>
+  <div style="background:#ffffff;padding:36px 32px;border-left:1px solid #EBE7E1;border-right:1px solid #EBE7E1;">
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="display:inline-block;width:52px;height:52px;border-radius:50%;background:rgba(56,161,105,.08);line-height:52px;font-size:1.5rem;">&#x2705;</div>
+    </div>
+    <h2 style="text-align:center;margin:0 0 8px;font-size:1.15rem;color:#1A2744;">D\u00fczenlemeniz Ba\u015far\u0131yla Al\u0131nd\u0131</h2>
+    <p style="text-align:center;margin:0 0 28px;font-size:.88rem;color:#718096;">G\u00fcncellenmi\u015f bilgileriniz tekrar de\u011ferlendirmeye al\u0131nd\u0131.</p>
+    <p style="font-size:.95rem;line-height:1.7;color:#1A2744;">Say\u0131n <strong>${ownerName}</strong>,</p>
+    <p style="font-size:.9rem;line-height:1.7;color:#4A5568;"><strong>${venueName}</strong> i\u00e7in g\u00f6nderdi\u011finiz g\u00fcncellenmi\u015f bilgiler taraf\u0131m\u0131za ula\u015fm\u0131\u015ft\u0131r. Ekibimiz de\u011fi\u015fiklikleri inceleyecek ve size d\u00f6n\u00fc\u015f yapacakt\u0131r.</p>
+    <p style="font-size:.82rem;font-weight:700;color:#1A2744;margin:24px 0 12px;">Ba\u015fvuru Durumu</p>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr><td style="padding:8px 12px;font-size:.82rem;background:rgba(56,161,105,.06);border-bottom:1px solid #EBE7E1;"><strong style="color:#276749;">1.</strong> <span style="color:#4A5568;">Ba\u015fvuru al\u0131nd\u0131</span> <span style="float:right;color:#276749;font-weight:600;">&#x2705;</span></td></tr>
+      <tr><td style="padding:8px 12px;font-size:.82rem;background:rgba(56,161,105,.06);border-bottom:1px solid #EBE7E1;"><strong style="color:#276749;">2.</strong> <span style="color:#4A5568;">Revizyon istendi</span> <span style="float:right;color:#276749;font-weight:600;">&#x2705;</span></td></tr>
+      <tr><td style="padding:8px 12px;font-size:.82rem;background:rgba(56,161,105,.06);border-bottom:1px solid #EBE7E1;"><strong style="color:#276749;">3.</strong> <span style="color:#4A5568;">D\u00fczenleme g\u00f6nderildi</span> <span style="float:right;color:#276749;font-weight:600;">&#x2705;</span></td></tr>
+      <tr><td style="padding:8px 12px;font-size:.82rem;background:rgba(212,147,90,.04);border-radius:0 0 8px 8px;"><strong style="color:#975A16;">4.</strong> <span style="color:#4A5568;">Onay ve yay\u0131na alma</span> <span style="float:right;color:#975A16;font-size:.72rem;">1-3 i\u015f g\u00fcn\u00fc</span></td></tr>
+    </table>
+    <p style="font-size:.85rem;line-height:1.7;color:#4A5568;margin-top:20px;">Sorular\u0131n\u0131z i\u00e7in <a href="mailto:info@assosukesfet.com" style="color:#C4521A;font-weight:600;">info@assosukesfet.com</a> adresine yazabilirsiniz.</p>
+  </div>
+  <div style="background:#FAFAF8;padding:24px 32px;border-left:1px solid #EBE7E1;border-right:1px solid #EBE7E1;border-top:2px solid #C4521A;">
+    <p style="margin:0 0 2px;font-size:.92rem;font-weight:700;color:#1A2744;">&#x1F3DB; Assos'u Ke\u015ffet</p>
+    <p style="margin:0 0 10px;font-size:.7rem;color:#A0AEC0;">Assos'un Dijital Ke\u015fif Rehberi</p>
+    <table style="border-collapse:collapse;"><tr><td style="font-size:.75rem;color:#A0AEC0;padding:3px 8px 3px 0;">&#x2709;</td><td style="font-size:.75rem;"><a href="mailto:info@assosukesfet.com" style="color:#C4521A;text-decoration:none;">info@assosukesfet.com</a></td></tr><tr><td style="font-size:.75rem;color:#A0AEC0;padding:3px 8px 3px 0;">&#x1F310;</td><td style="font-size:.75rem;"><a href="https://assosukesfet.com" style="color:#C4521A;text-decoration:none;">assosukesfet.com</a></td></tr><tr><td style="font-size:.75rem;color:#A0AEC0;padding:3px 8px 3px 0;">&#x1F4F8;</td><td style="font-size:.75rem;"><a href="https://instagram.com/assosukesfet" style="color:#C4521A;text-decoration:none;">@assosukesfet</a></td></tr></table>
+  </div>
+  <div style="background:linear-gradient(135deg,#1A2744,#243352);border-radius:0 0 16px 16px;padding:22px 32px;text-align:center;">
     <p style="margin:0;font-size:.65rem;color:rgba(255,255,255,.3);">&copy; ${new Date().getFullYear()} Assos'u Ke\u015ffet &bull; <a href="https://assosukesfet.com" style="color:rgba(255,255,255,.45);text-decoration:none;">assosukesfet.com</a></p>
   </div>
 </div></body></html>`
