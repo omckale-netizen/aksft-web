@@ -4309,6 +4309,7 @@ async function rejectPendingVenue(id, reason) {
       try {
         var html = buildMailHtml('Mekan Talebiniz Hakkında — ' + (data.title || ''),
           'Merhaba ' + (data.ownerName || 'Değerli İşletme Sahibi') + ',\n\n' +
+          (data.refNo ? 'Referans No: ' + data.refNo + '\n\n' : '') +
           (data.title || 'Mekanınız') + ' için gönderdiğiniz başvuruyu inceledik.\n\n' +
           'Başvurunuzda bazı eksik veya düzeltilmesi gereken bilgiler tespit ettik:\n\n' +
           '📋 ' + (reason || 'Eksik bilgi') + '\n\n' +
@@ -4385,6 +4386,7 @@ async function rejectPendingVenueFinal(id, reason) {
       try {
         var html = buildMailHtml('Mekan Başvurunuz Hakkında — ' + (data.title || ''),
           'Merhaba ' + (data.ownerName || 'Değerli İşletme Sahibi') + ',\n\n' +
+          (data.refNo ? 'Referans No: ' + data.refNo + '\n\n' : '') +
           (data.title || 'Mekanınız') + ' için gönderdiğiniz başvuruyu inceledik.\n\n' +
           'Maalesef başvurunuz şu an için onaylanamamıştır.\n\n' +
           '📋 Sebep: ' + (reason || 'Başvurunuz uygun bulunmadı') + '\n\n' +
