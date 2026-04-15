@@ -2799,17 +2799,27 @@ let ORIGINAL_DATA = { venues: [], places: [], villages: [], routes: [] };
 
 // Load data from Firestore
 async function loadDataFromFirestore() {
-  const [venuesSnap, placesSnap, villagesSnap, routesSnap] = await Promise.all([
-    db.collection('venues').get(),
-    db.collection('places').get(),
-    db.collection('villages').get(),
-    db.collection('routes').get()
-  ]);
-  draftData.venues = venuesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-  draftData.places = placesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-  draftData.villages = villagesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-  draftData.routes = routesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-  ORIGINAL_DATA = JSON.parse(JSON.stringify(draftData));
+  try {
+    const results = await Promise.allSettled([
+      db.collection('venues').get(),
+      db.collection('places').get(),
+      db.collection('villages').get(),
+      db.collection('routes').get()
+    ]);
+    draftData.venues = results[0].status === 'fulfilled' ? results[0].value.docs.map(d => ({ id: d.id, ...d.data() })) : [];
+    draftData.places = results[1].status === 'fulfilled' ? results[1].value.docs.map(d => ({ id: d.id, ...d.data() })) : [];
+    draftData.villages = results[2].status === 'fulfilled' ? results[2].value.docs.map(d => ({ id: d.id, ...d.data() })) : [];
+    draftData.routes = results[3].status === 'fulfilled' ? results[3].value.docs.map(d => ({ id: d.id, ...d.data() })) : [];
+    ORIGINAL_DATA = JSON.parse(JSON.stringify(draftData));
+    var failed = results.filter(r => r.status === 'rejected');
+    if (failed.length > 0) console.warn('Bazı koleksiyonlar yüklenemedi:', failed.length);
+  } catch(err) {
+    console.error('Firestore yükleme hatası:', err);
+    if (!draftData.venues) draftData.venues = [];
+    if (!draftData.places) draftData.places = [];
+    if (!draftData.villages) draftData.villages = [];
+    if (!draftData.routes) draftData.routes = [];
+  }
 }
 
 /* ── Firestore save/delete helpers ── */
@@ -3830,7 +3840,18 @@ fbAuth.onAuthStateChanged(async (user) => {
       return;
     }
     document.getElementById('admin-wrap').style.display = 'flex';
-    await loadDataFromFirestore();
+    try {
+      await Promise.race([
+        loadDataFromFirestore(),
+        new Promise(function(_,reject) { setTimeout(function() { reject(new Error('timeout')); }, 15000); })
+      ]);
+    } catch(e) {
+      console.error('Veri yüklenemedi:', e);
+      if (!draftData.venues) draftData.venues = [];
+      if (!draftData.places) draftData.places = [];
+      if (!draftData.villages) draftData.villages = [];
+      if (!draftData.routes) draftData.routes = [];
+    }
     document.getElementById('admin-loading').classList.add('hidden');
     initApp();
     startSessionTimer();
