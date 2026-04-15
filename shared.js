@@ -4383,11 +4383,22 @@ function renderPlacePage(placeId) {
     if (panel.classList.contains('open') && window.innerWidth > 768) document.getElementById('ai-chat-input').focus();
   };
 
+  // Sohbet hafızası — son mesajları tut
+  var aiChatMemory = [];
+  var lastQuestion = '';
+
   // Send
   window.aiChatSend = async function() {
     var input = document.getElementById('ai-chat-input');
     var msg = (input.value || '').trim();
     if (!msg) return;
+
+    // Spam koruması — aynı soruyu tekrar sormasın
+    if (msg.toLowerCase() === lastQuestion.toLowerCase()) {
+      addMsg('Bu soruyu az önce sordunuz. Farklı bir soru sormayı deneyin 😊', 'bot');
+      input.value = '';
+      return;
+    }
 
     var state = getAiState();
     if (state.count >= AI_DAILY_LIMIT) {
@@ -4395,8 +4406,13 @@ function renderPlacePage(placeId) {
       return;
     }
 
+    lastQuestion = msg;
     input.value = '';
     addMsg(msg, 'user');
+
+    // Hafızaya ekle
+    aiChatMemory.push({ role: 'user', content: msg });
+    if (aiChatMemory.length > 8) aiChatMemory = aiChatMemory.slice(-8);
 
     // Typing indicator
     var body = document.getElementById('ai-chat-body');
@@ -4409,16 +4425,24 @@ function renderPlacePage(placeId) {
     var sendBtn = document.getElementById('ai-chat-send');
     sendBtn.disabled = true;
 
+    // Timeout kontrolü
+    var controller = new AbortController();
+    var timeoutId = setTimeout(function() { controller.abort(); }, 15000);
+
     try {
       var resp = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: msg, context: buildContext() })
+        body: JSON.stringify({ message: msg, context: buildContext(), history: aiChatMemory.slice(-6) }),
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
       var data = await resp.json();
       typing.remove();
       if (data.reply) {
         addMsg(data.reply, 'bot');
+        aiChatMemory.push({ role: 'assistant', content: data.reply });
+        if (aiChatMemory.length > 8) aiChatMemory = aiChatMemory.slice(-8);
         state.count++;
         saveAiState(state);
         updateLimit();
@@ -4426,8 +4450,13 @@ function renderPlacePage(placeId) {
         addMsg(data.error || 'Bir hata oluştu, tekrar deneyin.', 'bot');
       }
     } catch(err) {
+      clearTimeout(timeoutId);
       typing.remove();
-      addMsg('Bağlantı hatası. Lütfen tekrar deneyin.', 'bot');
+      if (err.name === 'AbortError') {
+        addMsg('Yanıt süresi doldu. Sunucu yoğun olabilir, lütfen tekrar deneyin ⏳', 'bot');
+      } else {
+        addMsg('Bağlantı hatası. Lütfen tekrar deneyin.', 'bot');
+      }
     }
     sendBtn.disabled = false;
   };

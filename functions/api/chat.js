@@ -70,6 +70,22 @@ SINIRLAR:
 SİTE VERİLERİ (Güncel):
 ${siteContext}`;
 
+  function buildMessages(history, currentMsg) {
+    const msgs = [];
+    if (history && Array.isArray(history)) {
+      history.slice(-6).forEach(m => {
+        if (m.role === 'user' || m.role === 'assistant') {
+          msgs.push({ role: m.role, content: (m.content || '').substring(0, 500) });
+        }
+      });
+    }
+    // Son mesaj zaten history'de varsa ekleme
+    if (msgs.length === 0 || msgs[msgs.length - 1].content !== currentMsg) {
+      msgs.push({ role: 'user', content: currentMsg });
+    }
+    return msgs;
+  }
+
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -82,9 +98,7 @@ ${siteContext}`;
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 800,
         system: systemPrompt,
-        messages: [
-          { role: 'user', content: userMessage }
-        ],
+        messages: buildMessages(body.history, userMessage),
       }),
     });
 
