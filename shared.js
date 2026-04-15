@@ -4335,7 +4335,11 @@ function renderPlacePage(placeId) {
       var open = typeof isVenueOpen === 'function' ? isVenueOpen(v) : null;
       var st = open === true ? ' AÇIK' : open === false ? ' KAPALI' : '';
       var sea = v.seasonal ? '|SEZONLUK' : '';
-      return '- ' + v.id + '|' + prem + v.title + '|' + (v.category||'') + '|' + (v.location||'') + '|' + (v.shortDesc||'').substring(0,80) + st + sea;
+      var hrs = '';
+      if (v.weeklyHours && v.weeklyHours.length > 0) {
+        hrs = '|' + v.weeklyHours.map(function(wh) { return (wh.days||'').substring(0,3) + ':' + (wh.closed ? 'Kapalı' : (wh.hours || ((wh.open||'') + '-' + (wh.close||'')))); }).join(',');
+      } else if (v.hours) { hrs = '|' + v.hours; }
+      return '- ' + v.id + '|' + prem + v.title + '|' + (v.category||'') + '|' + (v.location||'') + '|' + (v.shortDesc||'').substring(0,80) + st + sea + hrs;
     }).join('\n') + '\n';
     var places = (DATA.places || []).slice(0, 15);
     if (places.length) ctx += 'YERLER:\n' + places.map(function(p) {
