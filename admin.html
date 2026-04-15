@@ -52,6 +52,27 @@
 [data-theme="dark"] .img-preview-item{background:var(--cream-dark)}
 [data-theme="dark"] .gal-card{background:var(--card-bg);border-color:var(--card-border)}
 [data-theme="dark"] .msg-search,[data-theme="dark"] .msg-cat-filter{background:var(--input-bg);border-color:var(--input-border);color:var(--text)}
+[data-theme="dark"] .msg-item{border-bottom-color:var(--card-border)}
+[data-theme="dark"] .msg-item:hover{background:rgba(255,255,255,.03)}
+[data-theme="dark"] .msg-item.unread{background:rgba(196,82,26,.08);border-left-color:var(--terra)}
+[data-theme="dark"] .msg-item.msg-active{background:rgba(196,82,26,.12) !important}
+[data-theme="dark"] .msg-name{color:var(--text)}
+[data-theme="dark"] .msg-preview{color:var(--text-light)}
+[data-theme="dark"] .msg-date{color:var(--text-muted)}
+[data-theme="dark"] .msg-detail-row .msg-detail-label{color:var(--text)}
+[data-theme="dark"] .msg-detail-row .msg-detail-val{color:var(--text-light)}
+[data-theme="dark"] #msg-detail-header{border-bottom-color:var(--card-border)}
+[data-theme="dark"] #msg-detail-actions{border-top-color:var(--card-border)}
+[data-theme="dark"] .msg-consent-box{background:rgba(56,161,105,.06);border-color:rgba(56,161,105,.15)}
+[data-theme="dark"] .msg-consent-row{border-bottom-color:var(--card-border)}
+[data-theme="dark"] .msg-consent-row span:last-child{color:var(--text)}
+[data-theme="dark"] .msg-device-box{background:rgba(255,255,255,.03);border-color:var(--card-border)}
+[data-theme="dark"] .msg-device-box .device-label{color:var(--text)}
+[data-theme="dark"] .msg-cat-badge{opacity:.85}
+[data-theme="dark"] .msg-trash-banner{background:rgba(229,62,62,.1);color:#FC8181}
+[data-theme="dark"] .msg-tab{color:var(--text-light)}
+[data-theme="dark"] .msg-tab.active{background:var(--terra) !important;color:#fff !important;border-color:var(--terra) !important}
+[data-theme="dark"] .msg-subject{color:#E8956A}
 [data-theme="dark"] .btn-secondary{background:var(--card-bg);color:var(--text);border-color:var(--card-border)}
 [data-theme="dark"] .search-bar{background:var(--input-bg);border-color:var(--input-border);color:var(--text)}
 [data-theme="dark"] .recent-emoji{background:var(--card-bg)}
@@ -3922,11 +3943,11 @@ async function openMessage(docId) {
 
   // Body — kişi bilgileri + mesaj
   document.getElementById('msg-detail-body').innerHTML =
-    '<div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:.82rem;margin-bottom:18px;padding:14px 16px;background:rgba(0,0,0,.02);border-radius:10px">' +
+    '<div class="msg-body-info" style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:.82rem;margin-bottom:18px;padding:14px 16px;background:var(--cream-dark,rgba(0,0,0,.02));border-radius:10px;border:1px solid var(--card-border,rgba(0,0,0,.04))">' +
       '<span style="color:var(--text-muted);font-weight:600">📧 E-posta</span><a href="mailto:' + (m.email || '') + '" style="color:var(--terra);font-weight:600;text-decoration:none">' + (m.email || '-') + '</a>' +
       (m.phone ? '<span style="color:var(--text-muted);font-weight:600">📞 Telefon</span><a href="tel:' + m.phone.replace(/\s/g,'') + '" style="color:var(--terra);font-weight:600;text-decoration:none">' + m.phone + '</a>' : '') +
     '</div>' +
-    '<div style="font-size:.88rem;color:var(--text);line-height:1.85;white-space:pre-wrap;padding:16px 18px;background:var(--cream);border-radius:12px;border:1px solid rgba(0,0,0,.04)">' + (m.message || '') + '</div>';
+    '<div style="font-size:.88rem;color:var(--text);line-height:1.85;white-space:pre-wrap;padding:16px 18px;background:var(--cream-dark,var(--cream));border-radius:12px;border:1px solid var(--card-border,rgba(0,0,0,.04))">' + (m.message || '') + '</div>';
 
   // KVKK Rıza + Cihaz bilgileri
   var consentHtml = '';
@@ -3974,13 +3995,13 @@ function closeMsgDetail() {
 
 // Çöp kutusuna gönder (soft delete)
 function openReplyMail(docId) {
-  var m = _allMessages.find(x => x._id === docId);
+  var m = allMessages.find(x => x._id === docId);
   if (!m || !m.email) { showToast('E-posta adresi bulunamadı', 'error'); return; }
   var replyArea = document.getElementById('msg-detail-consent');
   replyArea.innerHTML =
-    '<div style="margin-top:12px;padding:16px;background:var(--cream);border-radius:12px;border:1px solid rgba(0,0,0,.06)">' +
-      '<div style="font-size:.72rem;font-weight:700;color:var(--navy);margin-bottom:8px">✉️ Yanıt Gönder — ' + m.email + '</div>' +
-      '<textarea id="reply-mail-body" rows="5" placeholder="Yanıtınızı yazın..." style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:.85rem;font-family:inherit;resize:vertical;background:var(--card-bg);color:var(--navy)"></textarea>' +
+    '<div style="margin-top:12px;padding:16px;background:var(--cream-dark,var(--cream));border-radius:12px;border:1px solid var(--card-border,rgba(0,0,0,.06))">' +
+      '<div style="font-size:.72rem;font-weight:700;color:var(--text);margin-bottom:8px">✉️ Yanıt Gönder — ' + m.email + '</div>' +
+      '<textarea id="reply-mail-body" rows="5" placeholder="Yanıtınızı yazın..." style="width:100%;padding:10px 14px;border:1px solid var(--input-border,var(--border));border-radius:8px;font-size:.85rem;font-family:inherit;resize:vertical;background:var(--input-bg,#fff);color:var(--text)"></textarea>' +
       '<div style="display:flex;gap:8px;margin-top:10px;align-items:center">' +
         '<button class="btn btn-primary btn-sm" onclick="sendReplyMail(\'' + docId + '\')">Gönder</button>' +
         '<button class="btn btn-secondary btn-sm" onclick="document.getElementById(\'msg-detail-consent\').innerHTML=\'\'">İptal</button>' +
@@ -3990,7 +4011,7 @@ function openReplyMail(docId) {
   document.getElementById('reply-mail-body').focus();
 }
 async function sendReplyMail(docId) {
-  var m = _allMessages.find(x => x._id === docId);
+  var m = allMessages.find(x => x._id === docId);
   if (!m) return;
   var body = document.getElementById('reply-mail-body').value.trim();
   if (!body) { showToast('Yanıt boş olamaz', 'error'); return; }

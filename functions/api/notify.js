@@ -153,21 +153,61 @@ export async function onRequestPost(context) {
             to: [data.email],
             subject: 'Mesajınız Alındı — Assos\'u Keşfet',
             reply_to: 'info@assosukesfet.com',
-            html: `<div style="font-family:'Segoe UI',Arial,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;color:#1A2744;">
-              <div style="text-align:center;margin-bottom:28px;">
-                <h1 style="font-size:1.4rem;margin:0;color:#1A2744;">Assos'u Keşfet</h1>
-                <p style="font-size:.85rem;color:#718096;margin:6px 0 0;">assosukesfet.com</p>
-              </div>
-              <p style="font-size:.95rem;line-height:1.7;">Merhaba <strong>${userName}</strong>,</p>
-              <p style="font-size:.95rem;line-height:1.7;">Mesajınız bize ulaştı! En kısa sürede size dönüş yapacağız.</p>
-              <div style="background:#FAF7F2;border-radius:12px;padding:16px 20px;margin:20px 0;border-left:4px solid #C4521A;">
-                <p style="font-size:.8rem;color:#718096;margin:0 0 6px;">Mesajınız:</p>
-                <p style="font-size:.88rem;color:#1A2744;margin:0;line-height:1.6;">${sanitize(data.message, 300)}</p>
-              </div>
-              <p style="font-size:.88rem;line-height:1.7;color:#718096;">Assos, Ayvacık ve çevresini keşfetmeye devam edin!</p>
-              <hr style="border:none;border-top:1px solid #E2E8F0;margin:24px 0;">
-              <p style="font-size:.72rem;color:#A0AEC0;text-align:center;">Bu mail otomatik olarak gönderilmiştir. Yanıtlamak için doğrudan cevap yazabilirsiniz.</p>
-            </div>`
+            html: `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body style="margin:0;padding:0;background:#F0EDE8;font-family:'Segoe UI',Tahoma,Arial,sans-serif;">
+<div style="max-width:600px;margin:0 auto;padding:20px;">
+
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#1A2744 0%,#2D3E5F 100%);border-radius:16px 16px 0 0;padding:32px 28px;text-align:center;">
+    <h1 style="margin:0;font-size:1.5rem;color:#fff;font-weight:800;letter-spacing:-.02em;">Assos'u Keşfet</h1>
+    <p style="margin:8px 0 0;font-size:.82rem;color:rgba(255,255,255,.6);">Assos &bull; Ayvacık &bull; Çanakkale</p>
+  </div>
+
+  <!-- Body -->
+  <div style="background:#ffffff;padding:32px 28px;border-left:1px solid #E8E4DE;border-right:1px solid #E8E4DE;">
+
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="display:inline-block;width:52px;height:52px;border-radius:50%;background:rgba(56,161,105,.1);line-height:52px;font-size:1.5rem;">&#x2705;</div>
+    </div>
+
+    <h2 style="text-align:center;margin:0 0 8px;font-size:1.15rem;color:#1A2744;">Mesajınız Bize Ulaştı!</h2>
+    <p style="text-align:center;margin:0 0 28px;font-size:.88rem;color:#718096;">En kısa sürede size dönüş yapacağız.</p>
+
+    <p style="font-size:.95rem;line-height:1.7;color:#1A2744;">Merhaba <strong>${userName}</strong>,</p>
+    <p style="font-size:.9rem;line-height:1.7;color:#4A5568;">Mesajınızı aldık ve ekibimiz incelemeye başladı. Genellikle <strong>24 saat içinde</strong> dönüş sağlıyoruz.</p>
+
+    <!-- Mesaj Kutusu -->
+    <div style="background:#FAF7F2;border-radius:12px;padding:20px 22px;margin:24px 0;border-left:4px solid #C4521A;">
+      <table style="width:100%;border-collapse:collapse;">
+        ${data.subject ? '<tr><td style="font-size:.72rem;color:#A0AEC0;padding:0 0 4px;font-weight:600;width:60px;vertical-align:top;">Konu</td><td style="font-size:.85rem;color:#1A2744;padding:0 0 4px;font-weight:600;">' + sanitize(data.subject, 100) + '</td></tr>' : ''}
+        <tr><td style="font-size:.72rem;color:#A0AEC0;padding:4px 0;font-weight:600;width:60px;vertical-align:top;">Mesaj</td><td style="font-size:.85rem;color:#1A2744;padding:4px 0;line-height:1.6;">${sanitize(data.message, 500)}</td></tr>
+      </table>
+    </div>
+
+    <!-- CTA -->
+    <div style="text-align:center;margin:28px 0;">
+      <a href="https://assosukesfet.com" style="display:inline-block;padding:12px 28px;background:#C4521A;color:#fff;border-radius:10px;font-size:.88rem;font-weight:700;text-decoration:none;">Assos'u Keşfetmeye Devam Et</a>
+    </div>
+
+    <!-- İletişim Bilgileri -->
+    <div style="background:#F7F5F2;border-radius:10px;padding:16px 20px;margin-top:24px;">
+      <p style="margin:0 0 8px;font-size:.78rem;font-weight:700;color:#1A2744;">Bize Ulaşın</p>
+      <table style="border-collapse:collapse;width:100%;">
+        <tr><td style="font-size:.78rem;color:#718096;padding:3px 0;">&#x2709; E-posta</td><td style="font-size:.78rem;color:#1A2744;padding:3px 0;text-align:right;"><a href="mailto:info@assosukesfet.com" style="color:#C4521A;text-decoration:none;">info@assosukesfet.com</a></td></tr>
+        <tr><td style="font-size:.78rem;color:#718096;padding:3px 0;">&#x1F310; Website</td><td style="font-size:.78rem;color:#1A2744;padding:3px 0;text-align:right;"><a href="https://assosukesfet.com" style="color:#C4521A;text-decoration:none;">assosukesfet.com</a></td></tr>
+        <tr><td style="font-size:.78rem;color:#718096;padding:3px 0;">&#x1F4F8; Instagram</td><td style="font-size:.78rem;color:#1A2744;padding:3px 0;text-align:right;"><a href="https://instagram.com/assosukesfet" style="color:#C4521A;text-decoration:none;">@assosukesfet</a></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="background:#1A2744;border-radius:0 0 16px 16px;padding:24px 28px;text-align:center;">
+    <p style="margin:0 0 6px;font-size:.72rem;color:rgba(255,255,255,.5);">Bu mail otomatik olarak gönderilmiştir.</p>
+    <p style="margin:0;font-size:.72rem;color:rgba(255,255,255,.5);">Yanıtlamak için doğrudan bu maile cevap yazabilirsiniz.</p>
+    <p style="margin:12px 0 0;font-size:.65rem;color:rgba(255,255,255,.3);">&copy; ${new Date().getFullYear()} Assos'u Keşfet &bull; assosukesfet.com</p>
+  </div>
+
+</div>
+</body></html>`
           })
         });
       } catch(mailErr) { /* mail hatası telegram'ı engellemesin */ }
