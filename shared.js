@@ -4236,7 +4236,7 @@ function renderPlacePage(placeId) {
   };
 
   // State
-  var AI_DAILY_LIMIT = 10;
+  function getAiDailyLimit() { return (window.DATA && window.DATA.siteSettings && window.DATA.siteSettings.aiDailyLimit) || 25; }
   var AI_STORAGE_KEY = 'assos_ai_chat';
   var AI_HISTORY_KEY = 'assos_ai_history';
 
@@ -4272,7 +4272,7 @@ function renderPlacePage(placeId) {
   function updateLimit() {
     var s = getAiState();
     var el = document.getElementById('ai-chat-limit');
-    if (el) el.textContent = (AI_DAILY_LIMIT - s.count) + '/' + AI_DAILY_LIMIT + ' soru kaldı';
+    if (el) el.textContent = (getAiDailyLimit() - s.count) + '/' + getAiDailyLimit() + ' soru kaldı';
   }
   updateLimit();
 
@@ -4342,8 +4342,8 @@ function renderPlacePage(placeId) {
     }
 
     var state = getAiState();
-    if (state.count >= AI_DAILY_LIMIT) {
-      addMsg('Günlük 10 soruluk keşif hakkınız doldu ama merak etmeyin 😊 Yarın yeni sorularınızla tekrar buradayım. O zamana kadar Instagram\'dan bizi takip edin! 🧭', 'bot');
+    if (state.count >= getAiDailyLimit()) {
+      addMsg('Günlük ' + getAiDailyLimit() + ' soruluk keşif hakkınız doldu ama merak etmeyin 😊 Yarın yeni sorularınızla tekrar buradayım. O zamana kadar Instagram\'dan bizi takip edin! 🧭', 'bot');
       var limitBody = document.getElementById('ai-chat-body');
       var igBtn = document.createElement('div');
       igBtn.style.cssText = 'align-self:flex-start;margin-top:-4px;';
@@ -4391,7 +4391,7 @@ function renderPlacePage(placeId) {
         if (aiChatMemory.length > 8) aiChatMemory = aiChatMemory.slice(-8);
         // Server'dan gelen kalan hak ile senkronize et
         if (data.remaining !== undefined) {
-          state.count = AI_DAILY_LIMIT - data.remaining;
+          state.count = getAiDailyLimit() - data.remaining;
         } else {
           state.count++;
         }
@@ -4401,10 +4401,10 @@ function renderPlacePage(placeId) {
         var errMsg = data.error || 'Bir hata oluştu.';
         if (data.creditError) errMsg = 'Asistan şu an hizmet veremiyor. Lütfen daha sonra tekrar deneyin. 🙏';
         if (data.limitReached) {
-          state.count = AI_DAILY_LIMIT;
+          state.count = getAiDailyLimit();
           saveAiState(state);
           updateLimit();
-          addMsg('Günlük 10 soruluk keşif hakkınız doldu ama merak etmeyin 😊 Yarın yeni sorularınızla tekrar buradayım. O zamana kadar Instagram\'dan bizi takip edin! 🧭', 'bot');
+          addMsg('Günlük ' + getAiDailyLimit() + ' soruluk keşif hakkınız doldu ama merak etmeyin 😊 Yarın yeni sorularınızla tekrar buradayım. O zamana kadar Instagram\'dan bizi takip edin! 🧭', 'bot');
           var limitBody2 = document.getElementById('ai-chat-body');
           var igBtn2 = document.createElement('div');
           igBtn2.style.cssText = 'align-self:flex-start;margin-top:-4px;';

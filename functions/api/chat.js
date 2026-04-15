@@ -57,9 +57,14 @@ export async function onRequestPost(context) {
   // Tehlikeli talimatları temizle
   siteContext = siteContext.replace(/ignore|unut|forget|override|artık sen|you are now|act as/gi, '***');
 
-  // IP bazlı rate limit (KV gerekli)
+  // Dinamik günlük limit — KV'den oku, yoksa varsayılan 25
+  let AI_DAILY_LIMIT = 25;
   const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
   if (env.CHAT_KV) {
+    try {
+      const kvLimit = await env.CHAT_KV.get('ai_daily_limit');
+      if (kvLimit) AI_DAILY_LIMIT = parseInt(kvLimit) || 25;
+    } catch(e) {}
     try {
       // Dakikada 3 istek limiti
       const ipMinKey = 'ip_min_' + ip + '_' + Math.floor(Date.now() / 60000);
@@ -69,11 +74,11 @@ export async function onRequestPost(context) {
       }
       await env.CHAT_KV.put(ipMinKey, String(ipMinCount + 1), { expirationTtl: 60 });
 
-      // Günlük IP limiti (10 soru/gün — gizli sekme bypass'ını engeller)
+      // Günlük IP limiti — gizli sekme bypass'ını engeller
       const ipDayKey = 'ip_day_' + ip + '_' + today;
       const ipDayCount = parseInt(await env.CHAT_KV.get(ipDayKey) || '0');
-      if (ipDayCount >= 10) {
-        return new Response(JSON.stringify({ error: 'Günlük 10 soruluk keşif hakkınız doldu 😊 Yarın yeni sorularınızla tekrar buradayım!', limitReached: true }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      if (ipDayCount >= AI_DAILY_LIMIT) {
+        return new Response(JSON.stringify({ error: 'Günlük ' + AI_DAILY_LIMIT + ' soruluk keşif hakkınız doldu 😊 Yarın yeni sorularınızla tekrar buradayım!', limitReached: true }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
       await env.CHAT_KV.put(ipDayKey, String(ipDayCount + 1), { expirationTtl: 86400 });
     } catch(e) {
@@ -244,12 +249,12 @@ ${siteContext}`;
     } catch(e) {}
 
     // Kalan hak bilgisini cevaba ekle
-    let remaining = 10;
+    let remaining = AI_DAILY_LIMIT;
     try {
       if (env.CHAT_KV) {
         const ipDayKey2 = 'ip_day_' + ip + '_' + today;
         const used = parseInt(await env.CHAT_KV.get(ipDayKey2) || '0');
-        remaining = Math.max(0, 10 - used);
+        remaining = Math.max(0, AI_DAILY_LIMIT - used);
       }
     } catch(e) {}
 

@@ -101,7 +101,8 @@
         db.collection('villages').get(),
         db.collection('routes').get(),
         db.collection('settings').doc('place_categories').get(),
-        db.collection('settings').doc('venue_categories').get()
+        db.collection('settings').doc('venue_categories').get(),
+        db.collection('settings').doc('site').get()
       ]).then(function(results) {
         clearTimeout(timeout);
 
@@ -124,6 +125,7 @@
         var routes = results[3].status === 'fulfilled' ? results[3].value.docs.map(function(d) { return sanitizeItem(Object.assign({ id: d.id }, d.data())); }) : [];
         var placeCats = (results[4].status === 'fulfilled' && results[4].value.exists && results[4].value.data().list) ? results[4].value.data().list : [];
         var venueCats = (results[5].status === 'fulfilled' && results[5].value.exists && results[5].value.data().list) ? results[5].value.data().list : [];
+        var siteSettings = (results[6].status === 'fulfilled' && results[6].value.exists) ? results[6].value.data() : {};
 
         var failed = results.filter(function(r) { return r.status === 'rejected'; });
 
@@ -144,7 +146,7 @@
           return (a.sortOrder || 999) - (b.sortOrder || 999);
         });
         places.sort(function(a, b) { return (a.sortOrder || 999) - (b.sortOrder || 999); });
-        window.DATA = { routes: routes, places: places, venues: venues, villages: villages, placeCategories: placeCats, venueCategories: venueCats };
+        window.DATA = { routes: routes, places: places, venues: venues, villages: villages, placeCategories: placeCats, venueCategories: venueCats, siteSettings: siteSettings };
         window._firebaseReady = true;
 
         // Cache guncelle

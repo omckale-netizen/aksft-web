@@ -2111,9 +2111,23 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             </div>
           </div>
 
+          <!-- AI Chatbot Ayarları -->
+          <div class="panel-card" style="margin-bottom:20px">
+            <div class="panel-card-head"><h3>🤖 AI Chatbot</h3></div>
+            <div style="padding:20px">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+                <label style="font-size:.78rem;font-weight:600;color:var(--navy);white-space:nowrap">Günlük Soru Limiti</label>
+                <input type="number" id="ai-limit-input" min="1" max="100" value="25" style="width:80px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:.85rem;text-align:center;background:var(--card-bg);color:var(--navy)">
+                <button class="btn btn-primary" onclick="saveAiLimit()" style="font-size:.75rem;padding:8px 16px">Kaydet</button>
+              </div>
+              <div style="font-size:.7rem;color:var(--text-muted);line-height:1.5">Kullanıcı başına günlük AI soru hakkı (1-100). Hem istemci hem sunucu tarafında geçerlidir.</div>
+              <div id="ai-limit-status" style="font-size:.72rem;margin-top:8px;display:none"></div>
+            </div>
+          </div>
+
           <!-- AI İçerik Durumu -->
           <div class="panel-card" style="margin-bottom:20px">
-            <div class="panel-card-head"><h3>🤖 AI İçerik Dosyası</h3></div>
+            <div class="panel-card-head"><h3>📄 AI İçerik Dosyası</h3></div>
             <div style="padding:20px">
               <div style="display:flex;flex-direction:column;gap:12px">
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,0,0,.02);border-radius:8px">
@@ -3271,6 +3285,7 @@ async function loadLogoPreview() {
       if (doc.data().faviconUrl) showFavPreview(doc.data().faviconUrl);
       if (doc.data().ogImageUrl) showOgPreview(doc.data().ogImageUrl);
       if (doc.data().heroImageUrl) showHeroPreview(doc.data().heroImageUrl, doc.data().heroImagePosY);
+      if (doc.data().aiDailyLimit) { var aiInp = document.getElementById('ai-limit-input'); if (aiInp) aiInp.value = doc.data().aiDailyLimit; }
     }
   } catch(e) {}
   // Profil bilgilerini doldur
@@ -3290,6 +3305,46 @@ async function loadLogoPreview() {
     if (emailInfoEl) emailInfoEl.textContent = user.email;
     if (lastLoginEl) lastLoginEl.textContent = user.metadata.lastSignInTime ? new Date(user.metadata.lastSignInTime).toLocaleString('tr-TR') : '—';
   }
+}
+
+// AI Günlük Limit
+async function loadAiLimit() {
+  try {
+    const doc = await db.collection('settings').doc('site').get();
+    if (doc.exists && doc.data().aiDailyLimit) {
+      document.getElementById('ai-limit-input').value = doc.data().aiDailyLimit;
+    }
+  } catch(e) {}
+}
+async function saveAiLimit() {
+  const input = document.getElementById('ai-limit-input');
+  const limit = parseInt(input.value);
+  if (!limit || limit < 1 || limit > 100) { showToast('Limit 1-100 arasında olmalı', 'error'); return; }
+  const statusEl = document.getElementById('ai-limit-status');
+  statusEl.style.display = 'block';
+  statusEl.style.color = 'var(--text-muted)';
+  statusEl.textContent = 'Kaydediliyor...';
+  try {
+    // Firebase'e kaydet
+    await db.collection('settings').doc('site').set({ aiDailyLimit: limit }, { merge: true });
+    // KV'ye senkronize et (sunucu tarafı)
+    const resp = await fetch('/api/set-ai-limit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ limit }) });
+    const data = await resp.json();
+    if (data.ok) {
+      statusEl.style.color = 'var(--green)';
+      statusEl.textContent = 'Kaydedildi — hem istemci hem sunucu güncellendi';
+      showToast('AI günlük limit ' + limit + ' olarak ayarlandı', 'success');
+    } else {
+      statusEl.style.color = 'var(--orange)';
+      statusEl.textContent = 'Firebase kaydedildi ama KV senkronizasyonu başarısız: ' + (data.error || '');
+      showToast('Firebase güncellendi ama KV hatası', 'warning');
+    }
+  } catch(e) {
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = 'Hata: ' + e.message;
+    showToast('Limit kaydedilemedi', 'error');
+  }
+  setTimeout(function() { statusEl.style.display = 'none'; }, 5000);
 }
 
 // OG Image yükleme
