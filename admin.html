@@ -4119,7 +4119,7 @@ async function approvePendingVenue(id) {
       document.getElementById('f-category').value = data.category || '';
       document.getElementById('f-location').value = data.location || '';
       document.getElementById('f-address').value = data.address || '';
-      document.getElementById('f-shortDesc').value = (data.description || '').substring(0, 200);
+      document.getElementById('f-shortDesc').value = data.shortDesc || (data.description || '').substring(0, 200);
       document.getElementById('f-desc-editor').innerHTML = data.description || '';
       document.getElementById('f-website').value = data.website || '';
       document.getElementById('f-instagram').value = data.instagram || '';
@@ -4142,6 +4142,24 @@ async function approvePendingVenue(id) {
       document.getElementById('f-phones-list').innerHTML = '';
       if (data.phones && data.phones.length > 0) {
         data.phones.forEach(function(p) { addPhoneRow(p); });
+      }
+      // Çalışma saatleri
+      if (data.weeklyHours && data.weeklyHours.length > 0) {
+        renderWhGrid(data.weeklyHours);
+      }
+      // Konaklama bilgileri
+      if (data.category === 'konaklama') {
+        if (data.checkin) document.getElementById('f-checkin').value = data.checkin;
+        if (data.checkout) document.getElementById('f-checkout').value = data.checkout;
+        if (data.rooms && data.rooms.length > 0) loadRoomsData(data.rooms);
+        if (data.facilities && data.facilities.length > 0) loadFacilitiesData(data.facilities);
+      }
+      // Sezonluk
+      if (data.seasonal) {
+        document.getElementById('f-seasonal').checked = true;
+        toggleSeasonalFields();
+        if (data.seasonStart) document.getElementById('f-season-start').value = data.seasonStart;
+        if (data.seasonEnd) document.getElementById('f-season-end').value = data.seasonEnd;
       }
       autoId();
       autoCatEmoji();
