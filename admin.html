@@ -8909,9 +8909,10 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_IMAGES = 6;
 
 function handleImageUpload(files) {
+  var existingCount = editingVenueId ? (draftData.venues.find(v => v.id === editingVenueId)?.images || []).length : 0;
   Array.from(files).forEach(file => {
-    if (pendingImages.length >= MAX_IMAGES) {
-      showToast('Maksimum ' + MAX_IMAGES + ' gorsel yuklenebilir.', 'error');
+    if (existingCount + pendingImages.length >= MAX_IMAGES) {
+      showToast('Maksimum ' + MAX_IMAGES + ' görsel yüklenebilir. (' + (existingCount + pendingImages.length) + '/' + MAX_IMAGES + ')', 'error');
       return;
     }
     if (!ALLOWED_TYPES.includes(file.type)) {
@@ -9008,7 +9009,7 @@ function renderImagePreviews() {
 // Kapak fotoğrafı seç (ilk sıraya taşı)
 function setAsCover(globalIdx) {
   const venue = editingVenueId ? draftData.venues.find(v => v.id === editingVenueId) : null;
-  const existing = venue ? (venue.images || []) : [];
+  const existing = venue ? [...(venue.images || [])] : [];
   const exCount = existing.length;
 
   if (globalIdx < exCount) {
@@ -9016,18 +9017,19 @@ function setAsCover(globalIdx) {
     const item = existing.splice(globalIdx, 1)[0];
     existing.unshift(item);
     if (venue) {
-      venue.images = [...existing];
-      // Firestore'a anında kaydet
+      venue.images = existing;
       saveVenueToFirestore(venue);
     }
   } else {
-    // Pending görseli başa al
+    // Pending görseli başa al — tüm pending'i mevcut görsellerin önüne taşı
     const pIdx = globalIdx - exCount;
-    const item = pendingImages.splice(pIdx, 1)[0];
-    pendingImages.unshift(item);
+    if (pIdx >= 0 && pIdx < pendingImages.length) {
+      const item = pendingImages.splice(pIdx, 1)[0];
+      pendingImages.unshift(item);
+    }
   }
   renderImagePreviews();
-  showToast('Kapak fotografi degistirildi.', 'success');
+  showToast('Kapak fotoğrafı değiştirildi.', 'success');
 }
 
 // Sürükle-sırala
@@ -9055,29 +9057,31 @@ function imgDrop(e) {
   const dropIdx = +e.currentTarget.dataset.idx;
   if (imgDragIdx === null || imgDragIdx === dropIdx) return;
 
-  const existing = editingVenueId ? (draftData.venues.find(v => v.id === editingVenueId)?.images || []) : [];
-  const exCount = existing.length;
+  var venue = editingVenueId ? draftData.venues.find(v => v.id === editingVenueId) : null;
+  var existingArr = venue ? [...(venue.images || [])] : [];
 
   // Tüm görselleri birleşik dizi olarak yeniden sırala
-  const combined = [
-    ...existing.map(url => ({ type: 'e', url })),
+  var combined = [
+    ...existingArr.map(url => ({ type: 'e', url })),
     ...pendingImages.map(p => ({ type: 'p', data: p }))
   ];
 
-  const dragItem = combined.splice(imgDragIdx, 1)[0];
+  if (imgDragIdx < 0 || imgDragIdx >= combined.length || dropIdx < 0 || dropIdx >= combined.length) return;
+
+  var dragItem = combined.splice(imgDragIdx, 1)[0];
   combined.splice(dropIdx, 0, dragItem);
 
   // Geri ayır
-  const newExisting = [];
-  const newPending = [];
+  var newExisting = [];
+  var newPending = [];
   combined.forEach(item => {
     if (item.type === 'e') newExisting.push(item.url);
     else newPending.push(item.data);
   });
 
-  if (editingVenueId) {
-    const v = draftData.venues.find(x => x.id === editingVenueId);
-    if (v) v.images = newExisting;
+  if (venue) {
+    venue.images = newExisting;
+    saveVenueToFirestore(venue);
   }
   pendingImages = newPending;
 
@@ -9093,10 +9097,12 @@ function removePendingImage(i) {
 function removeExistingImage(i) {
   if (!editingVenueId) return;
   const v = draftData.venues.find(x => x.id === editingVenueId);
-  if (v && v.images) {
-    v.images.splice(i, 1);
+  if (v && v.images && i >= 0 && i < v.images.length) {
+    if (!confirm('Bu görseli silmek istiyor musunuz?')) return;
+    v.images = v.images.filter(function(_, idx) { return idx !== i; });
     saveVenueToFirestore(v);
     renderImagePreviews();
+    showToast('Görsel silindi.', 'success');
   }
 }
 
