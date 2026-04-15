@@ -3915,7 +3915,7 @@ function renderPlacePage(placeId) {
       } else {
         bodyHtml += '<div style="height:100px;background:' + cs.bg + ';display:flex;align-items:center;justify-content:center;font-size:2.5rem;">' + cs.emoji + '</div>';
       }
-      bodyHtml += '<div style="padding:14px 16px 16px;"><h4 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);margin:0;">' + venue.title + '</h4></div></a>';
+      bodyHtml += '<div style="padding:14px 16px 16px;"><h4 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);margin:0 0 4px;">' + venue.title + '</h4>' + (venue.location ? '<span style="font-size:.68rem;color:var(--text-muted);display:flex;align-items:center;gap:3px;">📍 ' + venue.location + '</span>' : '') + '</div></a>';
     });
     bodyHtml += '</div></div>';
   }
@@ -3933,7 +3933,7 @@ function renderPlacePage(placeId) {
       } else {
         bodyHtml += '<div style="height:100px;background:' + cs.bg + ';display:flex;align-items:center;justify-content:center;font-size:2.5rem;">' + cs.emoji + '</div>';
       }
-      bodyHtml += '<div style="padding:14px 16px 16px;"><h4 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);margin:0;">' + venue.title + '</h4></div></a>';
+      bodyHtml += '<div style="padding:14px 16px 16px;"><h4 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);margin:0 0 4px;">' + venue.title + '</h4>' + (venue.location ? '<span style="font-size:.68rem;color:var(--text-muted);display:flex;align-items:center;gap:3px;">📍 ' + venue.location + '</span>' : '') + '</div></a>';
     });
     bodyHtml += '</div></div>';
   }
