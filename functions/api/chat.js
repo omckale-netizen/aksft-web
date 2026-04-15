@@ -57,16 +57,25 @@ export async function onRequestPost(context) {
   // Tehlikeli talimatları temizle
   siteContext = siteContext.replace(/ignore|unut|forget|override|artık sen|you are now|act as/gi, '***');
 
-  // IP bazlı rate limit (dakikada 3 istek)
+  // IP bazlı rate limit
   const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
   try {
     if (env.CHAT_KV) {
-      const ipKey = 'ip_' + ip + '_' + Math.floor(Date.now() / 60000);
-      const ipCount = parseInt(await env.CHAT_KV.get(ipKey) || '0');
-      if (ipCount >= 3) {
+      // Dakikada 3 istek limiti
+      const ipMinKey = 'ip_min_' + ip + '_' + Math.floor(Date.now() / 60000);
+      const ipMinCount = parseInt(await env.CHAT_KV.get(ipMinKey) || '0');
+      if (ipMinCount >= 3) {
         return new Response(JSON.stringify({ error: 'Çok hızlı soru soruyorsunuz. Lütfen biraz bekleyin ⏳' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
-      await env.CHAT_KV.put(ipKey, String(ipCount + 1), { expirationTtl: 60 });
+      await env.CHAT_KV.put(ipMinKey, String(ipMinCount + 1), { expirationTtl: 60 });
+
+      // Günlük IP limiti (10 soru/gün — gizli sekme bypass'ını engeller)
+      const ipDayKey = 'ip_day_' + ip + '_' + today;
+      const ipDayCount = parseInt(await env.CHAT_KV.get(ipDayKey) || '0');
+      if (ipDayCount >= 10) {
+        return new Response(JSON.stringify({ error: 'Günlük 10 soruluk keşif hakkınız doldu 😊 Yarın yeni sorularınızla tekrar buradayım!', limitReached: true }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      await env.CHAT_KV.put(ipDayKey, String(ipDayCount + 1), { expirationTtl: 86400 });
     }
   } catch(e) {}
 
