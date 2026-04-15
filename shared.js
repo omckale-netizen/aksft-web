@@ -3879,10 +3879,25 @@ function renderPlacePage(placeId) {
     }
   }
 
+  // Mesafe hesaplama helper
+  function calcVenueDist(venue) {
+    if (!p.lat || !p.lng || !venue.lat || !venue.lng) return null;
+    var dLat = (venue.lat - p.lat) * Math.PI / 180;
+    var dLon = (venue.lng - p.lng) * Math.PI / 180;
+    var a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(p.lat*Math.PI/180)*Math.cos(venue.lat*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+    return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+  function distText(km) {
+    if (km === null) return '';
+    if (km < 1) return Math.round(km * 1000) + ' m';
+    return km.toFixed(1) + ' km';
+  }
+
   // Bu yerdeki işletmeler (placeId eşleşmesi)
   var placeVenues = (DATA.venues || []).filter(function(v) {
     return v.placeId && v.placeId === p.id;
   });
+  placeVenues.forEach(function(v) { v._dist = calcVenueDist(v); });
 
   // Yakındaki mekanlar (location veya villageId eşleşmesi, placeId olanları hariç tut)
   var nearbyVenues = [];
@@ -3898,6 +3913,8 @@ function renderPlacePage(placeId) {
       return v.villageId && v.villageId === p.villageId;
     }).slice(0, 6);
   }
+  nearbyVenues.forEach(function(v) { v._dist = calcVenueDist(v); });
+  nearbyVenues.sort(function(a, b) { return (a._dist || 999) - (b._dist || 999); });
 
   // Bu yerdeki işletmeler
   if (placeVenues.length > 0) {
@@ -3915,7 +3932,8 @@ function renderPlacePage(placeId) {
       } else {
         bodyHtml += '<div style="height:100px;background:' + cs.bg + ';display:flex;align-items:center;justify-content:center;font-size:2.5rem;">' + cs.emoji + '</div>';
       }
-      bodyHtml += '<div style="padding:14px 16px 16px;"><h4 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);margin:0 0 4px;">' + venue.title + '</h4>' + (venue.location ? '<span style="font-size:.68rem;color:var(--text-muted);display:flex;align-items:center;gap:3px;">📍 ' + venue.location + '</span>' : '') + '</div></a>';
+      var dTxt = distText(venue._dist);
+      bodyHtml += '<div style="padding:14px 16px 16px;"><div style="display:flex;align-items:center;justify-content:space-between;"><h4 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);margin:0;">' + venue.title + '</h4>' + (dTxt ? '<span style="font-size:.62rem;font-weight:700;color:var(--terra);white-space:nowrap;">~' + dTxt + '</span>' : '') + '</div>' + (venue.location ? '<span style="font-size:.68rem;color:var(--text-muted);display:flex;align-items:center;gap:3px;margin-top:3px;">📍 ' + venue.location + '</span>' : '') + '</div></a>';
     });
     bodyHtml += '</div></div>';
   }
@@ -3933,7 +3951,8 @@ function renderPlacePage(placeId) {
       } else {
         bodyHtml += '<div style="height:100px;background:' + cs.bg + ';display:flex;align-items:center;justify-content:center;font-size:2.5rem;">' + cs.emoji + '</div>';
       }
-      bodyHtml += '<div style="padding:14px 16px 16px;"><h4 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);margin:0 0 4px;">' + venue.title + '</h4>' + (venue.location ? '<span style="font-size:.68rem;color:var(--text-muted);display:flex;align-items:center;gap:3px;">📍 ' + venue.location + '</span>' : '') + '</div></a>';
+      var dTxt2 = distText(venue._dist);
+      bodyHtml += '<div style="padding:14px 16px 16px;"><div style="display:flex;align-items:center;justify-content:space-between;"><h4 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);margin:0;">' + venue.title + '</h4>' + (dTxt2 ? '<span style="font-size:.62rem;font-weight:700;color:var(--terra);white-space:nowrap;">~' + dTxt2 + '</span>' : '') + '</div>' + (venue.location ? '<span style="font-size:.68rem;color:var(--text-muted);display:flex;align-items:center;gap:3px;margin-top:3px;">📍 ' + venue.location + '</span>' : '') + '</div></a>';
     });
     bodyHtml += '</div></div>';
   }
