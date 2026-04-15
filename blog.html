@@ -73,7 +73,7 @@
       .blog-card-img{width:100%;min-height:160px;height:160px}
       .blog-card-body{padding:18px}
     }
-  </style>
+  @media(max-width:640px){.blog-hero{padding:90px 20px 40px !important}.blog-section{padding:36px 20px 50px !important}}</style>
 
   <!-- Structured Data -->
   <script type="application/ld+json">
@@ -174,13 +174,13 @@ if (new URLSearchParams(window.location.search).get('yazi')) {
 .bp-related-cat{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#C4521A;margin-bottom:4px}
 .bp-related-name{font-size:.8rem;font-weight:700;color:#1A2744;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 @media(max-width:640px){.bp-related-grid{grid-template-columns:1fr;max-width:320px;margin:0 auto}}
-</style>
+@media(max-width:640px){.blog-hero{padding:90px 20px 40px !important}.blog-section{padding:36px 20px 50px !important}}</style>
 
 <div id="footer-placeholder"></div>
 
 <script src="firebase-loader.js?v=4"></script>
 <script src="data.js?v=2"></script>
-<script src="shared.min.js?v=233"></script>
+<script src="shared.min.js?v=234"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
