@@ -4146,20 +4146,18 @@ async function approvePendingVenue(id) {
       if (data.phones && data.phones.length > 0) {
         data.phones.forEach(function(p) { addPhoneRow(p); });
       }
-      // Görselleri mevcut görseller olarak ekle (zaten Storage'da)
+      // Görselleri sisteme ekle — kapak seçme ve sıralama çalışsın
       if (data.images && data.images.length > 0) {
-        // Geçici venue oluştur ve images'ı ata — kaydetme sırasında existingImgs olarak kullanılacak
         window._pendingApproveImages = data.images.slice();
-        // Önizleme grid'ini manuel doldur
-        var grid = document.getElementById('img-preview-grid');
-        if (grid) {
-          grid.innerHTML = data.images.map(function(url, i) {
-            return '<div class="img-preview-item"><img src="' + url + '" onerror="this.parentElement.style.opacity=0.4"><div class="img-cover-badge ' + (i === 0 ? 'is-cover' : 'not-cover') + '">' + (i === 0 ? '★ Kapak' : (i+1)) + '</div></div>';
-          }).join('');
+        // Geçici bir venue ID oluştur — görseller mevcut olarak görünsün
+        var tempId = '_pending_approve_';
+        editingVenueId = tempId;
+        if (!draftData.venues.find(function(v){ return v.id === tempId; })) {
+          draftData.venues.push({ id: tempId, images: data.images.slice() });
+        } else {
+          draftData.venues.find(function(v){ return v.id === tempId; }).images = data.images.slice();
         }
-        var dropEl = document.getElementById('img-drop');
-        if (dropEl && data.images.length >= 6) dropEl.style.display = 'none';
-        updateImgInfo();
+        renderImagePreviews();
       }
       // Çalışma saatleri
       if (data.weeklyHours && data.weeklyHours.length > 0) {
@@ -7482,10 +7480,15 @@ async function saveVenue(e) {
     }
   }
   if (uploadFailed) showToast('Bazi gorseller yuklenemedi. Mekani kaydedip sonra tekrar deneyin.', 'error');
-  // Pending onay görselleri varsa dahil et
-  var approveImgs = window._pendingApproveImages || [];
+  // Pending onay görselleri — geçici venue'dan al
+  if (editingVenueId === '_pending_approve_') {
+    var tempVenue = draftData.venues.find(function(v){ return v.id === '_pending_approve_'; });
+    if (tempVenue && tempVenue.images) existingImgs = tempVenue.images.slice();
+    draftData.venues = draftData.venues.filter(function(v){ return v.id !== '_pending_approve_'; });
+    editingVenueId = null;
+  }
   window._pendingApproveImages = null;
-  const allImages = [...approveImgs, ...existingImgs, ...uploadedUrls];
+  const allImages = [...existingImgs, ...uploadedUrls];
   pendingImages = [];
 
   const _venuePhones = getPhonesData();
