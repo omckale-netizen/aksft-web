@@ -140,6 +140,39 @@ export async function onRequestPost(context) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: CHAT_ID, text: text })
     });
+
+    // İletişim formu — gönderene otomatik cevap maili
+    if (type === 'message' && data.email && env.RESEND_API_KEY) {
+      try {
+        const userName = sanitize(data.name, 50) || 'Ziyaretçi';
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: "Assos'u Keşfet <info@assosukesfet.com>",
+            to: [data.email],
+            subject: 'Mesajınız Alındı — Assos\'u Keşfet',
+            reply_to: 'info@assosukesfet.com',
+            html: `<div style="font-family:'Segoe UI',Arial,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;color:#1A2744;">
+              <div style="text-align:center;margin-bottom:28px;">
+                <h1 style="font-size:1.4rem;margin:0;color:#1A2744;">Assos'u Keşfet</h1>
+                <p style="font-size:.85rem;color:#718096;margin:6px 0 0;">assosukesfet.com</p>
+              </div>
+              <p style="font-size:.95rem;line-height:1.7;">Merhaba <strong>${userName}</strong>,</p>
+              <p style="font-size:.95rem;line-height:1.7;">Mesajınız bize ulaştı! En kısa sürede size dönüş yapacağız.</p>
+              <div style="background:#FAF7F2;border-radius:12px;padding:16px 20px;margin:20px 0;border-left:4px solid #C4521A;">
+                <p style="font-size:.8rem;color:#718096;margin:0 0 6px;">Mesajınız:</p>
+                <p style="font-size:.88rem;color:#1A2744;margin:0;line-height:1.6;">${sanitize(data.message, 300)}</p>
+              </div>
+              <p style="font-size:.88rem;line-height:1.7;color:#718096;">Assos, Ayvacık ve çevresini keşfetmeye devam edin!</p>
+              <hr style="border:none;border-top:1px solid #E2E8F0;margin:24px 0;">
+              <p style="font-size:.72rem;color:#A0AEC0;text-align:center;">Bu mail otomatik olarak gönderilmiştir. Yanıtlamak için doğrudan cevap yazabilirsiniz.</p>
+            </div>`
+          })
+        });
+      } catch(mailErr) { /* mail hatası telegram'ı engellemesin */ }
+    }
+
     return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch (err) {
     return new Response(JSON.stringify({ error: 'Send failed' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
