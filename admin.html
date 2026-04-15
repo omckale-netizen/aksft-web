@@ -2158,6 +2158,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                   <button class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText(document.getElementById('og-url-display').value);showToast('Kopyalandı','success')">Kopyala</button>
                 </div>
               </div>
+              <div style="margin-top:14px">
+                <div style="font-size:.68rem;font-weight:700;color:var(--text-muted);margin-bottom:6px">Geçmiş Görseller</div>
+                <div id="og-img-history" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+              </div>
             </div>
           </div>
 
@@ -3564,10 +3568,18 @@ async function uploadOgImage(file) {
     const ref = firebase.storage().ref('site/og-image.' + ext);
     await ref.put(file, { contentType: file.type });
     const url = await ref.getDownloadURL();
-    await db.collection('settings').doc('site').set({ ogImageUrl: url, ogImageUpdatedAt: new Date().toISOString() }, { merge: true });
-    statusEl.textContent = 'Yuklendi!';
+    // Geçmişe ekle
+    var doc2 = await db.collection('settings').doc('site').get();
+    var ogHistory = (doc2.exists && doc2.data().ogImageHistory) ? doc2.data().ogImageHistory : [];
+    if (!ogHistory.some(function(h) { return h.url === url; })) {
+      ogHistory.push({ url: url, date: new Date().toISOString() });
+      if (ogHistory.length > 10) ogHistory = ogHistory.slice(-10);
+    }
+    await db.collection('settings').doc('site').set({ ogImageUrl: url, ogImageUpdatedAt: new Date().toISOString(), ogImageHistory: ogHistory }, { merge: true });
+    statusEl.textContent = 'Yüklendi!';
     showOgPreview(url);
-    showToast('Sosyal medya gorseli guncellendi!', 'success');
+    loadOgHistory();
+    showToast('Sosyal medya görseli güncellendi!', 'success');
   } catch(err) {
     console.error('OG image upload error:', err);
     statusEl.textContent = 'Hata!';
@@ -3575,6 +3587,45 @@ async function uploadOgImage(file) {
   }
 }
 
+async function loadOgHistory() {
+  var container = document.getElementById('og-img-history');
+  if (!container) return;
+  try {
+    var doc = await db.collection('settings').doc('site').get();
+    var history = (doc.exists && doc.data().ogImageHistory) ? doc.data().ogImageHistory : [];
+    var currentUrl = doc.exists ? doc.data().ogImageUrl : '';
+    if (history.length === 0) { container.innerHTML = '<div style="font-size:.72rem;color:var(--text-muted)">Henüz geçmiş yok.</div>'; return; }
+    container.innerHTML = history.map(function(h, idx) {
+      var isCurrent = h.url === currentUrl;
+      var date = new Date(h.date).toLocaleDateString('tr-TR', {day:'numeric',month:'short'});
+      return '<div style="position:relative;cursor:pointer;border-radius:8px;overflow:hidden;border:2px solid ' + (isCurrent ? 'var(--terra)' : 'transparent') + ';width:80px;height:36px;flex-shrink:0;" onclick="selectOgImage(\'' + h.url.replace(/'/g,"\\'") + '\')" title="' + date + (isCurrent ? ' (aktif)' : '') + '">' +
+        '<img src="' + h.url + '" style="width:100%;height:100%;object-fit:cover;">' +
+        (isCurrent ? '<div style="position:absolute;bottom:1px;right:1px;width:12px;height:12px;border-radius:50%;background:var(--terra);display:flex;align-items:center;justify-content:center;font-size:7px;color:#fff;">✓</div>' : '<div onclick="event.stopPropagation();deleteOgHistory(' + idx + ')" style="position:absolute;top:1px;right:1px;width:16px;height:16px;border-radius:50%;background:rgba(229,62,62,.85);display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;cursor:pointer;" title="Sil">✕</div>') +
+      '</div>';
+    }).join('');
+  } catch(e) { container.innerHTML = ''; }
+}
+async function selectOgImage(url) {
+  try {
+    await db.collection('settings').doc('site').set({ ogImageUrl: url, ogImageUpdatedAt: new Date().toISOString() }, { merge: true });
+    showOgPreview(url);
+    loadOgHistory();
+    showToast('OG görseli değiştirildi!', 'success');
+  } catch(e) { showToast('Hata: ' + e.message, 'error'); }
+}
+async function deleteOgHistory(idx) {
+  if (!confirm('Bu görseli geçmişten silmek istiyor musunuz?')) return;
+  try {
+    var doc = await db.collection('settings').doc('site').get();
+    var history = (doc.exists && doc.data().ogImageHistory) ? doc.data().ogImageHistory : [];
+    if (idx >= 0 && idx < history.length) {
+      history.splice(idx, 1);
+      await db.collection('settings').doc('site').set({ ogImageHistory: history }, { merge: true });
+      loadOgHistory();
+      showToast('Görsel geçmişten silindi', 'success');
+    }
+  } catch(e) { showToast('Hata: ' + e.message, 'error'); }
+}
 function showOgPreview(url) {
   const img = document.getElementById('og-preview-img');
   const empty = document.getElementById('og-preview-empty');
@@ -3696,12 +3747,12 @@ async function loadHeroHistory() {
       container.innerHTML = '<div style="font-size:.72rem;color:var(--text-muted)">Henüz görsel yok.</div>';
       return;
     }
-    container.innerHTML = history.map(function(h) {
+    container.innerHTML = history.map(function(h, idx) {
       var isCurrent = h.url === currentUrl;
       var date = new Date(h.date).toLocaleDateString('tr-TR', {day:'numeric',month:'short'});
-      return '<div style="position:relative;cursor:pointer;border-radius:8px;overflow:hidden;border:2px solid ' + (isCurrent ? 'var(--terra)' : 'transparent') + ';width:80px;height:36px;flex-shrink:0;" onclick="selectHeroImage(\'' + h.url.replace(/'/g,"\\'") + '\')" title="' + date + '">' +
+      return '<div style="position:relative;cursor:pointer;border-radius:8px;overflow:hidden;border:2px solid ' + (isCurrent ? 'var(--terra)' : 'transparent') + ';width:80px;height:36px;flex-shrink:0;" onclick="selectHeroImage(\'' + h.url.replace(/'/g,"\\'") + '\')" title="' + date + (isCurrent ? ' (aktif)' : ' — sil: ✕') + '">' +
         '<img src="' + h.url + '" style="width:100%;height:100%;object-fit:cover;">' +
-        (isCurrent ? '<div style="position:absolute;bottom:1px;right:1px;width:12px;height:12px;border-radius:50%;background:var(--terra);display:flex;align-items:center;justify-content:center;font-size:7px;color:#fff;">✓</div>' : '') +
+        (isCurrent ? '<div style="position:absolute;bottom:1px;right:1px;width:12px;height:12px;border-radius:50%;background:var(--terra);display:flex;align-items:center;justify-content:center;font-size:7px;color:#fff;">✓</div>' : '<div onclick="event.stopPropagation();deleteHeroHistory(' + idx + ')" style="position:absolute;top:1px;right:1px;width:16px;height:16px;border-radius:50%;background:rgba(229,62,62,.85);display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;cursor:pointer;" title="Sil">✕</div>') +
       '</div>';
     }).join('');
   } catch(e) {
@@ -3720,6 +3771,19 @@ async function selectHeroImage(url) {
   }
 }
 
+async function deleteHeroHistory(idx) {
+  if (!confirm('Bu görseli geçmişten silmek istiyor musunuz?')) return;
+  try {
+    var doc = await db.collection('settings').doc('site').get();
+    var history = (doc.exists && doc.data().heroImageHistory) ? doc.data().heroImageHistory : [];
+    if (idx >= 0 && idx < history.length) {
+      history.splice(idx, 1);
+      await db.collection('settings').doc('site').set({ heroImageHistory: history }, { merge: true });
+      loadHeroHistory();
+      showToast('Görsel geçmişten silindi', 'success');
+    }
+  } catch(e) { showToast('Hata: ' + e.message, 'error'); }
+}
 async function removeHeroImage() {
   if (!confirm('Hero görseli kaldırılacak. Gradient arka plan kullanılacak. Devam?')) return;
   try {
@@ -4976,7 +5040,7 @@ showPage = function(page) {
   _origShowPage(page);
   if (page === 'gallery' && galItems.length === 0) galLoadItems();
   if (page === 'categories') { renderCatList(); renderPlaceCatList(); }
-  if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); loadHeroHistory(); updatePasswordDate(); }
+  if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); loadHeroHistory(); loadOgHistory(); updatePasswordDate(); }
   if (page === 'security') runSecurityCheck();
   if (page === 'export') { loadBackupList(); updateAutoBackupUI(); }
 };
