@@ -4426,7 +4426,7 @@ document.addEventListener('click', function(e) {
     dropdown.style.display = 'none';
   }
 });
-function buildMailHtml(subject, body) {
+function buildMailHtml(subject, body, opts) {
   var paragraphs = body.split('\n').filter(function(l) { return l.trim(); }).map(function(l) {
     if (l.trim() === '---') return '<hr style="border:none;border-top:1px solid #E8E4DE;margin:16px 0;">';
     var escaped = l.replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -4451,6 +4451,7 @@ function buildMailHtml(subject, body) {
       // Body
       '<div style="background:#ffffff;padding:36px 32px;border-left:1px solid #EBE7E1;border-right:1px solid #EBE7E1;">' +
         paragraphs +
+        (opts && opts.ctaUrl ? '<div style="text-align:center;margin:28px 0 8px;"><a href="' + opts.ctaUrl + '" style="display:inline-block;padding:14px 32px;background:#C4521A;color:#fff;border-radius:10px;font-size:.9rem;font-weight:700;text-decoration:none;box-shadow:0 4px 12px rgba(196,82,26,.25);">' + (opts.ctaText || 'Görüntüle') + ' &rarr;</a></div>' : '') +
       '</div>' +
 
       // Signature
@@ -4549,19 +4550,15 @@ async function sendVenueWelcomeMail(venue) {
   var catLabels = {kafe:'kafe',restoran:'restoran',kahvalti:'kahvaltı mekanı',konaklama:'konaklama tesisi',beach:'beach club',iskele:'iskele'};
   var catLabel = catLabels[venue.category] || 'mekan';
 
-  var body = 'Merhaba ' + ownerName + ',\n\n' +
+  var bodyText = 'Merhaba ' + ownerName + ',\n\n' +
     venue.title + ' artık Assos\'u Keşfet platformunda!\n\n' +
     'Mekanınız Assos bölgesinin en kapsamlı dijital rehberinde yerini aldı. ' +
     'Binlerce ziyaretçi mekanınızı keşfedebilecek.\n\n' +
-    'Mekan sayfanızı aşağıdaki linkten görüntüleyebilirsiniz:\n' +
-    venueUrl + '\n\n' +
     'Mekan bilgilerinizi güncel tutmak, fotoğraf eklemek veya değişiklik talep etmek için bize her zaman ulaşabilirsiniz.\n\n' +
     'Assos\'u Keşfet ailesine hoş geldiniz!';
 
   try {
-    var html = buildMailHtml('Hoş Geldiniz — ' + venue.title, body);
-    // Mail içindeki link'i tıklanabilir yap
-    html = html.replace(venueUrl, '<a href="' + venueUrl + '" style="color:#C4521A;font-weight:700;text-decoration:none;">' + venueUrl + '</a>');
+    var html = buildMailHtml('Hoş Geldiniz — ' + venue.title, bodyText, { ctaText: venue.title + ' Sayfanızı Görüntüleyin', ctaUrl: venueUrl });
 
     var resp = await fetch('/api/send-mail', {
       method: 'POST',
