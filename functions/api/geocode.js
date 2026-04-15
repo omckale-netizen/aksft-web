@@ -1,10 +1,14 @@
 export async function onRequestGet(context) {
+  const allowedOrigins = ['https://assosukesfet.com', 'https://www.assosukesfet.com'];
+  const origin = context.request.headers.get('Origin') || '';
+  const corsOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+
   const url = new URL(context.request.url);
   const q = url.searchParams.get('q');
   if (!q) {
     return new Response(JSON.stringify({ error: 'Missing q parameter' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': corsOrigin }
     });
   }
 
@@ -17,12 +21,12 @@ export async function onRequestGet(context) {
 
     return new Response(JSON.stringify(data), {
       status: 200,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': corsOrigin }
     });
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': corsOrigin }
     });
   }
 }

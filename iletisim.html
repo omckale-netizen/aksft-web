@@ -70,6 +70,10 @@
         </div>
 
         <form id="contact-form" onsubmit="submitContact(event)" novalidate>
+          <!-- Honeypot — botlar doldurur, kullanıcılar görmez -->
+          <div style="position:absolute;left:-9999px;top:-9999px;opacity:0;height:0;overflow:hidden;" aria-hidden="true">
+            <input type="text" id="ct-website" name="website" tabindex="-1" autocomplete="off">
+          </div>
           <div class="ct-row">
             <div class="ct-field">
               <label>Ad Soyad *</label>
@@ -368,9 +372,9 @@
 
 <div id="footer-placeholder"></div>
 
-<script src="firebase-loader.js?v=3"></script>
+<script src="firebase-loader.js?v=4"></script>
 <script src="data.js?v=2"></script>
-<script src="shared.min.js?v=227"></script>
+<script src="shared.min.js?v=228"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
@@ -471,6 +475,15 @@ async function submitContact(e) {
     return;
   }
 
+  // Honeypot kontrolü — client tarafında da kontrol
+  var hpField = document.getElementById('ct-website');
+  if (hpField && hpField.value) {
+    // Bot — sessizce başarılı göster ama gönderme
+    status.innerHTML = '<span style="color:#38A169">✓ Mesajınız başarıyla gönderildi!</span>';
+    document.getElementById('contact-form').reset();
+    return;
+  }
+
   // Rate limiting — dakikada max 2 mesaj
   var rlKey = 'rl_contact';
   var rlData = JSON.parse(localStorage.getItem(rlKey) || '{"count":0,"time":0}');
@@ -514,6 +527,7 @@ async function submitContact(e) {
     consentGiven: true,
     consentText: 'Gizlilik Politikası ve Kullanım Koşullarını okudum, kabul ediyorum.',
     consentDate: new Date().toISOString(),
+    _hp: (document.getElementById('ct-website') || {}).value || '',
     device: os + ' / ' + browser,
     userAgent: ua.substring(0, 200),
     screenSize: screen.width + 'x' + screen.height,

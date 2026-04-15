@@ -105,10 +105,23 @@
       ]).then(function(results) {
         clearTimeout(timeout);
 
-        var venues = results[0].status === 'fulfilled' ? results[0].value.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); }) : [];
-        var places = results[1].status === 'fulfilled' ? results[1].value.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); }) : [];
-        var villages = results[2].status === 'fulfilled' ? results[2].value.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); }) : [];
-        var routes = results[3].status === 'fulfilled' ? results[3].value.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); }) : [];
+        // XSS koruması — düz metin alanlarını sanitize et
+        function sanitizeText(s) { return s ? String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;') : s; }
+        function sanitizeItem(item) {
+          if (item.title) item.title = sanitizeText(item.title);
+          if (item.shortDesc) item.shortDesc = sanitizeText(item.shortDesc);
+          if (item.location) item.location = sanitizeText(item.location);
+          if (item.address) item.address = sanitizeText(item.address);
+          if (item.phone) item.phone = sanitizeText(item.phone);
+          if (item.tags && Array.isArray(item.tags)) item.tags = item.tags.map(sanitizeText);
+          if (item.keywords && Array.isArray(item.keywords)) item.keywords = item.keywords.map(sanitizeText);
+          // description alanı HTML içerebilir (zengin metin editörü) — dokunma
+          return item;
+        }
+        var venues = results[0].status === 'fulfilled' ? results[0].value.docs.map(function(d) { return sanitizeItem(Object.assign({ id: d.id }, d.data())); }) : [];
+        var places = results[1].status === 'fulfilled' ? results[1].value.docs.map(function(d) { return sanitizeItem(Object.assign({ id: d.id }, d.data())); }) : [];
+        var villages = results[2].status === 'fulfilled' ? results[2].value.docs.map(function(d) { return sanitizeItem(Object.assign({ id: d.id }, d.data())); }) : [];
+        var routes = results[3].status === 'fulfilled' ? results[3].value.docs.map(function(d) { return sanitizeItem(Object.assign({ id: d.id }, d.data())); }) : [];
         var placeCats = (results[4].status === 'fulfilled' && results[4].value.exists && results[4].value.data().list) ? results[4].value.data().list : [];
         var venueCats = (results[5].status === 'fulfilled' && results[5].value.exists && results[5].value.data().list) ? results[5].value.data().list : [];
 

@@ -43,6 +43,12 @@ function fixTR(s) {
 
 /* ── HTML attribute escape (XSS koruması) ── */
 function escAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function safeDesc(s) {
+  if (!s) return '';
+  // Sadece güvenli HTML taglarına izin ver
+  return String(s).replace(/<(?!\/?(?:p|br|strong|em|b|i|u|h[1-6]|ul|ol|li|a|span|div)\b)[^>]*>/gi, function(tag) { return tag.replace(/</g,'&lt;').replace(/>/g,'&gt;'); });
+}
 
 /* ── Preconnect kaldirildi — HTML'deki yeterli ── */
 
@@ -3334,7 +3340,7 @@ function renderVillagePage(villageId) {
   if (v.description) {
     bodyHtml += '<div style="margin-bottom:40px;">';
     bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:14px;">' + (v.title || '') + ' Hakkında</h2>';
-    var vDescRaw = v.description;
+    var vDescRaw = safeDesc(v.description);
     var vDescHtml = vDescRaw.indexOf('<') > -1 ? vDescRaw : '<p>' + vDescRaw.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>') + '</p>';
     bodyHtml += '<div style="font-size:.9rem;color:var(--text-mid);line-height:1.85;">' + vDescHtml + '</div>';
     bodyHtml += '</div>';
@@ -3859,7 +3865,7 @@ function renderPlacePage(placeId) {
   if (p.description) {
     bodyHtml += '<div style="margin-bottom:40px;">';
     bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:14px;">' + (p.title || '') + ' Hakkında</h2>';
-    var descRaw = p.description;
+    var descRaw = safeDesc(p.description);
     var descHtml = descRaw.indexOf('<') > -1 ? descRaw : '<p>' + descRaw.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>') + '</p>';
     bodyHtml += '<div style="font-size:.9rem;color:var(--text-mid);line-height:1.85;">' + descHtml + '</div>';
     bodyHtml += '</div>';

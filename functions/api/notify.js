@@ -25,6 +25,37 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ error: 'Missing type or data' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
   }
 
+  // Honeypot kontrolü — bot tuzağı (iletişim formu)
+  if (type === 'message' && data._hp) {
+    // Honeypot alanı doldurulmuş — bot
+    return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  }
+
+  // Server-side rate limit (iletişim formu)
+  if (type === 'message') {
+    const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+    try {
+      if (env.CHAT_KV) {
+        // Dakikada 2 mesaj
+        var minKey = 'contact_min_' + ip + '_' + Math.floor(Date.now() / 60000);
+        var minCount = parseInt(await env.CHAT_KV.get(minKey) || '0');
+        if (minCount >= 2) {
+          return new Response(JSON.stringify({ error: 'Çok hızlı mesaj gönderiyorsunuz. Lütfen biraz bekleyin.' }), { status: 429, headers: { 'Content-Type': 'application/json' } });
+        }
+        await env.CHAT_KV.put(minKey, String(minCount + 1), { expirationTtl: 60 });
+
+        // Günde 5 mesaj
+        var today = new Date().toISOString().split('T')[0];
+        var dayKey = 'contact_day_' + ip + '_' + today;
+        var dayCount = parseInt(await env.CHAT_KV.get(dayKey) || '0');
+        if (dayCount >= 5) {
+          return new Response(JSON.stringify({ error: 'Günlük mesaj limitinize ulaştınız. Yarın tekrar deneyebilirsiniz.' }), { status: 429, headers: { 'Content-Type': 'application/json' } });
+        }
+        await env.CHAT_KV.put(dayKey, String(dayCount + 1), { expirationTtl: 86400 });
+      }
+    } catch(e) {}
+  }
+
   const allowedTypes = ['login', 'login_blocked', 'message', 'backup', 'premium', 'security', 'password'];
   if (!allowedTypes.includes(type)) {
     return new Response(JSON.stringify({ error: 'Unknown type' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
