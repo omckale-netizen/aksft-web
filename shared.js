@@ -4289,6 +4289,7 @@ function renderPlacePage(placeId) {
       </div>
       <div class="ai-chat-input">
         <input type="text" id="ai-chat-input" placeholder="Sorunuzu yazın..." maxlength="500" autocomplete="off">
+        <button id="ai-chat-mic" onclick="aiChatMic()" title="Sesli soru sor" style="width:38px;height:38px;border-radius:12px;background:transparent;border:1.5px solid rgba(26,39,68,.1);color:#4A5870;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .2s;flex-shrink:0;">🎤</button>
         <button id="ai-chat-send" onclick="aiChatSend()">➤</button>
       </div>
     </div>
@@ -4299,6 +4300,56 @@ function renderPlacePage(placeId) {
   document.getElementById('ai-chat-input').addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); aiChatSend(); }
   });
+
+  // Sesli mesaj — Web Speech API
+  var _aiRecognition = null;
+  var _aiListening = false;
+  window.aiChatMic = function() {
+    var micBtn = document.getElementById('ai-chat-mic');
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      addMsg('Tarayıcınız sesli aramayı desteklemiyor. Chrome veya Safari kullanmayı deneyin.', 'bot');
+      return;
+    }
+    if (_aiListening) {
+      _aiRecognition.stop();
+      return;
+    }
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    _aiRecognition = new SR();
+    _aiRecognition.lang = 'tr-TR';
+    _aiRecognition.continuous = false;
+    _aiRecognition.interimResults = true;
+    var input = document.getElementById('ai-chat-input');
+    _aiRecognition.onstart = function() {
+      _aiListening = true;
+      micBtn.style.background = 'var(--terra)';
+      micBtn.style.color = '#fff';
+      micBtn.style.borderColor = 'var(--terra)';
+      input.placeholder = 'Dinliyorum...';
+    };
+    _aiRecognition.onresult = function(e) {
+      var text = '';
+      for (var i = 0; i < e.results.length; i++) text += e.results[i][0].transcript;
+      input.value = text;
+    };
+    _aiRecognition.onend = function() {
+      _aiListening = false;
+      micBtn.style.background = 'transparent';
+      micBtn.style.color = '#4A5870';
+      micBtn.style.borderColor = 'rgba(26,39,68,.1)';
+      input.placeholder = 'Sorunuzu yazın...';
+      if (input.value.trim()) aiChatSend();
+    };
+    _aiRecognition.onerror = function(e) {
+      _aiListening = false;
+      micBtn.style.background = 'transparent';
+      micBtn.style.color = '#4A5870';
+      micBtn.style.borderColor = 'rgba(26,39,68,.1)';
+      input.placeholder = 'Sorunuzu yazın...';
+      if (e.error === 'not-allowed') addMsg('Mikrofon erişimine izin vermeniz gerekiyor.', 'bot');
+    };
+    _aiRecognition.start();
+  };
 
   // Sohbeti temizle
   window.aiClearHistory = function() {
@@ -4434,7 +4485,12 @@ function renderPlacePage(placeId) {
 
     var state = getAiState();
     if (state.count >= AI_DAILY_LIMIT) {
-      addMsg('Günlük soru limitinize ulaştınız. Yarın tekrar sorabilirsiniz 🙏', 'bot');
+      addMsg('Günlük 10 soruluk keşif hakkınız doldu ama merak etmeyin 😊 Yarın yeni sorularınızla tekrar buradayım. O zamana kadar Instagram\'dan bizi takip edin! 🧭', 'bot');
+      var limitBody = document.getElementById('ai-chat-body');
+      var igBtn = document.createElement('div');
+      igBtn.style.cssText = 'align-self:flex-start;margin-top:-4px;';
+      igBtn.innerHTML = '<a href="https://www.instagram.com/assosukesfet/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:12px;background:linear-gradient(135deg,#833AB4,#E1306C,#F77737);color:#fff;font-size:.78rem;font-weight:700;text-decoration:none;transition:opacity .2s;" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">📸 Takip Et</a>';
+      limitBody.appendChild(igBtn);
       return;
     }
 
