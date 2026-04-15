@@ -472,7 +472,7 @@ function fmtPhone(el){
   else f='+'+d.substring(0,2)+' '+d.substring(2,5)+' '+d.substring(5,8)+' '+d.substring(8,10)+' '+d.substring(10,12);
   var diff=f.length-el.value.length;el.value=f;el.setSelectionRange(c+diff,c+diff);
 }
-function toast(msg,color){var t=document.createElement('div');t.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:'+(color==='red'?'var(--red)':'var(--green)')+';color:#fff;padding:10px 20px;border-radius:10px;font-size:.82rem;font-weight:600;z-index:999';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove();},3000);}
+function toast(msg,color){var t=document.createElement('div');t.style.cssText='position:fixed;top:16px;left:50%;transform:translateX(-50%);background:'+(color==='red'?'var(--red)':'var(--green)')+';color:#fff;padding:12px 24px;border-radius:12px;font-size:.82rem;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.2);max-width:90%;text-align:center';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove();},3000);}
 
 // Category change
 function onCatChange(){
