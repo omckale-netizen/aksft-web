@@ -119,7 +119,7 @@
           // description alanı HTML içerebilir (zengin metin editörü) — dokunma
           return item;
         }
-        var venues = results[0].status === 'fulfilled' ? results[0].value.docs.map(function(d) { return sanitizeItem(Object.assign({ id: d.id }, d.data())); }) : [];
+        var venues = results[0].status === 'fulfilled' ? results[0].value.docs.map(function(d) { return sanitizeItem(Object.assign({ id: d.id }, d.data())); }).filter(function(v) { var st = v.status || (v.active === false ? 'hidden' : 'published'); return st === 'published'; }) : [];
         var places = results[1].status === 'fulfilled' ? results[1].value.docs.map(function(d) { return sanitizeItem(Object.assign({ id: d.id }, d.data())); }) : [];
         var villages = results[2].status === 'fulfilled' ? results[2].value.docs.map(function(d) { return sanitizeItem(Object.assign({ id: d.id }, d.data())); }) : [];
         var routes = results[3].status === 'fulfilled' ? results[3].value.docs.map(function(d) { return sanitizeItem(Object.assign({ id: d.id }, d.data())); }) : [];

@@ -693,6 +693,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <option value="published">🟢 Yayında</option>
               <option value="draft">📝 Taslak</option>
               <option value="hidden">👁‍🗨 Gizli</option>
+              <option value="trashed">🗑 Çöp Kutusu</option>
             </select>
           </div>
           <button class="btn btn-secondary btn-sm" id="venue-sort-toggle" onclick="toggleVenueSortMode()" style="white-space:nowrap">↕ Sirala</button>
@@ -1760,18 +1761,22 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
     <!-- ══════ ACTIVITY LOG ══════ -->
     <div class="admin-page" id="page-activity">
-      <h2>Aktivite Logu</h2>
-      <p class="page-sub">Tum islemler ve degisiklikler burada kayit altinda.</p>
+      <h2>Değişiklik Geçmişi</h2>
+      <p class="page-sub">Tüm işlemler, değişiklikler ve kim ne zaman ne yaptı.</p>
       <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
-        <select id="activity-filter" onchange="renderActivityLog()" class="admin-filter-select" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:#fff;color:var(--text);cursor:pointer">
+        <select id="activity-filter" onchange="renderActivityLog()" class="admin-filter-select" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:var(--input-bg);color:var(--text);cursor:pointer">
           <option value="all">Tüm İşlemler</option>
-          <option value="giris">🔐 Giris</option>
           <option value="mekan">🏪 Mekan</option>
           <option value="yer">📍 Yer</option>
-          <option value="koy">🏘 Koy</option>
+          <option value="koy">🏘 Köy</option>
           <option value="rota">🗺 Rota</option>
+          <option value="blog">✍️ Blog</option>
+          <option value="premium">⭐ Premium</option>
+          <option value="sifre">🔐 Güvenlik</option>
+          <option value="sil">🗑 Silmeler</option>
         </select>
-        <span id="activity-count" style="font-size:.75rem;color:var(--text-muted);margin-left:auto"></span>
+        <input type="text" id="activity-search" placeholder="Mekan adı ile ara..." oninput="renderActivityLog()" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;background:var(--input-bg);color:var(--text);flex:1;min-width:160px">
+        <span id="activity-count" style="font-size:.75rem;color:var(--text-muted)"></span>
       </div>
       <div class="panel-card">
         <div id="activity-list" style="max-height:70vh;overflow-y:auto"></div>
@@ -2642,24 +2647,43 @@ function pingIndexNow(url) {
   } catch(e) {}
 }
 
-function logActivity(action, target, details) {
+function logActivity(action, target, details, changes) {
   try {
     const user = firebase.auth().currentUser;
-    db.collection('activity_logs').add({
+    const entry = {
       action: action,
       target: target,
       details: details || '',
       user: user ? user.email : 'bilinmeyen',
       timestamp: new Date().toISOString()
-    });
+    };
+    if (changes) entry.changes = changes;
+    db.collection('activity_logs').add(entry);
   } catch(e) {}
 }
+function diffChanges(before, after, fields) {
+  if (!before || !after) return null;
+  var changes = [];
+  (fields || Object.keys(after)).forEach(function(k) {
+    if (k === 'id' || k === 'sortOrder') return;
+    var bv = before[k], av = after[k];
+    if (Array.isArray(bv)) bv = JSON.stringify(bv);
+    if (Array.isArray(av)) av = JSON.stringify(av);
+    if (typeof bv === 'object' && bv) bv = JSON.stringify(bv);
+    if (typeof av === 'object' && av) av = JSON.stringify(av);
+    if (String(bv || '') !== String(av || '')) {
+      changes.push({ field: k, from: String(bv || '').substring(0, 200), to: String(av || '').substring(0, 200) });
+    }
+  });
+  return changes.length > 0 ? changes : null;
+}
 
-async function saveVenueToFirestore(venue) {
+async function saveVenueToFirestore(venue, beforeData) {
   const data = { ...venue };
   delete data.id;
   await db.collection('venues').doc(venue.id).set(data);
-  logActivity('mekan_guncelle', venue.id, venue.title);
+  var ch = beforeData ? diffChanges(beforeData, venue, ['title','category','location','phone','phones','address','website','instagram','shortDesc','hours','premium','seasonal','weeklyHours','facilities']) : null;
+  logActivity('mekan_guncelle', venue.id, venue.title, ch);
   pingIndexNow('https://assosukesfet.com/mekanlar/mekan-detay?id=' + venue.id);
 }
 
@@ -5088,7 +5112,8 @@ function toggleFeatured(id, e) {
 const VENUE_STATUS = {
   published: { label:'Yayında', icon:'🟢', color:'#276749', bg:'rgba(56,161,105,.1)' },
   draft:     { label:'Taslak',  icon:'📝', color:'#975A16', bg:'rgba(221,173,32,.1)' },
-  hidden:    { label:'Gizli',   icon:'👁‍🗨', color:'#9B2C2C', bg:'rgba(229,62,62,.08)' }
+  hidden:    { label:'Gizli',   icon:'👁‍🗨', color:'#9B2C2C', bg:'rgba(229,62,62,.08)' },
+  trashed:   { label:'Çöp',     icon:'🗑', color:'#718096', bg:'rgba(113,128,150,.1)' }
 };
 
 function getVenueStatusKey(v) {
@@ -5178,15 +5203,15 @@ function bulkSetStatus(status) {
 }
 
 function bulkDelete() {
-  showConfirm('Toplu Silme', bulkSelected.length + ' mekan kalici olarak silinecek. Bu islem geri alinamaz!', async () => {
+  showConfirm('Çöp Kutusuna Taşı', bulkSelected.length + ' mekan çöp kutusuna taşınacak.', async () => {
     for (const id of bulkSelected) {
-      await deleteVenueFromFirestore(id);
-      draftData.venues = draftData.venues.filter(v => v.id !== id);
+      const v = draftData.venues.find(x => x.id === id);
+      if (v) { v.status = 'trashed'; v.trashedAt = new Date().toISOString(); v.active = false; await saveVenueToFirestore(v); }
     }
     const count = bulkSelected.length;
     bulkDeselectAll();
     renderVenueTable();
-    showToast(count + ' mekan silindi.', 'success');
+    showToast('🗑 ' + count + ' mekan çöp kutusuna taşındı.', 'success');
   });
 }
 
@@ -5260,9 +5285,10 @@ function renderVenueTable() {
   if (q) venues = venues.filter(v => v.title.toLowerCase().includes(q) || (v.category||'').toLowerCase().includes(q) || (v.location||'').toLowerCase().includes(q));
   if (catFilter !== 'all') venues = venues.filter(v => v.category === catFilter);
   if (showFeaturedOnly) venues = venues.filter(v => v.featured);
-  if (activeFilter === 'published') venues = venues.filter(v => getVenueStatusKey(v) === 'published');
-  if (activeFilter === 'draft') venues = venues.filter(v => getVenueStatusKey(v) === 'draft');
-  if (activeFilter === 'hidden') venues = venues.filter(v => getVenueStatusKey(v) === 'hidden');
+  // Varsayılan: çöp kutusundakileri gizle
+  if (activeFilter === 'all') venues = venues.filter(v => getVenueStatusKey(v) !== 'trashed');
+  else if (activeFilter === 'trashed') venues = venues.filter(v => getVenueStatusKey(v) === 'trashed');
+  else venues = venues.filter(v => getVenueStatusKey(v) === activeFilter);
 
   document.getElementById('venue-tbody').innerHTML = venues.length === 0
     ? '<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--text-muted)">Mekan bulunamadi.</td></tr>'
@@ -5295,17 +5321,22 @@ function renderVenueTable() {
         <td>${v.location || '-'}</td>
         <td><span style="${starStyle}" onclick="toggleFeatured('${v.id}',event)" title="${v.featured ? 'Öne çıkanlardan kaldır' : 'Öne çıkanlara ekle'}">${v.featured ? '★' : '☆'}</span></td>
         <td>${isPremiumActive(v) ? '<span style="font-size:.85rem;cursor:default" title="Premium İşletme — Aktif">👑</span>' : v.premium ? '<span style="font-size:.85rem;opacity:.3;cursor:default" title="Premium süresi dolmuş">👑</span>' : '<span style="font-size:.85rem;opacity:.15;cursor:default">—</span>'}</td>
-        <td><select onchange="changeVenueStatus('${v.id}',this.value)" style="padding:4px 8px;border-radius:8px;border:1.5px solid rgba(0,0,0,.08);font-size:.72rem;font-family:inherit;background:${st.bg};color:${st.color};font-weight:600;cursor:pointer">
+        <td>${statusKey === 'trashed' ? `<span style="font-size:.68rem;color:var(--text-muted)">🗑 ${v.trashedAt ? new Date(v.trashedAt).toLocaleDateString('tr-TR') : ''}</span>` : `<select onchange="changeVenueStatus('${v.id}',this.value)" style="padding:4px 8px;border-radius:8px;border:1.5px solid rgba(0,0,0,.08);font-size:.72rem;font-family:inherit;background:${st.bg};color:${st.color};font-weight:600;cursor:pointer">
           <option value="published" ${statusKey==='published'?'selected':''}>🟢 Yayında</option>
           <option value="draft" ${statusKey==='draft'?'selected':''}>📝 Taslak</option>
           <option value="hidden" ${statusKey==='hidden'?'selected':''}>👁‍🗨 Gizli</option>
-        </select></td>
+        </select>`}</td>
         <td>${sBadge}</td>
         <td>
+          ${statusKey === 'trashed' ? `
+          <button class="btn-icon" title="Geri Al" onclick="restoreVenue('${v.id}')" style="color:var(--green)">↩</button>
+          <button class="btn-icon" title="Kalıcı Sil" onclick="permanentDeleteVenue('${v.id}')" style="margin-left:4px;color:var(--red)">✕</button>
+          ` : `
           <a class="btn-icon" href="https://assosukesfet.com/mekanlar/mekan-detay?id=${v.id}" target="_blank" title="Sayfayı Görüntüle" style="text-decoration:none;color:var(--terra)">↗</a>
           <button class="btn-icon" title="Düzenle" onclick="openVenueModal('${v.id}')" style="margin-left:4px">&#9998;</button>
           <button class="btn-icon" title="QR Kod" onclick="openQRModal('${v.id}')" style="margin-left:4px">📱</button>
-          <button class="btn-icon" title="Sil" onclick="confirmDeleteVenue('${v.id}')" style="margin-left:4px;color:var(--red)">&#128465;</button>
+          <button class="btn-icon" title="Çöp Kutusuna Taşı" onclick="confirmDeleteVenue('${v.id}')" style="margin-left:4px;color:var(--red)">&#128465;</button>
+          `}
         </td>
       </tr>`;
     }).join('');
@@ -6163,9 +6194,10 @@ async function saveVenue(e) {
   if (editingVenueId) {
     const idx = draftData.venues.findIndex(v => v.id === editingVenueId);
     if (idx >= 0) {
+      const beforeSnap = { ...draftData.venues[idx] };
       const existing = draftData.venues[idx];
       draftData.venues[idx] = { ...existing, ...venue };
-      await saveVenueToFirestore(draftData.venues[idx]);
+      await saveVenueToFirestore(draftData.venues[idx], beforeSnap);
     }
   } else {
     if (draftData.venues.some(v => v.id === venue.id)) {
@@ -6173,6 +6205,7 @@ async function saveVenue(e) {
       return;
     }
     draftData.venues.push(venue);
+    logActivity('mekan_ekle', venue.id, venue.title);
     await saveVenueToFirestore(venue);
   }
 
@@ -6192,13 +6225,41 @@ function confirmDeleteVenue(id) {
   const v = draftData.venues.find(x => x.id === id);
   if (!v) return;
   showConfirm(
-    'Mekan Silinecek',
-    `"${v.title}" mekanini silmek istediginize emin misiniz? Bu islem geri alinamaz.`,
+    'Çöp Kutusuna Taşı',
+    `"${v.title}" mekanı çöp kutusuna taşınacak. 30 gün içinde geri alabilirsiniz.`,
+    () => {
+      v.status = 'trashed';
+      v.trashedAt = new Date().toISOString();
+      v.active = false;
+      saveVenueToFirestore(v);
+      renderVenueTable();
+      logActivity('mekan_cop', v.id, v.title);
+      showToast('🗑 "' + v.title + '" çöp kutusuna taşındı.', 'success');
+    }
+  );
+}
+function restoreVenue(id) {
+  const v = draftData.venues.find(x => x.id === id);
+  if (!v) return;
+  v.status = 'draft';
+  v.active = false;
+  delete v.trashedAt;
+  saveVenueToFirestore(v);
+  renderVenueTable();
+  logActivity('mekan_geri_al', v.id, v.title);
+  showToast('📝 "' + v.title + '" taslak olarak geri alındı.', 'success');
+}
+function permanentDeleteVenue(id) {
+  const v = draftData.venues.find(x => x.id === id);
+  if (!v) return;
+  showConfirm(
+    'Kalıcı Silme',
+    `"${v.title}" kalıcı olarak silinecek. Bu işlem geri alınamaz!`,
     () => {
       draftData.venues = draftData.venues.filter(x => x.id !== id);
       deleteVenueFromFirestore(id);
       renderVenueTable();
-      showToast('"' + v.title + '" silindi.', 'success');
+      showToast('"' + v.title + '" kalıcı olarak silindi.', 'success');
     }
   );
 }
@@ -7826,13 +7887,28 @@ function deleteBlogPost(id) {
    AKTIVITE LOGU
 ══════════════════════════════════════════════════ */
 const ACTIVITY_LABELS = {
-  giris: { icon: '🔐', label: 'Giris', color: 'rgba(49,130,206,.1)' },
-  mekan_guncelle: { icon: '🏪', label: 'Mekan Guncellendi', color: 'rgba(196,82,26,.1)' },
-  mekan_sil: { icon: '🗑', label: 'Mekan Silindi', color: 'rgba(229,62,62,.1)' },
-  yer_guncelle: { icon: '📍', label: 'Yer Guncellendi', color: 'rgba(26,107,138,.1)' },
-  koy_guncelle: { icon: '🏘', label: 'Koy Guncellendi', color: 'rgba(90,122,86,.1)' },
-  rota_guncelle: { icon: '🗺', label: 'Rota Guncellendi', color: 'rgba(212,147,90,.1)' },
-  rota_ekle: { icon: '🗺', label: 'Rota Eklendi', color: 'rgba(56,161,105,.1)' }
+  giris: { icon: '🔐', label: 'Giriş', color: 'rgba(49,130,206,.1)' },
+  mekan_ekle: { icon: '➕', label: 'Mekan Eklendi', color: 'rgba(56,161,105,.1)' },
+  mekan_guncelle: { icon: '🏪', label: 'Mekan Güncellendi', color: 'rgba(196,82,26,.1)' },
+  mekan_sil: { icon: '🗑', label: 'Mekan Kalıcı Silindi', color: 'rgba(229,62,62,.1)' },
+  mekan_cop: { icon: '🗑', label: 'Mekan Çöpe Taşındı', color: 'rgba(113,128,150,.1)' },
+  mekan_geri_al: { icon: '↩', label: 'Mekan Geri Alındı', color: 'rgba(56,161,105,.1)' },
+  yer_guncelle: { icon: '📍', label: 'Yer Güncellendi', color: 'rgba(26,107,138,.1)' },
+  yer_ekle: { icon: '📍', label: 'Yer Eklendi', color: 'rgba(56,161,105,.1)' },
+  yer_sil: { icon: '🗑', label: 'Yer Silindi', color: 'rgba(229,62,62,.1)' },
+  koy_guncelle: { icon: '🏘', label: 'Köy Güncellendi', color: 'rgba(90,122,86,.1)' },
+  koy_ekle: { icon: '🏘', label: 'Köy Eklendi', color: 'rgba(56,161,105,.1)' },
+  koy_sil: { icon: '🗑', label: 'Köy Silindi', color: 'rgba(229,62,62,.1)' },
+  rota_guncelle: { icon: '🗺', label: 'Rota Güncellendi', color: 'rgba(212,147,90,.1)' },
+  rota_ekle: { icon: '🗺', label: 'Rota Eklendi', color: 'rgba(56,161,105,.1)' },
+  rota_sil: { icon: '🗑', label: 'Rota Silindi', color: 'rgba(229,62,62,.1)' },
+  blog_ekle: { icon: '✍️', label: 'Blog Yazısı Eklendi', color: 'rgba(56,161,105,.1)' },
+  blog_guncelle: { icon: '✍️', label: 'Blog Yazısı Güncellendi', color: 'rgba(196,82,26,.1)' },
+  blog_sil: { icon: '🗑', label: 'Blog Yazısı Silindi', color: 'rgba(229,62,62,.1)' },
+  sifre_degistir: { icon: '🔐', label: 'Şifre Değiştirildi', color: 'rgba(229,62,62,.1)' },
+  premium_bitti: { icon: '⭐', label: 'Premium Süresi Doldu', color: 'rgba(212,147,90,.1)' },
+  llms_guncelle: { icon: '🤖', label: 'AI İçerik Güncellendi', color: 'rgba(26,107,138,.1)' },
+  backup: { icon: '💾', label: 'Yedekleme', color: 'rgba(49,130,206,.1)' }
 };
 
 async function renderActivityLog() {
@@ -7842,22 +7918,30 @@ async function renderActivityLog() {
 
   try {
     const filter = document.getElementById('activity-filter')?.value || 'all';
-    let query = db.collection('activity_logs').orderBy('timestamp', 'desc').limit(100);
+    const search = (document.getElementById('activity-search')?.value || '').toLowerCase().trim();
+    let query = db.collection('activity_logs').orderBy('timestamp', 'desc').limit(200);
     const snap = await query.get();
     let logs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-    if (filter !== 'all') {
+    if (filter === 'sil') {
+      logs = logs.filter(l => l.action && l.action.includes('sil'));
+    } else if (filter !== 'all') {
       logs = logs.filter(l => l.action && l.action.startsWith(filter));
     }
 
-    document.getElementById('activity-count').textContent = logs.length + ' kayit';
+    if (search) {
+      logs = logs.filter(l => (l.details || '').toLowerCase().includes(search) || (l.target || '').toLowerCase().includes(search));
+    }
+
+    document.getElementById('activity-count').textContent = logs.length + ' kayıt';
 
     if (logs.length === 0) {
-      list.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted)">Henuz aktivite yok.</div>';
+      list.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted)">Sonuç bulunamadı.</div>';
       return;
     }
 
-    // Tarihe gore grupla
+    const FIELD_LABELS = {title:'Mekan Adı',category:'Kategori',location:'Konum',phone:'Telefon',phones:'Telefonlar',address:'Adres',website:'Website',instagram:'Instagram',shortDesc:'Kısa Açıklama',hours:'Çalışma Saati',premium:'Premium',seasonal:'Sezonluk',weeklyHours:'Haftalık Saatler',facilities:'Tesisler',description:'Açıklama',tags:'Etiketler',image:'Görsel',lat:'Enlem',lng:'Boylam'};
+
     const groups = {};
     logs.forEach(l => {
       const date = (l.timestamp || '').split('T')[0] || 'Bilinmeyen';
@@ -7869,18 +7953,36 @@ async function renderActivityLog() {
     Object.entries(groups).forEach(([date, items]) => {
       const d = new Date(date);
       const dateLabel = isNaN(d) ? date : d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' });
-      html += '<div style="padding:10px 20px;font-size:.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;background:var(--cream);border-bottom:1px solid rgba(0,0,0,.04)">' + dateLabel + '</div>';
+      html += '<div style="padding:10px 20px;font-size:.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;background:var(--cream);border-bottom:1px solid rgba(0,0,0,.04)">' + dateLabel + ' <span style="font-weight:500;text-transform:none;letter-spacing:0">(' + items.length + ' işlem)</span></div>';
       items.forEach(l => {
         const cfg = ACTIVITY_LABELS[l.action] || { icon: '📋', label: l.action, color: 'rgba(0,0,0,.05)' };
         const time = l.timestamp ? new Date(l.timestamp).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '';
-        html += '<div style="display:flex;gap:12px;padding:12px 20px;border-bottom:1px solid rgba(0,0,0,.03);align-items:center">' +
-          '<div style="width:36px;height:36px;border-radius:10px;background:' + cfg.color + ';display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">' + cfg.icon + '</div>' +
-          '<div style="flex:1;min-width:0">' +
-            '<div style="font-size:.82rem;font-weight:600;color:var(--navy)">' + cfg.label + (l.details ? ' — <span style="font-weight:700">' + l.details + '</span>' : '') + '</div>' +
-            '<div style="font-size:.7rem;color:var(--text-muted);margin-top:2px">' + (l.user || '') + '</div>' +
-          '</div>' +
-          '<div style="font-size:.72rem;color:var(--text-muted);flex-shrink:0">' + time + '</div>' +
-        '</div>';
+        const hasChanges = l.changes && l.changes.length > 0;
+        const logId = 'log-' + l.id;
+        html += '<div style="border-bottom:1px solid rgba(0,0,0,.03)">' +
+          '<div style="display:flex;gap:12px;padding:12px 20px;align-items:center;' + (hasChanges ? 'cursor:pointer' : '') + '"' + (hasChanges ? ' onclick="var el=document.getElementById(\'' + logId + '\');el.style.display=el.style.display===\'none\'?\'block\':\'none\'"' : '') + '>' +
+            '<div style="width:36px;height:36px;border-radius:10px;background:' + cfg.color + ';display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">' + cfg.icon + '</div>' +
+            '<div style="flex:1;min-width:0">' +
+              '<div style="font-size:.82rem;font-weight:600;color:var(--navy)">' + cfg.label + (l.details ? ' — <span style="font-weight:700">' + l.details + '</span>' : '') + '</div>' +
+              '<div style="font-size:.7rem;color:var(--text-muted);margin-top:2px">' + (l.user || '') + (hasChanges ? ' · <span style="color:var(--terra)">' + l.changes.length + ' değişiklik</span>' : '') + '</div>' +
+            '</div>' +
+            '<div style="font-size:.72rem;color:var(--text-muted);flex-shrink:0">' + time + (hasChanges ? ' <span style="font-size:.7rem;color:var(--terra)">▾</span>' : '') + '</div>' +
+          '</div>';
+        if (hasChanges) {
+          html += '<div id="' + logId + '" style="display:none;padding:0 20px 14px 68px">' +
+            '<div style="background:var(--cream);border-radius:8px;overflow:hidden;border:1px solid rgba(0,0,0,.04)">' +
+            l.changes.map(function(c) {
+              var label = FIELD_LABELS[c.field] || c.field;
+              return '<div style="display:flex;gap:8px;padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.03);font-size:.72rem;align-items:flex-start">' +
+                '<span style="font-weight:700;color:var(--navy);min-width:90px;flex-shrink:0">' + label + '</span>' +
+                '<span style="color:var(--red);text-decoration:line-through;word-break:break-word;max-width:40%">' + (c.from || '—') + '</span>' +
+                '<span style="color:var(--text-muted)">→</span>' +
+                '<span style="color:var(--green);font-weight:600;word-break:break-word;max-width:40%">' + (c.to || '—') + '</span>' +
+              '</div>';
+            }).join('') +
+            '</div></div>';
+        }
+        html += '</div>';
       });
     });
 
