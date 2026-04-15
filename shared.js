@@ -1155,7 +1155,7 @@ function initScrollToTop() {
   style.textContent = `
     #scroll-top-btn {
       position: fixed;
-      bottom: 90px;
+      bottom: 92px;
       right: 28px;
       z-index: 400;
       width: 44px;
@@ -2973,14 +2973,18 @@ function renderVenuePage(venueId) {
   (function() {
     const sticky = document.getElementById('vp-sticky');
     const fab = document.getElementById('ai-chat-fab');
+    const stt = document.getElementById('scroll-top-btn');
+    function updateFloatingPositions(stickyVisible) {
+      var isMob = window.innerWidth <= 480;
+      var fabBottom = stickyVisible ? (isMob ? 80 : 90) : (isMob ? 16 : 24);
+      if (fab) fab.style.bottom = fabBottom + 'px';
+      if (stt) stt.style.bottom = (fabBottom + (isMob ? 58 : 68)) + 'px';
+    }
     window.addEventListener('scroll', function() {
-      if (window.scrollY > 500) {
-        sticky.classList.add('show');
-        if (fab) fab.style.bottom = window.innerWidth <= 480 ? '80px' : '90px';
-      } else {
-        sticky.classList.remove('show');
-        if (fab) fab.style.bottom = '';
-      }
+      var show = window.scrollY > 500;
+      if (show) sticky.classList.add('show');
+      else sticky.classList.remove('show');
+      updateFloatingPositions(show);
     }, { passive: true });
   })();
 
