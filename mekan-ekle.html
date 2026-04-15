@@ -537,7 +537,7 @@ function collectData(){
     ownerName:san(document.getElementById('f-ownerName').value.trim()),ownerEmail:document.getElementById('f-ownerEmail').value.trim(),ownerPhone:document.getElementById('f-ownerPhone').value.trim(),
     title:san(document.getElementById('f-title').value.trim()),category:cat,location:document.getElementById('f-location').value,address:san(document.getElementById('f-address').value.trim()),mapsLink:document.getElementById('f-mapsLink').value.trim(),
     shortDesc:san(document.getElementById('f-shortDesc').value.trim()),description:san(document.getElementById('f-description').value.trim()),
-    phones:phones.map(function(p){return{number:p.number,label:san(p.label),whatsapp:p.whatsapp};}),tags:selTags.slice(),website:document.getElementById('f-website').value.trim(),instagram:san(document.getElementById('f-instagram').value.trim()),
+    phones:phones.map(function(p){return{number:p.number,label:san(p.label),whatsapp:p.whatsapp};}),tags:selTags.slice(),website:document.getElementById('f-website').value.trim(),instagram:(function(){var v=document.getElementById('f-instagram').value.trim().replace(/^https?:\/\/(www\.)?instagram\.com\//,'').replace(/\/$/,'');if(v&&!v.startsWith('@'))v='@'+v;return san(v);})(),
     weeklyHours:wh,checkin:cat==='konaklama'?document.getElementById('f-checkin').value:'',checkout:cat==='konaklama'?document.getElementById('f-checkout').value:'',
     rooms:rooms,facilities:facilities,
     seasonal:document.getElementById('f-seasonal').checked,seasonStart:document.getElementById('f-seasonStart').value,seasonEnd:document.getElementById('f-seasonEnd').value
