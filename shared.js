@@ -453,8 +453,8 @@ function renderNav(opts = {}) {
       /* Drawer */
       #save-drawer {
         position:fixed; top:0; right:0; z-index:451;
-        width:360px; max-width:calc(100vw - 32px); height:100dvh;
-        background:#FAF7F2; overflow-y:auto;
+        width:360px; max-width:calc(100vw - 16px); height:100dvh;
+        background:#FAF7F2; overflow-y:auto; overflow-x:hidden;
         box-shadow:-12px 0 48px rgba(26,39,68,.18);
         transform:translateX(105%); transition:transform .4s cubic-bezier(.4,0,.2,1);
         display:flex; flex-direction:column;
@@ -536,16 +536,16 @@ function renderNav(opts = {}) {
               <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);">Keşif Listenizi Paylaşın</span>
             </div>
             <div class="sd-sync-hint" style="margin-bottom:12px;">Bu kod sizin Assos rotanız! Arkadaşlarınıza gönderin, aynı listeyi görsünler. Başka cihazınıza aktarmak için de kullanabilirsiniz.</div>
-            <div class="sd-sync-row" style="margin-bottom:10px;">
+            <div class="sd-sync-row" style="margin-bottom:10px;flex-wrap:wrap;">
               <span class="sd-sync-label">Kodunuz</span>
               <span class="sd-sync-code" id="sd-sync-code" onclick="navigator.clipboard.writeText(this.textContent).then(()=>{this.dataset.tip='Kopyalandı!';setTimeout(()=>this.dataset.tip='',1500)})">—</span>
-              <button onclick="navigator.clipboard.writeText(document.getElementById('sd-sync-code').textContent).then(()=>{this.textContent='Kopyalandı!';setTimeout(()=>this.textContent='Kopyala',1500)})" style="padding:5px 10px;border:1px solid rgba(26,39,68,.12);border-radius:6px;background:#fff;font-size:.68rem;font-weight:600;cursor:pointer;color:var(--navy);font-family:inherit;transition:all .15s;">Kopyala</button>
+              <button onclick="navigator.clipboard.writeText(document.getElementById('sd-sync-code').textContent).then(()=>{this.textContent='✓';setTimeout(()=>this.textContent='Kopyala',1500)})" style="padding:5px 10px;border:1px solid rgba(26,39,68,.12);border-radius:6px;background:#fff;font-size:.68rem;font-weight:600;cursor:pointer;color:var(--navy);font-family:inherit;transition:all .15s;">Kopyala</button>
             </div>
             <div style="height:1px;background:rgba(26,39,68,.06);margin:10px 0;"></div>
-            <div class="sd-sync-row">
-              <input type="text" id="sd-sync-input" class="sd-sync-inp" placeholder="Kodu yapıştırın..." maxlength="8">
+            <div class="sd-sync-row" style="flex-wrap:wrap;">
+              <input type="text" id="sd-sync-input" class="sd-sync-inp" placeholder="Kodu yapıştırın..." maxlength="8" style="min-width:0;">
               <button class="sd-sync-load" onclick="loadFavCode()">Yükle</button>
-              <button onclick="refreshFavCode()" style="padding:5px 10px;border:1px solid rgba(26,39,68,.12);border-radius:6px;background:#fff;font-size:.78rem;cursor:pointer;color:var(--navy);font-family:inherit;transition:all .15s;" title="Listeyi güncelle">🔄</button>
+              <button onclick="refreshFavCode()" style="padding:5px 8px;border:1px solid rgba(26,39,68,.12);border-radius:6px;background:#fff;font-size:.78rem;cursor:pointer;color:var(--navy);font-family:inherit;transition:all .15s;flex-shrink:0;" title="Listeyi güncelle">🔄</button>
             </div>
             <div id="sd-sync-status" style="font-size:.72rem;margin-top:6px;min-height:16px;"></div>
             <div id="sd-last-code" style="font-size:.65rem;color:rgba(26,39,68,.3);margin-top:4px;"></div>
