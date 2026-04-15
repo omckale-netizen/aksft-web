@@ -4248,6 +4248,13 @@ function renderPlacePage(placeId) {
     .ai-chat-input button:hover{background:#D96B2E;}
     .ai-chat-input button:disabled{opacity:.4;cursor:default;}
     .ai-chat-limit{text-align:center;font-size:.65rem;color:rgba(26,39,68,.3);padding:4px 16px 8px;}
+    .ai-chat-suggestions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+    .ai-chat-sug{padding:7px 12px;border-radius:10px;border:1px solid rgba(26,39,68,.1);background:rgba(26,39,68,.03);font-size:.72rem;font-weight:600;color:var(--navy,#1A2744);cursor:pointer;transition:all .2s;font-family:inherit;}
+    .ai-chat-sug:hover{background:var(--terra,#C4521A);color:#fff;border-color:var(--terra);}
+    .ai-msg.bot{position:relative;cursor:pointer;}
+    .ai-msg.bot:hover::after{content:'📋';position:absolute;top:6px;right:8px;font-size:.6rem;opacity:.4;}
+    .ai-msg-copied{position:absolute;top:6px;right:6px;font-size:.58rem;font-weight:700;color:var(--terra,#C4521A);opacity:0;transition:opacity .3s;pointer-events:none;}
+    .ai-msg-copied.show{opacity:1;}
     .ai-chat-close{display:none;width:32px;height:32px;border-radius:50%;background:rgba(245,237,224,.12);border:none;color:rgba(245,237,224,.7);font-size:.9rem;cursor:pointer;align-items:center;justify-content:center;margin-left:auto;flex-shrink:0;transition:background .2s;}
     .ai-chat-close:hover{background:rgba(245,237,224,.2);}
     @media(max-width:480px){.ai-chat-panel{bottom:0;right:0;left:0;width:100%;max-width:100%;max-height:75vh;border-radius:20px 20px 0 0;}.ai-chat-fab{bottom:16px;right:16px;width:50px;height:50px;font-size:1.2rem;}.ai-chat-fab.open{display:none;}.ai-chat-close{display:flex;}}
@@ -4267,7 +4274,14 @@ function renderPlacePage(placeId) {
         <button class="ai-chat-close" onclick="aiChatToggle()">✕</button>
       </div>
       <div class="ai-chat-body" id="ai-chat-body">
-        <div class="ai-msg bot">Merhaba! 🌊 Ben Assos bölgesinin dijital rehberiyim. Nerede kalmalıyım, hangi koyda yüzmeliyim, ne yemeliyim, nasıl gidilir — aklınıza takılan her şeyi sorun, size özel öneriler sunayım!</div>
+        <div class="ai-msg bot">Merhaba! 🌊 Ben Assos bölgesinin dijital rehberiyim. Aklınıza takılan her şeyi sorun, size özel öneriler sunayım!</div>
+        <div class="ai-chat-suggestions" id="ai-suggestions">
+          <button class="ai-chat-sug" onclick="aiAskSuggestion(this)">🏨 Nerede kalmalıyım?</button>
+          <button class="ai-chat-sug" onclick="aiAskSuggestion(this)">🌊 En güzel koy hangisi?</button>
+          <button class="ai-chat-sug" onclick="aiAskSuggestion(this)">🚗 Nasıl gidilir?</button>
+          <button class="ai-chat-sug" onclick="aiAskSuggestion(this)">🍽 Nerede yemeli?</button>
+          <button class="ai-chat-sug" onclick="aiAskSuggestion(this)">🏛 Ne görmeliyim?</button>
+        </div>
       </div>
       <div class="ai-chat-limit" id="ai-chat-limit"></div>
       <div class="ai-chat-input">
@@ -4283,9 +4297,20 @@ function renderPlacePage(placeId) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); aiChatSend(); }
   });
 
+  // Hazır soru tıklama
+  window.aiAskSuggestion = function(btn) {
+    var q = btn.textContent.trim();
+    document.getElementById('ai-chat-input').value = q;
+    // Önerileri gizle
+    var sug = document.getElementById('ai-suggestions');
+    if (sug) sug.style.display = 'none';
+    aiChatSend();
+  };
+
   // State
   var AI_DAILY_LIMIT = 10;
   var AI_STORAGE_KEY = 'assos_ai_chat';
+  var AI_HISTORY_KEY = 'assos_ai_history';
 
   function getAiState() {
     try {
@@ -4296,6 +4321,26 @@ function renderPlacePage(placeId) {
     } catch { return { date: new Date().toISOString().split('T')[0], count: 0 }; }
   }
   function saveAiState(state) { try { localStorage.setItem(AI_STORAGE_KEY, JSON.stringify(state)); } catch {} }
+  function saveHistory(msg, type) {
+    try {
+      var hist = JSON.parse(localStorage.getItem(AI_HISTORY_KEY) || '[]');
+      hist.push({ text: msg, type: type, ts: Date.now() });
+      if (hist.length > 30) hist = hist.slice(-30); // Son 30 mesaj
+      localStorage.setItem(AI_HISTORY_KEY, JSON.stringify(hist));
+    } catch {}
+  }
+  function loadHistory() {
+    try {
+      var hist = JSON.parse(localStorage.getItem(AI_HISTORY_KEY) || '[]');
+      if (hist.length === 0) return;
+      // Önerileri gizle
+      var sug = document.getElementById('ai-suggestions');
+      if (sug) sug.style.display = 'none';
+      // Geçmişi render et
+      hist.forEach(function(m) { addMsg(m.text, m.type, true); });
+    } catch {}
+  }
+  loadHistory();
   function updateLimit() {
     var s = getAiState();
     var el = document.getElementById('ai-chat-limit');
@@ -4389,12 +4434,14 @@ function renderPlacePage(placeId) {
 
   function mdToHtml(text) {
     var linkStyle = 'color:var(--terra);font-weight:600;text-decoration:underline;';
-    // 1. Markdown linkleri [text](url)
-    var result = text.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" style="' + linkStyle + '">$1</a>');
-    // 2. Düz URL'leri tıklanabilir yap (henüz <a> içinde olmayanlar)
-    result = result.replace(/(?<!["=])(https?:\/\/assosukesfet\.com\/[^\s<,)]+)/g, function(url) {
+    // 1. Markdown linkleri [text](url) — https:// olsun olmasın
+    var result = text.replace(/\[([^\]]+)\]\((https?:\/\/)?assosukesfet\.com\/([^)]+)\)/g, '<a href="https://assosukesfet.com/$3" target="_blank" rel="noopener" style="' + linkStyle + '">$1</a>');
+    // 2. Düz URL'leri tıklanabilir yap (https:// olsun olmasın)
+    result = result.replace(/(?<!["=\/])((?:https?:\/\/)?assosukesfet\.com\/[^\s<,)"]+)/g, function(url) {
+      if (result.indexOf('href="' + url) > -1 || result.indexOf('href="https://' + url) > -1) return url;
       // Sondaki noktalama temizle
       var clean = url.replace(/[.)]+$/, '');
+      if (clean.indexOf('https://') !== 0) clean = 'https://' + clean;
       var name = 'Detayı Gör →';
       if (clean.indexOf('mekan-detay') > -1) name = '🏪 Mekana Git →';
       else if (clean.indexOf('yer-detay') > -1) name = '📍 Yeri Gör →';
@@ -4414,13 +4461,31 @@ function renderPlacePage(placeId) {
       .replace(/- (.+?)(?=<br>|$)/g, '• $1');
     return result;
   }
-  function addMsg(text, type) {
+  function addMsg(text, type, skipSave) {
     var body = document.getElementById('ai-chat-body');
     var div = document.createElement('div');
     div.className = 'ai-msg ' + type;
-    if (type === 'bot') div.innerHTML = mdToHtml(text);
-    else div.textContent = text;
+    if (type === 'bot') {
+      div.innerHTML = mdToHtml(text);
+      // Kopyalama
+      div.addEventListener('click', function() {
+        var plain = text.replace(/\*\*/g,'').replace(/\*/g,'').replace(/#{1,3}\s/g,'').replace(/\[([^\]]+)\]\([^)]+\)/g,'$1');
+        navigator.clipboard.writeText(plain).then(function() {
+          var badge = div.querySelector('.ai-msg-copied');
+          if (!badge) { badge = document.createElement('span'); badge.className = 'ai-msg-copied'; badge.textContent = 'Kopyalandı!'; div.appendChild(badge); }
+          badge.classList.add('show');
+          setTimeout(function() { badge.classList.remove('show'); }, 1500);
+        }).catch(function() {});
+      });
+    } else {
+      div.textContent = text;
+    }
     body.appendChild(div);
     body.scrollTop = body.scrollHeight;
+    // Geçmişe kaydet
+    if (!skipSave) saveHistory(text, type);
+    // Önerileri gizle
+    var sug = document.getElementById('ai-suggestions');
+    if (sug && !skipSave) sug.style.display = 'none';
   }
 })();

@@ -45,7 +45,8 @@ CEVAP FORMATI:
 - 4-6 cümle ideal uzunluk. Çok kısa cevap verme.
 - Somut mekan/yer isimleri ver, genel konuşma.
 - Mümkünse alternatif öneriler sun.
-- Site linklerini ver: mekanlar → assosukesfet.com/mekanlar/mekan-detay?id=X, yerler → assosukesfet.com/yerler/yer-detay?id=X, köyler → assosukesfet.com/koyler/koy-detay?id=X
+- Site linklerini HER ZAMAN https:// ile ver: https://assosukesfet.com/mekanlar/mekan-detay?id=X, https://assosukesfet.com/yerler/yer-detay?id=X, https://assosukesfet.com/koyler/koy-detay?id=X
+- Linkleri markdown formatında ver: [Mekan Adı](https://assosukesfet.com/mekanlar/mekan-detay?id=mekan-id)
 - Her cevabın sonunda ilgili bir takip sorusu öner.
 
 BÖLGE BİLGİSİ:
