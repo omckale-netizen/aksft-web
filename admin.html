@@ -2434,7 +2434,22 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         </div>
         <div class="form-group">
           <label>Detaylı Açıklama</label>
-          <textarea id="f-description" rows="4" placeholder="Mekan hakkında detaylı bilgi (detay sayfasında görünür)"></textarea>
+          <div class="rte-wrap">
+            <div class="rte-toolbar">
+              <button type="button" class="rte-btn" onclick="venueRteCmd('bold')" title="Kalın"><b>B</b></button>
+              <button type="button" class="rte-btn" onclick="venueRteCmd('italic')" title="İtalik"><i>I</i></button>
+              <span class="rte-sep"></span>
+              <button type="button" class="rte-btn" onclick="venueRteHeading('h3')" title="Alt Başlık">H3</button>
+              <button type="button" class="rte-btn" onclick="venueRteCmd('insertUnorderedList')" title="Liste">• Liste</button>
+              <button type="button" class="rte-btn" onclick="venueRteCmd('insertOrderedList')" title="Numaralı Liste">1. Liste</button>
+              <span class="rte-sep"></span>
+              <button type="button" class="rte-btn" onclick="venueRteLink()" title="Link">🔗</button>
+              <button type="button" class="rte-btn" onclick="venueRteCmd('removeFormat')" title="Temizle">✕</button>
+              <button type="button" class="rte-btn rte-btn-code" onclick="venueRteToggleSource()" title="HTML Kaynak">‹/›</button>
+            </div>
+            <div id="f-desc-editor" class="rte-editor" contenteditable="true" data-placeholder="Mekan hakkında detaylı bilgi yazın..." style="min-height:180px;"></div>
+            <textarea id="f-description" class="rte-source" style="display:none;min-height:180px;"></textarea>
+          </div>
         </div>
 
         <!-- ═══ İletişim ═══ -->
@@ -6540,6 +6555,10 @@ function openVenueModal(id) {
     document.getElementById('f-category').value = v.category || '';
     document.getElementById('f-shortDesc').value = v.shortDesc || '';
     document.getElementById('f-description').value = v.description || '';
+    document.getElementById('f-desc-editor').innerHTML = v.description || '';
+    window._venueRteSourceMode = false;
+    document.getElementById('f-desc-editor').style.display = 'block';
+    document.getElementById('f-description').style.display = 'none';
     document.getElementById('f-location').value = v.location || '';
     document.getElementById('f-placeId').value = v.placeId || '';
     document.getElementById('f-address').value = v.address || '';
@@ -6595,6 +6614,11 @@ function openVenueModal(id) {
     loadFacilitiesData([]);
     document.getElementById('f-phones-list').innerHTML = '';
     addPhoneRow();
+    document.getElementById('f-desc-editor').innerHTML = '';
+    document.getElementById('f-description').value = '';
+    window._venueRteSourceMode = false;
+    document.getElementById('f-desc-editor').style.display = 'block';
+    document.getElementById('f-description').style.display = 'none';
   }
   updateHoursVisibility();
 
@@ -6645,13 +6669,16 @@ function parseVPCoords(val) {
 
 var _venueFormSnapshot = '';
 function _getVenueFormState() {
-  var f = document.getElementById('venue-form');
-  if (!f) return '';
+  var keys = ['f-title','f-category','f-location','f-shortDesc','f-address','f-website','f-instagram','f-ownerName','f-ownerEmail','f-featured','f-premium','f-seasonal'];
   var parts = [];
-  f.querySelectorAll('input,select,textarea').forEach(function(el) {
-    if (el.type === 'hidden' || el.type === 'file') return;
-    parts.push(el.id + ':' + (el.type === 'checkbox' ? el.checked : el.value));
+  keys.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    parts.push(id + ':' + (el.type === 'checkbox' ? el.checked : el.value));
   });
+  // RTE editor içeriği
+  var editor = document.getElementById('f-desc-editor');
+  if (editor) parts.push('desc:' + editor.innerHTML.trim());
   return parts.join('|');
 }
 function snapshotVenueForm() { _venueFormSnapshot = _getVenueFormState(); }
@@ -6960,7 +6987,7 @@ async function saveVenue(e) {
     tagColor: catDef.tagColor || '',
     tagText: catDef.tagText || '',
     shortDesc: document.getElementById('f-shortDesc').value.trim(),
-    description: document.getElementById('f-description').value.trim(),
+    description: (window._venueRteSourceMode ? document.getElementById('f-description').value : document.getElementById('f-desc-editor').innerHTML).trim(),
     location: document.getElementById('f-location').value.trim(),
     placeId: document.getElementById('f-placeId').value || '',
     tags: tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [],
@@ -10701,6 +10728,39 @@ window._rteSourceMode = false;
 window._vpRteSourceMode = false;
 
 // VP (Yerler/Köyler) RTE fonksiyonları
+// ── Mekan RTE ──
+function venueRteCmd(cmd, val) {
+  document.getElementById('f-desc-editor').focus();
+  document.execCommand(cmd, false, val || null);
+}
+function venueRteHeading(tag) {
+  var editor = document.getElementById('f-desc-editor');
+  editor.focus();
+  var sel = window.getSelection();
+  if (!sel.rangeCount) return;
+  var parent = sel.startContainer.nodeType === 3 ? sel.startContainer.parentElement : sel.startContainer;
+  if (parent.tagName && parent.tagName.toLowerCase() === tag) document.execCommand('formatBlock', false, 'p');
+  else document.execCommand('formatBlock', false, tag);
+}
+function venueRteLink() {
+  var url = prompt('Link URL:', 'https://');
+  if (url) { document.getElementById('f-desc-editor').focus(); document.execCommand('createLink', false, url); }
+}
+function venueRteToggleSource() {
+  var editor = document.getElementById('f-desc-editor');
+  var source = document.getElementById('f-description');
+  if (window._venueRteSourceMode) {
+    editor.innerHTML = source.value;
+    source.style.display = 'none'; editor.style.display = 'block';
+    window._venueRteSourceMode = false;
+  } else {
+    source.value = editor.innerHTML;
+    editor.style.display = 'none'; source.style.display = 'block';
+    window._venueRteSourceMode = true;
+  }
+}
+
+// ── Yer/Köy RTE ──
 function vpRteCmd(cmd, val) {
   document.getElementById('vpf-desc-editor').focus();
   document.execCommand(cmd, false, val || null);
