@@ -4059,7 +4059,7 @@ function previewPendingVenue(id) {
           '<span style="color:var(--text-muted);font-weight:600">Kategori</span><span>' + (catLabels[d.category] || d.category || '—') + '</span>' +
           '<span style="color:var(--text-muted);font-weight:600">Konum</span><span>' + (d.location || '—') + '</span>' +
           '<span style="color:var(--text-muted);font-weight:600">Adres</span><span>' + (d.address || '—') + '</span>' +
-          (d.mapsLink ? '<span style="color:var(--text-muted);font-weight:600">Maps</span><a href="' + d.mapsLink + '" target="_blank" style="color:var(--terra);word-break:break-all">' + d.mapsLink + '</a>' : '') +
+          (d.mapsLink ? '<span style="color:var(--text-muted);font-weight:600">Maps</span><span><a href="' + d.mapsLink + '" target="_blank" style="color:var(--terra);word-break:break-all">Link Aç ↗</a> <span id="pending-coords-' + id + '" style="font-size:.72rem;color:var(--text-muted)">koordinat yükleniyor...</span></span>' : '') +
           '<span style="color:var(--text-muted);font-weight:600">Telefon</span><span>' + phoneStr + '</span>' +
           (d.website ? '<span style="color:var(--text-muted);font-weight:600">Website</span><a href="' + d.website + '" target="_blank" style="color:var(--terra)">' + d.website + '</a>' : '') +
           (d.instagram ? '<span style="color:var(--text-muted);font-weight:600">Instagram</span><span>' + d.instagram + '</span>' : '') +
@@ -4088,6 +4088,20 @@ function previewPendingVenue(id) {
       '</div>' +
     '</div>';
     document.body.appendChild(overlay);
+    // Maps link → koordinat çevir
+    if (d.mapsLink) {
+      fetch('/api/geocode?maps=' + encodeURIComponent(d.mapsLink)).then(function(r){return r.json();}).then(function(geo) {
+        var el = document.getElementById('pending-coords-' + id);
+        if (el && geo.lat && geo.lng) {
+          el.innerHTML = '✅ <strong>' + geo.lat.toFixed(5) + ', ' + geo.lng.toFixed(5) + '</strong> <button onclick="navigator.clipboard.writeText(\'' + geo.lat.toFixed(5) + ', ' + geo.lng.toFixed(5) + '\');this.textContent=\'✓\';setTimeout(function(){this.textContent=\'Kopyala\';}.bind(this),1500)" style="font-size:.65rem;padding:2px 6px;border:1px solid var(--border);border-radius:4px;background:var(--card-bg,#fff);cursor:pointer;font-family:inherit;color:var(--terra)">Kopyala</button>';
+        } else if (el) {
+          el.innerHTML = '❌ Koordinat bulunamadı';
+        }
+      }).catch(function() {
+        var el = document.getElementById('pending-coords-' + id);
+        if (el) el.innerHTML = '❌ Çözümlenemedi';
+      });
+    }
   }).catch(function(err) { showToast('Yüklenemedi: ' + err.message, 'error'); });
 }
 
