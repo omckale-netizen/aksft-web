@@ -4004,7 +4004,8 @@ async function renderPendingVenues() {
           (item.status === 'pending' || item.status === 'revision' ? '' : '') +
           (item.status === 'pending' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla & Mekan Ekle</button><button class="btn btn-sm" style="background:rgba(49,130,206,.1);color:#2B6CB0;border:1px solid rgba(49,130,206,.2)" onclick="rejectPendingVenue(\'' + item._id + '\')">📝 Revizyon İste</button>' : '') +
           (item.status === 'revision' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla</button><span style="font-size:.72rem;color:var(--text-muted)">Düzenleme bekleniyor</span>' : '') +
-          '<button class="btn btn-secondary btn-sm" onclick="openComposeMail(\'' + (item.ownerEmail || '') + '\')">✉️ Mail Gönder</button>' +
+          '<button class="btn btn-secondary btn-sm" onclick="pendingMailTo(\'' + (item.ownerEmail || '') + '\')">✉️ Mail</button>' +
+          '<button class="btn btn-secondary btn-sm" onclick="previewPendingVenue(\'' + item._id + '\')">👁 Detaylı İncele</button>' +
           '<button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="deletePendingVenue(\'' + item._id + '\')">🗑 Sil</button>' +
         '</div>' +
       '</div>';
@@ -4012,6 +4013,82 @@ async function renderPendingVenues() {
   } catch(err) {
     listEl.innerHTML = '<div style="padding:24px;color:var(--red)">Yüklenemedi: ' + err.message + '</div>';
   }
+}
+
+function pendingMailTo(email) {
+  if (!email) { showToast('E-posta adresi yok', 'error'); return; }
+  showPage('messages');
+  setTimeout(function() { openComposeMail(email); }, 300);
+}
+
+function previewPendingVenue(id) {
+  var items = document.querySelectorAll('#pending-list .panel-card');
+  // Firebase'den çek
+  db.collection('pending_venues').doc(id).get().then(function(doc) {
+    if (!doc.exists) { showToast('Talep bulunamadı', 'error'); return; }
+    var d = doc.data();
+    var catLabels = {kafe:'☕ Kafe',restoran:'🍽 Restoran',kahvalti:'🌞 Kahvaltı',konaklama:'🏨 Konaklama',beach:'🏖 Beach Club',iskele:'⚓ İskele'};
+    var phoneStr = (d.phones || []).map(function(p) { return p.number + (p.whatsapp ? ' (WhatsApp)' : '') + (p.label ? ' — ' + p.label : ''); }).join('<br>') || '—';
+    var tagsHtml = (d.tags || []).map(function(t) { return '<span style="display:inline-block;padding:3px 10px;border-radius:999px;background:rgba(26,39,68,.06);font-size:.72rem;font-weight:600;color:#4A5870;margin:2px">' + t + '</span>'; }).join('') || '—';
+    var imgsHtml = (d.images || []).map(function(url) { return '<img src="' + url + '" style="width:120px;height:80px;object-fit:cover;border-radius:8px;border:1px solid rgba(0,0,0,.06)">'; }).join('') || '<span style="color:var(--text-muted)">Görsel yüklenmemiş</span>';
+    var whHtml = (d.weeklyHours || []).map(function(wh) { return '<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:.78rem;border-bottom:1px solid rgba(0,0,0,.03)"><span style="font-weight:600;color:var(--navy)">' + wh.days + '</span><span style="color:' + (wh.closed ? 'var(--red)' : 'var(--text)') + '">' + (wh.closed ? 'Kapalı' : (wh.open + ' — ' + wh.close)) + '</span></div>'; }).join('') || '';
+    var roomsHtml = (d.rooms || []).map(function(r) { return '<div style="padding:6px 0;border-bottom:1px solid rgba(0,0,0,.03);font-size:.78rem"><strong>' + (r.name || 'Oda') + '</strong> · ' + (r.bed || '-') + ' · ' + (r.capacity || '-') + ' kişi' + (r.size ? ' · ' + r.size + ' m²' : '') + (r.view ? ' · ' + r.view : '') + '</div>'; }).join('') || '';
+    var facHtml = (d.facilities || []).join(', ') || '—';
+
+    // Modal oluştur
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:20px';
+    overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+    overlay.innerHTML = '<div style="background:var(--card-bg,#fff);border-radius:16px;max-width:700px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid rgba(0,0,0,.06);position:sticky;top:0;background:var(--card-bg,#fff);z-index:1;border-radius:16px 16px 0 0">' +
+        '<h3 style="margin:0;font-size:1rem;color:var(--navy)">📋 Mekan Talebi Detayı</h3>' +
+        '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="border:none;background:none;font-size:1.3rem;cursor:pointer;color:var(--text-muted)">&times;</button>' +
+      '</div>' +
+      '<div style="padding:20px 24px">' +
+        // Yetkili bilgileri
+        '<div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:10px">Yetkili Bilgileri</div>' +
+        '<div style="display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:.82rem;margin-bottom:20px;padding:12px 14px;background:rgba(0,0,0,.02);border-radius:10px">' +
+          '<span style="color:var(--text-muted);font-weight:600">Ad Soyad</span><span>' + (d.ownerName || '—') + '</span>' +
+          '<span style="color:var(--text-muted);font-weight:600">E-posta</span><a href="mailto:' + (d.ownerEmail || '') + '" style="color:var(--terra)">' + (d.ownerEmail || '—') + '</a>' +
+          '<span style="color:var(--text-muted);font-weight:600">Telefon</span><span>' + (d.ownerPhone || '—') + '</span>' +
+        '</div>' +
+        // Mekan bilgileri
+        '<div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:10px">Mekan Bilgileri</div>' +
+        '<div style="display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:.82rem;margin-bottom:16px;padding:12px 14px;background:rgba(0,0,0,.02);border-radius:10px">' +
+          '<span style="color:var(--text-muted);font-weight:600">Mekan Adı</span><strong style="color:var(--navy)">' + (d.title || '—') + '</strong>' +
+          '<span style="color:var(--text-muted);font-weight:600">Kategori</span><span>' + (catLabels[d.category] || d.category || '—') + '</span>' +
+          '<span style="color:var(--text-muted);font-weight:600">Konum</span><span>' + (d.location || '—') + '</span>' +
+          '<span style="color:var(--text-muted);font-weight:600">Adres</span><span>' + (d.address || '—') + '</span>' +
+          (d.mapsLink ? '<span style="color:var(--text-muted);font-weight:600">Maps</span><a href="' + d.mapsLink + '" target="_blank" style="color:var(--terra);word-break:break-all">' + d.mapsLink + '</a>' : '') +
+          '<span style="color:var(--text-muted);font-weight:600">Telefon</span><span>' + phoneStr + '</span>' +
+          (d.website ? '<span style="color:var(--text-muted);font-weight:600">Website</span><a href="' + d.website + '" target="_blank" style="color:var(--terra)">' + d.website + '</a>' : '') +
+          (d.instagram ? '<span style="color:var(--text-muted);font-weight:600">Instagram</span><span>' + d.instagram + '</span>' : '') +
+        '</div>' +
+        // Etiketler
+        '<div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:8px">Etiketler</div>' +
+        '<div style="margin-bottom:16px">' + tagsHtml + '</div>' +
+        // Açıklama
+        '<div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:8px">Kısa Açıklama</div>' +
+        '<div style="font-size:.82rem;color:var(--text);line-height:1.7;margin-bottom:12px;padding:10px 14px;background:rgba(0,0,0,.02);border-radius:8px">' + (d.shortDesc || '—') + '</div>' +
+        '<div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:8px">Detaylı Açıklama</div>' +
+        '<div style="font-size:.82rem;color:var(--text);line-height:1.7;margin-bottom:16px;padding:10px 14px;background:rgba(0,0,0,.02);border-radius:8px">' + (d.description || '—') + '</div>' +
+        // Çalışma saatleri
+        (whHtml ? '<div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:8px">Çalışma Saatleri</div><div style="margin-bottom:16px;padding:10px 14px;background:rgba(0,0,0,.02);border-radius:8px">' + whHtml + '</div>' : '') +
+        // Konaklama
+        (d.category === 'konaklama' ? '<div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:8px">Check-in / Check-out</div><div style="font-size:.82rem;margin-bottom:12px">' + (d.checkin || '14:00') + ' — ' + (d.checkout || '11:00') + '</div>' : '') +
+        (roomsHtml ? '<div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:8px">Oda Tipleri</div><div style="margin-bottom:16px;padding:10px 14px;background:rgba(0,0,0,.02);border-radius:8px">' + roomsHtml + '</div>' : '') +
+        (d.facilities && d.facilities.length > 0 ? '<div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:8px">Tesis Olanakları</div><div style="font-size:.82rem;margin-bottom:16px">' + facHtml + '</div>' : '') +
+        // Sezon
+        (d.seasonal ? '<div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:8px">Sezon</div><div style="font-size:.82rem;margin-bottom:16px">' + (d.seasonStart || '') + ' — ' + (d.seasonEnd || '') + '</div>' : '') +
+        // Görseller
+        '<div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:8px">Görseller</div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">' + imgsHtml + '</div>' +
+        // Meta
+        '<div style="font-size:.65rem;color:var(--text-muted);border-top:1px solid rgba(0,0,0,.04);padding-top:12px">Başvuru: ' + (d.submittedAt ? new Date(d.submittedAt).toLocaleString('tr-TR') : '—') + (d.updatedAt ? ' · Güncelleme: ' + new Date(d.updatedAt).toLocaleString('tr-TR') : '') + '</div>' +
+      '</div>' +
+    '</div>';
+    document.body.appendChild(overlay);
+  }).catch(function(err) { showToast('Yüklenemedi: ' + err.message, 'error'); });
 }
 
 async function approvePendingVenue(id) {
