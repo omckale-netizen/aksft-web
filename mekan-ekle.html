@@ -282,7 +282,7 @@ a{color:var(--terra);text-decoration:none}
   </div>
 </div>
 <div class="me-footer">
-  <div id="footer-logo" style="margin-bottom:8px"><span style="font-size:1.3rem">🏛️</span></div>
+  <div id="footer-logo" style="margin-bottom:8px;height:40px"></div>
   <div>© <script>document.write(new Date().getFullYear())</script> Assos'u Keşfet · <a href="/">assosukesfet.com</a></div>
 </div>
 
@@ -328,7 +328,7 @@ var CAT_LABELS={kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'
     document.getElementById('f-location').innerHTML='<option value="">Seçin</option><option value="Behramkale (Assos)">Behramkale (Assos)</option><option value="Kadırga Koyu">Kadırga Koyu</option><option value="Ayvacık Merkez">Ayvacık Merkez</option>';
   }
   // Footer logo
-  try{db.collection('settings').doc('site').get().then(function(doc){if(doc.exists&&doc.data().logoUrl){document.getElementById('footer-logo').innerHTML='<img src="'+doc.data().logoUrl+'" alt="Assos\'u Keşfet" style="height:40px;opacity:.8">';}}).catch(function(){});}catch(e){}
+  try{db.collection('settings').doc('site').get().then(function(doc){var el=document.getElementById('footer-logo');if(doc.exists&&doc.data().logoUrl){el.innerHTML='<img src="'+doc.data().logoUrl+'" alt="Assos\'u Keşfet" style="height:40px;opacity:0;transition:opacity .5s" onload="this.style.opacity=0.8">';}else{el.innerHTML='<span style="font-size:1.3rem">🏛️</span>';}}).catch(function(){document.getElementById('footer-logo').innerHTML='<span style="font-size:1.3rem">🏛️</span>';});}catch(e){}
   // Edit mode?
   var p=new URLSearchParams(location.search);
   editDocId=p.get('edit');
