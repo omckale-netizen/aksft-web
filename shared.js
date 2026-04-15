@@ -4283,7 +4283,10 @@ function renderPlacePage(placeId) {
           <button class="ai-chat-sug" onclick="aiAskSuggestion(this)">🏛 Ne görmeliyim?</button>
         </div>
       </div>
-      <div class="ai-chat-limit" id="ai-chat-limit"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px;">
+        <div class="ai-chat-limit" id="ai-chat-limit" style="padding:0;"></div>
+        <button onclick="aiClearHistory()" style="background:none;border:none;font-size:.6rem;color:var(--text-muted,#999);cursor:pointer;font-family:inherit;padding:4px 0;">Sohbeti Temizle</button>
+      </div>
       <div class="ai-chat-input">
         <input type="text" id="ai-chat-input" placeholder="Sorunuzu yazın..." maxlength="500" autocomplete="off">
         <button id="ai-chat-send" onclick="aiChatSend()">➤</button>
@@ -4296,6 +4299,22 @@ function renderPlacePage(placeId) {
   document.getElementById('ai-chat-input').addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); aiChatSend(); }
   });
+
+  // Sohbeti temizle
+  window.aiClearHistory = function() {
+    try { localStorage.removeItem(AI_HISTORY_KEY); } catch {}
+    aiChatMemory = [];
+    lastQuestion = '';
+    var body = document.getElementById('ai-chat-body');
+    body.innerHTML = '<div class="ai-msg bot">Merhaba! 🌊 Ben Assos bölgesinin dijital rehberiyim. Aklınıza takılan her şeyi sorun, size özel öneriler sunayım!</div>' +
+      '<div class="ai-chat-suggestions" id="ai-suggestions">' +
+        '<button class="ai-chat-sug" onclick="aiAskSuggestion(this)">🏨 Nerede kalmalıyım?</button>' +
+        '<button class="ai-chat-sug" onclick="aiAskSuggestion(this)">🌊 En güzel koy hangisi?</button>' +
+        '<button class="ai-chat-sug" onclick="aiAskSuggestion(this)">🚗 Nasıl gidilir?</button>' +
+        '<button class="ai-chat-sug" onclick="aiAskSuggestion(this)">🍽 Nerede yemeli?</button>' +
+        '<button class="ai-chat-sug" onclick="aiAskSuggestion(this)">🏛 Ne görmeliyim?</button>' +
+      '</div>';
+  };
 
   // Hazır soru tıklama
   window.aiAskSuggestion = function(btn) {
@@ -4348,32 +4367,35 @@ function renderPlacePage(placeId) {
   }
   updateLimit();
 
-  // Site context oluştur
+  // Site context — optimize edilmiş (kısa tutarak token tasarrufu)
+  var _cachedContext = null;
+  var _contextTime = 0;
   function buildContext() {
+    // 5 dakikada bir yenile, her sorguda tekrar oluşturma
+    if (_cachedContext && Date.now() - _contextTime < 300000) return _cachedContext;
     if (!window.DATA) return '';
     var ctx = '';
-    var venues = (DATA.venues || []).slice(0, 40);
-    if (venues.length) ctx += 'MEKANLAR (id | ad | kategori | konum | açıklama | durum):\n' + venues.map(function(v) {
-      var status = typeof isVenueOpen === 'function' ? isVenueOpen(v) : null;
-      var statusText = status === true ? 'ŞU AN AÇIK' : status === false ? 'ŞU AN KAPALI' : '';
-      var seasonText = v.seasonal ? ' | SEZONLUK(' + (v.seasonStart||'') + '-' + (v.seasonEnd||'') + ')' : '';
-      var hoursText = v.hours ? ' | Saat: ' + v.hours : '';
-      var premText = (typeof isPremiumActive === 'function' && isPremiumActive(v)) ? ' | ⭐PREMIUM' : '';
-      return '- ' + v.id + ' | ' + v.title + ' | ' + (v.category||'') + ' | ' + (v.location||'') + ' | ' + (v.shortDesc||'') + premText + hoursText + seasonText + (statusText ? ' | ' + statusText : '') + (v.phone ? ' | Tel: ' + v.phone : '');
-    }).join('\n') + '\n\n';
-    var places = (DATA.places || []).slice(0, 20);
-    if (places.length) ctx += 'GEZİLECEK YERLER (id | ad | kategori | konum | açıklama):\n' + places.map(function(p) {
-      return '- ' + p.id + ' | ' + p.title + ' | ' + (p.category||'') + ' | ' + (p.location||'') + ' | ' + (p.shortDesc||'');
-    }).join('\n') + '\n\n';
-    var villages = (DATA.villages || []).slice(0, 20);
-    if (villages.length) ctx += 'KÖYLER (id | ad | tür | açıklama):\n' + villages.map(function(v) {
-      return '- ' + v.id + ' | ' + v.title + ' | ' + (v.type||'koy') + ' | ' + (v.shortDesc||'');
-    }).join('\n') + '\n\n';
-    var routes = (DATA.routes || []).slice(0, 10);
-    if (routes.length) ctx += 'ROTALAR (id | ad | süre | durak | açıklama):\n' + routes.map(function(r) {
-      var stops = r.stops ? r.stops.map(function(s) { return typeof s === 'string' ? s : s.title || ''; }).join(', ') : '';
-      return '- ' + r.id + ' | ' + r.title + ' | ' + (r.sure||'') + ' | ' + (r.stops ? r.stops.length + ' durak' : '') + ' | ' + (r.shortDesc||'') + (stops ? ' | Duraklar: ' + stops : '');
+    var venues = (DATA.venues || []).slice(0, 30);
+    if (venues.length) ctx += 'MEKANLAR:\n' + venues.map(function(v) {
+      var prem = (typeof isPremiumActive === 'function' && isPremiumActive(v)) ? '⭐' : '';
+      var open = typeof isVenueOpen === 'function' ? isVenueOpen(v) : null;
+      var st = open === true ? ' AÇIK' : open === false ? ' KAPALI' : '';
+      return '- ' + v.id + '|' + prem + v.title + '|' + (v.category||'') + '|' + (v.location||'') + '|' + (v.shortDesc||'').substring(0,80) + st;
+    }).join('\n') + '\n';
+    var places = (DATA.places || []).slice(0, 15);
+    if (places.length) ctx += 'YERLER:\n' + places.map(function(p) {
+      return '- ' + p.id + '|' + p.title + '|' + (p.category||'') + '|' + (p.location||'') + '|' + (p.shortDesc||'').substring(0,60);
+    }).join('\n') + '\n';
+    var villages = (DATA.villages || []).slice(0, 15);
+    if (villages.length) ctx += 'KÖYLER:\n' + villages.map(function(v) {
+      return '- ' + v.id + '|' + v.title + '|' + (v.shortDesc||'').substring(0,50);
+    }).join('\n') + '\n';
+    var routes = (DATA.routes || []).slice(0, 8);
+    if (routes.length) ctx += 'ROTALAR:\n' + routes.map(function(r) {
+      return '- ' + r.id + '|' + r.title + '|' + (r.sure||'') + '|' + (r.stops ? r.stops.length + ' durak' : '');
     }).join('\n');
+    _cachedContext = ctx;
+    _contextTime = Date.now();
     return ctx;
   }
 
@@ -4386,7 +4408,11 @@ function renderPlacePage(placeId) {
     fab.textContent = panel.classList.contains('open') ? '✕' : '🧭';
     var sttBtn = document.getElementById('scroll-top-btn');
     if (sttBtn) sttBtn.style.display = panel.classList.contains('open') ? 'none' : '';
-    if (panel.classList.contains('open') && window.innerWidth > 768) document.getElementById('ai-chat-input').focus();
+    if (panel.classList.contains('open')) {
+      var chatBody = document.getElementById('ai-chat-body');
+      if (chatBody) setTimeout(function() { chatBody.scrollTop = chatBody.scrollHeight; }, 100);
+      if (window.innerWidth > 768) document.getElementById('ai-chat-input').focus();
+    }
   };
 
   // Sohbet hafızası — son mesajları tut
@@ -4453,16 +4479,23 @@ function renderPlacePage(placeId) {
         saveAiState(state);
         updateLimit();
       } else {
-        addMsg(data.error || 'Bir hata oluştu, tekrar deneyin.', 'bot');
+        var errMsg = data.error || 'Bir hata oluştu.';
+        if (data.creditError) errMsg = 'Asistan şu an hizmet veremiyor. Lütfen daha sonra tekrar deneyin. 🙏';
+        if (data.limitReached) errMsg = 'Asistan bugün çok yoğun çalıştı, yarın tekrar hizmetinizde! 🧭';
+        addMsg(errMsg, 'bot');
       }
     } catch(err) {
       clearTimeout(timeoutId);
       typing.remove();
+      var retryHtml = ' <button onclick="document.getElementById(\'ai-chat-input\').value=\'' + msg.replace(/'/g,"\\'") + '\';aiChatSend()" style="background:var(--terra);color:#fff;border:none;border-radius:8px;padding:4px 10px;font-size:.7rem;font-weight:600;cursor:pointer;margin-top:6px;font-family:inherit;">Tekrar Dene</button>';
       if (err.name === 'AbortError') {
-        addMsg('Yanıt süresi doldu. Sunucu yoğun olabilir, lütfen tekrar deneyin ⏳', 'bot');
+        addMsg('Yanıt süresi doldu. Sunucu yoğun olabilir ⏳', 'bot');
       } else {
-        addMsg('Bağlantı hatası. Lütfen tekrar deneyin.', 'bot');
+        addMsg('Bağlantı hatası oluştu.', 'bot');
       }
+      // Tekrar dene butonu ekle
+      var lastMsg = document.getElementById('ai-chat-body').lastElementChild;
+      if (lastMsg) lastMsg.innerHTML += retryHtml;
     }
     sendBtn.disabled = false;
   };

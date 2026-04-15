@@ -569,9 +569,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       <a class="admin-nav-item" data-page="security" onclick="showPage('security')">
         <span class="nav-icon">🛡️</span> Güvenlik
       </a>
-      <a class="admin-nav-item" data-page="chatlog" onclick="showPage('chatlog')">
-        <span class="nav-icon">🧭</span> AI Soru Logları
-      </a>
       <a class="admin-nav-item" data-page="settings" onclick="showPage('settings')">
         <span class="nav-icon">⚙️</span> Ayarlar
       </a>
@@ -1914,34 +1911,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       </div>
     </div>
 
-    <!-- ══════ AI SORU LOGLARI ══════ -->
-    <div class="admin-page" id="page-chatlog">
-      <h2>🧭 AI Soru Logları</h2>
-      <p class="page-sub">Assos'u Keşfet Asistan'a sorulan soruları ve kullanım istatistiklerini görüntüleyin.</p>
-
-      <!-- İstatistik kartları -->
-      <div class="stats-grid" id="chatlog-stats" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));margin-bottom:24px"></div>
-
-      <!-- Popüler sorular -->
-      <div class="panel-card" style="margin-bottom:20px">
-        <div class="panel-card-head"><h3>🔥 Popüler Sorular</h3></div>
-        <div id="chatlog-popular" style="padding:16px"></div>
-      </div>
-
-      <!-- Son sorular tablosu -->
-      <div class="panel-card">
-        <div class="panel-card-head" style="justify-content:space-between">
-          <h3>📋 Son Sorular</h3>
-          <button class="btn btn-secondary btn-sm" onclick="loadChatLogs()">🔄 Yenile</button>
-        </div>
-        <div style="overflow-x:auto">
-          <table class="panel-table">
-            <thead><tr><th>Soru</th><th>Tarih</th><th>Token</th></tr></thead>
-            <tbody id="chatlog-tbody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
 
     <div class="admin-page" id="page-settings">
       <h2>Ayarlar</h2>
@@ -3590,7 +3559,6 @@ function showPage(page) {
   if (page === 'export') renderExport();
   if (page === 'socialgen') sgUpdateList();
   if (page === 'analytics') renderAnalytics();
-  if (page === 'chatlog') loadChatLogs();
   if (page === 'messages') renderMessages();
   if (page === 'activity') renderActivityLog();
   if (page === 'blog') renderBlogTable();
@@ -8433,63 +8401,6 @@ function fcClearAll() {
   fcConvertedFiles = [];
   document.getElementById('fc-results').innerHTML = '';
   document.getElementById('fc-bulk-bar').style.display = 'none';
-}
-
-/* ══════════════════════════════════════════════════
-   AI SORU LOGLARI
-══════════════════════════════════════════════════ */
-async function loadChatLogs() {
-  var tbody = document.getElementById('chatlog-tbody');
-  var statsEl = document.getElementById('chatlog-stats');
-  var popularEl = document.getElementById('chatlog-popular');
-  if (!tbody) return;
-  tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--text-muted)">Yükleniyor...</td></tr>';
-
-  try {
-    var snap = await db.collection('chat_logs').orderBy('timestamp', 'desc').limit(100).get();
-    var logs = snap.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
-
-    // İstatistikler
-    var totalQuestions = logs.length;
-    var totalTokens = logs.reduce(function(s, l) { return s + (parseInt(l.tokens) || 0) + (parseInt(l.outputTokens) || 0); }, 0);
-    var today = new Date().toISOString().split('T')[0];
-    var todayCount = logs.filter(function(l) { return l.timestamp && l.timestamp.toDate && l.timestamp.toDate().toISOString().split('T')[0] === today; }).length;
-    // String timestamp fallback
-    if (todayCount === 0) todayCount = logs.filter(function(l) { return typeof l.timestamp === 'string' && l.timestamp.startsWith(today); }).length;
-
-    statsEl.innerHTML =
-      '<div class="stat-card"><div class="stat-label">Toplam Soru</div><div class="stat-val">' + totalQuestions + '</div></div>' +
-      '<div class="stat-card"><div class="stat-label">Bugün</div><div class="stat-val">' + todayCount + '</div></div>' +
-      '<div class="stat-card"><div class="stat-label">Toplam Token</div><div class="stat-val">' + (totalTokens > 1000 ? (totalTokens / 1000).toFixed(1) + 'K' : totalTokens) + '</div></div>' +
-      '<div class="stat-card"><div class="stat-label">Tahmini Maliyet</div><div class="stat-val">~$' + (totalTokens * 0.0000008).toFixed(3) + '</div></div>';
-
-    // Popüler sorular — kelime frekansı
-    var wordCount = {};
-    logs.forEach(function(l) {
-      var q = (l.question || '').toLowerCase().replace(/[?!.,]/g, '');
-      var words = q.split(/\s+/).filter(function(w) { return w.length > 3 && !['nasıl','nerede','hangi','kadar','nedir','için','daha','şey','bana','olan','gibi','çok','var','bir'].includes(w); });
-      words.forEach(function(w) { wordCount[w] = (wordCount[w] || 0) + 1; });
-    });
-    var topWords = Object.keys(wordCount).sort(function(a, b) { return wordCount[b] - wordCount[a]; }).slice(0, 12);
-    popularEl.innerHTML = topWords.length === 0
-      ? '<div style="color:var(--text-muted);font-size:.82rem">Henüz yeterli veri yok.</div>'
-      : '<div style="display:flex;flex-wrap:wrap;gap:8px">' + topWords.map(function(w) {
-          return '<span style="padding:6px 14px;border-radius:999px;background:rgba(196,82,26,.08);color:#C4521A;font-size:.75rem;font-weight:600;">' + w + ' <span style="opacity:.5">(' + wordCount[w] + ')</span></span>';
-        }).join('') + '</div>';
-
-    // Tablo
-    tbody.innerHTML = logs.length === 0
-      ? '<tr><td colspan="3" style="text-align:center;padding:32px;color:var(--text-muted)">Henüz soru sorulmamış.</td></tr>'
-      : logs.map(function(l) {
-          var ts = '';
-          if (l.timestamp && l.timestamp.toDate) ts = l.timestamp.toDate().toLocaleDateString('tr-TR') + ' ' + l.timestamp.toDate().toLocaleTimeString('tr-TR', {hour:'2-digit',minute:'2-digit'});
-          else if (typeof l.timestamp === 'string') ts = new Date(l.timestamp).toLocaleDateString('tr-TR') + ' ' + new Date(l.timestamp).toLocaleTimeString('tr-TR', {hour:'2-digit',minute:'2-digit'});
-          var tokens = (parseInt(l.tokens) || 0) + (parseInt(l.outputTokens) || 0);
-          return '<tr><td style="max-width:400px;white-space:normal;font-size:.82rem">' + (l.question || '-') + '</td><td style="font-size:.75rem;white-space:nowrap;color:var(--text-muted)">' + ts + '</td><td style="font-size:.75rem;color:var(--text-muted)">' + tokens + '</td></tr>';
-        }).join('');
-  } catch(err) {
-    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--red)">Yüklenemedi: ' + err.message + '</td></tr>';
-  }
 }
 
 /* ══════════════════════════════════════════════════

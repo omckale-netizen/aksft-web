@@ -8,10 +8,21 @@ export async function onRequestPost(context) {
     'Access-Control-Allow-Headers': 'Content-Type',
   };
 
-  // Rate limiting — basit IP bazlı (dakikada 5 istek)
-  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
-  const rateLimitKey = `chat_${ip}`;
-  // KV yoksa rate limit atla (basit koruma için yeterli)
+  // Sunucu tarafı günlük limit (toplam tüm kullanıcılar)
+  const DAILY_SERVER_LIMIT = 500;
+  const today = new Date().toISOString().split('T')[0];
+  const dailyKey = 'chat_daily_' + today;
+
+  // Cloudflare KV yoksa basit header bazlı sayaç
+  let dailyCount = parseInt(request.headers.get('X-Daily-Count') || '0');
+  try {
+    if (env.CHAT_KV) {
+      dailyCount = parseInt(await env.CHAT_KV.get(dailyKey) || '0');
+      if (dailyCount >= DAILY_SERVER_LIMIT) {
+        return new Response(JSON.stringify({ error: 'Günlük kullanım limiti doldu. Yarın tekrar deneyin.', limitReached: true }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+    }
+  } catch(e) {}
 
   let body;
   try {
@@ -23,6 +34,13 @@ export async function onRequestPost(context) {
   const userMessage = (body.message || '').trim();
   if (!userMessage || userMessage.length > 500) {
     return new Response(JSON.stringify({ error: 'Mesaj boş veya çok uzun (maks 500 karakter)' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+
+  // Prompt injection koruması
+  const lowerMsg = userMessage.toLowerCase();
+  const blocked = ['system prompt','ignore previous','forget instructions','ignore instructions','disregard','override','jailbreak','you are now','act as','roleplay','pretend you','sen artık','kuralları unut','talimatları unut','system mesajını','promptunu göster','ignore all'];
+  if (blocked.some(b => lowerMsg.includes(b))) {
+    return new Response(JSON.stringify({ reply: 'Ben Assos bölgesi hakkında sorularınıza yardımcı olmak için buradayım. Assos ile ilgili bir soru sormak ister misiniz? 🧭' }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 
   const siteContext = body.context || '';
@@ -134,27 +152,21 @@ ${siteContext}`;
     if (!response.ok) {
       const errText = await response.text();
       console.error('Anthropic API error:', response.status, errText);
-      return new Response(JSON.stringify({ error: 'AI servisi şu an yanıt veremiyor' }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      // Kredi bitmiş veya ödeme sorunu
+      if (response.status === 400 && errText.includes('credit') || response.status === 402) {
+        return new Response(JSON.stringify({ error: 'Asistan şu an hizmet veremiyor. Lütfen daha sonra tekrar deneyin.', creditError: true }), { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      return new Response(JSON.stringify({ error: 'AI servisi şu an yanıt veremiyor. Lütfen tekrar deneyin.' }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     const data = await response.json();
     const reply = data.content?.[0]?.text || 'Üzgünüm, şu an yanıt oluşturamadım.';
 
-    // Soru logunu Firebase'e kaydet (anonim, arka planda)
+    // Günlük sayaç güncelle
     try {
-      const firestoreUrl = 'https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents/chat_logs';
-      fetch(firestoreUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fields: {
-            question: { stringValue: userMessage.substring(0, 200) },
-            timestamp: { timestampValue: new Date().toISOString() },
-            tokens: { integerValue: String(data.usage?.input_tokens || 0) },
-            outputTokens: { integerValue: String(data.usage?.output_tokens || 0) }
-          }
-        })
-      }).catch(() => {});
+      if (env.CHAT_KV) {
+        await env.CHAT_KV.put(dailyKey, String(dailyCount + 1), { expirationTtl: 86400 });
+      }
     } catch(e) {}
 
     return new Response(JSON.stringify({ reply }), {
