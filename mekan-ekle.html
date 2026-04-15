@@ -333,7 +333,7 @@ async function loadEditData(id){
     if(d.status==='revision'){
       var ban=document.getElementById('revision-banner');
       ban.style.display='';
-      ban.innerHTML='<div class="me-revision">⚠️ <strong>Revizyon istendi</strong>'+(d.rejectReason?' — '+d.rejectReason:'')+'<br>Lütfen eksik bilgileri tamamlayıp tekrar gönderin.</div>';
+      ban.innerHTML='<div class="me-revision">⚠️ <strong>Revizyon istendi</strong>'+(d.rejectReason?' — '+d.rejectReason+'.' :' —')+' Lütfen eksik bilgileri tamamlayıp tekrar gönderin.</div>';
     }
     // Fill fields
     if(d.ownerName)document.getElementById('f-ownerName').value=d.ownerName;
