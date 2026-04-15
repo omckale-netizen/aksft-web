@@ -157,9 +157,9 @@ export async function onRequestPost(context) {
 <div style="max-width:600px;margin:0 auto;padding:20px;">
 
   <!-- Header -->
-  <div style="background:linear-gradient(135deg,#1A2744 0%,#2D3E5F 100%);border-radius:16px 16px 0 0;padding:32px 28px;text-align:center;">
-    <h1 style="margin:0;font-size:1.5rem;color:#fff;font-weight:800;letter-spacing:-.02em;">Assos'u Keşfet</h1>
-    <p style="margin:8px 0 0;font-size:.82rem;color:rgba(255,255,255,.6);">Assos &bull; Ayvacık &bull; Çanakkale</p>
+  <div style="background:linear-gradient(135deg,#1A2744 0%,#2D3E5F 100%);border-radius:16px 16px 0 0;padding:28px 28px;text-align:center;">
+    <img src="https://firebasestorage.googleapis.com/v0/b/assosu-kesfet.firebasestorage.app/o/site%2Flogo.png?alt=media" alt="Assos'u Kesfet" style="height:48px;margin-bottom:10px;" />
+    <p style="margin:0;font-size:.82rem;color:rgba(255,255,255,.6);">Assos'un Dijital Keşif Rehberi</p>
   </div>
 
   <!-- Body -->
@@ -188,15 +188,19 @@ export async function onRequestPost(context) {
       <a href="https://assosukesfet.com" style="display:inline-block;padding:12px 28px;background:#C4521A;color:#fff;border-radius:10px;font-size:.88rem;font-weight:700;text-decoration:none;">Assos'u Keşfetmeye Devam Et</a>
     </div>
 
-    <!-- İletişim Bilgileri -->
-    <div style="background:#F7F5F2;border-radius:10px;padding:16px 20px;margin-top:24px;">
-      <p style="margin:0 0 8px;font-size:.78rem;font-weight:700;color:#1A2744;">Bize Ulaşın</p>
-      <table style="border-collapse:collapse;width:100%;">
-        <tr><td style="font-size:.78rem;color:#718096;padding:3px 0;">&#x2709; E-posta</td><td style="font-size:.78rem;color:#1A2744;padding:3px 0;text-align:right;"><a href="mailto:info@assosukesfet.com" style="color:#C4521A;text-decoration:none;">info@assosukesfet.com</a></td></tr>
-        <tr><td style="font-size:.78rem;color:#718096;padding:3px 0;">&#x1F310; Website</td><td style="font-size:.78rem;color:#1A2744;padding:3px 0;text-align:right;"><a href="https://assosukesfet.com" style="color:#C4521A;text-decoration:none;">assosukesfet.com</a></td></tr>
-        <tr><td style="font-size:.78rem;color:#718096;padding:3px 0;">&#x1F4F8; Instagram</td><td style="font-size:.78rem;color:#1A2744;padding:3px 0;text-align:right;"><a href="https://instagram.com/assosukesfet" style="color:#C4521A;text-decoration:none;">@assosukesfet</a></td></tr>
-      </table>
-    </div>
+    <!-- İmza -->
+    <hr style="border:none;border-top:1px solid #E8E4DE;margin:24px 0 20px;">
+    <table style="width:100%"><tr>
+      <td style="vertical-align:middle;width:44px;padding-right:14px;"><img src="https://firebasestorage.googleapis.com/v0/b/assosu-kesfet.firebasestorage.app/o/site%2Flogo.png?alt=media" alt="" style="width:40px;height:40px;border-radius:10px;object-fit:contain;" /></td>
+      <td style="vertical-align:middle;">
+        <p style="margin:0 0 2px;font-size:.88rem;font-weight:700;color:#1A2744;">Assos'u Keşfet</p>
+        <table style="border-collapse:collapse;">
+          <tr><td style="font-size:.72rem;color:#A0AEC0;padding:1px 6px 1px 0;">&#x2709;</td><td style="font-size:.72rem;"><a href="mailto:info@assosukesfet.com" style="color:#C4521A;text-decoration:none;">info@assosukesfet.com</a></td></tr>
+          <tr><td style="font-size:.72rem;color:#A0AEC0;padding:1px 6px 1px 0;">&#x1F310;</td><td style="font-size:.72rem;"><a href="https://assosukesfet.com" style="color:#C4521A;text-decoration:none;">assosukesfet.com</a></td></tr>
+          <tr><td style="font-size:.72rem;color:#A0AEC0;padding:1px 6px 1px 0;">&#x1F4F8;</td><td style="font-size:.72rem;"><a href="https://instagram.com/assosukesfet" style="color:#C4521A;text-decoration:none;">@assosukesfet</a></td></tr>
+        </table>
+      </td>
+    </tr></table>
   </div>
 
   <!-- Footer -->

@@ -4071,20 +4071,10 @@ async function sendReplyMail(docId) {
         to: m.email,
         subject: 'Re: ' + (m.subject || 'Mesajınız') + ' — Assos\'u Keşfet',
         replyTo: 'info@assosukesfet.com',
-        html: '<div style="font-family:\'Segoe UI\',Arial,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;color:#1A2744;">' +
-          '<div style="text-align:center;margin-bottom:28px;">' +
-            '<h1 style="font-size:1.4rem;margin:0;color:#1A2744;">Assos\'u Keşfet</h1>' +
-            '<p style="font-size:.85rem;color:#718096;margin:6px 0 0;">assosukesfet.com</p>' +
-          '</div>' +
-          '<p style="font-size:.95rem;line-height:1.7;">Merhaba <strong>' + (m.name || '') + '</strong>,</p>' +
-          '<p style="font-size:.95rem;line-height:1.7;white-space:pre-wrap;">' + body.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</p>' +
-          '<hr style="border:none;border-top:1px solid #E2E8F0;margin:24px 0;">' +
-          '<div style="background:#FAF7F2;border-radius:12px;padding:14px 18px;border-left:4px solid #C4521A;">' +
-            '<p style="font-size:.72rem;color:#718096;margin:0 0 4px;">Orijinal mesajınız:</p>' +
-            '<p style="font-size:.82rem;color:#1A2744;margin:0;line-height:1.5;">' + (m.message || '').substring(0, 300).replace(/</g,'&lt;') + '</p>' +
-          '</div>' +
-          '<p style="font-size:.72rem;color:#A0AEC0;text-align:center;margin-top:20px;">Bu mail info@assosukesfet.com adresinden gönderilmiştir.</p>' +
-        '</div>'
+        html: buildMailHtml('Re: ' + (m.subject || 'Mesajınız'),
+          'Merhaba ' + (m.name || '') + ',\n\n' + body +
+          '\n\n---\n\nOrijinal mesajınız:\n' + (m.message || '').substring(0, 300)
+        )
       })
     });
     var data = await resp.json();
@@ -4121,30 +4111,36 @@ function closeComposeMail() {
 }
 function buildMailHtml(subject, body) {
   var paragraphs = body.split('\n').filter(function(l) { return l.trim(); }).map(function(l) {
-    return '<p style="font-size:.95rem;line-height:1.7;color:#2D3748;margin:0 0 12px;">' + l.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</p>';
+    if (l.trim() === '---') return '<hr style="border:none;border-top:1px solid #E8E4DE;margin:16px 0;">';
+    var escaped = l.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    // "Orijinal mesajınız:" gibi alıntı başlıkları
+    if (escaped.match(/^Orijinal mesaj/i)) return '<p style="font-size:.72rem;color:#A0AEC0;margin:0 0 6px;font-weight:600;">' + escaped + '</p>';
+    return '<p style="font-size:.95rem;line-height:1.7;color:#2D3748;margin:0 0 12px;">' + escaped + '</p>';
   }).join('');
 
   return '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>' +
     '<body style="margin:0;padding:0;background:#F0EDE8;font-family:\'Segoe UI\',Tahoma,Arial,sans-serif;">' +
     '<div style="max-width:600px;margin:0 auto;padding:20px;">' +
       '<div style="background:linear-gradient(135deg,#1A2744 0%,#2D3E5F 100%);border-radius:16px 16px 0 0;padding:28px 28px;text-align:center;">' +
-        '<h1 style="margin:0;font-size:1.4rem;color:#fff;font-weight:800;">Assos\'u Ke\u015ffet</h1>' +
-        '<p style="margin:6px 0 0;font-size:.78rem;color:rgba(255,255,255,.55);">Assos \u2022 Ayvac\u0131k \u2022 \u00c7anakkale</p>' +
+        '<img src="https://firebasestorage.googleapis.com/v0/b/assosu-kesfet.firebasestorage.app/o/site%2Flogo.png?alt=media" alt="Assos\'u Kesfet" style="height:48px;margin-bottom:10px;" />' +
+        '<p style="margin:0;font-size:.78rem;color:rgba(255,255,255,.6);">Assos\'un Dijital Ke\u015fif Rehberi</p>' +
       '</div>' +
       '<div style="background:#ffffff;padding:32px 28px;border-left:1px solid #E8E4DE;border-right:1px solid #E8E4DE;">' +
         paragraphs +
       '</div>' +
       '<div style="background:#ffffff;padding:0 28px 28px;border-left:1px solid #E8E4DE;border-right:1px solid #E8E4DE;">' +
         '<hr style="border:none;border-top:1px solid #E8E4DE;margin:0 0 20px;">' +
-        '<table style="width:100%"><tr><td style="vertical-align:top">' +
-          '<p style="margin:0 0 2px;font-size:.88rem;font-weight:700;color:#1A2744;">Assos\'u Ke\u015ffet</p>' +
-          '<p style="margin:0 0 8px;font-size:.72rem;color:#718096;">Assos, Ayvac\u0131k & \u00c7anakkale Rehberi</p>' +
-          '<table style="border-collapse:collapse;">' +
-            '<tr><td style="font-size:.72rem;color:#A0AEC0;padding:2px 8px 2px 0;">&#x2709;</td><td style="font-size:.72rem;"><a href="mailto:info@assosukesfet.com" style="color:#C4521A;text-decoration:none;">info@assosukesfet.com</a></td></tr>' +
-            '<tr><td style="font-size:.72rem;color:#A0AEC0;padding:2px 8px 2px 0;">&#x1F310;</td><td style="font-size:.72rem;"><a href="https://assosukesfet.com" style="color:#C4521A;text-decoration:none;">assosukesfet.com</a></td></tr>' +
-            '<tr><td style="font-size:.72rem;color:#A0AEC0;padding:2px 8px 2px 0;">&#x1F4F8;</td><td style="font-size:.72rem;"><a href="https://instagram.com/assosukesfet" style="color:#C4521A;text-decoration:none;">@assosukesfet</a></td></tr>' +
-          '</table>' +
-        '</td></tr></table>' +
+        '<table style="width:100%"><tr>' +
+          '<td style="vertical-align:middle;width:44px;padding-right:14px;"><img src="https://firebasestorage.googleapis.com/v0/b/assosu-kesfet.firebasestorage.app/o/site%2Flogo.png?alt=media" alt="" style="width:40px;height:40px;border-radius:10px;object-fit:contain;" /></td>' +
+          '<td style="vertical-align:middle;">' +
+            '<p style="margin:0 0 2px;font-size:.88rem;font-weight:700;color:#1A2744;">Assos\'u Ke\u015ffet</p>' +
+            '<table style="border-collapse:collapse;">' +
+              '<tr><td style="font-size:.72rem;color:#A0AEC0;padding:1px 6px 1px 0;">&#x2709;</td><td style="font-size:.72rem;"><a href="mailto:info@assosukesfet.com" style="color:#C4521A;text-decoration:none;">info@assosukesfet.com</a></td></tr>' +
+              '<tr><td style="font-size:.72rem;color:#A0AEC0;padding:1px 6px 1px 0;">&#x1F310;</td><td style="font-size:.72rem;"><a href="https://assosukesfet.com" style="color:#C4521A;text-decoration:none;">assosukesfet.com</a></td></tr>' +
+              '<tr><td style="font-size:.72rem;color:#A0AEC0;padding:1px 6px 1px 0;">&#x1F4F8;</td><td style="font-size:.72rem;"><a href="https://instagram.com/assosukesfet" style="color:#C4521A;text-decoration:none;">@assosukesfet</a></td></tr>' +
+            '</table>' +
+          '</td>' +
+        '</tr></table>' +
       '</div>' +
       '<div style="background:#1A2744;border-radius:0 0 16px 16px;padding:20px 28px;text-align:center;">' +
         '<p style="margin:0;font-size:.65rem;color:rgba(255,255,255,.4);">&copy; ' + new Date().getFullYear() + ' Assos\'u Ke\u015ffet \u2022 assosukesfet.com</p>' +
