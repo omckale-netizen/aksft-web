@@ -57,10 +57,10 @@ export async function onRequestPost(context) {
   // Tehlikeli talimatları temizle
   siteContext = siteContext.replace(/ignore|unut|forget|override|artık sen|you are now|act as/gi, '***');
 
-  // IP bazlı rate limit
+  // IP bazlı rate limit (KV gerekli)
   const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
-  try {
-    if (env.CHAT_KV) {
+  if (env.CHAT_KV) {
+    try {
       // Dakikada 3 istek limiti
       const ipMinKey = 'ip_min_' + ip + '_' + Math.floor(Date.now() / 60000);
       const ipMinCount = parseInt(await env.CHAT_KV.get(ipMinKey) || '0');
@@ -76,8 +76,12 @@ export async function onRequestPost(context) {
         return new Response(JSON.stringify({ error: 'Günlük 10 soruluk keşif hakkınız doldu 😊 Yarın yeni sorularınızla tekrar buradayım!', limitReached: true }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
       await env.CHAT_KV.put(ipDayKey, String(ipDayCount + 1), { expirationTtl: 86400 });
+    } catch(e) {
+      console.error('KV rate limit error:', e);
     }
-  } catch(e) {}
+  } else {
+    console.warn('CHAT_KV binding not found — rate limiting disabled');
+  }
 
   const ANTHROPIC_API_KEY = env.ANTHROPIC_API_KEY;
   if (!ANTHROPIC_API_KEY) {
