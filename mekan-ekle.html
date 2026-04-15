@@ -222,7 +222,7 @@ a{color:var(--terra);text-decoration:none}
         </div>
         <div id="season-fields" style="display:none">
           <div class="me-row">
-            <div class="me-field"><label class="me-label">Sezon Başlangıcı</label><input type="date" class="me-input" id="f-seasonStart"></div>
+            <div class="me-field"><label class="me-label">Sezon Başlangıcı</label><input type="date" class="me-input" id="f-seasonStart" onchange="document.getElementById('f-seasonEnd').min=this.value"></div>
             <div class="me-field"><label class="me-label">Sezon Bitişi</label><input type="date" class="me-input" id="f-seasonEnd"></div>
           </div>
         </div>
@@ -291,6 +291,7 @@ var CAT_LABELS={kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'
 (async function(){
   renderProgress(); renderWH(); addPhone();
   document.getElementById('f-seasonal').onchange=function(){document.getElementById('season-fields').style.display=this.checked?'':'none';};
+  document.getElementById('f-seasonStart').min=new Date().toISOString().split('T')[0];
   // Konumları Firebase'den yükle
   try{
     var snap=await db.collection('villages').get();
@@ -388,6 +389,33 @@ function validate(s){
   if(s===1){if(!v('f-ownerName','Ad soyad zorunlu'))return false;if(!v('f-ownerEmail','Geçerli e-posta girin')||!document.getElementById('f-ownerEmail').value.includes('@'))return false;if(!v('f-ownerPhone','Telefon zorunlu'))return false;return true;}
   if(s===2){if(!v('f-title','Mekan adı zorunlu'))return false;if(!document.getElementById('f-category').value){toast('Kategori seçin','red');return false;}if(!document.getElementById('f-location').value){toast('Konum seçin','red');return false;}return true;}
   if(s===3){if(!v('f-shortDesc','Kısa açıklama zorunlu'))return false;var desc=document.getElementById('f-description').value.trim();if(desc.length<50){toast('Detaylı açıklama en az 50 karakter ('+desc.length+'/50)','red');return false;}if(selTags.length<4){toast('En az 4 etiket seçin ('+selTags.length+'/4)','red');return false;}return true;}
+  if(s===4){
+    var cat=document.getElementById('f-category').value;
+    // Çalışma saatleri kontrolü (konaklama hariç)
+    if(cat!=='konaklama'){
+      var hasAnyHour=false;
+      document.querySelectorAll('#wh-grid .me-wh').forEach(function(row){
+        if(!row.querySelector('.wh-cb').checked&&row.querySelector('.wh-open').value)hasAnyHour=true;
+      });
+      if(!hasAnyHour){toast('En az bir gün için çalışma saati girin','red');return false;}
+    }
+    // Konaklama oda kontrolü
+    if(cat==='konaklama'){
+      var roomCount=document.querySelectorAll('#rooms .me-phone').length;
+      if(roomCount===0){toast('En az bir oda tipi ekleyin','red');return false;}
+    }
+    // Sezonluk kontroller
+    if(document.getElementById('f-seasonal').checked){
+      var sStart=document.getElementById('f-seasonStart').value;
+      var sEnd=document.getElementById('f-seasonEnd').value;
+      if(!sStart){toast('Sezon başlangıç tarihi seçin','red');return false;}
+      if(!sEnd){toast('Sezon bitiş tarihi seçin','red');return false;}
+      var today=new Date().toISOString().split('T')[0];
+      if(sStart<today){toast('Sezon başlangıcı bugünden önce olamaz','red');return false;}
+      if(sEnd<=sStart){toast('Sezon bitişi başlangıçtan sonra olmalı','red');return false;}
+    }
+    return true;
+  }
   return true;
 }
 function v(id,msg){var el=document.getElementById(id);if(!el||!el.value.trim()){toast(msg,'red');if(el)el.focus();return false;}return true;}
