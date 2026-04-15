@@ -224,9 +224,9 @@
       </p>
     </div>
 
-    <!-- Route Cards — dinamik, mobilde yatay scroll -->
-    <div id="home-route-cards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;"></div>
-    <style>@media(max-width:900px){#home-route-cards{display:flex !important;overflow-x:auto;scroll-snap-type:x mandatory;gap:14px !important;padding-bottom:12px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}#home-route-cards::-webkit-scrollbar{display:none;}#home-route-cards>.route-card{min-width:calc(100vw - 72px);max-width:340px;flex-shrink:0;scroll-snap-align:center;}}@media(max-width:640px){#rotalar,#yerler,#mekanlar,#koyler{padding-top:56px !important;padding-bottom:56px !important;}}</style>
+    <!-- Route Cards — dinamik, mobilde 2'li kompakt grid -->
+    <div id="home-route-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;"></div>
+    <style>@media(max-width:640px){#home-route-cards{grid-template-columns:repeat(2,1fr) !important;gap:10px !important;}#home-route-cards .route-card{border-radius:14px;}#home-route-cards .route-card>div:nth-child(2){height:90px !important;padding:14px 16px !important;}#home-route-cards .route-card>div:nth-child(2) div:first-child{font-size:2rem !important;}#home-route-cards .route-card>div:nth-child(3){padding:14px 14px 16px !important;}#home-route-cards .route-title{font-size:.88rem !important;margin-bottom:6px !important;}#home-route-cards .route-desc{display:none !important;}#home-route-cards .route-meta{font-size:.62rem !important;gap:6px !important;padding:8px 0 !important;margin-bottom:10px !important;}#home-route-cards .route-meta>div{white-space:nowrap;}#home-route-cards .route-btn{font-size:.65rem !important;padding:6px 10px !important;}#home-route-cards .route-number{font-size:.55rem !important;}#home-route-cards .route-tag{font-size:.5rem !important;padding:2px 6px !important;}#rotalar,#yerler,#mekanlar,#koyler{padding-top:56px !important;padding-bottom:56px !important;}}</style>
 
 
     <!-- Diğer rotalar + CTA (dinamik) -->
@@ -426,7 +426,7 @@
 
 <script src="firebase-loader.js?v=4"></script>
 <script src="data.js?v=2"></script>
-<script src="shared.min.js?v=231"></script>
+<script src="shared.min.js?v=232"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: true });
@@ -511,14 +511,15 @@ function pageInit() {
   (function() {
     var cardsEl = document.getElementById('home-route-cards');
     if (!cardsEl || !DATA.routes) return;
-    var routes = (DATA.routes || []).slice(0, 3);
+    var routes = (DATA.routes || []).slice(0, 4);
     var defaultColors = [
       { glow:'var(--terra)', headerBg:'linear-gradient(135deg,rgba(196,82,26,0.35) 0%,rgba(212,100,40,0.15) 100%)', tagBg:'rgba(196,82,26,0.3)', tagColor:'var(--terra-muted)' },
       { glow:'var(--amber)', headerBg:'linear-gradient(135deg,rgba(212,147,90,0.3) 0%,rgba(180,100,30,0.12) 100%)', tagBg:'rgba(212,147,90,0.25)', tagColor:'var(--amber)' },
-      { glow:'var(--aegean)', headerBg:'linear-gradient(135deg,rgba(26,107,138,0.3) 0%,rgba(15,60,90,0.12) 100%)', tagBg:'rgba(26,107,138,0.25)', tagColor:'var(--aegean-light,#63B3ED)' }
+      { glow:'var(--aegean)', headerBg:'linear-gradient(135deg,rgba(26,107,138,0.3) 0%,rgba(15,60,90,0.12) 100%)', tagBg:'rgba(26,107,138,0.25)', tagColor:'var(--aegean-light,#63B3ED)' },
+      { glow:'var(--sage)', headerBg:'linear-gradient(135deg,rgba(90,122,86,0.3) 0%,rgba(50,80,46,0.12) 100%)', tagBg:'rgba(90,122,86,0.25)', tagColor:'#7FB87B' }
     ];
     cardsEl.innerHTML = routes.map(function(r, i) {
-      var c = defaultColors[i % 3];
+      var c = defaultColors[i % 4];
       var bg = r.headerBg || c.headerBg;
       var num = String(i + 1).padStart(2, '0');
       var durak = r.stops ? r.stops.length + ' durak' : '';
@@ -549,7 +550,7 @@ function pageInit() {
 
   // Diğer rotaları dinamik doldur
   (function() {
-    var shownRoutes = (DATA.routes || []).slice(0, 3);
+    var shownRoutes = (DATA.routes || []).slice(0, 4);
     var shownIds = shownRoutes.map(function(r) { return r.id; });
     var others = (DATA.routes || []).filter(function(r) { return !shownIds.includes(r.id); });
     var pillsEl = document.getElementById('home-other-routes-pills');
