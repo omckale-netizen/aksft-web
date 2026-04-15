@@ -224,88 +224,9 @@
       </p>
     </div>
 
-    <!-- Route Cards Grid — ilk 3 öne çıkan -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:24px;">
+    <!-- Route Cards Grid — dinamik -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:24px;" id="home-route-cards"></div>
 
-      <!-- Route 1 — 1 Günde Assos -->
-      <div class="route-card fade-up" tabindex="0" role="article" aria-label="1 Günde Assos rotası">
-        <div class="route-card-glow" style="background:var(--terra);"></div>
-        <div style="height:140px;background:linear-gradient(135deg,rgba(196,82,26,0.35) 0%,rgba(212,100,40,0.15) 100%);border-bottom:1px solid rgba(245,237,224,0.06);position:relative;overflow:hidden;display:flex;align-items:center;padding:24px 28px;gap:16px;">
-          <div style="font-size:3.5rem;line-height:1;flex-shrink:0;filter:drop-shadow(0 4px 12px rgba(196,82,26,0.4));">🏛</div>
-          <div>
-            <span class="route-number" style="display:block;margin-bottom:8px;">ROTA 01</span>
-            <span class="route-tag" style="background:rgba(196,82,26,0.3);color:var(--terra-muted);">⭐ Popüler</span>
-          </div>
-          <div style="position:absolute;right:-20px;bottom:-20px;font-size:7rem;opacity:0.04;line-height:1;pointer-events:none;">🏛</div>
-        </div>
-        <div style="padding:24px 28px 28px;">
-          <h3 class="route-title" style="margin-bottom:10px;">1 Günde Assos</h3>
-          <p class="route-desc" style="margin-bottom:20px;">Sabah tapınaktan başla, öğlen limanda dinlen, akşam gün batımıyla uğurla.</p>
-          <div class="route-meta" style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:20px;padding:14px 0;border-top:1px solid rgba(245,237,224,0.06);border-bottom:1px solid rgba(245,237,224,0.06);">
-            <div>⏱ <span>6–8 saat</span></div>
-            <div>📍 <span>5 durak</span></div>
-            <div>🚶 <span>Kolay</span></div>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div style="font-size:0.7rem;color:rgba(245,237,224,0.28);font-weight:500;">Tüm ziyaretçiler için</div>
-            <a href="rotalar/rota-detay.html?id=bir-gunde-assos" class="route-btn">Rotayı İncele →</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Route 2 — Gün Batımı -->
-      <div class="route-card fade-up" tabindex="0" role="article" aria-label="Gün Batımı Rotası" style="animation-delay:.08s;">
-        <div class="route-card-glow" style="background:var(--amber);"></div>
-        <div style="height:140px;background:linear-gradient(135deg,rgba(212,147,90,0.3) 0%,rgba(180,100,30,0.12) 100%);border-bottom:1px solid rgba(245,237,224,0.06);position:relative;overflow:hidden;display:flex;align-items:center;padding:24px 28px;gap:16px;">
-          <div style="font-size:3.5rem;line-height:1;flex-shrink:0;filter:drop-shadow(0 4px 12px rgba(212,147,90,0.4));">🌅</div>
-          <div>
-            <span class="route-number" style="display:block;margin-bottom:8px;">ROTA 02</span>
-            <span class="route-tag" style="background:rgba(212,147,90,0.25);color:var(--amber);">📷 Fotoğrafçılar</span>
-          </div>
-          <div style="position:absolute;right:-20px;bottom:-20px;font-size:7rem;opacity:0.04;line-height:1;pointer-events:none;">🌅</div>
-        </div>
-        <div style="padding:24px 28px 28px;">
-          <h3 class="route-title" style="margin-bottom:10px;">Gün Batımı Rotası</h3>
-          <p class="route-desc" style="margin-bottom:20px;">Assos'un en büyülü anını yakalamak için özel tasarlanmış akşam rotası.</p>
-          <div class="route-meta" style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:20px;padding:14px 0;border-top:1px solid rgba(245,237,224,0.06);border-bottom:1px solid rgba(245,237,224,0.06);">
-            <div>⏱ <span>2–3 saat</span></div>
-            <div>📍 <span>3 durak</span></div>
-            <div>🧡 <span>Kolay</span></div>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div style="font-size:0.7rem;color:rgba(245,237,224,0.28);font-weight:500;">Çiftler & fotoğrafçılar</div>
-            <a href="rotalar/rota-detay.html?id=gun-batimi-rotasi" class="route-btn">Rotayı İncele →</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Route 3 — Tarih -->
-      <div class="route-card fade-up" tabindex="0" role="article" aria-label="Tarih Rotası" style="animation-delay:.16s;">
-        <div class="route-card-glow" style="background:var(--aegean);"></div>
-        <div style="height:140px;background:linear-gradient(135deg,rgba(26,107,138,0.3) 0%,rgba(15,60,90,0.12) 100%);border-bottom:1px solid rgba(245,237,224,0.06);position:relative;overflow:hidden;display:flex;align-items:center;padding:24px 28px;gap:16px;">
-          <div style="font-size:3.5rem;line-height:1;flex-shrink:0;filter:drop-shadow(0 4px 12px rgba(26,107,138,0.4));">🏺</div>
-          <div>
-            <span class="route-number" style="display:block;margin-bottom:8px;">ROTA 03</span>
-            <span class="route-tag" style="background:rgba(26,107,138,0.25);color:var(--aegean-light);">📚 Kültür</span>
-          </div>
-          <div style="position:absolute;right:-20px;bottom:-20px;font-size:7rem;opacity:0.04;line-height:1;pointer-events:none;">🏺</div>
-        </div>
-        <div style="padding:24px 28px 28px;">
-          <h3 class="route-title" style="margin-bottom:10px;">Tarih Rotası</h3>
-          <p class="route-desc" style="margin-bottom:20px;">Athena Tapınağı'ndan Apollon Smintheion'a antik çağın izlerini takip et.</p>
-          <div class="route-meta" style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:20px;padding:14px 0;border-top:1px solid rgba(245,237,224,0.06);border-bottom:1px solid rgba(245,237,224,0.06);">
-            <div>⏱ <span>3–4 saat</span></div>
-            <div>📍 <span>4 durak</span></div>
-            <div>📚 <span>Orta</span></div>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <div style="font-size:0.7rem;color:rgba(245,237,224,0.28);font-weight:500;">Tarih meraklıları</div>
-            <a href="rotalar/rota-detay.html?id=tarih-rotasi" class="route-btn">Rotayı İncele →</a>
-          </div>
-        </div>
-      </div>
-
-    </div>
 
     <!-- Diğer rotalar + CTA (dinamik) -->
     <div class="fade-up" id="home-other-routes" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-top:28px;padding:18px 24px;background:rgba(255,255,255,.04);border:1px solid rgba(245,237,224,.07);border-radius:16px;">
@@ -504,7 +425,7 @@
 
 <script src="firebase-loader.js?v=3"></script>
 <script src="data.js?v=2"></script>
-<script src="shared.min.js?v=221"></script>
+<script src="shared.min.js?v=222"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: true });
@@ -585,9 +506,50 @@ function pageInit() {
     }
   })();
 
-  // Diğer rotaları dinamik doldur (anasayfada gösterilen 3 rota hariç)
+  // Rota kartlarını Firebase'den render et
   (function() {
-    var shownIds = ['bir-gunde-assos','tarih-rotasi','gun-batimi-rotasi'];
+    var cardsEl = document.getElementById('home-route-cards');
+    if (!cardsEl || !DATA.routes) return;
+    var routes = (DATA.routes || []).slice(0, 3);
+    var defaultColors = [
+      { glow:'var(--terra)', headerBg:'linear-gradient(135deg,rgba(196,82,26,0.35) 0%,rgba(212,100,40,0.15) 100%)', tagBg:'rgba(196,82,26,0.3)', tagColor:'var(--terra-muted)' },
+      { glow:'var(--amber)', headerBg:'linear-gradient(135deg,rgba(212,147,90,0.3) 0%,rgba(180,100,30,0.12) 100%)', tagBg:'rgba(212,147,90,0.25)', tagColor:'var(--amber)' },
+      { glow:'var(--aegean)', headerBg:'linear-gradient(135deg,rgba(26,107,138,0.3) 0%,rgba(15,60,90,0.12) 100%)', tagBg:'rgba(26,107,138,0.25)', tagColor:'var(--aegean-light,#63B3ED)' }
+    ];
+    cardsEl.innerHTML = routes.map(function(r, i) {
+      var c = defaultColors[i % 3];
+      var bg = r.headerBg || c.headerBg;
+      var num = String(i + 1).padStart(2, '0');
+      var durak = r.stops ? r.stops.length + ' durak' : '';
+      return '<div class="route-card fade-up" tabindex="0" role="article" aria-label="' + r.title + '" style="animation-delay:' + (i * 0.08) + 's;">' +
+        '<div class="route-card-glow" style="background:' + (r.glowColor || c.glow) + ';"></div>' +
+        '<div style="height:140px;background:' + bg + ';border-bottom:1px solid rgba(245,237,224,0.06);position:relative;overflow:hidden;display:flex;align-items:center;padding:24px 28px;gap:16px;">' +
+          '<div style="font-size:3.5rem;line-height:1;flex-shrink:0;">' + (r.emoji || '🗺') + '</div>' +
+          '<div><span class="route-number" style="display:block;margin-bottom:8px;">ROTA ' + num + '</span>' +
+            '<span class="route-tag" style="background:' + (r.tagColor ? r.tagColor : c.tagBg) + ';color:' + (r.tagTextColor || c.tagColor) + ';">' + (r.tag || '') + '</span></div>' +
+          '<div style="position:absolute;right:-20px;bottom:-20px;font-size:7rem;opacity:0.04;line-height:1;pointer-events:none;">' + (r.emoji || '🗺') + '</div>' +
+        '</div>' +
+        '<div style="padding:24px 28px 28px;">' +
+          '<h3 class="route-title" style="margin-bottom:10px;">' + r.title + '</h3>' +
+          '<p class="route-desc" style="margin-bottom:20px;">' + (r.shortDesc || '') + '</p>' +
+          '<div class="route-meta" style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:20px;padding:14px 0;border-top:1px solid rgba(245,237,224,0.06);border-bottom:1px solid rgba(245,237,224,0.06);">' +
+            (r.sure ? '<div>⏱ <span>' + r.sure + '</span></div>' : '') +
+            (durak ? '<div>📍 <span>' + durak + '</span></div>' : '') +
+            (r.zorluk ? '<div>🚶 <span>' + r.zorluk + '</span></div>' : '') +
+          '</div>' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;">' +
+            '<div style="font-size:0.7rem;color:rgba(245,237,224,0.28);font-weight:500;">' + (r.hedefKitle || '') + '</div>' +
+            '<a href="rotalar/rota-detay.html?id=' + r.id + '" class="route-btn">Rotayı İncele →</a>' +
+          '</div>' +
+        '</div></div>';
+    }).join('');
+    if (typeof scrollFadeIn === 'function') scrollFadeIn();
+  })();
+
+  // Diğer rotaları dinamik doldur
+  (function() {
+    var shownRoutes = (DATA.routes || []).slice(0, 3);
+    var shownIds = shownRoutes.map(function(r) { return r.id; });
     var others = (DATA.routes || []).filter(function(r) { return !shownIds.includes(r.id); });
     var pillsEl = document.getElementById('home-other-routes-pills');
     var wrapEl = document.getElementById('home-other-routes');
