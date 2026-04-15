@@ -16,17 +16,19 @@ export async function onRequestGet(context) {
         const redirectResp = await fetch(mapsUrl, { redirect: 'follow' });
         finalUrl = redirectResp.url;
       }
-      // Koordinatları URL'den çıkar
+      // Koordinatları URL'den çıkar — öncelik sırası önemli
       let lat = null, lng = null;
-      // Pattern 1: @lat,lng
-      const m1 = finalUrl.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
-      if (m1) { lat = parseFloat(m1[1]); lng = parseFloat(m1[2]); }
+      // Pattern 1 (en doğru): !3d ve !4d — mekanın gerçek koordinatı
+      const m5 = finalUrl.match(/!3d(-?\d+\.?\d+)!4d(-?\d+\.?\d+)/);
+      if (m5) { lat = parseFloat(m5[1]); lng = parseFloat(m5[2]); }
       // Pattern 2: ?q=lat,lng
-      if (!lat) { const m2 = finalUrl.match(/[?&]q=(-?\d+\.?\d*),(-?\d+\.?\d*)/); if (m2) { lat = parseFloat(m2[1]); lng = parseFloat(m2[2]); } }
+      if (!lat) { const m2 = finalUrl.match(/[?&]q=(-?\d+\.?\d+),(-?\d+\.?\d+)/); if (m2) { lat = parseFloat(m2[1]); lng = parseFloat(m2[2]); } }
       // Pattern 3: /place/lat,lng
-      if (!lat) { const m3 = finalUrl.match(/place\/(-?\d+\.?\d*),(-?\d+\.?\d*)/); if (m3) { lat = parseFloat(m3[1]); lng = parseFloat(m3[2]); } }
+      if (!lat) { const m3 = finalUrl.match(/place\/(-?\d+\.?\d+),(-?\d+\.?\d+)/); if (m3) { lat = parseFloat(m3[1]); lng = parseFloat(m3[2]); } }
       // Pattern 4: ll=lat,lng
-      if (!lat) { const m4 = finalUrl.match(/ll=(-?\d+\.?\d*),(-?\d+\.?\d*)/); if (m4) { lat = parseFloat(m4[1]); lng = parseFloat(m4[2]); } }
+      if (!lat) { const m4 = finalUrl.match(/ll=(-?\d+\.?\d+),(-?\d+\.?\d+)/); if (m4) { lat = parseFloat(m4[1]); lng = parseFloat(m4[2]); } }
+      // Pattern 5 (fallback): @lat,lng — harita merkezi, mekan değil
+      if (!lat) { const m1 = finalUrl.match(/@(-?\d+\.?\d+),(-?\d+\.?\d+)/); if (m1) { lat = parseFloat(m1[1]); lng = parseFloat(m1[2]); } }
 
       if (lat && lng) {
         return new Response(JSON.stringify({ lat, lng, resolvedUrl: finalUrl }), {
