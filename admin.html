@@ -4010,6 +4010,7 @@ async function approvePendingVenue(id) {
       document.getElementById('f-desc-editor').innerHTML = data.description || '';
       document.getElementById('f-website').value = data.website || '';
       document.getElementById('f-instagram').value = data.instagram || '';
+      if (data.tags && data.tags.length > 0) setTagsFromString(data.tags.join(','));
       document.getElementById('f-ownerName').value = data.ownerName || '';
       document.getElementById('f-ownerEmail').value = data.ownerEmail || '';
       // Maps link → koordinat çevir

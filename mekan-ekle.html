@@ -91,6 +91,9 @@ a{color:var(--terra);text-decoration:none}
 .me-ok h2{font-size:1.1rem;color:var(--navy);margin:12px 0 8px}
 .me-ok p{font-size:.85rem;color:var(--text-light);line-height:1.7}
 /* Honeypot */
+.me-tag{font-size:.72rem;padding:6px 12px;border-radius:999px;border:1.5px solid var(--border);background:#fff;color:var(--navy);cursor:pointer;transition:all .15s;font-family:inherit;font-weight:600}
+.me-tag:hover{border-color:var(--terra);color:var(--terra)}
+.me-tag.sel{background:var(--terra);color:#fff;border-color:var(--terra)}
 .me-hp{position:absolute;left:-9999px;opacity:0;height:0;overflow:hidden}
 .me-footer{text-align:center;padding:16px;font-size:.65rem;color:var(--text-muted)}
 </style>
@@ -153,6 +156,12 @@ a{color:var(--terra);text-decoration:none}
       <div class="me-card">
         <div class="me-field"><label class="me-label">Kısa Açıklama * <span>(mekan listesinde görünür)</span></label><textarea class="me-textarea" id="f-shortDesc" rows="2" placeholder="1-2 cümlelik kısa tanıtım"></textarea></div>
         <div class="me-field"><label class="me-label">Detaylı Açıklama * <span>(detay sayfasında görünür)</span></label><textarea class="me-textarea" id="f-description" rows="4" placeholder="Mekanınızı detaylı tanıtın — sunduğunuz hizmetler, öne çıkan özellikler, atmosfer..."></textarea><div class="me-hint">En az 50 karakter</div></div>
+        <div class="me-section">Etiketler</div>
+        <div class="me-field">
+          <label class="me-label">Mekanınızı tanımlayan etiketler * <span>(en az 4 seçin)</span></label>
+          <div id="tag-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
+          <div id="tag-count" style="font-size:.68rem;color:var(--text-muted)"></div>
+        </div>
         <div class="me-section">İletişim</div>
         <div class="me-field">
           <label class="me-label" style="display:flex;align-items:center;justify-content:space-between">Telefon Numaraları <button type="button" class="me-btn-s" style="font-size:.62rem;padding:3px 8px;border-radius:5px" onclick="addPhone()">+ Ekle</button></label>
@@ -336,6 +345,7 @@ async function loadEditData(id){
     if(d.mapsLink)document.getElementById('f-mapsLink').value=d.mapsLink;
     if(d.shortDesc)document.getElementById('f-shortDesc').value=d.shortDesc;
     if(d.description)document.getElementById('f-description').value=d.description;
+    if(d.tags&&d.tags.length>0){selTags=d.tags.slice();renderTags();}
     if(d.website)document.getElementById('f-website').value=d.website;
     if(d.instagram)document.getElementById('f-instagram').value=d.instagram;
     // Phones
@@ -377,11 +387,31 @@ function showStep(){
 function validate(s){
   if(s===1){if(!v('f-ownerName','Ad soyad zorunlu'))return false;if(!v('f-ownerEmail','Geçerli e-posta girin')||!document.getElementById('f-ownerEmail').value.includes('@'))return false;if(!v('f-ownerPhone','Telefon zorunlu'))return false;return true;}
   if(s===2){if(!v('f-title','Mekan adı zorunlu'))return false;if(!document.getElementById('f-category').value){toast('Kategori seçin','red');return false;}if(!document.getElementById('f-location').value){toast('Konum seçin','red');return false;}return true;}
-  if(s===3){if(!v('f-shortDesc','Kısa açıklama zorunlu'))return false;var desc=document.getElementById('f-description').value.trim();if(desc.length<50){toast('Detaylı açıklama en az 50 karakter ('+desc.length+'/50)','red');return false;}return true;}
+  if(s===3){if(!v('f-shortDesc','Kısa açıklama zorunlu'))return false;var desc=document.getElementById('f-description').value.trim();if(desc.length<50){toast('Detaylı açıklama en az 50 karakter ('+desc.length+'/50)','red');return false;}if(selTags.length<4){toast('En az 4 etiket seçin ('+selTags.length+'/4)','red');return false;}return true;}
   return true;
 }
 function v(id,msg){var el=document.getElementById(id);if(!el||!el.value.trim()){toast(msg,'red');if(el)el.focus();return false;}return true;}
 function go(dir){if(dir===1&&!validate(step))return;step=Math.max(1,Math.min(maxStep,step+dir));showStep();}
+
+// Tags
+var TAGS=['manzaralı','deniz kenarı','sakin','gün batımı','doğa','organik','balık','taze','zeytinyağlı','ege mutfağı','kahvaltı','serpme','romantik','aile','tarihi','antik','köy','otantik','yerel','plaj','sahil','koy','berrak','iskele','liman','teras','bahçe','havuzlu','butik','taş ev','fotoğraf','popüler','canlı müzik','bar','kahve','çay','huzur','sessiz','yürüyüş'];
+var selTags=[];
+function renderTags(){
+  document.getElementById('tag-chips').innerHTML=TAGS.map(function(t){
+    var isSel=selTags.indexOf(t)>-1;
+    return '<button type="button" class="me-tag'+(isSel?' sel':'')+'" onclick="toggleTag(\''+t+'\')">'+t+'</button>';
+  }).join('');
+  document.getElementById('tag-count').textContent=selTags.length+' / 4 seçildi'+(selTags.length<4?' (en az 4 gerekli)':'');
+  document.getElementById('tag-count').style.color=selTags.length>=4?'var(--green)':'var(--terra)';
+}
+function toggleTag(t){
+  var idx=selTags.indexOf(t);
+  if(idx>-1)selTags.splice(idx,1);
+  else if(selTags.length<10)selTags.push(t);
+  else{toast('En fazla 10 etiket seçebilirsiniz','red');return;}
+  renderTags();
+}
+renderTags();
 
 function fmtPhone(el){
   var c=el.selectionStart;var raw=el.value.replace(/[^\d+]/g,'');
@@ -478,7 +508,7 @@ function collectData(){
     ownerName:document.getElementById('f-ownerName').value.trim(),ownerEmail:document.getElementById('f-ownerEmail').value.trim(),ownerPhone:document.getElementById('f-ownerPhone').value.trim(),
     title:document.getElementById('f-title').value.trim(),category:cat,location:document.getElementById('f-location').value,address:document.getElementById('f-address').value.trim(),mapsLink:document.getElementById('f-mapsLink').value.trim(),
     shortDesc:document.getElementById('f-shortDesc').value.trim(),description:document.getElementById('f-description').value.trim(),
-    phones:phones,website:document.getElementById('f-website').value.trim(),instagram:document.getElementById('f-instagram').value.trim(),
+    phones:phones,tags:selTags.slice(),website:document.getElementById('f-website').value.trim(),instagram:document.getElementById('f-instagram').value.trim(),
     weeklyHours:wh,checkin:cat==='konaklama'?document.getElementById('f-checkin').value:'',checkout:cat==='konaklama'?document.getElementById('f-checkout').value:'',
     rooms:rooms,facilities:facilities,
     seasonal:document.getElementById('f-seasonal').checked,seasonStart:document.getElementById('f-seasonStart').value,seasonEnd:document.getElementById('f-seasonEnd').value
@@ -488,7 +518,7 @@ function collectData(){
 // Summary
 function renderSummary(){
   var d=collectData();var phoneStr=d.phones.map(function(p){return p.number+(p.whatsapp?' (WA)':'');}).join(', ')||'—';
-  var rows=[['Yetkili',d.ownerName],['E-posta',d.ownerEmail],['Yetkili Tel',d.ownerPhone],['Mekan Adı',d.title],['Kategori',CAT_LABELS[d.category]||''],['Konum',d.location],['Adres',d.address||'—'],['Telefon',phoneStr],['Website',d.website||'—'],['Instagram',d.instagram||'—'],['Görseller',imgs.length>0?imgs.length+' fotoğraf':'Yüklenmedi']];
+  var rows=[['Yetkili',d.ownerName],['E-posta',d.ownerEmail],['Yetkili Tel',d.ownerPhone],['Mekan Adı',d.title],['Kategori',CAT_LABELS[d.category]||''],['Konum',d.location],['Adres',d.address||'—'],['Etiketler',d.tags.join(', ')],['Telefon',phoneStr],['Website',d.website||'—'],['Instagram',d.instagram||'—'],['Görseller',imgs.length>0?imgs.length+' fotoğraf':'Yüklenmedi']];
   if(d.category==='konaklama'){rows.push(['Check-in',d.checkin],['Check-out',d.checkout],['Oda Sayısı',d.rooms.length+''],['Tesisler',d.facilities.join(', ')||'—']);}
   if(d.seasonal)rows.push(['Sezon',d.seasonStart+' — '+d.seasonEnd]);
   document.getElementById('summary').innerHTML=rows.map(function(r){return '<div class="me-sumrow"><span class="me-suml">'+r[0]+'</span><span class="me-sumv">'+r[1]+'</span></div>';}).join('')+'<div style="margin-top:10px;font-size:.8rem;color:var(--text-light);line-height:1.6"><strong>Açıklama:</strong> '+d.description.substring(0,200)+(d.description.length>200?'...':'')+'</div>';
