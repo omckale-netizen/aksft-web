@@ -1,12 +1,21 @@
 export async function onRequestPost(context) {
   const { request, env } = context;
 
-  // CORS
+  // CORS — sadece kendi sitemizden
+  const allowedOrigins = ['https://assosukesfet.com', 'https://www.assosukesfet.com'];
+  const origin = request.headers.get('Origin') || '';
+  const isAllowed = allowedOrigins.includes(origin);
   const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': isAllowed ? origin : allowedOrigins[0],
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
   };
+  // Origin veya Referer kontrolü — curl/Postman'i de engelle
+  const referer = request.headers.get('Referer') || '';
+  const hasValidReferer = allowedOrigins.some(o => referer.startsWith(o));
+  if (!isAllowed && !hasValidReferer) {
+    return new Response(JSON.stringify({ error: 'Yetkisiz erişim' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
 
   // Sunucu tarafı günlük limit (toplam tüm kullanıcılar)
   const DAILY_SERVER_LIMIT = 500;
@@ -43,7 +52,23 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ reply: 'Ben Assos bölgesi hakkında sorularınıza yardımcı olmak için buradayım. Assos ile ilgili bir soru sormak ister misiniz? 🧭' }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 
-  const siteContext = body.context || '';
+  // Context'i client'tan al ama sanitize et — injection koruması
+  let siteContext = (body.context || '').substring(0, 5000);
+  // Tehlikeli talimatları temizle
+  siteContext = siteContext.replace(/ignore|unut|forget|override|artık sen|you are now|act as/gi, '***');
+
+  // IP bazlı rate limit (dakikada 3 istek)
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  try {
+    if (env.CHAT_KV) {
+      const ipKey = 'ip_' + ip + '_' + Math.floor(Date.now() / 60000);
+      const ipCount = parseInt(await env.CHAT_KV.get(ipKey) || '0');
+      if (ipCount >= 3) {
+        return new Response(JSON.stringify({ error: 'Çok hızlı soru soruyorsunuz. Lütfen biraz bekleyin ⏳' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      await env.CHAT_KV.put(ipKey, String(ipCount + 1), { expirationTtl: 60 });
+    }
+  } catch(e) {}
 
   const ANTHROPIC_API_KEY = env.ANTHROPIC_API_KEY;
   if (!ANTHROPIC_API_KEY) {
@@ -119,14 +144,20 @@ ${siteContext}`;
 
   function buildMessages(history, currentMsg) {
     const msgs = [];
-    if (history && Array.isArray(history)) {
+    if (history && Array.isArray(history) && history.length <= 10) {
+      // History sanitize — injection koruması + boyut sınırı
+      const blocked = ['system prompt','ignore previous','forget instructions','kuralları unut','talimatları unut','sen artık','you are now'];
       history.slice(-6).forEach(m => {
-        if (m.role === 'user' || m.role === 'assistant') {
-          msgs.push({ role: m.role, content: (m.content || '').substring(0, 500) });
+        if (m.role !== 'user' && m.role !== 'assistant') return;
+        let content = (m.content || '').substring(0, 300);
+        // Assistant mesajlarında injection kontrolü — sahte talimat enjekte edilmiş olabilir
+        if (m.role === 'assistant') {
+          const lower = content.toLowerCase();
+          if (blocked.some(b => lower.includes(b))) return; // Şüpheli mesajı atla
         }
+        msgs.push({ role: m.role, content: content });
       });
     }
-    // Son mesaj zaten history'de varsa ekleme
     if (msgs.length === 0 || msgs[msgs.length - 1].content !== currentMsg) {
       msgs.push({ role: 'user', content: currentMsg });
     }
@@ -180,10 +211,12 @@ ${siteContext}`;
   }
 }
 
-export async function onRequestOptions() {
+export async function onRequestOptions(context) {
+  const origin = context.request.headers.get('Origin') || '';
+  const allowedOrigins = ['https://assosukesfet.com', 'https://www.assosukesfet.com'];
   return new Response(null, {
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': allowedOrigins.includes(origin) ? origin : allowedOrigins[0],
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     },

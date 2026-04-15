@@ -4500,10 +4500,17 @@ function renderPlacePage(placeId) {
     sendBtn.disabled = false;
   };
 
+  function sanitizeHtml(text) {
+    return text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
   function mdToHtml(text) {
+    // Önce HTML tag'lerini escape et (XSS koruması)
+    text = sanitizeHtml(text);
     var linkStyle = 'color:var(--terra);font-weight:600;text-decoration:underline;';
-    // 1. Markdown linkleri [text](url) — https:// olsun olmasın
+    // 1. Markdown linkleri — SADECE assosukesfet.com (dış site linkleri engellenir)
     var result = text.replace(/\[([^\]]+)\]\((https?:\/\/)?assosukesfet\.com\/([^)]+)\)/g, '<a href="https://assosukesfet.com/$3" target="_blank" rel="noopener" style="' + linkStyle + '">$1</a>');
+    // Dış site markdown linklerini düz metin yap (tıklanamaz)
+    result = result.replace(/\[([^\]]+)\]\(https?:\/\/(?!assosukesfet\.com)[^)]+\)/g, '$1');
     // 2. Düz URL'leri tıklanabilir yap (https:// olsun olmasın)
     result = result.replace(/(?<!["=\/])((?:https?:\/\/)?assosukesfet\.com\/[^\s<,)"]+)/g, function(url) {
       if (result.indexOf('href="' + url) > -1 || result.indexOf('href="https://' + url) > -1) return url;
