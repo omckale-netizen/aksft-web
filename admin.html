@@ -5951,28 +5951,32 @@ function bulkChangeCategory() {
 
 function bulkSetStatus(status) {
   const s = VENUE_STATUS[status];
-  showConfirm('Durum Degistir', bulkSelected.length + ' mekan "' + s.label + '" yapilacak. Devam?', async () => {
-    for (const id of bulkSelected) {
-      const v = draftData.venues.find(x => x.id === id);
-      if (v) { v.status = status; v.active = status === 'published'; await saveVenueToFirestore(v); }
-    }
-    const count = bulkSelected.length;
-    bulkDeselectAll();
-    renderVenueTable();
-    showToast(s.icon + ' ' + count + ' mekan "' + s.label + '" yapildi.', 'success');
+  showConfirm('Durum Değiştir', bulkSelected.length + ' mekan "' + s.label + '" yapılacak. Devam?', async () => {
+    try {
+      for (const id of bulkSelected) {
+        const v = draftData.venues.find(x => x.id === id);
+        if (v) { v.status = status; v.active = status === 'published'; await saveVenueToFirestore(v); }
+      }
+      const count = bulkSelected.length;
+      bulkDeselectAll();
+      renderVenueTable();
+      showToast(s.icon + ' ' + count + ' mekan "' + s.label + '" yapıldı.', 'success');
+    } catch(err) { showToast('Toplu işlem hatası: ' + err.message, 'error'); }
   });
 }
 
 function bulkDelete() {
   showConfirm('Çöp Kutusuna Taşı', bulkSelected.length + ' mekan çöp kutusuna taşınacak.', async () => {
-    for (const id of bulkSelected) {
-      const v = draftData.venues.find(x => x.id === id);
-      if (v) { v.status = 'trashed'; v.trashedAt = new Date().toISOString(); v.active = false; await saveVenueToFirestore(v); }
-    }
-    const count = bulkSelected.length;
-    bulkDeselectAll();
-    renderVenueTable();
-    showToast('🗑 ' + count + ' mekan çöp kutusuna taşındı.', 'success');
+    try {
+      for (const id of bulkSelected) {
+        const v = draftData.venues.find(x => x.id === id);
+        if (v) { v.status = 'trashed'; v.trashedAt = new Date().toISOString(); v.active = false; await saveVenueToFirestore(v); }
+      }
+      const count = bulkSelected.length;
+      bulkDeselectAll();
+      renderVenueTable();
+      showToast('🗑 ' + count + ' mekan çöp kutusuna taşındı.', 'success');
+    } catch(err) { showToast('Toplu silme hatası: ' + err.message, 'error'); }
   });
 }
 
@@ -6977,6 +6981,7 @@ async function saveVenue(e) {
   const allImages = [...existingImgs, ...uploadedUrls];
   pendingImages = [];
 
+  const _venuePhones = getPhonesData();
   const venue = {
     id: id,
     title: document.getElementById('f-title').value.trim(),
@@ -6994,8 +6999,8 @@ async function saveVenue(e) {
     keywords: [],
     hours: category === 'konaklama' ? 'Check-in ' + (checkin || '14:00') : (dayHours ? (dayHours.find(d=>!d.closed)||{}).open + ' - ' + (dayHours.find(d=>!d.closed)||{}).close : ''),
     images: allImages,
-    phones: getPhonesData(),
-    phone: getPhonesData().length > 0 ? getPhonesData()[0].number : '',
+    phones: _venuePhones,
+    phone: _venuePhones.length > 0 ? _venuePhones[0].number : '',
     address: document.getElementById('f-address').value.trim(),
     website: document.getElementById('f-website').value.trim(),
     instagram: document.getElementById('f-instagram').value.trim(),
@@ -7056,6 +7061,9 @@ async function saveVenue(e) {
       }
     }, 500);
   }
+  } catch(err) {
+    console.error('Mekan kaydetme hatası:', err);
+    showToast('Mekan kaydedilemedi: ' + (err.message || 'Bilinmeyen hata'), 'error');
   } finally {
     if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Kaydet'; }
   }
@@ -7203,6 +7211,7 @@ function closeRouteModal() {
 
 async function saveRoute(e) {
   e.preventDefault();
+  try {
   const id = document.getElementById('rf-id').value || generateId(document.getElementById('rf-title').value);
 
   // Gather stops
@@ -7269,7 +7278,11 @@ async function saveRoute(e) {
   pingIndexNow('https://assosukesfet.com/rotalar/rota-detay?id=' + route.id);
   closeRouteModal();
   renderRoutesTable();
-  showToast('"' + route.title + '" ' + (isEdit ? 'guncellendi.' : 'eklendi.'), 'success');
+  showToast('"' + route.title + '" ' + (isEdit ? 'güncellendi.' : 'eklendi.'), 'success');
+  } catch(err) {
+    console.error('Rota kaydetme hatası:', err);
+    showToast('Rota kaydedilemedi: ' + (err.message || 'Bilinmeyen hata'), 'error');
+  }
 }
 
 function confirmDeleteRoute(id) {
@@ -7573,6 +7586,7 @@ function vpRemoveImage() {
 
 async function saveVP(e) {
   e.preventDefault();
+  try {
   const isPlaces = currentVPTab === 'places';
   const id = document.getElementById('vpf-id').value || generateId(document.getElementById('vpf-title').value);
   const tagsStr = document.getElementById('vpf-tags').value;
@@ -7689,7 +7703,11 @@ async function saveVP(e) {
 
   closeVPModal();
   renderVPTable();
-  showToast('"' + item.title + '" ' + (isEdit ? 'guncellendi.' : 'eklendi.'), 'success');
+  showToast('"' + item.title + '" ' + (isEdit ? 'güncellendi.' : 'eklendi.'), 'success');
+  } catch(err) {
+    console.error('Kaydetme hatası:', err);
+    showToast('Kaydedilemedi: ' + (err.message || 'Bilinmeyen hata'), 'error');
+  }
 }
 
 async function confirmDeleteVP(id) {
