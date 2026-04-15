@@ -2984,6 +2984,8 @@ function renderVenuePage(venueId) {
       var fabBottom = stickyVisible ? (isMob ? 80 : 90) : (isMob ? 16 : 24);
       if (fab) fab.style.bottom = fabBottom + 'px';
       if (stt) stt.style.bottom = (fabBottom + (isMob ? 58 : 68)) + 'px';
+      var panel = document.getElementById('ai-chat-panel');
+      if (panel) panel.style.bottom = (fabBottom + (isMob ? 60 : 72)) + 'px';
     }
     window.addEventListener('scroll', function() {
       var show = window.scrollY > 500;
