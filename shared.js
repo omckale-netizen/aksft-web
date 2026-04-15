@@ -4268,8 +4268,8 @@ function renderPlacePage(placeId) {
       <div class="ai-chat-head">
         <div class="ai-chat-avatar">🧭</div>
         <div>
-          <div class="ai-chat-title">Assos Rehberiniz</div>
-          <div class="ai-chat-sub">Yapay zeka destekli seyahat asistanı</div>
+          <div class="ai-chat-title">Assos'u Keşfet Asistan</div>
+          <div class="ai-chat-sub">Yapay zeka destekli kişisel seyahat rehberiniz</div>
         </div>
         <button class="ai-chat-close" onclick="aiChatToggle()">✕</button>
       </div>
