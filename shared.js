@@ -2972,9 +2972,15 @@ function renderVenuePage(venueId) {
   /* ── Sticky bar ── */
   (function() {
     const sticky = document.getElementById('vp-sticky');
+    const fab = document.getElementById('ai-chat-fab');
     window.addEventListener('scroll', function() {
-      if (window.scrollY > 500) sticky.classList.add('show');
-      else sticky.classList.remove('show');
+      if (window.scrollY > 500) {
+        sticky.classList.add('show');
+        if (fab) fab.style.bottom = window.innerWidth <= 480 ? '80px' : '90px';
+      } else {
+        sticky.classList.remove('show');
+        if (fab) fab.style.bottom = '';
+      }
     }, { passive: true });
   })();
 
