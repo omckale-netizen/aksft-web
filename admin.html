@@ -4002,7 +4002,7 @@ async function renderPendingVenues() {
         (imgCount > 0 ? '<div style="padding:0 20px 16px;display:flex;gap:6px;flex-wrap:wrap">' + item.images.slice(0, 4).map(function(url) { return '<img src="' + url + '" style="width:60px;height:42px;object-fit:cover;border-radius:6px;border:1px solid rgba(0,0,0,.06)">'; }).join('') + (imgCount > 4 ? '<span style="font-size:.72rem;color:var(--text-muted);align-self:center">+' + (imgCount - 4) + '</span>' : '') + '</div>' : '') +
         '<div style="padding:12px 20px;border-top:1px solid rgba(0,0,0,.04);display:flex;gap:8px;flex-wrap:wrap">' +
           (item.status === 'pending' || item.status === 'revision' ? '' : '') +
-          (item.status === 'pending' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla & Mekan Ekle</button><button class="btn btn-sm" style="background:rgba(49,130,206,.1);color:#2B6CB0;border:1px solid rgba(49,130,206,.2)" onclick="showRevisionModal(\'' + item._id + '\')">📝 Revizyon İste</button><button class="btn btn-danger btn-sm" onclick="rejectPendingVenueFinal(\'' + item._id + '\')">❌ Reddet</button>' : '') +
+          (item.status === 'pending' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla & Mekan Ekle</button><button class="btn btn-sm" style="background:rgba(49,130,206,.1);color:#2B6CB0;border:1px solid rgba(49,130,206,.2)" onclick="showRevisionModal(\'' + item._id + '\')">📝 Revizyon İste</button><button class="btn btn-danger btn-sm" onclick="showRejectModal(\'' + item._id + '\')">❌ Reddet</button>' : '') +
           (item.status === 'revision' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla</button><span style="font-size:.72rem;color:var(--text-muted)">Düzenleme bekleniyor</span>' : '') +
           '<button class="btn btn-secondary btn-sm" onclick="pendingMailTo(\'' + (item.ownerEmail || '') + '\')">✉️ Mail</button>' +
           '<button class="btn btn-secondary btn-sm" onclick="previewPendingVenue(\'' + item._id + '\')">👁 Detaylı İncele</button>' +
@@ -4306,9 +4306,52 @@ async function rejectPendingVenue(id, reason) {
   } catch(err) { showToast('Hata: ' + err.message, 'error'); }
 }
 
-async function rejectPendingVenueFinal(id) {
-  var reason = prompt('Red sebebi (mekan sahibine iletilecek):');
-  if (reason === null) return;
+var REJECT_REASONS = [
+  'Mekan Assos, Ayvacık ve çevresi bölgesinde bulunmuyor',
+  'Mekan bilgileri doğrulanamadı',
+  'Mekan kalıcı olarak kapalı görünüyor',
+  'Aynı mekan zaten platformumuzda kayıtlı',
+  'Başvuru bilgileri yetersiz ve revizyon sonrası tamamlanmadı',
+  'Mekan kategorisi platformumuzun kapsamı dışında',
+  'İletişim bilgileri doğrulanamadı',
+  'Başvuru spam veya test amaçlı görünüyor'
+];
+function showRejectModal(id) {
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:20px';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML = '<div style="background:var(--card-bg,#fff);border-radius:16px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)">' +
+    '<div style="padding:18px 24px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:center">' +
+      '<h3 style="margin:0;font-size:1rem;color:var(--red)">❌ Red Sebebi Seçin</h3>' +
+      '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="border:none;background:none;font-size:1.3rem;cursor:pointer;color:var(--text-muted)">&times;</button>' +
+    '</div>' +
+    '<div style="padding:16px 24px;max-height:300px;overflow-y:auto">' +
+      REJECT_REASONS.map(function(r) {
+        return '<label style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.03);cursor:pointer;font-size:.82rem;color:var(--text)">' +
+          '<input type="radio" name="reject-reason" value="' + r + '" style="width:16px;height:16px;accent-color:var(--red);cursor:pointer;flex-shrink:0;margin-top:2px">' +
+          r + '</label>';
+      }).join('') +
+      '<div style="margin-top:12px"><label style="font-size:.72rem;font-weight:700;color:var(--text-light);display:block;margin-bottom:4px">Ek not (opsiyonel)</label>' +
+      '<textarea id="reject-custom-note" rows="2" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:.82rem;font-family:inherit;resize:vertical;background:var(--input-bg,#fff);color:var(--text)" placeholder="Varsa ek açıklama..."></textarea></div>' +
+    '</div>' +
+    '<div style="padding:14px 24px;border-top:1px solid rgba(0,0,0,.06);display:flex;gap:8px;justify-content:flex-end">' +
+      '<button class="btn btn-secondary btn-sm" onclick="this.closest(\'div[style*=fixed]\').remove()">İptal</button>' +
+      '<button class="btn btn-danger btn-sm" onclick="submitReject(\'' + id + '\',this.closest(\'div[style*=fixed]\'))">Reddet & Mail Gönder</button>' +
+    '</div>' +
+  '</div>';
+  document.body.appendChild(overlay);
+}
+function submitReject(id, overlay) {
+  var selected = overlay.querySelector('input[name=reject-reason]:checked');
+  var customNote = overlay.querySelector('#reject-custom-note').value.trim();
+  if (!selected && !customNote) { showToast('Bir red sebebi seçin', 'error'); return; }
+  var reason = selected ? selected.value : '';
+  if (customNote) reason += (reason ? '. ' : '') + customNote;
+  overlay.remove();
+  rejectPendingVenueFinal(id, reason);
+}
+async function rejectPendingVenueFinal(id, reason) {
+  if (!reason) return;
   try {
     var doc = await db.collection('pending_venues').doc(id).get();
     var data = doc.exists ? doc.data() : {};
