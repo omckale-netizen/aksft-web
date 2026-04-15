@@ -397,7 +397,7 @@ function showStep(){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function validate(s){
-  if(s===1){if(!v('f-ownerName','Ad soyad zorunlu'))return false;if(!v('f-ownerEmail','Geçerli e-posta girin')||!document.getElementById('f-ownerEmail').value.includes('@'))return false;if(!v('f-ownerPhone','Telefon zorunlu'))return false;return true;}
+  if(s===1){if(!v('f-ownerName','Ad soyad zorunlu'))return false;var em=document.getElementById('f-ownerEmail').value.trim();if(!em||!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)){toast('Geçerli bir e-posta adresi girin (ör. isim@mail.com)','red');document.getElementById('f-ownerEmail').focus();return false;}if(!v('f-ownerPhone','Telefon zorunlu'))return false;return true;}
   if(s===2){if(!v('f-title','Mekan adı zorunlu'))return false;if(!document.getElementById('f-category').value){toast('Kategori seçin','red');return false;}if(!document.getElementById('f-location').value){toast('Konum seçin','red');return false;}var ml=document.getElementById('f-mapsLink').value.trim();if(!ml){toast('Google Maps linki zorunlu','red');document.getElementById('f-mapsLink').focus();return false;}if(!ml.includes('google') && !ml.includes('goo.gl') && !ml.includes('maps.app')){toast('Geçerli bir Google Maps linki girin','red');document.getElementById('f-mapsLink').focus();return false;}return true;}
   if(s===3){if(!v('f-shortDesc','Kısa açıklama zorunlu'))return false;var desc=document.getElementById('f-description').value.trim();if(desc.length<50){toast('Detaylı açıklama en az 50 karakter ('+desc.length+'/50)','red');return false;}if(selTags.length!==4){toast('Tam 4 etiket seçin ('+selTags.length+'/4)','red');return false;}return true;}
   if(s===4){
