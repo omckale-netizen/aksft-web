@@ -2375,31 +2375,43 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
     </div>
     <div class="modal-body">
       <form id="venue-form" onsubmit="saveVenue(event)">
+        <!-- ═══ Temel Bilgiler ═══ -->
+        <div style="font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--terra);margin-bottom:12px">Temel Bilgiler</div>
+        <div class="form-group">
+          <label>Mekan Adı</label>
+          <input type="text" id="f-title" required placeholder="Mekan adını girin" oninput="autoId()">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Yetkili Kişi <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(opsiyonel)</span></label>
+            <input type="text" id="f-ownerName" placeholder="Ad Soyad">
+          </div>
+          <div class="form-group">
+            <label>Yetkili E-posta <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(opsiyonel)</span></label>
+            <input type="email" id="f-ownerEmail" placeholder="yetkili@mail.com">
+          </div>
+        </div>
         <div class="form-row">
           <div class="form-group">
             <label>ID</label>
-            <input type="text" id="f-id" readonly placeholder="Otomatik olusturulur">
+            <input type="text" id="f-id" readonly placeholder="Otomatik oluşturulur">
           </div>
           <div class="form-group">
-            <label>Emoji <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(kategoriye gore otomatik)</span></label>
-            <input type="text" id="f-emoji" placeholder="Otomatik secilir" readonly style="cursor:default">
+            <label>Emoji <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(kategoriye göre otomatik)</span></label>
+            <input type="text" id="f-emoji" placeholder="Otomatik seçilir" readonly style="cursor:default">
           </div>
-        </div>
-        <div class="form-group">
-          <label>Mekan Adi</label>
-          <input type="text" id="f-title" required placeholder="Mekan adi" oninput="autoId()">
         </div>
         <div class="form-row">
           <div class="form-group">
             <label>Kategori</label>
             <select id="f-category" required onchange="autoCatEmoji();updateHoursVisibility()">
-              <option value="">Secin</option>
+              <option value="">Seçin</option>
               <option value="kafe">☕ Kafe</option>
               <option value="restoran">🍽 Restoran</option>
-              <option value="kahvalti">🌞 Kahvalti</option>
+              <option value="kahvalti">🌞 Kahvaltı</option>
               <option value="konaklama">🏨 Konaklama</option>
               <option value="beach">🏖 Beach</option>
-              <option value="iskele">⚓ Iskele</option>
+              <option value="iskele">⚓ İskele</option>
             </select>
           </div>
           <div class="form-group">
@@ -2409,11 +2421,38 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             </select>
           </div>
         </div>
+
+        <!-- ═══ Açıklama ═══ -->
+        <div style="font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--terra);margin:20px 0 12px;padding-top:16px;border-top:1px solid rgba(0,0,0,.06)">Açıklama</div>
         <div class="form-group">
-          <label>Bağlı Yer <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(opsiyonel — bu mekan hangi gezilecek yerde?)</span></label>
-          <select id="f-placeId">
-            <option value="">Yok</option>
-          </select>
+          <label>Kısa Açıklama</label>
+          <textarea id="f-shortDesc" rows="2" placeholder="Kısa tanıtım metni (mekan listesinde görünür)"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Detaylı Açıklama</label>
+          <textarea id="f-description" rows="4" placeholder="Mekan hakkında detaylı bilgi (detay sayfasında görünür)"></textarea>
+        </div>
+
+        <!-- ═══ İletişim ═══ -->
+        <div style="font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--terra);margin:20px 0 12px;padding-top:16px;border-top:1px solid rgba(0,0,0,.06)">İletişim & Konum</div>
+        <div class="form-group">
+          <label>Adres</label>
+          <input type="text" id="f-address" placeholder="Tam adres">
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;justify-content:space-between">Telefon Numaraları <button type="button" class="btn" style="font-size:.65rem;padding:3px 10px;background:var(--terra-bg);color:var(--terra);border:1px solid rgba(196,82,26,.2)" onclick="addPhoneRow()">+ Numara Ekle</button></label>
+          <div id="f-phones-list"></div>
+          <input type="hidden" id="f-phone">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Website</label>
+            <input type="text" id="f-website" placeholder="https://...">
+          </div>
+          <div class="form-group">
+            <label>Instagram</label>
+            <input type="text" id="f-instagram" placeholder="@mekanadi">
+          </div>
         </div>
         <div class="form-group">
           <label>Koordinat <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(Google Maps'ten kopyala: 39.4907, 26.3380)</span></label>
@@ -2422,42 +2461,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <input type="hidden" id="f-lng">
         </div>
         <div class="form-group">
-          <label>Kisa Aciklama</label>
-          <textarea id="f-shortDesc" rows="2" placeholder="Kisa tanitim metni"></textarea>
+          <label>Bağlı Yer <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(opsiyonel — bu mekan hangi gezilecek yerde?)</span></label>
+          <select id="f-placeId">
+            <option value="">Yok</option>
+          </select>
         </div>
-        <div class="form-group">
-          <label>Detayli Aciklama</label>
-          <textarea id="f-description" rows="4" placeholder="Mekan hakkinda detayli bilgi"></textarea>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Adres</label>
-            <input type="text" id="f-address" placeholder="Tam adres">
-          </div>
-          <div class="form-group">
-            <label style="display:flex;align-items:center;justify-content:space-between">Telefon Numaraları <button type="button" class="btn" style="font-size:.65rem;padding:3px 10px;background:var(--terra-bg);color:var(--terra);border:1px solid rgba(196,82,26,.2)" onclick="addPhoneRow()">+ Numara Ekle</button></label>
-            <div id="f-phones-list"></div>
-            <input type="hidden" id="f-phone">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Website</label>
-          <input type="text" id="f-website" placeholder="https://...">
-        </div>
-        <div class="form-group">
-          <label>Instagram</label>
-          <input type="text" id="f-instagram" placeholder="@mekanadi veya https://instagram.com/mekanadi">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Mekan Sahibi <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(opsiyonel)</span></label>
-            <input type="text" id="f-ownerName" placeholder="Ad Soyad">
-          </div>
-          <div class="form-group">
-            <label>Sahip E-posta <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(opsiyonel)</span></label>
-            <input type="email" id="f-ownerEmail" placeholder="sahip@mail.com">
-          </div>
-        </div>
+
+        <!-- ═══ Durum & Özellikler ═══ -->
+        <div style="font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--terra);margin:20px 0 12px;padding-top:16px;border-top:1px solid rgba(0,0,0,.06)">Durum & Özellikler</div>
         <div class="form-group">
           <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
             <input type="checkbox" id="f-featured" style="width:18px;height:18px;accent-color:var(--terra);cursor:pointer">
@@ -2525,8 +2536,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             </div>
           </div>
         </div>
+        <!-- ═══ Çalışma Saatleri ═══ -->
+        <div style="font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--terra);margin:20px 0 12px;padding-top:16px;border-top:1px solid rgba(0,0,0,.06)">Çalışma Saatleri</div>
         <div class="form-group" id="f-hours-group">
-          <label>Calisma Saatleri</label>
+          <label>Haftalık Çalışma Saatleri</label>
           <div id="f-hours-normal">
             <div class="wh-grid" id="wh-grid"></div>
           </div>
@@ -2580,22 +2593,24 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
         </div>
 
+        <!-- ═══ Görseller ═══ -->
+        <div style="font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--terra);margin:20px 0 12px;padding-top:16px;border-top:1px solid rgba(0,0,0,.06)">Görseller</div>
         <div class="form-group">
-          <label>Görseller <span style="font-weight:400;color:var(--text-muted);font-size:.72rem" id="img-upload-info"></span></label>
+          <label>Mekan Görselleri <span style="font-weight:400;color:var(--text-muted);font-size:.72rem" id="img-upload-info"></span></label>
           <div class="img-upload-area" id="img-upload-area">
             <div class="img-upload-drop" id="img-drop" onclick="document.getElementById('img-file-input').click()">
               <span style="font-size:2rem">📷</span>
-              <p>Gorsel yuklemek icin tiklayin veya surukleyin</p>
-              <p style="font-size:.7rem;color:var(--text-muted)">JPG, PNG, WebP · Maks 5MB/gorsel · Maks 6 adet</p>
-              <p style="font-size:.65rem;color:var(--text-muted)">Otomatik WebP sikistirma · Maks 1200px</p>
+              <p>Görsel yüklemek için tıklayın veya sürükleyin</p>
+              <p style="font-size:.7rem;color:var(--text-muted)">JPG, PNG, WebP · Maks 5MB/görsel · Maks 6 adet</p>
+              <p style="font-size:.65rem;color:var(--text-muted)">Otomatik WebP sıkıştırma · Maks 1200px</p>
             </div>
             <input type="file" id="img-file-input" multiple accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleImageUpload(this.files)">
             <div class="img-preview-grid" id="img-preview-grid"></div>
           </div>
         </div>
 
-        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:24px">
-          <button type="button" class="btn btn-secondary" onclick="closeVenueModal()">Iptal</button>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:24px;padding-top:16px;border-top:1px solid rgba(0,0,0,.06)">
+          <button type="button" class="btn btn-secondary" onclick="closeVenueModal()">İptal</button>
           <button type="submit" class="btn btn-primary">Kaydet</button>
         </div>
       </form>
