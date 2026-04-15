@@ -1632,8 +1632,24 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                 </optgroup>
               </select>
             </div>
+            <!-- Toplu Gönderim -->
+            <div style="padding:10px 14px;border-radius:8px;background:rgba(107,70,193,.04);border:1px solid rgba(107,70,193,.12)">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.78rem;font-weight:600;color:var(--text)">
+                <input type="checkbox" id="compose-bulk" onchange="toggleBulkMail()" style="width:16px;height:16px;accent-color:#6B46C1;cursor:pointer">
+                Tüm mekan sahiplerine toplu gönder
+              </label>
+              <div id="compose-bulk-options" style="display:none;margin-top:10px">
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                  <select id="compose-bulk-cat" onchange="updateBulkCount()" style="padding:6px 12px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:6px;font-size:.78rem;background:var(--input-bg,#fff);color:var(--text);cursor:pointer">
+                    <option value="all">Tüm Kategoriler</option>
+                  </select>
+                  <span id="compose-bulk-count" style="font-size:.72rem;font-weight:600;color:#6B46C1"></span>
+                </div>
+                <div id="compose-bulk-list" style="margin-top:8px;font-size:.68rem;color:var(--text-muted);max-height:80px;overflow-y:auto;line-height:1.6"></div>
+              </div>
+            </div>
             <!-- Alıcı -->
-            <div class="form-group" style="margin:0">
+            <div class="form-group" style="margin:0" id="compose-to-wrap">
               <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:4px">Alıcı <span style="font-weight:400;color:var(--text-muted);font-size:.68rem">(birden fazla için virgülle ayırın)</span></label>
               <div style="position:relative">
                 <input type="text" id="compose-to" placeholder="ornek@mail.com, diger@mail.com" oninput="showRecentEmails(this.value)" onfocus="showRecentEmails(this.value)" autocomplete="off" style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.88rem;background:var(--input-bg,#fff);color:var(--text);width:100%">
@@ -4254,6 +4270,44 @@ function openComposeMail(toEmail) {
 function closeComposeMail() {
   document.getElementById('compose-mail-panel').style.display = 'none';
   document.getElementById('compose-recent-emails').style.display = 'none';
+  var bulkCb = document.getElementById('compose-bulk');
+  if (bulkCb) { bulkCb.checked = false; toggleBulkMail(); }
+}
+
+// ── Toplu Gönderim ──
+function getBulkRecipients() {
+  var cat = document.getElementById('compose-bulk-cat')?.value || 'all';
+  return (draftData.venues || []).filter(function(v) {
+    if (!v.ownerEmail) return false;
+    if (cat !== 'all' && v.category !== cat) return false;
+    return true;
+  });
+}
+function toggleBulkMail() {
+  var checked = document.getElementById('compose-bulk').checked;
+  var opts = document.getElementById('compose-bulk-options');
+  var toWrap = document.getElementById('compose-to-wrap');
+  opts.style.display = checked ? 'block' : 'none';
+  toWrap.style.display = checked ? 'none' : '';
+  if (checked) {
+    // Kategori dropdown'ını doldur
+    var catSel = document.getElementById('compose-bulk-cat');
+    var cats = {};
+    (draftData.venues || []).forEach(function(v) { if (v.ownerEmail && v.category) cats[v.category] = true; });
+    var catLabels = {kafe:'Kafeler',restoran:'Restoranlar',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskeleler'};
+    catSel.innerHTML = '<option value="all">Tüm Kategoriler</option>' +
+      Object.keys(cats).map(function(c) { return '<option value="' + c + '">' + (catLabels[c] || c) + '</option>'; }).join('');
+    updateBulkCount();
+  }
+}
+function updateBulkCount() {
+  var recipients = getBulkRecipients();
+  var countEl = document.getElementById('compose-bulk-count');
+  var listEl = document.getElementById('compose-bulk-list');
+  countEl.textContent = recipients.length + ' mekan sahibine gönderilecek';
+  listEl.innerHTML = recipients.map(function(v) {
+    return (v.emoji || '') + ' ' + v.title + ' → <span style="color:var(--terra)">' + v.ownerEmail + '</span>' + (v.ownerName ? ' (' + v.ownerName + ')' : '');
+  }).join('<br>');
 }
 
 // ── Hazır Mail Şablonları ──
@@ -4427,17 +4481,30 @@ function previewComposeMail() {
   overlay.style.display = 'flex';
 }
 async function sendComposeMail() {
+  var isBulk = document.getElementById('compose-bulk').checked;
   var toRaw = document.getElementById('compose-to').value.trim();
   var subject = document.getElementById('compose-subject').value.trim();
   var body = document.getElementById('compose-body').value.trim();
   var statusEl = document.getElementById('compose-status');
 
-  if (!toRaw) { showToast('Alıcı adresi girin', 'error'); return; }
   if (!subject) { showToast('Konu yazın', 'error'); return; }
   if (!body) { showToast('İçerik yazın', 'error'); return; }
 
-  var toList = toRaw.split(',').map(function(e) { return e.trim(); }).filter(Boolean);
-  if (toList.length === 0) { showToast('Geçerli e-posta girin', 'error'); return; }
+  var toList;
+  if (isBulk) {
+    var recipients = getBulkRecipients();
+    if (recipients.length === 0) { showToast('Seçilen kategoride e-postası olan mekan sahibi yok', 'error'); return; }
+    toList = recipients.map(function(v) { return v.ownerEmail; });
+    var catLabel = document.getElementById('compose-bulk-cat').selectedOptions[0]?.textContent || '';
+    if (!confirm('⚠️ TOPLU MAIL GÖNDERİM\n\n' + toList.length + ' mekan sahibine mail gönderilecek.\nKategori: ' + catLabel + '\nKonu: ' + subject + '\n\nBu işlem geri alınamaz!\n\nDevam etmek istiyor musunuz?')) return;
+  } else {
+    if (!toRaw) { showToast('Alıcı adresi girin', 'error'); return; }
+    toList = toRaw.split(',').map(function(e) { return e.trim(); }).filter(Boolean);
+    if (toList.length === 0) { showToast('Geçerli e-posta girin', 'error'); return; }
+    if (toList.length > 1) {
+      if (!confirm(toList.length + ' alıcıya mail gönderilecek. Devam?')) return;
+    }
+  }
 
   statusEl.textContent = toList.length > 1 ? toList.length + ' alıcıya gönderiliyor...' : 'Gönderiliyor...';
   statusEl.style.color = 'var(--text-muted)';
@@ -4453,11 +4520,11 @@ async function sendComposeMail() {
     if (data.ok) {
       statusEl.textContent = 'Gönderildi!';
       statusEl.style.color = 'var(--green)';
-      showToast('✉️ Mail gönderildi: ' + toList.length + ' alıcı', 'success');
+      showToast('✉️ Mail gönderildi: ' + (data.sent || toList.length) + ' alıcı', 'success');
       toList.forEach(function(e) { saveRecentEmail(e); });
-      logActivity('mail_gonder', toList.join(', '), subject);
+      logActivity(isBulk ? 'toplu_mail' : 'mail_gonder', toList.length + ' alıcı', subject);
       // Firebase'e kaydet
-      try { db.collection('sent_mails').add({ to: toList, subject: subject, body: body, timestamp: new Date().toISOString(), user: firebase.auth().currentUser?.email || '' }); } catch(e) {}
+      try { db.collection('sent_mails').add({ to: toList, subject: subject, body: body, bulk: isBulk, timestamp: new Date().toISOString(), user: firebase.auth().currentUser?.email || '' }); } catch(e) {}
       setTimeout(function() {
         document.getElementById('compose-to').value = '';
         document.getElementById('compose-subject').value = '';
@@ -4473,6 +4540,57 @@ async function sendComposeMail() {
     statusEl.textContent = 'Bağlantı hatası';
     statusEl.style.color = 'var(--red)';
     showToast('Mail gönderilemedi: ' + e.message, 'error');
+  }
+}
+// ── Mekan Hoşgeldin Maili ──
+async function sendVenueWelcomeMail(venue) {
+  var ownerName = venue.ownerName || 'Değerli İşletme Sahibi';
+  var venueUrl = 'https://assosukesfet.com/mekanlar/mekan-detay?id=' + venue.id;
+  var catLabels = {kafe:'kafe',restoran:'restoran',kahvalti:'kahvaltı mekanı',konaklama:'konaklama tesisi',beach:'beach club',iskele:'iskele'};
+  var catLabel = catLabels[venue.category] || 'mekan';
+
+  var body = 'Merhaba ' + ownerName + ',\n\n' +
+    venue.title + ' artık Assos\'u Keşfet platformunda!\n\n' +
+    'Mekanınız Assos bölgesinin en kapsamlı dijital rehberinde yerini aldı. ' +
+    'Binlerce ziyaretçi mekanınızı keşfedebilecek.\n\n' +
+    'Mekan sayfanızı aşağıdaki linkten görüntüleyebilirsiniz:\n' +
+    venueUrl + '\n\n' +
+    'Mekan bilgilerinizi güncel tutmak, fotoğraf eklemek veya değişiklik talep etmek için bize her zaman ulaşabilirsiniz.\n\n' +
+    'Assos\'u Keşfet ailesine hoş geldiniz!';
+
+  try {
+    var html = buildMailHtml('Hoş Geldiniz — ' + venue.title, body);
+    // Mail içindeki link'i tıklanabilir yap
+    html = html.replace(venueUrl, '<a href="' + venueUrl + '" style="color:#C4521A;font-weight:700;text-decoration:none;">' + venueUrl + '</a>');
+
+    var resp = await fetch('/api/send-mail', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: [venue.ownerEmail],
+        subject: 'Hoş Geldiniz — ' + venue.title + ' Assos\'u Keşfet\'te!',
+        html: html
+      })
+    });
+    var data = await resp.json();
+    if (data.ok) {
+      showToast('✉️ Hoşgeldin maili gönderildi: ' + venue.ownerEmail, 'success');
+      saveRecentEmail(venue.ownerEmail);
+      logActivity('hosgeldin_mail', venue.ownerEmail, venue.title);
+      try { db.collection('sent_mails').add({ to: [venue.ownerEmail], subject: 'Hoş Geldiniz — ' + venue.title, body: body, venueId: venue.id, timestamp: new Date().toISOString(), user: firebase.auth().currentUser?.email || '' }); } catch(e) {}
+    } else {
+      showToast('Mail gönderilemedi: ' + (data.error || ''), 'error');
+    }
+  } catch(e) {
+    showToast('Mail hatası: ' + e.message, 'error');
+  }
+}
+function sendWelcomeMailToVenue(id) {
+  var v = draftData.venues.find(function(x) { return x.id === id; });
+  if (!v) return;
+  if (!v.ownerEmail) { showToast('Bu mekanın sahip e-postası yok', 'error'); return; }
+  if (confirm('✉️ "' + v.title + '" mekan sahibine hoşgeldin maili gönderilecek.\n\nAlıcı: ' + v.ownerEmail + '\n\nDevam?')) {
+    sendVenueWelcomeMail(v);
   }
 }
 async function trashMessage(docId) {
@@ -5837,6 +5955,7 @@ function renderVenueTable() {
           ` : `
           <a class="btn-icon" href="https://assosukesfet.com/mekanlar/mekan-detay?id=${v.id}" target="_blank" title="Sayfayı Görüntüle" style="text-decoration:none;color:var(--terra)">↗</a>
           <button class="btn-icon" title="Düzenle" onclick="openVenueModal('${v.id}')" style="margin-left:4px">&#9998;</button>
+          ${v.ownerEmail ? '<button class="btn-icon" title="Sahibine mail gönder: ' + v.ownerEmail + '" onclick="sendWelcomeMailToVenue(\'' + v.id + '\')" style="margin-left:4px;color:#6B46C1">✉</button>' : ''}
           <button class="btn-icon" title="QR Kod" onclick="openQRModal('${v.id}')" style="margin-left:4px">📱</button>
           <button class="btn-icon" title="Çöp Kutusuna Taşı" onclick="confirmDeleteVenue('${v.id}')" style="margin-left:4px;color:var(--red)">&#128465;</button>
           `}
@@ -6720,6 +6839,15 @@ async function saveVenue(e) {
   closeVenueModal(true);
   renderVenueTable();
   showToast('"' + venue.title + '" ' + (isEdit ? 'guncellendi.' : 'eklendi.'), 'success');
+
+  // Yeni mekan + sahip e-postası varsa hoşgeldin maili öner
+  if (!isEdit && venue.ownerEmail) {
+    setTimeout(function() {
+      if (confirm('✉️ "' + venue.title + '" mekan sahibine hoşgeldin maili göndermek ister misiniz?\n\nAlıcı: ' + venue.ownerEmail)) {
+        sendVenueWelcomeMail(venue);
+      }
+    }, 500);
+  }
   } finally {
     if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Kaydet'; }
   }
@@ -8416,7 +8544,9 @@ const ACTIVITY_LABELS = {
   premium_bitti: { icon: '⭐', label: 'Premium Süresi Doldu', color: 'rgba(212,147,90,.1)' },
   llms_guncelle: { icon: '🤖', label: 'AI İçerik Güncellendi', color: 'rgba(26,107,138,.1)' },
   backup: { icon: '💾', label: 'Yedekleme', color: 'rgba(49,130,206,.1)' },
-  mail_gonder: { icon: '✉️', label: 'Mail Gönderildi', color: 'rgba(196,82,26,.1)' }
+  mail_gonder: { icon: '✉️', label: 'Mail Gönderildi', color: 'rgba(196,82,26,.1)' },
+  toplu_mail: { icon: '📨', label: 'Toplu Mail Gönderildi', color: 'rgba(107,70,193,.1)' },
+  hosgeldin_mail: { icon: '👋', label: 'Hoşgeldin Maili', color: 'rgba(56,161,105,.1)' }
 };
 
 async function renderActivityLog() {
