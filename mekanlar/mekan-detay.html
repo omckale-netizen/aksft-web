@@ -86,6 +86,11 @@ function pageInit() {
     }
     if (twTitle) twTitle.content = seoTitle;
     if (twDesc) twDesc.content = seoDesc;
+    // Canonical URL
+    var canonicalUrl = 'https://assosukesfet.com/mekanlar/mekan-detay?id=' + venueId;
+    var canonicalEl = document.querySelector('link[rel="canonical"]');
+    if (!canonicalEl) { canonicalEl = document.createElement('link'); canonicalEl.rel = 'canonical'; document.head.appendChild(canonicalEl); }
+    canonicalEl.href = canonicalUrl;
 
     // Breadcrumb Schema
     var bcSchema = document.createElement('script');
