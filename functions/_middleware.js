@@ -106,6 +106,22 @@ export async function onRequest(context) {
       // Cookie yok — 404 sayfasina yonlendir
       return Response.redirect(url.origin + '/404.html', 302);
     }
+
+    // Server-side brute force koruması — login sayfası için IP bazlı rate limit
+    if ((path === '/admin-login' || path === '/admin-login.html') && env.CHAT_KV) {
+      try {
+        const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+        const loginKey = 'login_attempt_' + ip + '_' + Math.floor(Date.now() / 300000); // 5 dakikalık pencere
+        const attempts = parseInt(await env.CHAT_KV.get(loginKey) || '0');
+        if (attempts >= 15) {
+          return new Response(
+            '<html><body style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#06101E;color:#F5EDE0;font-family:sans-serif;text-align:center"><div><h1>⛔</h1><h2>Çok fazla giriş denemesi</h2><p style="color:rgba(245,237,224,.5)">5 dakika sonra tekrar deneyin.</p></div></body></html>',
+            { status: 429, headers: { 'Content-Type': 'text/html;charset=UTF-8', 'Retry-After': '300' } }
+          );
+        }
+        await env.CHAT_KV.put(loginKey, String(attempts + 1), { expirationTtl: 300 });
+      } catch(e) {}
+    }
     // Cookie var — devam et
   }
 
