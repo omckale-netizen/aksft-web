@@ -6,8 +6,7 @@ export async function onRequestPost(context) {
   const origin = request.headers.get('Origin') || '';
   const referer = request.headers.get('Referer') || '';
   const allowedOrigins = ['https://assosukesfet.com', 'https://www.assosukesfet.com'];
-  const isAllowed = allowedOrigins.some(o => origin.startsWith(o) || referer.startsWith(o))
-    || origin.includes('.pages.dev') || referer.includes('.pages.dev');
+  const isAllowed = allowedOrigins.some(o => origin.startsWith(o) || referer.startsWith(o));
 
   if (!isAllowed) {
     return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
