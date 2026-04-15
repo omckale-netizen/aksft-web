@@ -2353,14 +2353,16 @@ function renderVenuePage(venueId) {
       .vp-rezv-header-icon{font-size:1.5rem;flex-shrink:0;}
       .vp-rezv-header-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:1rem;color:#1A2744;margin:0 0 3px;}
       .vp-rezv-header-sub{font-size:.78rem;color:#718096;margin:0;line-height:1.5;}
-      .vp-contact-card{background:#fff;border-radius:16px;padding:18px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 10px rgba(26,39,68,.06);}
+      .vp-contact-card{background:#fff;border-radius:16px;padding:18px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 10px rgba(26,39,68,.06);flex-wrap:wrap;}
       .vp-contact-icon{font-size:1.5rem;flex-shrink:0;}
       .vp-contact-label{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#A0AEC0;margin-bottom:3px;}
       .vp-contact-val{font-size:.88rem;font-weight:600;color:#1A2744;}
-      .vp-contact-btn-outline{margin-left:auto;display:inline-flex;align-items:center;padding:8px 16px;border-radius:10px;border:1.5px solid rgba(26,39,68,.15);font-size:.78rem;font-weight:700;color:#1A2744;text-decoration:none;white-space:nowrap;transition:all .2s;flex-shrink:0;}
+      .vp-contact-acts{margin-left:auto;display:flex;align-items:center;gap:6px;flex-shrink:0;}
+      .vp-contact-btn-outline{display:inline-flex;align-items:center;padding:8px 16px;border-radius:10px;border:1.5px solid rgba(26,39,68,.15);font-size:.78rem;font-weight:700;color:#1A2744;text-decoration:none;white-space:nowrap;transition:all .2s;}
       .vp-contact-btn-outline:hover{background:#1A2744;color:#fff;}
-      .vp-wa-btn{margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;background:#25D366;color:#fff;font-size:.78rem;font-weight:700;text-decoration:none;white-space:nowrap;transition:all .2s;flex-shrink:0;}
+      .vp-wa-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;background:#25D366;color:#fff;font-size:.78rem;font-weight:700;text-decoration:none;white-space:nowrap;transition:all .2s;}
       .vp-wa-btn:hover{background:#1CB85A;transform:translateY(-1px);}
+      @media(max-width:480px){.vp-contact-card{flex-wrap:wrap;}.vp-contact-acts{margin-left:0;width:100%;justify-content:flex-end;padding-top:8px;border-top:1px solid rgba(26,39,68,.06);}}
 
       /* ── Gallery ── */
       .vp-gallery{display:grid;gap:8px;border-radius:18px;overflow:hidden;}
@@ -2719,7 +2721,7 @@ function renderVenuePage(venueId) {
                 <div class="vp-contact-label">${ph.label ? escHtml(ph.label) + ' (WhatsApp)' : 'WhatsApp'}</div>
                 <div class="vp-contact-val">${ph.number}</div>
               </div>
-              <div style="display:flex;gap:6px;">
+              <div class="vp-contact-acts">
                 <a href="tel:${cleanNum}" class="vp-contact-btn-outline" onclick="event.preventDefault();if(window.trackAction)trackAction('${escAttr(v.id)}','call');setTimeout(()=>{window.location.href=this.href},300)">Ara</a>
                 <a href="${phWaUrl}" target="_blank" rel="noopener" class="vp-wa-btn" onclick="if(window.trackAction)trackAction('${escAttr(v.id)}','whatsapp');">Yaz</a>
               </div>
@@ -2730,7 +2732,9 @@ function renderVenuePage(venueId) {
                 <div class="vp-contact-label">${ph.label ? escHtml(ph.label) : 'Telefon'}</div>
                 <div class="vp-contact-val">${ph.number}</div>
               </div>
-              <a href="tel:${cleanNum}" class="vp-contact-btn-outline" onclick="event.preventDefault();if(window.trackAction)trackAction('${escAttr(v.id)}','call');setTimeout(()=>{window.location.href=this.href},300)">Ara</a>
+              <div class="vp-contact-acts">
+                <a href="tel:${cleanNum}" class="vp-contact-btn-outline" onclick="event.preventDefault();if(window.trackAction)trackAction('${escAttr(v.id)}','call');setTimeout(()=>{window.location.href=this.href},300)">Ara</a>
+              </div>
             </div>`;
             }).join('')}
             ${phones.length === 0 ? `
