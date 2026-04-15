@@ -4146,17 +4146,20 @@ async function approvePendingVenue(id) {
       if (data.phones && data.phones.length > 0) {
         data.phones.forEach(function(p) { addPhoneRow(p); });
       }
-      // Görselleri pending olarak ekle
-      pendingImages = [];
+      // Görselleri mevcut görseller olarak ekle (zaten Storage'da)
       if (data.images && data.images.length > 0) {
-        for (var i = 0; i < data.images.length; i++) {
-          try {
-            var resp = await fetch(data.images[i]);
-            var blob = await resp.blob();
-            pendingImages.push({ blob: blob, name: 'pending_' + i + '.jpg', dataUrl: data.images[i], ext: 'jpg', origSize: blob.size, compSize: blob.size });
-          } catch(e) { console.warn('Görsel yüklenemedi:', e); }
+        // Geçici venue oluştur ve images'ı ata — kaydetme sırasında existingImgs olarak kullanılacak
+        window._pendingApproveImages = data.images.slice();
+        // Önizleme grid'ini manuel doldur
+        var grid = document.getElementById('img-preview-grid');
+        if (grid) {
+          grid.innerHTML = data.images.map(function(url, i) {
+            return '<div class="img-preview-item"><img src="' + url + '" onerror="this.parentElement.style.opacity=0.4"><div class="img-cover-badge ' + (i === 0 ? 'is-cover' : 'not-cover') + '">' + (i === 0 ? '★ Kapak' : (i+1)) + '</div></div>';
+          }).join('');
         }
-        renderImagePreviews();
+        var dropEl = document.getElementById('img-drop');
+        if (dropEl && data.images.length >= 6) dropEl.style.display = 'none';
+        updateImgInfo();
       }
       // Çalışma saatleri
       if (data.weeklyHours && data.weeklyHours.length > 0) {
@@ -7479,7 +7482,10 @@ async function saveVenue(e) {
     }
   }
   if (uploadFailed) showToast('Bazi gorseller yuklenemedi. Mekani kaydedip sonra tekrar deneyin.', 'error');
-  const allImages = [...existingImgs, ...uploadedUrls];
+  // Pending onay görselleri varsa dahil et
+  var approveImgs = window._pendingApproveImages || [];
+  window._pendingApproveImages = null;
+  const allImages = [...approveImgs, ...existingImgs, ...uploadedUrls];
   pendingImages = [];
 
   const _venuePhones = getPhonesData();
