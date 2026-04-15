@@ -4906,13 +4906,21 @@ function showRecentEmails(query) {
     var isOwner = ownerEmails.includes(e);
     var isContact = contactEmails.includes(e);
     var badge = isSent ? '<span style="font-size:.6rem;color:var(--green);font-weight:600;margin-left:auto">Gönderildi</span>' : isOwner ? '<span style="font-size:.6rem;color:#6B46C1;font-weight:600;margin-left:auto">Mekan Sahibi</span>' : isContact ? '<span style="font-size:.6rem;color:var(--terra);font-weight:600;margin-left:auto">İletişim</span>' : '';
-    return '<div onclick="selectRecentEmail(\'' + e + '\')" style="padding:8px 14px;cursor:pointer;font-size:.82rem;color:var(--text);display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--card-border,rgba(0,0,0,.04));transition:background .1s" onmouseover="this.style.background=\'var(--cream-dark,rgba(0,0,0,.03))\'" onmouseout="this.style.background=\'\'">' +
-      '<span style="color:var(--text-muted);font-size:.75rem">✉️</span>' +
-      '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + e + '</span>' +
+    return '<div style="padding:8px 14px;cursor:pointer;font-size:.82rem;color:var(--text);display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--card-border,rgba(0,0,0,.04));transition:background .1s" onmouseover="this.style.background=\'var(--cream-dark,rgba(0,0,0,.03))\'" onmouseout="this.style.background=\'\'">' +
+      '<span onclick="selectRecentEmail(\'' + e + '\')" style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">' +
+        '<span style="color:var(--text-muted);font-size:.75rem">✉️</span>' +
+        '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + e + '</span>' +
+      '</span>' +
       badge +
+      '<button onclick="event.stopPropagation();removeRecentEmail(\'' + e + '\')" style="border:none;background:none;color:var(--text-muted);font-size:.7rem;cursor:pointer;padding:2px 4px;flex-shrink:0;opacity:.4" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.4" title="Listeden kaldır">✕</button>' +
     '</div>';
   }).join('');
   dropdown.style.display = 'block';
+}
+function removeRecentEmail(email) {
+  var list = getRecentEmails().filter(function(e) { return e !== email; });
+  try { localStorage.setItem('assos_sent_emails', JSON.stringify(list)); } catch {}
+  showRecentEmails(document.getElementById('compose-to').value);
 }
 function selectRecentEmail(email) {
   var input = document.getElementById('compose-to');
