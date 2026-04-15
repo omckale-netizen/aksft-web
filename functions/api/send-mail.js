@@ -33,31 +33,35 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ error: 'to, subject ve html alanları zorunlu' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 
-  // Mail gönder
+  // Her alıcıya ayrı mail gönder (birbirlerini görmesinler)
   try {
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'Assos\'u Keşfet <info@assosukesfet.com>',
-        to: Array.isArray(to) ? to : [to],
-        subject: subject,
-        html: html,
-        reply_to: replyTo || 'info@assosukesfet.com',
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      console.error('Resend error:', data);
-      return new Response(JSON.stringify({ error: 'Mail gönderilemedi', details: data.message || '' }), { status: res.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const recipients = Array.isArray(to) ? to : [to];
+    const results = [];
+    for (const recipient of recipients) {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: 'Assos\'u Keşfet <info@assosukesfet.com>',
+          to: [recipient],
+          subject: subject,
+          html: html,
+          reply_to: replyTo || 'info@assosukesfet.com',
+        }),
+      });
+      const data = await res.json();
+      results.push({ to: recipient, ok: res.ok, id: data.id, error: data.message });
     }
 
-    return new Response(JSON.stringify({ ok: true, id: data.id }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const failed = results.filter(r => !r.ok);
+    if (failed.length > 0 && failed.length === recipients.length) {
+      return new Response(JSON.stringify({ error: 'Mail gönderilemedi', details: failed[0].error || '' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    return new Response(JSON.stringify({ ok: true, sent: results.filter(r => r.ok).length, total: recipients.length }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
   } catch(e) {
     console.error('Mail send error:', e);
