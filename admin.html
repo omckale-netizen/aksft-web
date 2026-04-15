@@ -3884,11 +3884,14 @@ async function renderMessages() {
       const unread = allMessages.filter(m => !m.read && !m.trashed).length;
       const today = allMessages.filter(m => !m.trashed && m.date === new Date().toISOString().split('T')[0]).length;
       const withConsent = allMessages.filter(m => m.consentGiven).length;
+      var todaySent = allSentMails.filter(function(s) { return s.timestamp && s.timestamp.startsWith(new Date().toISOString().split('T')[0]); }).length;
+      var uniqueRecipients = {};
+      allSentMails.forEach(function(s) { (s.to || []).forEach(function(e) { uniqueRecipients[e.toLowerCase()] = true; }); });
       statsEl.innerHTML =
         '<div class="stat-card"><div class="stat-label">Gelen</div><div class="stat-val">' + total + '</div></div>' +
         '<div class="stat-card terra"><div class="stat-label">Okunmamış</div><div class="stat-val">' + unread + '</div></div>' +
         '<div class="stat-card green"><div class="stat-label">Gönderilen</div><div class="stat-val">' + allSentMails.length + '</div></div>' +
-        '<div class="stat-card"><div class="stat-label">Bugün</div><div class="stat-val">' + today + '</div></div>';
+        '<div class="stat-card"><div class="stat-label">Alıcı Sayısı</div><div class="stat-val">' + Object.keys(uniqueRecipients).length + '</div></div>';
     }
   } catch(err) {
     document.getElementById('messages-list').innerHTML = '<div style="padding:24px;color:var(--red)">Mesajlar yüklenemedi: ' + err.message + '</div>';
@@ -4053,10 +4056,14 @@ function openSentMail(id) {
   document.getElementById('msg-detail-panel').classList.add('show');
 
   var toStr = (s.to || []).join(', ');
+  var toFirst = (s.to || [])[0] || '';
   document.getElementById('msg-detail-header').innerHTML =
     '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">' +
       '<div>' +
-        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:.62rem;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(56,161,105,.1);color:#276749;">GÖNDERİLDİ</span></div>' +
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">' +
+          '<span style="font-size:.62rem;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(56,161,105,.1);color:#276749;">GÖNDERİLDİ</span>' +
+          (s.bulk ? '<span style="font-size:.62rem;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(107,70,193,.1);color:#6B46C1;">TOPLU</span>' : '') +
+        '</div>' +
         '<div style="font-size:1.05rem;font-weight:800;color:var(--navy);margin-bottom:4px">' + toStr + '</div>' +
         '<div style="font-size:.82rem;font-weight:600;color:var(--terra)">' + (s.subject || '') + '</div>' +
         '<div style="font-size:.72rem;color:var(--text-muted);margin-top:4px">' + (s.timestamp ? new Date(s.timestamp).toLocaleString('tr-TR') : '') + (s.user ? ' — ' + s.user : '') + '</div>' +
@@ -4064,15 +4071,46 @@ function openSentMail(id) {
       '<button class="btn btn-sm btn-secondary" onclick="closeMsgDetail()" style="display:none" id="msg-close-mobile">← Geri</button>' +
     '</div>';
 
+  // Body — metin + HTML önizleme butonu
   document.getElementById('msg-detail-body').innerHTML =
-    '<div style="font-size:.88rem;color:var(--text);line-height:1.85;white-space:pre-wrap;padding:16px 18px;background:var(--cream-dark,var(--cream));border-radius:12px;border:1px solid var(--card-border,rgba(0,0,0,.04))">' + (s.body || '').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>';
+    '<div style="font-size:.88rem;color:var(--text);line-height:1.85;white-space:pre-wrap;padding:16px 18px;background:var(--cream-dark,var(--cream));border-radius:12px;border:1px solid var(--card-border,rgba(0,0,0,.04))">' + (s.body || '').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>' +
+    '<button onclick="previewSentMailHtml(\'' + id + '\')" style="margin-top:10px;padding:6px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;background:var(--card-bg,#fff);color:var(--terra);font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit">👁 HTML Önizleme — Alıcının gördüğü hali</button>';
 
-  document.getElementById('msg-detail-consent').innerHTML = '';
+  // Aynı kişiye gönderilen diğer mailler
+  var otherMails = allSentMails.filter(function(m) {
+    return m._id !== id && m.to && m.to.some(function(e) { return (s.to || []).includes(e); });
+  });
+  var consentHtml = '';
+  if (otherMails.length > 0) {
+    consentHtml = '<div style="margin-top:12px;padding:14px 16px;background:var(--cream-dark,rgba(0,0,0,.02));border-radius:10px;border:1px solid var(--card-border,rgba(0,0,0,.04))">' +
+      '<div style="font-size:.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">📬 Bu kişiye gönderilen diğer mailler (' + otherMails.length + ')</div>' +
+      otherMails.slice(0, 10).map(function(m) {
+        var d = m.timestamp ? new Date(m.timestamp) : null;
+        var dStr = d ? d.toLocaleDateString('tr-TR', {day:'2-digit',month:'short',year:'numeric'}) : '';
+        return '<div onclick="openSentMail(\'' + m._id + '\')" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--card-border,rgba(0,0,0,.03));cursor:pointer;font-size:.78rem" onmouseover="this.style.opacity=.7" onmouseout="this.style.opacity=1">' +
+          '<span style="color:var(--green);font-size:.7rem">📤</span>' +
+          '<span style="flex:1;color:var(--text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + (m.subject || 'Konu yok') + '</span>' +
+          '<span style="color:var(--text-muted);font-size:.68rem;flex-shrink:0">' + dStr + '</span>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }
+  document.getElementById('msg-detail-consent').innerHTML = consentHtml;
+
   document.getElementById('msg-detail-actions').innerHTML =
-    '<button class="btn btn-sm btn-secondary" onclick="openComposeMail(\'' + (s.to||[])[0] + '\')">↩ Tekrar Gönder</button>' +
+    '<button class="btn btn-sm btn-secondary" onclick="openComposeMail(\'' + toFirst + '\')">↩ Tekrar Gönder</button>' +
     '<button class="btn btn-sm btn-danger" style="margin-left:auto" onclick="deleteSentMail(\'' + id + '\')">🗑 Sil</button>';
 
   if (window.innerWidth <= 900) document.getElementById('msg-close-mobile').style.display = '';
+}
+
+function previewSentMailHtml(id) {
+  var s = allSentMails.find(function(x) { return x._id === id; });
+  if (!s) return;
+  var html = buildMailHtml(s.subject || '', s.body || '');
+  var overlay = document.getElementById('compose-preview-overlay');
+  document.getElementById('compose-preview-body').innerHTML = '<iframe srcdoc="' + html.replace(/"/g,'&quot;') + '" style="width:100%;height:70vh;border:none;"></iframe>';
+  overlay.style.display = 'flex';
 }
 
 async function deleteSentMail(id) {
