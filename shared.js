@@ -2332,7 +2332,7 @@ function renderVenuePage(venueId) {
 
       /* ── Description ── */
       .vp-desc{font-size:.94rem;line-height:1.9;color:#4A5568;}
-      .vp-desc p+p{margin-top:14px;}
+      .vp-desc p+p,.vp-desc div+div,.vp-desc p+div,.vp-desc div+p{margin-top:14px;}
 
       /* ── Highlights ── */
       .vp-hl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
@@ -2686,7 +2686,7 @@ function renderVenuePage(venueId) {
         <!-- Description + Tags -->
         <div class="vp-section fade-up">
           <div class="vp-eyebrow">Hakkında</div>
-          <div class="vp-desc"><p>${(v.description || v.shortDesc).replace(/\. ([A-ZÇŞĞÜÖİ])/g, '.</p><p>$1')}</p></div>
+          <div class="vp-desc">${(function(d){ return d.indexOf('<') > -1 ? d : '<p>' + d.replace(/\. ([A-ZÇŞĞÜÖİ])/g, '.</p><p>$1') + '</p>'; })(v.description || v.shortDesc)}</div>
           ${(v.tags||[]).length > 0 ? '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:16px">' + v.tags.map(t => '<span style="font-size:.72rem;font-weight:600;padding:4px 12px;border-radius:999px;background:rgba(26,39,68,.05);color:#4A5870;">' + t + '</span>').join('') + '</div>' : ''}
         </div>
 
