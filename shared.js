@@ -4353,8 +4353,13 @@ function renderPlacePage(placeId) {
     if (!window.DATA) return '';
     var ctx = '';
     var venues = (DATA.venues || []).slice(0, 40);
-    if (venues.length) ctx += 'MEKANLAR (id | ad | kategori | konum | açıklama):\n' + venues.map(function(v) {
-      return '- ' + v.id + ' | ' + v.title + ' | ' + (v.category||'') + ' | ' + (v.location||'') + ' | ' + (v.shortDesc||'') + (v.phone ? ' | Tel: ' + v.phone : '');
+    if (venues.length) ctx += 'MEKANLAR (id | ad | kategori | konum | açıklama | durum):\n' + venues.map(function(v) {
+      var status = typeof isVenueOpen === 'function' ? isVenueOpen(v) : null;
+      var statusText = status === true ? 'ŞU AN AÇIK' : status === false ? 'ŞU AN KAPALI' : '';
+      var seasonText = v.seasonal ? ' | SEZONLUK(' + (v.seasonStart||'') + '-' + (v.seasonEnd||'') + ')' : '';
+      var hoursText = v.hours ? ' | Saat: ' + v.hours : '';
+      var premText = (typeof isPremiumActive === 'function' && isPremiumActive(v)) ? ' | ⭐PREMIUM' : '';
+      return '- ' + v.id + ' | ' + v.title + ' | ' + (v.category||'') + ' | ' + (v.location||'') + ' | ' + (v.shortDesc||'') + premText + hoursText + seasonText + (statusText ? ' | ' + statusText : '') + (v.phone ? ' | Tel: ' + v.phone : '');
     }).join('\n') + '\n\n';
     var places = (DATA.places || []).slice(0, 20);
     if (places.length) ctx += 'GEZİLECEK YERLER (id | ad | kategori | konum | açıklama):\n' + places.map(function(p) {
@@ -4365,8 +4370,9 @@ function renderPlacePage(placeId) {
       return '- ' + v.id + ' | ' + v.title + ' | ' + (v.type||'koy') + ' | ' + (v.shortDesc||'');
     }).join('\n') + '\n\n';
     var routes = (DATA.routes || []).slice(0, 10);
-    if (routes.length) ctx += 'ROTALAR (id | ad | süre | açıklama):\n' + routes.map(function(r) {
-      return '- ' + r.id + ' | ' + r.title + ' | ' + (r.sure||'') + ' | ' + (r.shortDesc||'');
+    if (routes.length) ctx += 'ROTALAR (id | ad | süre | durak | açıklama):\n' + routes.map(function(r) {
+      var stops = r.stops ? r.stops.map(function(s) { return typeof s === 'string' ? s : s.title || ''; }).join(', ') : '';
+      return '- ' + r.id + ' | ' + r.title + ' | ' + (r.sure||'') + ' | ' + (r.stops ? r.stops.length + ' durak' : '') + ' | ' + (r.shortDesc||'') + (stops ? ' | Duraklar: ' + stops : '');
     }).join('\n');
     return ctx;
   }
