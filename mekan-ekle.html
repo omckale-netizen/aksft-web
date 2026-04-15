@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/icon.png" sizes="48x48" type="image/png"><link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=2">
+<title>Mekan Ekle — Assos'u Keşfet</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#1A2744;--terra:#C4521A;--cream:#FAF7F2;--cream-dark:#F0EDE8;--text:#2D3748;--text-light:#718096;--text-muted:#A0AEC0;--green:#38A169;--red:#E53E3E;--radius:16px}
+body{min-height:100vh;background:var(--cream);font-family:'Plus Jakarta Sans',sans-serif;color:var(--text)}
+a{color:var(--terra);text-decoration:none}
+
+/* Header */
+.me-header{background:linear-gradient(135deg,var(--navy) 0%,#2D3E5F 100%);padding:32px 24px;text-align:center}
+.me-header h1{color:#fff;font-size:1.3rem;font-weight:800;margin-bottom:4px}
+.me-header p{color:rgba(255,255,255,.5);font-size:.82rem}
+.me-logo{font-size:1.5rem;margin-bottom:12px}
+
+/* Container */
+.me-wrap{max-width:640px;margin:0 auto;padding:24px 16px 60px}
+
+/* Progress */
+.me-progress{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:32px;padding:20px 0}
+.me-step-dot{width:10px;height:10px;border-radius:50%;background:rgba(26,39,68,.1);transition:all .3s}
+.me-step-dot.active{background:var(--terra);transform:scale(1.3)}
+.me-step-dot.done{background:var(--green)}
+.me-step-line{width:24px;height:2px;background:rgba(26,39,68,.08);border-radius:1px;transition:background .3s}
+.me-step-line.done{background:var(--green)}
+
+/* Step info */
+.me-step-info{text-align:center;margin-bottom:28px}
+.me-step-num{font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--terra);margin-bottom:6px}
+.me-step-title{font-size:1.2rem;font-weight:800;color:var(--navy)}
+.me-step-desc{font-size:.82rem;color:var(--text-light);margin-top:4px}
+
+/* Card */
+.me-card{background:#fff;border-radius:var(--radius);padding:28px 24px;box-shadow:0 2px 12px rgba(26,39,68,.06);border:1px solid rgba(26,39,68,.06);margin-bottom:20px}
+
+/* Form */
+.me-field{margin-bottom:18px}
+.me-label{display:block;font-size:.75rem;font-weight:700;color:var(--navy);margin-bottom:6px}
+.me-label span{font-weight:400;color:var(--text-muted)}
+.me-input,.me-select,.me-textarea{width:100%;padding:12px 14px;border:1.5px solid rgba(26,39,68,.12);border-radius:10px;font-size:.88rem;font-family:inherit;color:var(--text);background:#fff;outline:none;transition:border-color .2s}
+.me-input:focus,.me-select:focus,.me-textarea:focus{border-color:var(--terra)}
+.me-input::placeholder,.me-textarea::placeholder{color:var(--text-muted)}
+.me-textarea{resize:vertical;min-height:100px}
+.me-select{cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23A0AEC0'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.me-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:500px){.me-row{grid-template-columns:1fr}}
+.me-hint{font-size:.68rem;color:var(--text-muted);margin-top:4px}
+.me-error{font-size:.72rem;color:var(--red);margin-top:4px;display:none}
+
+/* Phone rows */
+.me-phone-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.me-phone-row input{flex:1}
+.me-phone-wa{display:flex;align-items:center;gap:4px;font-size:.72rem;color:#25D366;font-weight:600;cursor:pointer;white-space:nowrap}
+.me-phone-wa input{width:16px;height:16px;accent-color:#25D366;cursor:pointer}
+.me-phone-remove{width:28px;height:28px;border:none;border-radius:6px;background:rgba(229,62,62,.08);color:var(--red);cursor:pointer;font-size:.8rem;flex-shrink:0}
+
+/* Image upload */
+.me-img-drop{border:2px dashed rgba(26,39,68,.12);border-radius:12px;padding:32px 20px;text-align:center;cursor:pointer;transition:all .2s}
+.me-img-drop:hover{border-color:var(--terra);background:rgba(196,82,26,.02)}
+.me-img-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.me-img-thumb{position:relative;aspect-ratio:4/3;border-radius:8px;overflow:hidden;background:var(--cream-dark)}
+.me-img-thumb img{width:100%;height:100%;object-fit:cover}
+.me-img-thumb button{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,.6);color:#fff;font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+
+/* Buttons */
+.me-btns{display:flex;gap:10px;justify-content:space-between;margin-top:24px}
+.me-btn{padding:12px 28px;border-radius:10px;font-size:.88rem;font-weight:700;font-family:inherit;cursor:pointer;border:none;transition:all .2s}
+.me-btn-primary{background:var(--terra);color:#fff}
+.me-btn-primary:hover{background:#D96B2E;transform:translateY(-1px)}
+.me-btn-secondary{background:rgba(26,39,68,.06);color:var(--text-light)}
+.me-btn-secondary:hover{background:rgba(26,39,68,.12)}
+.me-btn:disabled{opacity:.5;cursor:default;transform:none}
+
+/* Summary */
+.me-summary-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(26,39,68,.06);font-size:.82rem}
+.me-summary-label{color:var(--text-muted);font-weight:600}
+.me-summary-val{color:var(--navy);font-weight:600;text-align:right}
+
+/* KVKK */
+.me-kvkk{display:flex;align-items:flex-start;gap:10px;padding:14px;background:rgba(56,161,105,.04);border:1px solid rgba(56,161,105,.12);border-radius:10px;margin-top:16px}
+.me-kvkk input{width:18px;height:18px;accent-color:var(--green);cursor:pointer;flex-shrink:0;margin-top:2px}
+.me-kvkk label{font-size:.75rem;color:var(--text-light);line-height:1.6;cursor:pointer}
+
+/* Success */
+.me-success{text-align:center;padding:48px 24px}
+.me-success-icon{font-size:3rem;margin-bottom:16px}
+.me-success h2{font-size:1.2rem;color:var(--navy);margin-bottom:8px}
+.me-success p{font-size:.88rem;color:var(--text-light);line-height:1.7}
+
+/* Honeypot */
+.me-hp{position:absolute;left:-9999px;opacity:0;height:0;overflow:hidden}
+
+/* Footer */
+.me-footer{text-align:center;padding:20px;font-size:.68rem;color:var(--text-muted)}
+</style>
+</head>
+<body>
+
+<div class="me-header">
+  <div class="me-logo">🏛️</div>
+  <h1>Mekanınızı Ekleyin</h1>
+  <p>Assos'u Keşfet platformuna mekanınızı ücretsiz ekleyin</p>
+</div>
+
+<div class="me-wrap">
+  <!-- Progress -->
+  <div class="me-progress" id="me-progress"></div>
+
+  <!-- Steps container -->
+  <div id="me-steps">
+
+    <!-- Step 1: Yetkili -->
+    <div class="me-step" data-step="1">
+      <div class="me-step-info">
+        <div class="me-step-num">Adım 1 / 5</div>
+        <div class="me-step-title">Yetkili Bilgileri</div>
+        <div class="me-step-desc">Mekan sahibi veya yetkilinin bilgileri</div>
+      </div>
+      <div class="me-card">
+        <div class="me-field">
+          <label class="me-label">Ad Soyad *</label>
+          <input type="text" class="me-input" id="me-ownerName" placeholder="Adınız ve soyadınız" required>
+        </div>
+        <div class="me-row">
+          <div class="me-field">
+            <label class="me-label">E-posta *</label>
+            <input type="email" class="me-input" id="me-ownerEmail" placeholder="ornek@mail.com" required>
+          </div>
+          <div class="me-field">
+            <label class="me-label">Telefon *</label>
+            <input type="tel" class="me-input" id="me-ownerPhone" placeholder="+90 5XX XXX XX XX" required>
+          </div>
+        </div>
+        <!-- Honeypot -->
+        <div class="me-hp"><input type="text" id="me-hp-field" tabindex="-1" autocomplete="off"></div>
+      </div>
+    </div>
+
+    <!-- Step 2: Mekan Bilgileri -->
+    <div class="me-step" data-step="2" style="display:none">
+      <div class="me-step-info">
+        <div class="me-step-num">Adım 2 / 5</div>
+        <div class="me-step-title">Mekan Bilgileri</div>
+        <div class="me-step-desc">Mekanınızın temel bilgileri</div>
+      </div>
+      <div class="me-card">
+        <div class="me-field">
+          <label class="me-label">Mekan Adı *</label>
+          <input type="text" class="me-input" id="me-title" placeholder="Mekanınızın adı" required>
+        </div>
+        <div class="me-row">
+          <div class="me-field">
+            <label class="me-label">Kategori *</label>
+            <select class="me-select" id="me-category" required>
+              <option value="">Seçin</option>
+              <option value="kafe">☕ Kafe</option>
+              <option value="restoran">🍽 Restoran</option>
+              <option value="kahvalti">🌞 Kahvaltı</option>
+              <option value="konaklama">🏨 Konaklama</option>
+              <option value="beach">🏖 Beach Club</option>
+              <option value="iskele">⚓ İskele</option>
+            </select>
+          </div>
+          <div class="me-field">
+            <label class="me-label">Konum *</label>
+            <select class="me-select" id="me-location" required>
+              <option value="">Seçin</option>
+              <option value="Behramkale (Assos)">Behramkale (Assos)</option>
+              <option value="Kadırga Koyu">Kadırga Koyu</option>
+              <option value="Sivrice Koyu">Sivrice Koyu</option>
+              <option value="Assos Antik Liman">Assos Antik Liman</option>
+              <option value="Adatepe">Adatepe</option>
+              <option value="Babakale">Babakale</option>
+              <option value="Küçükkuyu">Küçükkuyu</option>
+              <option value="Altınoluk">Altınoluk</option>
+              <option value="Ayvacık Merkez">Ayvacık Merkez</option>
+              <option value="Gülpınar">Gülpınar</option>
+              <option value="Kayalar">Kayalar</option>
+              <option value="Bektaş">Bektaş</option>
+            </select>
+          </div>
+        </div>
+        <div class="me-field">
+          <label class="me-label">Tam Adres</label>
+          <input type="text" class="me-input" id="me-address" placeholder="Sokak, mahalle, bina no">
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Açıklama & İletişim -->
+    <div class="me-step" data-step="3" style="display:none">
+      <div class="me-step-info">
+        <div class="me-step-num">Adım 3 / 5</div>
+        <div class="me-step-title">Açıklama & İletişim</div>
+        <div class="me-step-desc">Mekanınızı tanıtın ve iletişim bilgilerinizi ekleyin</div>
+      </div>
+      <div class="me-card">
+        <div class="me-field">
+          <label class="me-label">Mekan Açıklaması *</label>
+          <textarea class="me-textarea" id="me-description" placeholder="Mekanınızı kısaca tanıtın — ne tür yemekler/hizmetler sunuyorsunuz, öne çıkan özellikleriniz neler?" rows="4"></textarea>
+          <div class="me-hint">En az 50 karakter yazın</div>
+        </div>
+        <div class="me-field">
+          <label class="me-label" style="display:flex;align-items:center;justify-content:space-between">Telefon Numaraları <button type="button" class="me-btn-secondary" style="font-size:.65rem;padding:4px 10px;border-radius:6px" onclick="meAddPhone()">+ Numara Ekle</button></label>
+          <div id="me-phones"></div>
+        </div>
+        <div class="me-row">
+          <div class="me-field">
+            <label class="me-label">Website <span>(opsiyonel)</span></label>
+            <input type="url" class="me-input" id="me-website" placeholder="https://...">
+          </div>
+          <div class="me-field">
+            <label class="me-label">Instagram <span>(opsiyonel)</span></label>
+            <input type="text" class="me-input" id="me-instagram" placeholder="@mekanadi">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Görseller -->
+    <div class="me-step" data-step="4" style="display:none">
+      <div class="me-step-info">
+        <div class="me-step-num">Adım 4 / 5</div>
+        <div class="me-step-title">Görseller</div>
+        <div class="me-step-desc">Mekanınızın fotoğraflarını yükleyin (opsiyonel)</div>
+      </div>
+      <div class="me-card">
+        <div class="me-img-drop" id="me-img-drop" onclick="document.getElementById('me-img-input').click()">
+          <div style="font-size:2rem;margin-bottom:8px">📷</div>
+          <div style="font-size:.88rem;font-weight:600;color:var(--navy)">Fotoğraf yüklemek için tıklayın</div>
+          <div style="font-size:.72rem;color:var(--text-muted);margin-top:4px">JPG, PNG, WebP · Maks 5MB · Maks 6 adet</div>
+        </div>
+        <input type="file" id="me-img-input" multiple accept="image/jpeg,image/png,image/webp" style="display:none" onchange="meHandleImages(this.files)">
+        <div class="me-img-grid" id="me-img-grid"></div>
+        <div class="me-hint" style="margin-top:8px">İlk fotoğraf kapak görseli olarak kullanılacaktır.</div>
+      </div>
+    </div>
+
+    <!-- Step 5: Onay -->
+    <div class="me-step" data-step="5" style="display:none">
+      <div class="me-step-info">
+        <div class="me-step-num">Adım 5 / 5</div>
+        <div class="me-step-title">Onay & Gönder</div>
+        <div class="me-step-desc">Bilgilerinizi kontrol edin ve gönderin</div>
+      </div>
+      <div class="me-card">
+        <div id="me-summary"></div>
+        <div class="me-kvkk">
+          <input type="checkbox" id="me-consent">
+          <label for="me-consent">Kişisel verilerimin Assos'u Keşfet platformunda mekan bilgisi olarak yayınlanmasını ve <a href="/gizlilik.html" target="_blank">Gizlilik Politikası</a> kapsamında işlenmesini kabul ediyorum.</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success -->
+    <div id="me-success" style="display:none">
+      <div class="me-card">
+        <div class="me-success">
+          <div class="me-success-icon">🎉</div>
+          <h2>Başvurunuz Alındı!</h2>
+          <p>Mekan ekleme talebiniz ekibimize iletildi. En kısa sürede incelenip size dönüş yapılacaktır.</p>
+          <p style="margin-top:16px;font-size:.78rem;color:var(--text-muted)">Ortalama değerlendirme süresi: 1-3 iş günü</p>
+          <a href="/" class="me-btn me-btn-primary" style="display:inline-block;margin-top:24px;text-decoration:none">Ana Sayfaya Dön</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation buttons -->
+  <div class="me-btns" id="me-btns">
+    <button class="me-btn me-btn-secondary" id="me-prev" onclick="meGoStep(-1)" style="display:none">← Geri</button>
+    <div style="flex:1"></div>
+    <button class="me-btn me-btn-primary" id="me-next" onclick="meGoStep(1)">Devam →</button>
+    <button class="me-btn me-btn-primary" id="me-submit" onclick="meSubmit()" style="display:none">Gönder</button>
+  </div>
+</div>
+
+<div class="me-footer">
+  © 2026 Assos'u Keşfet · <a href="/">assosukesfet.com</a>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-storage-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyCXqgczplchzjClAZt-Wl2eqgqmUMhLVJs",
+  authDomain:"assosu-kesfet.firebaseapp.com",
+  projectId:"assosu-kesfet",
+  storageBucket:"assosu-kesfet.firebasestorage.app",
+  messagingSenderId:"225032191860",
+  appId:"1:225032191860:web:61ac6ba36764b530be3621"
+});
+var db = firebase.firestore();
+
+var meStep = 1;
+var meMaxStep = 5;
+var meImages = [];
+
+// Progress bar
+function meRenderProgress() {
+  var html = '';
+  for (var i = 1; i <= meMaxStep; i++) {
+    var cls = i < meStep ? 'done' : (i === meStep ? 'active' : '');
+    html += '<div class="me-step-dot ' + cls + '"></div>';
+    if (i < meMaxStep) html += '<div class="me-step-line ' + (i < meStep ? 'done' : '') + '"></div>';
+  }
+  document.getElementById('me-progress').innerHTML = html;
+}
+
+// Show step
+function meShowStep() {
+  document.querySelectorAll('.me-step').forEach(function(el) {
+    el.style.display = el.dataset.step == meStep ? '' : 'none';
+  });
+  document.getElementById('me-prev').style.display = meStep > 1 ? '' : 'none';
+  document.getElementById('me-next').style.display = meStep < meMaxStep ? '' : 'none';
+  document.getElementById('me-submit').style.display = meStep === meMaxStep ? '' : 'none';
+  document.getElementById('me-btns').style.display = document.getElementById('me-success').style.display === 'none' ? '' : 'none';
+  meRenderProgress();
+  if (meStep === 5) meRenderSummary();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Validate step
+function meValidateStep(step) {
+  if (step === 1) {
+    var name = document.getElementById('me-ownerName').value.trim();
+    var email = document.getElementById('me-ownerEmail').value.trim();
+    var phone = document.getElementById('me-ownerPhone').value.trim();
+    if (!name) { meShowError('me-ownerName', 'Ad soyad zorunludur'); return false; }
+    if (!email || !email.includes('@')) { meShowError('me-ownerEmail', 'Geçerli bir e-posta girin'); return false; }
+    if (!phone || phone.length < 10) { meShowError('me-ownerPhone', 'Geçerli bir telefon girin'); return false; }
+    return true;
+  }
+  if (step === 2) {
+    var title = document.getElementById('me-title').value.trim();
+    var cat = document.getElementById('me-category').value;
+    var loc = document.getElementById('me-location').value;
+    if (!title) { meShowError('me-title', 'Mekan adı zorunludur'); return false; }
+    if (!cat) { meShowError('me-category', 'Kategori seçin'); return false; }
+    if (!loc) { meShowError('me-location', 'Konum seçin'); return false; }
+    return true;
+  }
+  if (step === 3) {
+    var desc = document.getElementById('me-description').value.trim();
+    if (!desc || desc.length < 50) { meShowError('me-description', 'En az 50 karakter açıklama yazın (' + desc.length + '/50)'); return false; }
+    return true;
+  }
+  return true;
+}
+
+function meShowError(fieldId, msg) {
+  var el = document.getElementById(fieldId);
+  if (el) { el.style.borderColor = 'var(--red)'; el.focus(); }
+  // Geçici toast
+  var toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--red);color:#fff;padding:10px 20px;border-radius:10px;font-size:.82rem;font-weight:600;z-index:999;animation:meFadeIn .3s';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(function() { toast.remove(); }, 3000);
+  if (el) el.addEventListener('input', function() { el.style.borderColor = ''; }, { once: true });
+}
+
+// Navigate
+function meGoStep(dir) {
+  if (dir === 1 && !meValidateStep(meStep)) return;
+  meStep = Math.max(1, Math.min(meMaxStep, meStep + dir));
+  meShowStep();
+}
+
+// Phone rows
+function meAddPhone(data) {
+  var container = document.getElementById('me-phones');
+  var row = document.createElement('div');
+  row.className = 'me-phone-row';
+  var num = (data && data.number) || '';
+  var isWa = (data && data.whatsapp) || false;
+  row.innerHTML = '<input type="tel" class="me-input" value="' + num + '" placeholder="+90 5XX XXX XX XX" style="padding:10px 12px">' +
+    '<label class="me-phone-wa"><input type="checkbox" ' + (isWa ? 'checked' : '') + '> WA</label>' +
+    '<button type="button" class="me-phone-remove" onclick="this.parentElement.remove()">×</button>';
+  container.appendChild(row);
+}
+// İlk telefon satırı
+meAddPhone();
+
+// Image handling
+function meHandleImages(files) {
+  Array.from(files).forEach(function(file) {
+    if (meImages.length >= 6) return;
+    if (file.size > 5 * 1024 * 1024) { meShowError('me-img-input', file.name + ' çok büyük (maks 5MB)'); return; }
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      meImages.push({ file: file, dataUrl: e.target.result, name: file.name });
+      meRenderImages();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function meRenderImages() {
+  var grid = document.getElementById('me-img-grid');
+  grid.innerHTML = meImages.map(function(img, i) {
+    return '<div class="me-img-thumb">' +
+      '<img src="' + img.dataUrl + '">' +
+      '<button onclick="meImages.splice(' + i + ',1);meRenderImages()">×</button>' +
+      (i === 0 ? '<div style="position:absolute;bottom:2px;left:2px;font-size:.55rem;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--terra);color:#fff">Kapak</div>' : '') +
+    '</div>';
+  }).join('');
+  document.getElementById('me-img-drop').style.display = meImages.length >= 6 ? 'none' : '';
+}
+
+// Summary
+function meRenderSummary() {
+  var catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach Club',iskele:'İskele'};
+  var phones = [];
+  document.querySelectorAll('#me-phones .me-phone-row').forEach(function(row) {
+    var num = row.querySelector('input[type="tel"]').value.trim();
+    if (num) phones.push(num + (row.querySelector('input[type="checkbox"]').checked ? ' (WhatsApp)' : ''));
+  });
+
+  var rows = [
+    ['Yetkili', document.getElementById('me-ownerName').value],
+    ['E-posta', document.getElementById('me-ownerEmail').value],
+    ['Yetkili Tel', document.getElementById('me-ownerPhone').value],
+    ['Mekan Adı', document.getElementById('me-title').value],
+    ['Kategori', catLabels[document.getElementById('me-category').value] || ''],
+    ['Konum', document.getElementById('me-location').value],
+    ['Adres', document.getElementById('me-address').value || '—'],
+    ['Telefon', phones.join(', ') || '—'],
+    ['Website', document.getElementById('me-website').value || '—'],
+    ['Instagram', document.getElementById('me-instagram').value || '—'],
+    ['Görseller', meImages.length > 0 ? meImages.length + ' fotoğraf' : 'Yüklenmedi']
+  ];
+
+  document.getElementById('me-summary').innerHTML = rows.map(function(r) {
+    return '<div class="me-summary-row"><span class="me-summary-label">' + r[0] + '</span><span class="me-summary-val">' + r[1] + '</span></div>';
+  }).join('') + '<div class="me-summary-row" style="border:none;padding-top:12px"><span class="me-summary-label">Açıklama</span></div><div style="font-size:.82rem;color:var(--text);line-height:1.7;padding:8px 0">' + document.getElementById('me-description').value.substring(0, 200) + (document.getElementById('me-description').value.length > 200 ? '...' : '') + '</div>';
+}
+
+// Submit
+async function meSubmit() {
+  // Honeypot check
+  if (document.getElementById('me-hp-field').value) {
+    document.getElementById('me-success').style.display = '';
+    document.getElementById('me-btns').style.display = 'none';
+    document.querySelectorAll('.me-step').forEach(function(el) { el.style.display = 'none'; });
+    return;
+  }
+
+  // KVKK check
+  if (!document.getElementById('me-consent').checked) {
+    meShowError('me-consent', 'KVKK onayı zorunludur');
+    return;
+  }
+
+  // Rate limit check (localStorage)
+  var rlKey = 'me_submit_' + new Date().toISOString().split('T')[0];
+  var rlCount = parseInt(localStorage.getItem(rlKey) || '0');
+  if (rlCount >= 3) {
+    meShowError('me-submit', 'Günlük başvuru limitinize ulaştınız. Yarın tekrar deneyin.');
+    return;
+  }
+
+  var btn = document.getElementById('me-submit');
+  btn.disabled = true;
+  btn.textContent = 'Gönderiliyor...';
+
+  try {
+    // Collect phones
+    var phones = [];
+    document.querySelectorAll('#me-phones .me-phone-row').forEach(function(row) {
+      var num = row.querySelector('input[type="tel"]').value.trim();
+      if (num) phones.push({ number: num, whatsapp: row.querySelector('input[type="checkbox"]').checked });
+    });
+
+    // Upload images
+    var imageUrls = [];
+    for (var i = 0; i < meImages.length; i++) {
+      try {
+        var path = 'pending/' + Date.now() + '_' + i + '.jpg';
+        var ref = firebase.storage().ref(path);
+        await ref.put(meImages[i].file, { contentType: meImages[i].file.type });
+        var url = await ref.getDownloadURL();
+        imageUrls.push(url);
+      } catch(e) { console.warn('Görsel yüklenemedi:', e); }
+    }
+
+    // Save to Firestore
+    await db.collection('pending_venues').add({
+      ownerName: document.getElementById('me-ownerName').value.trim(),
+      ownerEmail: document.getElementById('me-ownerEmail').value.trim(),
+      ownerPhone: document.getElementById('me-ownerPhone').value.trim(),
+      title: document.getElementById('me-title').value.trim(),
+      category: document.getElementById('me-category').value,
+      location: document.getElementById('me-location').value,
+      address: document.getElementById('me-address').value.trim(),
+      description: document.getElementById('me-description').value.trim(),
+      phones: phones,
+      website: document.getElementById('me-website').value.trim(),
+      instagram: document.getElementById('me-instagram').value.trim(),
+      images: imageUrls,
+      consentGiven: true,
+      consentDate: new Date().toISOString(),
+      status: 'pending',
+      submittedAt: new Date().toISOString(),
+      userAgent: navigator.userAgent.substring(0, 200),
+      referrer: document.referrer || ''
+    });
+
+    // Rate limit update
+    localStorage.setItem(rlKey, String(rlCount + 1));
+
+    // Telegram notification
+    try {
+      fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'message', data: {
+          name: document.getElementById('me-ownerName').value.trim(),
+          email: document.getElementById('me-ownerEmail').value.trim(),
+          phone: document.getElementById('me-ownerPhone').value.trim(),
+          subject: 'Mekan Ekleme Talebi',
+          message: '🏪 Yeni mekan başvurusu!\n\nMekan: ' + document.getElementById('me-title').value.trim() + '\nKategori: ' + document.getElementById('me-category').value + '\nKonum: ' + document.getElementById('me-location').value + '\n\nAdmin panelden inceleyin.'
+        }})
+      });
+    } catch(e) {}
+
+    // Show success
+    document.getElementById('me-success').style.display = '';
+    document.getElementById('me-btns').style.display = 'none';
+    document.querySelectorAll('.me-step').forEach(function(el) { el.style.display = 'none'; });
+    document.getElementById('me-progress').style.display = 'none';
+
+  } catch(err) {
+    console.error('Gönderim hatası:', err);
+    meShowError('me-submit', 'Gönderim başarısız: ' + (err.message || 'Lütfen tekrar deneyin'));
+    btn.disabled = false;
+    btn.textContent = 'Gönder';
+  }
+}
+
+// Init
+meShowStep();
+</script>
+<style>@keyframes meFadeIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}</style>
+</body>
+</html>
