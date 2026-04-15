@@ -663,8 +663,10 @@ function renderNav(opts = {}) {
   window.openSaveDrawer = function () {
     try { renderSaveDrawer(); } catch(e) { console.error('Favori render hatası:', e); }
     _sdJustOpened = true;
-    document.getElementById('save-drawer').classList.add('open');
-    document.getElementById('save-overlay').classList.add('open');
+    var drawer = document.getElementById('save-drawer');
+    var overlay = document.getElementById('save-overlay');
+    if (drawer) drawer.classList.add('open');
+    if (overlay) overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
     setTimeout(function() { _sdJustOpened = false; }, 400);
   };
@@ -680,8 +682,10 @@ function renderNav(opts = {}) {
   }
 
   window.closeSaveDrawer = function () {
-    document.getElementById('save-drawer').classList.remove('open');
-    document.getElementById('save-overlay').classList.remove('open');
+    var drawer = document.getElementById('save-drawer');
+    var overlay = document.getElementById('save-overlay');
+    if (drawer) drawer.classList.remove('open');
+    if (overlay) overlay.classList.remove('open');
     document.body.style.overflow = '';
   };
 
@@ -774,7 +778,7 @@ function renderNav(opts = {}) {
     if (!body) return;
 
     const totalCount = savedVenues.size + savedPlaces.size;
-    count.textContent = totalCount;
+    if (count) count.textContent = totalCount;
     if (goLink) goLink.href = getMekanListPath();
 
     if (footer) footer.style.display = 'block';
@@ -1001,7 +1005,7 @@ function renderNav(opts = {}) {
       msg += ' başarıyla yüklendi!';
       if (statusEl) statusEl.innerHTML = '<span style="color:#38A169">' + msg + '</span>';
     } catch(err) {
-      if (statusEl) { statusEl.innerHTML = '<span style="color:#E53E3E">Yükleme hatası:</span>'; statusEl.querySelector('span').appendChild(document.createTextNode(err.message)); }
+      if (statusEl) { statusEl.innerHTML = '<span style="color:#E53E3E">Yükleme hatası: ' + (err.message || 'Bilinmeyen hata') + '</span>'; }
     }
   };
 
@@ -1022,7 +1026,7 @@ function renderNav(opts = {}) {
         const total = (data.venues || []).length + (data.places || []).length;
         if (statusEl) statusEl.innerHTML = '<span style="color:#38A169">✓ Liste güncellendi! ' + total + ' kayıt.</span>';
       } else {
-        if (statusEl) statusEl.innerHTML = '<span style="color:var(--text-muted)">Liste zaten güncel.</span>';
+        if (statusEl) statusEl.innerHTML = '<span style="color:var(--text-muted)">Bu kod için kayıtlı liste bulunamadı.</span>';
       }
     } catch(err) {
       if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Güncelleme hatası.</span>';
