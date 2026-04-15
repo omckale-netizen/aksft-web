@@ -4166,7 +4166,7 @@ function renderPlacePage(placeId) {
     .ai-msg-copied.show{opacity:1;}
     .ai-chat-close{display:none;width:32px;height:32px;border-radius:50%;background:rgba(245,237,224,.12);border:none;color:rgba(245,237,224,.7);font-size:.9rem;cursor:pointer;align-items:center;justify-content:center;margin-left:auto;flex-shrink:0;transition:background .2s;}
     .ai-chat-close:hover{background:rgba(245,237,224,.2);}
-    @media(max-width:480px){.ai-chat-panel{bottom:0;right:0;left:0;width:100%;max-width:100%;max-height:75vh;border-radius:20px 20px 0 0;}.ai-chat-fab{bottom:16px;right:16px;width:50px;height:50px;font-size:1.2rem;}.ai-chat-fab.open{display:none;}.ai-chat-close{display:flex;}}
+    @media(max-width:480px){.ai-chat-panel{bottom:8px;right:8px;left:8px;width:auto;max-width:100%;max-height:80vh;border-radius:20px;}.ai-chat-fab{bottom:16px;right:16px;width:50px;height:50px;font-size:1.2rem;}.ai-chat-fab.open{display:none;}.ai-chat-close{display:flex;}}
   `;
   document.head.appendChild(chatCSS);
 
