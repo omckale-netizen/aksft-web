@@ -2071,10 +2071,12 @@ function renderVenuePage(venueId) {
   const getSaved  = () => { try { return new Set(JSON.parse(localStorage.getItem(SAVE_KEY)||'[]')); } catch { return new Set(); } };
   const isSaved   = getSaved().has(v.id);
 
-  /* ── WhatsApp contact URL ── */
-  const waNum = (v.phone || '').replace(/\D/g,'').replace(/^0/,'90');
+  /* ── Telefon numaraları (çoklu destek) ── */
+  const phones = v.phones && v.phones.length > 0 ? v.phones : (v.phone ? [{ number: v.phone, label: '', whatsapp: true }] : []);
+  const waPhone = phones.find(p => p.whatsapp) || phones[0];
+  const waNum = waPhone ? waPhone.number.replace(/\D/g,'').replace(/^0/,'90') : '';
   const waContactMsg = encodeURIComponent('Merhaba! *Assos\'u Keşfet* (assosukesfet.com) üzerinden ulaşıyorum.\n\n' + v.title + ' hakkında bilgi almak istiyorum.');
-  const waContactUrl = `https://wa.me/${waNum}?text=${waContactMsg}`;
+  const waContactUrl = waNum ? `https://wa.me/${waNum}?text=${waContactMsg}` : '';
 
   /* ── Sezonluk mekan kontrolü ── */
   const isSeasonClosed = (() => {
@@ -2706,22 +2708,35 @@ function renderVenuePage(venueId) {
           <div class="vp-eyebrow">İletişim</div>
           <h2 class="vp-stitle">Ulaşın</h2>
           <div class="vp-contact-grid${v.category === 'konaklama' ? ' vp-contact-grid-1col' : ''}">
+            ${phones.map(function(ph) {
+              var cleanNum = ph.number.replace(/\s/g,'');
+              var phWaNum = ph.number.replace(/\D/g,'').replace(/^0/,'90');
+              var phWaUrl = 'https://wa.me/' + phWaNum + '?text=' + waContactMsg;
+              return ph.whatsapp ? `
+            <div class="vp-contact-card vp-contact-wa">
+              <div class="vp-contact-icon">💬</div>
+              <div>
+                <div class="vp-contact-label">${ph.label ? escHtml(ph.label) + ' (WhatsApp)' : 'WhatsApp'}</div>
+                <div class="vp-contact-val">${ph.number}</div>
+              </div>
+              <a href="${phWaUrl}" target="_blank" rel="noopener" class="vp-wa-btn" onclick="if(window.trackAction)trackAction('${escAttr(v.id)}','whatsapp');">WhatsApp ile Yaz</a>
+            </div>` : `
+            <div class="vp-contact-card">
+              <div class="vp-contact-icon">📞</div>
+              <div>
+                <div class="vp-contact-label">${ph.label ? escHtml(ph.label) : 'Telefon'}</div>
+                <div class="vp-contact-val">${ph.number}</div>
+              </div>
+              <a href="tel:${cleanNum}" class="vp-contact-btn-outline" onclick="event.preventDefault();if(window.trackAction)trackAction('${escAttr(v.id)}','call');setTimeout(()=>{window.location.href=this.href},300)">Ara</a>
+            </div>`;
+            }).join('')}
+            ${phones.length === 0 ? `
             <div class="vp-contact-card">
               <div class="vp-contact-icon">📞</div>
               <div>
                 <div class="vp-contact-label">Telefon</div>
-                <div class="vp-contact-val">${v.phone || '—'}</div>
+                <div class="vp-contact-val">—</div>
               </div>
-              ${v.phone ? `<a href="tel:${v.phone.replace(/\s/g,'')}" class="vp-contact-btn-outline" onclick="event.preventDefault();if(window.trackAction)trackAction('${escAttr(v.id)}','call');setTimeout(()=>{window.location.href=this.href},300)">Ara</a>` : ''}
-            </div>
-            ${v.category !== 'konaklama' ? `
-            <div class="vp-contact-card vp-contact-wa">
-              <div class="vp-contact-icon">💬</div>
-              <div>
-                <div class="vp-contact-label">WhatsApp</div>
-                <div class="vp-contact-val">Mesaj Gönder</div>
-              </div>
-              <a href="${waContactUrl}" target="_blank" rel="noopener" class="vp-wa-btn" onclick="if(window.trackAction)trackAction('${escAttr(v.id)}','whatsapp');">WhatsApp ile Yaz</a>
             </div>` : ''}
           </div>
           ${v.category === 'konaklama' ? `
@@ -2904,8 +2919,8 @@ function renderVenuePage(venueId) {
             <span class="vp-sticky-name">${v.title}</span>
           </div>
           <div class="vp-sticky-acts">
-            ${v.phone ? '<a href="tel:' + v.phone.replace(/\\s/g,'') + '" class="vp-sticky-btn vp-sticky-call" onclick="event.preventDefault();if(window.trackAction)trackAction(\'' + escAttr(v.id) + '\',\'call\');setTimeout(()=>{window.location.href=this.href},300)">📞 Ara</a>' : ''}
-            ${v.phone && v.category !== 'konaklama' ? '<a href="' + waContactUrl + '" target="_blank" rel="noopener" class="vp-sticky-btn vp-sticky-wa" onclick="if(window.trackAction)trackAction(\'' + escAttr(v.id) + '\',\'whatsapp\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="#fff" style="vertical-align:middle;margin-right:3px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.528 5.855L0 24l6.335-1.52C8.034 23.46 9.98 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.846 0-3.584-.479-5.104-1.32l-.369-.21-3.76.902.948-3.668-.223-.374A9.944 9.944 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>WhatsApp</a>' : ''}
+            ${phones.length > 0 ? '<a href="tel:' + phones[0].number.replace(/\s/g,'') + '" class="vp-sticky-btn vp-sticky-call" onclick="event.preventDefault();if(window.trackAction)trackAction(\'' + escAttr(v.id) + '\',\'call\');setTimeout(()=>{window.location.href=this.href},300)">📞 Ara</a>' : ''}
+            ${waContactUrl && v.category !== 'konaklama' ? '<a href="' + waContactUrl + '" target="_blank" rel="noopener" class="vp-sticky-btn vp-sticky-wa" onclick="if(window.trackAction)trackAction(\'' + escAttr(v.id) + '\',\'whatsapp\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="#fff" style="vertical-align:middle;margin-right:3px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.528 5.855L0 24l6.335-1.52C8.034 23.46 9.98 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.846 0-3.584-.479-5.104-1.32l-.369-.21-3.76.902.948-3.668-.223-.374A9.944 9.944 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>WhatsApp</a>' : ''}
             <a href="${mapsUrl}" target="_blank" rel="noopener" class="vp-sticky-btn vp-sticky-map" onclick="if(window.trackAction)trackAction('${escAttr(v.id)}','directions')">🗺 Yol Tarifi Al</a>
           </div>
         </div>
@@ -3126,7 +3141,8 @@ function renderVenuePage(venueId) {
       '_Assos\'u Keşfet (assosukesfet.com) üzerinden gönderilmiştir._'
     ];
     const msg = encodeURIComponent(lines.join('\n'));
-    const rezWaNum = (v.phone || '').replace(/\D/g,'').replace(/^0/,'90');
+    const rezWaPhone = (v.phones && v.phones.length > 0) ? (v.phones.find(p => p.whatsapp) || v.phones[0]) : { number: v.phone || '' };
+    const rezWaNum = rezWaPhone.number.replace(/\D/g,'').replace(/^0/,'90');
     window.open(`https://wa.me/${rezWaNum}?text=${msg}`, '_blank');
   };
 
