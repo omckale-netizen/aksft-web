@@ -1637,6 +1637,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                   <option value="mekan_bilgi">Mekan Bilgi Güncelleme Talebi</option>
                   <option value="mekan_premium">Premium Üyelik Bilgilendirme</option>
                   <option value="mekan_premium_bitis">Premium Süre Dolum Uyarısı</option>
+                  <option value="mekan_ekleme_yonlendirme">📋 Mekan Ekleme Formu Yönlendirme</option>
                 </optgroup>
                 <optgroup label="📋 Genel">
                   <option value="hosgeldin">Hoşgeldin Mesajı</option>
@@ -4616,6 +4617,11 @@ var MAIL_TEMPLATES = {
     subject: 'İşbirliği Teklifi',
     body: 'Merhaba,\n\nAssos\'u Keşfet olarak bölgedeki işletmelerle işbirliği yapmaktan mutluluk duyarız.\n\nPlatformumuz aylık binlerce ziyaretçiye ulaşmakta ve Assos bölgesinin en kapsamlı dijital rehberi konumundadır.\n\nBirlikte neler yapabileceğimizi konuşmak isterseniz, bu maile yanıt yazabilirsiniz.\n\nSaygılarımızla.'
   },
+  mekan_ekleme_yonlendirme: {
+    subject: 'Mekanınızı Assos\'u Keşfet\'e Ekleyin',
+    body: 'Merhaba,\n\nAssos\'u Keşfet platformuna gösterdiğiniz ilgi için teşekkür ederiz.\n\nMekanınızı Assos bölgesinin en kapsamlı dijital rehberine eklemek için aşağıdaki formu doldurmanız yeterlidir. Form üzerinden mekanınızın tüm bilgilerini (çalışma saatleri, telefon numaraları, fotoğraflar, açıklama vb.) adım adım girebilirsiniz.\n\nFormu doldurduktan sonra ekibimiz başvurunuzu 1-3 iş günü içinde değerlendirecek ve size e-posta ile dönüş yapacaktır.\n\nBaşvuru süreciyle ilgili sorularınız için bu maile yanıt yazabilirsiniz.\n\nSaygılarımızla,\nAssos\'u Keşfet Ekibi',
+    cta: { text: 'Mekan Ekleme Formunu Doldurun', url: 'https://assosukesfet.com/mekan-ekle' }
+  },
   bilgilendirme: {
     subject: 'Bilgilendirme',
     body: 'Merhaba,\n\n\n\nSaygılarımızla,\nAssos\'u Keşfet Ekibi'
@@ -4627,6 +4633,7 @@ function applyMailTemplate() {
   var tpl = MAIL_TEMPLATES[sel.value];
   if (!tpl) return;
   document.getElementById('compose-subject').value = tpl.subject;
+  window._composeTemplateCta = tpl.cta || null;
   document.getElementById('compose-body').value = tpl.body;
   document.getElementById('compose-body').focus();
 }
@@ -4783,7 +4790,8 @@ async function sendComposeMail() {
   statusEl.style.color = 'var(--text-muted)';
 
   try {
-    var html = buildMailHtml(subject, body);
+    var html = buildMailHtml(subject, body, window._composeTemplateCta ? { ctaText: window._composeTemplateCta.text, ctaUrl: window._composeTemplateCta.url } : null);
+    window._composeTemplateCta = null;
     var resp = await fetch('/api/send-mail', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
