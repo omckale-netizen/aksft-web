@@ -138,19 +138,7 @@ a{color:var(--terra);text-decoration:none}
           </div>
           <div class="me-field"><label class="me-label">Konum *</label>
             <select class="me-select" id="f-location">
-              <option value="">Seçin</option>
-              <option value="Behramkale (Assos)">Behramkale (Assos)</option>
-              <option value="Kadırga Koyu">Kadırga Koyu</option>
-              <option value="Sivrice Koyu">Sivrice Koyu</option>
-              <option value="Assos Antik Liman">Assos Antik Liman</option>
-              <option value="Adatepe">Adatepe</option>
-              <option value="Babakale">Babakale</option>
-              <option value="Küçükkuyu">Küçükkuyu</option>
-              <option value="Altınoluk">Altınoluk</option>
-              <option value="Ayvacık Merkez">Ayvacık Merkez</option>
-              <option value="Gülpınar">Gülpınar</option>
-              <option value="Kayalar">Kayalar</option>
-              <option value="Bektaş">Bektaş</option>
+              <option value="">Yükleniyor...</option>
             </select>
           </div>
         </div>
@@ -254,7 +242,7 @@ a{color:var(--terra);text-decoration:none}
         <div id="summary"></div>
         <div class="me-kvkk">
           <input type="checkbox" id="consent">
-          <label for="consent">Kişisel verilerimin Assos'u Keşfet platformunda mekan bilgisi olarak yayınlanmasını ve <a href="/gizlilik.html" target="_blank">Gizlilik Politikası</a> kapsamında işlenmesini kabul ediyorum.</label>
+          <label for="consent">Mekanıma ait bilgilerin (mekan adı, adres, telefon, görseller, çalışma saatleri) assosukesfet.com platformunda yayınlanmasını kabul ediyorum. Kişisel verilerimin (ad, e-posta, telefon) yalnızca iletişim amacıyla kullanılacağını ve üçüncü taraflarla paylaşılmayacağını, dilediğim zaman info@assosukesfet.com adresine yazarak verilerimin silinmesini talep edebileceğimi biliyorum. <a href="/gizlilik.html" target="_blank">Gizlilik Politikası</a></label>
         </div>
       </div>
     </div>
@@ -291,9 +279,35 @@ var DAYS=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar
 var CAT_LABELS={kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach Club',iskele:'İskele'};
 
 // Init
-(function(){
+(async function(){
   renderProgress(); renderWH(); addPhone();
   document.getElementById('f-seasonal').onchange=function(){document.getElementById('season-fields').style.display=this.checked?'':'none';};
+  // Konumları Firebase'den yükle
+  try{
+    var snap=await db.collection('villages').get();
+    var villages=snap.docs.map(function(d){return{title:d.data().title,type:d.data().type||'koy'};}).sort(function(a,b){return(a.title||'').localeCompare(b.title||'','tr');});
+    var sel=document.getElementById('f-location');
+    var html='<option value="">Seçin</option>';
+    // Sabit özel konumlar
+    html+='<optgroup label="📍 Özel Konumlar">';
+    html+='<option value="Assos Antik Liman">Assos Antik Liman</option>';
+    html+='<option value="Kadırga Koyu">Kadırga Koyu</option>';
+    html+='<option value="Sivrice Koyu">Sivrice Koyu</option>';
+    html+='<option value="Ayvacık Merkez">Ayvacık Merkez</option>';
+    html+='</optgroup>';
+    // Köyler
+    var koyler=villages.filter(function(v){return v.type==='koy';});
+    if(koyler.length>0){html+='<optgroup label="🏘 Köyler ('+koyler.length+')">';koyler.forEach(function(v){html+='<option value="'+v.title+'">'+v.title+'</option>';});html+='</optgroup>';}
+    // Beldeler
+    var beldeler=villages.filter(function(v){return v.type==='belde';});
+    if(beldeler.length>0){html+='<optgroup label="🏛 Beldeler ('+beldeler.length+')">';beldeler.forEach(function(v){html+='<option value="'+v.title+'">'+v.title+'</option>';});html+='</optgroup>';}
+    // Mahalleler
+    var mahalleler=villages.filter(function(v){return v.type==='mahalle';});
+    if(mahalleler.length>0){html+='<optgroup label="🏠 Mahalleler ('+mahalleler.length+')">';mahalleler.forEach(function(v){html+='<option value="'+v.title+'">'+v.title+'</option>';});html+='</optgroup>';}
+    sel.innerHTML=html;
+  }catch(e){
+    document.getElementById('f-location').innerHTML='<option value="">Seçin</option><option value="Behramkale (Assos)">Behramkale (Assos)</option><option value="Kadırga Koyu">Kadırga Koyu</option><option value="Ayvacık Merkez">Ayvacık Merkez</option>';
+  }
   // Edit mode?
   var p=new URLSearchParams(location.search);
   editDocId=p.get('edit');
