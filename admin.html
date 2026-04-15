@@ -3959,7 +3959,8 @@ async function renderPendingVenues() {
 
     // Stats
     var revision = items.filter(function(i){ return i.status === 'revision'; });
-    var totalItems = items.length;
+    var trashed = items.filter(function(i){ return i.status === 'trashed'; });
+    var totalItems = items.length - trashed.length;
     var approveRate = totalItems > 0 ? Math.round(approved.length / totalItems * 100) : 0;
     // Ortalama değerlendirme süresi
     var avgDays = '—';
@@ -3987,7 +3988,7 @@ async function renderPendingVenues() {
     }
 
     var catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskele'};
-    var statusLabels = { pending: { label:'Bekliyor', bg:'rgba(212,147,90,.1)', color:'#975A16', icon:'⏳' }, revision: { label:'Revizyon Bekleniyor', bg:'rgba(49,130,206,.08)', color:'#2B6CB0', icon:'📝' }, approved: { label:'Onaylandı', bg:'rgba(56,161,105,.1)', color:'#276749', icon:'✅' }, rejected: { label:'Reddedildi', bg:'rgba(229,62,62,.08)', color:'#C53030', icon:'❌' } };
+    var statusLabels = { pending: { label:'Bekliyor', bg:'rgba(212,147,90,.1)', color:'#975A16', icon:'⏳' }, revision: { label:'Revizyon Bekleniyor', bg:'rgba(49,130,206,.08)', color:'#2B6CB0', icon:'📝' }, approved: { label:'Onaylandı', bg:'rgba(56,161,105,.1)', color:'#276749', icon:'✅' }, rejected: { label:'Reddedildi', bg:'rgba(229,62,62,.08)', color:'#C53030', icon:'❌' }, trashed: { label:'Çöp', bg:'rgba(113,128,150,.08)', color:'#718096', icon:'🗑' } };
 
     listEl.innerHTML = items.map(function(item) {
       var st = statusLabels[item.status] || statusLabels.pending;
@@ -4020,9 +4021,11 @@ async function renderPendingVenues() {
           (item.status === 'pending' || item.status === 'revision' ? '' : '') +
           (item.status === 'pending' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla & Mekan Ekle</button><button class="btn btn-sm" style="background:rgba(49,130,206,.1);color:#2B6CB0;border:1px solid rgba(49,130,206,.2)" onclick="showRevisionModal(\'' + item._id + '\')">📝 Revizyon İste</button><button class="btn btn-danger btn-sm" onclick="showRejectModal(\'' + item._id + '\')">❌ Reddet</button>' : '') +
           (item.status === 'revision' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla</button><span style="font-size:.72rem;color:var(--text-muted)">Düzenleme bekleniyor</span>' : '') +
-          '<button class="btn btn-secondary btn-sm" onclick="pendingMailTo(\'' + (item.ownerEmail || '') + '\')">✉️ Mail</button>' +
+          (item.status !== 'trashed' ? '<button class="btn btn-secondary btn-sm" onclick="pendingMailTo(\'' + (item.ownerEmail || '') + '\')">✉️ Mail</button>' +
           '<button class="btn btn-secondary btn-sm" onclick="previewPendingVenue(\'' + item._id + '\')">👁 Detaylı İncele</button>' +
-          '<button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="deletePendingVenue(\'' + item._id + '\')">🗑 Sil</button>' +
+          '<button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="deletePendingVenue(\'' + item._id + '\')">🗑 Sil</button>' :
+          '<button class="btn btn-primary btn-sm" onclick="restorePendingVenue(\'' + item._id + '\')">↩ Geri Al</button>' +
+          '<button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="permanentDeletePendingVenue(\'' + item._id + '\')">✕ Kalıcı Sil</button>') +
         '</div>' +
       '</div>';
     }).join('');
@@ -4397,11 +4400,26 @@ async function rejectPendingVenueFinal(id, reason) {
   } catch(err) { showToast('Hata: ' + err.message, 'error'); }
 }
 async function deletePendingVenue(id) {
-  if (!confirm('Bu talebi kalıcı olarak silmek istiyor musunuz?')) return;
+  if (!confirm('Bu talebi çöp kutusuna taşımak istiyor musunuz?')) return;
+  try {
+    await db.collection('pending_venues').doc(id).update({ status: 'trashed', trashedAt: new Date().toISOString() });
+    renderPendingVenues();
+    showToast('🗑 Talep çöp kutusuna taşındı.', 'success');
+  } catch(err) { showToast('Hata: ' + err.message, 'error'); }
+}
+async function restorePendingVenue(id) {
+  try {
+    await db.collection('pending_venues').doc(id).update({ status: 'pending', trashedAt: null });
+    renderPendingVenues();
+    showToast('↩ Talep geri alındı.', 'success');
+  } catch(err) { showToast('Hata: ' + err.message, 'error'); }
+}
+async function permanentDeletePendingVenue(id) {
+  if (!confirm('Bu talebi kalıcı olarak silmek istiyor musunuz? Bu işlem geri alınamaz!')) return;
   try {
     await db.collection('pending_venues').doc(id).delete();
     renderPendingVenues();
-    showToast('Talep silindi.', 'success');
+    showToast('Talep kalıcı olarak silindi.', 'success');
   } catch(err) { showToast('Hata: ' + err.message, 'error'); }
 }
 
