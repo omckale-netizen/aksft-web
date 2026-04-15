@@ -5339,10 +5339,23 @@ function addPhoneRow(data) {
       '<label style="display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--text-mid);cursor:pointer" title="WhatsApp numarası">' +
         '<input type="checkbox" class="phone-wa" ' + (isWa ? 'checked' : '') + ' style="width:16px;height:16px;accent-color:#25D366;cursor:pointer">' +
         '<span style="color:#25D366;font-weight:600">WhatsApp Numarası</span></label>' +
-      '<button type="button" onclick="this.closest(\'.phone-row\').remove()" style="font-size:.68rem;padding:4px 10px;border:none;border-radius:6px;background:var(--red-bg);color:var(--red);cursor:pointer;font-weight:600">Sil</button>' +
+      '<div style="display:flex;gap:6px;">' +
+        '<button type="button" onclick="movePhoneRow(this,-1)" title="Yukarı" style="width:28px;height:28px;border:1px solid var(--border);border-radius:6px;background:var(--card-bg);color:var(--text-mid);font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center">↑</button>' +
+        '<button type="button" onclick="movePhoneRow(this,1)" title="Aşağı" style="width:28px;height:28px;border:1px solid var(--border);border-radius:6px;background:var(--card-bg);color:var(--text-mid);font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center">↓</button>' +
+        '<button type="button" onclick="this.closest(\'.phone-row\').remove()" style="font-size:.68rem;padding:4px 10px;border:none;border-radius:6px;background:var(--red-bg);color:var(--red);cursor:pointer;font-weight:600">Sil</button>' +
+      '</div>' +
     '</div>';
   list.appendChild(row);
   if (!data) row.querySelector('.phone-num').focus();
+}
+function movePhoneRow(btn, dir) {
+  var row = btn.closest('.phone-row');
+  var list = row.parentElement;
+  if (dir === -1 && row.previousElementSibling) {
+    list.insertBefore(row, row.previousElementSibling);
+  } else if (dir === 1 && row.nextElementSibling) {
+    list.insertBefore(row.nextElementSibling, row);
+  }
 }
 function getPhonesData() {
   var rows = document.querySelectorAll('#f-phones-list > .phone-row');
