@@ -287,13 +287,6 @@ a{color:var(--terra);text-decoration:none}
   <div>Assos'un Dijital Keşif Rehberi</div>
   <div style="margin-top:8px">© <script>document.write(new Date().getFullYear())</script> Assos'u Keşfet · <a href="/">assosukesfet.com</a></div>
 </div>
-<script>
-firebase.firestore().collection('settings').doc('site').get().then(function(doc){
-  if(doc.exists&&doc.data().logoUrl){
-    document.getElementById('footer-logo').innerHTML='<img src="'+doc.data().logoUrl+'" alt="Assos\'u Keşfet" style="height:40px;opacity:.8">';
-  }
-}).catch(function(){});
-</script>
 
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
@@ -336,6 +329,8 @@ var CAT_LABELS={kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'
   }catch(e){
     document.getElementById('f-location').innerHTML='<option value="">Seçin</option><option value="Behramkale (Assos)">Behramkale (Assos)</option><option value="Kadırga Koyu">Kadırga Koyu</option><option value="Ayvacık Merkez">Ayvacık Merkez</option>';
   }
+  // Footer logo
+  try{db.collection('settings').doc('site').get().then(function(doc){if(doc.exists&&doc.data().logoUrl){document.getElementById('footer-logo').innerHTML='<img src="'+doc.data().logoUrl+'" alt="Assos\'u Keşfet" style="height:40px;opacity:.8">';}}).catch(function(){});}catch(e){}
   // Edit mode?
   var p=new URLSearchParams(location.search);
   editDocId=p.get('edit');
