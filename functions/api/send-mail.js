@@ -61,7 +61,8 @@ export async function onRequestPost(context) {
       return new Response(JSON.stringify({ error: 'Mail gönderilemedi', details: failed[0].error || '' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    return new Response(JSON.stringify({ ok: true, sent: results.filter(r => r.ok).length, total: recipients.length }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const successResults = results.filter(r => r.ok);
+    return new Response(JSON.stringify({ ok: true, sent: successResults.length, total: recipients.length, emailIds: successResults.map(r => ({ to: r.to, id: r.id })) }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
   } catch(e) {
     console.error('Mail send error:', e);
