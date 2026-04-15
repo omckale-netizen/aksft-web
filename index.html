@@ -224,8 +224,9 @@
       </p>
     </div>
 
-    <!-- Route Cards Grid — dinamik -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:24px;" id="home-route-cards"></div>
+    <!-- Route Cards — dinamik, mobilde yatay scroll -->
+    <div id="home-route-cards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;"></div>
+    <style>@media(max-width:900px){#home-route-cards{display:flex !important;overflow-x:auto;scroll-snap-type:x mandatory;gap:16px !important;padding-bottom:12px;scrollbar-width:none;}#home-route-cards::-webkit-scrollbar{display:none;}#home-route-cards>.route-card{min-width:280px;flex-shrink:0;scroll-snap-align:start;}}@media(max-width:640px){#rotalar,#yerler,#mekanlar,#koyler{padding-top:56px !important;padding-bottom:56px !important;}}</style>
 
 
     <!-- Diğer rotalar + CTA (dinamik) -->
@@ -425,7 +426,7 @@
 
 <script src="firebase-loader.js?v=4"></script>
 <script src="data.js?v=2"></script>
-<script src="shared.min.js?v=229"></script>
+<script src="shared.min.js?v=230"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: true });
