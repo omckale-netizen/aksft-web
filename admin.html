@@ -1634,9 +1634,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             </div>
             <!-- Alıcı -->
             <div class="form-group" style="margin:0">
-              <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:4px">Alıcı</label>
+              <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:4px">Alıcı <span style="font-weight:400;color:var(--text-muted);font-size:.68rem">(birden fazla için virgülle ayırın)</span></label>
               <div style="position:relative">
-                <input type="email" id="compose-to" placeholder="ornek@mail.com" oninput="showRecentEmails(this.value)" onfocus="showRecentEmails(this.value)" autocomplete="off" style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.88rem;background:var(--input-bg,#fff);color:var(--text);width:100%">
+                <input type="text" id="compose-to" placeholder="ornek@mail.com, diger@mail.com" oninput="showRecentEmails(this.value)" onfocus="showRecentEmails(this.value)" autocomplete="off" style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.88rem;background:var(--input-bg,#fff);color:var(--text);width:100%">
                 <div id="compose-recent-emails" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:10;background:var(--card-bg,#fff);border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:0 0 8px 8px;max-height:180px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.12)"></div>
               </div>
             </div>
@@ -4159,7 +4159,7 @@ var MAIL_TEMPLATES = {
   },
   hosgeldin: {
     subject: 'Assos\'u Keşfet\'e Hoşgeldiniz',
-    body: 'Merhaba,\n\nAssos\'u Keşfet platformuna ilginiz için teşekkür ederiz!\n\nAssos, Ayvacık ve çevresindeki en güzel mekanları, gezilecek yerleri ve rotaları keşfetmek için assosukesfet.com adresini ziyaret edebilirsiniz.\n\nSorularınız için her zaman buradayız.'
+    body: 'Merhaba,\n\nAssos\'u Keşfet platformuna ilginiz için teşekkür ederiz!\n\nAssos çevresindeki en güzel mekanları, gezilecek yerleri ve rotaları keşfetmek için assosukesfet.com adresini ziyaret edebilirsiniz.\n\nSorularınız için her zaman buradayız.'
   },
   tesekkur: {
     subject: 'Teşekkür Ederiz',
@@ -4198,7 +4198,10 @@ function saveRecentEmail(email) {
 }
 function showRecentEmails(query) {
   var dropdown = document.getElementById('compose-recent-emails');
-  var q = (query || '').toLowerCase().trim();
+  var raw = query || '';
+  // Virgülden sonraki kısmı al (son yazılan adres)
+  var lastComma = raw.lastIndexOf(',');
+  var q = (lastComma >= 0 ? raw.substring(lastComma + 1) : raw).toLowerCase().trim();
   // İletişim formundan gelen e-postalar + son gönderilenler
   var contactEmails = allMessages.map(function(m) { return m.email; }).filter(Boolean);
   var sentEmails = getRecentEmails();
@@ -4226,7 +4229,18 @@ function showRecentEmails(query) {
   dropdown.style.display = 'block';
 }
 function selectRecentEmail(email) {
-  document.getElementById('compose-to').value = email;
+  var input = document.getElementById('compose-to');
+  var current = input.value.trim();
+  // Virgülle ayırarak mevcut adresleri al
+  var existing = current ? current.split(',').map(function(e) { return e.trim(); }).filter(Boolean) : [];
+  // Son girilen kısmi metni çıkar (henüz virgülden sonrası)
+  var lastComma = current.lastIndexOf(',');
+  if (lastComma >= 0) {
+    existing = current.substring(0, lastComma).split(',').map(function(e) { return e.trim(); }).filter(Boolean);
+  }
+  // Zaten varsa ekleme
+  if (!existing.includes(email)) existing.push(email);
+  input.value = existing.join(', ');
   document.getElementById('compose-recent-emails').style.display = 'none';
   document.getElementById('compose-subject').focus();
 }
@@ -4253,7 +4267,7 @@ function buildMailHtml(subject, body) {
 
       // Header
       '<div style="background:linear-gradient(135deg,#1A2744 0%,#243352 50%,#2D3E5F 100%);border-radius:16px 16px 0 0;padding:36px 32px 32px;text-align:center;">' +
-        '<div style="display:inline-block;width:48px;height:48px;border-radius:14px;background:rgba(196,82,26,.9);color:#fff;font-size:1.5rem;line-height:48px;text-align:center;margin-bottom:14px;">&#x1F9ED;</div>' +
+        '<div style="display:inline-block;width:48px;height:48px;border-radius:14px;background:rgba(196,82,26,.9);color:#fff;font-size:1.5rem;line-height:48px;text-align:center;margin-bottom:14px;">&#x1F3DB;</div>' +
         '<h1 style="margin:0;font-size:1.45rem;color:#ffffff;font-weight:800;letter-spacing:-.03em;">Assos\'u Ke\u015ffet</h1>' +
         '<p style="margin:6px 0 0;font-size:.78rem;color:rgba(255,255,255,.5);font-weight:500;">Assos\'un Dijital Ke\u015fif Rehberi</p>' +
         '<div style="width:40px;height:3px;background:rgba(196,82,26,.7);border-radius:2px;margin:16px auto 0;"></div>' +
@@ -4266,7 +4280,7 @@ function buildMailHtml(subject, body) {
 
       // Signature
       '<div style="background:#FAFAF8;padding:24px 32px;border-left:1px solid #EBE7E1;border-right:1px solid #EBE7E1;border-top:2px solid #C4521A;">' +
-        '<p style="margin:0 0 2px;font-size:.92rem;font-weight:700;color:#1A2744;">&#x1F9ED; Assos\'u Ke\u015ffet</p>' +
+        '<p style="margin:0 0 2px;font-size:.92rem;font-weight:700;color:#1A2744;">&#x1F3DB; Assos\'u Ke\u015ffet</p>' +
         '<p style="margin:0 0 10px;font-size:.7rem;color:#A0AEC0;">Assos\'un Dijital Ke\u015fif Rehberi</p>' +
         '<table style="border-collapse:collapse;">' +
           '<tr><td style="font-size:.75rem;color:#A0AEC0;padding:3px 8px 3px 0;">&#x2709;</td><td style="font-size:.75rem;"><a href="mailto:info@assosukesfet.com" style="color:#C4521A;text-decoration:none;font-weight:500;">info@assosukesfet.com</a></td></tr>' +
@@ -4292,16 +4306,19 @@ function previewComposeMail() {
   overlay.style.display = 'flex';
 }
 async function sendComposeMail() {
-  var to = document.getElementById('compose-to').value.trim();
+  var toRaw = document.getElementById('compose-to').value.trim();
   var subject = document.getElementById('compose-subject').value.trim();
   var body = document.getElementById('compose-body').value.trim();
   var statusEl = document.getElementById('compose-status');
 
-  if (!to) { showToast('Alıcı adresi girin', 'error'); return; }
+  if (!toRaw) { showToast('Alıcı adresi girin', 'error'); return; }
   if (!subject) { showToast('Konu yazın', 'error'); return; }
   if (!body) { showToast('İçerik yazın', 'error'); return; }
 
-  statusEl.textContent = 'Gönderiliyor...';
+  var toList = toRaw.split(',').map(function(e) { return e.trim(); }).filter(Boolean);
+  if (toList.length === 0) { showToast('Geçerli e-posta girin', 'error'); return; }
+
+  statusEl.textContent = toList.length > 1 ? toList.length + ' alıcıya gönderiliyor...' : 'Gönderiliyor...';
   statusEl.style.color = 'var(--text-muted)';
 
   try {
@@ -4309,15 +4326,15 @@ async function sendComposeMail() {
     var resp = await fetch('/api/send-mail', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ to: to, subject: subject + ' — Assos\'u Keşfet', html: html })
+      body: JSON.stringify({ to: toList, subject: subject + ' — Assos\'u Keşfet', html: html })
     });
     var data = await resp.json();
     if (data.ok) {
       statusEl.textContent = 'Gönderildi!';
       statusEl.style.color = 'var(--green)';
-      showToast('✉️ Mail gönderildi: ' + to, 'success');
-      saveRecentEmail(to);
-      logActivity('mail_gonder', to, subject);
+      showToast('✉️ Mail gönderildi: ' + toList.length + ' alıcı', 'success');
+      toList.forEach(function(e) { saveRecentEmail(e); });
+      logActivity('mail_gonder', toList.join(', '), subject);
       setTimeout(function() {
         document.getElementById('compose-to').value = '';
         document.getElementById('compose-subject').value = '';

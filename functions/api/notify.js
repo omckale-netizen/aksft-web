@@ -158,7 +158,7 @@ export async function onRequestPost(context) {
 
   <!-- Header -->
   <div style="background:linear-gradient(135deg,#1A2744 0%,#243352 50%,#2D3E5F 100%);border-radius:16px 16px 0 0;padding:36px 32px 32px;text-align:center;">
-    <div style="display:inline-block;width:48px;height:48px;border-radius:14px;background:rgba(196,82,26,.9);color:#fff;font-size:1.5rem;line-height:48px;text-align:center;margin-bottom:14px;">&#x1F9ED;</div>
+    <div style="display:inline-block;width:48px;height:48px;border-radius:14px;background:rgba(196,82,26,.9);color:#fff;font-size:1.5rem;line-height:48px;text-align:center;margin-bottom:14px;">&#x1F3DB;</div>
     <h1 style="margin:0;font-size:1.45rem;color:#ffffff;font-weight:800;letter-spacing:-.03em;">Assos'u Ke\u015ffet</h1>
     <p style="margin:6px 0 0;font-size:.78rem;color:rgba(255,255,255,.5);font-weight:500;">Assos'un Dijital Ke\u015fif Rehberi</p>
     <div style="width:40px;height:3px;background:rgba(196,82,26,.7);border-radius:2px;margin:16px auto 0;"></div>
@@ -193,7 +193,7 @@ export async function onRequestPost(context) {
 
   <!-- Signature -->
   <div style="background:#FAFAF8;padding:24px 32px;border-left:1px solid #EBE7E1;border-right:1px solid #EBE7E1;border-top:2px solid #C4521A;">
-    <p style="margin:0 0 2px;font-size:.92rem;font-weight:700;color:#1A2744;">&#x1F9ED; Assos'u Ke\u015ffet</p>
+    <p style="margin:0 0 2px;font-size:.92rem;font-weight:700;color:#1A2744;">&#x1F3DB; Assos'u Ke\u015ffet</p>
     <p style="margin:0 0 10px;font-size:.7rem;color:#A0AEC0;">Assos'un Dijital Ke\u015fif Rehberi</p>
     <table style="border-collapse:collapse;">
       <tr><td style="font-size:.75rem;color:#A0AEC0;padding:3px 8px 3px 0;">&#x2709;</td><td style="font-size:.75rem;"><a href="mailto:info@assosukesfet.com" style="color:#C4521A;text-decoration:none;font-weight:500;">info@assosukesfet.com</a></td></tr>
