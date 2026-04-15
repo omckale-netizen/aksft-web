@@ -5332,7 +5332,7 @@ function addPhoneRow(data) {
   var label = (data && data.label) || '';
   var isWa = (data && data.whatsapp) || false;
   row.innerHTML = '<div style="display:flex;gap:8px;margin-bottom:8px;">' +
-      '<input type="text" class="phone-num" value="' + num + '" placeholder="+90 5XX XXX XX XX" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:.85rem;background:var(--card-bg);color:var(--navy)">' +
+      '<input type="text" class="phone-num" value="' + num + '" placeholder="+90 5XX XXX XX XX" oninput="liveFormatPhone(this)" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:.85rem;background:var(--card-bg);color:var(--navy)">' +
       '<input type="text" class="phone-label" value="' + label + '" placeholder="Etiket (ör. Rezervasyon)" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:.85rem;background:var(--card-bg);color:var(--navy)">' +
     '</div>' +
     '<div style="display:flex;align-items:center;justify-content:space-between;">' +
@@ -5370,6 +5370,27 @@ function loadPhonesData(v) {
   }
 }
 
+function liveFormatPhone(el) {
+  var cursor = el.selectionStart;
+  var raw = el.value.replace(/[^\d+]/g, '');
+  // Baştaki 0'ı +90'a çevir
+  if (raw.startsWith('0')) raw = '+90' + raw.substring(1);
+  else if (raw.startsWith('90') && !raw.startsWith('+90')) raw = '+' + raw;
+  else if (raw.length > 0 && !raw.startsWith('+') && !raw.startsWith('9')) raw = '+90' + raw;
+  // Formatla: +90 5XX XXX XX XX
+  var digits = raw.replace(/\D/g, '');
+  var formatted = '';
+  if (digits.length <= 2) { formatted = '+' + digits; }
+  else if (digits.length <= 5) { formatted = '+' + digits.substring(0,2) + ' ' + digits.substring(2); }
+  else if (digits.length <= 8) { formatted = '+' + digits.substring(0,2) + ' ' + digits.substring(2,5) + ' ' + digits.substring(5); }
+  else if (digits.length <= 10) { formatted = '+' + digits.substring(0,2) + ' ' + digits.substring(2,5) + ' ' + digits.substring(5,8) + ' ' + digits.substring(8); }
+  else { formatted = '+' + digits.substring(0,2) + ' ' + digits.substring(2,5) + ' ' + digits.substring(5,8) + ' ' + digits.substring(8,10) + ' ' + digits.substring(10,12); }
+  var oldLen = el.value.length;
+  el.value = formatted;
+  // Cursor pozisyonunu koru
+  var diff = el.value.length - oldLen;
+  el.setSelectionRange(cursor + diff, cursor + diff);
+}
 function formatPhoneNumber(phone) {
   if (!phone) return '';
   // Tum bosluk, parantez, tire temizle
