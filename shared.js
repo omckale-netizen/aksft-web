@@ -2353,16 +2353,15 @@ function renderVenuePage(venueId) {
       .vp-rezv-header-icon{font-size:1.5rem;flex-shrink:0;}
       .vp-rezv-header-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:1rem;color:#1A2744;margin:0 0 3px;}
       .vp-rezv-header-sub{font-size:.78rem;color:#718096;margin:0;line-height:1.5;}
-      .vp-contact-card{background:#fff;border-radius:16px;padding:18px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 10px rgba(26,39,68,.06);flex-wrap:wrap;}
-      .vp-contact-icon{font-size:1.5rem;flex-shrink:0;}
-      .vp-contact-label{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#A0AEC0;margin-bottom:3px;}
+      .vp-contact-card{background:#fff;border-radius:16px;padding:16px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 10px rgba(26,39,68,.06);}
+      .vp-contact-icon{flex-shrink:0;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;}
+      .vp-contact-label{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#A0AEC0;margin-bottom:2px;}
       .vp-contact-val{font-size:.88rem;font-weight:600;color:#1A2744;}
       .vp-contact-acts{margin-left:auto;display:flex;align-items:center;gap:6px;flex-shrink:0;}
-      .vp-contact-btn-outline{display:inline-flex;align-items:center;padding:8px 16px;border-radius:10px;border:1.5px solid rgba(26,39,68,.15);font-size:.78rem;font-weight:700;color:#1A2744;text-decoration:none;white-space:nowrap;transition:all .2s;}
+      .vp-contact-btn-outline{display:inline-flex;align-items:center;gap:4px;padding:8px 14px;border-radius:10px;border:1.5px solid rgba(26,39,68,.15);font-size:.78rem;font-weight:700;color:#1A2744;text-decoration:none;white-space:nowrap;transition:all .2s;}
       .vp-contact-btn-outline:hover{background:#1A2744;color:#fff;}
-      .vp-wa-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;background:#25D366;color:#fff;font-size:.78rem;font-weight:700;text-decoration:none;white-space:nowrap;transition:all .2s;}
+      .vp-wa-btn{display:inline-flex;align-items:center;gap:4px;padding:8px 14px;border-radius:10px;background:#25D366;color:#fff;font-size:.78rem;font-weight:700;text-decoration:none;white-space:nowrap;transition:all .2s;}
       .vp-wa-btn:hover{background:#1CB85A;transform:translateY(-1px);}
-      @media(max-width:480px){.vp-contact-card{flex-wrap:wrap;}.vp-contact-acts{margin-left:0;width:100%;justify-content:flex-end;padding-top:8px;border-top:1px solid rgba(26,39,68,.06);}}
 
       /* ── Gallery ── */
       .vp-gallery{display:grid;gap:8px;border-radius:18px;overflow:hidden;}
@@ -2714,26 +2713,28 @@ function renderVenuePage(venueId) {
               var cleanNum = ph.number.replace(/\s/g,'');
               var phWaNum = ph.number.replace(/\D/g,'').replace(/^0/,'90');
               var phWaUrl = 'https://wa.me/' + phWaNum + '?text=' + waContactMsg;
+              var phoneIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
+              var waIconSmall = '<svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.528 5.855L0 24l6.335-1.52C8.034 23.46 9.98 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.846 0-3.584-.479-5.104-1.32l-.369-.21-3.76.902.948-3.668-.223-.374A9.944 9.944 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>';
               return ph.whatsapp ? `
             <div class="vp-contact-card vp-contact-wa">
-              <div class="vp-contact-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.528 5.855L0 24l6.335-1.52C8.034 23.46 9.98 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.846 0-3.584-.479-5.104-1.32l-.369-.21-3.76.902.948-3.668-.223-.374A9.944 9.944 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg></div>
-              <div>
-                <div class="vp-contact-label">${ph.label ? escHtml(ph.label) + ' (WhatsApp)' : 'WhatsApp'}</div>
-                <div class="vp-contact-val">${ph.number}</div>
-              </div>
-              <div class="vp-contact-acts">
-                <a href="tel:${cleanNum}" class="vp-contact-btn-outline" onclick="event.preventDefault();if(window.trackAction)trackAction('${escAttr(v.id)}','call');setTimeout(()=>{window.location.href=this.href},300)">Ara</a>
-                <a href="${phWaUrl}" target="_blank" rel="noopener" class="vp-wa-btn" onclick="if(window.trackAction)trackAction('${escAttr(v.id)}','whatsapp');">Yaz</a>
-              </div>
-            </div>` : `
-            <div class="vp-contact-card">
-              <div class="vp-contact-icon">📞</div>
-              <div>
+              <div class="vp-contact-icon" style="background:rgba(26,39,68,.06);color:#1A2744;">${phoneIcon}</div>
+              <div style="flex:1;min-width:0;">
                 <div class="vp-contact-label">${ph.label ? escHtml(ph.label) : 'Telefon'}</div>
                 <div class="vp-contact-val">${ph.number}</div>
               </div>
               <div class="vp-contact-acts">
-                <a href="tel:${cleanNum}" class="vp-contact-btn-outline" onclick="event.preventDefault();if(window.trackAction)trackAction('${escAttr(v.id)}','call');setTimeout(()=>{window.location.href=this.href},300)">Ara</a>
+                <a href="tel:${cleanNum}" class="vp-contact-btn-outline" onclick="event.preventDefault();if(window.trackAction)trackAction('${escAttr(v.id)}','call');setTimeout(()=>{window.location.href=this.href},300)">📞 Ara</a>
+                <a href="${phWaUrl}" target="_blank" rel="noopener" class="vp-wa-btn" onclick="if(window.trackAction)trackAction('${escAttr(v.id)}','whatsapp');">${waIconSmall} Yaz</a>
+              </div>
+            </div>` : `
+            <div class="vp-contact-card">
+              <div class="vp-contact-icon" style="background:rgba(26,39,68,.06);color:#1A2744;">${phoneIcon}</div>
+              <div style="flex:1;min-width:0;">
+                <div class="vp-contact-label">${ph.label ? escHtml(ph.label) : 'Telefon'}</div>
+                <div class="vp-contact-val">${ph.number}</div>
+              </div>
+              <div class="vp-contact-acts">
+                <a href="tel:${cleanNum}" class="vp-contact-btn-outline" onclick="event.preventDefault();if(window.trackAction)trackAction('${escAttr(v.id)}','call');setTimeout(()=>{window.location.href=this.href},300)">📞 Ara</a>
               </div>
             </div>`;
             }).join('')}
