@@ -226,7 +226,7 @@
 
     <!-- Route Cards — dinamik, mobilde 2'li kompakt grid -->
     <div id="home-route-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;"></div>
-    <style>@media(max-width:640px){#home-route-cards{grid-template-columns:repeat(2,1fr) !important;gap:10px !important;}#home-route-cards .route-card{border-radius:14px;}#home-route-cards .route-card>div:nth-child(2){height:90px !important;padding:14px 16px !important;}#home-route-cards .route-card>div:nth-child(2) div:first-child{font-size:2rem !important;}#home-route-cards .route-card>div:nth-child(3){padding:14px 14px 16px !important;}#home-route-cards .route-title{font-size:.88rem !important;margin-bottom:6px !important;}#home-route-cards .route-desc{display:none !important;}#home-route-cards .route-meta{font-size:.62rem !important;gap:6px !important;padding:8px 0 !important;margin-bottom:10px !important;}#home-route-cards .route-meta>div{white-space:nowrap;}#home-route-cards .route-btn{font-size:.65rem !important;padding:6px 10px !important;}#home-route-cards .route-number{font-size:.55rem !important;}#home-route-cards .route-tag{font-size:.5rem !important;padding:2px 6px !important;}#rotalar,#yerler,#mekanlar,#koyler{padding-top:56px !important;padding-bottom:56px !important;}}</style>
+    <style>@media(max-width:640px){#home-route-cards{grid-template-columns:repeat(2,1fr) !important;gap:10px !important;}#home-route-cards .route-card{border-radius:14px;cursor:pointer;}#home-route-cards .route-card-glow{display:none;}#home-route-cards .route-card>div:nth-child(2){height:70px !important;padding:12px 14px !important;gap:10px !important;}#home-route-cards .route-card>div:nth-child(2)>div:first-child{font-size:1.6rem !important;}#home-route-cards .route-card>div:nth-child(2)>div:last-child{display:none !important;}#home-route-cards .route-number{display:none !important;}#home-route-cards .route-tag{display:none !important;}#home-route-cards .route-card>div:nth-child(3){padding:10px 12px 12px !important;}#home-route-cards .route-title{font-size:.82rem !important;margin-bottom:4px !important;line-height:1.2 !important;}#home-route-cards .route-desc{display:none !important;}#home-route-cards .route-meta{font-size:.58rem !important;gap:6px !important;padding:6px 0 !important;margin-bottom:0 !important;border:none !important;}#home-route-cards .route-meta>div{white-space:nowrap;}#home-route-cards .route-card>div:nth-child(3)>div:last-child{display:none !important;}#rotalar,#yerler,#mekanlar,#koyler{padding-top:56px !important;padding-bottom:56px !important;}}</style>
 
 
     <!-- Diğer rotalar + CTA (dinamik) -->
@@ -426,7 +426,7 @@
 
 <script src="firebase-loader.js?v=4"></script>
 <script src="data.js?v=2"></script>
-<script src="shared.min.js?v=232"></script>
+<script src="shared.min.js?v=233"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: true });
@@ -523,7 +523,7 @@ function pageInit() {
       var bg = r.headerBg || c.headerBg;
       var num = String(i + 1).padStart(2, '0');
       var durak = r.stops ? r.stops.length + ' durak' : '';
-      return '<div class="route-card fade-up" tabindex="0" role="article" aria-label="' + r.title + '" style="animation-delay:' + (i * 0.08) + 's;">' +
+      return '<div class="route-card fade-up" tabindex="0" role="article" aria-label="' + r.title + '" style="animation-delay:' + (i * 0.08) + 's;" onclick="window.location.href=\'rotalar/rota-detay.html?id=' + r.id + '\'">' +
         '<div class="route-card-glow" style="background:' + (r.glowColor || c.glow) + ';"></div>' +
         '<div style="height:140px;background:' + bg + ';border-bottom:1px solid rgba(245,237,224,0.06);position:relative;overflow:hidden;display:flex;align-items:center;padding:24px 28px;gap:16px;">' +
           '<div style="font-size:3.5rem;line-height:1;flex-shrink:0;">' + (r.emoji || '🗺') + '</div>' +
