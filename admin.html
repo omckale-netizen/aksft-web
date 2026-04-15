@@ -1700,9 +1700,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                 <button class="btn btn-sm btn-secondary msg-tab" onclick="setMsgFilter('sent',this)">📤 Gönderilenler <span class="msg-tab-count" id="msg-count-sent"></span></button>
               </div>
             </div>
-            <div style="padding:10px 14px 0;flex-shrink:0;display:flex;gap:8px">
-              <input type="text" class="msg-search" id="msg-search" placeholder="Mesajlarda ara..." oninput="renderMessageList()" style="flex:1">
-              <select class="msg-cat-filter" id="msg-cat-filter" onchange="renderMessageList()" style="width:130px">
+            <div style="padding:10px 14px 0;flex-shrink:0;display:flex;gap:8px;flex-wrap:wrap">
+              <input type="text" class="msg-search" id="msg-search" placeholder="Mesajlarda ara..." oninput="renderMessageList()" style="flex:1;min-width:140px">
+              <select class="msg-cat-filter" id="msg-cat-filter" onchange="renderMessageList()" style="width:120px">
                 <option value="">Tüm Konular</option>
                 <option value="Genel">Genel</option>
                 <option value="Öneri">Öneri</option>
@@ -1711,6 +1711,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                 <option value="Mekan Ekleme Talebi">Mekan Ekleme</option>
                 <option value="Hata Bildirimi">Hata Bildirimi</option>
               </select>
+              <select class="msg-cat-filter" id="msg-label-filter" onchange="renderMessageList()" style="width:120px">
+                <option value="">Tüm Etiketler</option>
+                <option value="cevaplanacak">🔴 Cevaplanacak</option>
+                <option value="beklemede">🟡 Beklemede</option>
+                <option value="tamamlandi">🟢 Tamamlandı</option>
+                <option value="none">Etiketsiz</option>
+              </select>
+              <button class="btn btn-sm btn-secondary" onclick="exportMessages()" title="Dışa Aktar" style="font-size:.72rem;padding:4px 10px">📥 CSV</button>
             </div>
             <div id="messages-list" style="flex:1;overflow-y:auto;max-height:calc(100vh - 320px)"></div>
           </div>
@@ -3947,6 +3955,7 @@ function renderMessageList() {
   updateMsgTabCounts();
   const searchQ = (document.getElementById('msg-search')?.value || '').toLowerCase().trim();
   const catFilter = document.getElementById('msg-cat-filter')?.value || '';
+  const labelFilter = document.getElementById('msg-label-filter')?.value || '';
 
   let msgs = allMessages;
 
@@ -3966,6 +3975,10 @@ function renderMessageList() {
 
   // Kategori filtresi
   if (catFilter) msgs = msgs.filter(m => (m.subject || 'Genel') === catFilter);
+
+  // Etiket filtresi
+  if (labelFilter === 'none') msgs = msgs.filter(m => !m.label);
+  else if (labelFilter) msgs = msgs.filter(m => m.label === labelFilter);
 
   // Arama filtresi
   if (searchQ) {
@@ -4000,10 +4013,12 @@ function renderMessageList() {
     const dateStr = date ? date.toLocaleDateString('tr-TR', { day:'2-digit', month:'short' }) : '';
     const timeStr = date ? date.toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' }) : '';
     const catClass = getMsgCatClass(m.subject);
+    var labelIcons = { cevaplanacak: '🔴', beklemede: '🟡', tamamlandi: '🟢' };
+    var labelIcon = m.label && labelIcons[m.label] ? '<span title="' + m.label + '" style="font-size:.6rem">' + labelIcons[m.label] + '</span>' : '';
     return '<div class="msg-item ' + (m.read ? '' : 'unread') + (m.trashed ? ' trashed' : '') + '" onclick="openMessage(\'' + m._id + '\')" data-id="' + m._id + '">' +
       '<div class="msg-dot ' + (m.read ? 'read' : 'unread') + '"></div>' +
       '<div class="msg-info">' +
-        '<div class="msg-name">' + (m.name || 'İsimsiz') + '</div>' +
+        '<div class="msg-name">' + (m.name || 'İsimsiz') + ' ' + labelIcon + '</div>' +
         '<span class="msg-cat-badge ' + catClass + '">' + (m.subject || 'Genel') + '</span>' +
         '<div class="msg-preview">' + (m.message || '').substring(0, 80) + '</div>' +
       '</div>' +
@@ -4099,6 +4114,7 @@ function openSentMail(id) {
 
   document.getElementById('msg-detail-actions').innerHTML =
     '<button class="btn btn-sm btn-secondary" onclick="openComposeMail(\'' + toFirst + '\')">↩ Tekrar Gönder</button>' +
+    '<button class="btn btn-sm btn-secondary" onclick="forwardSentMail(\'' + id + '\')">➡ İlet</button>' +
     '<button class="btn btn-sm btn-danger" style="margin-left:auto" onclick="deleteSentMail(\'' + id + '\')">🗑 Sil</button>';
 
   if (window.innerWidth <= 900) document.getElementById('msg-close-mobile').style.display = '';
@@ -4196,9 +4212,15 @@ async function openMessage(docId) {
       ? '<button class="btn btn-primary btn-sm" onclick="restoreMessage(\'' + docId + '\')">↩ Geri Yükle</button>' +
         '<button class="btn btn-danger btn-sm" onclick="permanentDeleteMessage(\'' + docId + '\')">Kalıcı Sil</button>'
       : '<button class="btn btn-primary btn-sm" onclick="openReplyMail(\'' + docId + '\')">✉️ Yanıtla</button>' +
-        '<a href="mailto:' + (m.email || '') + '?subject=Re: ' + encodeURIComponent(m.subject || 'Mesajınız') + '" class="btn btn-secondary btn-sm" title="E-posta istemcisi ile aç">📧 Mail ile</a>' +
+        '<button class="btn btn-secondary btn-sm" onclick="openComposeMail(\'' + (m.email || '') + '\')">📝 Yeni Mail</button>' +
         (m.phone ? '<a href="tel:' + m.phone.replace(/\s/g,'') + '" class="btn btn-secondary btn-sm">📞 Ara</a>' : '') +
-        '<button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="trashMessage(\'' + docId + '\')">🗑 Sil</button>'
+        '<select onchange="setMsgLabel(\'' + docId + '\',this.value)" style="padding:5px 10px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:6px;font-size:.72rem;background:var(--input-bg,#fff);color:var(--text);cursor:pointer;margin-left:auto">' +
+          '<option value=""' + (!m.label ? ' selected' : '') + '>Etiket</option>' +
+          '<option value="cevaplanacak"' + (m.label === 'cevaplanacak' ? ' selected' : '') + '>🔴 Cevaplanacak</option>' +
+          '<option value="beklemede"' + (m.label === 'beklemede' ? ' selected' : '') + '>🟡 Beklemede</option>' +
+          '<option value="tamamlandi"' + (m.label === 'tamamlandi' ? ' selected' : '') + '>🟢 Tamamlandı</option>' +
+        '</select>' +
+        '<button class="btn btn-danger btn-sm" onclick="trashMessage(\'' + docId + '\')">🗑</button>'
     );
 
   // Mobilde geri butonunu göster
@@ -4631,6 +4653,49 @@ function sendWelcomeMailToVenue(id) {
   if (confirm('✉️ "' + v.title + '" mekan sahibine hoşgeldin maili gönderilecek.\n\nAlıcı: ' + v.ownerEmail + '\n\nDevam?')) {
     sendVenueWelcomeMail(v);
   }
+}
+function exportMessages() {
+  var tab = msgFilter;
+  var rows = [];
+  if (tab === 'sent') {
+    rows.push(['Tarih', 'Alıcı', 'Konu', 'İçerik']);
+    allSentMails.forEach(function(s) {
+      rows.push([s.timestamp || '', (s.to || []).join('; '), s.subject || '', (s.body || '').replace(/\n/g, ' ').substring(0, 500)]);
+    });
+  } else {
+    rows.push(['Tarih', 'Ad', 'E-posta', 'Telefon', 'Konu', 'Mesaj', 'Etiket']);
+    var msgs = allMessages.filter(function(m) { return tab === 'trash' ? m.trashed : !m.trashed; });
+    msgs.forEach(function(m) {
+      var labels = { cevaplanacak: 'Cevaplanacak', beklemede: 'Beklemede', tamamlandi: 'Tamamlandı' };
+      rows.push([m.timestamp || '', m.name || '', m.email || '', m.phone || '', m.subject || '', (m.message || '').replace(/\n/g, ' ').substring(0, 500), labels[m.label] || '']);
+    });
+  }
+  var csv = rows.map(function(r) { return r.map(function(c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(','); }).join('\n');
+  var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (tab === 'sent' ? 'gonderilenler' : 'mesajlar') + '_' + new Date().toISOString().split('T')[0] + '.csv';
+  a.click();
+  showToast('📥 CSV indirildi', 'success');
+}
+function forwardSentMail(id) {
+  var s = allSentMails.find(function(x) { return x._id === id; });
+  if (!s) return;
+  openComposeMail();
+  setTimeout(function() {
+    document.getElementById('compose-subject').value = 'Fwd: ' + (s.subject || '');
+    document.getElementById('compose-body').value = '--- İletilen Mesaj ---\nKonu: ' + (s.subject || '') + '\nAlıcı: ' + (s.to || []).join(', ') + '\nTarih: ' + (s.timestamp ? new Date(s.timestamp).toLocaleString('tr-TR') : '') + '\n\n' + (s.body || '');
+  }, 100);
+}
+async function setMsgLabel(docId, label) {
+  var m = allMessages.find(function(x) { return x._id === docId; });
+  if (!m) return;
+  m.label = label || null;
+  var update = label ? { label: label } : { label: firebase.firestore.FieldValue.delete() };
+  await db.collection('messages').doc(docId).update(update);
+  renderMessageList();
+  var labels = { cevaplanacak: '🔴 Cevaplanacak', beklemede: '🟡 Beklemede', tamamlandi: '🟢 Tamamlandı' };
+  showToast(label ? labels[label] + ' olarak işaretlendi' : 'Etiket kaldırıldı', 'success');
 }
 async function trashMessage(docId) {
   const m = allMessages.find(x => x._id === docId);
