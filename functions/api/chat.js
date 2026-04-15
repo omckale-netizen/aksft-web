@@ -243,7 +243,17 @@ ${siteContext}`;
       }
     } catch(e) {}
 
-    return new Response(JSON.stringify({ reply }), {
+    // Kalan hak bilgisini cevaba ekle
+    let remaining = 10;
+    try {
+      if (env.CHAT_KV) {
+        const ipDayKey2 = 'ip_day_' + ip + '_' + today;
+        const used = parseInt(await env.CHAT_KV.get(ipDayKey2) || '0');
+        remaining = Math.max(0, 10 - used);
+      }
+    } catch(e) {}
+
+    return new Response(JSON.stringify({ reply, remaining }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

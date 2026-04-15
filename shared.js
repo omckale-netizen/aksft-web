@@ -4480,13 +4480,29 @@ function renderPlacePage(placeId) {
         addMsg(data.reply, 'bot');
         aiChatMemory.push({ role: 'assistant', content: data.reply });
         if (aiChatMemory.length > 8) aiChatMemory = aiChatMemory.slice(-8);
-        state.count++;
+        // Server'dan gelen kalan hak ile senkronize et
+        if (data.remaining !== undefined) {
+          state.count = AI_DAILY_LIMIT - data.remaining;
+        } else {
+          state.count++;
+        }
         saveAiState(state);
         updateLimit();
       } else {
         var errMsg = data.error || 'Bir hata oluştu.';
         if (data.creditError) errMsg = 'Asistan şu an hizmet veremiyor. Lütfen daha sonra tekrar deneyin. 🙏';
-        if (data.limitReached) errMsg = 'Asistan bugün çok yoğun çalıştı, yarın tekrar hizmetinizde! 🧭';
+        if (data.limitReached) {
+          state.count = AI_DAILY_LIMIT;
+          saveAiState(state);
+          updateLimit();
+          addMsg('Günlük 10 soruluk keşif hakkınız doldu ama merak etmeyin 😊 Yarın yeni sorularınızla tekrar buradayım. O zamana kadar Instagram\'dan bizi takip edin! 🧭', 'bot');
+          var limitBody2 = document.getElementById('ai-chat-body');
+          var igBtn2 = document.createElement('div');
+          igBtn2.style.cssText = 'align-self:flex-start;margin-top:-4px;';
+          igBtn2.innerHTML = '<a href="https://www.instagram.com/assosukesfet/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:12px;background:linear-gradient(135deg,#833AB4,#E1306C,#F77737);color:#fff;font-size:.78rem;font-weight:700;text-decoration:none;">📸 Takip Et</a>';
+          limitBody2.appendChild(igBtn2);
+          return;
+        }
         addMsg(errMsg, 'bot');
       }
     } catch(err) {
