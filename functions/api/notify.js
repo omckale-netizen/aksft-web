@@ -55,7 +55,7 @@ export async function onRequestPost(context) {
     } catch(e) {}
   }
 
-  const allowedTypes = ['login', 'login_blocked', 'message', 'backup', 'premium', 'security', 'password'];
+  const allowedTypes = ['login', 'login_blocked', 'message', 'venue_request', 'backup', 'premium', 'security', 'password'];
   if (!allowedTypes.includes(type)) {
     return new Response(JSON.stringify({ error: 'Unknown type' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
   }
@@ -117,6 +117,18 @@ export async function onRequestPost(context) {
     if (data.phone) text += '\u{1F4DE} ' + sanitize(data.phone, 30) + '\n';
     text += '\u{1F4CB} Konu: ' + sanitize(data.subject || 'Genel', 50) + '\n\n';
     text += '\u{1F4AC} ' + sanitize(data.message, 500);
+
+  } else if (type === 'venue_request') {
+    text = '━━━━━━━━━━━━━━━━━━━━\n';
+    text += '\u{1F3EA} YENI MEKAN BASVURUSU\n';
+    text += '━━━━━━━━━━━━━━━━━━━━\n\n';
+    text += '\u{1F3E0} Mekan: ' + sanitize(data.venueTitle, 100) + '\n';
+    text += '\u{1F4CD} Konum: ' + sanitize(data.location, 100) + '\n';
+    text += '\u{1F4C2} Kategori: ' + sanitize(data.category, 50) + '\n\n';
+    text += '\u{1F464} Yetkili: ' + sanitize(data.name, 100) + '\n';
+    text += '\u{1F4E7} ' + sanitize(data.email, 100) + '\n';
+    if (data.phone) text += '\u{1F4DE} ' + sanitize(data.phone, 30) + '\n';
+    text += '\n\u{1F449} Admin panelden inceleyin: Mekan Talepleri';
 
   } else if (type === 'backup') {
     text = '━━━━━━━━━━━━━━━━━━━━\n';
@@ -228,6 +240,58 @@ export async function onRequestPost(context) {
           })
         });
       } catch(mailErr) { /* mail hatası telegram'ı engellemesin */ }
+    }
+
+    // Mekan ekleme talebi — başvuru sahibine otomatik bilgilendirme maili
+    if (type === 'venue_request' && data.email && env.RESEND_API_KEY) {
+      try {
+        const venueName = sanitize(data.venueTitle, 100) || 'Mekanınız';
+        const ownerName = sanitize(data.name, 50) || 'Değerli İşletme Sahibi';
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: "Assos'u Keşfet <info@assosukesfet.com>",
+            to: [data.email],
+            subject: 'Mekan Ekleme Talebiniz Alındı — ' + venueName,
+            reply_to: 'info@assosukesfet.com',
+            html: `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body style="margin:0;padding:0;background:#F0EDE8;font-family:'Segoe UI',Tahoma,Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+<div style="max-width:600px;margin:0 auto;padding:24px 16px;">
+  <div style="background:linear-gradient(135deg,#1A2744 0%,#243352 50%,#2D3E5F 100%);border-radius:16px 16px 0 0;padding:36px 32px 32px;text-align:center;">
+    <div style="display:inline-block;width:48px;height:48px;border-radius:14px;background:rgba(196,82,26,.9);color:#fff;font-size:1.5rem;line-height:48px;text-align:center;margin-bottom:14px;">&#x1F3DB;</div>
+    <h1 style="margin:0;font-size:1.45rem;color:#ffffff;font-weight:800;">Assos'u Ke\u015ffet</h1>
+    <p style="margin:6px 0 0;font-size:.78rem;color:rgba(255,255,255,.5);">Assos'un Dijital Ke\u015fif Rehberi</p>
+    <div style="width:40px;height:3px;background:rgba(196,82,26,.7);border-radius:2px;margin:16px auto 0;"></div>
+  </div>
+  <div style="background:#ffffff;padding:36px 32px;border-left:1px solid #EBE7E1;border-right:1px solid #EBE7E1;">
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="display:inline-block;width:52px;height:52px;border-radius:50%;background:rgba(56,161,105,.08);line-height:52px;font-size:1.5rem;">&#x2705;</div>
+    </div>
+    <h2 style="text-align:center;margin:0 0 8px;font-size:1.15rem;color:#1A2744;">Mekan Ekleme Talebiniz Al\u0131nd\u0131!</h2>
+    <p style="text-align:center;margin:0 0 28px;font-size:.88rem;color:#718096;">Ekibimiz ba\u015fvurunuzu incelemeye ba\u015flad\u0131.</p>
+    <p style="font-size:.95rem;line-height:1.7;color:#1A2744;">Merhaba <strong>${ownerName}</strong>,</p>
+    <p style="font-size:.9rem;line-height:1.7;color:#4A5568;"><strong>${venueName}</strong> i\u00e7in mekan ekleme talebiniz ba\u015far\u0131yla al\u0131nd\u0131. Ekibimiz ba\u015fvurunuzu inceleyecek ve <strong>1-3 i\u015f g\u00fcn\u00fc i\u00e7inde</strong> size d\u00f6n\u00fc\u015f yapacakt\u0131r.</p>
+    <div style="background:#FAF7F2;border-radius:12px;padding:20px 22px;margin:24px 0;border-left:4px solid #C4521A;">
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><td style="font-size:.72rem;color:#A0AEC0;padding:4px 0;font-weight:600;width:70px;">Mekan</td><td style="font-size:.85rem;color:#1A2744;font-weight:600;">${venueName}</td></tr>
+        <tr><td style="font-size:.72rem;color:#A0AEC0;padding:4px 0;font-weight:600;">Kategori</td><td style="font-size:.85rem;color:#1A2744;">${sanitize(data.category, 50)}</td></tr>
+        <tr><td style="font-size:.72rem;color:#A0AEC0;padding:4px 0;font-weight:600;">Konum</td><td style="font-size:.85rem;color:#1A2744;">${sanitize(data.location, 100)}</td></tr>
+      </table>
+    </div>
+    <p style="font-size:.85rem;line-height:1.7;color:#4A5568;">Onay s\u00fcrecinde ek bilgi gerekirse sizinle ileti\u015fime ge\u00e7ece\u011fiz. Sorular\u0131n\u0131z i\u00e7in <a href="mailto:info@assosukesfet.com" style="color:#C4521A;">info@assosukesfet.com</a> adresine yazabilirsiniz.</p>
+  </div>
+  <div style="background:#FAFAF8;padding:24px 32px;border-left:1px solid #EBE7E1;border-right:1px solid #EBE7E1;border-top:2px solid #C4521A;">
+    <p style="margin:0 0 2px;font-size:.92rem;font-weight:700;color:#1A2744;">&#x1F3DB; Assos'u Ke\u015ffet</p>
+    <p style="margin:0 0 10px;font-size:.7rem;color:#A0AEC0;">Assos'un Dijital Ke\u015fif Rehberi</p>
+    <table style="border-collapse:collapse;"><tr><td style="font-size:.75rem;color:#A0AEC0;padding:3px 8px 3px 0;">&#x2709;</td><td style="font-size:.75rem;"><a href="mailto:info@assosukesfet.com" style="color:#C4521A;text-decoration:none;">info@assosukesfet.com</a></td></tr><tr><td style="font-size:.75rem;color:#A0AEC0;padding:3px 8px 3px 0;">&#x1F310;</td><td style="font-size:.75rem;"><a href="https://assosukesfet.com" style="color:#C4521A;text-decoration:none;">assosukesfet.com</a></td></tr><tr><td style="font-size:.75rem;color:#A0AEC0;padding:3px 8px 3px 0;">&#x1F4F8;</td><td style="font-size:.75rem;"><a href="https://instagram.com/assosukesfet" style="color:#C4521A;text-decoration:none;">@assosukesfet</a></td></tr></table>
+  </div>
+  <div style="background:linear-gradient(135deg,#1A2744,#243352);border-radius:0 0 16px 16px;padding:22px 32px;text-align:center;">
+    <p style="margin:0;font-size:.68rem;color:rgba(255,255,255,.35);">&copy; ${new Date().getFullYear()} Assos'u Ke\u015ffet &bull; <a href="https://assosukesfet.com" style="color:rgba(255,255,255,.5);text-decoration:none;">assosukesfet.com</a></p>
+  </div>
+</div></body></html>`
+          })
+        });
+      } catch(mailErr) {}
     }
 
     return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });

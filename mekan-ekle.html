@@ -523,12 +523,13 @@ async function meSubmit() {
       fetch('/api/notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'message', data: {
+        body: JSON.stringify({ type: 'venue_request', data: {
           name: document.getElementById('me-ownerName').value.trim(),
           email: document.getElementById('me-ownerEmail').value.trim(),
           phone: document.getElementById('me-ownerPhone').value.trim(),
-          subject: 'Mekan Ekleme Talebi',
-          message: '🏪 Yeni mekan başvurusu!\n\nMekan: ' + document.getElementById('me-title').value.trim() + '\nKategori: ' + document.getElementById('me-category').value + '\nKonum: ' + document.getElementById('me-location').value + '\n\nAdmin panelden inceleyin.'
+          venueTitle: document.getElementById('me-title').value.trim(),
+          category: document.getElementById('me-category').value,
+          location: document.getElementById('me-location').value
         }})
       });
     } catch(e) {}
