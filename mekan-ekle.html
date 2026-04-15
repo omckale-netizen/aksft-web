@@ -526,17 +526,18 @@ function renderImgs(){
 }
 
 // Collect data
+function san(s){return(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function collectData(){
   var phones=[];document.querySelectorAll('#phones .me-phone').forEach(function(row){var n=row.querySelector('.ph-num').value.trim();if(n)phones.push({number:n,label:row.querySelector('.ph-label').value.trim(),whatsapp:row.querySelector('.ph-wa').checked});});
   var cat=document.getElementById('f-category').value;
   var wh=[];if(cat!=='konaklama'){document.querySelectorAll('#wh-grid .me-wh').forEach(function(row){wh.push({days:row.querySelector('.me-wh-day').textContent,open:row.querySelector('.wh-open').value,close:row.querySelector('.wh-close').value,closed:row.querySelector('.wh-cb').checked});});}
-  var rooms=[];if(cat==='konaklama'){document.querySelectorAll('#rooms .me-phone').forEach(function(row){rooms.push({name:row.querySelector('.rm-name').value.trim(),bed:(row.querySelector('.rm-bed')||{}).value||'',capacity:(row.querySelector('.rm-cap')||{}).value||'',size:(row.querySelector('.rm-size')||{}).value||'',view:(row.querySelector('.rm-view')||{}).value||''});});}
+  var rooms=[];if(cat==='konaklama'){document.querySelectorAll('#rooms .me-phone').forEach(function(row){rooms.push({name:san(row.querySelector('.rm-name').value.trim()),bed:(row.querySelector('.rm-bed')||{}).value||'',capacity:(row.querySelector('.rm-cap')||{}).value||'',size:(row.querySelector('.rm-size')||{}).value||'',view:(row.querySelector('.rm-view')||{}).value||''});});}
   var facilities=[];if(cat==='konaklama'){document.querySelectorAll('#facilities input:checked').forEach(function(cb){facilities.push(cb.value);});}
   return {
-    ownerName:document.getElementById('f-ownerName').value.trim(),ownerEmail:document.getElementById('f-ownerEmail').value.trim(),ownerPhone:document.getElementById('f-ownerPhone').value.trim(),
-    title:document.getElementById('f-title').value.trim(),category:cat,location:document.getElementById('f-location').value,address:document.getElementById('f-address').value.trim(),mapsLink:document.getElementById('f-mapsLink').value.trim(),
-    shortDesc:document.getElementById('f-shortDesc').value.trim(),description:document.getElementById('f-description').value.trim(),
-    phones:phones,tags:selTags.slice(),website:document.getElementById('f-website').value.trim(),instagram:document.getElementById('f-instagram').value.trim(),
+    ownerName:san(document.getElementById('f-ownerName').value.trim()),ownerEmail:document.getElementById('f-ownerEmail').value.trim(),ownerPhone:document.getElementById('f-ownerPhone').value.trim(),
+    title:san(document.getElementById('f-title').value.trim()),category:cat,location:document.getElementById('f-location').value,address:san(document.getElementById('f-address').value.trim()),mapsLink:document.getElementById('f-mapsLink').value.trim(),
+    shortDesc:san(document.getElementById('f-shortDesc').value.trim()),description:san(document.getElementById('f-description').value.trim()),
+    phones:phones.map(function(p){return{number:p.number,label:san(p.label),whatsapp:p.whatsapp};}),tags:selTags.slice(),website:document.getElementById('f-website').value.trim(),instagram:san(document.getElementById('f-instagram').value.trim()),
     weeklyHours:wh,checkin:cat==='konaklama'?document.getElementById('f-checkin').value:'',checkout:cat==='konaklama'?document.getElementById('f-checkout').value:'',
     rooms:rooms,facilities:facilities,
     seasonal:document.getElementById('f-seasonal').checked,seasonStart:document.getElementById('f-seasonStart').value,seasonEnd:document.getElementById('f-seasonEnd').value
