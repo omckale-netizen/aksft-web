@@ -242,20 +242,21 @@ export async function onRequestPost(context) {
       } catch(mailErr) { /* mail hatası telegram'ı engellemesin */ }
     }
 
-    // Mekan ekleme talebi — başvuru sahibine otomatik bilgilendirme maili
+    // Mekan ekleme talebi — başvuru sahibine kurumsal bilgilendirme maili
     if (type === 'venue_request' && data.email && env.RESEND_API_KEY) {
       try {
-        const venueName = sanitize(data.venueTitle, 100) || 'Mekanınız';
-        const ownerName = sanitize(data.name, 50) || 'Değerli İşletme Sahibi';
+        const venueName = sanitize(data.venueTitle, 100) || 'Mekan\u0131n\u0131z';
+        const ownerName = sanitize(data.name, 50) || 'De\u011ferli \u0130\u015fletme Sahibi';
+        const refNo = 'A-' + Date.now().toString(36).toUpperCase().slice(-6);
         await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: { 'Authorization': 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            from: "Assos'u Keşfet <info@assosukesfet.com>",
+            from: "Assos'u Ke\u015ffet <info@assosukesfet.com>",
             to: [data.email],
-            subject: 'Mekan Ekleme Talebiniz Alındı — ' + venueName,
+            subject: 'Ba\u015fvurunuz Al\u0131nd\u0131 \u2014 ' + venueName + ' | Assos\'u Ke\u015ffet',
             reply_to: 'info@assosukesfet.com',
-            html: `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body style="margin:0;padding:0;background:#F0EDE8;font-family:'Segoe UI',Tahoma,Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+            html: `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body style="margin:0;padding:0;background:#F0EDE8;font-family:'Segoe UI',Tahoma,Arial,sans-serif;">
 <div style="max-width:600px;margin:0 auto;padding:24px 16px;">
   <div style="background:linear-gradient(135deg,#1A2744 0%,#243352 50%,#2D3E5F 100%);border-radius:16px 16px 0 0;padding:36px 32px 32px;text-align:center;">
     <div style="display:inline-block;width:48px;height:48px;border-radius:14px;background:rgba(196,82,26,.9);color:#fff;font-size:1.5rem;line-height:48px;text-align:center;margin-bottom:14px;">&#x1F3DB;</div>
@@ -267,18 +268,33 @@ export async function onRequestPost(context) {
     <div style="text-align:center;margin-bottom:24px;">
       <div style="display:inline-block;width:52px;height:52px;border-radius:50%;background:rgba(56,161,105,.08);line-height:52px;font-size:1.5rem;">&#x2705;</div>
     </div>
-    <h2 style="text-align:center;margin:0 0 8px;font-size:1.15rem;color:#1A2744;">Mekan Ekleme Talebiniz Al\u0131nd\u0131!</h2>
-    <p style="text-align:center;margin:0 0 28px;font-size:.88rem;color:#718096;">Ekibimiz ba\u015fvurunuzu incelemeye ba\u015flad\u0131.</p>
-    <p style="font-size:.95rem;line-height:1.7;color:#1A2744;">Merhaba <strong>${ownerName}</strong>,</p>
-    <p style="font-size:.9rem;line-height:1.7;color:#4A5568;"><strong>${venueName}</strong> i\u00e7in mekan ekleme talebiniz ba\u015far\u0131yla al\u0131nd\u0131. Ekibimiz ba\u015fvurunuzu inceleyecek ve <strong>1-3 i\u015f g\u00fcn\u00fc i\u00e7inde</strong> size d\u00f6n\u00fc\u015f yapacakt\u0131r.</p>
+    <h2 style="text-align:center;margin:0 0 8px;font-size:1.15rem;color:#1A2744;">Ba\u015fvurunuz Ba\u015far\u0131yla Al\u0131nd\u0131</h2>
+    <p style="text-align:center;margin:0 0 6px;font-size:.88rem;color:#718096;">Referans No: <strong style="color:#C4521A;letter-spacing:.05em">${refNo}</strong></p>
+    <p style="text-align:center;margin:0 0 28px;font-size:.72rem;color:#A0AEC0;">\u0130leti\u015fimlerinizde bu numaray\u0131 kullanabilirsiniz.</p>
+    <p style="font-size:.95rem;line-height:1.7;color:#1A2744;">Say\u0131n <strong>${ownerName}</strong>,</p>
+    <p style="font-size:.9rem;line-height:1.7;color:#4A5568;"><strong>${venueName}</strong> mekan\u0131n\u0131z i\u00e7in Assos'u Ke\u015ffet platformuna yapt\u0131\u011f\u0131n\u0131z ba\u015fvuru taraf\u0131m\u0131za ula\u015fm\u0131\u015ft\u0131r.</p>
     <div style="background:#FAF7F2;border-radius:12px;padding:20px 22px;margin:24px 0;border-left:4px solid #C4521A;">
       <table style="width:100%;border-collapse:collapse;">
-        <tr><td style="font-size:.72rem;color:#A0AEC0;padding:4px 0;font-weight:600;width:70px;">Mekan</td><td style="font-size:.85rem;color:#1A2744;font-weight:600;">${venueName}</td></tr>
+        <tr><td style="font-size:.72rem;color:#A0AEC0;padding:4px 0;font-weight:600;width:80px;">Mekan Ad\u0131</td><td style="font-size:.85rem;color:#1A2744;font-weight:600;">${venueName}</td></tr>
         <tr><td style="font-size:.72rem;color:#A0AEC0;padding:4px 0;font-weight:600;">Kategori</td><td style="font-size:.85rem;color:#1A2744;">${sanitize(data.category, 50)}</td></tr>
         <tr><td style="font-size:.72rem;color:#A0AEC0;padding:4px 0;font-weight:600;">Konum</td><td style="font-size:.85rem;color:#1A2744;">${sanitize(data.location, 100)}</td></tr>
+        <tr><td style="font-size:.72rem;color:#A0AEC0;padding:4px 0;font-weight:600;">Ba\u015fvuru Tarihi</td><td style="font-size:.85rem;color:#1A2744;">${new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})}</td></tr>
       </table>
     </div>
-    <p style="font-size:.85rem;line-height:1.7;color:#4A5568;">Onay s\u00fcrecinde ek bilgi gerekirse sizinle ileti\u015fime ge\u00e7ece\u011fiz. Sorular\u0131n\u0131z i\u00e7in <a href="mailto:info@assosukesfet.com" style="color:#C4521A;">info@assosukesfet.com</a> adresine yazabilirsiniz.</p>
+    <p style="font-size:.82rem;font-weight:700;color:#1A2744;margin:24px 0 12px;">De\u011ferlendirme S\u00fcreci</p>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr><td style="padding:8px 12px;font-size:.82rem;background:rgba(56,161,105,.06);border-radius:8px 8px 0 0;border-bottom:1px solid #EBE7E1;"><strong style="color:#276749;">1.</strong> <span style="color:#4A5568;">Ba\u015fvurunuz al\u0131nd\u0131</span> <span style="float:right;color:#276749;font-weight:600;">&#x2705; Tamamland\u0131</span></td></tr>
+      <tr><td style="padding:8px 12px;font-size:.82rem;background:rgba(212,147,90,.04);border-bottom:1px solid #EBE7E1;"><strong style="color:#975A16;">2.</strong> <span style="color:#4A5568;">\u0130\u00e7erik ve bilgi kontrol\u00fc</span> <span style="float:right;color:#975A16;font-size:.72rem;">1-3 i\u015f g\u00fcn\u00fc</span></td></tr>
+      <tr><td style="padding:8px 12px;font-size:.82rem;background:rgba(0,0,0,.01);border-bottom:1px solid #EBE7E1;"><strong style="color:#718096;">3.</strong> <span style="color:#4A5568;">Onay veya revizyon bildirimi</span></td></tr>
+      <tr><td style="padding:8px 12px;font-size:.82rem;background:rgba(0,0,0,.01);border-radius:0 0 8px 8px;"><strong style="color:#718096;">4.</strong> <span style="color:#4A5568;">Mekan\u0131n\u0131z yay\u0131na al\u0131n\u0131r</span></td></tr>
+    </table>
+    <div style="background:rgba(26,39,68,.03);border-radius:10px;padding:16px 18px;margin-top:24px;">
+      <p style="font-size:.78rem;font-weight:700;color:#1A2744;margin:0 0 8px;">&#x2753; S\u0131k\u00e7a Sorulan Sorular</p>
+      <p style="font-size:.75rem;color:#4A5568;line-height:1.7;margin:0 0 6px;"><strong>De\u011ferlendirme ne kadar s\u00fcrer?</strong><br>Ba\u015fvurular genellikle 1-3 i\u015f g\u00fcn\u00fc i\u00e7inde de\u011ferlendirilir.</p>
+      <p style="font-size:.75rem;color:#4A5568;line-height:1.7;margin:0 0 6px;"><strong>Eksik bilgi varsa ne olur?</strong><br>Size e-posta ile bildirim yap\u0131l\u0131r ve d\u00fczenleme linki g\u00f6nderilir. S\u0131f\u0131rdan doldurmak zorunda kalmazs\u0131n\u0131z.</p>
+      <p style="font-size:.75rem;color:#4A5568;line-height:1.7;margin:0;"><strong>Bilgilerimi sonradan g\u00fcncelleyebilir miyim?</strong><br>Evet, onay sonras\u0131 da info@assosukesfet.com adresine yazarak g\u00fcncelleme talep edebilirsiniz.</p>
+    </div>
+    <p style="font-size:.85rem;line-height:1.7;color:#4A5568;margin-top:24px;">Sorular\u0131n\u0131z i\u00e7in <a href="mailto:info@assosukesfet.com" style="color:#C4521A;font-weight:600;">info@assosukesfet.com</a> adresine yazabilir veya bu maile do\u011frudan yan\u0131t verebilirsiniz.</p>
   </div>
   <div style="background:#FAFAF8;padding:24px 32px;border-left:1px solid #EBE7E1;border-right:1px solid #EBE7E1;border-top:2px solid #C4521A;">
     <p style="margin:0 0 2px;font-size:.92rem;font-weight:700;color:#1A2744;">&#x1F3DB; Assos'u Ke\u015ffet</p>
@@ -286,7 +302,8 @@ export async function onRequestPost(context) {
     <table style="border-collapse:collapse;"><tr><td style="font-size:.75rem;color:#A0AEC0;padding:3px 8px 3px 0;">&#x2709;</td><td style="font-size:.75rem;"><a href="mailto:info@assosukesfet.com" style="color:#C4521A;text-decoration:none;">info@assosukesfet.com</a></td></tr><tr><td style="font-size:.75rem;color:#A0AEC0;padding:3px 8px 3px 0;">&#x1F310;</td><td style="font-size:.75rem;"><a href="https://assosukesfet.com" style="color:#C4521A;text-decoration:none;">assosukesfet.com</a></td></tr><tr><td style="font-size:.75rem;color:#A0AEC0;padding:3px 8px 3px 0;">&#x1F4F8;</td><td style="font-size:.75rem;"><a href="https://instagram.com/assosukesfet" style="color:#C4521A;text-decoration:none;">@assosukesfet</a></td></tr></table>
   </div>
   <div style="background:linear-gradient(135deg,#1A2744,#243352);border-radius:0 0 16px 16px;padding:22px 32px;text-align:center;">
-    <p style="margin:0;font-size:.68rem;color:rgba(255,255,255,.35);">&copy; ${new Date().getFullYear()} Assos'u Ke\u015ffet &bull; <a href="https://assosukesfet.com" style="color:rgba(255,255,255,.5);text-decoration:none;">assosukesfet.com</a></p>
+    <p style="margin:0 0 4px;font-size:.68rem;color:rgba(255,255,255,.4);">Bu mail otomatik olarak g\u00f6nderilmi\u015ftir.</p>
+    <p style="margin:0;font-size:.65rem;color:rgba(255,255,255,.3);">&copy; ${new Date().getFullYear()} Assos'u Ke\u015ffet &bull; <a href="https://assosukesfet.com" style="color:rgba(255,255,255,.45);text-decoration:none;">assosukesfet.com</a></p>
   </div>
 </div></body></html>`
           })
