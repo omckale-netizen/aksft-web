@@ -496,7 +496,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 <!-- LOADING -->
 <div id="admin-loading">
   <div class="ld-spinner"></div>
-  <span style="font-size:.8rem;color:var(--text-muted)">Yukleniyor...</span>
+  <span style="font-size:.8rem;color:var(--text-muted)">Yükleniyor...</span>
 </div>
 
 <!-- AUTH GUARD: onAuthStateChanged zaten asagida, giris yoksa login'e yonlendirir -->
@@ -747,7 +747,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <table class="panel-table" id="venue-table">
             <thead>
               <tr>
-                <th style="width:32px"><input type="checkbox" id="bulk-select-all" onchange="bulkToggleAll(this.checked)" title="Tumunu sec"></th>
+                <th style="width:32px"><input type="checkbox" id="bulk-select-all" onchange="bulkToggleAll(this.checked)" title="Tümünü seç"></th>
                 <th></th>
                 <th>Ad</th>
                 <th>Kategori</th>
@@ -1093,24 +1093,24 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <label>Gorsel Onizleme <span id="place-pos-label" style="font-weight:400;color:var(--text-muted);font-size:.75rem"></span></label>
+            <label>Görsel Önizleme <span id="place-pos-label" style="font-weight:400;color:var(--text-muted);font-size:.75rem"></span></label>
             <div class="crop-container" id="crop-container">
               <div class="crop-empty" id="crop-empty">
                 <span style="font-size:2rem">📷</span>
-                <p>Gorsel yuklemek icin tiklayin</p>
+                <p>Görsel yüklemek için tıklayın</p>
               </div>
               <img id="crop-img" class="crop-img" style="display:none" draggable="false" alt="Mekan görseli">
               <div class="crop-hint" id="crop-hint" style="display:none">↕ Surukleyerek konumlandir</div>
             </div>
             <input type="file" id="place-img-file" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handlePlaceImage(this.files[0])">
             <div style="display:flex;gap:8px;margin-top:8px">
-              <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('place-img-file').click()">📷 Gorsel Sec</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('place-img-file').click()">📷 Görsel Seç</button>
               <button type="button" class="btn btn-secondary btn-sm" onclick="resetCropPos()">↺ Ortala</button>
             </div>
           </div>
           <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
             <button class="btn btn-secondary" onclick="closePlaceImgModal()">Iptal</button>
-            <button class="btn btn-danger" onclick="removePlaceImage()" id="place-img-remove-btn" style="display:none">Gorseli Kaldir</button>
+            <button class="btn btn-danger" onclick="removePlaceImage()" id="place-img-remove-btn" style="display:none">Görseli Kaldır</button>
             <button class="btn btn-primary" onclick="savePlaceImage()">Kaydet</button>
           </div>
         </div>
@@ -1272,11 +1272,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               </div>
             </div>
             <div class="form-group">
-              <label>Kisa Aciklama</label>
-              <textarea id="vpf-shortDesc" rows="2" placeholder="Kisa tanitim"></textarea>
+              <label>Kısa Açıklama</label>
+              <textarea id="vpf-shortDesc" rows="2" placeholder="Kısa tanıtım"></textarea>
             </div>
             <div class="form-group">
-              <label>Detayli Aciklama</label>
+              <label>Detaylı Açıklama</label>
               <div class="rte-wrap">
                 <div class="rte-toolbar">
                   <button type="button" class="rte-btn" onclick="vpRteCmd('bold')" title="Kalın"><b>B</b></button>
@@ -1298,15 +1298,15 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <input type="text" id="vpf-tags" placeholder="Antik, Manzara, Doğa">
             </div>
             <div class="form-group" id="vpf-img-group">
-              <label>Kapak Gorseli <span id="vpf-img-info" style="font-weight:400;color:var(--text-muted);font-size:.72rem"></span></label>
+              <label>Kapak Görseli <span id="vpf-img-info" style="font-weight:400;color:var(--text-muted);font-size:.72rem"></span></label>
               <div id="vpf-img-preview" style="aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#e8e4de,#f0ece6);display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;margin-bottom:8px" onclick="document.getElementById('vpf-img-input').click()">
                 <img id="vpf-img-thumb" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none" alt="Önizleme">
-                <span id="vpf-img-empty" style="color:var(--text-muted);font-size:.82rem">📷 Gorsel yuklemek icin tiklayin</span>
+                <span id="vpf-img-empty" style="color:var(--text-muted);font-size:.82rem">📷 Görsel yüklemek için tıklayın</span>
               </div>
               <input type="file" id="vpf-img-input" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="vpHandleImage(this.files[0])">
               <div style="display:flex;gap:8px">
-                <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('vpf-img-input').click()">📷 Gorsel Sec</button>
-                <button type="button" class="btn btn-danger btn-sm" id="vpf-img-remove" style="display:none" onclick="vpRemoveImage()">Gorseli Kaldir</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('vpf-img-input').click()">📷 Görsel Seç</button>
+                <button type="button" class="btn btn-danger btn-sm" id="vpf-img-remove" style="display:none" onclick="vpRemoveImage()">Görseli Kaldır</button>
               </div>
             </div>
             <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:24px">
@@ -1387,11 +1387,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
     <!-- ══════ GALLERY ══════ -->
     <div class="admin-page" id="page-gallery">
       <h2>Galeri</h2>
-      <p class="page-sub">Gorselleri yukle, kategorize et ve URL'lerini kopyala.</p>
+      <p class="page-sub">Görselleri yükle, kategorize et ve URL'lerini kopyala.</p>
 
       <!-- Upload area -->
       <div class="panel-card">
-        <div class="panel-card-head"><h3>Gorsel Yukle</h3></div>
+        <div class="panel-card-head"><h3>Görsel Yükle</h3></div>
         <div style="padding:20px">
           <div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:16px">
             <div style="flex:1;min-width:180px">
@@ -1413,7 +1413,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
           <div id="gal-dropzone" style="border:2px dashed rgba(0,0,0,.12);border-radius:12px;padding:40px 20px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(196,82,26,.02)" onclick="document.getElementById('gal-file-input').click()">
             <div style="font-size:2rem;margin-bottom:8px">📁</div>
-            <div style="font-size:.85rem;color:var(--navy);font-weight:600">Gorselleri surukle veya tikla</div>
+            <div style="font-size:.85rem;color:var(--navy);font-weight:600">Görselleri sürükle veya tıkla</div>
             <div style="font-size:.72rem;color:var(--text-muted);margin-top:4px">JPG, PNG, WebP · Maks 5MB · Otomatik WebP sikistirma</div>
           </div>
           <input type="file" id="gal-file-input" multiple accept="image/jpeg,image/png,image/webp" style="display:none" onchange="galHandleFiles(this.files)">
@@ -1425,7 +1425,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       <!-- Gallery grid -->
       <div class="panel-card" style="margin-top:20px">
         <div class="panel-card-head" style="flex-wrap:wrap;gap:10px">
-          <h3>Yuklenen Gorseller</h3>
+          <h3>Yüklenen Görseller</h3>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
             <input type="text" id="gal-search" placeholder="Ara..." oninput="galRender()" style="padding:6px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit;width:140px">
             <select id="gal-filter-cat" onchange="galRender()" style="padding:6px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit">
@@ -1439,7 +1439,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
     <!-- ══════ EXPORT / BACKUP ══════ -->
     <div class="admin-page" id="page-export">
-      <h2>Yedekleme & Geri Yukleme</h2>
+      <h2>Yedekleme & Geri Yükleme</h2>
       <p class="page-sub">Verilerinizi yedekleyin, disa aktarin veya geri yukleyin.</p>
 
       <!-- AI Rehber -->
@@ -1540,7 +1540,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <div class="backup-btns">
                 <button class="btn btn-primary" onclick="exportFullBackup()" style="font-size:.8rem">📥 Tam Yedek (JSON)</button>
                 <button class="btn btn-secondary" onclick="exportDataJS()" style="font-size:.8rem">📄 data.js Indir</button>
-                <button class="btn btn-secondary" onclick="exportImages()" style="font-size:.8rem">🖼 Gorselleri Indir</button>
+                <button class="btn btn-secondary" onclick="exportImages()" style="font-size:.8rem">🖼 Görselleri İndir</button>
               </div>
               <div style="margin-top:14px;border-top:1px solid rgba(0,0,0,.04);padding-top:14px">
                 <p style="font-size:.75rem;font-weight:600;color:var(--navy);margin-bottom:10px">Tek Koleksiyon Indir:</p>
@@ -1560,7 +1560,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <!-- Import / Restore -->
           <div class="backup-card" style="margin-bottom:20px">
             <div class="backup-card-head">
-              <h4>📂 Geri Yukle</h4>
+              <h4>📂 Geri Yükle</h4>
             </div>
             <div class="backup-card-body">
               <p>Daha once indirdiginiz bir yedek dosyasini yukleyerek verileri geri getirebilirsiniz.</p>
@@ -2287,7 +2287,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                   <span id="llms-last-update" style="font-size:.78rem;font-weight:600;color:var(--navy)">—</span>
                 </div>
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(0,0,0,.02);border-radius:8px">
-                  <span style="font-size:.78rem;color:var(--text-light)">Sonraki Kontrol</span>
+                  <span style="font-size:.78rem;color:var(--text-light)">Sonraki kontrol</span>
                   <span id="llms-next-check" style="font-size:.78rem;font-weight:600;color:var(--navy)">—</span>
                 </div>
               </div>
@@ -2677,12 +2677,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
         </div>
         <div class="form-group">
-          <label>Kisa Aciklama</label>
-          <textarea id="rf-shortDesc" rows="2" placeholder="Kisa tanitim"></textarea>
+          <label>Kısa Açıklama</label>
+          <textarea id="rf-shortDesc" rows="2" placeholder="Kısa tanıtım"></textarea>
         </div>
         <div class="form-group">
-          <label>Detayli Aciklama</label>
-          <textarea id="rf-description" rows="3" placeholder="Detayli bilgi"></textarea>
+          <label>Detaylı Açıklama</label>
+          <textarea id="rf-description" rows="3" placeholder="Detaylı bilgi"></textarea>
         </div>
 
         <!-- DURAKLAR -->
@@ -3421,7 +3421,7 @@ async function uploadLogo(file) {
       img.src = URL.createObjectURL(file);
     });
 
-    statusEl.textContent = 'Yukleniyor...';
+    statusEl.textContent = 'Yükleniyor...';
     const ref = firebase.storage().ref('site/logo.webp');
     await ref.put(optimizedBlob, { contentType: 'image/webp' });
     const url = await ref.getDownloadURL();
@@ -3547,7 +3547,7 @@ async function uploadOgImage(file) {
   if (file.size > 5 * 1024 * 1024) { showToast('Dosya cok buyuk. Maks 5MB.', 'error'); return; }
 
   const statusEl = document.getElementById('og-upload-status');
-  statusEl.textContent = 'Yukleniyor...';
+  statusEl.textContent = 'Yükleniyor...';
 
   try {
     const ext = file.type === 'image/png' ? 'png' : 'jpg';
@@ -3725,7 +3725,7 @@ async function removeHeroImage() {
 async function uploadFavicon(file) {
   if (!file) return;
   const statusEl = document.getElementById('fav-upload-status');
-  statusEl.textContent = 'Yukleniyor...';
+  statusEl.textContent = 'Yükleniyor...';
 
   try {
     // Canvas ile 32x32 ve 180x180 boyutlarında favicon oluştur
@@ -4819,7 +4819,7 @@ function galRenderPending() {
   const btn = document.getElementById('gal-upload-btn');
   if (galPending.length === 0) { el.innerHTML = ''; btn.style.display = 'none'; return; }
   btn.style.display = '';
-  btn.textContent = galPending.length + ' Gorsel Yukle';
+  btn.textContent = galPending.length + ' Görsel Yükle';
   el.innerHTML = galPending.map((p, i) =>
     '<div class="gal-upload-thumb">' +
       '<img src="' + p.dataUrl + '">' +
@@ -5320,7 +5320,7 @@ async function renderAnalytics() {
     });
 
     const weatherEmojis = { acik:'☀️', az_bulutlu:'🌤', parcali_bulutlu:'⛅', bulutlu:'☁️', sisli:'🌫', hafif_yagmur:'🌦', yagmurlu:'🌧', yogun_yagmur:'🌧', saganak:'⛈', firtina:'⛈', kar:'🌨', bilinmiyor:'🌡' };
-    const weatherLabels = { acik:'Acik', az_bulutlu:'Az Bulutlu', parcali_bulutlu:'Parcali Bulutlu', bulutlu:'Bulutlu', sisli:'Sisli', hafif_yagmur:'Hafif Yagmur', yagmurlu:'Yagmurlu', yogun_yagmur:'Yogun Yagmur', saganak:'Saganak', firtina:'Firtina', kar:'Kar', bilinmiyor:'Bilinmiyor' };
+    const weatherLabels = { acik:'Açık', az_bulutlu:'Az Bulutlu', parcali_bulutlu:'Parçalı Bulutlu', bulutlu:'Bulutlu', sisli:'Sisli', hafif_yagmur:'Hafif Yağmur', yagmurlu:'Yağmurlu', yogun_yagmur:'Yoğun Yağmur', saganak:'Sağanak', firtina:'Fırtına', kar:'Kar', bilinmiyor:'Bilinmiyor' };
     const weatherList = Object.entries(weatherCounts).sort((a, b) => b[1].total - a[1].total);
     const maxWeather = weatherList.length > 0 ? weatherList[0][1].total : 1;
 
@@ -6695,8 +6695,8 @@ function renderWhGrid(dayHours) {
         '<span>—</span>' +
         '<input type="time" class="wh-close" value="' + close + '" ' + (isClosed ? 'disabled' : '') + '>' +
       '</div>' +
-      '<label class="wh-day-closed"><input type="checkbox" class="wh-closed-cb" ' + (isClosed ? 'checked' : '') + ' onchange="toggleWhDay(this)"> Kapali</label>' +
-      '<button type="button" class="wh-copy-btn" onclick="copyWhDay(' + i + ')" title="Bu saati diger gunlere kopyala">Kopyala ↓</button>' +
+      '<label class="wh-day-closed"><input type="checkbox" class="wh-closed-cb" ' + (isClosed ? 'checked' : '') + ' onchange="toggleWhDay(this)"> Kapalı</label>' +
+      '<button type="button" class="wh-copy-btn" onclick="copyWhDay(' + i + ')" title="Bu saati diğer günlere kopyala">Kopyala ↓</button>' +
     '</div>';
   }).join('');
 }
@@ -8114,7 +8114,7 @@ function handleBackupImport(file) {
         ${meta}
         <div style="font-size:.82rem;font-weight:600;color:var(--navy);margin-bottom:10px">📋 Icerik: ${counts.join(', ')}</div>
         <div style="display:flex;gap:8px">
-          <button class="btn btn-primary" style="font-size:.78rem;padding:8px 16px" onclick="confirmBackupRestore()">✅ Geri Yukle</button>
+          <button class="btn btn-primary" style="font-size:.78rem;padding:8px 16px" onclick="confirmBackupRestore()">✅ Geri Yükle</button>
           <button class="btn btn-secondary" style="font-size:.78rem;padding:8px 16px" onclick="cancelBackupImport()">Iptal</button>
         </div>
       </div>
@@ -8128,7 +8128,7 @@ function confirmBackupRestore() {
   const data = window._pendingBackupData;
   if (!data) return;
   showConfirm(
-    'Veriyi Geri Yukle',
+    'Veriyi Geri Yükle',
     'Mevcut veriler yedek dosyasindaki verilerle degistirilecek. Bu islem geri alinamaz. Devam etmek istiyor musunuz?',
     async () => {
       try {
@@ -8330,7 +8330,7 @@ let notifFilter = 'all';
 async function renderNotifications() {
   const list = document.getElementById('notif-list');
   if (!list) return;
-  list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted)">Yukleniyor...</div>';
+  list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted)">Yükleniyor...</div>';
 
   try {
     allNotifs = [];
@@ -8737,7 +8737,7 @@ const ACTIVITY_LABELS = {
 async function renderActivityLog() {
   const list = document.getElementById('activity-list');
   if (!list) return;
-  list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted)">Yukleniyor...</div>';
+  list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted)">Yükleniyor...</div>';
 
   try {
     const filter = document.getElementById('activity-filter')?.value || 'all';
