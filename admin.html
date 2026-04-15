@@ -7214,7 +7214,7 @@ async function saveVenue(e) {
     phone: _venuePhones.length > 0 ? _venuePhones[0].number : '',
     address: document.getElementById('f-address').value.trim(),
     website: document.getElementById('f-website').value.trim(),
-    instagram: document.getElementById('f-instagram').value.trim(),
+    instagram: (function(){var v=document.getElementById('f-instagram').value.trim().replace(/^https?:\/\/(www\.)?instagram\.com\//,'').replace(/\/$/,'');if(v&&!v.startsWith('@'))v='@'+v;return v;})(),
     ownerName: document.getElementById('f-ownerName').value.trim(),
     ownerEmail: document.getElementById('f-ownerEmail').value.trim(),
     premium: document.getElementById('f-premium').checked,
