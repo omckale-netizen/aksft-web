@@ -153,27 +153,29 @@ export async function onRequestPost(context) {
             to: [data.email],
             subject: 'Mesajınız Alındı — Assos\'u Keşfet',
             reply_to: 'info@assosukesfet.com',
-            html: `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body style="margin:0;padding:0;background:#F0EDE8;font-family:'Segoe UI',Tahoma,Arial,sans-serif;">
-<div style="max-width:600px;margin:0 auto;padding:20px;">
+            html: `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body style="margin:0;padding:0;background:#F0EDE8;font-family:'Segoe UI',Tahoma,Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+<div style="max-width:600px;margin:0 auto;padding:24px 16px;">
 
   <!-- Header -->
-  <div style="background:linear-gradient(135deg,#1A2744 0%,#2D3E5F 100%);border-radius:16px 16px 0 0;padding:28px 28px;text-align:center;">
-    <img src="https://firebasestorage.googleapis.com/v0/b/assosu-kesfet.firebasestorage.app/o/site%2Flogo.png?alt=media" alt="Assos'u Kesfet" style="height:48px;margin-bottom:10px;" />
-    <p style="margin:0;font-size:.82rem;color:rgba(255,255,255,.6);">Assos'un Dijital Keşif Rehberi</p>
+  <div style="background:linear-gradient(135deg,#1A2744 0%,#243352 50%,#2D3E5F 100%);border-radius:16px 16px 0 0;padding:36px 32px 32px;text-align:center;">
+    <div style="display:inline-block;width:48px;height:48px;border-radius:14px;background:rgba(196,82,26,.9);color:#fff;font-size:1.1rem;font-weight:800;line-height:48px;text-align:center;margin-bottom:14px;">AK</div>
+    <h1 style="margin:0;font-size:1.45rem;color:#ffffff;font-weight:800;letter-spacing:-.03em;">Assos'u Ke\u015ffet</h1>
+    <p style="margin:6px 0 0;font-size:.78rem;color:rgba(255,255,255,.5);font-weight:500;">Assos'un Dijital Ke\u015fif Rehberi</p>
+    <div style="width:40px;height:3px;background:rgba(196,82,26,.7);border-radius:2px;margin:16px auto 0;"></div>
   </div>
 
   <!-- Body -->
-  <div style="background:#ffffff;padding:32px 28px;border-left:1px solid #E8E4DE;border-right:1px solid #E8E4DE;">
+  <div style="background:#ffffff;padding:36px 32px;border-left:1px solid #EBE7E1;border-right:1px solid #EBE7E1;">
 
     <div style="text-align:center;margin-bottom:24px;">
-      <div style="display:inline-block;width:52px;height:52px;border-radius:50%;background:rgba(56,161,105,.1);line-height:52px;font-size:1.5rem;">&#x2705;</div>
+      <div style="display:inline-block;width:52px;height:52px;border-radius:50%;background:rgba(56,161,105,.08);line-height:52px;font-size:1.5rem;">&#x2705;</div>
     </div>
 
-    <h2 style="text-align:center;margin:0 0 8px;font-size:1.15rem;color:#1A2744;">Mesajınız Bize Ulaştı!</h2>
-    <p style="text-align:center;margin:0 0 28px;font-size:.88rem;color:#718096;">En kısa sürede size dönüş yapacağız.</p>
+    <h2 style="text-align:center;margin:0 0 8px;font-size:1.15rem;color:#1A2744;">Mesaj\u0131n\u0131z Bize Ula\u015ft\u0131!</h2>
+    <p style="text-align:center;margin:0 0 28px;font-size:.88rem;color:#718096;">En k\u0131sa s\u00fcrede size d\u00f6n\u00fc\u015f yapaca\u011f\u0131z.</p>
 
     <p style="font-size:.95rem;line-height:1.7;color:#1A2744;">Merhaba <strong>${userName}</strong>,</p>
-    <p style="font-size:.9rem;line-height:1.7;color:#4A5568;">Mesajınızı aldık ve ekibimiz incelemeye başladı. Genellikle <strong>24 saat içinde</strong> dönüş sağlıyoruz.</p>
+    <p style="font-size:.9rem;line-height:1.7;color:#4A5568;">Mesaj\u0131n\u0131z\u0131 ald\u0131k ve ekibimiz incelemeye ba\u015flad\u0131. Genellikle <strong>24 saat i\u00e7inde</strong> d\u00f6n\u00fc\u015f sa\u011fl\u0131yoruz.</p>
 
     <!-- Mesaj Kutusu -->
     <div style="background:#FAF7F2;border-radius:12px;padding:20px 22px;margin:24px 0;border-left:4px solid #C4521A;">
@@ -185,29 +187,34 @@ export async function onRequestPost(context) {
 
     <!-- CTA -->
     <div style="text-align:center;margin:28px 0;">
-      <a href="https://assosukesfet.com" style="display:inline-block;padding:12px 28px;background:#C4521A;color:#fff;border-radius:10px;font-size:.88rem;font-weight:700;text-decoration:none;">Assos'u Keşfetmeye Devam Et</a>
+      <a href="https://assosukesfet.com" style="display:inline-block;padding:13px 32px;background:#C4521A;color:#fff;border-radius:10px;font-size:.88rem;font-weight:700;text-decoration:none;box-shadow:0 4px 12px rgba(196,82,26,.25);">Assos'u Ke\u015ffetmeye Devam Et</a>
     </div>
+  </div>
 
-    <!-- İmza -->
-    <hr style="border:none;border-top:1px solid #E8E4DE;margin:24px 0 20px;">
-    <table style="width:100%"><tr>
-      <td style="vertical-align:middle;width:44px;padding-right:14px;"><img src="https://firebasestorage.googleapis.com/v0/b/assosu-kesfet.firebasestorage.app/o/site%2Flogo.png?alt=media" alt="" style="width:40px;height:40px;border-radius:10px;object-fit:contain;" /></td>
+  <!-- Signature -->
+  <div style="background:#FAFAF8;padding:24px 32px;border-left:1px solid #EBE7E1;border-right:1px solid #EBE7E1;border-top:2px solid #C4521A;">
+    <table style="width:100%;border-collapse:collapse;"><tr>
+      <td style="vertical-align:middle;width:50px;padding-right:16px;">
+        <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#1A2744,#2D3E5F);color:#fff;font-size:.9rem;font-weight:800;line-height:44px;text-align:center;">AK</div>
+      </td>
       <td style="vertical-align:middle;">
-        <p style="margin:0 0 2px;font-size:.88rem;font-weight:700;color:#1A2744;">Assos'u Keşfet</p>
+        <p style="margin:0 0 1px;font-size:.9rem;font-weight:700;color:#1A2744;">Assos'u Ke\u015ffet</p>
+        <p style="margin:0 0 8px;font-size:.68rem;color:#A0AEC0;">Assos'un Dijital Ke\u015fif Rehberi</p>
         <table style="border-collapse:collapse;">
-          <tr><td style="font-size:.72rem;color:#A0AEC0;padding:1px 6px 1px 0;">&#x2709;</td><td style="font-size:.72rem;"><a href="mailto:info@assosukesfet.com" style="color:#C4521A;text-decoration:none;">info@assosukesfet.com</a></td></tr>
-          <tr><td style="font-size:.72rem;color:#A0AEC0;padding:1px 6px 1px 0;">&#x1F310;</td><td style="font-size:.72rem;"><a href="https://assosukesfet.com" style="color:#C4521A;text-decoration:none;">assosukesfet.com</a></td></tr>
-          <tr><td style="font-size:.72rem;color:#A0AEC0;padding:1px 6px 1px 0;">&#x1F4F8;</td><td style="font-size:.72rem;"><a href="https://instagram.com/assosukesfet" style="color:#C4521A;text-decoration:none;">@assosukesfet</a></td></tr>
+          <tr><td style="font-size:.73rem;color:#A0AEC0;padding:2px 8px 2px 0;line-height:1;">&#x2709;</td><td style="font-size:.73rem;line-height:1;"><a href="mailto:info@assosukesfet.com" style="color:#C4521A;text-decoration:none;font-weight:500;">info@assosukesfet.com</a></td>
+          <td style="font-size:.73rem;color:#D4D0CA;padding:2px 8px;line-height:1;">|</td>
+          <td style="font-size:.73rem;color:#A0AEC0;padding:2px 8px 2px 0;line-height:1;">&#x1F310;</td><td style="font-size:.73rem;line-height:1;"><a href="https://assosukesfet.com" style="color:#C4521A;text-decoration:none;font-weight:500;">assosukesfet.com</a></td>
+          <td style="font-size:.73rem;color:#D4D0CA;padding:2px 8px;line-height:1;">|</td>
+          <td style="font-size:.73rem;color:#A0AEC0;padding:2px 8px 2px 0;line-height:1;">&#x1F4F8;</td><td style="font-size:.73rem;line-height:1;"><a href="https://instagram.com/assosukesfet" style="color:#C4521A;text-decoration:none;font-weight:500;">@assosukesfet</a></td></tr>
         </table>
       </td>
     </tr></table>
   </div>
 
   <!-- Footer -->
-  <div style="background:#1A2744;border-radius:0 0 16px 16px;padding:24px 28px;text-align:center;">
-    <p style="margin:0 0 6px;font-size:.72rem;color:rgba(255,255,255,.5);">Bu mail otomatik olarak gönderilmiştir.</p>
-    <p style="margin:0;font-size:.72rem;color:rgba(255,255,255,.5);">Yanıtlamak için doğrudan bu maile cevap yazabilirsiniz.</p>
-    <p style="margin:12px 0 0;font-size:.65rem;color:rgba(255,255,255,.3);">&copy; ${new Date().getFullYear()} Assos'u Keşfet &bull; assosukesfet.com</p>
+  <div style="background:linear-gradient(135deg,#1A2744,#243352);border-radius:0 0 16px 16px;padding:22px 32px;text-align:center;">
+    <p style="margin:0 0 4px;font-size:.68rem;color:rgba(255,255,255,.4);">Bu mail otomatik olarak g\u00f6nderilmi\u015ftir. Yan\u0131tlamak i\u00e7in do\u011frudan cevap yazabilirsiniz.</p>
+    <p style="margin:0;font-size:.65rem;color:rgba(255,255,255,.3);">&copy; ${new Date().getFullYear()} Assos'u Ke\u015ffet &bull; <a href="https://assosukesfet.com" style="color:rgba(255,255,255,.45);text-decoration:none;">assosukesfet.com</a></p>
   </div>
 
 </div>
