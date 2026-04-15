@@ -69,6 +69,19 @@
       if (!window.DATA.venueCategories) window.DATA.venueCategories = [];
       window._firebaseReady = false;
       if (!window._cacheUsed) { hideLoader(); document.dispatchEvent(new Event('dataReady')); }
+    } else {
+      // data.js henüz yüklenmemişse dinamik yükle
+      var ds = document.createElement('script');
+      var bp = (window.location.pathname.indexOf('/mekanlar/') > -1 || window.location.pathname.indexOf('/rotalar/') > -1 || window.location.pathname.indexOf('/koyler/') > -1 || window.location.pathname.indexOf('/yerler/') > -1) ? '../' : '';
+      ds.src = bp + 'data.js?v=2';
+      ds.onload = function() {
+        if (window.DATA) {
+          if (!window.DATA.placeCategories) window.DATA.placeCategories = [];
+          if (!window.DATA.venueCategories) window.DATA.venueCategories = [];
+          hideLoader(); document.dispatchEvent(new Event('dataReady'));
+        }
+      };
+      document.head.appendChild(ds);
     }
   }
 
