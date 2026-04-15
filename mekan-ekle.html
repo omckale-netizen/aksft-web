@@ -5,160 +5,128 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="/icon.png" sizes="48x48" type="image/png"><link rel="icon" href="/icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=2">
 <title>Mekan Ekle — Assos'u Keşfet</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--navy:#1A2744;--terra:#C4521A;--cream:#FAF7F2;--cream-dark:#F0EDE8;--text:#2D3748;--text-light:#718096;--text-muted:#A0AEC0;--green:#38A169;--red:#E53E3E;--radius:16px}
+:root{--navy:#1A2744;--terra:#C4521A;--cream:#FAF7F2;--cream-dark:#F0EDE8;--text:#2D3748;--text-light:#718096;--text-muted:#A0AEC0;--green:#38A169;--red:#E53E3E;--radius:16px;--border:rgba(26,39,68,.12)}
 body{min-height:100vh;background:var(--cream);font-family:'Plus Jakarta Sans',sans-serif;color:var(--text)}
 a{color:var(--terra);text-decoration:none}
-
-/* Header */
-.me-header{background:linear-gradient(135deg,var(--navy) 0%,#2D3E5F 100%);padding:32px 24px;text-align:center}
-.me-header h1{color:#fff;font-size:1.3rem;font-weight:800;margin-bottom:4px}
-.me-header p{color:rgba(255,255,255,.5);font-size:.82rem}
-.me-logo{font-size:1.5rem;margin-bottom:12px}
-
-/* Container */
-.me-wrap{max-width:640px;margin:0 auto;padding:24px 16px 60px}
-
+.me-header{background:linear-gradient(135deg,var(--navy) 0%,#2D3E5F 100%);padding:28px 24px;text-align:center}
+.me-header h1{color:#fff;font-size:1.2rem;font-weight:800;margin-bottom:4px}
+.me-header p{color:rgba(255,255,255,.5);font-size:.78rem}
+.me-wrap{max-width:680px;margin:0 auto;padding:20px 16px 60px}
 /* Progress */
-.me-progress{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:32px;padding:20px 0}
-.me-step-dot{width:10px;height:10px;border-radius:50%;background:rgba(26,39,68,.1);transition:all .3s}
-.me-step-dot.active{background:var(--terra);transform:scale(1.3)}
-.me-step-dot.done{background:var(--green)}
-.me-step-line{width:24px;height:2px;background:rgba(26,39,68,.08);border-radius:1px;transition:background .3s}
-.me-step-line.done{background:var(--green)}
-
+.me-progress{display:flex;align-items:center;justify-content:center;gap:4px;margin-bottom:24px;padding:16px 0}
+.me-dot{width:10px;height:10px;border-radius:50%;background:rgba(26,39,68,.1);transition:all .3s}
+.me-dot.active{background:var(--terra);transform:scale(1.3)}
+.me-dot.done{background:var(--green)}
+.me-line{width:20px;height:2px;background:rgba(26,39,68,.08);border-radius:1px}
+.me-line.done{background:var(--green)}
 /* Step info */
-.me-step-info{text-align:center;margin-bottom:28px}
-.me-step-num{font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--terra);margin-bottom:6px}
-.me-step-title{font-size:1.2rem;font-weight:800;color:var(--navy)}
-.me-step-desc{font-size:.82rem;color:var(--text-light);margin-top:4px}
-
-/* Card */
-.me-card{background:#fff;border-radius:var(--radius);padding:28px 24px;box-shadow:0 2px 12px rgba(26,39,68,.06);border:1px solid rgba(26,39,68,.06);margin-bottom:20px}
-
-/* Form */
-.me-field{margin-bottom:18px}
-.me-label{display:block;font-size:.75rem;font-weight:700;color:var(--navy);margin-bottom:6px}
-.me-label span{font-weight:400;color:var(--text-muted)}
-.me-input,.me-select,.me-textarea{width:100%;padding:12px 14px;border:1.5px solid rgba(26,39,68,.12);border-radius:10px;font-size:.88rem;font-family:inherit;color:var(--text);background:#fff;outline:none;transition:border-color .2s}
+.me-sinfo{text-align:center;margin-bottom:20px}
+.me-snum{font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--terra);margin-bottom:4px}
+.me-stitle{font-size:1.1rem;font-weight:800;color:var(--navy)}
+/* Revision banner */
+.me-revision{background:rgba(212,147,90,.08);border:1px solid rgba(212,147,90,.2);border-radius:12px;padding:14px 18px;margin-bottom:20px;font-size:.82rem;color:#975A16;line-height:1.6}
+.me-revision strong{color:var(--terra)}
+/* Card & form */
+.me-card{background:#fff;border-radius:var(--radius);padding:24px 20px;box-shadow:0 2px 12px rgba(26,39,68,.06);border:1px solid rgba(26,39,68,.06);margin-bottom:16px}
+.me-section{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin:20px 0 10px;padding-top:14px;border-top:1px solid rgba(0,0,0,.06)}
+.me-section:first-child{margin-top:0;padding-top:0;border-top:none}
+.me-field{margin-bottom:14px}
+.me-label{display:block;font-size:.73rem;font-weight:700;color:var(--navy);margin-bottom:5px}
+.me-label span{font-weight:400;color:var(--text-muted);font-size:.68rem}
+.me-input,.me-select,.me-textarea{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:.85rem;font-family:inherit;color:var(--text);background:#fff;outline:none;transition:border-color .2s}
 .me-input:focus,.me-select:focus,.me-textarea:focus{border-color:var(--terra)}
 .me-input::placeholder,.me-textarea::placeholder{color:var(--text-muted)}
-.me-textarea{resize:vertical;min-height:100px}
-.me-select{cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23A0AEC0'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
-.me-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media(max-width:500px){.me-row{grid-template-columns:1fr}}
-.me-hint{font-size:.68rem;color:var(--text-muted);margin-top:4px}
-.me-error{font-size:.72rem;color:var(--red);margin-top:4px;display:none}
-
-/* Phone rows */
-.me-phone-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
-.me-phone-row input{flex:1}
-.me-phone-wa{display:flex;align-items:center;gap:4px;font-size:.72rem;color:#25D366;font-weight:600;cursor:pointer;white-space:nowrap}
-.me-phone-wa input{width:16px;height:16px;accent-color:#25D366;cursor:pointer}
-.me-phone-remove{width:28px;height:28px;border:none;border-radius:6px;background:rgba(229,62,62,.08);color:var(--red);cursor:pointer;font-size:.8rem;flex-shrink:0}
-
-/* Image upload */
-.me-img-drop{border:2px dashed rgba(26,39,68,.12);border-radius:12px;padding:32px 20px;text-align:center;cursor:pointer;transition:all .2s}
-.me-img-drop:hover{border-color:var(--terra);background:rgba(196,82,26,.02)}
-.me-img-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
-.me-img-thumb{position:relative;aspect-ratio:4/3;border-radius:8px;overflow:hidden;background:var(--cream-dark)}
-.me-img-thumb img{width:100%;height:100%;object-fit:cover}
-.me-img-thumb button{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,.6);color:#fff;font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
-
+.me-textarea{resize:vertical;min-height:80px}
+.me-select{cursor:pointer}
+.me-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.me-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:500px){.me-row,.me-row3{grid-template-columns:1fr}}
+.me-hint{font-size:.65rem;color:var(--text-muted);margin-top:3px}
+/* Phone row */
+.me-phone{padding:10px 12px;margin-bottom:8px;border:1px solid var(--border);border-radius:10px;background:rgba(0,0,0,.01)}
+.me-phone-top{display:flex;gap:8px;margin-bottom:6px}
+.me-phone-top input{flex:1}
+.me-phone-bot{display:flex;align-items:center;justify-content:space-between}
+.me-wa{display:flex;align-items:center;gap:5px;font-size:.72rem;color:#25D366;font-weight:600;cursor:pointer}
+.me-wa input{width:16px;height:16px;accent-color:#25D366;cursor:pointer}
+.me-phone-del{font-size:.65rem;padding:3px 8px;border:none;border-radius:5px;background:rgba(229,62,62,.08);color:var(--red);cursor:pointer;font-weight:600}
+/* Weekly hours */
+.me-wh{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,.03);font-size:.8rem}
+.me-wh:last-child{border-bottom:none}
+.me-wh-day{width:80px;font-weight:600;color:var(--navy);flex-shrink:0;font-size:.75rem}
+.me-wh input[type="time"]{padding:4px 6px;border:1px solid var(--border);border-radius:6px;font-size:.78rem;font-family:inherit}
+.me-wh-closed{display:flex;align-items:center;gap:4px;font-size:.68rem;color:var(--text-muted);cursor:pointer;margin-left:auto}
+.me-wh-closed input{width:14px;height:14px;accent-color:var(--red);cursor:pointer}
+/* Facilities */
+.me-fac{display:flex;flex-wrap:wrap;gap:6px}
+.me-fac label{display:flex;align-items:center;gap:5px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;transition:all .15s}
+.me-fac label:has(input:checked){background:rgba(196,82,26,.06);border-color:rgba(196,82,26,.25);color:var(--terra)}
+.me-fac input{width:14px;height:14px;accent-color:var(--terra);cursor:pointer}
+/* Images */
+.me-imgdrop{border:2px dashed var(--border);border-radius:12px;padding:28px 16px;text-align:center;cursor:pointer;transition:all .2s}
+.me-imgdrop:hover{border-color:var(--terra);background:rgba(196,82,26,.02)}
+.me-imggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.me-imgthumb{position:relative;aspect-ratio:4/3;border-radius:8px;overflow:hidden;background:var(--cream-dark)}
+.me-imgthumb img{width:100%;height:100%;object-fit:cover}
+.me-imgthumb button{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;border:none;background:rgba(0,0,0,.6);color:#fff;font-size:.65rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
 /* Buttons */
-.me-btns{display:flex;gap:10px;justify-content:space-between;margin-top:24px}
-.me-btn{padding:12px 28px;border-radius:10px;font-size:.88rem;font-weight:700;font-family:inherit;cursor:pointer;border:none;transition:all .2s}
-.me-btn-primary{background:var(--terra);color:#fff}
-.me-btn-primary:hover{background:#D96B2E;transform:translateY(-1px)}
-.me-btn-secondary{background:rgba(26,39,68,.06);color:var(--text-light)}
-.me-btn-secondary:hover{background:rgba(26,39,68,.12)}
-.me-btn:disabled{opacity:.5;cursor:default;transform:none}
-
+.me-btns{display:flex;gap:10px;justify-content:space-between;margin-top:20px}
+.me-btn{padding:11px 24px;border-radius:10px;font-size:.85rem;font-weight:700;font-family:inherit;cursor:pointer;border:none;transition:all .2s}
+.me-btn-p{background:var(--terra);color:#fff}.me-btn-p:hover{background:#D96B2E}
+.me-btn-s{background:rgba(26,39,68,.06);color:var(--text-light)}.me-btn-s:hover{background:rgba(26,39,68,.12)}
+.me-btn:disabled{opacity:.5;cursor:default}
 /* Summary */
-.me-summary-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(26,39,68,.06);font-size:.82rem}
-.me-summary-label{color:var(--text-muted);font-weight:600}
-.me-summary-val{color:var(--navy);font-weight:600;text-align:right}
-
+.me-sumrow{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(26,39,68,.05);font-size:.8rem}
+.me-suml{color:var(--text-muted);font-weight:600}.me-sumv{color:var(--navy);font-weight:600;text-align:right;max-width:60%;word-break:break-word}
 /* KVKK */
-.me-kvkk{display:flex;align-items:flex-start;gap:10px;padding:14px;background:rgba(56,161,105,.04);border:1px solid rgba(56,161,105,.12);border-radius:10px;margin-top:16px}
+.me-kvkk{display:flex;align-items:flex-start;gap:10px;padding:12px;background:rgba(56,161,105,.04);border:1px solid rgba(56,161,105,.12);border-radius:10px;margin-top:14px}
 .me-kvkk input{width:18px;height:18px;accent-color:var(--green);cursor:pointer;flex-shrink:0;margin-top:2px}
-.me-kvkk label{font-size:.75rem;color:var(--text-light);line-height:1.6;cursor:pointer}
-
+.me-kvkk label{font-size:.72rem;color:var(--text-light);line-height:1.6;cursor:pointer}
 /* Success */
-.me-success{text-align:center;padding:48px 24px}
-.me-success-icon{font-size:3rem;margin-bottom:16px}
-.me-success h2{font-size:1.2rem;color:var(--navy);margin-bottom:8px}
-.me-success p{font-size:.88rem;color:var(--text-light);line-height:1.7}
-
+.me-ok{text-align:center;padding:40px 20px}
+.me-ok h2{font-size:1.1rem;color:var(--navy);margin:12px 0 8px}
+.me-ok p{font-size:.85rem;color:var(--text-light);line-height:1.7}
 /* Honeypot */
 .me-hp{position:absolute;left:-9999px;opacity:0;height:0;overflow:hidden}
-
-/* Footer */
-.me-footer{text-align:center;padding:20px;font-size:.68rem;color:var(--text-muted)}
+.me-footer{text-align:center;padding:16px;font-size:.65rem;color:var(--text-muted)}
 </style>
 </head>
 <body>
-
 <div class="me-header">
-  <div class="me-logo">🏛️</div>
+  <div style="font-size:1.4rem;margin-bottom:8px">🏛️</div>
   <h1>Mekanınızı Ekleyin</h1>
   <p>Assos'u Keşfet platformuna mekanınızı ücretsiz ekleyin</p>
 </div>
-
 <div class="me-wrap">
-  <!-- Progress -->
-  <div class="me-progress" id="me-progress"></div>
+  <div class="me-progress" id="progress"></div>
+  <div id="revision-banner" style="display:none"></div>
+  <div id="steps">
 
-  <!-- Steps container -->
-  <div id="me-steps">
-
-    <!-- Step 1: Yetkili -->
+    <!-- STEP 1: Yetkili -->
     <div class="me-step" data-step="1">
-      <div class="me-step-info">
-        <div class="me-step-num">Adım 1 / 5</div>
-        <div class="me-step-title">Yetkili Bilgileri</div>
-        <div class="me-step-desc">Mekan sahibi veya yetkilinin bilgileri</div>
-      </div>
+      <div class="me-sinfo"><div class="me-snum">Adım 1 / 6</div><div class="me-stitle">Yetkili Bilgileri</div></div>
       <div class="me-card">
-        <div class="me-field">
-          <label class="me-label">Ad Soyad *</label>
-          <input type="text" class="me-input" id="me-ownerName" placeholder="Adınız ve soyadınız" required>
-        </div>
+        <div class="me-field"><label class="me-label">Ad Soyad *</label><input class="me-input" id="f-ownerName" placeholder="Adınız ve soyadınız"></div>
         <div class="me-row">
-          <div class="me-field">
-            <label class="me-label">E-posta *</label>
-            <input type="email" class="me-input" id="me-ownerEmail" placeholder="ornek@mail.com" required>
-          </div>
-          <div class="me-field">
-            <label class="me-label">Telefon *</label>
-            <input type="tel" class="me-input" id="me-ownerPhone" placeholder="+90 5XX XXX XX XX" required>
-          </div>
+          <div class="me-field"><label class="me-label">E-posta *</label><input type="email" class="me-input" id="f-ownerEmail" placeholder="ornek@mail.com"></div>
+          <div class="me-field"><label class="me-label">Telefon *</label><input type="tel" class="me-input" id="f-ownerPhone" placeholder="+90 5XX XXX XX XX" oninput="fmtPhone(this)"></div>
         </div>
-        <!-- Honeypot -->
-        <div class="me-hp"><input type="text" id="me-hp-field" tabindex="-1" autocomplete="off"></div>
+        <div class="me-hp"><input type="text" id="hp" tabindex="-1" autocomplete="off"></div>
       </div>
     </div>
 
-    <!-- Step 2: Mekan Bilgileri -->
+    <!-- STEP 2: Mekan Bilgileri -->
     <div class="me-step" data-step="2" style="display:none">
-      <div class="me-step-info">
-        <div class="me-step-num">Adım 2 / 5</div>
-        <div class="me-step-title">Mekan Bilgileri</div>
-        <div class="me-step-desc">Mekanınızın temel bilgileri</div>
-      </div>
+      <div class="me-sinfo"><div class="me-snum">Adım 2 / 6</div><div class="me-stitle">Mekan Bilgileri</div></div>
       <div class="me-card">
-        <div class="me-field">
-          <label class="me-label">Mekan Adı *</label>
-          <input type="text" class="me-input" id="me-title" placeholder="Mekanınızın adı" required>
-        </div>
+        <div class="me-field"><label class="me-label">Mekan Adı *</label><input class="me-input" id="f-title" placeholder="Mekanınızın adı"></div>
         <div class="me-row">
-          <div class="me-field">
-            <label class="me-label">Kategori *</label>
-            <select class="me-select" id="me-category" required>
+          <div class="me-field"><label class="me-label">Kategori *</label>
+            <select class="me-select" id="f-category" onchange="onCatChange()">
               <option value="">Seçin</option>
               <option value="kafe">☕ Kafe</option>
               <option value="restoran">🍽 Restoran</option>
@@ -168,9 +136,8 @@ a{color:var(--terra);text-decoration:none}
               <option value="iskele">⚓ İskele</option>
             </select>
           </div>
-          <div class="me-field">
-            <label class="me-label">Konum *</label>
-            <select class="me-select" id="me-location" required>
+          <div class="me-field"><label class="me-label">Konum *</label>
+            <select class="me-select" id="f-location">
               <option value="">Seçin</option>
               <option value="Behramkale (Assos)">Behramkale (Assos)</option>
               <option value="Kadırga Koyu">Kadırga Koyu</option>
@@ -187,370 +154,360 @@ a{color:var(--terra);text-decoration:none}
             </select>
           </div>
         </div>
-        <div class="me-field">
-          <label class="me-label">Tam Adres</label>
-          <input type="text" class="me-input" id="me-address" placeholder="Sokak, mahalle, bina no">
-        </div>
+        <div class="me-field"><label class="me-label">Tam Adres</label><input class="me-input" id="f-address" placeholder="Mahalle, sokak, no"></div>
+        <div class="me-field"><label class="me-label">Google Maps Linki <span>(opsiyonel — mekanınızı Google Maps'te bulun, paylaş linkini yapıştırın)</span></label><input type="url" class="me-input" id="f-mapsLink" placeholder="https://maps.google.com/..."></div>
       </div>
     </div>
 
-    <!-- Step 3: Açıklama & İletişim -->
+    <!-- STEP 3: Açıklama & İletişim -->
     <div class="me-step" data-step="3" style="display:none">
-      <div class="me-step-info">
-        <div class="me-step-num">Adım 3 / 5</div>
-        <div class="me-step-title">Açıklama & İletişim</div>
-        <div class="me-step-desc">Mekanınızı tanıtın ve iletişim bilgilerinizi ekleyin</div>
-      </div>
+      <div class="me-sinfo"><div class="me-snum">Adım 3 / 6</div><div class="me-stitle">Açıklama & İletişim</div></div>
       <div class="me-card">
+        <div class="me-field"><label class="me-label">Kısa Açıklama * <span>(mekan listesinde görünür)</span></label><textarea class="me-textarea" id="f-shortDesc" rows="2" placeholder="1-2 cümlelik kısa tanıtım"></textarea></div>
+        <div class="me-field"><label class="me-label">Detaylı Açıklama * <span>(detay sayfasında görünür)</span></label><textarea class="me-textarea" id="f-description" rows="4" placeholder="Mekanınızı detaylı tanıtın — sunduğunuz hizmetler, öne çıkan özellikler, atmosfer..."></textarea><div class="me-hint">En az 50 karakter</div></div>
+        <div class="me-section">İletişim</div>
         <div class="me-field">
-          <label class="me-label">Mekan Açıklaması *</label>
-          <textarea class="me-textarea" id="me-description" placeholder="Mekanınızı kısaca tanıtın — ne tür yemekler/hizmetler sunuyorsunuz, öne çıkan özellikleriniz neler?" rows="4"></textarea>
-          <div class="me-hint">En az 50 karakter yazın</div>
-        </div>
-        <div class="me-field">
-          <label class="me-label" style="display:flex;align-items:center;justify-content:space-between">Telefon Numaraları <button type="button" class="me-btn-secondary" style="font-size:.65rem;padding:4px 10px;border-radius:6px" onclick="meAddPhone()">+ Numara Ekle</button></label>
-          <div id="me-phones"></div>
+          <label class="me-label" style="display:flex;align-items:center;justify-content:space-between">Telefon Numaraları <button type="button" class="me-btn-s" style="font-size:.62rem;padding:3px 8px;border-radius:5px" onclick="addPhone()">+ Ekle</button></label>
+          <div id="phones"></div>
         </div>
         <div class="me-row">
-          <div class="me-field">
-            <label class="me-label">Website <span>(opsiyonel)</span></label>
-            <input type="url" class="me-input" id="me-website" placeholder="https://...">
-          </div>
-          <div class="me-field">
-            <label class="me-label">Instagram <span>(opsiyonel)</span></label>
-            <input type="text" class="me-input" id="me-instagram" placeholder="@mekanadi">
-          </div>
+          <div class="me-field"><label class="me-label">Website <span>(opsiyonel)</span></label><input type="url" class="me-input" id="f-website" placeholder="https://..."></div>
+          <div class="me-field"><label class="me-label">Instagram <span>(opsiyonel)</span></label><input class="me-input" id="f-instagram" placeholder="@mekanadi"></div>
         </div>
       </div>
     </div>
 
-    <!-- Step 4: Görseller -->
+    <!-- STEP 4: Çalışma Saatleri -->
     <div class="me-step" data-step="4" style="display:none">
-      <div class="me-step-info">
-        <div class="me-step-num">Adım 4 / 5</div>
-        <div class="me-step-title">Görseller</div>
-        <div class="me-step-desc">Mekanınızın fotoğraflarını yükleyin (opsiyonel)</div>
-      </div>
+      <div class="me-sinfo"><div class="me-snum">Adım 4 / 6</div><div class="me-stitle">Çalışma Bilgileri</div></div>
       <div class="me-card">
-        <div class="me-img-drop" id="me-img-drop" onclick="document.getElementById('me-img-input').click()">
-          <div style="font-size:2rem;margin-bottom:8px">📷</div>
-          <div style="font-size:.88rem;font-weight:600;color:var(--navy)">Fotoğraf yüklemek için tıklayın</div>
-          <div style="font-size:.72rem;color:var(--text-muted);margin-top:4px">JPG, PNG, WebP · Maks 5MB · Maks 6 adet</div>
+        <!-- Normal mekanlar: haftalık saatler -->
+        <div id="sec-hours">
+          <div class="me-section" style="margin-top:0;padding-top:0;border-top:none">Haftalık Çalışma Saatleri</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+            <button type="button" class="me-btn-s" style="font-size:.68rem;padding:5px 10px;border-radius:6px" onclick="whQuick('09:00','22:00')">09:00 – 22:00</button>
+            <button type="button" class="me-btn-s" style="font-size:.68rem;padding:5px 10px;border-radius:6px" onclick="whQuick('08:00','23:00')">08:00 – 23:00</button>
+            <button type="button" class="me-btn-s" style="font-size:.68rem;padding:5px 10px;border-radius:6px" onclick="whQuick('07:00','22:00')">07:00 – 22:00</button>
+            <button type="button" class="me-btn-s" style="font-size:.68rem;padding:5px 10px;border-radius:6px;background:rgba(56,161,105,.08);color:var(--green);border:1px solid rgba(56,161,105,.2)" onclick="whQuick('00:00','00:00',true)">7/24 Açık</button>
+            <button type="button" class="me-btn-s" style="font-size:.68rem;padding:5px 10px;border-radius:6px" onclick="whCopyFirst()">İlk günü tümüne uygula ↓</button>
+          </div>
+          <div id="wh-grid"></div>
+          <div class="me-hint" style="margin-top:6px">Bir saati seçin, kapalı günleri işaretleyin. "İlk günü tümüne uygula" ile hızlıca doldurun.</div>
         </div>
-        <input type="file" id="me-img-input" multiple accept="image/jpeg,image/png,image/webp" style="display:none" onchange="meHandleImages(this.files)">
-        <div class="me-img-grid" id="me-img-grid"></div>
-        <div class="me-hint" style="margin-top:8px">İlk fotoğraf kapak görseli olarak kullanılacaktır.</div>
+        <!-- Konaklama: check-in/out + oda + tesis -->
+        <div id="sec-konaklama" style="display:none">
+          <div class="me-section" style="margin-top:0;padding-top:0;border-top:none">Giriş / Çıkış</div>
+          <div class="me-row">
+            <div class="me-field"><label class="me-label">Check-in</label><input type="time" class="me-input" id="f-checkin" value="14:00"></div>
+            <div class="me-field"><label class="me-label">Check-out</label><input type="time" class="me-input" id="f-checkout" value="11:00"></div>
+          </div>
+          <div class="me-section">Oda Tipleri <button type="button" class="me-btn-s" style="font-size:.62rem;padding:3px 8px;border-radius:5px;float:right" onclick="addRoom()">+ Oda Ekle</button></div>
+          <div id="rooms"></div>
+          <div class="me-section">Tesis Olanakları</div>
+          <div class="me-fac" id="facilities">
+            <label><input type="checkbox" value="Havuz"> 🏊 Havuz</label>
+            <label><input type="checkbox" value="Otopark"> 🅿️ Otopark</label>
+            <label><input type="checkbox" value="WiFi"> 📶 WiFi</label>
+            <label><input type="checkbox" value="Kahvaltı Dahil"> ☕ Kahvaltı Dahil</label>
+            <label><input type="checkbox" value="Restoran"> 🍽 Restoran</label>
+            <label><input type="checkbox" value="Spa"> 💆 Spa</label>
+            <label><input type="checkbox" value="Klima"> ❄️ Klima</label>
+            <label><input type="checkbox" value="Deniz Manzaralı"> 🌊 Deniz Manzaralı</label>
+            <label><input type="checkbox" value="Bahçe"> 🌿 Bahçe</label>
+            <label><input type="checkbox" value="Barbekü"> 🔥 Barbekü</label>
+            <label><input type="checkbox" value="Evcil Hayvan"> 🐾 Evcil Hayvan</label>
+          </div>
+        </div>
+        <!-- Sezonluk -->
+        <div class="me-section">Sezon</div>
+        <div class="me-field">
+          <label class="me-label" style="cursor:pointer"><input type="checkbox" id="f-seasonal" style="width:16px;height:16px;accent-color:var(--terra);vertical-align:middle;margin-right:6px"> Sezonluk mekan (belirli aylarda açık)</label>
+        </div>
+        <div id="season-fields" style="display:none">
+          <div class="me-row">
+            <div class="me-field"><label class="me-label">Sezon Başlangıcı</label><input type="date" class="me-input" id="f-seasonStart"></div>
+            <div class="me-field"><label class="me-label">Sezon Bitişi</label><input type="date" class="me-input" id="f-seasonEnd"></div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Step 5: Onay -->
+    <!-- STEP 5: Görseller -->
     <div class="me-step" data-step="5" style="display:none">
-      <div class="me-step-info">
-        <div class="me-step-num">Adım 5 / 5</div>
-        <div class="me-step-title">Onay & Gönder</div>
-        <div class="me-step-desc">Bilgilerinizi kontrol edin ve gönderin</div>
-      </div>
+      <div class="me-sinfo"><div class="me-snum">Adım 5 / 6</div><div class="me-stitle">Görseller</div></div>
       <div class="me-card">
-        <div id="me-summary"></div>
+        <div class="me-imgdrop" id="imgdrop" onclick="document.getElementById('imginput').click()">
+          <div style="font-size:1.8rem;margin-bottom:6px">📷</div>
+          <div style="font-size:.85rem;font-weight:600;color:var(--navy)">Fotoğraf yüklemek için tıklayın</div>
+          <div style="font-size:.7rem;color:var(--text-muted);margin-top:4px">JPG, PNG, WebP · Maks 5MB · Maks 6 adet</div>
+        </div>
+        <input type="file" id="imginput" multiple accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleImgs(this.files)">
+        <div class="me-imggrid" id="imggrid"></div>
+        <div class="me-hint">İlk fotoğraf kapak görseli olarak kullanılır.</div>
+      </div>
+    </div>
+
+    <!-- STEP 6: Onay -->
+    <div class="me-step" data-step="6" style="display:none">
+      <div class="me-sinfo"><div class="me-snum">Adım 6 / 6</div><div class="me-stitle">Onay & Gönder</div></div>
+      <div class="me-card">
+        <div id="summary"></div>
         <div class="me-kvkk">
-          <input type="checkbox" id="me-consent">
-          <label for="me-consent">Kişisel verilerimin Assos'u Keşfet platformunda mekan bilgisi olarak yayınlanmasını ve <a href="/gizlilik.html" target="_blank">Gizlilik Politikası</a> kapsamında işlenmesini kabul ediyorum.</label>
+          <input type="checkbox" id="consent">
+          <label for="consent">Kişisel verilerimin Assos'u Keşfet platformunda mekan bilgisi olarak yayınlanmasını ve <a href="/gizlilik.html" target="_blank">Gizlilik Politikası</a> kapsamında işlenmesini kabul ediyorum.</label>
         </div>
       </div>
     </div>
 
     <!-- Success -->
-    <div id="me-success" style="display:none">
-      <div class="me-card">
-        <div class="me-success">
-          <div class="me-success-icon">🎉</div>
-          <h2>Başvurunuz Alındı!</h2>
-          <p>Mekan ekleme talebiniz ekibimize iletildi. En kısa sürede incelenip size dönüş yapılacaktır.</p>
-          <p style="margin-top:16px;font-size:.78rem;color:var(--text-muted)">Ortalama değerlendirme süresi: 1-3 iş günü</p>
-          <a href="/" class="me-btn me-btn-primary" style="display:inline-block;margin-top:24px;text-decoration:none">Ana Sayfaya Dön</a>
-        </div>
-      </div>
+    <div id="success" style="display:none">
+      <div class="me-card"><div class="me-ok">
+        <div style="font-size:2.5rem">🎉</div>
+        <h2>Başvurunuz Alındı!</h2>
+        <p>Mekan ekleme talebiniz ekibimize iletildi.<br>En kısa sürede incelenip size dönüş yapılacaktır.</p>
+        <p style="margin-top:12px;font-size:.75rem;color:var(--text-muted)">Ortalama değerlendirme süresi: 1-3 iş günü</p>
+        <a href="/" class="me-btn me-btn-p" style="display:inline-block;margin-top:20px;text-decoration:none">Ana Sayfaya Dön</a>
+      </div></div>
     </div>
   </div>
 
-  <!-- Navigation buttons -->
-  <div class="me-btns" id="me-btns">
-    <button class="me-btn me-btn-secondary" id="me-prev" onclick="meGoStep(-1)" style="display:none">← Geri</button>
+  <div class="me-btns" id="btns">
+    <button class="me-btn me-btn-s" id="prevBtn" onclick="go(-1)" style="display:none">← Geri</button>
     <div style="flex:1"></div>
-    <button class="me-btn me-btn-primary" id="me-next" onclick="meGoStep(1)">Devam →</button>
-    <button class="me-btn me-btn-primary" id="me-submit" onclick="meSubmit()" style="display:none">Gönder</button>
+    <button class="me-btn me-btn-p" id="nextBtn" onclick="go(1)">Devam →</button>
+    <button class="me-btn me-btn-p" id="submitBtn" onclick="submit()" style="display:none">Gönder</button>
   </div>
 </div>
-
-<div class="me-footer">
-  © 2026 Assos'u Keşfet · <a href="/">assosukesfet.com</a>
-</div>
+<div class="me-footer">© 2026 Assos'u Keşfet · <a href="/">assosukesfet.com</a></div>
 
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-storage-compat.js"></script>
 <script>
-firebase.initializeApp({
-  apiKey:"AIzaSyCXqgczplchzjClAZt-Wl2eqgqmUMhLVJs",
-  authDomain:"assosu-kesfet.firebaseapp.com",
-  projectId:"assosu-kesfet",
-  storageBucket:"assosu-kesfet.firebasestorage.app",
-  messagingSenderId:"225032191860",
-  appId:"1:225032191860:web:61ac6ba36764b530be3621"
-});
-var db = firebase.firestore();
+firebase.initializeApp({apiKey:"AIzaSyCXqgczplchzjClAZt-Wl2eqgqmUMhLVJs",authDomain:"assosu-kesfet.firebaseapp.com",projectId:"assosu-kesfet",storageBucket:"assosu-kesfet.firebasestorage.app",messagingSenderId:"225032191860",appId:"1:225032191860:web:61ac6ba36764b530be3621"});
+var db=firebase.firestore();
+var step=1,maxStep=6,imgs=[],editDocId=null;
+var DAYS=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
+var CAT_LABELS={kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach Club',iskele:'İskele'};
 
-var meStep = 1;
-var meMaxStep = 5;
-var meImages = [];
+// Init
+(function(){
+  renderProgress(); renderWH(); addPhone();
+  document.getElementById('f-seasonal').onchange=function(){document.getElementById('season-fields').style.display=this.checked?'':'none';};
+  // Edit mode?
+  var p=new URLSearchParams(location.search);
+  editDocId=p.get('edit');
+  if(editDocId) loadEditData(editDocId);
+})();
 
-// Progress bar
-function meRenderProgress() {
-  var html = '';
-  for (var i = 1; i <= meMaxStep; i++) {
-    var cls = i < meStep ? 'done' : (i === meStep ? 'active' : '');
-    html += '<div class="me-step-dot ' + cls + '"></div>';
-    if (i < meMaxStep) html += '<div class="me-step-line ' + (i < meStep ? 'done' : '') + '"></div>';
-  }
-  document.getElementById('me-progress').innerHTML = html;
+async function loadEditData(id){
+  try{
+    var doc=await db.collection('pending_venues').doc(id).get();
+    if(!doc.exists){toast('Talep bulunamadı','red');return;}
+    var d=doc.data();
+    // Revision banner
+    if(d.status==='revision'){
+      var ban=document.getElementById('revision-banner');
+      ban.style.display='';
+      ban.innerHTML='<div class="me-revision">⚠️ <strong>Revizyon istendi</strong>'+(d.rejectReason?' — '+d.rejectReason:'')+'<br>Lütfen eksik bilgileri tamamlayıp tekrar gönderin.</div>';
+    }
+    // Fill fields
+    if(d.ownerName)document.getElementById('f-ownerName').value=d.ownerName;
+    if(d.ownerEmail)document.getElementById('f-ownerEmail').value=d.ownerEmail;
+    if(d.ownerPhone)document.getElementById('f-ownerPhone').value=d.ownerPhone;
+    if(d.title)document.getElementById('f-title').value=d.title;
+    if(d.category){document.getElementById('f-category').value=d.category;onCatChange();}
+    if(d.location)document.getElementById('f-location').value=d.location;
+    if(d.address)document.getElementById('f-address').value=d.address;
+    if(d.mapsLink)document.getElementById('f-mapsLink').value=d.mapsLink;
+    if(d.shortDesc)document.getElementById('f-shortDesc').value=d.shortDesc;
+    if(d.description)document.getElementById('f-description').value=d.description;
+    if(d.website)document.getElementById('f-website').value=d.website;
+    if(d.instagram)document.getElementById('f-instagram').value=d.instagram;
+    // Phones
+    document.getElementById('phones').innerHTML='';
+    if(d.phones&&d.phones.length>0)d.phones.forEach(function(p){addPhone(p);});
+    else addPhone();
+    // Hours
+    if(d.weeklyHours)renderWH(d.weeklyHours);
+    if(d.checkin)document.getElementById('f-checkin').value=d.checkin;
+    if(d.checkout)document.getElementById('f-checkout').value=d.checkout;
+    // Rooms
+    if(d.rooms&&d.rooms.length>0)d.rooms.forEach(function(r){addRoom(r);});
+    // Facilities
+    if(d.facilities)(d.facilities).forEach(function(f){var cb=document.querySelector('#facilities input[value="'+f+'"]');if(cb)cb.checked=true;});
+    // Seasonal
+    if(d.seasonal){document.getElementById('f-seasonal').checked=true;document.getElementById('season-fields').style.display='';if(d.seasonStart)document.getElementById('f-seasonStart').value=d.seasonStart;if(d.seasonEnd)document.getElementById('f-seasonEnd').value=d.seasonEnd;}
+    // Existing images as URLs
+    if(d.images&&d.images.length>0){
+      d.images.forEach(function(url){imgs.push({dataUrl:url,file:null,existing:true});});
+      renderImgs();
+    }
+    document.querySelector('.me-header h1').textContent='Mekanınızı Düzenleyin';
+  }catch(e){toast('Veri yüklenemedi: '+e.message,'red');}
 }
 
-// Show step
-function meShowStep() {
-  document.querySelectorAll('.me-step').forEach(function(el) {
-    el.style.display = el.dataset.step == meStep ? '' : 'none';
-  });
-  document.getElementById('me-prev').style.display = meStep > 1 ? '' : 'none';
-  document.getElementById('me-next').style.display = meStep < meMaxStep ? '' : 'none';
-  document.getElementById('me-submit').style.display = meStep === meMaxStep ? '' : 'none';
-  document.getElementById('me-btns').style.display = document.getElementById('me-success').style.display === 'none' ? '' : 'none';
-  meRenderProgress();
-  if (meStep === 5) meRenderSummary();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+function renderProgress(){
+  var h='';for(var i=1;i<=maxStep;i++){h+='<div class="me-dot '+(i<step?'done':i===step?'active':'')+'"></div>';if(i<maxStep)h+='<div class="me-line '+(i<step?'done':'')+'"></div>';}
+  document.getElementById('progress').innerHTML=h;
 }
-
-// Validate step
-function meValidateStep(step) {
-  if (step === 1) {
-    var name = document.getElementById('me-ownerName').value.trim();
-    var email = document.getElementById('me-ownerEmail').value.trim();
-    var phone = document.getElementById('me-ownerPhone').value.trim();
-    if (!name) { meShowError('me-ownerName', 'Ad soyad zorunludur'); return false; }
-    if (!email || !email.includes('@')) { meShowError('me-ownerEmail', 'Geçerli bir e-posta girin'); return false; }
-    if (!phone || phone.length < 10) { meShowError('me-ownerPhone', 'Geçerli bir telefon girin'); return false; }
-    return true;
-  }
-  if (step === 2) {
-    var title = document.getElementById('me-title').value.trim();
-    var cat = document.getElementById('me-category').value;
-    var loc = document.getElementById('me-location').value;
-    if (!title) { meShowError('me-title', 'Mekan adı zorunludur'); return false; }
-    if (!cat) { meShowError('me-category', 'Kategori seçin'); return false; }
-    if (!loc) { meShowError('me-location', 'Konum seçin'); return false; }
-    return true;
-  }
-  if (step === 3) {
-    var desc = document.getElementById('me-description').value.trim();
-    if (!desc || desc.length < 50) { meShowError('me-description', 'En az 50 karakter açıklama yazın (' + desc.length + '/50)'); return false; }
-    return true;
-  }
+function showStep(){
+  document.querySelectorAll('.me-step').forEach(function(el){el.style.display=el.dataset.step==step?'':'none';});
+  document.getElementById('prevBtn').style.display=step>1?'':'none';
+  document.getElementById('nextBtn').style.display=step<maxStep?'':'none';
+  document.getElementById('submitBtn').style.display=step===maxStep?'':'none';
+  document.getElementById('btns').style.display=document.getElementById('success').style.display==='none'?'':'none';
+  renderProgress();if(step===maxStep)renderSummary();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function validate(s){
+  if(s===1){if(!v('f-ownerName','Ad soyad zorunlu'))return false;if(!v('f-ownerEmail','Geçerli e-posta girin')||!document.getElementById('f-ownerEmail').value.includes('@'))return false;if(!v('f-ownerPhone','Telefon zorunlu'))return false;return true;}
+  if(s===2){if(!v('f-title','Mekan adı zorunlu'))return false;if(!document.getElementById('f-category').value){toast('Kategori seçin','red');return false;}if(!document.getElementById('f-location').value){toast('Konum seçin','red');return false;}return true;}
+  if(s===3){if(!v('f-shortDesc','Kısa açıklama zorunlu'))return false;var desc=document.getElementById('f-description').value.trim();if(desc.length<50){toast('Detaylı açıklama en az 50 karakter ('+desc.length+'/50)','red');return false;}return true;}
   return true;
 }
+function v(id,msg){var el=document.getElementById(id);if(!el||!el.value.trim()){toast(msg,'red');if(el)el.focus();return false;}return true;}
+function go(dir){if(dir===1&&!validate(step))return;step=Math.max(1,Math.min(maxStep,step+dir));showStep();}
 
-function meShowError(fieldId, msg) {
-  var el = document.getElementById(fieldId);
-  if (el) { el.style.borderColor = 'var(--red)'; el.focus(); }
-  // Geçici toast
-  var toast = document.createElement('div');
-  toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--red);color:#fff;padding:10px 20px;border-radius:10px;font-size:.82rem;font-weight:600;z-index:999;animation:meFadeIn .3s';
-  toast.textContent = msg;
-  document.body.appendChild(toast);
-  setTimeout(function() { toast.remove(); }, 3000);
-  if (el) el.addEventListener('input', function() { el.style.borderColor = ''; }, { once: true });
+function fmtPhone(el){
+  var c=el.selectionStart;var raw=el.value.replace(/[^\d+]/g,'');
+  if(raw.startsWith('0'))raw='+90'+raw.substring(1);
+  else if(raw.startsWith('90')&&!raw.startsWith('+90'))raw='+'+raw;
+  else if(raw.length>0&&!raw.startsWith('+')&&!raw.startsWith('9'))raw='+90'+raw;
+  var d=raw.replace(/\D/g,'');var f='';
+  if(d.length<=2)f='+'+d;
+  else if(d.length<=5)f='+'+d.substring(0,2)+' '+d.substring(2);
+  else if(d.length<=8)f='+'+d.substring(0,2)+' '+d.substring(2,5)+' '+d.substring(5);
+  else if(d.length<=10)f='+'+d.substring(0,2)+' '+d.substring(2,5)+' '+d.substring(5,8)+' '+d.substring(8);
+  else f='+'+d.substring(0,2)+' '+d.substring(2,5)+' '+d.substring(5,8)+' '+d.substring(8,10)+' '+d.substring(10,12);
+  var diff=f.length-el.value.length;el.value=f;el.setSelectionRange(c+diff,c+diff);
+}
+function toast(msg,color){var t=document.createElement('div');t.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:'+(color==='red'?'var(--red)':'var(--green)')+';color:#fff;padding:10px 20px;border-radius:10px;font-size:.82rem;font-weight:600;z-index:999';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove();},3000);}
+
+// Category change
+function onCatChange(){
+  var cat=document.getElementById('f-category').value;
+  document.getElementById('sec-hours').style.display=cat==='konaklama'?'none':'';
+  document.getElementById('sec-konaklama').style.display=cat==='konaklama'?'':'none';
 }
 
-// Navigate
-function meGoStep(dir) {
-  if (dir === 1 && !meValidateStep(meStep)) return;
-  meStep = Math.max(1, Math.min(meMaxStep, meStep + dir));
-  meShowStep();
+// Weekly hours
+function renderWH(data){
+  document.getElementById('wh-grid').innerHTML=DAYS.map(function(day,i){
+    var d=data?data[i]:null;var closed=d?d.closed:false;var open=d?d.open:'';var close=d?d.close:'';
+    return '<div class="me-wh"><span class="me-wh-day">'+day+'</span><input type="time" class="wh-open" value="'+open+'" '+(closed?'disabled':'')+' style="width:100px"><span style="color:var(--text-muted)">—</span><input type="time" class="wh-close" value="'+close+'" '+(closed?'disabled':'')+' style="width:100px"><label class="me-wh-closed"><input type="checkbox" class="wh-cb" '+(closed?'checked':'')+' onchange="var r=this.closest(\'.me-wh\');r.querySelectorAll(\'input[type=time]\').forEach(function(t){t.disabled=this.checked}.bind(this))"> Kapalı</label></div>';
+  }).join('');
 }
 
-// Phone rows
-function meAddPhone(data) {
-  var container = document.getElementById('me-phones');
-  var row = document.createElement('div');
-  row.className = 'me-phone-row';
-  var num = (data && data.number) || '';
-  var isWa = (data && data.whatsapp) || false;
-  row.innerHTML = '<input type="tel" class="me-input" value="' + num + '" placeholder="+90 5XX XXX XX XX" style="padding:10px 12px">' +
-    '<label class="me-phone-wa"><input type="checkbox" ' + (isWa ? 'checked' : '') + '> WA</label>' +
-    '<button type="button" class="me-phone-remove" onclick="this.parentElement.remove()">×</button>';
-  container.appendChild(row);
+// Quick fill hours
+function whQuick(open,close,is24){
+  document.querySelectorAll('#wh-grid .me-wh').forEach(function(row){
+    row.querySelector('.wh-open').value=is24?'':open;
+    row.querySelector('.wh-close').value=is24?'':close;
+    row.querySelector('.wh-cb').checked=false;
+    row.querySelectorAll('input[type=time]').forEach(function(t){t.disabled=false;});
+    if(is24){row.querySelector('.wh-open').value='00:00';row.querySelector('.wh-close').value='23:59';}
+  });
+  toast('Tüm günler dolduruldu','green');
 }
-// İlk telefon satırı
-meAddPhone();
+function whCopyFirst(){
+  var rows=document.querySelectorAll('#wh-grid .me-wh');
+  if(rows.length<2)return;
+  var first=rows[0];var open=first.querySelector('.wh-open').value;var close=first.querySelector('.wh-close').value;var closed=first.querySelector('.wh-cb').checked;
+  for(var i=1;i<rows.length;i++){
+    rows[i].querySelector('.wh-open').value=open;rows[i].querySelector('.wh-close').value=close;
+    rows[i].querySelector('.wh-cb').checked=closed;
+    rows[i].querySelectorAll('input[type=time]').forEach(function(t){t.disabled=closed;});
+  }
+  toast('İlk gün tümüne uygulandı','green');
+}
 
-// Image handling
-function meHandleImages(files) {
-  Array.from(files).forEach(function(file) {
-    if (meImages.length >= 6) return;
-    if (file.size > 5 * 1024 * 1024) { meShowError('me-img-input', file.name + ' çok büyük (maks 5MB)'); return; }
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      meImages.push({ file: file, dataUrl: e.target.result, name: file.name });
-      meRenderImages();
-    };
-    reader.readAsDataURL(file);
+// Phones
+function addPhone(data){
+  var c=document.getElementById('phones');var d=document.createElement('div');d.className='me-phone';
+  var num=(data&&data.number)||'';var lbl=(data&&data.label)||'';var wa=(data&&data.whatsapp)||false;
+  d.innerHTML='<div class="me-phone-top"><input class="me-input ph-num" value="'+num+'" placeholder="+90 5XX XXX XX XX" style="padding:8px 10px" oninput="fmtPhone(this)"><input class="me-input ph-label" value="'+lbl+'" placeholder="Etiket (ör. Rezervasyon)" style="padding:8px 10px"></div><div class="me-phone-bot"><label class="me-wa"><input type="checkbox" class="ph-wa" '+(wa?'checked':'')+'>WhatsApp</label><button type="button" class="me-phone-del" onclick="this.closest(\'.me-phone\').remove()">Sil</button></div>';
+  c.appendChild(d);
+}
+
+// Rooms
+function addRoom(data){
+  var c=document.getElementById('rooms');var d=document.createElement('div');d.className='me-phone';d.style.cssText='margin-bottom:10px';
+  var r=data||{};
+  d.innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:.75rem;font-weight:700;color:var(--navy)">🛏 Oda</span><button type="button" class="me-phone-del" onclick="this.closest(\'.me-phone\').remove()">Sil</button></div>'+
+    '<div class="me-row" style="margin-bottom:8px"><div class="me-field" style="margin:0"><label class="me-label" style="font-size:.65rem">Oda Adı</label><input class="me-input rm-name" value="'+(r.name||'')+'" placeholder="ör. Deluxe" style="padding:8px 10px"></div><div class="me-field" style="margin:0"><label class="me-label" style="font-size:.65rem">Yatak Tipi</label><select class="me-select rm-bed" style="padding:8px 10px"><option value="">Seçin</option><option'+(r.bed==='Tek Kişilik'?' selected':'')+'>Tek Kişilik</option><option'+(r.bed==='Çift Kişilik'?' selected':'')+'>Çift Kişilik</option><option'+(r.bed==='King Size'?' selected':'')+'>King Size</option><option'+(r.bed==='2 Ayrı Tek Yatak'?' selected':'')+'>2 Ayrı Tek Yatak</option></select></div></div>'+
+    '<div class="me-row3"><div class="me-field" style="margin:0"><label class="me-label" style="font-size:.65rem">Kapasite</label><select class="me-select rm-cap" style="padding:8px 10px"><option value="">Kişi</option><option'+(r.capacity==='1'?' selected':'')+'>1</option><option'+(r.capacity==='2'?' selected':'')+'>2</option><option'+(r.capacity==='3'?' selected':'')+'>3</option><option'+(r.capacity==='4'?' selected':'')+'>4</option><option'+(r.capacity==='5'?' selected':'')+'>5</option><option'+(r.capacity==='6+'?' selected':'')+'>6+</option></select></div><div class="me-field" style="margin:0"><label class="me-label" style="font-size:.65rem">m²</label><input class="me-input rm-size" value="'+(r.size||'')+'" placeholder="25" style="padding:8px 10px"></div><div class="me-field" style="margin:0"><label class="me-label" style="font-size:.65rem">Manzara</label><select class="me-select rm-view" style="padding:8px 10px"><option value="">Seçin</option><option'+(r.view==='Deniz Manzaralı'?' selected':'')+'>🌊 Deniz</option><option'+(r.view==='Kara Manzaralı'?' selected':'')+'>🏔 Kara</option><option'+(r.view==='Bahçe Manzaralı'?' selected':'')+'>🌿 Bahçe</option></select></div></div>';
+  c.appendChild(d);
+}
+
+// Images
+function handleImgs(files){
+  Array.from(files).forEach(function(f){if(imgs.length>=6)return;if(f.size>5*1024*1024){toast(f.name+' çok büyük','red');return;}
+    var reader=new FileReader();reader.onload=function(e){imgs.push({file:f,dataUrl:e.target.result});renderImgs();};reader.readAsDataURL(f);
   });
 }
-
-function meRenderImages() {
-  var grid = document.getElementById('me-img-grid');
-  grid.innerHTML = meImages.map(function(img, i) {
-    return '<div class="me-img-thumb">' +
-      '<img src="' + img.dataUrl + '">' +
-      '<button onclick="meImages.splice(' + i + ',1);meRenderImages()">×</button>' +
-      (i === 0 ? '<div style="position:absolute;bottom:2px;left:2px;font-size:.55rem;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--terra);color:#fff">Kapak</div>' : '') +
-    '</div>';
+function renderImgs(){
+  document.getElementById('imggrid').innerHTML=imgs.map(function(img,i){
+    return '<div class="me-imgthumb"><img src="'+img.dataUrl+'"><button onclick="imgs.splice('+i+',1);renderImgs()">×</button>'+(i===0?'<div style="position:absolute;bottom:2px;left:2px;font-size:.5rem;font-weight:700;padding:2px 5px;border-radius:3px;background:var(--terra);color:#fff">Kapak</div>':'')+' </div>';
   }).join('');
-  document.getElementById('me-img-drop').style.display = meImages.length >= 6 ? 'none' : '';
+  document.getElementById('imgdrop').style.display=imgs.length>=6?'none':'';
+}
+
+// Collect data
+function collectData(){
+  var phones=[];document.querySelectorAll('#phones .me-phone').forEach(function(row){var n=row.querySelector('.ph-num').value.trim();if(n)phones.push({number:n,label:row.querySelector('.ph-label').value.trim(),whatsapp:row.querySelector('.ph-wa').checked});});
+  var cat=document.getElementById('f-category').value;
+  var wh=[];if(cat!=='konaklama'){document.querySelectorAll('#wh-grid .me-wh').forEach(function(row){wh.push({days:row.querySelector('.me-wh-day').textContent,open:row.querySelector('.wh-open').value,close:row.querySelector('.wh-close').value,closed:row.querySelector('.wh-cb').checked});});}
+  var rooms=[];if(cat==='konaklama'){document.querySelectorAll('#rooms .me-phone').forEach(function(row){rooms.push({name:row.querySelector('.rm-name').value.trim(),bed:(row.querySelector('.rm-bed')||{}).value||'',capacity:(row.querySelector('.rm-cap')||{}).value||'',size:(row.querySelector('.rm-size')||{}).value||'',view:(row.querySelector('.rm-view')||{}).value||''});});}
+  var facilities=[];if(cat==='konaklama'){document.querySelectorAll('#facilities input:checked').forEach(function(cb){facilities.push(cb.value);});}
+  return {
+    ownerName:document.getElementById('f-ownerName').value.trim(),ownerEmail:document.getElementById('f-ownerEmail').value.trim(),ownerPhone:document.getElementById('f-ownerPhone').value.trim(),
+    title:document.getElementById('f-title').value.trim(),category:cat,location:document.getElementById('f-location').value,address:document.getElementById('f-address').value.trim(),mapsLink:document.getElementById('f-mapsLink').value.trim(),
+    shortDesc:document.getElementById('f-shortDesc').value.trim(),description:document.getElementById('f-description').value.trim(),
+    phones:phones,website:document.getElementById('f-website').value.trim(),instagram:document.getElementById('f-instagram').value.trim(),
+    weeklyHours:wh,checkin:cat==='konaklama'?document.getElementById('f-checkin').value:'',checkout:cat==='konaklama'?document.getElementById('f-checkout').value:'',
+    rooms:rooms,facilities:facilities,
+    seasonal:document.getElementById('f-seasonal').checked,seasonStart:document.getElementById('f-seasonStart').value,seasonEnd:document.getElementById('f-seasonEnd').value
+  };
 }
 
 // Summary
-function meRenderSummary() {
-  var catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach Club',iskele:'İskele'};
-  var phones = [];
-  document.querySelectorAll('#me-phones .me-phone-row').forEach(function(row) {
-    var num = row.querySelector('input[type="tel"]').value.trim();
-    if (num) phones.push(num + (row.querySelector('input[type="checkbox"]').checked ? ' (WhatsApp)' : ''));
-  });
-
-  var rows = [
-    ['Yetkili', document.getElementById('me-ownerName').value],
-    ['E-posta', document.getElementById('me-ownerEmail').value],
-    ['Yetkili Tel', document.getElementById('me-ownerPhone').value],
-    ['Mekan Adı', document.getElementById('me-title').value],
-    ['Kategori', catLabels[document.getElementById('me-category').value] || ''],
-    ['Konum', document.getElementById('me-location').value],
-    ['Adres', document.getElementById('me-address').value || '—'],
-    ['Telefon', phones.join(', ') || '—'],
-    ['Website', document.getElementById('me-website').value || '—'],
-    ['Instagram', document.getElementById('me-instagram').value || '—'],
-    ['Görseller', meImages.length > 0 ? meImages.length + ' fotoğraf' : 'Yüklenmedi']
-  ];
-
-  document.getElementById('me-summary').innerHTML = rows.map(function(r) {
-    return '<div class="me-summary-row"><span class="me-summary-label">' + r[0] + '</span><span class="me-summary-val">' + r[1] + '</span></div>';
-  }).join('') + '<div class="me-summary-row" style="border:none;padding-top:12px"><span class="me-summary-label">Açıklama</span></div><div style="font-size:.82rem;color:var(--text);line-height:1.7;padding:8px 0">' + document.getElementById('me-description').value.substring(0, 200) + (document.getElementById('me-description').value.length > 200 ? '...' : '') + '</div>';
+function renderSummary(){
+  var d=collectData();var phoneStr=d.phones.map(function(p){return p.number+(p.whatsapp?' (WA)':'');}).join(', ')||'—';
+  var rows=[['Yetkili',d.ownerName],['E-posta',d.ownerEmail],['Yetkili Tel',d.ownerPhone],['Mekan Adı',d.title],['Kategori',CAT_LABELS[d.category]||''],['Konum',d.location],['Adres',d.address||'—'],['Telefon',phoneStr],['Website',d.website||'—'],['Instagram',d.instagram||'—'],['Görseller',imgs.length>0?imgs.length+' fotoğraf':'Yüklenmedi']];
+  if(d.category==='konaklama'){rows.push(['Check-in',d.checkin],['Check-out',d.checkout],['Oda Sayısı',d.rooms.length+''],['Tesisler',d.facilities.join(', ')||'—']);}
+  if(d.seasonal)rows.push(['Sezon',d.seasonStart+' — '+d.seasonEnd]);
+  document.getElementById('summary').innerHTML=rows.map(function(r){return '<div class="me-sumrow"><span class="me-suml">'+r[0]+'</span><span class="me-sumv">'+r[1]+'</span></div>';}).join('')+'<div style="margin-top:10px;font-size:.8rem;color:var(--text-light);line-height:1.6"><strong>Açıklama:</strong> '+d.description.substring(0,200)+(d.description.length>200?'...':'')+'</div>';
 }
 
 // Submit
-async function meSubmit() {
-  // Honeypot check
-  if (document.getElementById('me-hp-field').value) {
-    document.getElementById('me-success').style.display = '';
-    document.getElementById('me-btns').style.display = 'none';
-    document.querySelectorAll('.me-step').forEach(function(el) { el.style.display = 'none'; });
-    return;
-  }
-
-  // KVKK check
-  if (!document.getElementById('me-consent').checked) {
-    meShowError('me-consent', 'KVKK onayı zorunludur');
-    return;
-  }
-
-  // Rate limit check (localStorage)
-  var rlKey = 'me_submit_' + new Date().toISOString().split('T')[0];
-  var rlCount = parseInt(localStorage.getItem(rlKey) || '0');
-  if (rlCount >= 3) {
-    meShowError('me-submit', 'Günlük başvuru limitinize ulaştınız. Yarın tekrar deneyin.');
-    return;
-  }
-
-  var btn = document.getElementById('me-submit');
-  btn.disabled = true;
-  btn.textContent = 'Gönderiliyor...';
-
-  try {
-    // Collect phones
-    var phones = [];
-    document.querySelectorAll('#me-phones .me-phone-row').forEach(function(row) {
-      var num = row.querySelector('input[type="tel"]').value.trim();
-      if (num) phones.push({ number: num, whatsapp: row.querySelector('input[type="checkbox"]').checked });
-    });
-
+async function submit(){
+  if(document.getElementById('hp').value){document.getElementById('success').style.display='';document.getElementById('btns').style.display='none';document.querySelectorAll('.me-step').forEach(function(el){el.style.display='none';});return;}
+  if(!document.getElementById('consent').checked){toast('KVKK onayı zorunlu','red');return;}
+  var rlKey='me_sub_'+new Date().toISOString().split('T')[0];var rlC=parseInt(localStorage.getItem(rlKey)||'0');
+  if(rlC>=3){toast('Günlük başvuru limitine ulaştınız','red');return;}
+  var btn=document.getElementById('submitBtn');btn.disabled=true;btn.textContent='Gönderiliyor...';
+  try{
+    var data=collectData();
     // Upload images
-    var imageUrls = [];
-    for (var i = 0; i < meImages.length; i++) {
-      try {
-        var path = 'pending/' + Date.now() + '_' + i + '.jpg';
-        var ref = firebase.storage().ref(path);
-        await ref.put(meImages[i].file, { contentType: meImages[i].file.type });
-        var url = await ref.getDownloadURL();
-        imageUrls.push(url);
-      } catch(e) { console.warn('Görsel yüklenemedi:', e); }
+    var imageUrls=[];
+    for(var i=0;i<imgs.length;i++){
+      if(imgs[i].existing){imageUrls.push(imgs[i].dataUrl);continue;}
+      try{var path='pending/'+Date.now()+'_'+i+'.jpg';var ref=firebase.storage().ref(path);await ref.put(imgs[i].file,{contentType:imgs[i].file.type});imageUrls.push(await ref.getDownloadURL());}catch(e){}
     }
-
-    // Save to Firestore
-    await db.collection('pending_venues').add({
-      ownerName: document.getElementById('me-ownerName').value.trim(),
-      ownerEmail: document.getElementById('me-ownerEmail').value.trim(),
-      ownerPhone: document.getElementById('me-ownerPhone').value.trim(),
-      title: document.getElementById('me-title').value.trim(),
-      category: document.getElementById('me-category').value,
-      location: document.getElementById('me-location').value,
-      address: document.getElementById('me-address').value.trim(),
-      description: document.getElementById('me-description').value.trim(),
-      phones: phones,
-      website: document.getElementById('me-website').value.trim(),
-      instagram: document.getElementById('me-instagram').value.trim(),
-      images: imageUrls,
-      consentGiven: true,
-      consentDate: new Date().toISOString(),
-      status: 'pending',
-      submittedAt: new Date().toISOString(),
-      userAgent: navigator.userAgent.substring(0, 200),
-      referrer: document.referrer || ''
-    });
-
-    // Rate limit update
-    localStorage.setItem(rlKey, String(rlCount + 1));
-
-    // Telegram notification
-    try {
-      fetch('/api/notify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'venue_request', data: {
-          name: document.getElementById('me-ownerName').value.trim(),
-          email: document.getElementById('me-ownerEmail').value.trim(),
-          phone: document.getElementById('me-ownerPhone').value.trim(),
-          venueTitle: document.getElementById('me-title').value.trim(),
-          category: document.getElementById('me-category').value,
-          location: document.getElementById('me-location').value
-        }})
-      });
-    } catch(e) {}
-
-    // Show success
-    document.getElementById('me-success').style.display = '';
-    document.getElementById('me-btns').style.display = 'none';
-    document.querySelectorAll('.me-step').forEach(function(el) { el.style.display = 'none'; });
-    document.getElementById('me-progress').style.display = 'none';
-
-  } catch(err) {
-    console.error('Gönderim hatası:', err);
-    meShowError('me-submit', 'Gönderim başarısız: ' + (err.message || 'Lütfen tekrar deneyin'));
-    btn.disabled = false;
-    btn.textContent = 'Gönder';
-  }
+    data.images=imageUrls;data.consentGiven=true;data.consentDate=new Date().toISOString();data.submittedAt=new Date().toISOString();data.status='pending';data.userAgent=navigator.userAgent.substring(0,200);
+    if(editDocId){
+      data.updatedAt=new Date().toISOString();
+      await db.collection('pending_venues').doc(editDocId).update(data);
+    }else{
+      await db.collection('pending_venues').add(data);
+    }
+    localStorage.setItem(rlKey,String(rlC+1));
+    try{fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'venue_request',data:{name:data.ownerName,email:data.ownerEmail,phone:data.ownerPhone,venueTitle:data.title,category:CAT_LABELS[data.category]||data.category,location:data.location}})});}catch(e){}
+    document.getElementById('success').style.display='';document.getElementById('btns').style.display='none';document.querySelectorAll('.me-step').forEach(function(el){el.style.display='none';});document.getElementById('progress').style.display='none';document.getElementById('revision-banner').style.display='none';
+  }catch(err){toast('Gönderim başarısız: '+err.message,'red');btn.disabled=false;btn.textContent='Gönder';}
 }
-
-// Init
-meShowStep();
+showStep();
 </script>
-<style>@keyframes meFadeIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}</style>
 </body>
 </html>

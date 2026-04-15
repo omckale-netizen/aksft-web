@@ -3949,7 +3949,7 @@ async function renderPendingVenues() {
     }
 
     var catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskele'};
-    var statusLabels = { pending: { label:'Bekliyor', bg:'rgba(212,147,90,.1)', color:'#975A16', icon:'⏳' }, approved: { label:'Onaylandı', bg:'rgba(56,161,105,.1)', color:'#276749', icon:'✅' }, rejected: { label:'Reddedildi', bg:'rgba(229,62,62,.08)', color:'#C53030', icon:'❌' } };
+    var statusLabels = { pending: { label:'Bekliyor', bg:'rgba(212,147,90,.1)', color:'#975A16', icon:'⏳' }, revision: { label:'Revizyon Bekleniyor', bg:'rgba(49,130,206,.08)', color:'#2B6CB0', icon:'📝' }, approved: { label:'Onaylandı', bg:'rgba(56,161,105,.1)', color:'#276749', icon:'✅' }, rejected: { label:'Reddedildi', bg:'rgba(229,62,62,.08)', color:'#C53030', icon:'❌' } };
 
     listEl.innerHTML = items.map(function(item) {
       var st = statusLabels[item.status] || statusLabels.pending;
@@ -3979,7 +3979,9 @@ async function renderPendingVenues() {
         (item.description ? '<div style="padding:0 20px 16px;font-size:.8rem;color:var(--text-light);line-height:1.7;border-top:1px solid rgba(0,0,0,.03);padding-top:12px">' + item.description.substring(0, 300) + (item.description.length > 300 ? '...' : '') + '</div>' : '') +
         (imgCount > 0 ? '<div style="padding:0 20px 16px;display:flex;gap:6px;flex-wrap:wrap">' + item.images.slice(0, 4).map(function(url) { return '<img src="' + url + '" style="width:60px;height:42px;object-fit:cover;border-radius:6px;border:1px solid rgba(0,0,0,.06)">'; }).join('') + (imgCount > 4 ? '<span style="font-size:.72rem;color:var(--text-muted);align-self:center">+' + (imgCount - 4) + '</span>' : '') + '</div>' : '') +
         '<div style="padding:12px 20px;border-top:1px solid rgba(0,0,0,.04);display:flex;gap:8px;flex-wrap:wrap">' +
-          (item.status === 'pending' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla & Mekan Ekle</button><button class="btn btn-danger btn-sm" onclick="rejectPendingVenue(\'' + item._id + '\')">❌ Reddet</button>' : '') +
+          (item.status === 'pending' || item.status === 'revision' ? '' : '') +
+          (item.status === 'pending' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla & Mekan Ekle</button><button class="btn btn-sm" style="background:rgba(49,130,206,.1);color:#2B6CB0;border:1px solid rgba(49,130,206,.2)" onclick="rejectPendingVenue(\'' + item._id + '\')">📝 Revizyon İste</button>' : '') +
+          (item.status === 'revision' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla</button><span style="font-size:.72rem;color:var(--text-muted)">Düzenleme bekleniyor</span>' : '') +
           '<button class="btn btn-secondary btn-sm" onclick="openComposeMail(\'' + (item.ownerEmail || '') + '\')">✉️ Mail Gönder</button>' +
           '<button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="deletePendingVenue(\'' + item._id + '\')">🗑 Sil</button>' +
         '</div>' +
@@ -4027,22 +4029,35 @@ async function approvePendingVenue(id) {
 }
 
 async function rejectPendingVenue(id) {
-  var reason = prompt('Red sebebi (opsiyonel):');
+  var reason = prompt('Revizyon sebebi / eksik bilgi açıklaması:');
   if (reason === null) return;
   try {
     var doc = await db.collection('pending_venues').doc(id).get();
     var data = doc.exists ? doc.data() : {};
-    await db.collection('pending_venues').doc(id).update({ status: 'rejected', rejectedAt: new Date().toISOString(), rejectReason: reason || '' });
-    logActivity('mekan_talep_red', id, data.title || id);
+    await db.collection('pending_venues').doc(id).update({ status: 'revision', rejectedAt: new Date().toISOString(), rejectReason: reason || 'Eksik bilgi' });
+    logActivity('mekan_talep_revizyon', id, data.title || id);
     renderPendingVenues();
-    showToast('❌ Talep reddedildi.', 'success');
-    // Mail gönder
-    if (data.ownerEmail && confirm('Mekan sahibine red maili göndermek ister misiniz?')) {
-      openComposeMail(data.ownerEmail);
-      setTimeout(function() {
-        document.getElementById('compose-template').value = 'mekan_red';
-        applyMailTemplate();
-      }, 200);
+    showToast('📝 Revizyon istendi.', 'success');
+    // Otomatik revizyon maili gönder
+    if (data.ownerEmail) {
+      var editUrl = 'https://assosukesfet.com/mekan-ekle?edit=' + id;
+      try {
+        var html = buildMailHtml('Mekan Talebiniz Hakkında — ' + (data.title || ''),
+          'Merhaba ' + (data.ownerName || 'Değerli İşletme Sahibi') + ',\n\n' +
+          (data.title || 'Mekanınız') + ' için gönderdiğiniz başvuruyu inceledik.\n\n' +
+          'Başvurunuzda bazı eksik veya düzeltilmesi gereken bilgiler tespit ettik:\n\n' +
+          '📋 ' + (reason || 'Eksik bilgi') + '\n\n' +
+          'Aşağıdaki butona tıklayarak mevcut bilgilerinizi düzenleyebilir ve tekrar gönderebilirsiniz. Sıfırdan doldurmak zorunda değilsiniz, sadece eksik alanları tamamlayın.',
+          { ctaText: 'Başvurumu Düzenle', ctaUrl: editUrl }
+        );
+        await fetch('/api/send-mail', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ to: [data.ownerEmail], subject: 'Mekan Talebiniz Hakkında — ' + (data.title || '') + ' | Assos\'u Keşfet', html: html })
+        });
+        showToast('✉️ Revizyon maili gönderildi: ' + data.ownerEmail, 'success');
+        try { db.collection('sent_mails').add({ to: [data.ownerEmail], subject: 'Revizyon — ' + (data.title || ''), body: reason || 'Eksik bilgi', timestamp: new Date().toISOString(), user: firebase.auth().currentUser?.email || '' }); } catch(e) {}
+      } catch(mailErr) { showToast('Mail gönderilemedi', 'error'); }
     }
   } catch(err) { showToast('Hata: ' + err.message, 'error'); }
 }
@@ -8927,7 +8942,9 @@ const ACTIVITY_LABELS = {
   backup: { icon: '💾', label: 'Yedekleme', color: 'rgba(49,130,206,.1)' },
   mail_gonder: { icon: '✉️', label: 'Mail Gönderildi', color: 'rgba(196,82,26,.1)' },
   toplu_mail: { icon: '📨', label: 'Toplu Mail Gönderildi', color: 'rgba(107,70,193,.1)' },
-  hosgeldin_mail: { icon: '👋', label: 'Hoşgeldin Maili', color: 'rgba(56,161,105,.1)' }
+  hosgeldin_mail: { icon: '👋', label: 'Hoşgeldin Maili', color: 'rgba(56,161,105,.1)' },
+  mekan_talep_onayla: { icon: '✅', label: 'Mekan Talebi Onaylandı', color: 'rgba(56,161,105,.1)' },
+  mekan_talep_revizyon: { icon: '📝', label: 'Mekan Talebi Revizyon', color: 'rgba(49,130,206,.1)' }
 };
 
 async function renderActivityLog() {
