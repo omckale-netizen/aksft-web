@@ -4012,6 +4012,18 @@ async function approvePendingVenue(id) {
       document.getElementById('f-instagram').value = data.instagram || '';
       document.getElementById('f-ownerName').value = data.ownerName || '';
       document.getElementById('f-ownerEmail').value = data.ownerEmail || '';
+      // Maps link → koordinat çevir
+      if (data.mapsLink) {
+        try {
+          var geoResp = await fetch('/api/geocode?maps=' + encodeURIComponent(data.mapsLink));
+          var geoData = await geoResp.json();
+          if (geoData.lat && geoData.lng) {
+            document.getElementById('f-lat').value = geoData.lat;
+            document.getElementById('f-lng').value = geoData.lng;
+            document.getElementById('f-coords').value = geoData.lat + ', ' + geoData.lng;
+          }
+        } catch(e) {}
+      }
       // Telefonları ekle
       document.getElementById('f-phones-list').innerHTML = '';
       if (data.phones && data.phones.length > 0) {
