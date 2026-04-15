@@ -1490,6 +1490,17 @@ function isVenueOpen(v) {
 }
 
 /* ═══════════════════
+   VP-STYLES INJECT (paylaş/kaydet butonları CSS)
+═══════════════════ */
+function ensureVpStyles() {
+  if (document.getElementById('vp-styles')) return;
+  var s = document.createElement('style');
+  s.id = 'vp-styles';
+  s.textContent = '.vp-hero-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}.vp-back-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.16);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,.25);color:rgba(255,255,255,.9);font-size:.76rem;font-weight:600;text-decoration:none;transition:background .2s;font-family:inherit;}.vp-back-btn:hover{background:rgba(255,255,255,.26);}.vp-hero-acts{display:flex;gap:8px;}.vp-act-btn{display:inline-flex;align-items:center;gap:5px;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.16);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,.25);color:rgba(255,255,255,.9);font-size:.74rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;}.vp-act-btn:hover{background:rgba(255,255,255,.28);}.vp-act-btn.saved{background:rgba(196,82,26,.82);border-color:rgba(196,82,26,.5);}.vp-share-wrap{position:relative;display:inline-block;}.vp-share-btn{display:inline-flex;align-items:center;gap:5px;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.16);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,.25);color:rgba(255,255,255,.9);font-size:.74rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;white-space:nowrap;}.vp-share-btn:hover{background:rgba(255,255,255,.28);}.vp-share-dd{position:absolute;top:calc(100% + 8px);right:0;min-width:180px;background:rgba(255,255,255,.12);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:6px;opacity:0;visibility:hidden;transform:translateY(-4px);transition:all .2s;z-index:20;}.vp-share-dd.open{opacity:1;visibility:visible;transform:translateY(0);}.vp-share-opt{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;border:none;background:none;cursor:pointer;transition:background .15s;text-decoration:none;font-family:inherit;font-size:.78rem;font-weight:600;color:#fff;width:100%;text-align:left;white-space:nowrap;}.vp-share-opt:hover{background:rgba(255,255,255,.12);}.vp-share-opt-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}';
+  document.head.appendChild(s);
+}
+
+/* ═══════════════════
    PLACE CATEGORY HELPER
 ═══════════════════ */
 var PLACE_CAT_FALLBACK = {
@@ -3202,6 +3213,7 @@ function renderVenuePage(venueId) {
    renderVillagePage — Köy detay sayfası
    ═══════════════════════════════════════════════ */
 function renderVillagePage(villageId) {
+  ensureVpStyles();
   var v = (DATA.villages || []).find(function(x) { return x.id === villageId; });
   if (!v) {
     document.getElementById('village-hero').innerHTML = '';
@@ -3674,6 +3686,7 @@ function renderVillagePage(villageId) {
    renderPlacePage — Gezilecek yer detay sayfası
 ═══════════════════ */
 function renderPlacePage(placeId) {
+  ensureVpStyles();
   var p = (DATA.places || []).find(function(x) { return x.id === placeId; });
   if (!p) {
     document.getElementById('place-hero').innerHTML = '';
