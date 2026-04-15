@@ -111,6 +111,23 @@ ${siteContext}`;
     const data = await response.json();
     const reply = data.content?.[0]?.text || 'Üzgünüm, şu an yanıt oluşturamadım.';
 
+    // Soru logunu Firebase'e kaydet (anonim, arka planda)
+    try {
+      const firestoreUrl = 'https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents/chat_logs';
+      fetch(firestoreUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fields: {
+            question: { stringValue: userMessage.substring(0, 200) },
+            timestamp: { timestampValue: new Date().toISOString() },
+            tokens: { integerValue: String(data.usage?.input_tokens || 0) },
+            outputTokens: { integerValue: String(data.usage?.output_tokens || 0) }
+          }
+        })
+      }).catch(() => {});
+    } catch(e) {}
+
     return new Response(JSON.stringify({ reply }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
