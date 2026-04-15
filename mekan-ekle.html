@@ -288,7 +288,7 @@ a{color:var(--terra);text-decoration:none}
   <div style="margin-top:8px">© <script>document.write(new Date().getFullYear())</script> Assos'u Keşfet · <a href="/">assosukesfet.com</a></div>
 </div>
 <script>
-db.collection('settings').doc('site').get().then(function(doc){
+firebase.firestore().collection('settings').doc('site').get().then(function(doc){
   if(doc.exists&&doc.data().logoUrl){
     document.getElementById('footer-logo').innerHTML='<img src="'+doc.data().logoUrl+'" alt="Assos\'u Keşfet" style="height:40px;opacity:.8">';
   }
