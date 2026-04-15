@@ -15,7 +15,7 @@ a{color:var(--terra);text-decoration:none}
 .me-header{background:linear-gradient(135deg,var(--navy) 0%,#2D3E5F 100%);padding:28px 24px;text-align:center}
 .me-header h1{color:#fff;font-size:1.2rem;font-weight:800;margin-bottom:4px}
 .me-header p{color:rgba(255,255,255,.5);font-size:.78rem}
-.me-wrap{max-width:680px;margin:0 auto;padding:20px 16px 60px}
+.me-wrap{max-width:680px;margin:0 auto;padding:20px 16px 24px}
 /* Progress */
 .me-progress{display:flex;align-items:center;justify-content:center;gap:4px;margin-bottom:24px;padding:16px 0}
 .me-dot{width:10px;height:10px;border-radius:50%;background:rgba(26,39,68,.1);transition:all .3s}
@@ -281,7 +281,12 @@ a{color:var(--terra);text-decoration:none}
     <button class="me-btn me-btn-p" id="submitBtn" onclick="submit()" style="display:none">Gönder</button>
   </div>
 </div>
-<div class="me-footer">© 2026 Assos'u Keşfet · <a href="/">assosukesfet.com</a></div>
+<div class="me-footer">
+  <div style="font-size:1.3rem;margin-bottom:6px">🏛️</div>
+  <div style="font-weight:700;color:var(--navy);font-size:.78rem;margin-bottom:2px">Assos'u Keşfet</div>
+  <div>Assos'un Dijital Keşif Rehberi</div>
+  <div style="margin-top:8px">© 2026 Assos'u Keşfet · <a href="/">assosukesfet.com</a></div>
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
