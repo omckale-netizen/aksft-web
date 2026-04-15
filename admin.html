@@ -255,8 +255,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .fac-check{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border:1px solid rgba(0,0,0,.08);border-radius:8px;font-size:.75rem;font-weight:500;cursor:pointer;transition:all .15s;user-select:none}
 .fac-check:has(input:checked){background:rgba(90,122,86,.1);border-color:rgba(90,122,86,.3);color:#5A7A56;font-weight:600}
 .fac-check input{width:0;height:0;opacity:0;position:absolute}
-.room-row{display:flex;gap:8px;align-items:center;padding:10px;background:rgba(0,0,0,.02);border-radius:10px;margin-bottom:8px;flex-wrap:wrap}
-.room-row input{padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.78rem;font-family:inherit}
+.room-row{padding:14px 16px;background:rgba(0,0,0,.02);border:1px solid var(--card-border,rgba(0,0,0,.06));border-radius:12px;margin-bottom:10px}
+.room-row input,.room-row select{padding:8px 10px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.78rem;font-family:inherit;background:var(--input-bg,#fff);color:var(--text)}
 .wh-copy-btn{font-size:.65rem;padding:3px 8px;border:1px solid rgba(0,0,0,.1);border-radius:6px;background:rgba(196,82,26,.05);color:var(--terra);cursor:pointer;font-family:inherit;font-weight:600;transition:all .15s;white-space:nowrap}
 .wh-copy-btn:hover{background:rgba(196,82,26,.12)}
 /* Tag chips */
@@ -6763,25 +6763,36 @@ function addRoomRow(data) {
   var list = document.getElementById('f-rooms-list');
   var row = document.createElement('div');
   row.className = 'room-row';
-  row.style.cssText = 'flex-direction:column;gap:10px;';
   var d = data || {};
-  var uid = 'room_' + Date.now() + '_' + Math.random().toString(36).substr(2,4);
   row.style.cursor = 'grab';
+  function sel(val, opt) { return val === opt ? ' selected' : ''; }
   row.innerHTML =
-    '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;width:100%">' +
-      '<span style="cursor:grab;color:var(--text-muted);font-size:.8rem;user-select:none;" title="Sürükle">☰</span>' +
-      '<input type="text" class="room-name" value="' + (d.name || '') + '" placeholder="Oda adı" style="flex:1;min-width:120px">' +
-      '<select class="room-capacity" style="width:80px;padding:6px 8px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.75rem;font-family:inherit"><option value="">Kişi</option><option value="1"' + (d.capacity === '1' ? ' selected' : '') + '>1 Kişi</option><option value="2"' + (d.capacity === '2' ? ' selected' : '') + '>2 Kişi</option><option value="3"' + (d.capacity === '3' ? ' selected' : '') + '>3 Kişi</option><option value="4"' + (d.capacity === '4' ? ' selected' : '') + '>4 Kişi</option><option value="5"' + (d.capacity === '5' ? ' selected' : '') + '>5 Kişi</option><option value="6"' + (d.capacity === '6' ? ' selected' : '') + '>6 Kişi</option><option value="6+"' + (d.capacity === '6+' ? ' selected' : '') + '>6+ Kişi</option></select>' +
-      '<select class="room-bed" style="width:130px;padding:6px 8px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.75rem;font-family:inherit"><option value="">Yatak Tipi</option><option value="Tek Kişilik"' + (d.bed === 'Tek Kişilik' ? ' selected' : '') + '>Tek Kişilik</option><option value="Çift Kişilik"' + (d.bed === 'Çift Kişilik' ? ' selected' : '') + '>Çift Kişilik</option><option value="King Size"' + (d.bed === 'King Size' ? ' selected' : '') + '>King Size</option><option value="2 Ayrı Tek Yatak"' + (d.bed === '2 Ayrı Tek Yatak' ? ' selected' : '') + '>2 Ayrı Tek Yatak</option><option value="Çift Kişilik + Tek"' + (d.bed === 'Çift Kişilik + Tek' ? ' selected' : '') + '>Çift Kişilik + Tek</option><option value="Çift Kişilik + 2 Tek"' + (d.bed === 'Çift Kişilik + 2 Tek' ? ' selected' : '') + '>Çift Kişilik + 2 Tek</option><option value="Ranza"' + (d.bed === 'Ranza' ? ' selected' : '') + '>Ranza</option><option value="Suit (Çift Kişilik + Salon)"' + (d.bed === 'Suit (Çift Kişilik + Salon)' ? ' selected' : '') + '>Suit (Çift Kişilik + Salon)</option></select>' +
-      '<input type="text" class="room-size" value="' + (d.size || '') + '" placeholder="m²" style="width:60px">' +
-      '<select class="room-view" style="width:110px;padding:6px 8px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.75rem;font-family:inherit"><option value="">Manzara</option><option value="Deniz Manzaralı"' + (d.view === 'Deniz Manzaralı' ? ' selected' : '') + '>🌊 Deniz</option><option value="Kara Manzaralı"' + (d.view === 'Kara Manzaralı' ? ' selected' : '') + '>🏔 Kara</option><option value="Bahçe Manzaralı"' + (d.view === 'Bahçe Manzaralı' ? ' selected' : '') + '>🌿 Bahçe</option><option value="Havuz Manzaralı"' + (d.view === 'Havuz Manzaralı' ? ' selected' : '') + '>🏊 Havuz</option><option value="Deniz & Kara Manzaralı"' + (d.view === 'Deniz & Kara Manzaralı' ? ' selected' : '') + '>🌊🏔 Deniz & Kara</option></select>' +
-      '<button type="button" class="btn-icon" onclick="this.closest(\'.room-row\').remove()" style="color:var(--red);font-size:.85rem" title="Sil">✕</button>' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
+      '<div style="display:flex;align-items:center;gap:8px">' +
+        '<span style="cursor:grab;color:var(--text-muted);font-size:.8rem;user-select:none" title="Sürükle">☰</span>' +
+        '<span style="font-size:.72rem;font-weight:700;color:var(--navy)">🛏 Oda Bilgileri</span>' +
+      '</div>' +
+      '<button type="button" onclick="this.closest(\'.room-row\').remove()" style="font-size:.68rem;padding:4px 10px;border:none;border-radius:6px;background:var(--red-bg);color:var(--red);cursor:pointer;font-weight:600">Sil</button>' +
     '</div>' +
-    '<div style="display:flex;gap:8px;align-items:center">' +
-      '<div class="room-img-preview" style="width:60px;height:40px;border-radius:6px;overflow:hidden;background:rgba(0,0,0,.05);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--text-muted)">' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">' +
+      '<div><label style="font-size:.65rem;color:var(--text-muted);margin-bottom:3px;display:block">Oda Adı</label>' +
+        '<input type="text" class="room-name" value="' + (d.name || '') + '" placeholder="ör. Deluxe Deniz Manzaralı" style="width:100%"></div>' +
+      '<div><label style="font-size:.65rem;color:var(--text-muted);margin-bottom:3px;display:block">Yatak Tipi</label>' +
+        '<select class="room-bed" style="width:100%"><option value="">Seçin</option><option value="Tek Kişilik"' + sel(d.bed,'Tek Kişilik') + '>Tek Kişilik</option><option value="Çift Kişilik"' + sel(d.bed,'Çift Kişilik') + '>Çift Kişilik</option><option value="King Size"' + sel(d.bed,'King Size') + '>King Size</option><option value="2 Ayrı Tek Yatak"' + sel(d.bed,'2 Ayrı Tek Yatak') + '>2 Ayrı Tek Yatak</option><option value="Çift Kişilik + Tek"' + sel(d.bed,'Çift Kişilik + Tek') + '>Çift Kişilik + Tek</option><option value="Ranza"' + sel(d.bed,'Ranza') + '>Ranza</option><option value="Suit (Çift Kişilik + Salon)"' + sel(d.bed,'Suit (Çift Kişilik + Salon)') + '>Suit</option></select></div>' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">' +
+      '<div><label style="font-size:.65rem;color:var(--text-muted);margin-bottom:3px;display:block">Kapasite</label>' +
+        '<select class="room-capacity" style="width:100%"><option value="">Seçin</option><option value="1"' + sel(d.capacity,'1') + '>1 Kişi</option><option value="2"' + sel(d.capacity,'2') + '>2 Kişi</option><option value="3"' + sel(d.capacity,'3') + '>3 Kişi</option><option value="4"' + sel(d.capacity,'4') + '>4 Kişi</option><option value="5"' + sel(d.capacity,'5') + '>5 Kişi</option><option value="6"' + sel(d.capacity,'6') + '>6 Kişi</option><option value="6+"' + sel(d.capacity,'6+') + '>6+</option></select></div>' +
+      '<div><label style="font-size:.65rem;color:var(--text-muted);margin-bottom:3px;display:block">Oda Boyutu</label>' +
+        '<input type="text" class="room-size" value="' + (d.size || '') + '" placeholder="ör. 25" style="width:100%"></div>' +
+      '<div><label style="font-size:.65rem;color:var(--text-muted);margin-bottom:3px;display:block">Manzara</label>' +
+        '<select class="room-view" style="width:100%"><option value="">Seçin</option><option value="Deniz Manzaralı"' + sel(d.view,'Deniz Manzaralı') + '>🌊 Deniz</option><option value="Kara Manzaralı"' + sel(d.view,'Kara Manzaralı') + '>🏔 Kara</option><option value="Bahçe Manzaralı"' + sel(d.view,'Bahçe Manzaralı') + '>🌿 Bahçe</option><option value="Havuz Manzaralı"' + sel(d.view,'Havuz Manzaralı') + '>🏊 Havuz</option><option value="Deniz & Kara Manzaralı"' + sel(d.view,'Deniz & Kara Manzaralı') + '>🌊🏔 Karma</option></select></div>' +
+    '</div>' +
+    '<div style="display:flex;gap:10px;align-items:center">' +
+      '<div class="room-img-preview" style="width:64px;height:44px;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.04);border:1px solid var(--card-border,rgba(0,0,0,.06));flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--text-muted)">' +
         (d.image ? '<img src="' + d.image + '" style="width:100%;height:100%;object-fit:cover">' : '📷') +
       '</div>' +
-      '<input type="file" class="room-img-input" accept="image/jpeg,image/png,image/webp" style="font-size:.7rem;flex:1" onchange="handleRoomImage(this)">' +
+      '<input type="file" class="room-img-input" accept="image/jpeg,image/png,image/webp" style="font-size:.72rem;flex:1" onchange="handleRoomImage(this)">' +
       '<input type="hidden" class="room-image" value="' + (d.image || '') + '">' +
     '</div>';
   list.appendChild(row);
