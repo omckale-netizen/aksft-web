@@ -4002,7 +4002,7 @@ async function renderPendingVenues() {
         (imgCount > 0 ? '<div style="padding:0 20px 16px;display:flex;gap:6px;flex-wrap:wrap">' + item.images.slice(0, 4).map(function(url) { return '<img src="' + url + '" style="width:60px;height:42px;object-fit:cover;border-radius:6px;border:1px solid rgba(0,0,0,.06)">'; }).join('') + (imgCount > 4 ? '<span style="font-size:.72rem;color:var(--text-muted);align-self:center">+' + (imgCount - 4) + '</span>' : '') + '</div>' : '') +
         '<div style="padding:12px 20px;border-top:1px solid rgba(0,0,0,.04);display:flex;gap:8px;flex-wrap:wrap">' +
           (item.status === 'pending' || item.status === 'revision' ? '' : '') +
-          (item.status === 'pending' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla & Mekan Ekle</button><button class="btn btn-sm" style="background:rgba(49,130,206,.1);color:#2B6CB0;border:1px solid rgba(49,130,206,.2)" onclick="showRevisionModal(\'' + item._id + '\')">📝 Revizyon İste</button>' : '') +
+          (item.status === 'pending' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla & Mekan Ekle</button><button class="btn btn-sm" style="background:rgba(49,130,206,.1);color:#2B6CB0;border:1px solid rgba(49,130,206,.2)" onclick="showRevisionModal(\'' + item._id + '\')">📝 Revizyon İste</button><button class="btn btn-danger btn-sm" onclick="rejectPendingVenueFinal(\'' + item._id + '\')">❌ Reddet</button>' : '') +
           (item.status === 'revision' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla</button><span style="font-size:.72rem;color:var(--text-muted)">Düzenleme bekleniyor</span>' : '') +
           '<button class="btn btn-secondary btn-sm" onclick="pendingMailTo(\'' + (item.ownerEmail || '') + '\')">✉️ Mail</button>' +
           '<button class="btn btn-secondary btn-sm" onclick="previewPendingVenue(\'' + item._id + '\')">👁 Detaylı İncele</button>' +
@@ -4306,6 +4306,36 @@ async function rejectPendingVenue(id, reason) {
   } catch(err) { showToast('Hata: ' + err.message, 'error'); }
 }
 
+async function rejectPendingVenueFinal(id) {
+  var reason = prompt('Red sebebi (mekan sahibine iletilecek):');
+  if (reason === null) return;
+  try {
+    var doc = await db.collection('pending_venues').doc(id).get();
+    var data = doc.exists ? doc.data() : {};
+    await db.collection('pending_venues').doc(id).update({ status: 'rejected', rejectedAt: new Date().toISOString(), rejectReason: reason || 'Başvurunuz uygun bulunmadı' });
+    logActivity('mekan_talep_red', id, data.title || id);
+    renderPendingVenues();
+    showToast('❌ Talep reddedildi.', 'success');
+    // Red maili gönder
+    if (data.ownerEmail) {
+      try {
+        var html = buildMailHtml('Mekan Başvurunuz Hakkında — ' + (data.title || ''),
+          'Merhaba ' + (data.ownerName || 'Değerli İşletme Sahibi') + ',\n\n' +
+          (data.title || 'Mekanınız') + ' için gönderdiğiniz başvuruyu inceledik.\n\n' +
+          'Maalesef başvurunuz şu an için onaylanamamıştır.\n\n' +
+          '📋 Sebep: ' + (reason || 'Başvurunuz uygun bulunmadı') + '\n\n' +
+          'Sorularınız için info@assosukesfet.com adresine yazabilirsiniz.\n\nSaygılarımızla,\nAssos\'u Keşfet Ekibi'
+        );
+        await fetch('/api/send-mail', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ to: [data.ownerEmail], subject: 'Mekan Başvurunuz Hakkında — ' + (data.title || '') + ' | Assos\'u Keşfet', html: html })
+        });
+        showToast('✉️ Red maili gönderildi: ' + data.ownerEmail, 'success');
+      } catch(mailErr) {}
+    }
+  } catch(err) { showToast('Hata: ' + err.message, 'error'); }
+}
 async function deletePendingVenue(id) {
   if (!confirm('Bu talebi kalıcı olarak silmek istiyor musunuz?')) return;
   try {
