@@ -4023,7 +4023,7 @@ async function approvePendingVenue(id) {
     // Mekan formunu aç ve bilgileri doldur
     showPage('venues');
     openVenueModal();
-    setTimeout(function() {
+    setTimeout(async function() {
       document.getElementById('f-title').value = data.title || '';
       document.getElementById('f-category').value = data.category || '';
       document.getElementById('f-location').value = data.location || '';
