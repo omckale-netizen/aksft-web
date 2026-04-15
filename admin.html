@@ -4002,7 +4002,7 @@ async function renderPendingVenues() {
         (imgCount > 0 ? '<div style="padding:0 20px 16px;display:flex;gap:6px;flex-wrap:wrap">' + item.images.slice(0, 4).map(function(url) { return '<img src="' + url + '" style="width:60px;height:42px;object-fit:cover;border-radius:6px;border:1px solid rgba(0,0,0,.06)">'; }).join('') + (imgCount > 4 ? '<span style="font-size:.72rem;color:var(--text-muted);align-self:center">+' + (imgCount - 4) + '</span>' : '') + '</div>' : '') +
         '<div style="padding:12px 20px;border-top:1px solid rgba(0,0,0,.04);display:flex;gap:8px;flex-wrap:wrap">' +
           (item.status === 'pending' || item.status === 'revision' ? '' : '') +
-          (item.status === 'pending' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla & Mekan Ekle</button><button class="btn btn-sm" style="background:rgba(49,130,206,.1);color:#2B6CB0;border:1px solid rgba(49,130,206,.2)" onclick="rejectPendingVenue(\'' + item._id + '\')">📝 Revizyon İste</button>' : '') +
+          (item.status === 'pending' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla & Mekan Ekle</button><button class="btn btn-sm" style="background:rgba(49,130,206,.1);color:#2B6CB0;border:1px solid rgba(49,130,206,.2)" onclick="showRevisionModal(\'' + item._id + '\')">📝 Revizyon İste</button>' : '') +
           (item.status === 'revision' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla</button><span style="font-size:.72rem;color:var(--text-muted)">Düzenleme bekleniyor</span>' : '') +
           '<button class="btn btn-secondary btn-sm" onclick="pendingMailTo(\'' + (item.ownerEmail || '') + '\')">✉️ Mail</button>' +
           '<button class="btn btn-secondary btn-sm" onclick="previewPendingVenue(\'' + item._id + '\')">👁 Detaylı İncele</button>' +
@@ -4154,9 +4154,57 @@ async function approvePendingVenue(id) {
   } catch(err) { showToast('Hata: ' + err.message, 'error'); }
 }
 
-async function rejectPendingVenue(id) {
-  var reason = prompt('Revizyon sebebi / eksik bilgi açıklaması:');
-  if (reason === null) return;
+var REVISION_REASONS = [
+  'Mekan görselleri eksik veya yetersiz',
+  'Çalışma saatleri belirtilmemiş',
+  'Telefon numarası eksik veya hatalı',
+  'Mekan açıklaması çok kısa veya yetersiz',
+  'Konum/adres bilgisi eksik veya hatalı',
+  'Google Maps linki eksik',
+  'Kategori yanlış seçilmiş',
+  'İletişim bilgileri eksik (website/instagram)',
+  'Oda bilgileri eksik (konaklama)',
+  'Etiketler eksik veya uygun değil',
+  'Mekan bölge dışında görünüyor',
+  'Birden fazla bilgi eksik, genel gözden geçirme gerekli'
+];
+function showRevisionModal(id) {
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:20px';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML = '<div style="background:var(--card-bg,#fff);border-radius:16px;max-width:500px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)">' +
+    '<div style="padding:18px 24px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:center">' +
+      '<h3 style="margin:0;font-size:1rem;color:var(--navy)">📝 Revizyon Sebebi Seçin</h3>' +
+      '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="border:none;background:none;font-size:1.3rem;cursor:pointer;color:var(--text-muted)">&times;</button>' +
+    '</div>' +
+    '<div style="padding:16px 24px;max-height:350px;overflow-y:auto">' +
+      REVISION_REASONS.map(function(r, i) {
+        return '<label style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.03);cursor:pointer;font-size:.82rem;color:var(--text)" onmouseover="this.style.background=\'rgba(0,0,0,.02)\'" onmouseout="this.style.background=\'\'">' +
+          '<input type="checkbox" class="rev-reason-cb" value="' + r + '" style="width:16px;height:16px;accent-color:var(--terra);cursor:pointer;flex-shrink:0;margin-top:2px">' +
+          r + '</label>';
+      }).join('') +
+      '<div style="margin-top:12px"><label style="font-size:.72rem;font-weight:700;color:var(--text-light);display:block;margin-bottom:4px">Ek not (opsiyonel)</label>' +
+      '<textarea id="rev-custom-note" rows="2" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:.82rem;font-family:inherit;resize:vertical;background:var(--input-bg,#fff);color:var(--text)" placeholder="Varsa ek açıklama yazın..."></textarea></div>' +
+    '</div>' +
+    '<div style="padding:14px 24px;border-top:1px solid rgba(0,0,0,.06);display:flex;gap:8px;justify-content:flex-end">' +
+      '<button class="btn btn-secondary btn-sm" onclick="this.closest(\'div[style*=fixed]\').remove()">İptal</button>' +
+      '<button class="btn btn-primary btn-sm" onclick="submitRevision(\'' + id + '\',this.closest(\'div[style*=fixed]\'))">Revizyon Gönder</button>' +
+    '</div>' +
+  '</div>';
+  document.body.appendChild(overlay);
+}
+function submitRevision(id, overlay) {
+  var selected = [];
+  overlay.querySelectorAll('.rev-reason-cb:checked').forEach(function(cb) { selected.push(cb.value); });
+  var customNote = overlay.querySelector('#rev-custom-note').value.trim();
+  if (selected.length === 0 && !customNote) { showToast('En az bir sebep seçin veya not yazın', 'error'); return; }
+  var reason = selected.join('. ');
+  if (customNote) reason += (reason ? '. ' : '') + customNote;
+  overlay.remove();
+  rejectPendingVenue(id, reason);
+}
+async function rejectPendingVenue(id, reason) {
+  if (!reason) return;
   try {
     var doc = await db.collection('pending_venues').doc(id).get();
     var data = doc.exists ? doc.data() : {};
