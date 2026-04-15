@@ -18,6 +18,12 @@
 /*.html
   Cache-Control: public, max-age=300, stale-while-revalidate=86400
 
+/favicon*
+  Cache-Control: no-cache, must-revalidate
+
+/apple-touch-icon*
+  Cache-Control: no-cache, must-revalidate
+
 /admin*
   X-Robots-Tag: noindex, nofollow
   Cache-Control: no-store, no-cache, must-revalidate
