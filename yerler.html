@@ -86,7 +86,7 @@
 
 <script src="firebase-loader.js?v=4"></script>
 <script src="data.js?v=2"></script>
-<script src="shared.min.js?v=236"></script>
+<script src="shared.min.js?v=238"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
@@ -122,21 +122,24 @@ function pageInit() {
 
     // Filtre butonları — sadece alttaki grid'de sonucu olan kategoriler
     var filtersEl = document.getElementById('yl-filters');
-    if (filtersEl && cats.length > 0) {
+    if (filtersEl) {
       var gridPlaces = places.filter(function(p) { return !p.mustSee && p.category !== 'tarihi' && p.category !== 'orenyeri'; });
       var usedCats = {};
       gridPlaces.forEach(function(p) { if (p.category) usedCats[p.category] = true; });
-      // showInPlaces köyler için de 'koyu' ekle
       var hasVillagePlaces = (DATA.villages || []).some(function(v) { return v.showInPlaces; });
       if (hasVillagePlaces) usedCats['koyu'] = true;
       var filterHtml = '<button class="filter-btn active" onclick="filterPlaces(this,\'all\')">Tümü</button>';
-      cats.forEach(function(c) {
+      // Dinamik kategoriler veya fallback
+      var catList = cats.length > 0 ? cats : Object.keys(usedCats).map(function(id) { var ci = typeof getPlaceCatInfo === 'function' ? getPlaceCatInfo(id) : {label:id,emoji:'📍'}; return {id:id,label:ci.label,emoji:ci.emoji}; });
+      catList.forEach(function(c) {
         if (usedCats[c.id]) {
           filterHtml += '<button class="filter-btn" onclick="filterPlaces(this,\'' + c.id + '\')">' + (c.emoji || '📍') + ' ' + c.label + '</button>';
         }
       });
-      filtersEl.innerHTML = filterHtml;
-      filtersEl.style.display = 'flex';
+      if (Object.keys(usedCats).length > 0) {
+        filtersEl.innerHTML = filterHtml;
+        filtersEl.style.display = 'flex';
+      }
     }
   })();
 
@@ -240,42 +243,8 @@ function pageInit() {
     if (paramId) { window.location.href = 'yerler/yer-detay.html?id=' + paramId; return; }
   }
 
-  function openPlace(id) {
-    const p = DATA.places.find(x => x.id === id);
-    if (!p) return;
-    const cat = CAT_COLORS[p.category] || CAT_COLORS.tarihi;
-    document.getElementById('place-modal-body').innerHTML = `
-      <div style="background:linear-gradient(135deg,${cat.bg[0]}cc,${cat.bg[1]}cc);padding:48px 32px 32px;text-align:center;border-radius:24px 24px 0 0;">
-        <div style="font-size:4rem;margin-bottom:14px;">${p.emoji}</div>
-        <span style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 12px;border-radius:999px;background:rgba(255,255,255,.15);color:rgba(255,255,255,.9);margin-bottom:12px;display:inline-block;">${cat.label}</span>
-        <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.6rem;color:#fff;margin-top:8px;">${p.title}</h2>
-        <p style="font-size:.8rem;color:rgba(255,255,255,.55);margin-top:8px;">📍 ${p.location || ''}</p>
-      </div>
-      <div style="padding:28px 32px 32px;">
-        <p style="color:var(--text-mid);font-size:.9rem;line-height:1.8;margin-bottom:20px;">${p.description || p.shortDesc}</p>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;">
-          ${(p.tags||[]).map(t=>`<span style="font-size:.65rem;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(26,39,68,.06);color:var(--text-mid);">${t}</span>`).join('')}
-        </div>
-        ${p.tip ? `<div class="tip-box" style="margin-top:16px;">${p.tip}</div>` : ''}
-      </div>
-    `;
-    document.getElementById('place-modal').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeModal() {
-    document.getElementById('place-modal').style.display = 'none';
-    document.body.style.overflow = '';
-  }
-
-  document.getElementById('place-modal').addEventListener('click', e => {
-    if (e.target === document.getElementById('place-modal')) closeModal();
-  });
-
   // Expose functions to global scope for onclick handlers
   window.filterPlaces = filterPlaces;
-  window.openPlace = openPlace;
-  window.closeModal = closeModal;
   window.renderPlacesGrid = renderGrid;
 
   renderGrid();
