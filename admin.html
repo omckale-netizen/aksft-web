@@ -5326,6 +5326,7 @@ function isPremiumActive(v) {
 function addPhoneRow(data) {
   var list = document.getElementById('f-phones-list');
   var row = document.createElement('div');
+  row.className = 'phone-row';
   row.style.cssText = 'padding:12px 14px;margin-bottom:10px;border:1px solid var(--border);border-radius:10px;background:rgba(0,0,0,.02);';
   var num = (data && data.number) || '';
   var label = (data && data.label) || '';
@@ -5338,13 +5339,13 @@ function addPhoneRow(data) {
       '<label style="display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--text-mid);cursor:pointer" title="WhatsApp numarası">' +
         '<input type="checkbox" class="phone-wa" ' + (isWa ? 'checked' : '') + ' style="width:16px;height:16px;accent-color:#25D366;cursor:pointer">' +
         '<span style="color:#25D366;font-weight:600">WhatsApp Numarası</span></label>' +
-      '<button type="button" onclick="this.closest(\'[style*=padding]\').remove()" style="font-size:.68rem;padding:4px 10px;border:none;border-radius:6px;background:var(--red-bg);color:var(--red);cursor:pointer;font-weight:600">Sil</button>' +
+      '<button type="button" onclick="this.closest(\'.phone-row\').remove()" style="font-size:.68rem;padding:4px 10px;border:none;border-radius:6px;background:var(--red-bg);color:var(--red);cursor:pointer;font-weight:600">Sil</button>' +
     '</div>';
   list.appendChild(row);
   if (!data) row.querySelector('.phone-num').focus();
 }
 function getPhonesData() {
-  var rows = document.querySelectorAll('#f-phones-list > div');
+  var rows = document.querySelectorAll('#f-phones-list > .phone-row');
   var phones = [];
   rows.forEach(function(row) {
     var num = row.querySelector('.phone-num').value.trim();
@@ -5628,6 +5629,7 @@ function openVenueModal(id) {
 
   renderImagePreviews();
   document.getElementById('venue-modal').classList.add('show');
+  setTimeout(snapshotVenueForm, 100);
 }
 
 /* ── Koordinat parse ── */
@@ -5657,10 +5659,26 @@ function parseVPCoords(val) {
   }
 }
 
-function closeVenueModal() {
+var _venueFormSnapshot = '';
+function _getVenueFormState() {
+  var f = document.getElementById('venue-form');
+  if (!f) return '';
+  var parts = [];
+  f.querySelectorAll('input,select,textarea').forEach(function(el) {
+    if (el.type === 'hidden' || el.type === 'file') return;
+    parts.push(el.id + ':' + (el.type === 'checkbox' ? el.checked : el.value));
+  });
+  return parts.join('|');
+}
+function snapshotVenueForm() { _venueFormSnapshot = _getVenueFormState(); }
+function closeVenueModal(force) {
+  if (!force && _venueFormSnapshot && _getVenueFormState() !== _venueFormSnapshot) {
+    if (!confirm('Kaydedilmemiş değişiklikler var. Çıkmak istediğinize emin misiniz?')) return;
+  }
   document.getElementById('venue-modal').classList.remove('show');
   editingVenueId = null;
   pendingImages = [];
+  _venueFormSnapshot = '';
 }
 
 const WH_DAYS = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
@@ -6000,7 +6018,7 @@ async function saveVenue(e) {
   }
 
   const isEdit = !!editingVenueId;
-  closeVenueModal();
+  closeVenueModal(true);
   renderVenueTable();
   showToast('"' + venue.title + '" ' + (isEdit ? 'guncellendi.' : 'eklendi.'), 'success');
   } finally {
