@@ -4071,18 +4071,10 @@ function openSentMail(id) {
       '<button class="btn btn-sm btn-secondary" onclick="closeMsgDetail()" style="display:none" id="msg-close-mobile">← Geri</button>' +
     '</div>';
 
-  // Body — metin + HTML önizleme + durum
-  var statusHtml = '<div id="sent-mail-status-' + id + '" style="margin-top:10px"></div>';
+  // Body — metin + HTML önizleme
   document.getElementById('msg-detail-body').innerHTML =
     '<div style="font-size:.88rem;color:var(--text);line-height:1.85;white-space:pre-wrap;padding:16px 18px;background:var(--cream-dark,var(--cream));border-radius:12px;border:1px solid var(--card-border,rgba(0,0,0,.04))">' + (s.body || '').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>' +
-    '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">' +
-      '<button onclick="previewSentMailHtml(\'' + id + '\')" style="padding:6px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;background:var(--card-bg,#fff);color:var(--terra);font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit">👁 HTML Önizleme</button>' +
-      (s.emailIds && s.emailIds.length > 0 ? '<button onclick="checkMailStatus(\'' + id + '\')" style="padding:6px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;background:var(--card-bg,#fff);color:#6B46C1;font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit">📊 Teslimat Durumu</button>' : '') +
-    '</div>' +
-    statusHtml;
-
-  // Otomatik durum kontrolü (emailIds varsa)
-  if (s.emailIds && s.emailIds.length > 0) checkMailStatus(id);
+    '<button onclick="previewSentMailHtml(\'' + id + '\')" style="margin-top:10px;padding:6px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;background:var(--card-bg,#fff);color:var(--terra);font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit">👁 HTML Önizleme — Alıcının gördüğü hali</button>';
 
   // Aynı kişiye gönderilen diğer mailler
   var otherMails = allSentMails.filter(function(m) {
@@ -4112,55 +4104,7 @@ function openSentMail(id) {
   if (window.innerWidth <= 900) document.getElementById('msg-close-mobile').style.display = '';
 }
 
-async function checkMailStatus(id) {
-  var s = allSentMails.find(function(x) { return x._id === id; });
-  if (!s || !s.emailIds || s.emailIds.length === 0) return;
-  var el = document.getElementById('sent-mail-status-' + id);
-  if (!el) return;
-  el.innerHTML = '<div style="font-size:.72rem;color:var(--text-muted);padding:8px 0">Durum kontrol ediliyor...</div>';
-  try {
-    var resp = await fetch('/api/mail-status', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ emailIds: s.emailIds })
-    });
-    var data = await resp.json();
-    if (!data.ok || !data.results) { el.innerHTML = ''; return; }
-    var statusLabels = {
-      'delivered': { label: 'Teslim Edildi', icon: '✅', color: '#276749', bg: 'rgba(56,161,105,.08)' },
-      'opened': { label: 'Açıldı', icon: '👁', color: '#6B46C1', bg: 'rgba(107,70,193,.08)' },
-      'clicked': { label: 'Link Tıklandı', icon: '🔗', color: '#C4521A', bg: 'rgba(196,82,26,.08)' },
-      'bounced': { label: 'Geri Döndü', icon: '❌', color: '#C53030', bg: 'rgba(229,62,62,.08)' },
-      'complained': { label: 'Spam', icon: '⚠️', color: '#C53030', bg: 'rgba(229,62,62,.08)' },
-      'sent': { label: 'Gönderildi', icon: '📤', color: '#718096', bg: 'rgba(113,128,150,.08)' },
-      'unknown': { label: 'Bilinmiyor', icon: '❓', color: '#718096', bg: 'rgba(113,128,150,.08)' }
-    };
-    var delivered = data.results.filter(function(r) { return r.status === 'delivered' || r.status === 'opened' || r.status === 'clicked'; }).length;
-    var opened = data.results.filter(function(r) { return r.status === 'opened' || r.status === 'clicked'; }).length;
-    var total = data.results.length;
 
-    el.innerHTML =
-      '<div style="padding:12px 16px;background:var(--cream-dark,rgba(0,0,0,.02));border-radius:10px;border:1px solid var(--card-border,rgba(0,0,0,.04));margin-top:4px">' +
-        '<div style="font-size:.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📊 Teslimat Raporu</div>' +
-        '<div style="display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap">' +
-          '<div style="text-align:center"><div style="font-size:1.1rem;font-weight:800;color:#276749">' + delivered + '/' + total + '</div><div style="font-size:.62rem;color:var(--text-muted)">Teslim</div></div>' +
-          '<div style="text-align:center"><div style="font-size:1.1rem;font-weight:800;color:#6B46C1">' + opened + '/' + total + '</div><div style="font-size:.62rem;color:var(--text-muted)">Açılma</div></div>' +
-          (total > 0 ? '<div style="text-align:center"><div style="font-size:1.1rem;font-weight:800;color:var(--terra)">' + (total > 0 ? Math.round(opened/total*100) : 0) + '%</div><div style="font-size:.62rem;color:var(--text-muted)">Açılma Oranı</div></div>' : '') +
-        '</div>' +
-        data.results.map(function(r) {
-          var st = statusLabels[r.status] || statusLabels['unknown'];
-          var toStr = r.to ? (Array.isArray(r.to) ? r.to.join(', ') : r.to) : '—';
-          return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--card-border,rgba(0,0,0,.03));font-size:.75rem">' +
-            '<span>' + st.icon + '</span>' +
-            '<span style="flex:1;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + toStr + '</span>' +
-            '<span style="padding:2px 8px;border-radius:6px;background:' + st.bg + ';color:' + st.color + ';font-size:.65rem;font-weight:600;white-space:nowrap">' + st.label + '</span>' +
-          '</div>';
-        }).join('') +
-      '</div>';
-  } catch(e) {
-    el.innerHTML = '<div style="font-size:.72rem;color:var(--red);padding:4px 0">Durum kontrol edilemedi</div>';
-  }
-}
 function previewSentMailHtml(id) {
   var s = allSentMails.find(function(x) { return x._id === id; });
   if (!s) return;
