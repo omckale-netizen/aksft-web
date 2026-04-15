@@ -1867,6 +1867,24 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         <div id="analytics-weather" style="padding:20px"></div>
       </div>
 
+      <!-- Saatlik Trafik -->
+      <div class="panel-card" style="margin-top:20px">
+        <div class="panel-card-head"><h3>🕐 Saatlik Trafik Dağılımı</h3><span style="font-size:.68rem;color:var(--text-muted)">Ziyaretçilerin en aktif olduğu saatler</span></div>
+        <div id="analytics-hourly" style="padding:20px"></div>
+      </div>
+
+      <!-- Yer & Köy İstatistikleri -->
+      <div class="panel-card" style="margin-top:20px">
+        <div class="panel-card-head"><h3>🏛 Yer & Köy Görüntülenmeleri</h3></div>
+        <div id="analytics-places" style="padding:20px"></div>
+      </div>
+
+      <!-- AI Chatbot İstatistikleri -->
+      <div class="panel-card" style="margin-top:20px">
+        <div class="panel-card-head"><h3>🤖 AI Chatbot Kullanımı</h3></div>
+        <div id="analytics-ai" style="padding:20px"></div>
+      </div>
+
       <!-- Favori Kodları -->
       <div class="panel-card" style="margin-top:20px">
         <div class="panel-card-head"><h3>🔗 Favori Kodlari & Kullanim</h3></div>
@@ -4554,6 +4572,113 @@ async function renderAnalytics() {
           '</div>' +
         '</div>';
       }).join('');
+    }
+
+    // ── Saatlik Trafik Dağılımı ──
+    const hourlyEl = document.getElementById('analytics-hourly');
+    if (hourlyEl) {
+      const hourCounts = new Array(24).fill(0);
+      events.forEach(ev => { if (ev.hour != null) hourCounts[ev.hour]++; });
+      const maxHour = Math.max(...hourCounts, 1);
+      const peakHour = hourCounts.indexOf(maxHour);
+      hourlyEl.innerHTML =
+        '<div style="display:flex;align-items:flex-end;gap:3px;height:120px;margin-bottom:12px;padding:0 2px">' +
+        hourCounts.map((c, i) => {
+          const pct = Math.max(Math.round((c / maxHour) * 100), 2);
+          const isPeak = i === peakHour && c > 0;
+          const color = isPeak ? 'var(--terra)' : c > maxHour * 0.6 ? 'var(--aegean)' : 'rgba(26,39,68,.15)';
+          return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px" title="' + String(i).padStart(2,'0') + ':00 — ' + c + ' etkinlik">' +
+            (isPeak ? '<span style="font-size:.55rem;font-weight:700;color:var(--terra)">' + c + '</span>' : '') +
+            '<div style="width:100%;height:' + pct + '%;background:' + color + ';border-radius:3px 3px 0 0;transition:height .4s;min-height:2px"></div>' +
+          '</div>';
+        }).join('') +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;font-size:.55rem;color:var(--text-muted);padding:0 2px">' +
+          '<span>00</span><span>03</span><span>06</span><span>09</span><span>12</span><span>15</span><span>18</span><span>21</span><span>23</span>' +
+        '</div>' +
+        '<div style="display:flex;gap:16px;margin-top:14px;font-size:.72rem;color:var(--text-mid)">' +
+          '<span>En yoğun saat: <strong style="color:var(--terra)">' + String(peakHour).padStart(2,'0') + ':00</strong></span>' +
+          '<span>Toplam: <strong>' + hourCounts.reduce((a,b)=>a+b,0) + '</strong> etkinlik</span>' +
+        '</div>';
+    }
+
+    // ── Yer & Köy İstatistikleri ──
+    const placesEl = document.getElementById('analytics-places');
+    if (placesEl) {
+      const placeViews = {};
+      const villageViews = {};
+      events.forEach(ev => {
+        if (ev.type === 'pageview') {
+          if (ev.target?.startsWith('place_')) {
+            const pid = ev.target.replace('place_', '');
+            placeViews[pid] = (placeViews[pid] || 0) + 1;
+          } else if (ev.target?.startsWith('village_')) {
+            const vid = ev.target.replace('village_', '');
+            villageViews[vid] = (villageViews[vid] || 0) + 1;
+          }
+        }
+      });
+      const placeList = Object.entries(placeViews).map(([id, views]) => {
+        const place = (draftData.places || []).find(p => p.id === id);
+        return { id, title: place ? place.title : id, emoji: place ? place.emoji : '🏛', views };
+      }).sort((a, b) => b.views - a.views);
+      const villageList = Object.entries(villageViews).map(([id, views]) => {
+        const village = (draftData.villages || []).find(v => v.id === id);
+        return { id, title: village ? village.title : id, emoji: village ? village.emoji : '🏘', views };
+      }).sort((a, b) => b.views - a.views);
+
+      const allPV = [...placeList, ...villageList].sort((a,b) => b.views - a.views);
+      const maxPV = allPV.length > 0 ? allPV[0].views : 1;
+
+      placesEl.innerHTML = allPV.length === 0
+        ? '<div style="text-align:center;color:var(--text-muted)">Henüz yer/köy görüntülemesi yok.</div>'
+        : allPV.slice(0, 10).map((p, i) => {
+          const pct = Math.max(Math.round((p.views / maxPV) * 100), 5);
+          return '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">' +
+            '<span style="width:18px;font-size:.65rem;font-weight:800;color:var(--text-muted);text-align:right">' + (i+1) + '</span>' +
+            '<span style="font-size:1rem;width:24px;text-align:center">' + p.emoji + '</span>' +
+            '<div style="flex:1;min-width:0">' +
+              '<div style="display:flex;justify-content:space-between;margin-bottom:4px">' +
+                '<span style="font-size:.8rem;font-weight:700;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + p.title + '</span>' +
+                '<span style="font-size:.68rem;color:var(--text-muted);flex-shrink:0;margin-left:8px">' + p.views + '</span>' +
+              '</div>' +
+              '<div style="height:5px;background:rgba(0,0,0,.04);border-radius:3px"><div style="height:100%;width:' + pct + '%;background:var(--aegean);border-radius:3px;transition:width .5s"></div></div>' +
+            '</div>' +
+          '</div>';
+        }).join('') +
+        '<div style="display:flex;gap:16px;margin-top:8px;font-size:.72rem;color:var(--text-mid)">' +
+          '<span>Toplam yer: <strong>' + placeList.reduce((s,p) => s + p.views, 0) + '</strong> görüntüleme</span>' +
+          '<span>Toplam köy: <strong>' + villageList.reduce((s,v) => s + v.views, 0) + '</strong> görüntüleme</span>' +
+        '</div>';
+    }
+
+    // ── AI Chatbot İstatistikleri ──
+    const aiEl = document.getElementById('analytics-ai');
+    if (aiEl) {
+      const aiEvents = events.filter(ev => ev.type === 'action' && ev.action === 'ai_chat');
+      const aiDailyMap = {};
+      aiEvents.forEach(ev => { aiDailyMap[ev.date] = (aiDailyMap[ev.date] || 0) + 1; });
+      const aiDays = Object.entries(aiDailyMap).sort((a,b) => b[0].localeCompare(a[0])).slice(0, 14);
+      const totalAiQuestions = aiEvents.length;
+
+      // AI chat event yoksa analytics_events'te, chat KV'den oku
+      try {
+        const chatResp = await fetch('/api/chat-stats');
+        const chatStats = chatResp.ok ? await chatResp.json() : null;
+        if (chatStats) {
+          aiEl.innerHTML =
+            '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;text-align:center;margin-bottom:20px">' +
+              '<div><div style="font-size:.65rem;color:var(--text-muted);margin-bottom:4px">Bugün</div><div style="font-size:1.4rem;font-weight:800;color:var(--navy)">' + (chatStats.today || 0) + '</div></div>' +
+              '<div><div style="font-size:.65rem;color:var(--text-muted);margin-bottom:4px">Toplam (Sunucu)</div><div style="font-size:1.4rem;font-weight:800;color:var(--terra)">' + (chatStats.total || 0) + '</div></div>' +
+              '<div><div style="font-size:.65rem;color:var(--text-muted);margin-bottom:4px">Günlük Limit</div><div style="font-size:1.4rem;font-weight:800;color:var(--green)">' + (chatStats.dailyLimit || 25) + '</div></div>' +
+            '</div>' +
+            '<div style="font-size:.72rem;color:var(--text-muted);text-align:center">Sunucu günlük limit: ' + (chatStats.serverUsed || 0) + ' / ' + (chatStats.serverLimit || 500) + '</div>';
+        } else {
+          aiEl.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:.82rem">AI istatistikleri için <code>/api/chat-stats</code> endpoint gerekli.</div>';
+        }
+      } catch(e) {
+        aiEl.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:.82rem">AI istatistikleri yüklenemedi.</div>';
+      }
     }
 
     // ── Favori Kodları İstatistiği ──
