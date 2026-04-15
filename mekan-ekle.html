@@ -146,7 +146,13 @@ a{color:var(--terra);text-decoration:none}
           </div>
         </div>
         <div class="me-field"><label class="me-label">Tam Adres</label><input class="me-input" id="f-address" placeholder="Mahalle, sokak, no"></div>
-        <div class="me-field"><label class="me-label">Google Maps Linki <span>(opsiyonel — mekanınızı Google Maps'te bulun, paylaş linkini yapıştırın)</span></label><input type="url" class="me-input" id="f-mapsLink" placeholder="https://maps.google.com/..."></div>
+        <div class="me-field">
+          <label class="me-label">Google Maps Linki *</label>
+          <input type="url" class="me-input" id="f-mapsLink" placeholder="https://maps.google.com/... veya https://maps.app.goo.gl/...">
+          <div class="me-hint" style="margin-top:6px;line-height:1.7">
+            <strong>Nasıl bulunur?</strong> Google Maps'i açın → mekanınızı aratın → mekanınıza tıklayın → <strong>"Paylaş"</strong> butonuna basın → <strong>"Bağlantıyı kopyala"</strong> seçeneğini tıklayın → buraya yapıştırın.
+          </div>
+        </div>
       </div>
     </div>
 
@@ -387,7 +393,7 @@ function showStep(){
 }
 function validate(s){
   if(s===1){if(!v('f-ownerName','Ad soyad zorunlu'))return false;if(!v('f-ownerEmail','Geçerli e-posta girin')||!document.getElementById('f-ownerEmail').value.includes('@'))return false;if(!v('f-ownerPhone','Telefon zorunlu'))return false;return true;}
-  if(s===2){if(!v('f-title','Mekan adı zorunlu'))return false;if(!document.getElementById('f-category').value){toast('Kategori seçin','red');return false;}if(!document.getElementById('f-location').value){toast('Konum seçin','red');return false;}return true;}
+  if(s===2){if(!v('f-title','Mekan adı zorunlu'))return false;if(!document.getElementById('f-category').value){toast('Kategori seçin','red');return false;}if(!document.getElementById('f-location').value){toast('Konum seçin','red');return false;}var ml=document.getElementById('f-mapsLink').value.trim();if(!ml){toast('Google Maps linki zorunlu','red');document.getElementById('f-mapsLink').focus();return false;}if(!ml.includes('google') && !ml.includes('goo.gl') && !ml.includes('maps.app')){toast('Geçerli bir Google Maps linki girin','red');document.getElementById('f-mapsLink').focus();return false;}return true;}
   if(s===3){if(!v('f-shortDesc','Kısa açıklama zorunlu'))return false;var desc=document.getElementById('f-description').value.trim();if(desc.length<50){toast('Detaylı açıklama en az 50 karakter ('+desc.length+'/50)','red');return false;}if(selTags.length!==4){toast('Tam 4 etiket seçin ('+selTags.length+'/4)','red');return false;}return true;}
   if(s===4){
     var cat=document.getElementById('f-category').value;
