@@ -15,6 +15,29 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ error: 'Yetkisiz erişim' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 
+  // Admin doğrulama — cookie veya header
+  const cookies = request.headers.get('Cookie') || '';
+  const adminKey = request.headers.get('X-Admin-Key') || '';
+  const hasGateCookie = env.ADMIN_GATE_KEY && cookies.includes('admin_gate=' + env.ADMIN_GATE_KEY);
+  const hasGateHeader = env.ADMIN_GATE_KEY && adminKey === env.ADMIN_GATE_KEY;
+  if (!hasGateCookie && !hasGateHeader) {
+    return new Response(JSON.stringify({ error: 'Yetkisiz' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+
+  // Rate limit — günde max 50 mail
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  if (env.CHAT_KV) {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const mailDayKey = 'mail_day_' + ip + '_' + today;
+      const mailCount = parseInt(await env.CHAT_KV.get(mailDayKey) || '0');
+      if (mailCount >= 100) {
+        return new Response(JSON.stringify({ error: 'Günlük mail limiti doldu' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      await env.CHAT_KV.put(mailDayKey, String(mailCount + 1), { expirationTtl: 86400 });
+    } catch(e) {}
+  }
+
   const RESEND_API_KEY = env.RESEND_API_KEY;
   if (!RESEND_API_KEY) {
     return new Response(JSON.stringify({ error: 'Mail servisi yapılandırılmamış' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });

@@ -22,8 +22,7 @@ export async function onRequestPost(context) {
   const today = new Date().toISOString().split('T')[0];
   const dailyKey = 'chat_daily_' + today;
 
-  // Cloudflare KV yoksa basit header bazlı sayaç
-  let dailyCount = parseInt(request.headers.get('X-Daily-Count') || '0');
+  let dailyCount = 0;
   try {
     if (env.CHAT_KV) {
       dailyCount = parseInt(await env.CHAT_KV.get(dailyKey) || '0');

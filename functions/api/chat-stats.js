@@ -14,6 +14,15 @@ export async function onRequestGet(context) {
     return new Response(JSON.stringify({ error: 'Yetkisiz' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 
+  // Admin doğrulama — cookie veya header
+  const cookies = request.headers.get('Cookie') || '';
+  const adminKey = request.headers.get('X-Admin-Key') || '';
+  const hasGateCookie = env.ADMIN_GATE_KEY && cookies.includes('admin_gate=' + env.ADMIN_GATE_KEY);
+  const hasGateHeader = env.ADMIN_GATE_KEY && adminKey === env.ADMIN_GATE_KEY;
+  if (!hasGateCookie && !hasGateHeader) {
+    return new Response(JSON.stringify({ error: 'Yetkisiz' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+
   const today = new Date().toISOString().split('T')[0];
 
   try {

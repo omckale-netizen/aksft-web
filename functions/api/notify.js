@@ -60,6 +60,21 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ error: 'Unknown type' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
   }
 
+  // Admin tipi bildirimler için rate limit (spam koruması)
+  if (type !== 'message') {
+    const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+    try {
+      if (env.CHAT_KV) {
+        var notifKey = 'notif_' + type + '_' + ip + '_' + Math.floor(Date.now() / 60000);
+        var notifCount = parseInt(await env.CHAT_KV.get(notifKey) || '0');
+        if (notifCount >= 5) {
+          return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        }
+        await env.CHAT_KV.put(notifKey, String(notifCount + 1), { expirationTtl: 60 });
+      }
+    } catch(e) {}
+  }
+
   const TOKEN = String(env.TELEGRAM_BOT_TOKEN || '').trim();
   const CHAT_ID = String(env.TELEGRAM_CHAT_ID || '564543310').trim();
 

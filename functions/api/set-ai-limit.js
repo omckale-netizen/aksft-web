@@ -15,6 +15,15 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ error: 'Yetkisiz erişim' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 
+  // Admin doğrulama — cookie veya header
+  const cookies = request.headers.get('Cookie') || '';
+  const adminKey = request.headers.get('X-Admin-Key') || '';
+  const hasGateCookie = env.ADMIN_GATE_KEY && cookies.includes('admin_gate=' + env.ADMIN_GATE_KEY);
+  const hasGateHeader = env.ADMIN_GATE_KEY && adminKey === env.ADMIN_GATE_KEY;
+  if (!hasGateCookie && !hasGateHeader) {
+    return new Response(JSON.stringify({ error: 'Yetkisiz' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+
   let body;
   try {
     body = await request.json();
