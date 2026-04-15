@@ -2414,6 +2414,16 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <label>Instagram</label>
           <input type="text" id="f-instagram" placeholder="@mekanadi veya https://instagram.com/mekanadi">
         </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Mekan Sahibi <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(opsiyonel)</span></label>
+            <input type="text" id="f-ownerName" placeholder="Ad Soyad">
+          </div>
+          <div class="form-group">
+            <label>Sahip E-posta <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(opsiyonel)</span></label>
+            <input type="email" id="f-ownerEmail" placeholder="sahip@mail.com">
+          </div>
+        </div>
         <div class="form-group">
           <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
             <input type="checkbox" id="f-featured" style="width:18px;height:18px;accent-color:var(--terra);cursor:pointer">
@@ -4315,10 +4325,11 @@ function showRecentEmails(query) {
   var q = (lastComma >= 0 ? raw.substring(lastComma + 1) : raw).toLowerCase().trim();
   // İletişim formundan gelen e-postalar + son gönderilenler
   var contactEmails = allMessages.map(function(m) { return m.email; }).filter(Boolean);
+  var ownerEmails = (draftData.venues || []).map(function(v) { return v.ownerEmail; }).filter(Boolean);
   var sentEmails = getRecentEmails();
   var allEmails = [];
   var seen = {};
-  sentEmails.concat(contactEmails).forEach(function(e) {
+  sentEmails.concat(ownerEmails).concat(contactEmails).forEach(function(e) {
     var lower = e.toLowerCase();
     if (!seen[lower]) { seen[lower] = true; allEmails.push(e); }
   });
@@ -4329,8 +4340,9 @@ function showRecentEmails(query) {
   }
   dropdown.innerHTML = allEmails.slice(0, 8).map(function(e) {
     var isSent = sentEmails.includes(e);
+    var isOwner = ownerEmails.includes(e);
     var isContact = contactEmails.includes(e);
-    var badge = isSent ? '<span style="font-size:.6rem;color:var(--green);font-weight:600;margin-left:auto">Gönderildi</span>' : isContact ? '<span style="font-size:.6rem;color:var(--terra);font-weight:600;margin-left:auto">İletişim</span>' : '';
+    var badge = isSent ? '<span style="font-size:.6rem;color:var(--green);font-weight:600;margin-left:auto">Gönderildi</span>' : isOwner ? '<span style="font-size:.6rem;color:#6B46C1;font-weight:600;margin-left:auto">Mekan Sahibi</span>' : isContact ? '<span style="font-size:.6rem;color:var(--terra);font-weight:600;margin-left:auto">İletişim</span>' : '';
     return '<div onclick="selectRecentEmail(\'' + e + '\')" style="padding:8px 14px;cursor:pointer;font-size:.82rem;color:var(--text);display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--card-border,rgba(0,0,0,.04));transition:background .1s" onmouseover="this.style.background=\'var(--cream-dark,rgba(0,0,0,.03))\'" onmouseout="this.style.background=\'\'">' +
       '<span style="color:var(--text-muted);font-size:.75rem">✉️</span>' +
       '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + e + '</span>' +
@@ -6245,6 +6257,8 @@ function openVenueModal(id) {
     loadPhonesData(v);
     document.getElementById('f-website').value = v.website || '';
     document.getElementById('f-instagram').value = v.instagram || '';
+    document.getElementById('f-ownerName').value = v.ownerName || '';
+    document.getElementById('f-ownerEmail').value = v.ownerEmail || '';
     document.getElementById('f-featured').checked = !!v.featured;
     // Premium süresi kontrolü — dolmuşsa otomatik kapat
     var premActive = !!v.premium;
@@ -6658,6 +6672,8 @@ async function saveVenue(e) {
     address: document.getElementById('f-address').value.trim(),
     website: document.getElementById('f-website').value.trim(),
     instagram: document.getElementById('f-instagram').value.trim(),
+    ownerName: document.getElementById('f-ownerName').value.trim(),
+    ownerEmail: document.getElementById('f-ownerEmail').value.trim(),
     premium: document.getElementById('f-premium').checked,
     featured: document.getElementById('f-premium').checked ? false : document.getElementById('f-featured').checked,
     premiumStart: document.getElementById('f-premium-start').value || null,
