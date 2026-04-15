@@ -2063,6 +2063,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <div class="panel-card">
             <div class="panel-card-head"><h3>🔒 Şifre Değiştir</h3></div>
             <div style="padding:20px">
+              <div id="pw-last-change" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(0,0,0,.02);border-radius:8px;margin-bottom:16px;">
+                <span style="font-size:.78rem;color:var(--text-light)">Son değişiklik:</span>
+                <span style="font-size:.78rem;font-weight:600;color:var(--navy)" id="pw-last-date">—</span>
+              </div>
+              <div id="pw-warning" style="display:none;padding:10px 14px;background:rgba(229,62,62,.06);border:1px solid rgba(229,62,62,.15);border-radius:8px;margin-bottom:16px;font-size:.78rem;color:#E53E3E;font-weight:600;">⚠️ Şifreniz 6 aydan uzun süredir değiştirilmedi. Güvenliğiniz için değiştirmenizi öneriyoruz.</div>
               <div class="form-group">
                 <label>Mevcut Şifre</label>
                 <input type="password" id="pw-current" placeholder="Mevcut şifrenizi girin">
@@ -2836,6 +2841,9 @@ async function changePassword() {
     document.getElementById('pw-confirm').value = '';
     matchEl.innerHTML = '';
     showToast('Şifre başarıyla değiştirildi!', 'success');
+    // Şifre değiştirme tarihini kaydet
+    try { await db.collection('settings').doc('security').set({ lastPasswordChange: new Date().toISOString() }, { merge: true }); } catch(e) {}
+    updatePasswordDate();
     logActivity('sifre_degistir', user.email, 'Şifre değiştirildi');
     // Telegram bildirim
     const device = getDeviceInfo();
@@ -2853,6 +2861,37 @@ async function changePassword() {
     if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') errEl.textContent = 'Mevcut şifre yanlış.';
     else errEl.textContent = 'Hata: ' + err.message;
   }
+}
+
+// ── Şifre Tarih Kontrolü ──
+async function updatePasswordDate() {
+  try {
+    var doc = await db.collection('settings').doc('security').get();
+    var dateEl = document.getElementById('pw-last-date');
+    var warnEl = document.getElementById('pw-warning');
+    if (doc.exists && doc.data().lastPasswordChange) {
+      var d = new Date(doc.data().lastPasswordChange);
+      dateEl.textContent = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+      // 6 ay kontrolü
+      var sixMonths = 180 * 24 * 60 * 60 * 1000;
+      if (Date.now() - d.getTime() > sixMonths) {
+        warnEl.style.display = 'block';
+        // Telegram uyarısı gönder (günde 1 kez)
+        var warnKey = 'pw_warn_' + new Date().toISOString().split('T')[0];
+        if (!localStorage.getItem(warnKey)) {
+          localStorage.setItem(warnKey, '1');
+          fetch('/api/notify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+            type: 'security',
+            data: { alert: '⚠️ Şifre 6 aydan uzun süredir değiştirilmedi! Son değişiklik: ' + d.toLocaleDateString('tr-TR') }
+          })}).catch(function(){});
+        }
+      } else {
+        warnEl.style.display = 'none';
+      }
+    } else {
+      dateEl.textContent = 'Bilgi yok';
+    }
+  } catch(e) {}
 }
 
 // ── Kategori Yönetimi ──
@@ -3552,7 +3591,7 @@ function showPage(page) {
     document.getElementById('sidebar-overlay').classList.remove('show');
   }
   // Refresh page data
-  if (page === 'dashboard') renderDashboard();
+  if (page === 'dashboard') { renderDashboard(); updatePasswordDate(); }
   if (page === 'venues') renderVenueTable();
   if (page === 'routes') renderRoutesTable();
   if (page === 'villages') { switchVillageTab(currentVPTab); }
@@ -4077,7 +4116,7 @@ showPage = function(page) {
   _origShowPage(page);
   if (page === 'gallery' && galItems.length === 0) galLoadItems();
   if (page === 'categories') { renderCatList(); renderPlaceCatList(); }
-  if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); loadHeroHistory(); }
+  if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); loadHeroHistory(); updatePasswordDate(); }
   if (page === 'security') runSecurityCheck();
   if (page === 'export') { loadBackupList(); updateAutoBackupUI(); }
 };
