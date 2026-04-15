@@ -80,7 +80,8 @@ export async function onRequestPost(context) {
       console.error('KV rate limit error:', e);
     }
   } else {
-    console.warn('CHAT_KV binding not found — rate limiting disabled');
+    // KV yok — debug için cevaba ekle (sonra kaldırılacak)
+    return new Response(JSON.stringify({ reply: '⚠️ DEBUG: CHAT_KV binding bulunamadı. Cloudflare Bindings ayarını kontrol edin.' }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 
   const ANTHROPIC_API_KEY = env.ANTHROPIC_API_KEY;
