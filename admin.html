@@ -4106,11 +4106,14 @@ function previewPendingVenue(id) {
 }
 
 async function approvePendingVenue(id) {
-  if (!confirm('Bu mekan talebini onaylayıp mekan olarak eklemek istiyor musunuz?')) return;
+  if (!confirm('Bu mekan talebini onaylayıp mekan olarak eklemek istiyor musunuz?\n\nTüm bilgiler forma yüklenecek, kontrol edip "Kaydet" butonuna basmanız yeterli.')) return;
   try {
     var doc = await db.collection('pending_venues').doc(id).get();
     if (!doc.exists) return;
     var data = doc.data();
+    // Pending ID'yi kaydet — kaydetme sonrası onay maili için
+    window._pendingApproveId = id;
+    window._pendingApproveData = data;
     // Mekan formunu aç ve bilgileri doldur
     showPage('venues');
     openVenueModal();
@@ -4143,6 +4146,18 @@ async function approvePendingVenue(id) {
       if (data.phones && data.phones.length > 0) {
         data.phones.forEach(function(p) { addPhoneRow(p); });
       }
+      // Görselleri pending olarak ekle
+      pendingImages = [];
+      if (data.images && data.images.length > 0) {
+        for (var i = 0; i < data.images.length; i++) {
+          try {
+            var resp = await fetch(data.images[i]);
+            var blob = await resp.blob();
+            pendingImages.push({ blob: blob, name: 'pending_' + i + '.jpg', dataUrl: data.images[i], ext: 'jpg', origSize: blob.size, compSize: blob.size });
+          } catch(e) { console.warn('Görsel yüklenemedi:', e); }
+        }
+        renderImagePreviews();
+      }
       // Çalışma saatleri
       if (data.weeklyHours && data.weeklyHours.length > 0) {
         renderWhGrid(data.weeklyHours);
@@ -4165,11 +4180,47 @@ async function approvePendingVenue(id) {
       autoCatEmoji();
       updateHoursVisibility();
     }, 300);
-    // Durumu güncelle
-    await db.collection('pending_venues').doc(id).update({ status: 'approved', approvedAt: new Date().toISOString() });
     logActivity('mekan_talep_onayla', id, data.title);
-    showToast('✅ Talep onaylandı — mekan bilgileri forma yüklendi, kaydet butonuna basın.', 'success');
+    showToast('✅ Bilgiler forma yüklendi — kontrol edip "Kaydet" butonuna basın.', 'success');
   } catch(err) { showToast('Hata: ' + err.message, 'error'); }
+}
+// Mekan kaydedildikten sonra pending onay + mail gönder
+async function afterVenueSaveApproval(venue) {
+  if (!window._pendingApproveId || !window._pendingApproveData) return;
+  var id = window._pendingApproveId;
+  var data = window._pendingApproveData;
+  window._pendingApproveId = null;
+  window._pendingApproveData = null;
+  try {
+    // Pending durumunu güncelle
+    await db.collection('pending_venues').doc(id).update({ status: 'approved', approvedAt: new Date().toISOString() });
+    // Onay maili gönder
+    if (data.ownerEmail) {
+      var venueUrl = 'https://assosukesfet.com/mekanlar/mekan-detay?id=' + venue.id;
+      var catEmojis = {kafe:'☕',restoran:'🍽',kahvalti:'🌞',konaklama:'🏨',beach:'🏖',iskele:'⚓'};
+      var catEmoji = catEmojis[venue.category] || '🏪';
+      try {
+        var html = buildMailHtml(catEmoji + ' ' + venue.title + ' Artık Assos\'u Keşfet\'te!',
+          'Merhaba ' + (data.ownerName || 'Değerli İşletme Sahibi') + ',\n\n' +
+          'Harika haberlerimiz var! 🎉\n\n' +
+          venue.title + ' mekanınız değerlendirme sürecini başarıyla tamamladı ve artık Assos\'u Keşfet platformunda yerini aldı!\n\n' +
+          'Bundan sonra Assos bölgesini keşfeden binlerce ziyaretçi mekanınızı görebilecek, iletişim bilgilerinize ulaşabilecek ve size yol tarifi alabilecek.\n\n' +
+          '🔗 Mekan sayfanız hazır ve yayında!\n\n' +
+          'Mekan bilgilerinizde güncelleme yapmak isterseniz her zaman info@assosukesfet.com adresine yazabilirsiniz.\n\n' +
+          'Assos\'u Keşfet ailesine hoş geldiniz! 🏛️',
+          { ctaText: venue.title + ' Sayfanızı Görüntüleyin', ctaUrl: venueUrl }
+        );
+        await fetch('/api/send-mail', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ to: [data.ownerEmail], subject: catEmoji + ' ' + venue.title + ' Artık Assos\'u Keşfet\'te! 🎉', html: html })
+        });
+        showToast('✉️ Onay maili gönderildi: ' + data.ownerEmail, 'success');
+        saveRecentEmail(data.ownerEmail);
+        try { db.collection('sent_mails').add({ to: [data.ownerEmail], subject: venue.title + ' — Onay', body: 'Mekan onaylandı ve yayına alındı', timestamp: new Date().toISOString(), user: firebase.auth().currentUser?.email || '' }); } catch(e) {}
+      } catch(mailErr) { console.warn('Onay maili gönderilemedi:', mailErr); }
+    }
+  } catch(e) { console.warn('Pending güncelleme hatası:', e); }
 }
 
 var REVISION_REASONS = [
@@ -7422,8 +7473,11 @@ async function saveVenue(e) {
   renderVenueTable();
   showToast('"' + venue.title + '" ' + (isEdit ? 'guncellendi.' : 'eklendi.'), 'success');
 
-  // Yeni mekan + sahip e-postası varsa hoşgeldin maili öner
-  if (!isEdit && venue.ownerEmail) {
+  // Pending onay akışı — mekan kaydedildikten sonra durum güncelle + onay maili
+  if (!isEdit && window._pendingApproveId) {
+    afterVenueSaveApproval(venue);
+  } else if (!isEdit && venue.ownerEmail) {
+    // Manuel eklenen mekan — hoşgeldin maili öner
     setTimeout(function() {
       if (confirm('✉️ "' + venue.title + '" mekan sahibine hoşgeldin maili göndermek ister misiniz?\n\nAlıcı: ' + venue.ownerEmail)) {
         sendVenueWelcomeMail(venue);
