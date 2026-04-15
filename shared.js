@@ -1932,7 +1932,7 @@ function venueCardHTML(v, delay = 0) {
    VENUE DETAIL PAGE
 ═══════════════════════════════════════════════ */
 function renderVenuePage(venueId) {
-  const v = DATA.venues.find(x => x.id === venueId);
+  const v = (DATA.venues || []).find(x => x.id === venueId);
   if (!v) {
     document.getElementById('vp-hero').innerHTML = '';
     document.getElementById('vp-body').innerHTML = '<p style="padding:80px 24px;text-align:center;color:#718096;">Mekan bulunamadı.</p>';
@@ -2062,7 +2062,7 @@ function renderVenuePage(venueId) {
   const highlights = generateHighlights(v.tags, v.description || v.shortDesc);
 
   /* ── Related data ── */
-  const similar      = DATA.venues.filter(x => x.id !== v.id && x.category === v.category).slice(0,6);
+  const similar      = (DATA.venues || []).filter(x => x.id !== v.id && x.category === v.category).slice(0,6);
   const relatedRoutes = DATA.routes.filter(r => (r.relatedVenues||[]).includes(v.id));
 
   /* ── Paths ── */
@@ -2839,7 +2839,7 @@ function renderVenuePage(venueId) {
 
         <!-- Komşu Mekanlar (aynı konum) -->
         ${(() => {
-          const neighbors = DATA.venues.filter(x => x.id !== v.id && x.location && v.location && x.location.toLowerCase() === v.location.toLowerCase()).slice(0, 4);
+          const neighbors = (DATA.venues || []).filter(x => x.id !== v.id && x.location && v.location && x.location.toLowerCase() === v.location.toLowerCase()).slice(0, 4);
           if (neighbors.length === 0) return '';
           return '<div class="vp-section fade-up">' +
             '<div class="vp-eyebrow">Komşu Mekanlar</div>' +
@@ -4428,7 +4428,8 @@ function renderPlacePage(placeId) {
         signal: controller.signal
       });
       clearTimeout(timeoutId);
-      var data = await resp.json();
+      var data;
+      try { data = await resp.json(); } catch(je) { data = { error: 'Sunucudan geçersiz yanıt' }; }
       typing.remove();
       if (data.reply) {
         addMsg(data.reply, 'bot');
