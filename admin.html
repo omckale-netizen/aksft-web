@@ -697,9 +697,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <div style="display:flex;gap:8px;flex:1;flex-wrap:wrap;align-items:center">
             <div class="search-bar" style="flex:1;min-width:160px">
               <span>&#128269;</span>
-              <input type="text" id="venue-search" placeholder="Mekan ara..." oninput="renderVenueTable()">
+              <input type="text" id="venue-search" placeholder="Mekan ara..." oninput="renderVenueTable(true)">
             </div>
-            <select id="venue-cat-filter" onchange="renderVenueTable()" class="admin-filter-select" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:#fff;color:var(--text);cursor:pointer">
+            <select id="venue-cat-filter" onchange="renderVenueTable(true)" class="admin-filter-select" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:#fff;color:var(--text);cursor:pointer">
               <option value="all">Tüm Kategoriler</option>
               <option value="kafe">☕ Kafeler</option>
               <option value="restoran">🍽 Restoranlar</option>
@@ -708,8 +708,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <option value="beach">🏖 Beach</option>
               <option value="iskele">⚓ İskeleler</option>
             </select>
+            <select id="venue-loc-filter" onchange="renderVenueTable(true)" class="admin-filter-select" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:#fff;color:var(--text);cursor:pointer">
+              <option value="all">Tüm Konumlar</option>
+            </select>
             <button class="btn btn-secondary btn-sm" id="venue-featured-filter" onclick="toggleFeaturedFilter()" style="white-space:nowrap">⭐ Öne Çıkanlar</button>
-            <select id="venue-active-filter" onchange="renderVenueTable()" class="admin-filter-select" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:#fff;color:var(--text);cursor:pointer">
+            <button class="btn btn-secondary btn-sm" id="venue-premium-filter" onclick="togglePremiumFilter()" style="white-space:nowrap">👑 Premium</button>
+            <select id="venue-active-filter" onchange="renderVenueTable(true)" class="admin-filter-select" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:#fff;color:var(--text);cursor:pointer">
               <option value="all" selected>Tüm Durumlar</option>
               <option value="published">🟢 Yayında</option>
               <option value="draft">📝 Taslak</option>
@@ -748,15 +752,21 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                 <th>Ad</th>
                 <th>Kategori</th>
                 <th>Konum</th>
+                <th>📞</th>
+                <th>📷</th>
                 <th>⭐</th>
                 <th>👑</th>
-                <th>Aktif</th>
                 <th>Durum</th>
+                <th>Açık/Kapalı</th>
                 <th>İşlemler</th>
               </tr>
             </thead>
             <tbody id="venue-tbody"></tbody>
           </table>
+        </div>
+        <div id="venue-pagination" style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid rgba(0,0,0,.04);flex-wrap:wrap;gap:8px">
+          <span id="venue-count-label" style="font-size:.75rem;color:var(--text-muted)"></span>
+          <div id="venue-page-btns" style="display:flex;gap:4px"></div>
         </div>
       </div>
     </div>
@@ -5811,6 +5821,7 @@ function renderDashboard() {
    VENUES TABLE
 ══════════════════════════════════════════════════ */
 let showFeaturedOnly = false;
+let showPremiumOnly = false;
 
 function toggleFeaturedFilter() {
   showFeaturedOnly = !showFeaturedOnly;
@@ -5818,7 +5829,15 @@ function toggleFeaturedFilter() {
   btn.style.background = showFeaturedOnly ? 'var(--terra)' : '';
   btn.style.color = showFeaturedOnly ? '#fff' : '';
   btn.style.borderColor = showFeaturedOnly ? 'var(--terra)' : '';
-  renderVenueTable();
+  renderVenueTable(true);
+}
+function togglePremiumFilter() {
+  showPremiumOnly = !showPremiumOnly;
+  const btn = document.getElementById('venue-premium-filter');
+  btn.style.background = showPremiumOnly ? '#D4935A' : '';
+  btn.style.color = showPremiumOnly ? '#fff' : '';
+  btn.style.borderColor = showPremiumOnly ? '#D4935A' : '';
+  renderVenueTable(true);
 }
 
 function toggleFeatured(id, e) {
@@ -5997,11 +6016,26 @@ async function saveVenueOrder() {
   }
 }
 
-function renderVenueTable() {
+var venueCurrentPage = 1;
+var VENUE_PER_PAGE = 20;
+function renderVenueTable(resetPage) {
+  if (resetPage) venueCurrentPage = 1;
   const q = (document.getElementById('venue-search')?.value || '').toLowerCase();
   const catFilter = document.getElementById('venue-cat-filter')?.value || 'all';
+  const locFilter = document.getElementById('venue-loc-filter')?.value || 'all';
   const activeFilter = document.getElementById('venue-active-filter')?.value || 'all';
-  const catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvalti',konaklama:'Konaklama',beach:'Beach',iskele:'Iskele'};
+  const catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskele'};
+
+  // Konum filtre dropdown'ını doldur (ilk çağrıda)
+  var locSel = document.getElementById('venue-loc-filter');
+  if (locSel && locSel.options.length <= 1) {
+    var locs = {};
+    (draftData.venues || []).forEach(function(v) { if (v.location) locs[v.location] = true; });
+    Object.keys(locs).sort(function(a,b) { return a.localeCompare(b,'tr'); }).forEach(function(loc) {
+      var o = document.createElement('option'); o.value = loc; o.textContent = loc; locSel.appendChild(o);
+    });
+  }
+
   let venues = [...(draftData.venues || [])].sort((a, b) => {
     const pa = isPremiumActive(a) ? 0 : 1;
     const pb = isPremiumActive(b) ? 0 : 1;
@@ -6010,17 +6044,44 @@ function renderVenueTable() {
   });
   if (q) venues = venues.filter(v => v.title.toLowerCase().includes(q) || (v.category||'').toLowerCase().includes(q) || (v.location||'').toLowerCase().includes(q));
   if (catFilter !== 'all') venues = venues.filter(v => v.category === catFilter);
+  if (locFilter !== 'all') venues = venues.filter(v => v.location === locFilter);
   if (showFeaturedOnly) venues = venues.filter(v => v.featured);
-  // Varsayılan: çöp kutusundakileri gizle
+  if (showPremiumOnly) venues = venues.filter(v => isPremiumActive(v));
   if (activeFilter === 'all') venues = venues.filter(v => getVenueStatusKey(v) !== 'trashed');
   else if (activeFilter === 'trashed') venues = venues.filter(v => getVenueStatusKey(v) === 'trashed');
   else venues = venues.filter(v => getVenueStatusKey(v) === activeFilter);
 
-  document.getElementById('venue-tbody').innerHTML = venues.length === 0
-    ? '<tr><td colspan="10" style="text-align:center;padding:32px;color:var(--text-muted)">Mekan bulunamadi.</td></tr>'
-    : venues.map(v => {
+  var totalFiltered = venues.length;
+  var totalAll = (draftData.venues || []).length;
+  var totalPages = Math.ceil(totalFiltered / VENUE_PER_PAGE) || 1;
+  if (venueCurrentPage > totalPages) venueCurrentPage = totalPages;
+  var startIdx = (venueCurrentPage - 1) * VENUE_PER_PAGE;
+  var pageVenues = venues.slice(startIdx, startIdx + VENUE_PER_PAGE);
+
+  // Sayaç
+  var countLabel = document.getElementById('venue-count-label');
+  if (countLabel) countLabel.textContent = totalFiltered + ' mekan gösteriliyor' + (totalFiltered !== totalAll ? ' (toplam ' + totalAll + ')' : '');
+
+  // Sayfalama butonları
+  var pageBtns = document.getElementById('venue-page-btns');
+  if (pageBtns) {
+    if (totalPages <= 1) { pageBtns.innerHTML = ''; }
+    else {
+      var btns = '';
+      if (venueCurrentPage > 1) btns += '<button class="btn btn-sm btn-secondary" onclick="venueCurrentPage--;renderVenueTable()">←</button>';
+      for (var pg = 1; pg <= totalPages; pg++) {
+        if (totalPages > 7 && pg > 2 && pg < totalPages - 1 && Math.abs(pg - venueCurrentPage) > 1) { if (pg === 3 || pg === totalPages - 2) btns += '<span style="padding:0 4px;color:var(--text-muted)">…</span>'; continue; }
+        btns += '<button class="btn btn-sm ' + (pg === venueCurrentPage ? 'btn-primary' : 'btn-secondary') + '" onclick="venueCurrentPage=' + pg + ';renderVenueTable()">' + pg + '</button>';
+      }
+      if (venueCurrentPage < totalPages) btns += '<button class="btn btn-sm btn-secondary" onclick="venueCurrentPage++;renderVenueTable()">→</button>';
+      pageBtns.innerHTML = btns;
+    }
+  }
+
+  document.getElementById('venue-tbody').innerHTML = pageVenues.length === 0
+    ? '<tr><td colspan="12" style="text-align:center;padding:32px;color:var(--text-muted)">Mekan bulunamadı.</td></tr>'
+    : pageVenues.map(v => {
       const s = getVenueStatus(v);
-      // Sezon dışı kontrolü
       var isSeasonOff = false;
       if (v.seasonal && v.seasonStart && v.seasonEnd) {
         var now = new Date();
@@ -6039,12 +6100,16 @@ function renderVenueTable() {
       const rowStyle = isPublished ? '' : 'opacity:.6;';
       const checked = bulkSelected.includes(v.id) ? 'checked' : '';
       const statusLabel = statusKey !== 'published' ? ' <span style="font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:6px;background:'+st.bg+';color:'+st.color+'">'+st.label.toUpperCase()+'</span>' : '';
+      var phoneCount = (v.phones && v.phones.length) || (v.phone ? 1 : 0);
+      var imgCount = (v.images && v.images.length) || 0;
       return `<tr style="${rowStyle}" data-venue-id="${v.id}">
         <td>${venueSortMode ? '<span class="drag-handle">☰</span>' : '<input type="checkbox" class="bulk-cb" data-id="' + v.id + '" ' + checked + ' onchange="bulkToggleOne(\'' + v.id + '\',this.checked)">'}</td>
         <td class="emoji-col">${v.emoji || ''}</td>
         <td><strong>${v.title}</strong>${statusLabel}</td>
         <td><span class="badge badge-cat">${catLabels[v.category] || v.category || '-'}</span></td>
-        <td>${v.location || '-'}</td>
+        <td style="font-size:.78rem">${v.location || '-'}</td>
+        <td style="font-size:.75rem;text-align:center;color:${phoneCount > 0 ? 'var(--text)' : 'var(--red)'}" title="${phoneCount > 0 ? phoneCount + ' numara' : 'Telefon yok!'}">${phoneCount > 0 ? phoneCount : '✗'}</td>
+        <td style="font-size:.75rem;text-align:center;color:${imgCount > 0 ? 'var(--text)' : 'var(--red)'}" title="${imgCount > 0 ? imgCount + ' görsel' : 'Görsel yok!'}">${imgCount > 0 ? imgCount : '✗'}</td>
         <td><span style="${starStyle}" onclick="toggleFeatured('${v.id}',event)" title="${v.featured ? 'Öne çıkanlardan kaldır' : 'Öne çıkanlara ekle'}">${v.featured ? '★' : '☆'}</span></td>
         <td>${isPremiumActive(v) ? '<span style="font-size:.85rem;cursor:default" title="Premium İşletme — Aktif">👑</span>' : v.premium ? '<span style="font-size:.85rem;opacity:.3;cursor:default" title="Premium süresi dolmuş">👑</span>' : '<span style="font-size:.85rem;opacity:.15;cursor:default">—</span>'}</td>
         <td>${statusKey === 'trashed' ? `<span style="font-size:.68rem;color:var(--text-muted)">🗑 ${v.trashedAt ? new Date(v.trashedAt).toLocaleDateString('tr-TR') : ''}</span>` : `<select onchange="changeVenueStatus('${v.id}',this.value)" style="padding:4px 8px;border-radius:8px;border:1.5px solid rgba(0,0,0,.08);font-size:.72rem;font-family:inherit;background:${st.bg};color:${st.color};font-weight:600;cursor:pointer">
@@ -6061,7 +6126,6 @@ function renderVenueTable() {
           <a class="btn-icon" href="https://assosukesfet.com/mekanlar/mekan-detay?id=${v.id}" target="_blank" title="Sayfayı Görüntüle" style="text-decoration:none;color:var(--terra)">↗</a>
           <button class="btn-icon" title="Düzenle" onclick="openVenueModal('${v.id}')" style="margin-left:4px">&#9998;</button>
           ${v.ownerEmail ? '<button class="btn-icon" title="Sahibine mail gönder: ' + v.ownerEmail + '" onclick="sendWelcomeMailToVenue(\'' + v.id + '\')" style="margin-left:4px;color:#6B46C1">✉</button>' : ''}
-          <button class="btn-icon" title="QR Kod" onclick="openQRModal('${v.id}')" style="margin-left:4px">📱</button>
           <button class="btn-icon" title="Çöp Kutusuna Taşı" onclick="confirmDeleteVenue('${v.id}')" style="margin-left:4px;color:var(--red)">&#128465;</button>
           `}
         </td>
