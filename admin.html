@@ -3791,6 +3791,8 @@ fbAuth.onAuthStateChanged(async (user) => {
     document.getElementById('admin-loading').classList.add('hidden');
     initApp();
     startSessionTimer();
+    // Giriş loglarını Firebase'e aktar
+    syncLoginLogs();
   } else {
     // Giris yapilmamis — login sayfasina yonlendir
     window.location.replace('admin-login.html');
@@ -5581,36 +5583,32 @@ function renderDashboard() {
   const r = draftData.routes || [];
   const vi = draftData.villages || [];
   const p = draftData.places || [];
-  const konaklama = v.filter(x => x.category === 'konaklama').length;
-  const featured = v.filter(x => x.featured).length;
-  const withImages = v.filter(x => x.images && x.images.length > 0).length;
-  let openCount = 0;
-  v.forEach(x => { if (getVenueStatus(x) === true) openCount++; });
 
-  const catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvalti',konaklama:'Konaklama',beach:'Beach',iskele:'Iskele'};
+  const catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskele'};
   const catEmojis = {kafe:'☕',restoran:'🍽',kahvalti:'🌞',konaklama:'🏨',beach:'🏖',iskele:'⚓'};
   const catColors = {kafe:'#C4521A',restoran:'#1A6B8A',kahvalti:'#D4935A',konaklama:'#5A7A56',beach:'#1A9A8A',iskele:'#3A5A8A'};
 
-  /* Stats */
-  const activeCount = v.filter(x => getVenueStatusKey(x) === 'published').length;
-  const closedCount = v.length - openCount;
-  const withImgCount = v.filter(x => x.images && x.images.length > 0).length;
-
+  /* Stats — doğru sayılar */
+  const published = v.filter(x => getVenueStatusKey(x) === 'published').length;
+  const draft = v.filter(x => getVenueStatusKey(x) === 'draft').length;
+  const trashed = v.filter(x => getVenueStatusKey(x) === 'trashed').length;
+  const featured = v.filter(x => x.featured).length;
   const premiumCount = v.filter(x => isPremiumActive && isPremiumActive(x)).length;
-  const totalContent = v.length + r.length + vi.length + p.length;
-
+  const withImgCount = v.filter(x => x.images && x.images.length > 0).length;
+  const noImgCount = v.filter(x => getVenueStatusKey(x) === 'published' && (!x.images || x.images.length === 0)).length;
+  let openCount = 0;
+  v.forEach(x => { if (getVenueStatus(x) === true) openCount++; });
   var blogCount = (typeof blogPosts !== 'undefined' ? blogPosts.length : 0);
+
   document.getElementById('stats-grid').innerHTML =
-    '<div class="stat-card"><div class="stat-label">Toplam İçerik</div><div class="stat-val">' + totalContent + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Mekanlar</div><div class="stat-val">' + v.length + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Rotalar</div><div class="stat-val">' + r.length + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Köyler</div><div class="stat-val">' + vi.length + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Yerler</div><div class="stat-val">' + p.length + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">Blog</div><div class="stat-val">' + blogCount + '</div></div>' +
-    '<div class="stat-card green"><div class="stat-label">Açık</div><div class="stat-val">' + openCount + '</div></div>' +
-    '<div class="stat-card terra"><div class="stat-label">Öne Çıkan</div><div class="stat-val">' + featured + '</div></div>' +
-    (premiumCount > 0 ? '<div class="stat-card" style=""><div class="stat-label">👑 Premium</div><div class="stat-val" style="color:#D4935A">' + premiumCount + '</div></div>' : '') +
-    '<div class="stat-card"><div class="stat-label">Görselli</div><div class="stat-val">' + withImgCount + '/' + v.length + '</div></div>';
+    '<div class="stat-card"><div class="stat-label">🏪 Mekanlar</div><div class="stat-val">' + published + '<span style="font-size:.6rem;color:var(--text-muted);font-weight:400">/' + v.length + '</span></div><div style="font-size:.6rem;color:var(--text-muted);margin-top:2px">' + published + ' yayında' + (draft ? ', ' + draft + ' taslak' : '') + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">🏛 Yerler</div><div class="stat-val">' + p.length + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">🏘 Köyler</div><div class="stat-val">' + vi.length + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">🗺 Rotalar</div><div class="stat-val">' + r.length + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">✍️ Blog</div><div class="stat-val">' + blogCount + '</div></div>' +
+    '<div class="stat-card green"><div class="stat-label">Şu An Açık</div><div class="stat-val">' + openCount + '<span style="font-size:.6rem;color:var(--text-muted);font-weight:400">/' + published + '</span></div></div>' +
+    (premiumCount > 0 ? '<div class="stat-card"><div class="stat-label">👑 Premium</div><div class="stat-val" style="color:#D4935A">' + premiumCount + '</div></div>' : '') +
+    '<div class="stat-card terra"><div class="stat-label">⭐ Öne Çıkan</div><div class="stat-val">' + featured + '</div></div>';
 
 
   /* Kategori dağılımı */
@@ -5697,10 +5695,13 @@ function renderDashboard() {
 
   // Bildirimler (alerts)
   const alerts = [];
-  const noImgCount = v.filter(x => !x.images || x.images.length === 0).length;
-  if (noImgCount > 0) alerts.push({ icon:'📷', text:noImgCount + ' mekanin gorseli eksik', action:'venues', color:'#D4935A' });
-  const inactiveCount = v.filter(x => getVenueStatusKey(x) !== 'published').length;
-  if (inactiveCount > 0) alerts.push({ icon:'⏸', text:inactiveCount + ' mekan pasif durumda', action:'venues', color:'#718096' });
+  if (noImgCount > 0) alerts.push({ icon:'📷', text:noImgCount + ' yayındaki mekanın görseli eksik', action:'venues', color:'#D4935A' });
+  if (draft > 0) alerts.push({ icon:'📝', text:draft + ' mekan taslak durumda — yayınlamayı unutma', action:'venues', color:'#975A16' });
+  if (trashed > 0) alerts.push({ icon:'🗑', text:trashed + ' mekan çöp kutusunda', action:'venues', color:'#718096' });
+  var noPhoneCount = v.filter(x => getVenueStatusKey(x) === 'published' && (!x.phones || x.phones.length === 0) && !x.phone).length;
+  if (noPhoneCount > 0) alerts.push({ icon:'📞', text:noPhoneCount + ' mekanın telefon numarası yok', action:'venues', color:'#C53030' });
+  var noOwnerEmail = v.filter(x => getVenueStatusKey(x) === 'published' && !x.ownerEmail).length;
+  if (noOwnerEmail > 0 && noOwnerEmail < v.length) alerts.push({ icon:'✉️', text:noOwnerEmail + ' mekanın sahip e-postası eksik', action:'venues', color:'#6B46C1' });
 
   const alertEl = document.getElementById('dash-alerts');
   if (alertEl) {
@@ -8626,7 +8627,8 @@ function deleteBlogPost(id) {
    AKTIVITE LOGU
 ══════════════════════════════════════════════════ */
 const ACTIVITY_LABELS = {
-  giris: { icon: '🔐', label: 'Giriş', color: 'rgba(49,130,206,.1)' },
+  giris: { icon: '🟢', label: 'Başarılı Giriş', color: 'rgba(56,161,105,.1)' },
+  giris_basarisiz: { icon: '🔴', label: 'Başarısız Giriş', color: 'rgba(229,62,62,.1)' },
   mekan_ekle: { icon: '➕', label: 'Mekan Eklendi', color: 'rgba(56,161,105,.1)' },
   mekan_guncelle: { icon: '🏪', label: 'Mekan Güncellendi', color: 'rgba(196,82,26,.1)' },
   mekan_sil: { icon: '🗑', label: 'Mekan Kalıcı Silindi', color: 'rgba(229,62,62,.1)' },
@@ -9572,6 +9574,37 @@ function fcClearAll() {
 /* ══════════════════════════════════════════════════
    GÜVENLİK SAYFASI
 ══════════════════════════════════════════════════ */
+async function syncLoginLogs() {
+  try {
+    // Başarılı giriş kaydı
+    var lastLogin = localStorage.getItem('assos_last_login');
+    if (lastLogin) {
+      var info = JSON.parse(lastLogin);
+      await db.collection('activity_logs').add({
+        action: 'giris',
+        target: info.email || '',
+        details: (info.device || '') + (info.ip ? ' · IP: ' + info.ip : ''),
+        user: info.email || '',
+        timestamp: info.timestamp || new Date().toISOString()
+      });
+      localStorage.removeItem('assos_last_login');
+    }
+    // Başarısız giriş kayıtları
+    var failedLogs = JSON.parse(localStorage.getItem('assos_failed_logins') || '[]');
+    if (failedLogs.length > 0) {
+      for (var fl of failedLogs) {
+        await db.collection('activity_logs').add({
+          action: 'giris_basarisiz',
+          target: fl.email || '',
+          details: fl.error || 'Hatalı şifre',
+          user: fl.email || '',
+          timestamp: fl.timestamp || new Date().toISOString()
+        });
+      }
+      localStorage.removeItem('assos_failed_logins');
+    }
+  } catch(e) {}
+}
 async function runSecurityCheck() {
   const btn = document.getElementById('sec-check-btn');
   btn.disabled = true; btn.textContent = 'Taranıyor...';
@@ -9710,11 +9743,11 @@ async function loadSecurityLogs() {
       .limit(30)
       .get();
 
-    const secActions = ['giris', 'cikis', 'sifre_degistir', 'mekan_sil', 'yer_sil', 'rota_sil', 'koy_sil', 'blog_sil', 'galeri_sil', 'toplu_sil'];
+    const secActions = ['giris', 'giris_basarisiz', 'cikis', 'sifre_degistir', 'mekan_sil', 'mekan_cop', 'yer_sil', 'rota_sil', 'koy_sil', 'blog_sil', 'galeri_sil', 'toplu_sil', 'toplu_mail'];
     const logs = [];
     snap.forEach(doc => {
       const d = doc.data();
-      if (secActions.some(a => (d.action || '').includes(a)) || (d.action || '').includes('sil')) {
+      if (secActions.some(a => (d.action || '') === a) || (d.action || '').includes('sil') || (d.action || '').includes('giris')) {
         logs.push(d);
       }
     });
@@ -9724,14 +9757,23 @@ async function loadSecurityLogs() {
       return;
     }
 
+    var secLabels = {
+      giris: { icon: '🟢', label: 'Başarılı Giriş' },
+      giris_basarisiz: { icon: '🔴', label: 'Başarısız Giriş Denemesi' },
+      sifre_degistir: { icon: '🔑', label: 'Şifre Değiştirildi' },
+      mekan_sil: { icon: '🗑', label: 'Mekan Kalıcı Silindi' },
+      mekan_cop: { icon: '🗑', label: 'Mekan Çöpe Taşındı' },
+      toplu_mail: { icon: '📨', label: 'Toplu Mail Gönderildi' }
+    };
     container.innerHTML = logs.slice(0, 20).map(l => {
-      const isRisky = (l.action || '').includes('sil') || (l.action || '').includes('blocked');
-      const icon = isRisky ? '🔴' : '🟢';
-      const date = l.timestamp ? new Date(l.timestamp).toLocaleString('tr-TR') : '';
+      var act = l.action || '';
+      var isRisky = act.includes('sil') || act.includes('basarisiz') || act.includes('cop');
+      var sl = secLabels[act] || { icon: isRisky ? '🔴' : '🟢', label: act.replace(/_/g, ' ') };
+      var date = l.timestamp ? new Date(l.timestamp).toLocaleString('tr-TR') : '';
       return '<div class="notif-item" style="cursor:default">' +
-        '<div class="notif-icon" style="background:' + (isRisky ? 'var(--red-bg)' : 'var(--green-bg)') + '">' + icon + '</div>' +
+        '<div class="notif-icon" style="background:' + (isRisky ? 'var(--red-bg)' : 'var(--green-bg)') + '">' + sl.icon + '</div>' +
         '<div class="notif-body">' +
-          '<div class="notif-title">' + (l.action || '').replace(/_/g, ' ') + '</div>' +
+          '<div class="notif-title">' + sl.label + '</div>' +
           '<div class="notif-desc">' + (l.target || '') + (l.details ? ' — ' + l.details : '') + '</div>' +
           '<div class="notif-time">' + date + ' · ' + (l.user || '') + '</div>' +
         '</div>' +
@@ -9753,7 +9795,7 @@ async function loadLoginLogs() {
     const logins = [];
     snap.forEach(doc => {
       const d = doc.data();
-      if ((d.action || '') === 'giris') logins.push(d);
+      if ((d.action || '') === 'giris' || (d.action || '') === 'giris_basarisiz') logins.push(d);
     });
 
     if (logins.length === 0) {
@@ -9761,10 +9803,16 @@ async function loadLoginLogs() {
       return;
     }
 
-    container.innerHTML = '<table class="panel-table"><thead><tr><th>Tarih</th><th>Kullanıcı</th><th>Detay</th></tr></thead><tbody>' +
-      logins.slice(0, 15).map(l => {
+    container.innerHTML = '<table class="panel-table"><thead><tr><th>Tarih</th><th>Durum</th><th>Kullanıcı</th><th>Detay</th></tr></thead><tbody>' +
+      logins.slice(0, 20).map(l => {
         const date = l.timestamp ? new Date(l.timestamp).toLocaleString('tr-TR') : '';
-        return '<tr><td style="font-size:.78rem;white-space:nowrap">' + date + '</td>' +
+        const isFail = (l.action || '') === 'giris_basarisiz';
+        const badge = isFail
+          ? '<span style="font-size:.68rem;padding:2px 8px;border-radius:6px;background:rgba(229,62,62,.08);color:#C53030;font-weight:600">Başarısız</span>'
+          : '<span style="font-size:.68rem;padding:2px 8px;border-radius:6px;background:rgba(56,161,105,.08);color:#276749;font-weight:600">Başarılı</span>';
+        return '<tr style="' + (isFail ? 'background:rgba(229,62,62,.03)' : '') + '">' +
+          '<td style="font-size:.78rem;white-space:nowrap">' + date + '</td>' +
+          '<td>' + badge + '</td>' +
           '<td style="font-size:.78rem">' + (l.user || l.target || '') + '</td>' +
           '<td style="font-size:.78rem;color:var(--text-light)">' + (l.details || '') + '</td></tr>';
       }).join('') +

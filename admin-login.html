@@ -150,8 +150,15 @@ async function checkAuth() {
     clearLoginAttempts();
     errEl.style.color = '#38A169';
     errEl.textContent = '✓ Giriş başarılı! Yönlendiriliyorsunuz...';
-    // Telegram bildirim
     localStorage.setItem('lastActivity', Date.now().toString());
+    // Başarılı girişi localStorage'a kaydet
+    try {
+      var loginInfo = { email: email, timestamp: new Date().toISOString(), success: true };
+      try { var ipR2 = await fetch('https://api.ipify.org?format=json'); var ipJ2 = await ipR2.json(); loginInfo.ip = ipJ2.ip || ''; } catch(e) {}
+      loginInfo.device = getDeviceInfo().platform;
+      localStorage.setItem('assos_last_login', JSON.stringify(loginInfo));
+    } catch(e) {}
+    // Telegram bildirim
     var device = getDeviceInfo().platform;
     var ip = '';
     try { var ipR = await fetch('https://api.ipify.org?format=json'); var ipJ = await ipR.json(); ip = ipJ.ip || ''; } catch(e) {}
@@ -165,6 +172,13 @@ async function checkAuth() {
     window.location.href = 'admin.html';
   } catch(err) {
     const updated = recordFailedLogin();
+    // Başarısız girişi localStorage'a kaydet (admin panelde Firebase'e aktarılacak)
+    try {
+      var failedLogs = JSON.parse(localStorage.getItem('assos_failed_logins') || '[]');
+      failedLogs.push({ email: email, timestamp: new Date().toISOString(), error: err.code || err.message });
+      if (failedLogs.length > 50) failedLogs = failedLogs.slice(-50);
+      localStorage.setItem('assos_failed_logins', JSON.stringify(failedLogs));
+    } catch(e) {}
     if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
       const left = LOGIN_MAX_ATTEMPTS - updated.count;
       if (left > 0) {
