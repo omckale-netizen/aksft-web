@@ -1596,8 +1596,53 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
     <!-- ══════ MESSAGES ══════ -->
     <div class="admin-page" id="page-messages">
-      <h2>Mesajlar</h2>
-      <p class="page-sub">İletişim formundan gelen mesajlar.</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:4px">
+        <div>
+          <h2 style="margin:0">Mesajlar</h2>
+          <p class="page-sub" style="margin:4px 0 0">İletişim formundan gelen mesajlar ve mail gönderimi.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openComposeMail()">✉️ Yeni Mail Gönder</button>
+      </div>
+
+      <!-- Compose Mail Panel -->
+      <div id="compose-mail-panel" style="display:none;margin-bottom:20px">
+        <div class="panel-card">
+          <div class="panel-card-head" style="justify-content:space-between">
+            <h3>✉️ Yeni Mail Gönder</h3>
+            <button class="btn btn-sm btn-secondary" onclick="closeComposeMail()">✕ Kapat</button>
+          </div>
+          <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+            <div class="form-group" style="margin:0">
+              <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:4px">Alıcı</label>
+              <input type="email" id="compose-to" placeholder="ornek@mail.com" style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.88rem;background:var(--input-bg,#fff);color:var(--text);width:100%">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:4px">Konu</label>
+              <input type="text" id="compose-subject" placeholder="Mail konusu" style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.88rem;background:var(--input-bg,#fff);color:var(--text);width:100%">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:4px">İçerik</label>
+              <textarea id="compose-body" rows="8" placeholder="Mail içeriğini yazın..." style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.88rem;font-family:inherit;resize:vertical;background:var(--input-bg,#fff);color:var(--text);width:100%;line-height:1.7"></textarea>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center">
+              <button class="btn btn-primary" onclick="sendComposeMail()">Gönder</button>
+              <button class="btn btn-secondary" onclick="previewComposeMail()">Önizleme</button>
+              <span id="compose-status" style="font-size:.75rem;color:var(--text-muted);margin-left:auto"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mail Önizleme Modal -->
+      <div id="compose-preview-overlay" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center" onclick="if(event.target===this)this.style.display='none'">
+        <div style="background:#fff;border-radius:16px;max-width:640px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid #E2E8F0">
+            <span style="font-size:.85rem;font-weight:700;color:#1A2744">Mail Önizleme</span>
+            <button onclick="document.getElementById('compose-preview-overlay').style.display='none'" style="border:none;background:none;font-size:1.2rem;cursor:pointer;color:#718096">&times;</button>
+          </div>
+          <div id="compose-preview-body" style="padding:0"></div>
+        </div>
+      </div>
 
       <!-- Stats -->
       <div class="stats-grid" id="msg-stats" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px"></div>
@@ -4048,6 +4093,105 @@ async function sendReplyMail(docId) {
       statusEl.style.color = 'var(--green)';
       showToast('✉️ Yanıt gönderildi: ' + m.email, 'success');
       setTimeout(function() { document.getElementById('msg-detail-consent').innerHTML = ''; }, 2000);
+    } else {
+      statusEl.textContent = 'Hata: ' + (data.error || data.details || '');
+      statusEl.style.color = 'var(--red)';
+      showToast('Mail gönderilemedi', 'error');
+    }
+  } catch(e) {
+    statusEl.textContent = 'Bağlantı hatası';
+    statusEl.style.color = 'var(--red)';
+    showToast('Mail gönderilemedi: ' + e.message, 'error');
+  }
+}
+// ── Yeni Mail Gönder ──
+function openComposeMail(toEmail) {
+  var panel = document.getElementById('compose-mail-panel');
+  panel.style.display = 'block';
+  document.getElementById('compose-to').value = toEmail || '';
+  document.getElementById('compose-subject').value = '';
+  document.getElementById('compose-body').value = '';
+  document.getElementById('compose-status').textContent = '';
+  if (!toEmail) document.getElementById('compose-to').focus();
+  else document.getElementById('compose-subject').focus();
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function closeComposeMail() {
+  document.getElementById('compose-mail-panel').style.display = 'none';
+}
+function buildMailHtml(subject, body) {
+  var paragraphs = body.split('\n').filter(function(l) { return l.trim(); }).map(function(l) {
+    return '<p style="font-size:.95rem;line-height:1.7;color:#2D3748;margin:0 0 12px;">' + l.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</p>';
+  }).join('');
+
+  return '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>' +
+    '<body style="margin:0;padding:0;background:#F0EDE8;font-family:\'Segoe UI\',Tahoma,Arial,sans-serif;">' +
+    '<div style="max-width:600px;margin:0 auto;padding:20px;">' +
+      '<div style="background:linear-gradient(135deg,#1A2744 0%,#2D3E5F 100%);border-radius:16px 16px 0 0;padding:28px 28px;text-align:center;">' +
+        '<h1 style="margin:0;font-size:1.4rem;color:#fff;font-weight:800;">Assos\'u Ke\u015ffet</h1>' +
+        '<p style="margin:6px 0 0;font-size:.78rem;color:rgba(255,255,255,.55);">Assos \u2022 Ayvac\u0131k \u2022 \u00c7anakkale</p>' +
+      '</div>' +
+      '<div style="background:#ffffff;padding:32px 28px;border-left:1px solid #E8E4DE;border-right:1px solid #E8E4DE;">' +
+        paragraphs +
+      '</div>' +
+      '<div style="background:#ffffff;padding:0 28px 28px;border-left:1px solid #E8E4DE;border-right:1px solid #E8E4DE;">' +
+        '<hr style="border:none;border-top:1px solid #E8E4DE;margin:0 0 20px;">' +
+        '<table style="width:100%"><tr><td style="vertical-align:top">' +
+          '<p style="margin:0 0 2px;font-size:.88rem;font-weight:700;color:#1A2744;">Assos\'u Ke\u015ffet</p>' +
+          '<p style="margin:0 0 8px;font-size:.72rem;color:#718096;">Assos, Ayvac\u0131k & \u00c7anakkale Rehberi</p>' +
+          '<table style="border-collapse:collapse;">' +
+            '<tr><td style="font-size:.72rem;color:#A0AEC0;padding:2px 8px 2px 0;">&#x2709;</td><td style="font-size:.72rem;"><a href="mailto:info@assosukesfet.com" style="color:#C4521A;text-decoration:none;">info@assosukesfet.com</a></td></tr>' +
+            '<tr><td style="font-size:.72rem;color:#A0AEC0;padding:2px 8px 2px 0;">&#x1F310;</td><td style="font-size:.72rem;"><a href="https://assosukesfet.com" style="color:#C4521A;text-decoration:none;">assosukesfet.com</a></td></tr>' +
+            '<tr><td style="font-size:.72rem;color:#A0AEC0;padding:2px 8px 2px 0;">&#x1F4F8;</td><td style="font-size:.72rem;"><a href="https://instagram.com/assosukesfet" style="color:#C4521A;text-decoration:none;">@assosukesfet</a></td></tr>' +
+          '</table>' +
+        '</td></tr></table>' +
+      '</div>' +
+      '<div style="background:#1A2744;border-radius:0 0 16px 16px;padding:20px 28px;text-align:center;">' +
+        '<p style="margin:0;font-size:.65rem;color:rgba(255,255,255,.4);">&copy; ' + new Date().getFullYear() + ' Assos\'u Ke\u015ffet \u2022 assosukesfet.com</p>' +
+      '</div>' +
+    '</div></body></html>';
+}
+function previewComposeMail() {
+  var subject = document.getElementById('compose-subject').value.trim();
+  var body = document.getElementById('compose-body').value.trim();
+  if (!body) { showToast('Önce içerik yazın', 'error'); return; }
+  var html = buildMailHtml(subject, body);
+  var overlay = document.getElementById('compose-preview-overlay');
+  document.getElementById('compose-preview-body').innerHTML = '<iframe srcdoc="' + html.replace(/"/g,'&quot;') + '" style="width:100%;height:70vh;border:none;"></iframe>';
+  overlay.style.display = 'flex';
+}
+async function sendComposeMail() {
+  var to = document.getElementById('compose-to').value.trim();
+  var subject = document.getElementById('compose-subject').value.trim();
+  var body = document.getElementById('compose-body').value.trim();
+  var statusEl = document.getElementById('compose-status');
+
+  if (!to) { showToast('Alıcı adresi girin', 'error'); return; }
+  if (!subject) { showToast('Konu yazın', 'error'); return; }
+  if (!body) { showToast('İçerik yazın', 'error'); return; }
+
+  statusEl.textContent = 'Gönderiliyor...';
+  statusEl.style.color = 'var(--text-muted)';
+
+  try {
+    var html = buildMailHtml(subject, body);
+    var resp = await fetch('/api/send-mail', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to: to, subject: subject + ' — Assos\'u Keşfet', html: html })
+    });
+    var data = await resp.json();
+    if (data.ok) {
+      statusEl.textContent = 'Gönderildi!';
+      statusEl.style.color = 'var(--green)';
+      showToast('✉️ Mail gönderildi: ' + to, 'success');
+      logActivity('mail_gonder', to, subject);
+      setTimeout(function() {
+        document.getElementById('compose-to').value = '';
+        document.getElementById('compose-subject').value = '';
+        document.getElementById('compose-body').value = '';
+        statusEl.textContent = '';
+      }, 3000);
     } else {
       statusEl.textContent = 'Hata: ' + (data.error || data.details || '');
       statusEl.style.color = 'var(--red)';
@@ -7995,7 +8139,8 @@ const ACTIVITY_LABELS = {
   sifre_degistir: { icon: '🔐', label: 'Şifre Değiştirildi', color: 'rgba(229,62,62,.1)' },
   premium_bitti: { icon: '⭐', label: 'Premium Süresi Doldu', color: 'rgba(212,147,90,.1)' },
   llms_guncelle: { icon: '🤖', label: 'AI İçerik Güncellendi', color: 'rgba(26,107,138,.1)' },
-  backup: { icon: '💾', label: 'Yedekleme', color: 'rgba(49,130,206,.1)' }
+  backup: { icon: '💾', label: 'Yedekleme', color: 'rgba(49,130,206,.1)' },
+  mail_gonder: { icon: '✉️', label: 'Mail Gönderildi', color: 'rgba(196,82,26,.1)' }
 };
 
 async function renderActivityLog() {
