@@ -1575,7 +1575,24 @@ const ROUTE_TEMPO_ICO  = {'Sakin':'🌿','Aktif':'⚡','Keşif':'🔍','Dinlendi
 function renderRoutePage(routeId) {
   if (!window.DATA) { console.error('DATA not loaded'); return; }
   const r = DATA.routes.find(x => x.id === routeId);
-  if (!r) { console.error('Route not found:', routeId); return; }
+  if (!r) {
+    var noindex = document.createElement('meta'); noindex.name = 'robots'; noindex.content = 'noindex, nofollow'; document.head.appendChild(noindex);
+    document.title = 'Rota Bulunamadı — Assos\u2019u Keşfet';
+    var footer = document.getElementById('footer-placeholder'); if (footer) footer.style.display = 'none';
+    var body = document.querySelector('main') || document.body;
+    var notFound = document.createElement('div');
+    notFound.innerHTML = `
+      <div style="min-height:calc(100vh - 72px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:linear-gradient(180deg,#FAFAF8 0%,#FFF5EE 50%,#FFECD2 100%);position:relative;overflow:hidden;">
+        <div style="text-align:center;max-width:500px;position:relative;z-index:1;">
+          <div style="width:140px;height:140px;margin:0 auto 32px;border-radius:50%;background:linear-gradient(135deg,#fff,#FFF5EE);box-shadow:0 8px 32px rgba(196,82,26,.12);display:flex;align-items:center;justify-content:center;font-size:3rem;">🗺️</div>
+          <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.75rem;color:#1A2744;margin:0 0 12px;font-weight:800;letter-spacing:-.02em;">Rota Bulunamadı</h1>
+          <p style="color:#718096;font-size:1rem;line-height:1.7;margin:0 0 40px;">Aradığınız rota kaldırılmış veya geçici olarak erişime kapatılmış olabilir.</p>
+          <a href="../rotalar.html" style="display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#C4521A,#A3431A);color:#fff;padding:16px 36px;border-radius:14px;text-decoration:none;font-weight:700;font-size:1rem;box-shadow:0 4px 16px rgba(196,82,26,.3);">Tüm Rotaları Keşfet</a>
+        </div>
+      </div>`;
+    body.appendChild(notFound);
+    return;
+  }
   const p = ROUTE_PAL[routeId] || ROUTE_PAL['bir-gunde-assos'];
 
   document.title = r.title + ' — Assos Gezi Rotası | Assos\'u Keşfet';
@@ -1934,6 +1951,9 @@ function venueCardHTML(v, delay = 0) {
 function renderVenuePage(venueId) {
   const v = (DATA.venues || []).find(x => x.id === venueId);
   if (!v) {
+    // SEO: noindex ekle — silinen mekan Google indeksinden düşsün
+    var noindex = document.createElement('meta'); noindex.name = 'robots'; noindex.content = 'noindex, nofollow'; document.head.appendChild(noindex);
+    document.title = 'Mekan Bulunamadı — Assos\u2019u Keşfet';
     document.getElementById('vp-hero').innerHTML = '';
     var footer = document.getElementById('footer-placeholder'); if (footer) footer.style.display = 'none';
     document.getElementById('vp-body').innerHTML = `
@@ -3315,8 +3335,19 @@ function renderVillagePage(villageId) {
   ensureVpStyles();
   var v = (DATA.villages || []).find(function(x) { return x.id === villageId; });
   if (!v) {
+    var noindex = document.createElement('meta'); noindex.name = 'robots'; noindex.content = 'noindex, nofollow'; document.head.appendChild(noindex);
+    document.title = 'Köy Bulunamadı — Assos\u2019u Keşfet';
+    var footer = document.getElementById('footer-placeholder'); if (footer) footer.style.display = 'none';
     document.getElementById('village-hero').innerHTML = '';
-    document.getElementById('village-body').innerHTML = '<p style="padding:80px 24px;text-align:center;color:#718096;">Köy bulunamadı.</p>';
+    document.getElementById('village-body').innerHTML = `
+      <div style="min-height:calc(100vh - 72px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:linear-gradient(180deg,#FAFAF8 0%,#FFF5EE 50%,#FFECD2 100%);position:relative;overflow:hidden;">
+        <div style="text-align:center;max-width:500px;position:relative;z-index:1;">
+          <div style="width:140px;height:140px;margin:0 auto 32px;border-radius:50%;background:linear-gradient(135deg,#fff,#FFF5EE);box-shadow:0 8px 32px rgba(196,82,26,.12);display:flex;align-items:center;justify-content:center;font-size:3rem;">🏘️</div>
+          <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.75rem;color:#1A2744;margin:0 0 12px;font-weight:800;letter-spacing:-.02em;">Köy Bulunamadı</h1>
+          <p style="color:#718096;font-size:1rem;line-height:1.7;margin:0 0 40px;">Aradığınız köy kaldırılmış veya geçici olarak erişime kapatılmış olabilir.</p>
+          <a href="../koyler.html" style="display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#C4521A,#A3431A);color:#fff;padding:16px 36px;border-radius:14px;text-decoration:none;font-weight:700;font-size:1rem;box-shadow:0 4px 16px rgba(196,82,26,.3);">Tüm Köyleri Keşfet</a>
+        </div>
+      </div>`;
     return;
   }
 
@@ -3788,8 +3819,19 @@ function renderPlacePage(placeId) {
   ensureVpStyles();
   var p = (DATA.places || []).find(function(x) { return x.id === placeId; });
   if (!p) {
+    var noindex = document.createElement('meta'); noindex.name = 'robots'; noindex.content = 'noindex, nofollow'; document.head.appendChild(noindex);
+    document.title = 'Yer Bulunamadı — Assos\u2019u Keşfet';
+    var footer = document.getElementById('footer-placeholder'); if (footer) footer.style.display = 'none';
     document.getElementById('place-hero').innerHTML = '';
-    document.getElementById('place-body').innerHTML = '<p style="padding:80px 24px;text-align:center;color:#718096;">Yer bulunamadı.</p>';
+    document.getElementById('place-body').innerHTML = `
+      <div style="min-height:calc(100vh - 72px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:linear-gradient(180deg,#FAFAF8 0%,#FFF5EE 50%,#FFECD2 100%);position:relative;overflow:hidden;">
+        <div style="text-align:center;max-width:500px;position:relative;z-index:1;">
+          <div style="width:140px;height:140px;margin:0 auto 32px;border-radius:50%;background:linear-gradient(135deg,#fff,#FFF5EE);box-shadow:0 8px 32px rgba(196,82,26,.12);display:flex;align-items:center;justify-content:center;font-size:3rem;">📍</div>
+          <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.75rem;color:#1A2744;margin:0 0 12px;font-weight:800;letter-spacing:-.02em;">Yer Bulunamadı</h1>
+          <p style="color:#718096;font-size:1rem;line-height:1.7;margin:0 0 40px;">Aradığınız yer kaldırılmış veya geçici olarak erişime kapatılmış olabilir.</p>
+          <a href="../yerler.html" style="display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#C4521A,#A3431A);color:#fff;padding:16px 36px;border-radius:14px;text-decoration:none;font-weight:700;font-size:1rem;box-shadow:0 4px 16px rgba(196,82,26,.3);">Tüm Yerleri Keşfet</a>
+        </div>
+      </div>`;
     return;
   }
 
