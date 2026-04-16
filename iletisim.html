@@ -160,7 +160,7 @@
           <div class="ct-card-icon" style="background:linear-gradient(135deg,rgba(196,82,26,.12),rgba(196,82,26,.04));">📧</div>
           <div>
             <div class="ct-card-label">E-posta</div>
-            <a href="mailto:assosukesfet@gmail.com" class="ct-card-val">assosukesfet@gmail.com</a>
+            <a href="mailto:info@assosukesfet.com" class="ct-card-val">info@assosukesfet.com</a>
           </div>
         </div>
 
@@ -318,6 +318,8 @@
 .ct-consent{margin:18px 0 6px}
 .ct-consent-warn{font-size:.76rem;color:#E53E3E;margin-top:8px;padding:8px 12px;background:rgba(229,62,62,.06);border:1px solid rgba(229,62,62,.15);border-radius:8px;animation:ctShake .4s}
 .ct-consent-error .ct-checkmark{border-color:#E53E3E !important;box-shadow:0 0 0 3px rgba(229,62,62,.1)}
+/* ── FIELD ERROR ── */
+.ct-field-error input,.ct-field-error select,.ct-field-error textarea{border-color:#E53E3E !important;background:rgba(229,62,62,.04) !important;box-shadow:0 0 0 3px rgba(229,62,62,.08) !important;animation:ctShake .4s}
 @keyframes ctShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
 .ct-checkbox-label{display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:.78rem;color:var(--text-mid);line-height:1.6;user-select:none}
 .ct-checkbox-label input{display:none}
@@ -436,31 +438,57 @@ async function submitContact(e) {
   const btn = document.getElementById('ct-submit');
   const status = document.getElementById('ct-status');
 
+  // Önceki hata işaretlerini temizle
+  document.querySelectorAll('.ct-field-error').forEach(function(el) { el.classList.remove('ct-field-error'); });
+  if (!window._ctFieldErrListener) {
+    document.getElementById('contact-form').addEventListener('input', function(e) {
+      var f = e.target.closest('.ct-field');
+      if (f && f.classList.contains('ct-field-error')) f.classList.remove('ct-field-error');
+    });
+    window._ctFieldErrListener = true;
+  }
+
   // Zorunlu alan kontrolü
-  var name = document.getElementById('ct-name').value.trim();
-  var email = document.getElementById('ct-email').value.trim();
+  var nameEl = document.getElementById('ct-name');
+  var emailEl = document.getElementById('ct-email');
+  var phoneEl = document.getElementById('ct-phone');
+  var messageEl = document.getElementById('ct-message');
   var phoneCode = document.getElementById('ct-phone-code').value;
-  var phoneRaw = document.getElementById('ct-phone').value.trim();
+  var name = nameEl.value.trim();
+  var email = emailEl.value.trim();
+  var phoneRaw = phoneEl.value.trim();
   var phone = phoneCode + ' ' + phoneRaw;
-  var message = document.getElementById('ct-message').value.trim();
+  var message = messageEl.value.trim();
+
   if (!name || !email || !phoneRaw || !message) {
-    status.innerHTML = '<span style="color:#E53E3E">Lütfen tüm zorunlu alanları doldurun.</span>';
+    var firstEmpty = null;
+    if (!name) { nameEl.closest('.ct-field').classList.add('ct-field-error'); if (!firstEmpty) firstEmpty = nameEl; }
+    if (!email) { emailEl.closest('.ct-field').classList.add('ct-field-error'); if (!firstEmpty) firstEmpty = emailEl; }
+    if (!phoneRaw) { phoneEl.closest('.ct-field').classList.add('ct-field-error'); if (!firstEmpty) firstEmpty = phoneEl; }
+    if (!message) { messageEl.closest('.ct-field').classList.add('ct-field-error'); if (!firstEmpty) firstEmpty = messageEl; }
+    status.innerHTML = '<span style="color:#E53E3E">Lütfen kırmızı ile işaretli zorunlu alanları doldurun.</span>';
+    if (firstEmpty) firstEmpty.focus();
     return;
   }
   if (message.length > 2000) {
+    messageEl.closest('.ct-field').classList.add('ct-field-error');
     status.innerHTML = '<span style="color:#E53E3E">Mesaj en fazla 2000 karakter olabilir.</span>';
+    messageEl.focus();
     return;
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    emailEl.closest('.ct-field').classList.add('ct-field-error');
     status.innerHTML = '<span style="color:#E53E3E">Lütfen geçerli bir e-posta adresi girin.</span>';
+    emailEl.focus();
     return;
   }
 
   // Telefon format kontrolü
   if (!validatePhone()) {
+    phoneEl.closest('.ct-field').classList.add('ct-field-error');
     var phoneErr = document.getElementById('ct-phone-error');
     if (phoneErr) phoneErr.textContent = phoneCode === '+90' ? 'Telefon numarası 10 haneli olmalıdır.' : 'Geçerli bir telefon numarası girin.';
-    document.getElementById('ct-phone').focus();
+    phoneEl.focus();
     return;
   }
 
