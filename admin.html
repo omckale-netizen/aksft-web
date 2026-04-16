@@ -722,6 +722,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <option value="published">🟢 Yayında</option>
               <option value="draft">📝 Taslak</option>
               <option value="hidden">👁‍🗨 Gizli</option>
+              <option value="trashed" style="display:none">🗑 Çöp Kutusu</option>
             </select>
           </div>
           <button class="btn btn-secondary btn-sm" id="venue-trash-btn" onclick="document.getElementById('venue-active-filter').value='trashed';renderVenueTable(true)" style="white-space:nowrap;position:relative">🗑 Çöp <span id="venue-trash-count" style="font-size:.58rem;font-weight:700;padding:1px 5px;border-radius:999px;background:var(--red);color:#fff;margin-left:2px;display:none"></span></button>
@@ -6692,10 +6693,12 @@ function renderVenueTable(resetPage) {
   // Sayaç
   var countLabel = document.getElementById('venue-count-label');
   if (countLabel) countLabel.textContent = totalFiltered + ' mekan gösteriliyor' + (totalFiltered !== totalAll ? ' (toplam ' + totalAll + ')' : '');
-  // Çöp kutusu badge
+  // Çöp kutusu badge + aktif gösterge
   var trashCount = (draftData.venues || []).filter(function(v){ return getVenueStatusKey(v) === 'trashed'; }).length;
   var trashBadge = document.getElementById('venue-trash-count');
   if (trashBadge) { trashBadge.textContent = trashCount; trashBadge.style.display = trashCount > 0 ? '' : 'none'; }
+  var trashBtn = document.getElementById('venue-trash-btn');
+  if (trashBtn) { trashBtn.style.background = activeFilter === 'trashed' ? 'var(--red)' : ''; trashBtn.style.color = activeFilter === 'trashed' ? '#fff' : ''; }
 
   // Sayfalama butonları
   var pageBtns = document.getElementById('venue-page-btns');
