@@ -1581,15 +1581,7 @@ function renderRoutePage(routeId) {
     var footer = document.getElementById('footer-placeholder'); if (footer) footer.style.display = 'none';
     var body = document.querySelector('main') || document.body;
     var notFound = document.createElement('div');
-    notFound.innerHTML = `
-      <div style="min-height:calc(100vh - 72px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:linear-gradient(180deg,#FAFAF8 0%,#FFF5EE 50%,#FFECD2 100%);position:relative;overflow:hidden;">
-        <div style="text-align:center;max-width:500px;position:relative;z-index:1;">
-          <div style="width:140px;height:140px;margin:0 auto 32px;border-radius:50%;background:linear-gradient(135deg,#fff,#FFF5EE);box-shadow:0 8px 32px rgba(196,82,26,.12);display:flex;align-items:center;justify-content:center;font-size:3rem;">🗺️</div>
-          <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.75rem;color:#1A2744;margin:0 0 12px;font-weight:800;letter-spacing:-.02em;">Rota Bulunamadı</h1>
-          <p style="color:#718096;font-size:1rem;line-height:1.7;margin:0 0 40px;">Aradığınız rota kaldırılmış veya geçici olarak erişime kapatılmış olabilir.</p>
-          <a href="../rotalar.html" style="display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#C4521A,#A3431A);color:#fff;padding:16px 36px;border-radius:14px;text-decoration:none;font-weight:700;font-size:1rem;box-shadow:0 4px 16px rgba(196,82,26,.3);">Tüm Rotaları Keşfet</a>
-        </div>
-      </div>`;
+    notFound.innerHTML = notFoundHTML('Rota', '🗺️', '../rotalar.html', 'Tüm Rotaları Keşfet');
     body.appendChild(notFound);
     return;
   }
@@ -1946,6 +1938,60 @@ function venueCardHTML(v, delay = 0) {
 }
 
 /* ═══════════════════════════════════════════════
+   Ortak "Bulunamadı" tasarımı — mekan/yer/köy/rota için
+═══════════════════════════════════════════════ */
+function notFoundHTML(label, icon, backUrl, backLabel) {
+  return `
+    <div style="min-height:calc(100vh - 72px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:linear-gradient(180deg,#FAFAF8 0%,#FFF5EE 50%,#FFECD2 100%);position:relative;overflow:hidden;">
+      <div style="position:absolute;top:-80px;right:-80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(196,82,26,.06) 0%,transparent 70%);pointer-events:none"></div>
+      <div style="position:absolute;bottom:-60px;left:-60px;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,rgba(26,39,68,.04) 0%,transparent 70%);pointer-events:none"></div>
+      <div style="text-align:center;max-width:500px;position:relative;z-index:1;">
+        <div style="position:relative;width:140px;height:140px;margin:0 auto 32px;">
+          <div style="width:140px;height:140px;border-radius:50%;background:linear-gradient(135deg,#fff,#FFF5EE);box-shadow:0 8px 32px rgba(196,82,26,.12),0 2px 8px rgba(0,0,0,.04);display:flex;align-items:center;justify-content:center;">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8" stroke="#C4521A" stroke-width="1.5" fill="rgba(196,82,26,.06)"/>
+              <path d="M21 21l-4.35-4.35" stroke="#C4521A" stroke-width="2"/>
+              <path d="M9 11h4M11 9v4" stroke="#C4521A" stroke-width="1.5" opacity=".4" transform="rotate(45 11 11)"/>
+            </svg>
+          </div>
+          <div style="position:absolute;top:8px;right:-4px;width:28px;height:28px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:14px;">${icon}</span>
+          </div>
+        </div>
+        <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.75rem;color:#1A2744;margin:0 0 12px;font-weight:800;letter-spacing:-.02em;">${label} Bulunamadı</h1>
+        <p style="color:#718096;font-size:1rem;line-height:1.7;margin:0 0 40px;max-width:380px;margin-left:auto;margin-right:auto;">
+          Aradığınız ${label.toLowerCase()} kaldırılmış, taşınmış veya geçici olarak erişime kapatılmış olabilir.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:14px;align-items:center;">
+          <a href="${backUrl}" style="display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#C4521A,#A3431A);color:#fff;padding:16px 36px;border-radius:14px;text-decoration:none;font-weight:700;font-size:1rem;transition:all .25s ease;box-shadow:0 4px 16px rgba(196,82,26,.3);"
+             onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 28px rgba(196,82,26,.4)'"
+             onmouseout="this.style.transform='';this.style.boxShadow='0 4px 16px rgba(196,82,26,.3)'">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            ${backLabel}
+          </a>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;">
+            <a href="../" style="display:inline-flex;align-items:center;gap:6px;color:#718096;text-decoration:none;font-size:.88rem;padding:10px 18px;border-radius:10px;transition:all .2s ease;border:1.5px solid transparent;"
+               onmouseover="this.style.color='#1A2744';this.style.background='#fff';this.style.borderColor='rgba(26,39,68,.1)';this.style.boxShadow='0 2px 8px rgba(0,0,0,.06)'"
+               onmouseout="this.style.color='#718096';this.style.background='transparent';this.style.borderColor='transparent';this.style.boxShadow='none'">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              Ana Sayfa
+            </a>
+            <a href="../iletisim.html" style="display:inline-flex;align-items:center;gap:6px;color:#718096;text-decoration:none;font-size:.88rem;padding:10px 18px;border-radius:10px;transition:all .2s ease;border:1.5px solid transparent;"
+               onmouseover="this.style.color='#1A2744';this.style.background='#fff';this.style.borderColor='rgba(26,39,68,.1)';this.style.boxShadow='0 2px 8px rgba(0,0,0,.06)'"
+               onmouseout="this.style.color='#718096';this.style.background='transparent';this.style.borderColor='transparent';this.style.boxShadow='none'">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              İletişim
+            </a>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute;bottom:24px;text-align:center;color:rgba(113,128,150,.5);font-size:.75rem;">
+        © 2026 Assos'u Keşfet
+      </div>
+    </div>`;
+}
+
+/* ═══════════════════════════════════════════════
    VENUE DETAIL PAGE
 ═══════════════════════════════════════════════ */
 function renderVenuePage(venueId) {
@@ -1956,54 +2002,7 @@ function renderVenuePage(venueId) {
     document.title = 'Mekan Bulunamadı — Assos\u2019u Keşfet';
     document.getElementById('vp-hero').innerHTML = '';
     var footer = document.getElementById('footer-placeholder'); if (footer) footer.style.display = 'none';
-    document.getElementById('vp-body').innerHTML = `
-      <div style="min-height:calc(100vh - 72px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:linear-gradient(180deg,#FAFAF8 0%,#FFF5EE 50%,#FFECD2 100%);position:relative;overflow:hidden;">
-        <div style="position:absolute;top:-80px;right:-80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(196,82,26,.06) 0%,transparent 70%);pointer-events:none"></div>
-        <div style="position:absolute;bottom:-60px;left:-60px;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,rgba(26,39,68,.04) 0%,transparent 70%);pointer-events:none"></div>
-        <div style="text-align:center;max-width:500px;position:relative;z-index:1;">
-          <div style="position:relative;width:140px;height:140px;margin:0 auto 32px;">
-            <div style="width:140px;height:140px;border-radius:50%;background:linear-gradient(135deg,#fff,#FFF5EE);box-shadow:0 8px 32px rgba(196,82,26,.12),0 2px 8px rgba(0,0,0,.04);display:flex;align-items:center;justify-content:center;">
-              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8" stroke="#C4521A" stroke-width="1.5" fill="rgba(196,82,26,.06)"/>
-                <path d="M21 21l-4.35-4.35" stroke="#C4521A" stroke-width="2"/>
-                <path d="M9 11h4M11 9v4" stroke="#C4521A" stroke-width="1.5" opacity=".4" transform="rotate(45 11 11)"/>
-              </svg>
-            </div>
-            <div style="position:absolute;top:8px;right:-4px;width:28px;height:28px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;">
-              <span style="font-size:14px;">🏛️</span>
-            </div>
-          </div>
-          <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.75rem;color:#1A2744;margin:0 0 12px;font-weight:800;letter-spacing:-.02em;">Mekan Bulunamadı</h1>
-          <p style="color:#718096;font-size:1rem;line-height:1.7;margin:0 0 40px;max-width:380px;margin-left:auto;margin-right:auto;">
-            Aradığınız mekan kaldırılmış, taşınmış veya geçici olarak erişime kapatılmış olabilir.
-          </p>
-          <div style="display:flex;flex-direction:column;gap:14px;align-items:center;">
-            <a href="../mekanlar.html" style="display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#C4521A,#A3431A);color:#fff;padding:16px 36px;border-radius:14px;text-decoration:none;font-weight:700;font-size:1rem;transition:all .25s ease;box-shadow:0 4px 16px rgba(196,82,26,.3);"
-               onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 28px rgba(196,82,26,.4)'"
-               onmouseout="this.style.transform='';this.style.boxShadow='0 4px 16px rgba(196,82,26,.3)'">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-              Mekanları Keşfet
-            </a>
-            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;">
-              <a href="../" style="display:inline-flex;align-items:center;gap:6px;color:#718096;text-decoration:none;font-size:.88rem;padding:10px 18px;border-radius:10px;transition:all .2s ease;border:1.5px solid transparent;"
-                 onmouseover="this.style.color='#1A2744';this.style.background='#fff';this.style.borderColor='rgba(26,39,68,.1)';this.style.boxShadow='0 2px 8px rgba(0,0,0,.06)'"
-                 onmouseout="this.style.color='#718096';this.style.background='transparent';this.style.borderColor='transparent';this.style.boxShadow='none'">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                Ana Sayfa
-              </a>
-              <a href="../iletisim.html" style="display:inline-flex;align-items:center;gap:6px;color:#718096;text-decoration:none;font-size:.88rem;padding:10px 18px;border-radius:10px;transition:all .2s ease;border:1.5px solid transparent;"
-                 onmouseover="this.style.color='#1A2744';this.style.background='#fff';this.style.borderColor='rgba(26,39,68,.1)';this.style.boxShadow='0 2px 8px rgba(0,0,0,.06)'"
-                 onmouseout="this.style.color='#718096';this.style.background='transparent';this.style.borderColor='transparent';this.style.boxShadow='none'">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                İletişim
-              </a>
-            </div>
-          </div>
-        </div>
-        <div style="position:absolute;bottom:24px;text-align:center;color:rgba(113,128,150,.5);font-size:.75rem;">
-          © 2026 Assos'u Keşfet
-        </div>
-      </div>`;
+    document.getElementById('vp-body').innerHTML = notFoundHTML('Mekan', '🏛️', '../mekanlar.html', 'Mekanları Keşfet');
     return;
   }
 
@@ -3339,15 +3338,7 @@ function renderVillagePage(villageId) {
     document.title = 'Köy Bulunamadı — Assos\u2019u Keşfet';
     var footer = document.getElementById('footer-placeholder'); if (footer) footer.style.display = 'none';
     document.getElementById('village-hero').innerHTML = '';
-    document.getElementById('village-body').innerHTML = `
-      <div style="min-height:calc(100vh - 72px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:linear-gradient(180deg,#FAFAF8 0%,#FFF5EE 50%,#FFECD2 100%);position:relative;overflow:hidden;">
-        <div style="text-align:center;max-width:500px;position:relative;z-index:1;">
-          <div style="width:140px;height:140px;margin:0 auto 32px;border-radius:50%;background:linear-gradient(135deg,#fff,#FFF5EE);box-shadow:0 8px 32px rgba(196,82,26,.12);display:flex;align-items:center;justify-content:center;font-size:3rem;">🏘️</div>
-          <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.75rem;color:#1A2744;margin:0 0 12px;font-weight:800;letter-spacing:-.02em;">Köy Bulunamadı</h1>
-          <p style="color:#718096;font-size:1rem;line-height:1.7;margin:0 0 40px;">Aradığınız köy kaldırılmış veya geçici olarak erişime kapatılmış olabilir.</p>
-          <a href="../koyler.html" style="display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#C4521A,#A3431A);color:#fff;padding:16px 36px;border-radius:14px;text-decoration:none;font-weight:700;font-size:1rem;box-shadow:0 4px 16px rgba(196,82,26,.3);">Tüm Köyleri Keşfet</a>
-        </div>
-      </div>`;
+    document.getElementById('village-body').innerHTML = notFoundHTML('Köy', '🏘️', '../koyler.html', 'Tüm Köyleri Keşfet');
     return;
   }
 
@@ -3823,15 +3814,7 @@ function renderPlacePage(placeId) {
     document.title = 'Yer Bulunamadı — Assos\u2019u Keşfet';
     var footer = document.getElementById('footer-placeholder'); if (footer) footer.style.display = 'none';
     document.getElementById('place-hero').innerHTML = '';
-    document.getElementById('place-body').innerHTML = `
-      <div style="min-height:calc(100vh - 72px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:linear-gradient(180deg,#FAFAF8 0%,#FFF5EE 50%,#FFECD2 100%);position:relative;overflow:hidden;">
-        <div style="text-align:center;max-width:500px;position:relative;z-index:1;">
-          <div style="width:140px;height:140px;margin:0 auto 32px;border-radius:50%;background:linear-gradient(135deg,#fff,#FFF5EE);box-shadow:0 8px 32px rgba(196,82,26,.12);display:flex;align-items:center;justify-content:center;font-size:3rem;">📍</div>
-          <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.75rem;color:#1A2744;margin:0 0 12px;font-weight:800;letter-spacing:-.02em;">Yer Bulunamadı</h1>
-          <p style="color:#718096;font-size:1rem;line-height:1.7;margin:0 0 40px;">Aradığınız yer kaldırılmış veya geçici olarak erişime kapatılmış olabilir.</p>
-          <a href="../yerler.html" style="display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#C4521A,#A3431A);color:#fff;padding:16px 36px;border-radius:14px;text-decoration:none;font-weight:700;font-size:1rem;box-shadow:0 4px 16px rgba(196,82,26,.3);">Tüm Yerleri Keşfet</a>
-        </div>
-      </div>`;
+    document.getElementById('place-body').innerHTML = notFoundHTML('Yer', '📍', '../yerler.html', 'Tüm Yerleri Keşfet');
     return;
   }
 
