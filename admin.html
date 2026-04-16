@@ -7570,7 +7570,13 @@ async function saveVenue(e) {
 
   // Image handling: combine existing images with new pending uploads
   const venueId = id;
+  // Pending onay modu — geçici venue'dan görselleri al ve temizle
+  var isPendingApprove = editingVenueId === '_pending_approve_';
   let existingImgs = editingVenueId ? (draftData.venues.find(v => v.id === editingVenueId)?.images || []) : [];
+  if (isPendingApprove) {
+    draftData.venues = draftData.venues.filter(function(v){ return v.id !== '_pending_approve_'; });
+    editingVenueId = null;
+  }
 
   // Upload new images to Firebase Storage and get download URLs
   const uploadedUrls = [];
@@ -7589,13 +7595,6 @@ async function saveVenue(e) {
     }
   }
   if (uploadFailed) showToast('Bazi gorseller yuklenemedi. Mekani kaydedip sonra tekrar deneyin.', 'error');
-  // Pending onay görselleri — geçici venue'dan al
-  if (editingVenueId === '_pending_approve_') {
-    var tempVenue = draftData.venues.find(function(v){ return v.id === '_pending_approve_'; });
-    if (tempVenue && tempVenue.images) existingImgs = tempVenue.images.slice();
-    draftData.venues = draftData.venues.filter(function(v){ return v.id !== '_pending_approve_'; });
-    editingVenueId = null;
-  }
   window._pendingApproveImages = null;
   const allImages = [...existingImgs, ...uploadedUrls];
   pendingImages = [];
@@ -7649,7 +7648,7 @@ async function saveVenue(e) {
     venue.category
   ].filter(Boolean);
 
-  if (editingVenueId) {
+  if (editingVenueId && !isPendingApprove) {
     const idx = draftData.venues.findIndex(v => v.id === editingVenueId);
     if (idx >= 0) {
       const beforeSnap = { ...draftData.venues[idx] };
