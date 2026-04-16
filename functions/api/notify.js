@@ -349,7 +349,8 @@ export async function onRequestPost(context) {
       <div style="display:inline-block;width:52px;height:52px;border-radius:50%;background:rgba(56,161,105,.08);line-height:52px;font-size:1.5rem;">&#x2705;</div>
     </div>
     <h2 style="text-align:center;margin:0 0 8px;font-size:1.15rem;color:#1A2744;">D\u00fczenlemeniz Ba\u015far\u0131yla Al\u0131nd\u0131</h2>
-    <p style="text-align:center;margin:0 0 28px;font-size:.88rem;color:#718096;">G\u00fcncellenmi\u015f bilgileriniz tekrar de\u011ferlendirmeye al\u0131nd\u0131.</p>
+    ${data.refNo ? '<p style="text-align:center;margin:0 0 6px;font-size:.88rem;color:#718096;">Referans No: <strong style="color:#C4521A;letter-spacing:.05em">' + sanitize(data.refNo, 20) + '</strong></p>' : ''}
+    <p style="text-align:center;margin:0 0 28px;font-size:.72rem;color:#A0AEC0;">G\u00fcncellenmi\u015f bilgileriniz tekrar de\u011ferlendirmeye al\u0131nd\u0131.</p>
     <p style="font-size:.95rem;line-height:1.7;color:#1A2744;">Say\u0131n <strong>${ownerName}</strong>,</p>
     <p style="font-size:.9rem;line-height:1.7;color:#4A5568;"><strong>${venueName}</strong> i\u00e7in g\u00f6nderdi\u011finiz g\u00fcncellenmi\u015f bilgiler taraf\u0131m\u0131za ula\u015fm\u0131\u015ft\u0131r. Ekibimiz de\u011fi\u015fiklikleri inceleyecek ve size d\u00f6n\u00fc\u015f yapacakt\u0131r.</p>
     <p style="font-size:.82rem;font-weight:700;color:#1A2744;margin:24px 0 12px;">Ba\u015fvuru Durumu</p>

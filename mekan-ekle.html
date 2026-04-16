@@ -297,7 +297,7 @@ a{color:var(--terra);text-decoration:none}
 <script>
 firebase.initializeApp({apiKey:"AIzaSyCXqgczplchzjClAZt-Wl2eqgqmUMhLVJs",authDomain:"assosu-kesfet.firebaseapp.com",projectId:"assosu-kesfet",storageBucket:"assosu-kesfet.firebasestorage.app",messagingSenderId:"225032191860",appId:"1:225032191860:web:61ac6ba36764b530be3621"});
 var db=firebase.firestore();
-var step=1,maxStep=6,imgs=[],editDocId=null;
+var step=1,maxStep=6,imgs=[],editDocId=null,editRefNo='';
 var DAYS=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
 var CAT_LABELS={kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach Club',iskele:'İskele'};
 
@@ -354,6 +354,7 @@ async function loadEditData(id){
       ban.innerHTML='<div class="me-revision">⚠️ <strong>Revizyon istendi</strong>'+(d.rejectReason?' — '+d.rejectReason+'.' :' —')+' Lütfen eksik bilgileri tamamlayıp tekrar gönderin.</div>';
     }
     // Fill fields
+    if(d.refNo)editRefNo=d.refNo;
     if(d.ownerName)document.getElementById('f-ownerName').value=d.ownerName;
     if(d.ownerEmail)document.getElementById('f-ownerEmail').value=d.ownerEmail;
     if(d.ownerPhone)document.getElementById('f-ownerPhone').value=d.ownerPhone;
@@ -609,7 +610,7 @@ async function submit(){
       data.status='updated';
       await db.collection('pending_venues').doc(editDocId).update(data);
       // Düzenleme bildirimi — mail göndermeden sadece Telegram
-      try{fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'venue_update',data:{name:data.ownerName,email:data.ownerEmail,phone:data.ownerPhone,venueTitle:data.title,category:CAT_LABELS[data.category]||data.category,location:data.location}})});}catch(e){}
+      try{fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'venue_update',data:{name:data.ownerName,email:data.ownerEmail,phone:data.ownerPhone,venueTitle:data.title,category:CAT_LABELS[data.category]||data.category,location:data.location,refNo:editRefNo}})});}catch(e){}
     }else{
       data.submittedAt=new Date().toISOString();
       data.status='pending';
