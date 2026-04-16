@@ -4126,6 +4126,14 @@ function previewPendingVenue(id) {
         // Görseller
         '<div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:8px">Görseller</div>' +
         '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">' + imgsHtml + '</div>' +
+        // KVKK Onay
+        (d.consentGiven ? '<div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:8px">KVKK Onayı</div>' +
+        '<div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(56,161,105,.06);border:1px solid rgba(56,161,105,.15);border-radius:8px;margin-bottom:16px;font-size:.78rem">' +
+          '<span style="color:#38A169;font-weight:700">✓ Onay Verildi</span>' +
+          '<span style="color:var(--text-muted)">·</span>' +
+          '<span style="color:var(--text-muted)">' + (d.consentDate ? new Date(d.consentDate).toLocaleString('tr-TR') : '—') + '</span>' +
+          (d.userAgent ? '<span style="color:var(--text-muted)">·</span><span style="color:var(--text-muted);font-size:.68rem;word-break:break-all">' + d.userAgent.substring(0, 80) + '</span>' : '') +
+        '</div>' : '') +
         // Meta
         '<div style="font-size:.65rem;color:var(--text-muted);border-top:1px solid rgba(0,0,0,.04);padding-top:12px">Başvuru: ' + (d.submittedAt ? new Date(d.submittedAt).toLocaleString('tr-TR') : '—') + (d.updatedAt ? ' · Güncelleme: ' + new Date(d.updatedAt).toLocaleString('tr-TR') : '') + '</div>' +
       '</div>' +
