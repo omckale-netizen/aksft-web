@@ -4023,10 +4023,13 @@ async function renderPendingVenues() {
           (item.status === 'pending' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla & Mekan Ekle</button><button class="btn btn-sm" style="background:rgba(49,130,206,.1);color:#2B6CB0;border:1px solid rgba(49,130,206,.2)" onclick="showRevisionModal(\'' + item._id + '\')">📝 Revizyon İste</button><button class="btn btn-danger btn-sm" onclick="showRejectModal(\'' + item._id + '\')">❌ Reddet</button>' : '') +
           (item.status === 'revision' ? (function(){
             var daysSince = item.rejectedAt ? Math.floor((Date.now() - new Date(item.rejectedAt).getTime()) / 86400000) : 0;
-            var urgency = daysSince >= 7 ? 'color:var(--red);font-weight:700' : daysSince >= 3 ? 'color:var(--terra)' : 'color:var(--text-muted)';
+            var urgBg = daysSince >= 7 ? 'rgba(229,62,62,.08)' : daysSince >= 3 ? 'rgba(212,147,90,.08)' : 'rgba(49,130,206,.06)';
+            var urgColor = daysSince >= 7 ? '#C53030' : daysSince >= 3 ? '#975A16' : '#2B6CB0';
+            var urgIcon = daysSince >= 7 ? '🔴' : daysSince >= 3 ? '🟡' : '🔵';
+            var urgText = daysSince > 0 ? daysSince + ' gündür bekleniyor' : 'Bugün istendi';
             return '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla</button>' +
               '<button class="btn btn-sm" style="background:rgba(212,147,90,.1);color:#975A16;border:1px solid rgba(212,147,90,.2)" onclick="remindPendingVenue(\'' + item._id + '\')">🔔 Hatırlat</button>' +
-              '<span style="font-size:.68rem;' + urgency + '">' + (daysSince > 0 ? daysSince + ' gündür bekleniyor' : 'Bugün istendi') + '</span>';
+              '<span style="font-size:.65rem;font-weight:600;padding:4px 10px;border-radius:8px;background:' + urgBg + ';color:' + urgColor + ';display:inline-flex;align-items:center;gap:4px">' + urgIcon + ' ' + urgText + '</span>';
           })() : '') +
           (item.status !== 'trashed' ? '<button class="btn btn-secondary btn-sm" onclick="pendingMailTo(\'' + (item.ownerEmail || '') + '\')">✉️ Mail</button>' +
           '<button class="btn btn-secondary btn-sm" onclick="previewPendingVenue(\'' + item._id + '\')">👁 Detaylı İncele</button>' +
