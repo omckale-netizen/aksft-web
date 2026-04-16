@@ -2788,6 +2788,23 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
 <script>
 /* ══════════════════════════════════════════════════
+   XSS KORUMA — HTML escape helper
+   Kullanıcıdan gelen (messages, pending_venues) verilerin innerHTML'e basılmadan önce escape edilmesi için.
+══════════════════════════════════════════════════ */
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/`/g, '&#96;');
+}
+// Kısa alias — sık kullanılacak
+var esc = escapeHtml;
+
+/* ══════════════════════════════════════════════════
    DATA MANAGEMENT — Firebase
 ══════════════════════════════════════════════════ */
 // Initialize Firebase
@@ -3970,30 +3987,32 @@ function renderPendingList(items) {
   listEl.innerHTML = filtered.map(function(item) {
     var st = statusLabels[item.status] || statusLabels.pending;
     var date = item.submittedAt ? new Date(item.submittedAt).toLocaleString('tr-TR') : '';
-    var phoneStr = (item.phones || []).map(function(p) { return p.number + (p.whatsapp ? ' (WA)' : ''); }).join(', ') || '—';
+    var phoneStr = (item.phones || []).map(function(p) { return esc(p.number) + (p.whatsapp ? ' (WA)' : ''); }).join(', ') || '—';
     var imgCount = (item.images || []).length;
+    // URL — javascript: vs. ile XSS'i önlemek için sadece http(s) protokolüne izin ver
+    var safeWebsite = (item.website && /^https?:\/\//i.test(item.website)) ? item.website : '';
     return '<div class="panel-card" style="margin-bottom:14px;padding:0;overflow:hidden;min-width:0">' +
       '<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid rgba(0,0,0,.04);flex-wrap:wrap;gap:8px">' +
         '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0">' +
-          '<span style="font-size:.65rem;font-weight:700;padding:3px 10px;border-radius:6px;background:' + st.bg + ';color:' + st.color + '">' + st.icon + ' ' + st.label + '</span>' +
-          '<span style="font-size:1rem;font-weight:800;color:var(--navy);word-break:break-word">' + (item.title || 'İsimsiz') + '</span>' +
-          '<span class="badge badge-cat" style="font-size:.65rem">' + (catLabels[item.category] || item.category || '') + '</span>' +
-          (item.refNo ? '<span style="font-size:.62rem;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(26,39,68,.06);color:var(--navy);letter-spacing:.06em;font-family:monospace">Ref: ' + item.refNo + '</span>' : '') +
+          '<span style="font-size:.65rem;font-weight:700;padding:3px 10px;border-radius:6px;background:' + st.bg + ';color:' + st.color + '">' + st.icon + ' ' + esc(st.label) + '</span>' +
+          '<span style="font-size:1rem;font-weight:800;color:var(--navy);word-break:break-word">' + esc(item.title || 'İsimsiz') + '</span>' +
+          '<span class="badge badge-cat" style="font-size:.65rem">' + esc(catLabels[item.category] || item.category || '') + '</span>' +
+          (item.refNo ? '<span style="font-size:.62rem;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(26,39,68,.06);color:var(--navy);letter-spacing:.06em;font-family:monospace">Ref: ' + esc(item.refNo) + '</span>' : '') +
         '</div>' +
         '<span style="font-size:.72rem;color:var(--text-muted)">' + date + '</span>' +
       '</div>' +
       '<div style="padding:16px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px 20px;font-size:.8rem">' +
-        '<div style="min-width:0;word-break:break-word"><span style="color:var(--text-muted);font-weight:600">Yetkili:</span> ' + (item.ownerName || '—') + '</div>' +
-        '<div style="min-width:0;word-break:break-word;overflow-wrap:anywhere"><span style="color:var(--text-muted);font-weight:600">E-posta:</span> <a href="mailto:' + (item.ownerEmail || '') + '" style="color:var(--terra)">' + (item.ownerEmail || '—') + '</a></div>' +
-        '<div style="min-width:0;word-break:break-word"><span style="color:var(--text-muted);font-weight:600">Telefon:</span> ' + (item.ownerPhone || '—') + '</div>' +
-        '<div style="min-width:0;word-break:break-word"><span style="color:var(--text-muted);font-weight:600">Konum:</span> ' + (item.location || '—') + '</div>' +
+        '<div style="min-width:0;word-break:break-word"><span style="color:var(--text-muted);font-weight:600">Yetkili:</span> ' + esc(item.ownerName || '—') + '</div>' +
+        '<div style="min-width:0;word-break:break-word;overflow-wrap:anywhere"><span style="color:var(--text-muted);font-weight:600">E-posta:</span> <a href="mailto:' + esc(item.ownerEmail || '') + '" style="color:var(--terra)">' + esc(item.ownerEmail || '—') + '</a></div>' +
+        '<div style="min-width:0;word-break:break-word"><span style="color:var(--text-muted);font-weight:600">Telefon:</span> ' + esc(item.ownerPhone || '—') + '</div>' +
+        '<div style="min-width:0;word-break:break-word"><span style="color:var(--text-muted);font-weight:600">Konum:</span> ' + esc(item.location || '—') + '</div>' +
         '<div style="min-width:0;word-break:break-word"><span style="color:var(--text-muted);font-weight:600">Mekan Tel:</span> ' + phoneStr + '</div>' +
         '<div style="min-width:0"><span style="color:var(--text-muted);font-weight:600">Görseller:</span> ' + (imgCount > 0 ? imgCount + ' fotoğraf' : 'Yok') + '</div>' +
-        (item.website ? '<div style="min-width:0;word-break:break-word;overflow-wrap:anywhere"><span style="color:var(--text-muted);font-weight:600">Website:</span> <a href="' + item.website + '" target="_blank" style="color:var(--terra)">' + item.website + '</a></div>' : '') +
-        (item.instagram ? '<div style="min-width:0;word-break:break-word"><span style="color:var(--text-muted);font-weight:600">Instagram:</span> ' + item.instagram + '</div>' : '') +
+        (safeWebsite ? '<div style="min-width:0;word-break:break-word;overflow-wrap:anywhere"><span style="color:var(--text-muted);font-weight:600">Website:</span> <a href="' + esc(safeWebsite) + '" target="_blank" rel="noopener noreferrer" style="color:var(--terra)">' + esc(safeWebsite) + '</a></div>' : '') +
+        (item.instagram ? '<div style="min-width:0;word-break:break-word"><span style="color:var(--text-muted);font-weight:600">Instagram:</span> ' + esc(item.instagram) + '</div>' : '') +
       '</div>' +
-      (item.description ? '<div style="padding:0 20px 16px;font-size:.8rem;color:var(--text-light);line-height:1.7;border-top:1px solid rgba(0,0,0,.03);padding-top:12px;word-break:break-word;overflow-wrap:anywhere">' + item.description.substring(0, 300) + (item.description.length > 300 ? '...' : '') + '</div>' : '') +
-      (imgCount > 0 ? '<div style="padding:0 20px 16px;display:flex;gap:6px;flex-wrap:wrap">' + item.images.slice(0, 4).map(function(url) { return '<img src="' + url + '" style="width:60px;height:42px;object-fit:cover;border-radius:6px;border:1px solid rgba(0,0,0,.06)">'; }).join('') + (imgCount > 4 ? '<span style="font-size:.72rem;color:var(--text-muted);align-self:center">+' + (imgCount - 4) + '</span>' : '') + '</div>' : '') +
+      (item.description ? '<div style="padding:0 20px 16px;font-size:.8rem;color:var(--text-light);line-height:1.7;border-top:1px solid rgba(0,0,0,.03);padding-top:12px;word-break:break-word;overflow-wrap:anywhere">' + esc(item.description.replace(/<[^>]*>/g,'').substring(0, 300)) + (item.description.length > 300 ? '...' : '') + '</div>' : '') +
+      (imgCount > 0 ? '<div style="padding:0 20px 16px;display:flex;gap:6px;flex-wrap:wrap">' + item.images.slice(0, 4).map(function(url) { var safeUrl = /^https?:\/\//i.test(url) ? url : ''; return safeUrl ? '<img src="' + esc(safeUrl) + '" style="width:60px;height:42px;object-fit:cover;border-radius:6px;border:1px solid rgba(0,0,0,.06)" loading="lazy">' : ''; }).join('') + (imgCount > 4 ? '<span style="font-size:.72rem;color:var(--text-muted);align-self:center">+' + (imgCount - 4) + '</span>' : '') + '</div>' : '') +
       '<div style="padding:12px 20px;border-top:1px solid rgba(0,0,0,.04);display:flex;gap:8px;flex-wrap:wrap">' +
         (item.status === 'pending' || item.status === 'revision' ? '' : '') +
         (item.status === 'pending' || item.status === 'updated' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla & Mekan Ekle</button><button class="btn btn-sm" style="background:rgba(49,130,206,.1);color:#2B6CB0;border:1px solid rgba(49,130,206,.2)" onclick="showRevisionModal(\'' + item._id + '\')">📝 Revizyon İste</button><button class="btn btn-danger btn-sm" onclick="showRejectModal(\'' + item._id + '\')">❌ Reddet</button>' : '') +
@@ -4071,12 +4090,15 @@ function previewPendingVenue(id) {
     if (!doc.exists) { showToast('Talep bulunamadı', 'error'); return; }
     var d = doc.data();
     var catLabels = {kafe:'☕ Kafe',restoran:'🍽 Restoran',kahvalti:'🌞 Kahvaltı',konaklama:'🏨 Konaklama',beach:'🏖 Beach Club',iskele:'⚓ İskele'};
-    var phoneStr = (d.phones || []).map(function(p) { return p.number + (p.whatsapp ? ' (WhatsApp)' : '') + (p.label ? ' — ' + p.label : ''); }).join('<br>') || '—';
-    var tagsHtml = (d.tags || []).map(function(t) { return '<span style="display:inline-block;padding:3px 10px;border-radius:999px;background:rgba(26,39,68,.06);font-size:.72rem;font-weight:600;color:#4A5870;margin:2px">' + t + '</span>'; }).join('') || '—';
-    var imgsHtml = (d.images || []).map(function(url) { return '<img src="' + url + '" style="width:120px;height:80px;object-fit:cover;border-radius:8px;border:1px solid rgba(0,0,0,.06)">'; }).join('') || '<span style="color:var(--text-muted)">Görsel yüklenmemiş</span>';
-    var whHtml = (d.weeklyHours || []).map(function(wh) { return '<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:.78rem;border-bottom:1px solid rgba(0,0,0,.03)"><span style="font-weight:600;color:var(--navy)">' + wh.days + '</span><span style="color:' + (wh.closed ? 'var(--red)' : 'var(--text)') + '">' + (wh.closed ? 'Kapalı' : (wh.open + ' — ' + wh.close)) + '</span></div>'; }).join('') || '';
-    var roomsHtml = (d.rooms || []).map(function(r) { return '<div style="padding:6px 0;border-bottom:1px solid rgba(0,0,0,.03);font-size:.78rem"><strong>' + (r.name || 'Oda') + '</strong> · ' + (r.bed || '-') + ' · ' + (r.capacity || '-') + ' kişi' + (r.size ? ' · ' + r.size + ' m²' : '') + (r.view ? ' · ' + r.view : '') + '</div>'; }).join('') || '';
-    var facHtml = (d.facilities || []).join(', ') || '—';
+    var phoneStr = (d.phones || []).map(function(p) { return esc(p.number) + (p.whatsapp ? ' (WhatsApp)' : '') + (p.label ? ' — ' + esc(p.label) : ''); }).join('<br>') || '—';
+    var tagsHtml = (d.tags || []).map(function(t) { return '<span style="display:inline-block;padding:3px 10px;border-radius:999px;background:rgba(26,39,68,.06);font-size:.72rem;font-weight:600;color:#4A5870;margin:2px">' + esc(t) + '</span>'; }).join('') || '—';
+    var imgsHtml = (d.images || []).map(function(url) { var safeUrl = /^https?:\/\//i.test(url) ? url : ''; return safeUrl ? '<img src="' + esc(safeUrl) + '" style="width:120px;height:80px;object-fit:cover;border-radius:8px;border:1px solid rgba(0,0,0,.06)" loading="lazy">' : ''; }).join('') || '<span style="color:var(--text-muted)">Görsel yüklenmemiş</span>';
+    var whHtml = (d.weeklyHours || []).map(function(wh) { return '<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:.78rem;border-bottom:1px solid rgba(0,0,0,.03)"><span style="font-weight:600;color:var(--navy)">' + esc(wh.days) + '</span><span style="color:' + (wh.closed ? 'var(--red)' : 'var(--text)') + '">' + (wh.closed ? 'Kapalı' : (esc(wh.open) + ' — ' + esc(wh.close))) + '</span></div>'; }).join('') || '';
+    var roomsHtml = (d.rooms || []).map(function(r) { return '<div style="padding:6px 0;border-bottom:1px solid rgba(0,0,0,.03);font-size:.78rem"><strong>' + esc(r.name || 'Oda') + '</strong> · ' + esc(r.bed || '-') + ' · ' + esc(r.capacity || '-') + ' kişi' + (r.size ? ' · ' + esc(r.size) + ' m²' : '') + (r.view ? ' · ' + esc(r.view) : '') + '</div>'; }).join('') || '';
+    var facHtml = esc((d.facilities || []).join(', ') || '—');
+    // Güvenli URL kontrolü
+    var safeMapsLink = (d.mapsLink && /^https?:\/\//i.test(d.mapsLink)) ? d.mapsLink : '';
+    var safeWebsite = (d.website && /^https?:\/\//i.test(d.website)) ? d.website : '';
 
     // Modal oluştur
     var overlay = document.createElement('div');
@@ -4091,30 +4113,30 @@ function previewPendingVenue(id) {
         // Yetkili bilgileri
         '<div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:10px">Yetkili Bilgileri</div>' +
         '<div style="display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:.82rem;margin-bottom:20px;padding:12px 14px;background:rgba(0,0,0,.02);border-radius:10px">' +
-          '<span style="color:var(--text-muted);font-weight:600">Ad Soyad</span><span>' + (d.ownerName || '—') + '</span>' +
-          '<span style="color:var(--text-muted);font-weight:600">E-posta</span><a href="mailto:' + (d.ownerEmail || '') + '" style="color:var(--terra)">' + (d.ownerEmail || '—') + '</a>' +
-          '<span style="color:var(--text-muted);font-weight:600">Telefon</span><span>' + (d.ownerPhone || '—') + '</span>' +
+          '<span style="color:var(--text-muted);font-weight:600">Ad Soyad</span><span>' + esc(d.ownerName || '—') + '</span>' +
+          '<span style="color:var(--text-muted);font-weight:600">E-posta</span><a href="mailto:' + esc(d.ownerEmail || '') + '" style="color:var(--terra)">' + esc(d.ownerEmail || '—') + '</a>' +
+          '<span style="color:var(--text-muted);font-weight:600">Telefon</span><span>' + esc(d.ownerPhone || '—') + '</span>' +
         '</div>' +
         // Mekan bilgileri
         '<div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:10px">Mekan Bilgileri</div>' +
         '<div style="display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:.82rem;margin-bottom:16px;padding:12px 14px;background:rgba(0,0,0,.02);border-radius:10px">' +
-          '<span style="color:var(--text-muted);font-weight:600">Mekan Adı</span><strong style="color:var(--navy)">' + (d.title || '—') + '</strong>' +
-          '<span style="color:var(--text-muted);font-weight:600">Kategori</span><span>' + (catLabels[d.category] || d.category || '—') + '</span>' +
-          '<span style="color:var(--text-muted);font-weight:600">Konum</span><span>' + (d.location || '—') + '</span>' +
-          '<span style="color:var(--text-muted);font-weight:600">Adres</span><span>' + (d.address || '—') + '</span>' +
-          (d.mapsLink ? '<span style="color:var(--text-muted);font-weight:600">Maps</span><span><a href="' + d.mapsLink + '" target="_blank" style="color:var(--terra);word-break:break-all">Link Aç ↗</a> <span id="pending-coords-' + id + '" style="font-size:.72rem;color:var(--text-muted)">koordinat yükleniyor...</span></span>' : '') +
+          '<span style="color:var(--text-muted);font-weight:600">Mekan Adı</span><strong style="color:var(--navy)">' + esc(d.title || '—') + '</strong>' +
+          '<span style="color:var(--text-muted);font-weight:600">Kategori</span><span>' + esc(catLabels[d.category] || d.category || '—') + '</span>' +
+          '<span style="color:var(--text-muted);font-weight:600">Konum</span><span>' + esc(d.location || '—') + '</span>' +
+          '<span style="color:var(--text-muted);font-weight:600">Adres</span><span>' + esc(d.address || '—') + '</span>' +
+          (safeMapsLink ? '<span style="color:var(--text-muted);font-weight:600">Maps</span><span><a href="' + esc(safeMapsLink) + '" target="_blank" rel="noopener noreferrer" style="color:var(--terra);word-break:break-all">Link Aç ↗</a> <span id="pending-coords-' + esc(id) + '" style="font-size:.72rem;color:var(--text-muted)">koordinat yükleniyor...</span></span>' : '') +
           '<span style="color:var(--text-muted);font-weight:600">Telefon</span><span>' + phoneStr + '</span>' +
-          (d.website ? '<span style="color:var(--text-muted);font-weight:600">Website</span><a href="' + d.website + '" target="_blank" style="color:var(--terra)">' + d.website + '</a>' : '') +
-          (d.instagram ? '<span style="color:var(--text-muted);font-weight:600">Instagram</span><span>' + d.instagram + '</span>' : '') +
+          (safeWebsite ? '<span style="color:var(--text-muted);font-weight:600">Website</span><a href="' + esc(safeWebsite) + '" target="_blank" rel="noopener noreferrer" style="color:var(--terra)">' + esc(safeWebsite) + '</a>' : '') +
+          (d.instagram ? '<span style="color:var(--text-muted);font-weight:600">Instagram</span><span>' + esc(d.instagram) + '</span>' : '') +
         '</div>' +
         // Etiketler
         '<div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:8px">Etiketler</div>' +
         '<div style="margin-bottom:16px">' + tagsHtml + '</div>' +
         // Açıklama
         '<div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:8px">Kısa Açıklama</div>' +
-        '<div style="font-size:.82rem;color:var(--text);line-height:1.7;margin-bottom:12px;padding:10px 14px;background:rgba(0,0,0,.02);border-radius:8px">' + (d.shortDesc || '—') + '</div>' +
+        '<div style="font-size:.82rem;color:var(--text);line-height:1.7;margin-bottom:12px;padding:10px 14px;background:rgba(0,0,0,.02);border-radius:8px">' + esc(d.shortDesc || '—') + '</div>' +
         '<div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:8px">Detaylı Açıklama</div>' +
-        '<div style="font-size:.82rem;color:var(--text);line-height:1.7;margin-bottom:16px;padding:10px 14px;background:rgba(0,0,0,.02);border-radius:8px">' + (d.description || '—') + '</div>' +
+        '<div style="font-size:.82rem;color:var(--text);line-height:1.7;margin-bottom:16px;padding:10px 14px;background:rgba(0,0,0,.02);border-radius:8px">' + esc((d.description || '').replace(/<[^>]*>/g,'')) + '</div>' +
         // Çalışma saatleri
         (whHtml ? '<div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:8px">Çalışma Saatleri</div><div style="margin-bottom:16px;padding:10px 14px;background:rgba(0,0,0,.02);border-radius:8px">' + whHtml + '</div>' : '') +
         // Konaklama
@@ -4622,12 +4644,12 @@ function renderMessageList() {
     const catClass = getMsgCatClass(m.subject);
     var labelIcons = { cevaplanacak: '🔴', beklemede: '🟡', tamamlandi: '🟢' };
     var labelIcon = m.label && labelIcons[m.label] ? '<span title="' + m.label + '" style="font-size:.6rem">' + labelIcons[m.label] + '</span>' : '';
-    return '<div class="msg-item ' + (m.read ? '' : 'unread') + (m.trashed ? ' trashed' : '') + '" onclick="openMessage(\'' + m._id + '\')" data-id="' + m._id + '">' +
+    return '<div class="msg-item ' + (m.read ? '' : 'unread') + (m.trashed ? ' trashed' : '') + '" onclick="openMessage(\'' + esc(m._id) + '\')" data-id="' + esc(m._id) + '">' +
       '<div class="msg-dot ' + (m.read ? 'read' : 'unread') + '"></div>' +
       '<div class="msg-info">' +
-        '<div class="msg-name">' + (m.name || 'İsimsiz') + ' ' + labelIcon + '</div>' +
-        '<span class="msg-cat-badge ' + catClass + '">' + (m.subject || 'Genel') + '</span>' +
-        '<div class="msg-preview">' + (m.message || '').substring(0, 80) + '</div>' +
+        '<div class="msg-name">' + esc(m.name || 'İsimsiz') + ' ' + labelIcon + '</div>' +
+        '<span class="msg-cat-badge ' + catClass + '">' + esc(m.subject || 'Genel') + '</span>' +
+        '<div class="msg-preview">' + esc((m.message || '').substring(0, 80)) + '</div>' +
       '</div>' +
       '<div class="msg-date">' + dateStr + '<br>' + timeStr + '</div>' +
     '</div>';
@@ -4776,9 +4798,9 @@ async function openMessage(docId) {
   document.getElementById('msg-detail-header').innerHTML =
     '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">' +
       '<div>' +
-        '<div style="font-size:1.05rem;font-weight:800;color:var(--navy);margin-bottom:4px">' + (m.name || 'İsimsiz') + '</div>' +
+        '<div style="font-size:1.05rem;font-weight:800;color:var(--navy);margin-bottom:4px">' + esc(m.name || 'İsimsiz') + '</div>' +
         '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
-          '<span class="msg-cat-badge ' + catClass + '">' + (m.subject || 'Genel') + '</span>' +
+          '<span class="msg-cat-badge ' + catClass + '">' + esc(m.subject || 'Genel') + '</span>' +
           '<span style="font-size:.72rem;color:var(--text-muted)">' + (m.timestamp ? new Date(m.timestamp).toLocaleString('tr-TR') : '') + '</span>' +
         '</div>' +
       '</div>' +
@@ -4788,10 +4810,10 @@ async function openMessage(docId) {
   // Body — kişi bilgileri + mesaj
   document.getElementById('msg-detail-body').innerHTML =
     '<div class="msg-body-info" style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:.82rem;margin-bottom:18px;padding:14px 16px;background:var(--cream-dark,rgba(0,0,0,.02));border-radius:10px;border:1px solid var(--card-border,rgba(0,0,0,.04))">' +
-      '<span style="color:var(--text-muted);font-weight:600">📧 E-posta</span><a href="mailto:' + (m.email || '') + '" style="color:var(--terra);font-weight:600;text-decoration:none">' + (m.email || '-') + '</a>' +
-      (m.phone ? '<span style="color:var(--text-muted);font-weight:600">📞 Telefon</span><a href="tel:' + m.phone.replace(/\s/g,'') + '" style="color:var(--terra);font-weight:600;text-decoration:none">' + m.phone + '</a>' : '') +
+      '<span style="color:var(--text-muted);font-weight:600">📧 E-posta</span><a href="mailto:' + esc(m.email || '') + '" style="color:var(--terra);font-weight:600;text-decoration:none">' + esc(m.email || '-') + '</a>' +
+      (m.phone ? '<span style="color:var(--text-muted);font-weight:600">📞 Telefon</span><a href="tel:' + esc(m.phone.replace(/\s/g,'')) + '" style="color:var(--terra);font-weight:600;text-decoration:none">' + esc(m.phone) + '</a>' : '') +
     '</div>' +
-    '<div style="font-size:.88rem;color:var(--text);line-height:1.85;white-space:pre-wrap;padding:16px 18px;background:var(--cream-dark,var(--cream));border-radius:12px;border:1px solid var(--card-border,rgba(0,0,0,.04))">' + (m.message || '') + '</div>';
+    '<div style="font-size:.88rem;color:var(--text);line-height:1.85;white-space:pre-wrap;padding:16px 18px;background:var(--cream-dark,var(--cream));border-radius:12px;border:1px solid var(--card-border,rgba(0,0,0,.04))">' + esc(m.message || '') + '</div>';
 
   // KVKK Rıza + Cihaz bilgileri
   var consentHtml = '';
