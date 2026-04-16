@@ -1775,7 +1775,18 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         </div>
         <button class="btn btn-secondary" onclick="renderPendingVenues()">🔄 Yenile</button>
       </div>
-      <div class="stats-grid" id="pending-stats" style="grid-template-columns:repeat(auto-fill,minmax(120px,1fr));margin-bottom:20px"></div>
+      <div class="stats-grid" id="pending-stats" style="grid-template-columns:repeat(auto-fill,minmax(120px,1fr));margin-bottom:16px"></div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+        <div class="search-bar" style="flex:1;min-width:200px"><span>&#128269;</span><input type="text" id="pending-search" placeholder="Referans no, mekan adı veya e-posta ile ara..." oninput="filterPendingVenues()"></div>
+        <select id="pending-status-filter" onchange="filterPendingVenues()" class="admin-filter-select" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:var(--input-bg,#fff);color:var(--text);cursor:pointer">
+          <option value="all">Tüm Durumlar</option>
+          <option value="pending">⏳ Bekleyen</option>
+          <option value="revision">📝 Revizyon</option>
+          <option value="approved">✅ Onaylanan</option>
+          <option value="rejected">❌ Reddedilen</option>
+          <option value="trashed">🗑 Çöp</option>
+        </select>
+      </div>
       <div id="pending-list"></div>
     </div>
 
@@ -3942,6 +3953,62 @@ function setMsgFilter(f, btn) {
 }
 
 // ══════ PENDING VENUES ══════
+var _allPendingItems = [];
+function filterPendingVenues() { renderPendingList(_allPendingItems); }
+function renderPendingList(items) {
+  var listEl = document.getElementById('pending-list');
+  var q = (document.getElementById('pending-search')?.value || '').toLowerCase().trim();
+  var statusFilter = document.getElementById('pending-status-filter')?.value || 'all';
+  var filtered = items;
+  if (statusFilter !== 'all') filtered = filtered.filter(function(i) { return i.status === statusFilter; });
+  if (q) filtered = filtered.filter(function(i) { return (i.title || '').toLowerCase().includes(q) || (i.refNo || '').toLowerCase().includes(q) || (i.ownerEmail || '').toLowerCase().includes(q) || (i.ownerName || '').toLowerCase().includes(q); });
+  var catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskele'};
+  var statusLabels = { pending: { label:'Bekliyor', bg:'rgba(212,147,90,.1)', color:'#975A16', icon:'⏳' }, revision: { label:'Revizyon Bekleniyor', bg:'rgba(49,130,206,.08)', color:'#2B6CB0', icon:'📝' }, approved: { label:'Onaylandı', bg:'rgba(56,161,105,.1)', color:'#276749', icon:'✅' }, rejected: { label:'Reddedildi', bg:'rgba(229,62,62,.08)', color:'#C53030', icon:'❌' }, trashed: { label:'Çöp', bg:'rgba(113,128,150,.08)', color:'#718096', icon:'🗑' } };
+  if (filtered.length === 0) { listEl.innerHTML = '<div class="panel-card" style="padding:32px;text-align:center;color:var(--text-muted)">' + (q ? 'Aramayla eşleşen sonuç yok.' : 'Bu durumda talep yok.') + '</div>'; return; }
+  listEl.innerHTML = filtered.map(function(item) {
+    var st = statusLabels[item.status] || statusLabels.pending;
+    var date = item.submittedAt ? new Date(item.submittedAt).toLocaleString('tr-TR') : '';
+    var phoneStr = (item.phones || []).map(function(p) { return p.number + (p.whatsapp ? ' (WA)' : ''); }).join(', ') || '—';
+    var imgCount = (item.images || []).length;
+    return '<div class="panel-card" style="margin-bottom:14px;padding:0;overflow:hidden">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid rgba(0,0,0,.04);flex-wrap:wrap;gap:8px">' +
+        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
+          '<span style="font-size:.65rem;font-weight:700;padding:3px 10px;border-radius:6px;background:' + st.bg + ';color:' + st.color + '">' + st.icon + ' ' + st.label + '</span>' +
+          '<span style="font-size:1rem;font-weight:800;color:var(--navy)">' + (item.title || 'İsimsiz') + '</span>' +
+          '<span class="badge badge-cat" style="font-size:.65rem">' + (catLabels[item.category] || item.category || '') + '</span>' +
+          (item.refNo ? '<span style="font-size:.62rem;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(26,39,68,.06);color:var(--navy);letter-spacing:.06em;font-family:monospace">Ref: ' + item.refNo + '</span>' : '') +
+        '</div>' +
+        '<span style="font-size:.72rem;color:var(--text-muted)">' + date + '</span>' +
+      '</div>' +
+      '<div style="padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;font-size:.8rem">' +
+        '<div><span style="color:var(--text-muted);font-weight:600">Yetkili:</span> ' + (item.ownerName || '—') + '</div>' +
+        '<div><span style="color:var(--text-muted);font-weight:600">E-posta:</span> <a href="mailto:' + (item.ownerEmail || '') + '" style="color:var(--terra)">' + (item.ownerEmail || '—') + '</a></div>' +
+        '<div><span style="color:var(--text-muted);font-weight:600">Telefon:</span> ' + (item.ownerPhone || '—') + '</div>' +
+        '<div><span style="color:var(--text-muted);font-weight:600">Konum:</span> ' + (item.location || '—') + '</div>' +
+        '<div><span style="color:var(--text-muted);font-weight:600">Mekan Tel:</span> ' + phoneStr + '</div>' +
+        '<div><span style="color:var(--text-muted);font-weight:600">Görseller:</span> ' + (imgCount > 0 ? imgCount + ' fotoğraf' : 'Yok') + '</div>' +
+        (item.website ? '<div><span style="color:var(--text-muted);font-weight:600">Website:</span> <a href="' + item.website + '" target="_blank" style="color:var(--terra)">' + item.website + '</a></div>' : '') +
+        (item.instagram ? '<div><span style="color:var(--text-muted);font-weight:600">Instagram:</span> ' + item.instagram + '</div>' : '') +
+      '</div>' +
+      (item.description ? '<div style="padding:0 20px 16px;font-size:.8rem;color:var(--text-light);line-height:1.7;border-top:1px solid rgba(0,0,0,.03);padding-top:12px">' + item.description.substring(0, 300) + (item.description.length > 300 ? '...' : '') + '</div>' : '') +
+      (imgCount > 0 ? '<div style="padding:0 20px 16px;display:flex;gap:6px;flex-wrap:wrap">' + item.images.slice(0, 4).map(function(url) { return '<img src="' + url + '" style="width:60px;height:42px;object-fit:cover;border-radius:6px;border:1px solid rgba(0,0,0,.06)">'; }).join('') + (imgCount > 4 ? '<span style="font-size:.72rem;color:var(--text-muted);align-self:center">+' + (imgCount - 4) + '</span>' : '') + '</div>' : '') +
+      '<div style="padding:12px 20px;border-top:1px solid rgba(0,0,0,.04);display:flex;gap:8px;flex-wrap:wrap">' +
+        (item.status === 'pending' || item.status === 'revision' ? '' : '') +
+        (item.status === 'pending' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla & Mekan Ekle</button><button class="btn btn-sm" style="background:rgba(49,130,206,.1);color:#2B6CB0;border:1px solid rgba(49,130,206,.2)" onclick="showRevisionModal(\'' + item._id + '\')">📝 Revizyon İste</button><button class="btn btn-danger btn-sm" onclick="showRejectModal(\'' + item._id + '\')">❌ Reddet</button>' : '') +
+        (item.status === 'revision' ? (function(){
+          var daysSince = item.rejectedAt ? Math.floor((Date.now() - new Date(item.rejectedAt).getTime()) / 86400000) : 0;
+          var urgBg = daysSince >= 7 ? 'rgba(229,62,62,.08)' : daysSince >= 3 ? 'rgba(212,147,90,.08)' : 'rgba(49,130,206,.06)';
+          var urgColor = daysSince >= 7 ? '#C53030' : daysSince >= 3 ? '#975A16' : '#2B6CB0';
+          var urgIcon = daysSince >= 7 ? '🔴' : daysSince >= 3 ? '🟡' : '🔵';
+          var urgText = daysSince > 0 ? daysSince + ' gündür bekleniyor' : 'Bugün istendi';
+          return '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla</button><button class="btn btn-sm" style="background:rgba(212,147,90,.1);color:#975A16;border:1px solid rgba(212,147,90,.2)" onclick="remindPendingVenue(\'' + item._id + '\')">🔔 Hatırlat</button><span style="font-size:.65rem;font-weight:600;padding:4px 10px;border-radius:8px;background:' + urgBg + ';color:' + urgColor + ';display:inline-flex;align-items:center;gap:4px">' + urgIcon + ' ' + urgText + '</span>';
+        })() : '') +
+        (item.status !== 'trashed' ? '<button class="btn btn-secondary btn-sm" onclick="pendingMailTo(\'' + (item.ownerEmail || '') + '\')">✉️ Mail</button><button class="btn btn-secondary btn-sm" onclick="previewPendingVenue(\'' + item._id + '\')">👁 Detaylı İncele</button><button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="deletePendingVenue(\'' + item._id + '\')">🗑 Sil</button>' :
+        '<button class="btn btn-primary btn-sm" onclick="restorePendingVenue(\'' + item._id + '\')">↩ Geri Al</button><button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="permanentDeletePendingVenue(\'' + item._id + '\')">✕ Kalıcı Sil</button>') +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
 async function renderPendingVenues() {
   var listEl = document.getElementById('pending-list');
   var statsEl = document.getElementById('pending-stats');
@@ -3982,65 +4049,10 @@ async function renderPendingVenues() {
         '<div class="stat-card"><div class="stat-label">Ort. Süre</div><div class="stat-val">' + avgDays + '</div></div>';
     }
 
-    if (items.length === 0) {
-      listEl.innerHTML = '<div class="panel-card" style="padding:40px;text-align:center;color:var(--text-muted)"><div style="font-size:2rem;margin-bottom:12px">📋</div>Henüz mekan talebi yok.</div>';
-      return;
-    }
-
-    var catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskele'};
-    var statusLabels = { pending: { label:'Bekliyor', bg:'rgba(212,147,90,.1)', color:'#975A16', icon:'⏳' }, revision: { label:'Revizyon Bekleniyor', bg:'rgba(49,130,206,.08)', color:'#2B6CB0', icon:'📝' }, approved: { label:'Onaylandı', bg:'rgba(56,161,105,.1)', color:'#276749', icon:'✅' }, rejected: { label:'Reddedildi', bg:'rgba(229,62,62,.08)', color:'#C53030', icon:'❌' }, trashed: { label:'Çöp', bg:'rgba(113,128,150,.08)', color:'#718096', icon:'🗑' } };
-
-    listEl.innerHTML = items.map(function(item) {
-      var st = statusLabels[item.status] || statusLabels.pending;
-      var date = item.submittedAt ? new Date(item.submittedAt).toLocaleString('tr-TR') : '';
-      var phoneStr = (item.phones || []).map(function(p) { return p.number + (p.whatsapp ? ' (WA)' : ''); }).join(', ') || '—';
-      var imgCount = (item.images || []).length;
-
-      return '<div class="panel-card" style="margin-bottom:14px;padding:0;overflow:hidden">' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid rgba(0,0,0,.04);flex-wrap:wrap;gap:8px">' +
-          '<div style="display:flex;align-items:center;gap:10px">' +
-            '<span style="font-size:.65rem;font-weight:700;padding:3px 10px;border-radius:6px;background:' + st.bg + ';color:' + st.color + '">' + st.icon + ' ' + st.label + '</span>' +
-            '<span style="font-size:1rem;font-weight:800;color:var(--navy)">' + (item.title || 'İsimsiz') + '</span>' +
-            '<span class="badge badge-cat" style="font-size:.65rem">' + (catLabels[item.category] || item.category || '') + '</span>' +
-            (item.refNo ? '<span style="font-size:.6rem;font-weight:600;color:var(--text-muted);letter-spacing:.05em">' + item.refNo + '</span>' : '') +
-          '</div>' +
-          '<span style="font-size:.72rem;color:var(--text-muted)">' + date + '</span>' +
-        '</div>' +
-        '<div style="padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;font-size:.8rem">' +
-          '<div><span style="color:var(--text-muted);font-weight:600">Yetkili:</span> ' + (item.ownerName || '—') + '</div>' +
-          '<div><span style="color:var(--text-muted);font-weight:600">E-posta:</span> <a href="mailto:' + (item.ownerEmail || '') + '" style="color:var(--terra)">' + (item.ownerEmail || '—') + '</a></div>' +
-          '<div><span style="color:var(--text-muted);font-weight:600">Telefon:</span> ' + (item.ownerPhone || '—') + '</div>' +
-          '<div><span style="color:var(--text-muted);font-weight:600">Konum:</span> ' + (item.location || '—') + '</div>' +
-          '<div><span style="color:var(--text-muted);font-weight:600">Mekan Tel:</span> ' + phoneStr + '</div>' +
-          '<div><span style="color:var(--text-muted);font-weight:600">Görseller:</span> ' + (imgCount > 0 ? imgCount + ' fotoğraf' : 'Yok') + '</div>' +
-          (item.website ? '<div><span style="color:var(--text-muted);font-weight:600">Website:</span> <a href="' + item.website + '" target="_blank" style="color:var(--terra)">' + item.website + '</a></div>' : '') +
-          (item.instagram ? '<div><span style="color:var(--text-muted);font-weight:600">Instagram:</span> ' + item.instagram + '</div>' : '') +
-        '</div>' +
-        (item.description ? '<div style="padding:0 20px 16px;font-size:.8rem;color:var(--text-light);line-height:1.7;border-top:1px solid rgba(0,0,0,.03);padding-top:12px">' + item.description.substring(0, 300) + (item.description.length > 300 ? '...' : '') + '</div>' : '') +
-        (imgCount > 0 ? '<div style="padding:0 20px 16px;display:flex;gap:6px;flex-wrap:wrap">' + item.images.slice(0, 4).map(function(url) { return '<img src="' + url + '" style="width:60px;height:42px;object-fit:cover;border-radius:6px;border:1px solid rgba(0,0,0,.06)">'; }).join('') + (imgCount > 4 ? '<span style="font-size:.72rem;color:var(--text-muted);align-self:center">+' + (imgCount - 4) + '</span>' : '') + '</div>' : '') +
-        '<div style="padding:12px 20px;border-top:1px solid rgba(0,0,0,.04);display:flex;gap:8px;flex-wrap:wrap">' +
-          (item.status === 'pending' || item.status === 'revision' ? '' : '') +
-          (item.status === 'pending' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla & Mekan Ekle</button><button class="btn btn-sm" style="background:rgba(49,130,206,.1);color:#2B6CB0;border:1px solid rgba(49,130,206,.2)" onclick="showRevisionModal(\'' + item._id + '\')">📝 Revizyon İste</button><button class="btn btn-danger btn-sm" onclick="showRejectModal(\'' + item._id + '\')">❌ Reddet</button>' : '') +
-          (item.status === 'revision' ? (function(){
-            var daysSince = item.rejectedAt ? Math.floor((Date.now() - new Date(item.rejectedAt).getTime()) / 86400000) : 0;
-            var urgBg = daysSince >= 7 ? 'rgba(229,62,62,.08)' : daysSince >= 3 ? 'rgba(212,147,90,.08)' : 'rgba(49,130,206,.06)';
-            var urgColor = daysSince >= 7 ? '#C53030' : daysSince >= 3 ? '#975A16' : '#2B6CB0';
-            var urgIcon = daysSince >= 7 ? '🔴' : daysSince >= 3 ? '🟡' : '🔵';
-            var urgText = daysSince > 0 ? daysSince + ' gündür bekleniyor' : 'Bugün istendi';
-            return '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla</button>' +
-              '<button class="btn btn-sm" style="background:rgba(212,147,90,.1);color:#975A16;border:1px solid rgba(212,147,90,.2)" onclick="remindPendingVenue(\'' + item._id + '\')">🔔 Hatırlat</button>' +
-              '<span style="font-size:.65rem;font-weight:600;padding:4px 10px;border-radius:8px;background:' + urgBg + ';color:' + urgColor + ';display:inline-flex;align-items:center;gap:4px">' + urgIcon + ' ' + urgText + '</span>';
-          })() : '') +
-          (item.status !== 'trashed' ? '<button class="btn btn-secondary btn-sm" onclick="pendingMailTo(\'' + (item.ownerEmail || '') + '\')">✉️ Mail</button>' +
-          '<button class="btn btn-secondary btn-sm" onclick="previewPendingVenue(\'' + item._id + '\')">👁 Detaylı İncele</button>' +
-          '<button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="deletePendingVenue(\'' + item._id + '\')">🗑 Sil</button>' :
-          '<button class="btn btn-primary btn-sm" onclick="restorePendingVenue(\'' + item._id + '\')">↩ Geri Al</button>' +
-          '<button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="permanentDeletePendingVenue(\'' + item._id + '\')">✕ Kalıcı Sil</button>') +
-        '</div>' +
-      '</div>';
-    }).join('');
+    _allPendingItems = items;
+    renderPendingList(items);
   } catch(err) {
-    listEl.innerHTML = '<div style="padding:24px;color:var(--red)">Yüklenemedi: ' + err.message + '</div>';
+    document.getElementById('pending-list').innerHTML = '<div style="padding:24px;color:var(--red)">Yüklenemedi: ' + err.message + '</div>';
   }
 }
 
