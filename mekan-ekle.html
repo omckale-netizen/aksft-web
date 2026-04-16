@@ -606,7 +606,7 @@ async function submit(){
     data.images=imageUrls;data.consentGiven=true;data.consentDate=new Date().toISOString();data.userAgent=navigator.userAgent.substring(0,200);
     if(editDocId){
       data.updatedAt=new Date().toISOString();
-      data.status='pending';
+      data.status='updated';
       await db.collection('pending_venues').doc(editDocId).update(data);
       // Düzenleme bildirimi — mail göndermeden sadece Telegram
       try{fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'venue_update',data:{name:data.ownerName,email:data.ownerEmail,phone:data.ownerPhone,venueTitle:data.title,category:CAT_LABELS[data.category]||data.category,location:data.location}})});}catch(e){}

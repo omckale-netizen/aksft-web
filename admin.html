@@ -1781,6 +1781,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         <select id="pending-status-filter" onchange="filterPendingVenues()" class="admin-filter-select" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:var(--input-bg,#fff);color:var(--text);cursor:pointer">
           <option value="all">Tüm Durumlar</option>
           <option value="pending">⏳ Bekleyen</option>
+          <option value="updated">🔄 Düzenlendi</option>
           <option value="revision">📝 Revizyon</option>
           <option value="approved">✅ Onaylanan</option>
           <option value="rejected">❌ Reddedilen</option>
@@ -3963,7 +3964,7 @@ function renderPendingList(items) {
   if (statusFilter !== 'all') filtered = filtered.filter(function(i) { return i.status === statusFilter; });
   if (q) filtered = filtered.filter(function(i) { return (i.title || '').toLowerCase().includes(q) || (i.refNo || '').toLowerCase().includes(q) || (i.ownerEmail || '').toLowerCase().includes(q) || (i.ownerName || '').toLowerCase().includes(q); });
   var catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskele'};
-  var statusLabels = { pending: { label:'Bekliyor', bg:'rgba(212,147,90,.1)', color:'#975A16', icon:'⏳' }, revision: { label:'Revizyon Bekleniyor', bg:'rgba(49,130,206,.08)', color:'#2B6CB0', icon:'📝' }, approved: { label:'Onaylandı', bg:'rgba(56,161,105,.1)', color:'#276749', icon:'✅' }, rejected: { label:'Reddedildi', bg:'rgba(229,62,62,.08)', color:'#C53030', icon:'❌' }, trashed: { label:'Çöp', bg:'rgba(113,128,150,.08)', color:'#718096', icon:'🗑' } };
+  var statusLabels = { pending: { label:'Bekliyor', bg:'rgba(212,147,90,.1)', color:'#975A16', icon:'⏳' }, updated: { label:'Düzenlendi — İnceleme Bekliyor', bg:'rgba(56,161,105,.08)', color:'#276749', icon:'🔄' }, revision: { label:'Revizyon Bekleniyor', bg:'rgba(49,130,206,.08)', color:'#2B6CB0', icon:'📝' }, approved: { label:'Onaylandı', bg:'rgba(56,161,105,.1)', color:'#276749', icon:'✅' }, rejected: { label:'Reddedildi', bg:'rgba(229,62,62,.08)', color:'#C53030', icon:'❌' }, trashed: { label:'Çöp', bg:'rgba(113,128,150,.08)', color:'#718096', icon:'🗑' } };
   if (filtered.length === 0) { listEl.innerHTML = '<div class="panel-card" style="padding:32px;text-align:center;color:var(--text-muted)">' + (q ? 'Aramayla eşleşen sonuç yok.' : 'Bu durumda talep yok.') + '</div>'; return; }
   listEl.innerHTML = filtered.map(function(item) {
     var st = statusLabels[item.status] || statusLabels.pending;
@@ -3994,7 +3995,7 @@ function renderPendingList(items) {
       (imgCount > 0 ? '<div style="padding:0 20px 16px;display:flex;gap:6px;flex-wrap:wrap">' + item.images.slice(0, 4).map(function(url) { return '<img src="' + url + '" style="width:60px;height:42px;object-fit:cover;border-radius:6px;border:1px solid rgba(0,0,0,.06)">'; }).join('') + (imgCount > 4 ? '<span style="font-size:.72rem;color:var(--text-muted);align-self:center">+' + (imgCount - 4) + '</span>' : '') + '</div>' : '') +
       '<div style="padding:12px 20px;border-top:1px solid rgba(0,0,0,.04);display:flex;gap:8px;flex-wrap:wrap">' +
         (item.status === 'pending' || item.status === 'revision' ? '' : '') +
-        (item.status === 'pending' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla & Mekan Ekle</button><button class="btn btn-sm" style="background:rgba(49,130,206,.1);color:#2B6CB0;border:1px solid rgba(49,130,206,.2)" onclick="showRevisionModal(\'' + item._id + '\')">📝 Revizyon İste</button><button class="btn btn-danger btn-sm" onclick="showRejectModal(\'' + item._id + '\')">❌ Reddet</button>' : '') +
+        (item.status === 'pending' || item.status === 'updated' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla & Mekan Ekle</button><button class="btn btn-sm" style="background:rgba(49,130,206,.1);color:#2B6CB0;border:1px solid rgba(49,130,206,.2)" onclick="showRevisionModal(\'' + item._id + '\')">📝 Revizyon İste</button><button class="btn btn-danger btn-sm" onclick="showRejectModal(\'' + item._id + '\')">❌ Reddet</button>' : '') +
         (item.status === 'revision' ? (function(){
           var daysSince = item.rejectedAt ? Math.floor((Date.now() - new Date(item.rejectedAt).getTime()) / 86400000) : 0;
           var urgBg = daysSince >= 7 ? 'rgba(229,62,62,.08)' : daysSince >= 3 ? 'rgba(212,147,90,.08)' : 'rgba(49,130,206,.06)';
@@ -6318,7 +6319,7 @@ function renderDashboard() {
     try {
       var pendSnap = await db.collection('pending_venues').get();
       var pendItems = pendSnap.docs.map(function(d){ return d.data(); });
-      var pendingCount = pendItems.filter(function(i){ return i.status === 'pending'; }).length;
+      var pendingCount = pendItems.filter(function(i){ return i.status === 'pending' || i.status === 'updated'; }).length;
       if (pendingCount > 0) alerts.push({ icon:'📋', text:pendingCount + ' mekan talebi bekliyor — inceleyin', action:'pending', color:'#C4521A' });
       // Badge güncelle
       var badge = document.getElementById('pending-badge');
