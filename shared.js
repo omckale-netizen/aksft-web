@@ -4250,9 +4250,6 @@ function renderPlacePage(placeId) {
     .ai-chat-input button:hover{background:#D96B2E;}
     .ai-chat-input button:disabled{opacity:.4;cursor:default;}
     .ai-chat-limit{text-align:center;font-size:.65rem;color:rgba(26,39,68,.3);padding:4px 16px 8px;}
-    .ai-chat-suggestions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
-    .ai-chat-sug{padding:7px 12px;border-radius:10px;border:1px solid rgba(26,39,68,.1);background:rgba(26,39,68,.03);font-size:.72rem;font-weight:600;color:var(--navy,#1A2744);cursor:pointer;transition:all .2s;font-family:inherit;}
-    .ai-chat-sug:hover{background:var(--terra,#C4521A);color:#fff;border-color:var(--terra);}
     .ai-msg.bot{position:relative;cursor:pointer;}
     .ai-msg.bot:hover::after{content:'📋';position:absolute;top:6px;right:8px;font-size:.6rem;opacity:.4;}
     .ai-msg-copied{position:absolute;top:6px;right:6px;font-size:.58rem;font-weight:700;color:var(--terra,#C4521A);opacity:0;transition:opacity .3s;pointer-events:none;}
@@ -4276,14 +4273,7 @@ function renderPlacePage(placeId) {
         <button class="ai-chat-close" onclick="aiChatToggle()">✕</button>
       </div>
       <div class="ai-chat-body" id="ai-chat-body">
-        <div class="ai-msg bot">Merhaba! 🌊 Ben Assos bölgesinin dijital rehberiyim. Aklınıza takılan her şeyi sorun, size özel öneriler sunayım!</div>
-        <div class="ai-chat-suggestions" id="ai-suggestions">
-          <button class="ai-chat-sug" onclick="aiAskSuggestion(this)">🏨 Nerede kalmalıyım?</button>
-          <button class="ai-chat-sug" onclick="aiAskSuggestion(this)">🌊 En güzel koy hangisi?</button>
-          <button class="ai-chat-sug" onclick="aiAskSuggestion(this)">🚗 Nasıl gidilir?</button>
-          <button class="ai-chat-sug" onclick="aiAskSuggestion(this)">🍽 Nerede yemeli?</button>
-          <button class="ai-chat-sug" onclick="aiAskSuggestion(this)">🏛 Ne görmeliyim?</button>
-        </div>
+        <div class="ai-msg bot">Selam! 👋 Saklı bir koy, kahvaltı için güzel bir köy kafesi ya da gün batımında büyüleyici bir manzara mı arıyorsun? Ne istersen sor, Assos'u birlikte keşfedelim 🌅</div>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px;">
         <div class="ai-chat-limit" id="ai-chat-limit" style="padding:0;"></div>
@@ -4308,26 +4298,10 @@ function renderPlacePage(placeId) {
     aiChatMemory = [];
     lastQuestion = '';
     var body = document.getElementById('ai-chat-body');
-    body.innerHTML = '<div class="ai-msg bot">Merhaba! 🌊 Ben Assos bölgesinin dijital rehberiyim. Aklınıza takılan her şeyi sorun, size özel öneriler sunayım!</div>' +
-      '<div class="ai-chat-suggestions" id="ai-suggestions">' +
-        '<button class="ai-chat-sug" onclick="aiAskSuggestion(this)">🏨 Nerede kalmalıyım?</button>' +
-        '<button class="ai-chat-sug" onclick="aiAskSuggestion(this)">🌊 En güzel koy hangisi?</button>' +
-        '<button class="ai-chat-sug" onclick="aiAskSuggestion(this)">🚗 Nasıl gidilir?</button>' +
-        '<button class="ai-chat-sug" onclick="aiAskSuggestion(this)">🍽 Nerede yemeli?</button>' +
-        '<button class="ai-chat-sug" onclick="aiAskSuggestion(this)">🏛 Ne görmeliyim?</button>' +
-      '</div>';
+    body.innerHTML = '<div class="ai-msg bot">Selam! 👋 Saklı bir koy, kahvaltı için güzel bir köy kafesi ya da gün batımında büyüleyici bir manzara mı arıyorsun? Ne istersen sor, Assos\u2019u birlikte keşfedelim 🌅</div>';
   };
 
   // Hazır soru tıklama
-  window.aiAskSuggestion = function(btn) {
-    var q = btn.textContent.trim();
-    document.getElementById('ai-chat-input').value = q;
-    // Önerileri gizle
-    var sug = document.getElementById('ai-suggestions');
-    if (sug) sug.style.display = 'none';
-    aiChatSend();
-  };
-
   // State
   function getAiDailyLimit() { return (window.DATA && window.DATA.siteSettings && window.DATA.siteSettings.aiDailyLimit) || 25; }
   var AI_STORAGE_KEY = 'assos_ai_chat';
