@@ -425,6 +425,8 @@ function pageInit() {
     const isWinterSel = sel.mevsim === 'kis';
     // Kışta beach/iskele cezala
     if (isWinterSel && (v.category === 'beach' || v.category === 'iskele')) s -= 5;
+    // Sezonluk mekan kışta kapalıysa cezala (veride seasonal:true olanlar genelde Mayıs-Ekim)
+    if (isWinterSel && v.seasonal === true) s -= 8;
     // İlgi alanı
     if (sel.ilgi.has('yemek') && (v.category === 'restoran' || v.category === 'kahvalti')) s += 3;
     if (sel.ilgi.has('yemek') && v.category === 'kafe') s += 2;
@@ -436,6 +438,64 @@ function pageInit() {
     if (sel.grup === 'cift' && /romantik|manzara|sessiz/.test((v.tags||[]).join(' ').toLowerCase())) s += 2;
     if (sel.grup === 'aile') s += 0.5;
     return s;
+  }
+
+  /* ── Haversine formülü — iki koordinat arası km mesafe ── */
+  function haversineKm(lat1, lng1, lat2, lng2) {
+    if (lat1 == null || lng1 == null || lat2 == null || lng2 == null) return null;
+    const R = 6371; // Dünya yarıçapı (km)
+    const toRad = d => d * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLng = toRad(lng2 - lng1);
+    const a = Math.sin(dLat/2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng/2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  /* ── Karayolu mesafesi tahmini — kuş uçuşu * 1.35 (dolambaçlı yollar için) ── */
+  function roadKm(v1, v2) {
+    const d = haversineKm(v1.lat, v1.lng, v2.lat, v2.lng);
+    return d == null ? null : d * 1.35;
+  }
+
+  /* ── Dakika tahmini — 50 km/s ortalama kır yolları ── */
+  function travelMin(km) {
+    if (km == null) return null;
+    return Math.max(5, Math.round(km * 60 / 50)); // minimum 5 dk
+  }
+
+  /* ── Mesafe formatı ── */
+  function distLabel(fromName, toName, fromPoint, toPoint) {
+    const km = roadKm(fromPoint, toPoint);
+    const min = travelMin(km);
+    if (km == null) return '';
+    return '(' + fromName + '\u2019den ' + km.toFixed(1) + ' km, ' + min + ' dk)';
+  }
+
+  /* ── Bilinen koordinatlar — referans noktalar (data.js'de olmayanlar için) ── */
+  const POI = {
+    behramkale:    { lat: 39.4897, lng: 26.3370 },
+    athena:        { lat: 39.4910, lng: 26.3375 },
+    antikLiman:    { lat: 39.4883, lng: 26.3394 },
+    kadirga:       { lat: 39.4830, lng: 26.3470 },
+    sivrice:       { lat: 39.4810, lng: 26.3070 },
+    sokakagzi:     { lat: 39.4830, lng: 26.3200 },
+    gulpinar:      { lat: 39.5569, lng: 26.1303 },
+    babakale:      { lat: 39.4619, lng: 26.0700 },
+    adatepe:       { lat: 39.5594, lng: 26.4242 },
+    yesilyurt:     { lat: 39.5850, lng: 26.4400 },
+    koyunevi:      { lat: 39.5350, lng: 26.3750 },
+  };
+
+  /* ── Ören yeri açılış saatleri — mevsime göre ── */
+  function orenStartTime() {
+    // Yaz dönemi (Nisan-Ekim): 08:30 açılış, 20:00 kapanış
+    // Kış dönemi (Kasım-Mart): 08:30 açılış, 17:30 kapanış
+    // Başlangıç saati aynı; kışta sadece kapanış erken — 08:30'da başlamak uygun
+    return '08:30';
+  }
+  function orenLastEntry() {
+    // Gişe kapanıştan 30 dk önce kapanır
+    return sel.mevsim === 'kis' ? '17:00' : '19:30';
   }
 
   function getMaxRoutes() {
@@ -495,38 +555,57 @@ function pageInit() {
     // Blog linkleri
     const blogLink = (slug, text) => '<a href="blog?yazi=' + slug + '" style="color:var(--amber);text-decoration:underline;font-size:.72rem;margin-left:6px">' + text + '</a>';
 
-    // COĞRAFİ KÜMELER (Behramkale merkez alınarak):
+    // COĞRAFİ KÜMELER (Behramkale merkez alınarak, Haversine ile gerçek mesafe):
     //   MERKEZ: Behramkale + Antik Liman + Athena Tapınağı (0 km)
     //   KIYI (güney-güneybatı, 2-9 km): Kadırga Koyu, Sokakağzı, Sivrice
     //   BATI (30 km, ~40 dk): Gülpınar, Babakale
     //   DOĞU (8-15 km, ~15-20 dk): Adatepe, Yeşilyurt, Koyunevi, Kayalar, Büyükhusun
     // Her gün tek bir yön + merkez kombine edilir — dolaşım azalır
 
+    // Sezonluk mekan uyarısı
+    const seasonalVenueCount = (DATA.venues || []).filter(v => v.seasonal === true).length;
+    const closedInWinter = isWinter && seasonalVenueCount > 0;
+
+    // Dinamik mesafe etiketleri — koordinat bazlı
+    const dBehKad   = distLabel('Behramkale', 'Kadırga', POI.behramkale, POI.kadirga);
+    const dBehSiv   = distLabel('Behramkale', 'Sivrice', POI.behramkale, POI.sivrice);
+    const dBehGul   = distLabel('Behramkale', 'Gülpınar', POI.behramkale, POI.gulpinar);
+    const dGulBab   = distLabel('Gülpınar', 'Babakale', POI.gulpinar, POI.babakale);
+    const dBabBeh   = distLabel('Babakale', 'Behramkale', POI.babakale, POI.behramkale);
+    const dBehAda   = distLabel('Behramkale', 'Adatepe', POI.behramkale, POI.adatepe);
+    const dAdaYes   = distLabel('Adatepe', 'Yeşilyurt', POI.adatepe, POI.yesilyurt);
+    const dKadSiv   = distLabel('Kadırga', 'Sivrice', POI.kadirga, POI.sivrice);
+    const dSivSok   = distLabel('Sivrice', 'Sokakağzı', POI.sivrice, POI.sokakagzi);
+
+    // Ören yeri açılış — mevsime göre
+    const orenOpen = orenStartTime();
+    const orenLast = orenLastEntry();
+
     const dayProgram = [];
     if (sel.sure === '1gun') {
       // 1 günlük plan: Merkez + tek yön kümesi
       const items = [
-        { time: '08:30', text: 'Athena Tapınağı — açılışta git, kalabalıksız' + blogLink('assos-antik-kenti-gezi-rehberi', 'Rehber →') },
+        { time: orenOpen, text: 'Athena Tapınağı — açılışta git, kalabalıksız' + (isWinter ? ' <span style="color:#D4935A">(kışın gişe 17:00\'da kapanır)</span>' : '') + blogLink('assos-antik-kenti-gezi-rehberi', 'Rehber →') },
         { time: '10:00', text: 'Behramkale köy sokakları + kahve molası' },
-        { time: '11:30', text: 'Antik Liman\'a iniş + öğle yemeği (Behramkale → Liman 2 km, 5 dk)' + blogLink('assos-yerel-lezzetler-ne-yenir', 'Ne yenir? →') },
+        { time: '11:30', text: 'Antik Liman\'a iniş + öğle yemeği ' + distLabel('Behramkale', 'Liman', POI.behramkale, POI.antikLiman) + blogLink('assos-yerel-lezzetler-ne-yenir', 'Ne yenir? →') },
       ];
       // Yön seçimi: yaz/deniz → KIYI, müze/köy → DOĞU (Adatepe), tarih+batı tercihi → BATI
       if ((isSummer || hasSea || sel.ilgi.has('plaj')) && !isWinter) {
         // KIYI kümesi
-        items.push({ time: '14:00', text: 'Kadırga Koyu\'nda deniz (Liman\'dan 2 km, 5 dk)' + blogLink('assos-koy-plaj-rehberi', 'Koy rehberi →') });
-        items.push({ time: '16:00', text: 'Sivrice veya Sokakağzı Koyu (Kadırga\'dan 9 km, 15 dk)' });
-        items.push({ time: '18:00', text: 'Behramkale\'ye dönüş (15 dk yol)' });
+        items.push({ time: '14:00', text: 'Kadırga Koyu\'nda deniz ' + distLabel('Liman', 'Kadırga', POI.antikLiman, POI.kadirga) + blogLink('assos-koy-plaj-rehberi', 'Koy rehberi →') });
+        items.push({ time: '16:00', text: 'Sivrice veya Sokakağzı Koyu ' + dKadSiv });
+        items.push({ time: '18:00', text: 'Behramkale\'ye dönüş ' + distLabel('Sivrice', 'Behramkale', POI.sivrice, POI.behramkale) });
       } else if (hasMuseum || hasVillage) {
         // DOĞU kümesi — Adatepe yakın
-        items.push({ time: '14:00', text: 'Adatepe köyü + Zeytinyağı Müzesi (Behramkale\'den 10 km, 20 dk)' + blogLink('adatepe-gezi-rehberi', 'Rehber →') });
-        items.push({ time: '16:30', text: 'Yeşilyurt köyü — taş evler ve manzara (Adatepe\'den 8 km, 15 dk)' });
-        items.push({ time: '18:00', text: 'Behramkale\'ye dönüş (25 dk yol)' });
+        items.push({ time: '14:00', text: 'Adatepe köyü + Zeytinyağı Müzesi ' + dBehAda + blogLink('adatepe-gezi-rehberi', 'Rehber →') });
+        items.push({ time: '16:30', text: 'Yeşilyurt köyü — taş evler ve manzara ' + dAdaYes });
+        items.push({ time: '18:00', text: 'Behramkale\'ye dönüş ' + distLabel('Yeşilyurt', 'Behramkale', POI.yesilyurt, POI.behramkale) });
       } else if (hasHistory) {
         // Tarih odaklı — Nekropol Behramkale'de
         items.push({ time: '14:00', text: 'Nekropol + Antik Surlar gezisi (Behramkale içinde)' });
-        items.push({ time: '16:00', text: 'Adatepe köyü + Zeytinyağı Müzesi (10 km, 20 dk)' + blogLink('adatepe-gezi-rehberi', 'Rehber →') });
+        items.push({ time: '16:00', text: 'Adatepe köyü + Zeytinyağı Müzesi ' + dBehAda + blogLink('adatepe-gezi-rehberi', 'Rehber →') });
       } else {
-        items.push({ time: '14:00', text: 'Adatepe köy gezisi (10 km, 20 dk)' + blogLink('adatepe-gezi-rehberi', 'Rehber →') });
+        items.push({ time: '14:00', text: 'Adatepe köy gezisi ' + dBehAda + blogLink('adatepe-gezi-rehberi', 'Rehber →') });
         items.push({ time: '16:00', text: isWinter ? 'Behramkale\'ye dönüş + sıcak çay ve manzara' : 'Sivrice Koyu veya kıyı yürüyüşü' });
       }
       items.push({ time: '18:30', text: 'Gün batımı — ' + sunsetPick + blogLink('assos-gun-batimi-en-iyi-noktalar', '5 nokta →') });
@@ -536,17 +615,17 @@ function pageInit() {
     } else if (sel.sure === '2gun') {
       // 2 günlük plan: 1. gün MERKEZ + KIYI/DOĞU, 2. gün BATI veya alternatif
       const day1 = [
-        { time: '09:00', text: 'Athena Tapınağı + Surlar + Hüdavendigâr Camii' + blogLink('assos-antik-kenti-gezi-rehberi', 'Tarih rehberi →') },
+        { time: orenOpen, text: 'Athena Tapınağı + Surlar + Hüdavendigâr Camii' + (isWinter ? ' <span style="color:#D4935A">(kışın gişe 17:00\'da kapanır)</span>' : '') + blogLink('assos-antik-kenti-gezi-rehberi', 'Tarih rehberi →') },
         { time: '11:00', text: 'Behramkale köy gezisi + kahve' },
-        { time: '12:30', text: 'Antik Liman\'da öğle yemeği (2 km aşağı, 5 dk)' + blogLink('assos-yerel-lezzetler-ne-yenir', 'Ne yenir? →') },
+        { time: '12:30', text: 'Antik Liman\'da öğle yemeği ' + distLabel('Behramkale', 'Liman', POI.behramkale, POI.antikLiman) + blogLink('assos-yerel-lezzetler-ne-yenir', 'Ne yenir? →') },
       ];
       if (!isWinter && (hasSea || isSummer)) {
         // Yaz/deniz: KIYI kümesi
-        day1.push({ time: '14:30', text: 'Kadırga Koyu\'nda deniz (Liman\'dan 2 km, 5 dk)' + blogLink('assos-koy-plaj-rehberi', 'Koy rehberi →') });
-        day1.push({ time: '16:30', text: 'Sivrice veya Sokakağzı Koyu (9 km, 15 dk)' });
+        day1.push({ time: '14:30', text: 'Kadırga Koyu\'nda deniz ' + distLabel('Liman', 'Kadırga', POI.antikLiman, POI.kadirga) + blogLink('assos-koy-plaj-rehberi', 'Koy rehberi →') });
+        day1.push({ time: '16:30', text: 'Sivrice veya Sokakağzı Koyu ' + dKadSiv });
       } else {
         // DOĞU kümesi
-        day1.push({ time: '14:30', text: 'Adatepe + Zeytinyağı Müzesi (10 km, 20 dk)' + blogLink('adatepe-gezi-rehberi', 'Rehber →') });
+        day1.push({ time: '14:30', text: 'Adatepe + Zeytinyağı Müzesi ' + dBehAda + blogLink('adatepe-gezi-rehberi', 'Rehber →') });
       }
       day1.push({ time: '17:30', text: 'Behramkale\'ye dönüş + konaklama check-in' + blogLink('assos-nerede-kalinir-konaklama', 'Nerede kalınır? →') });
       day1.push({ time: '18:30', text: 'Gün batımı — ' + sunsetPick + blogLink('assos-gun-batimi-en-iyi-noktalar', '5 nokta →') });
@@ -555,11 +634,11 @@ function pageInit() {
       // 2. GÜN — BATI kümesi (Gülpınar + Babakale)
       const day2 = [
         { time: '09:00', text: hasFood ? 'Serpme köy kahvaltısı' + blogLink('assos-en-iyi-kahvalti-mekanlari', 'Kahvaltı rehberi →') : 'Kahvaltı + yola çıkış' },
-        { time: '10:30', text: 'Gülpınar — Apollo Smintheion Tapınağı (Behramkale\'den 26 km, 30 dk)' },
-        { time: '12:30', text: 'Babakale — Anadolu\'nun en batı noktası (Gülpınar\'dan 5 km, 10 dk)' + blogLink('babakale-gezi-rehberi', 'Rehber →') },
+        { time: '10:30', text: 'Gülpınar — Apollo Smintheion Tapınağı ' + dBehGul },
+        { time: '12:30', text: 'Babakale — Anadolu\'nun en batı noktası ' + dGulBab + blogLink('babakale-gezi-rehberi', 'Rehber →') },
         { time: '13:30', text: 'Babakale\'de öğle yemeği + kale gezisi' },
         { time: '15:30', text: isWinter ? 'Sıcak şömine başında çay + manzara' : 'Babakale sahili ve kayalıklar' },
-        { time: '16:30', text: 'Dönüş yolu (Babakale → Behramkale 30 km, 40 dk)' },
+        { time: '16:30', text: 'Dönüş yolu ' + dBabBeh },
       ];
       dayProgram.push({ title: '2. Gün — Batı Rotası (Gülpınar + Babakale)', items: day2 });
 
@@ -569,11 +648,11 @@ function pageInit() {
       dayProgram.push({
         title: '1. Gün — Merkez: Tarih & Antik Kent',
         items: [
-          { time: '09:00', text: 'Athena Tapınağı + Antik Kent + Surlar' + blogLink('assos-antik-kenti-gezi-rehberi', 'Tarih rehberi →') },
+          { time: orenOpen, text: 'Athena Tapınağı + Antik Kent + Surlar' + (isWinter ? ' <span style="color:#D4935A">(kışın gişe 17:00\'da kapanır)</span>' : '') + blogLink('assos-antik-kenti-gezi-rehberi', 'Tarih rehberi →') },
           { time: '11:30', text: 'Behramkale sokakları + kahve molası' },
-          { time: '13:00', text: 'Antik Liman\'da balık yemeği (2 km aşağı, 5 dk)' + blogLink('assos-yerel-lezzetler-ne-yenir', 'Lezzetler →') },
+          { time: '13:00', text: 'Antik Liman\'da balık yemeği ' + distLabel('Behramkale', 'Liman', POI.behramkale, POI.antikLiman) + blogLink('assos-yerel-lezzetler-ne-yenir', 'Lezzetler →') },
           { time: '15:00', text: 'Nekropol + Hüdavendigâr Camii gezisi' },
-          { time: '16:30', text: 'Kadırga Koyu\'na kısa iniş (Liman\'dan 2 km, 5 dk)' + blogLink('assos-koy-plaj-rehberi', 'Koy rehberi →') },
+          { time: '16:30', text: 'Kadırga Koyu\'na kısa iniş ' + distLabel('Liman', 'Kadırga', POI.antikLiman, POI.kadirga) + blogLink('assos-koy-plaj-rehberi', 'Koy rehberi →') },
           { time: '17:30', text: 'Konaklama check-in' + blogLink('assos-nerede-kalinir-konaklama', 'Nerede kalınır? →') },
           { time: '18:30', text: 'Gün batımı — ' + sunsetPick + blogLink('assos-gun-batimi-en-iyi-noktalar', '5 nokta →') },
         ]
@@ -584,11 +663,11 @@ function pageInit() {
         dayProgram.push({
           title: '2. Gün — Kıyı Rotası: Koylar & Deniz',
           items: [
-            { time: '08:30', text: 'Kadırga Koyu — sabah erken, sakin (Behramkale\'den 2 km, 5 dk)' + blogLink('assos-koy-plaj-rehberi', 'Koy rehberi →') },
-            { time: '11:00', text: 'Sivrice Koyu (Kadırga\'dan 10 km, 20 dk)' },
+            { time: '08:30', text: 'Kadırga Koyu — sabah erken, sakin ' + dBehKad + blogLink('assos-koy-plaj-rehberi', 'Koy rehberi →') },
+            { time: '11:00', text: 'Sivrice Koyu ' + dKadSiv },
             { time: '13:00', text: 'Koy kenarında öğle yemeği' },
-            { time: '14:30', text: 'Sokakağzı / Yeşil Liman (Sivrice\'den 5 km, 10 dk)' },
-            { time: '16:30', text: 'Behramkale\'ye dönüş (15 dk yol)' },
+            { time: '14:30', text: 'Sokakağzı / Yeşil Liman ' + dSivSok },
+            { time: '16:30', text: 'Behramkale\'ye dönüş ' + distLabel('Sokakağzı', 'Behramkale', POI.sokakagzi, POI.behramkale) },
             { time: '18:00', text: 'Konaklama + akşam yemeği' },
           ]
         });
@@ -597,9 +676,9 @@ function pageInit() {
           title: '2. Gün — Doğu Rotası: Köyler & Kültür (Kış)' + blogLink('assosa-kisin-gitmek', 'Kış rehberi →'),
           items: [
             { time: '09:00', text: hasFood ? 'Serpme köy kahvaltısı' + blogLink('assos-en-iyi-kahvalti-mekanlari', 'Kahvaltı →') : 'Kahvaltı + çıkış' },
-            { time: '11:00', text: 'Adatepe köyü + Zeytinyağı Müzesi (Behramkale\'den 10 km, 20 dk)' + blogLink('adatepe-gezi-rehberi', 'Rehber →') },
+            { time: '11:00', text: 'Adatepe köyü + Zeytinyağı Müzesi ' + dBehAda + blogLink('adatepe-gezi-rehberi', 'Rehber →') },
             { time: '13:00', text: 'Yerel zeytinyağlı yemekler' + blogLink('assos-yerel-lezzetler-ne-yenir', 'Lezzetler →') },
-            { time: '15:00', text: 'Yeşilyurt köyü — taş evler (Adatepe\'den 8 km, 15 dk)' },
+            { time: '15:00', text: 'Yeşilyurt köyü — taş evler ' + dAdaYes },
             { time: '17:00', text: 'Behramkale\'ye dönüş + sıcak şömine başında çay' },
           ]
         });
@@ -610,11 +689,11 @@ function pageInit() {
         title: '3. Gün — Batı Rotası: Gülpınar & Babakale',
         items: [
           { time: '09:00', text: hasFood ? 'Serpme köy kahvaltısı' + blogLink('assos-en-iyi-kahvalti-mekanlari', 'Kahvaltı →') : 'Kahvaltı + çıkış' },
-          { time: '10:30', text: 'Gülpınar — Apollo Smintheion (Behramkale\'den 26 km, 30 dk)' },
-          { time: '12:00', text: 'Babakale — Anadolu\'nun en batı noktası (Gülpınar\'dan 5 km, 10 dk)' + blogLink('babakale-gezi-rehberi', 'Rehber →') },
+          { time: '10:30', text: 'Gülpınar — Apollo Smintheion ' + dBehGul },
+          { time: '12:00', text: 'Babakale — Anadolu\'nun en batı noktası ' + dGulBab + blogLink('babakale-gezi-rehberi', 'Rehber →') },
           { time: '13:00', text: 'Babakale\'de öğle yemeği + kale gezisi' },
           { time: '15:00', text: 'Babakale sahili + zeytinyağı hediyelik alışverişi' },
-          { time: '16:30', text: 'Dönüş yolu (Babakale → Behramkale 30 km, 40 dk)' },
+          { time: '16:30', text: 'Dönüş yolu ' + dBabBeh },
           { time: '17:30', text: 'Konaklama + dinlenme' },
         ]
       });
@@ -627,9 +706,9 @@ function pageInit() {
             title: '4. Gün — Doğu Rotası: Köyler & Dağ',
             items: [
               { time: '09:00', text: hasFood ? 'Serpme köy kahvaltısı' + blogLink('assos-en-iyi-kahvalti-mekanlari', 'Kahvaltı →') : 'Kahvaltı + çıkış' },
-              { time: '10:30', text: 'Adatepe + Zeytinyağı Müzesi (10 km, 20 dk)' + blogLink('adatepe-gezi-rehberi', 'Rehber →') },
+              { time: '10:30', text: 'Adatepe + Zeytinyağı Müzesi ' + dBehAda + blogLink('adatepe-gezi-rehberi', 'Rehber →') },
               { time: '13:00', text: 'Adatepe\'de köy usulü öğle yemeği' },
-              { time: '14:30', text: 'Yeşilyurt + Koyunevi köyleri (Adatepe\'den 10-15 km)' + blogLink('assos-koylari-rehberi', 'Köy rotası →') },
+              { time: '14:30', text: 'Yeşilyurt + Koyunevi köyleri ' + dAdaYes + blogLink('assos-koylari-rehberi', 'Köy rotası →') },
               { time: '17:00', text: 'Son gün batımı — farklı bir noktadan izle' + blogLink('assos-gun-batimi-en-iyi-noktalar', '5 nokta →') },
               { time: '19:00', text: 'Veda yemeği + dönüş' },
             ]
@@ -674,7 +753,16 @@ function pageInit() {
       daySection.innerHTML = '<div style="max-width:900px;margin:0 auto;"><div style="margin-bottom:32px;"><p class="section-label" style="color:var(--amber);">Gün Programı</p><h3 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;font-size:1.6rem;color:var(--cream);letter-spacing:-.02em;margin-top:8px;">Saat saat planın</h3></div><div id="day-program-content"></div></div>';
       routesSection.after(daySection);
     }
-    document.getElementById('day-program-content').innerHTML = dayHTML;
+    // Sezonluk mekan uyarısı (kışta)
+    const seasonalWarning = closedInWinter ? `
+      <div style="background:rgba(212,147,90,.1);border:1px solid rgba(212,147,90,.25);border-radius:14px;padding:16px 20px;margin-bottom:20px;display:flex;gap:12px;align-items:flex-start;">
+        <span style="font-size:1.3rem;flex-shrink:0;">❄️</span>
+        <div>
+          <div style="font-weight:700;color:var(--amber);font-size:.88rem;margin-bottom:4px;">Kış Dönemi Uyarısı</div>
+          <div style="font-size:.78rem;color:rgba(245,237,224,.65);line-height:1.6;">Bazı sahil mekanları (beach club, sezonluk kafeler, bazı koy restoranları) kış aylarında kapalı olabilir. Plandaki mekanlar kış döneminde açık olanlardan seçildi. Yola çıkmadan önce işletmeyle iletişime geçmeniz önerilir.</div>
+        </div>
+      </div>` : '';
+    document.getElementById('day-program-content').innerHTML = seasonalWarning + dayHTML;
 
     // Render venues
     document.getElementById('plan-venues').innerHTML = venues.map((v, i) => `
