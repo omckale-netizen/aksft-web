@@ -7570,7 +7570,7 @@ async function saveVenue(e) {
 
   // Image handling: combine existing images with new pending uploads
   const venueId = id;
-  const existingImgs = editingVenueId ? (draftData.venues.find(v => v.id === editingVenueId)?.images || []) : [];
+  let existingImgs = editingVenueId ? (draftData.venues.find(v => v.id === editingVenueId)?.images || []) : [];
 
   // Upload new images to Firebase Storage and get download URLs
   const uploadedUrls = [];
