@@ -725,7 +725,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <option value="trashed" style="display:none">🗑 Çöp Kutusu</option>
             </select>
           </div>
-          <button class="btn btn-secondary btn-sm" id="venue-trash-btn" onclick="document.getElementById('venue-active-filter').value='trashed';renderVenueTable(true)" style="white-space:nowrap;position:relative">🗑 Çöp <span id="venue-trash-count" style="font-size:.58rem;font-weight:700;padding:1px 5px;border-radius:999px;background:var(--red);color:#fff;margin-left:2px;display:none"></span></button>
+          <button class="btn btn-secondary btn-sm" id="venue-trash-btn" onclick="(function(){var sel=document.getElementById('venue-active-filter');sel.value=sel.value==='trashed'?'all':'trashed';renderVenueTable(true);})()" style="white-space:nowrap;position:relative">🗑 Çöp <span id="venue-trash-count" style="font-size:.58rem;font-weight:700;padding:1px 5px;border-radius:999px;background:var(--red);color:#fff;margin-left:2px;display:none"></span></button>
           <button class="btn btn-secondary btn-sm" id="venue-sort-toggle" onclick="toggleVenueSortMode()" style="white-space:nowrap">↕ Sırala</button>
           <button class="btn btn-primary" onclick="openVenueModal()" style="white-space:nowrap">+ Yeni Mekan Ekle</button>
         </div>
@@ -3972,27 +3972,27 @@ function renderPendingList(items) {
     var date = item.submittedAt ? new Date(item.submittedAt).toLocaleString('tr-TR') : '';
     var phoneStr = (item.phones || []).map(function(p) { return p.number + (p.whatsapp ? ' (WA)' : ''); }).join(', ') || '—';
     var imgCount = (item.images || []).length;
-    return '<div class="panel-card" style="margin-bottom:14px;padding:0;overflow:hidden">' +
+    return '<div class="panel-card" style="margin-bottom:14px;padding:0;overflow:hidden;min-width:0">' +
       '<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid rgba(0,0,0,.04);flex-wrap:wrap;gap:8px">' +
-        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">' +
+        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0">' +
           '<span style="font-size:.65rem;font-weight:700;padding:3px 10px;border-radius:6px;background:' + st.bg + ';color:' + st.color + '">' + st.icon + ' ' + st.label + '</span>' +
-          '<span style="font-size:1rem;font-weight:800;color:var(--navy)">' + (item.title || 'İsimsiz') + '</span>' +
+          '<span style="font-size:1rem;font-weight:800;color:var(--navy);word-break:break-word">' + (item.title || 'İsimsiz') + '</span>' +
           '<span class="badge badge-cat" style="font-size:.65rem">' + (catLabels[item.category] || item.category || '') + '</span>' +
           (item.refNo ? '<span style="font-size:.62rem;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(26,39,68,.06);color:var(--navy);letter-spacing:.06em;font-family:monospace">Ref: ' + item.refNo + '</span>' : '') +
         '</div>' +
         '<span style="font-size:.72rem;color:var(--text-muted)">' + date + '</span>' +
       '</div>' +
-      '<div style="padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;font-size:.8rem">' +
-        '<div><span style="color:var(--text-muted);font-weight:600">Yetkili:</span> ' + (item.ownerName || '—') + '</div>' +
-        '<div><span style="color:var(--text-muted);font-weight:600">E-posta:</span> <a href="mailto:' + (item.ownerEmail || '') + '" style="color:var(--terra)">' + (item.ownerEmail || '—') + '</a></div>' +
-        '<div><span style="color:var(--text-muted);font-weight:600">Telefon:</span> ' + (item.ownerPhone || '—') + '</div>' +
-        '<div><span style="color:var(--text-muted);font-weight:600">Konum:</span> ' + (item.location || '—') + '</div>' +
-        '<div><span style="color:var(--text-muted);font-weight:600">Mekan Tel:</span> ' + phoneStr + '</div>' +
-        '<div><span style="color:var(--text-muted);font-weight:600">Görseller:</span> ' + (imgCount > 0 ? imgCount + ' fotoğraf' : 'Yok') + '</div>' +
-        (item.website ? '<div><span style="color:var(--text-muted);font-weight:600">Website:</span> <a href="' + item.website + '" target="_blank" style="color:var(--terra)">' + item.website + '</a></div>' : '') +
-        (item.instagram ? '<div><span style="color:var(--text-muted);font-weight:600">Instagram:</span> ' + item.instagram + '</div>' : '') +
+      '<div style="padding:16px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px 20px;font-size:.8rem">' +
+        '<div style="min-width:0;word-break:break-word"><span style="color:var(--text-muted);font-weight:600">Yetkili:</span> ' + (item.ownerName || '—') + '</div>' +
+        '<div style="min-width:0;word-break:break-word;overflow-wrap:anywhere"><span style="color:var(--text-muted);font-weight:600">E-posta:</span> <a href="mailto:' + (item.ownerEmail || '') + '" style="color:var(--terra)">' + (item.ownerEmail || '—') + '</a></div>' +
+        '<div style="min-width:0;word-break:break-word"><span style="color:var(--text-muted);font-weight:600">Telefon:</span> ' + (item.ownerPhone || '—') + '</div>' +
+        '<div style="min-width:0;word-break:break-word"><span style="color:var(--text-muted);font-weight:600">Konum:</span> ' + (item.location || '—') + '</div>' +
+        '<div style="min-width:0;word-break:break-word"><span style="color:var(--text-muted);font-weight:600">Mekan Tel:</span> ' + phoneStr + '</div>' +
+        '<div style="min-width:0"><span style="color:var(--text-muted);font-weight:600">Görseller:</span> ' + (imgCount > 0 ? imgCount + ' fotoğraf' : 'Yok') + '</div>' +
+        (item.website ? '<div style="min-width:0;word-break:break-word;overflow-wrap:anywhere"><span style="color:var(--text-muted);font-weight:600">Website:</span> <a href="' + item.website + '" target="_blank" style="color:var(--terra)">' + item.website + '</a></div>' : '') +
+        (item.instagram ? '<div style="min-width:0;word-break:break-word"><span style="color:var(--text-muted);font-weight:600">Instagram:</span> ' + item.instagram + '</div>' : '') +
       '</div>' +
-      (item.description ? '<div style="padding:0 20px 16px;font-size:.8rem;color:var(--text-light);line-height:1.7;border-top:1px solid rgba(0,0,0,.03);padding-top:12px">' + item.description.substring(0, 300) + (item.description.length > 300 ? '...' : '') + '</div>' : '') +
+      (item.description ? '<div style="padding:0 20px 16px;font-size:.8rem;color:var(--text-light);line-height:1.7;border-top:1px solid rgba(0,0,0,.03);padding-top:12px;word-break:break-word;overflow-wrap:anywhere">' + item.description.substring(0, 300) + (item.description.length > 300 ? '...' : '') + '</div>' : '') +
       (imgCount > 0 ? '<div style="padding:0 20px 16px;display:flex;gap:6px;flex-wrap:wrap">' + item.images.slice(0, 4).map(function(url) { return '<img src="' + url + '" style="width:60px;height:42px;object-fit:cover;border-radius:6px;border:1px solid rgba(0,0,0,.06)">'; }).join('') + (imgCount > 4 ? '<span style="font-size:.72rem;color:var(--text-muted);align-self:center">+' + (imgCount - 4) + '</span>' : '') + '</div>' : '') +
       '<div style="padding:12px 20px;border-top:1px solid rgba(0,0,0,.04);display:flex;gap:8px;flex-wrap:wrap">' +
         (item.status === 'pending' || item.status === 'revision' ? '' : '') +
