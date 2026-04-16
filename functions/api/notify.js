@@ -140,6 +140,7 @@ export async function onRequestPost(context) {
     text += '\u{1F4C2} Kategori: ' + sanitize(data.category, 50) + '\n\n';
     text += '\u{1F464} Yetkili: ' + sanitize(data.name, 100) + '\n';
     text += '\u{1F4E7} ' + sanitize(data.email, 100) + '\n';
+    if (data.refNo) text += '\n\u{1F4CB} Ref: ' + sanitize(data.refNo, 20);
     text += '\n\u{1F449} Revizyon tamamlandi — Admin panelden inceleyin';
 
   } else if (type === 'backup') {
