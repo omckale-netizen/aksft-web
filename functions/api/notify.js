@@ -60,6 +60,20 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ error: 'Unknown type' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
   }
 
+  // Admin tipi bildirimler için admin gate kontrolü (sahte bildirim koruması)
+  // 'login' ve 'login_blocked' hariç — bu ikisi admin-login sayfasında gate cookie olmadan çağrılır
+  // 'message' ve 'venue_request'/'venue_update' herkese açık (iletişim formu / mekan ekleme)
+  const PROTECTED_TYPES = ['backup', 'premium', 'security', 'password'];
+  if (PROTECTED_TYPES.includes(type)) {
+    const cookies = request.headers.get('Cookie') || '';
+    const adminKey = request.headers.get('X-Admin-Key') || '';
+    const hasGateCookie = env.ADMIN_GATE_KEY && cookies.includes('admin_gate=' + env.ADMIN_GATE_KEY);
+    const hasGateHeader = env.ADMIN_GATE_KEY && adminKey === env.ADMIN_GATE_KEY;
+    if (!hasGateCookie && !hasGateHeader) {
+      return new Response(JSON.stringify({ error: 'Yetkisiz' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+    }
+  }
+
   // Admin tipi bildirimler için rate limit (spam koruması)
   if (type !== 'message') {
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';

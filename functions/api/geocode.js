@@ -1,7 +1,35 @@
 export async function onRequestGet(context) {
   const allowedOrigins = ['https://assosukesfet.com', 'https://www.assosukesfet.com'];
   const origin = context.request.headers.get('Origin') || '';
+  const referer = context.request.headers.get('Referer') || '';
   const corsOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+
+  // Origin veya Referer kontrolü — sadece kendi sitemizden çağrılabilir (SSRF koruması)
+  const isAllowed = allowedOrigins.includes(origin) || allowedOrigins.some(o => referer.startsWith(o));
+  if (!isAllowed) {
+    return new Response(JSON.stringify({ error: 'Yetkisiz erişim' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': corsOrigin }
+    });
+  }
+
+  // Google Maps host whitelist (SSRF koruması)
+  const ALLOWED_MAPS_HOSTS = [
+    'maps.google.com',
+    'www.google.com',
+    'google.com',
+    'maps.app.goo.gl',
+    'goo.gl',
+    'g.co'
+  ];
+  function isAllowedMapsUrl(u) {
+    try {
+      const parsed = new URL(u);
+      if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return false;
+      const host = parsed.hostname.toLowerCase();
+      return ALLOWED_MAPS_HOSTS.some(h => host === h || host.endsWith('.' + h));
+    } catch(e) { return false; }
+  }
 
   const url = new URL(context.request.url);
   const q = url.searchParams.get('q');
@@ -9,12 +37,26 @@ export async function onRequestGet(context) {
 
   // Google Maps link → koordinat çevirici
   if (mapsUrl) {
+    // Whitelist kontrolü — sadece Google Maps domain'leri
+    if (!isAllowedMapsUrl(mapsUrl)) {
+      return new Response(JSON.stringify({ error: 'Sadece Google Maps linkleri kabul edilir' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': corsOrigin }
+      });
+    }
     try {
-      // Kısa link (goo.gl) ise redirect takip et
+      // Kısa link (goo.gl) ise redirect takip et — redirect sonrası tekrar whitelist kontrol
       let finalUrl = mapsUrl;
       if (mapsUrl.includes('goo.gl') || mapsUrl.includes('maps.app')) {
         const redirectResp = await fetch(mapsUrl, { redirect: 'follow' });
         finalUrl = redirectResp.url;
+        // Redirect sonrası URL de whitelist'te olmalı
+        if (!isAllowedMapsUrl(finalUrl)) {
+          return new Response(JSON.stringify({ error: 'Redirect güvenli değil' }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': corsOrigin }
+          });
+        }
       }
       // Koordinatları URL'den çıkar — öncelik sırası önemli
       let lat = null, lng = null;

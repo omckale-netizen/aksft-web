@@ -35,13 +35,30 @@ service cloud.firestore {
     }
 
     // Analitik: herkes yazabilir (anonim kullanici izleme), sadece admin okuyabilir
+    // Sema validasyonu + boyut kisiti ile spam/storage abuse onleme
+    // Izin verilen alanlar: views, lastViewed, id + action_count/action_last (phone, whatsapp, directions, share, website, instagram)
+    function isValidAnalyticsKeys(keys) {
+      return keys.hasOnly(['views','lastViewed','id',
+        'phone_count','phone_last',
+        'whatsapp_count','whatsapp_last',
+        'directions_count','directions_last',
+        'share_count','share_last',
+        'website_count','website_last',
+        'instagram_count','instagram_last']);
+    }
     match /analytics/{docId} {
-      allow create, update: if true;
+      allow create: if isValidAnalyticsKeys(request.resource.data.keys());
+      allow update: if isValidAnalyticsKeys(request.resource.data.keys());
       allow read, delete: if isAdmin();
     }
 
     match /analytics_events/{docId} {
-      allow create: if true;
+      allow create: if
+        // Sadece belirli alanlar, metin uzunluklari sinirli
+        request.resource.data.keys().hasOnly(['type','target','meta','action','pageId','venueId','ts','timestamp','userAgent','referrer','path'])
+        && (!('type' in request.resource.data) || (request.resource.data.type is string && request.resource.data.type.size() < 50))
+        && (!('target' in request.resource.data) || (request.resource.data.target is string && request.resource.data.target.size() < 200))
+        && (!('userAgent' in request.resource.data) || (request.resource.data.userAgent is string && request.resource.data.userAgent.size() < 300));
       allow read, delete: if isAdmin();
     }
 
