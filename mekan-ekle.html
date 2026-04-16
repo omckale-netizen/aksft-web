@@ -262,7 +262,7 @@ a{color:var(--terra);text-decoration:none}
         <div id="summary"></div>
         <div class="me-kvkk">
           <input type="checkbox" id="consent">
-          <label for="consent">Mekanıma ait bilgilerin (mekan adı, adres, telefon, görseller, çalışma saatleri) assosukesfet.com platformunda yayınlanmasını kabul ediyorum. Kişisel verilerimin (ad, e-posta, telefon) yalnızca iletişim amacıyla kullanılacağını ve üçüncü taraflarla paylaşılmayacağını, dilediğim zaman info@assosukesfet.com adresine yazarak verilerimin silinmesini talep edebileceğimi biliyorum. <a href="/gizlilik.html" target="_blank">Gizlilik Politikası</a> · <a href="/kullanim-kosullari.html" target="_blank">Kullanım Koşulları</a></label>
+          <label for="consent">Mekanıma ait bilgilerin (mekan adı, adres, telefon, görseller, çalışma saatleri) assosukesfet.com platformunda yayınlanmasını kabul ediyorum. Yüklediğim görsellerin telif hakkının bana ait olduğunu veya kullanım iznimin bulunduğunu ve platformda kullanılmasına izin verdiğimi beyan ederim. Verdiğim bilgilerin doğru ve güncel olduğunu kabul ediyorum. Kişisel verilerimin (ad, e-posta, telefon) yalnızca iletişim amacıyla kullanılacağını ve üçüncü taraflarla paylaşılmayacağını, dilediğim zaman info@assosukesfet.com adresine yazarak verilerimin silinmesini talep edebileceğimi biliyorum. <a href="/gizlilik.html" target="_blank">Gizlilik Politikası</a> ve <a href="/kullanim-kosullari.html" target="_blank">Kullanım Koşullarını</a> okudum ve kabul ediyorum.</label>
         </div>
       </div>
     </div>
@@ -586,7 +586,7 @@ function renderSummary(){
   var rows=[['Yetkili',d.ownerName],['E-posta',d.ownerEmail],['Yetkili Tel',d.ownerPhone],['Mekan Adı',d.title],['Kategori',CAT_LABELS[d.category]||''],['Konum',d.location],['Adres',d.address||'—'],['Etiketler',d.tags.join(', ')],['Telefon',phoneStr],['Website',d.website||'—'],['Instagram',d.instagram||'—'],['Görseller',imgs.length>0?imgs.length+' fotoğraf':'Yüklenmedi']];
   if(d.category==='konaklama'){rows.push(['Check-in',d.checkin],['Check-out',d.checkout],['Oda Sayısı',d.rooms.length+''],['Tesisler',d.facilities.join(', ')||'—']);}
   if(d.seasonal)rows.push(['Sezon',d.seasonStart+' — '+d.seasonEnd]);
-  document.getElementById('summary').innerHTML=rows.map(function(r){return '<div class="me-sumrow"><span class="me-suml">'+r[0]+'</span><span class="me-sumv">'+r[1]+'</span></div>';}).join('')+'<div style="margin-top:10px;font-size:.8rem;color:var(--text-light);line-height:1.6"><strong>Açıklama:</strong> '+d.description.substring(0,200)+(d.description.length>200?'...':'')+'</div>';
+  document.getElementById('summary').innerHTML=rows.map(function(r){return '<div class="me-sumrow"><span class="me-suml">'+r[0]+'</span><span class="me-sumv">'+r[1]+'</span></div>';}).join('')+'<div style="margin-top:10px;font-size:.8rem;color:var(--text-light);line-height:1.6;word-break:break-word;overflow-wrap:anywhere"><strong>Açıklama:</strong> '+d.description.substring(0,200)+(d.description.length>200?'...':'')+'</div>';
 }
 
 // Submit
