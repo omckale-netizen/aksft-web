@@ -338,8 +338,26 @@ var CAT_LABELS={kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'
   try{db.collection('settings').doc('site').get().then(function(doc){var el=document.getElementById('footer-logo');if(doc.exists&&doc.data().logoUrl){el.innerHTML='<img src="'+doc.data().logoUrl+'" alt="Assos\'u Keşfet" style="height:40px;opacity:0;transition:opacity .5s" onload="this.style.opacity=0.8">';}else{el.innerHTML='<span style="font-size:1.3rem">🏛️</span>';}}).catch(function(){document.getElementById('footer-logo').innerHTML='<span style="font-size:1.3rem">🏛️</span>';});}catch(e){}
   // Edit mode?
   var p=new URLSearchParams(location.search);
-  editDocId=p.get('edit');
-  if(editDocId) loadEditData(editDocId);
+  var editId=p.get('edit');
+  var editTok=p.get('token');
+  if(editId) {
+    // HMAC token doğrulaması (IDOR koruması) — Firestore rules zaten koruyor, bu ek katman
+    (async function() {
+      if (editTok) {
+        try {
+          var vResp = await fetch('/api/edit-token?id=' + encodeURIComponent(editId) + '&token=' + encodeURIComponent(editTok));
+          var vData = await vResp.json();
+          if (!vData.valid) {
+            toast('Düzenleme linki geçersiz veya süresi dolmuş.','red');
+            return;
+          }
+        } catch(e) {}
+      }
+      // Token geçerli veya yok (eski linkler için geriye uyumluluk — Firestore rules koruyor)
+      editDocId = editId;
+      loadEditData(editId);
+    })();
+  }
 })();
 
 async function loadEditData(id){

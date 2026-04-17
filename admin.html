@@ -4403,7 +4403,20 @@ async function rejectPendingVenue(id, reason) {
     showToast('📝 Revizyon istendi.', 'success');
     // Otomatik revizyon maili gönder
     if (data.ownerEmail) {
-      var editUrl = 'https://assosukesfet.com/mekan-ekle?edit=' + id;
+      // HMAC imzalı edit token oluştur (30 gün geçerli, IDOR koruması)
+      var editToken = '';
+      try {
+        var tokResp = await fetch('/api/edit-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: id })
+        });
+        if (tokResp.ok) {
+          var tokData = await tokResp.json();
+          editToken = tokData.token || '';
+        }
+      } catch(e) {}
+      var editUrl = 'https://assosukesfet.com/mekan-ekle?edit=' + id + (editToken ? '&token=' + editToken : '');
       try {
         var html = buildMailHtml('Mekan Talebiniz Hakkında — ' + (data.title || ''),
           'Merhaba ' + (data.ownerName || 'Değerli İşletme Sahibi') + ',\n\n' +
@@ -4506,7 +4519,17 @@ async function remindPendingVenue(id) {
     if (!doc.exists) return;
     var data = doc.data();
     if (!data.ownerEmail) { showToast('E-posta adresi yok', 'error'); return; }
-    var editUrl = 'https://assosukesfet.com/mekan-ekle?edit=' + id;
+    // HMAC imzalı edit token (IDOR koruması)
+    var editToken = '';
+    try {
+      var tokResp = await fetch('/api/edit-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id })
+      });
+      if (tokResp.ok) { var tokData = await tokResp.json(); editToken = tokData.token || ''; }
+    } catch(e) {}
+    var editUrl = 'https://assosukesfet.com/mekan-ekle?edit=' + id + (editToken ? '&token=' + editToken : '');
     var html = buildMailHtml('Hatırlatma — ' + (data.title || 'Mekan Başvurunuz'),
       'Merhaba ' + (data.ownerName || 'Değerli İşletme Sahibi') + ',\n\n' +
       (data.refNo ? 'Referans No: ' + data.refNo + '\n\n' : '') +

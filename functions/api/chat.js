@@ -256,15 +256,29 @@ MEVSİMSEL FARKINDALIK (Şu anki tarih: ${new Date().toLocaleDateString('tr-TR',
 SİTE VERİLERİ (Güncel):
 ${siteContext}`;
 
+  // Normalize — leetspeak + Unicode tricks + special chars bypass önleme
+  function normalizeForScan(text) {
+    return String(text || '').toLowerCase()
+      // Leetspeak
+      .replace(/[0-9]/g, c => ({ '0':'o','1':'i','3':'e','4':'a','5':'s','7':'t','8':'b','9':'g' }[c] || c))
+      // Zero-width characters (invisible bypass)
+      .replace(/[\u200B-\u200F\u2028-\u202F\u205F-\u206F\uFEFF]/g, '')
+      // Özel karakterleri boşluğa çevir (s-y-s-t-e-m gibi)
+      .replace(/[_\-\.\*\+\|\\\/#@!$%^&(){}[\]<>~`'"]/g, ' ')
+      .replace(/\s+/g, ' ').trim();
+  }
+
   function buildMessages(history, currentMsg) {
     const msgs = [];
     if (history && Array.isArray(history) && history.length <= 10) {
-      // History sanitize — injection koruması + boyut sınırı
-      const historyBlocked = /system\s*prompt|ignore\s*(previous|all|instructions)|forget\s*instructions|kurallar[iı]\s*unut|talimatlar[iı]\s*unut|sen\s*art[iı]k|you\s*are\s*now|jailbreak|bypass|developer\s*mode|DAN|do\s*anything\s*now/i;
+      // History sanitize — normalize + pattern kontrolü (userMessage ile aynı koruma)
+      const historyBlocked = /system\s*prompt|ignore\s*(previous|all|instructions)|forget\s*instructions|kurallar[iı]?\s*unut|talimatlar[iı]?\s*unut|sen\s*art[iı]?k|you\s*are\s*now|jailbreak|bypass|developer\s*mode|\bDAN\b|do\s*anything\s*now|act\s*as|roleplay|pretend|reveal\s*(system|prompt|instruction)/i;
       history.slice(-6).forEach(m => {
         if (m.role !== 'user' && m.role !== 'assistant') return;
         let content = (m.content || '').substring(0, 300);
-        if (historyBlocked.test(content)) return; // Şüpheli mesajı atla
+        // Hem orijinal hem normalize edilmiş halini kontrol et (leetspeak bypass önleme)
+        const normalized = normalizeForScan(content);
+        if (historyBlocked.test(content) || historyBlocked.test(normalized)) return; // Şüpheli mesajı atla
         msgs.push({ role: m.role, content: content });
       });
     }

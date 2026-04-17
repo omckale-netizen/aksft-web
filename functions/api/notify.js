@@ -1,5 +1,11 @@
 import { requireAdmin } from './_verify.js';
 
+async function sha256(text) {
+  const buf = new TextEncoder().encode(text);
+  const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 export async function onRequestPost(context) {
   const request = context.request;
   const env = context.env || {};
@@ -53,6 +59,22 @@ export async function onRequestPost(context) {
           return new Response(JSON.stringify({ error: 'Günlük mesaj limitinize ulaştınız. Yarın tekrar deneyebilirsiniz.' }), { status: 429, headers: { 'Content-Type': 'application/json' } });
         }
         await env.CHAT_KV.put(dayKey, String(dayCount + 1), { expirationTtl: 86400 });
+
+        // Mail amplifikasyon koruması — aynı kurban e-postaya max 2 auto-reply/gün
+        // Dağıtık saldırıda (farklı IP'lerden) kurbanın spam'a boğulmasını önler
+        if (data.email && typeof data.email === 'string') {
+          const recipientEmail = data.email.trim().toLowerCase();
+          if (recipientEmail && recipientEmail.length <= 100) {
+            const recipientHash = await sha256(recipientEmail);
+            const recipientKey = 'recipient_day_' + recipientHash + '_' + today;
+            const recipientCount = parseInt(await env.CHAT_KV.get(recipientKey) || '0');
+            if (recipientCount >= 2) {
+              // Sessizce başarılı döndür — sahte response, saldırgan fark etmesin
+              return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+            }
+            await env.CHAT_KV.put(recipientKey, String(recipientCount + 1), { expirationTtl: 86400 });
+          }
+        }
       }
     } catch(e) {}
   }

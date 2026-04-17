@@ -153,9 +153,26 @@ async function checkAuth() {
     return;
   }
 
+  // E-posta bazlı server-side lockout kontrolü (dağıtık saldırı koruması)
+  try {
+    const lockResp = await fetch('/api/login-attempt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, action: 'check' })
+    });
+    if (lockResp.status === 429) {
+      const data = await lockResp.json();
+      const mins = Math.ceil((data.remaining || 0) / 60);
+      errEl.textContent = `Bu e-posta için giriş kilitlendi. ${mins} dakika sonra tekrar deneyin.`;
+      return;
+    }
+  } catch(e) {}
+
   try {
     await fbAuth.signInWithEmailAndPassword(email, pw);
     clearLoginAttempts();
+    // Server-side email sayacını sıfırla
+    try { fetch('/api/login-attempt', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, action: 'success' }) }); } catch(e) {}
     errEl.style.color = '#38A169';
     errEl.textContent = '✓ Giriş başarılı! Yönlendiriliyorsunuz...';
     localStorage.setItem('lastActivity', Date.now().toString());
@@ -180,6 +197,14 @@ async function checkAuth() {
     window.location.href = 'admin.html';
   } catch(err) {
     const updated = recordFailedLogin();
+    // Server-side email bazlı sayacı artır (dağıtık saldırı koruması)
+    try {
+      fetch('/api/login-attempt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, action: 'fail' })
+      });
+    } catch(e) {}
     // Başarısız girişi localStorage'a kaydet (admin panelde Firebase'e aktarılacak)
     try {
       var failedLogs = JSON.parse(localStorage.getItem('assos_failed_logins') || '[]');
