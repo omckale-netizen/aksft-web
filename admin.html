@@ -544,6 +544,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       <a class="admin-nav-item" data-page="venues" onclick="showPage('venues')">
         <span class="nav-icon">🏪</span> Mekanlar
       </a>
+      <a class="admin-nav-item" data-page="pending" onclick="showPage('pending')">
+        <span class="nav-icon">📋</span> Mekan Talepleri <span id="pending-badge" style="background:var(--terra);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;display:none"></span>
+      </a>
       <a class="admin-nav-item" data-page="routes" onclick="showPage('routes')">
         <span class="nav-icon">🗺</span> Rotalar
       </a>
@@ -568,9 +571,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       <div class="nav-group-label">İletişim & Analiz</div>
       <a class="admin-nav-item" data-page="messages" onclick="showPage('messages')">
         <span class="nav-icon">✉️</span> Mesajlar <span id="msg-badge" style="background:var(--red);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;display:none"></span>
-      </a>
-      <a class="admin-nav-item" data-page="pending" onclick="showPage('pending')">
-        <span class="nav-icon">📋</span> Mekan Talepleri <span id="pending-badge" style="background:var(--terra);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;display:none"></span>
       </a>
       <a class="admin-nav-item" data-page="analytics" onclick="showPage('analytics')">
         <span class="nav-icon">📈</span> İstatistikler
@@ -4083,12 +4083,14 @@ async function renderPendingVenues() {
     var snap = await db.collection('pending_venues').orderBy('submittedAt', 'desc').get();
     var items = snap.docs.map(function(d) { return { _id: d.id, ...d.data() }; });
     var pending = items.filter(function(i) { return i.status === 'pending'; });
+    var updated = items.filter(function(i) { return i.status === 'updated'; });
     var approved = items.filter(function(i) { return i.status === 'approved'; });
     var rejected = items.filter(function(i) { return i.status === 'rejected'; });
 
-    // Badge
+    // Badge: bekleyen + düzenlendi (ikisi de admin aksiyonu bekliyor)
     var badge = document.getElementById('pending-badge');
-    if (badge) { badge.textContent = pending.length; badge.style.display = pending.length > 0 ? '' : 'none'; }
+    var needsReview = pending.length + updated.length;
+    if (badge) { badge.textContent = needsReview; badge.style.display = needsReview > 0 ? '' : 'none'; }
 
     // Stats
     var revision = items.filter(function(i){ return i.status === 'revision'; });
@@ -4106,10 +4108,11 @@ async function renderPendingVenues() {
     }
     if (statsEl) {
       statsEl.innerHTML =
-        '<div class="stat-card terra"><div class="stat-label">Bekleyen</div><div class="stat-val">' + pending.length + '</div></div>' +
+        '<div class="stat-card terra"><div class="stat-label">⏳ Bekleyen</div><div class="stat-val">' + pending.length + '</div></div>' +
+        '<div class="stat-card" style=""><div class="stat-label">🔄 Düzenlendi</div><div class="stat-val" style="color:#276749">' + updated.length + '</div></div>' +
         '<div class="stat-card" style=""><div class="stat-label">📝 Revizyon</div><div class="stat-val" style="color:#2B6CB0">' + revision.length + '</div></div>' +
-        '<div class="stat-card green"><div class="stat-label">Onaylanan</div><div class="stat-val">' + approved.length + '</div></div>' +
-        '<div class="stat-card"><div class="stat-label">Reddedilen</div><div class="stat-val">' + rejected.length + '</div></div>' +
+        '<div class="stat-card green"><div class="stat-label">✅ Onaylanan</div><div class="stat-val">' + approved.length + '</div></div>' +
+        '<div class="stat-card"><div class="stat-label">❌ Reddedilen</div><div class="stat-val">' + rejected.length + '</div></div>' +
         '<div class="stat-card"><div class="stat-label">Toplam</div><div class="stat-val">' + totalItems + '</div></div>' +
         '<div class="stat-card"><div class="stat-label">Onay Oranı</div><div class="stat-val" style="color:' + (approveRate >= 50 ? 'var(--green)' : 'var(--terra)') + '">%' + approveRate + '</div></div>' +
         '<div class="stat-card"><div class="stat-label">Ort. Süre</div><div class="stat-val">' + avgDays + '</div></div>';
