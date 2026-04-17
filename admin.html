@@ -7834,13 +7834,13 @@ function renderDashboard() {
         </div>`).join('');
   }
 
-  // Son Mesajlar
+  // Son Mesajlar — çöpe atılmış olanları hariç tut
   (async function() {
     const msgEl = document.getElementById('dash-messages');
     if (!msgEl) return;
     try {
-      const snap = await db.collection('messages').orderBy('timestamp','desc').limit(5).get();
-      const msgs = snap.docs.map(d => d.data());
+      const snap = await db.collection('messages').orderBy('timestamp','desc').limit(20).get();
+      const msgs = snap.docs.map(d => d.data()).filter(m => !m.trashed).slice(0, 5);
       msgEl.innerHTML = msgs.length === 0
         ? '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:.85rem">Henuz mesaj yok.</div>'
         : msgs.map(m =>
@@ -10557,11 +10557,12 @@ async function renderNotifications() {
   try {
     allNotifs = [];
 
-    // 1. Mesajlar (sadece erişim yetkisi olan görsün)
+    // 1. Mesajlar (sadece erişim yetkisi olan görsün, çöp'dekiler hariç)
     if (canAccessPage('messages')) {
       const msgSnap = await db.collection('messages').orderBy('timestamp', 'desc').limit(50).get();
       msgSnap.docs.forEach(d => {
         const m = d.data();
+        if (m.trashed) return;
         allNotifs.push({
           id: d.id, type: 'message', read: !!m.read,
           icon: '✉️', iconBg: 'rgba(26,107,138,.1)',
@@ -12454,7 +12455,7 @@ async function renderEditorMsgList() {
   if (typeof canAccessPage === 'function' && !canAccessPage('messages')) { el.innerHTML = ''; return; }
   el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:.82rem">Yükleniyor...</div>';
   try {
-    var snap = await db.collection('messages').orderBy('timestamp', 'desc').limit(6).get();
+    var snap = await db.collection('messages').orderBy('timestamp', 'desc').limit(20).get();
     var msgs = snap.docs.map(function(d) { return { _id: d.id, ...d.data() }; }).filter(function(m) { return !m.trashed; }).slice(0, 6);
     if (msgs.length === 0) {
       el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:.82rem">Mesaj yok.</div>';
