@@ -2141,10 +2141,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       <p class="page-sub">Maps koordinat çıkarıcı, emoji arama ve renk paleti üretici — tek yerde.</p>
 
       <!-- Tab navigation -->
-      <div style="display:flex;gap:6px;padding:6px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;margin-bottom:20px;max-width:520px;box-shadow:var(--shadow-xs)">
+      <div style="display:flex;gap:6px;padding:6px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;margin-bottom:20px;max-width:680px;box-shadow:var(--shadow-xs);flex-wrap:wrap">
         <button class="mt-tab active" onclick="showMtTab('maps',this)"><i data-lucide="map-pin" style="width:15px;height:15px"></i> Maps Parser</button>
         <button class="mt-tab" onclick="showMtTab('emoji',this)"><i data-lucide="smile" style="width:15px;height:15px"></i> Emoji</button>
         <button class="mt-tab" onclick="showMtTab('color',this)"><i data-lucide="palette" style="width:15px;height:15px"></i> Renk Paleti</button>
+        <button class="mt-tab" onclick="showMtTab('utm',this)"><i data-lucide="link-2" style="width:15px;height:15px"></i> UTM Link</button>
       </div>
 
       <!-- === MAPS PARSER === -->
@@ -2243,6 +2244,98 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
             <!-- Kontrast sonuçları -->
             <div id="mt-color-contrast" style="margin-top:18px;padding:14px 16px;background:var(--cream-dark);border-radius:10px;font-size:.78rem"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- === UTM LİNK ÜRETİCİ === -->
+      <div class="mt-pane" data-pane="utm" style="display:none">
+        <div class="panel-card" style="max-width:720px">
+          <div class="panel-card-head"><h3>🔗 UTM Link Üretici</h3></div>
+          <div style="padding:20px">
+            <div class="form-group">
+              <label>Hedef URL *</label>
+              <input type="text" id="mt-utm-base" value="https://assosukesfet.com/" placeholder="https://assosukesfet.com/mekanlar/..." oninput="mtUtmUpdate()">
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px" class="mt-utm-grid">
+              <div class="form-group">
+                <label>Kaynak (utm_source) *</label>
+                <select id="mt-utm-source" onchange="mtUtmSourceChange()">
+                  <option value="instagram">📷 Instagram</option>
+                  <option value="facebook">👍 Facebook</option>
+                  <option value="youtube">▶️ YouTube</option>
+                  <option value="tiktok">🎵 TikTok</option>
+                  <option value="twitter">🐦 Twitter/X</option>
+                  <option value="linkedin">💼 LinkedIn</option>
+                  <option value="google">🔍 Google Business</option>
+                  <option value="email">✉️ E-mail</option>
+                  <option value="qr">📱 QR Kod</option>
+                  <option value="whatsapp">💬 WhatsApp</option>
+                  <option value="print">📰 Basılı</option>
+                  <option value="partner">🤝 Partner Site</option>
+                  <option value="custom">✏️ Özel...</option>
+                </select>
+              </div>
+              <div class="form-group" id="mt-utm-source-custom-wrap" style="display:none">
+                <label>Özel Kaynak</label>
+                <input type="text" id="mt-utm-source-custom" placeholder="örn: blog, newsletter" oninput="mtUtmUpdate()">
+              </div>
+
+              <div class="form-group">
+                <label>Ortam (utm_medium)</label>
+                <select id="mt-utm-medium" onchange="mtUtmUpdate()">
+                  <option value="bio">bio (profil linki)</option>
+                  <option value="post">post (gönderi)</option>
+                  <option value="story">story (hikaye)</option>
+                  <option value="reel">reel (video)</option>
+                  <option value="ad">ad (reklam)</option>
+                  <option value="newsletter">newsletter (mail)</option>
+                  <option value="signature">signature (mail imzası)</option>
+                  <option value="dm">dm (direkt mesaj)</option>
+                  <option value="organic">organic (arama)</option>
+                  <option value="cpc">cpc (tıklama ücretli)</option>
+                  <option value="referral">referral (başka site)</option>
+                  <option value="qr">qr (basılı QR)</option>
+                  <option value="print">print (basılı afiş)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Kampanya (utm_campaign) — opsiyonel</label>
+              <input type="text" id="mt-utm-campaign" placeholder="örn: yaz2026, opening, mart-indirim" oninput="mtUtmUpdate()">
+              <div style="font-size:.65rem;color:var(--text-muted);margin-top:4px">Dönem/kampanya adı. Boşluk yerine tire kullanın.</div>
+            </div>
+
+            <div class="form-group">
+              <label>İçerik (utm_content) — opsiyonel</label>
+              <input type="text" id="mt-utm-content" placeholder="örn: banner-1, video-a, post-123" oninput="mtUtmUpdate()">
+              <div style="font-size:.65rem;color:var(--text-muted);margin-top:4px">Aynı kampanyada farklı varyantları ayırmak için (A/B test).</div>
+            </div>
+
+            <!-- Sonuç -->
+            <div style="margin-top:20px;padding:16px;background:rgba(196,82,26,.05);border:1px solid rgba(196,82,26,.2);border-radius:10px">
+              <div style="font-size:.72rem;font-weight:700;color:var(--terra);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">✓ Üretilen Link</div>
+              <div id="mt-utm-result" style="font-family:'SF Mono',Consolas,monospace;font-size:.78rem;color:var(--navy);word-break:break-all;padding:10px;background:#fff;border:1px solid rgba(0,0,0,.05);border-radius:6px;margin-bottom:10px"></div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="btn btn-sm btn-primary" onclick="mtUtmCopy()"><i data-lucide="copy" style="width:13px;height:13px"></i> Kopyala</button>
+                <button class="btn btn-sm btn-secondary" onclick="mtUtmShort()"><i data-lucide="scissors" style="width:13px;height:13px"></i> Kısa Link</button>
+                <button class="btn btn-sm btn-secondary" onclick="mtUtmQr()"><i data-lucide="qr-code" style="width:13px;height:13px"></i> QR Kod</button>
+                <button class="btn btn-sm btn-secondary" onclick="mtUtmTest()"><i data-lucide="external-link" style="width:13px;height:13px"></i> Test Et</button>
+              </div>
+              <div id="mt-utm-short" style="display:none;margin-top:10px;padding:10px;background:rgba(56,161,105,.06);border:1px solid rgba(56,161,105,.2);border-radius:8px">
+                <div style="font-size:.68rem;font-weight:700;color:var(--green);text-transform:uppercase;margin-bottom:4px">🔗 Vanity Kısa Link</div>
+                <div id="mt-utm-short-url" style="font-family:'SF Mono',Consolas,monospace;font-size:.85rem;font-weight:700;color:var(--green)"></div>
+                <div style="font-size:.68rem;color:var(--text-muted);margin-top:4px">Bu link tıklandığında otomatik UTM'li URL'e yönlendirilir. Bio'da çok daha temiz görünür.</div>
+              </div>
+              <div id="mt-utm-qr" style="display:none;margin-top:12px;text-align:center;padding:14px;background:#fff;border-radius:8px;border:1px solid rgba(0,0,0,.05)"></div>
+            </div>
+
+            <div style="margin-top:14px;padding:12px 14px;background:rgba(49,130,206,.05);border-left:3px solid var(--blue);border-radius:6px;font-size:.72rem;color:var(--text-light);line-height:1.6">
+              💡 <strong>Kullanım ipucu:</strong> Instagram bio'ya uzun UTM link yerine kısa link (örn. <code>assosukesfet.com/ig</code>) koyun — temiz görünür, aynı tracking'i yapar.<br>
+              <strong>Analiz:</strong> 24 saat sonra <strong>İstatistikler → Trafik Kaynakları</strong> sekmesinden hangi kampanyanın ne kadar ziyaretçi getirdiğini görebilirsiniz.
+            </div>
           </div>
         </div>
       </div>
@@ -4376,10 +4469,133 @@ function showMtTab(tab, btn) {
   document.querySelectorAll('#page-minitools .mt-pane').forEach(function(p) {
     p.style.display = (p.getAttribute('data-pane') === tab) ? '' : 'none';
   });
-  // Emoji tab'ı ilk açılışta doldur
+  // İlk açılışlarda init
   if (tab === 'emoji' && !window._emojiInitialized) { mtEmojiRender(); window._emojiInitialized = true; }
   if (tab === 'color' && !window._colorInitialized) { mtColorUpdate(); window._colorInitialized = true; }
+  if (tab === 'utm' && !window._utmInitialized) { mtUtmUpdate(); window._utmInitialized = true; }
+  // Lucide ikonları yeni render olanlar için etkinleştir
+  if (window.lucide && typeof lucide.createIcons === 'function') try { lucide.createIcons(); } catch(e) {}
 }
+
+// --- UTM LİNK ÜRETİCİ ---
+// source → kısa link eşleştirmesi (vanity redirects için)
+var VANITY_LINKS = {
+  instagram: { bio: '/ig', post: '/ig-post', story: '/ig-story', reel: '/ig-reel' },
+  facebook: { bio: '/fb', post: '/fb-post', ad: '/fb-ad' },
+  youtube: { bio: '/yt', post: '/yt-video' },
+  tiktok: { bio: '/tt' },
+  twitter: { bio: '/tw' },
+  linkedin: { bio: '/li' },
+  google: { bio: '/gs', organic: '/g' },
+  email: { newsletter: '/mail' },
+  qr: { qr: '/qr' },
+  whatsapp: { bio: '/wa' }
+};
+
+function mtUtmSourceChange() {
+  var sel = document.getElementById('mt-utm-source');
+  var customWrap = document.getElementById('mt-utm-source-custom-wrap');
+  if (sel.value === 'custom') customWrap.style.display = '';
+  else customWrap.style.display = 'none';
+  mtUtmUpdate();
+}
+
+function mtUtmGetSource() {
+  var sel = document.getElementById('mt-utm-source');
+  if (sel.value === 'custom') {
+    return (document.getElementById('mt-utm-source-custom').value || '').trim().toLowerCase();
+  }
+  return sel.value;
+}
+
+function mtUtmBuild() {
+  var base = (document.getElementById('mt-utm-base').value || '').trim();
+  if (!base) return '';
+  var source = mtUtmGetSource();
+  var medium = document.getElementById('mt-utm-medium').value;
+  var campaign = (document.getElementById('mt-utm-campaign').value || '').trim();
+  var content = (document.getElementById('mt-utm-content').value || '').trim();
+  if (!source) return base;
+
+  // URL ve mevcut params'ı ayır
+  var url;
+  try { url = new URL(base); } catch(e) {
+    // Invalid URL — prepend https if missing
+    try { url = new URL('https://' + base); } catch(e2) { return base; }
+  }
+  url.searchParams.set('utm_source', source);
+  if (medium) url.searchParams.set('utm_medium', medium);
+  if (campaign) url.searchParams.set('utm_campaign', campaign.replace(/\s+/g, '-').toLowerCase());
+  if (content) url.searchParams.set('utm_content', content.replace(/\s+/g, '-').toLowerCase());
+  return url.toString();
+}
+
+function mtUtmUpdate() {
+  var url = mtUtmBuild();
+  var resEl = document.getElementById('mt-utm-result');
+  if (resEl) resEl.textContent = url || '(URL belirtin)';
+  // Kısa ve QR alanları kapat
+  var shortEl = document.getElementById('mt-utm-short');
+  var qrEl = document.getElementById('mt-utm-qr');
+  if (shortEl) shortEl.style.display = 'none';
+  if (qrEl) qrEl.style.display = 'none';
+}
+
+function mtUtmCopy() {
+  var url = mtUtmBuild();
+  if (!url) return;
+  navigator.clipboard.writeText(url).then(function() {
+    showToast('✓ UTM link kopyalandı', 'success');
+  }).catch(function() { showToast('Kopyalanamadı', 'error'); });
+}
+
+function mtUtmShort() {
+  var source = mtUtmGetSource();
+  var medium = document.getElementById('mt-utm-medium').value;
+  var shortEl = document.getElementById('mt-utm-short');
+  var urlEl = document.getElementById('mt-utm-short-url');
+  if (!shortEl || !urlEl) return;
+
+  var short = null;
+  if (VANITY_LINKS[source]) short = VANITY_LINKS[source][medium] || VANITY_LINKS[source].bio || null;
+  if (!short) {
+    shortEl.style.display = 'none';
+    showToast('Bu kaynak/ortam için vanity link tanımlı değil. Hedef URL doğrudan kullanılabilir.', 'info');
+    return;
+  }
+  urlEl.textContent = 'assosukesfet.com' + short;
+  shortEl.style.display = '';
+}
+
+function mtUtmQr() {
+  var url = mtUtmBuild();
+  if (!url) return;
+  var box = document.getElementById('mt-utm-qr');
+  box.style.display = '';
+  box.innerHTML = '<div style="font-size:.68rem;font-weight:700;color:var(--text-light);text-transform:uppercase;margin-bottom:8px">📱 QR Kod</div>';
+  // qrcode-generator kütüphanesi zaten admin.html'de yüklü
+  try {
+    if (typeof qrcode !== 'undefined') {
+      var qr = qrcode(0, 'M');
+      qr.addData(url);
+      qr.make();
+      var img = qr.createImgTag(4, 8);
+      box.innerHTML += img + '<div style="font-size:.68rem;color:var(--text-muted);margin-top:6px">Sağ tık → Kaydet</div>';
+    } else {
+      // Fallback: Google Charts QR API
+      box.innerHTML += '<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(url) + '" alt="QR" style="max-width:200px">';
+    }
+  } catch(e) {
+    box.innerHTML += '<div style="color:var(--red);font-size:.78rem">QR oluşturulamadı</div>';
+  }
+}
+
+function mtUtmTest() {
+  var url = mtUtmBuild();
+  if (url) window.open(url, '_blank');
+}
+
+// Mevcut fonksiyon yeniden tanımlanmasın — önceki showMtTab'ı değiştirdik (üstte)
 
 // --- MAPS PARSER ---
 var _mtMapsData = null;
