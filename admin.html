@@ -3048,6 +3048,30 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
       <div class="stats-grid" id="analytics-stats"></div>
 
+      <!-- Trafik Kaynakları -->
+      <div class="panel-card" style="margin-bottom:20px">
+        <div class="panel-card-head">
+          <h3>🌐 Trafik Kaynakları</h3>
+          <span style="font-size:.68rem;color:var(--text-muted)">Hangi kanaldan kaç ziyaret geldi</span>
+        </div>
+        <div style="padding:18px 20px">
+          <div style="display:grid;grid-template-columns:260px 1fr;gap:24px;align-items:start" class="ts-grid">
+            <!-- Pie chart / bar summary -->
+            <div>
+              <canvas id="ts-pie" width="240" height="240" style="max-width:100%"></canvas>
+              <div id="ts-total" style="text-align:center;font-size:.72rem;color:var(--text-muted);margin-top:8px"></div>
+            </div>
+            <!-- List -->
+            <div id="ts-list" style="min-height:120px"></div>
+          </div>
+          <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--card-border)">
+            <div style="font-size:.82rem;font-weight:700;color:var(--navy);margin-bottom:10px">📋 En Başarılı Kampanyalar</div>
+            <div id="ts-campaigns" style="font-size:.8rem"></div>
+          </div>
+        </div>
+      </div>
+      <style>@media(max-width:700px){.ts-grid{grid-template-columns:1fr !important}}</style>
+
       <!-- Günlük Aksiyon Detayı -->
       <div class="panel-card" style="margin-bottom:20px">
         <div class="panel-card-head">
@@ -4460,6 +4484,145 @@ function skeletonCards(count, width) {
 
 function skeletonList(count) {
   return '<div style="padding:10px 18px">' + skeletonRows(count) + '</div>';
+}
+
+// ═══ TRAFİK KAYNAKLARI DASHBOARD ═══
+// source → renk + emoji + etiket
+var TS_CHANNELS = {
+  instagram: { label: 'Instagram', color: '#E4405F', icon: '📷' },
+  facebook:  { label: 'Facebook',  color: '#1877F2', icon: '👍' },
+  youtube:   { label: 'YouTube',   color: '#FF0000', icon: '▶️' },
+  tiktok:    { label: 'TikTok',    color: '#000000', icon: '🎵' },
+  twitter:   { label: 'Twitter/X', color: '#1DA1F2', icon: '🐦' },
+  linkedin:  { label: 'LinkedIn',  color: '#0A66C2', icon: '💼' },
+  google:    { label: 'Google',    color: '#4285F4', icon: '🔍' },
+  bing:      { label: 'Bing',      color: '#00809D', icon: '🔍' },
+  yandex:    { label: 'Yandex',    color: '#FF0000', icon: '🔍' },
+  duckduckgo:{ label: 'DuckDuckGo',color: '#DE5833', icon: '🦆' },
+  whatsapp:  { label: 'WhatsApp',  color: '#25D366', icon: '💬' },
+  email:     { label: 'E-mail',    color: '#D4682E', icon: '✉️' },
+  qr:        { label: 'QR Kod',    color: '#5A7A56', icon: '📱' },
+  print:     { label: 'Basılı',    color: '#805AD5', icon: '📰' },
+  direct:    { label: 'Direkt',    color: '#718096', icon: '🌐' },
+  internal:  { label: 'Site içi',  color: '#A0AEC0', icon: '🔗' },
+  referral:  { label: 'Başka Site',color: '#D69E2E', icon: '🌍' }
+};
+
+function _tsChannelInfo(source) {
+  if (TS_CHANNELS[source]) return TS_CHANNELS[source];
+  return { label: source || 'Bilinmiyor', color: '#9F7AEA', icon: '❓' };
+}
+
+function renderTrafficSources(events) {
+  if (!events || !Array.isArray(events)) return;
+  // Sadece pageview eventleri say (aksiyonlar duplicate sayılmasın)
+  var pageviews = events.filter(function(ev) { return ev.type === 'pageview'; });
+  var total = pageviews.length;
+
+  // Source gruplama
+  var sourceCounts = {};
+  var campaignCounts = {};
+  pageviews.forEach(function(ev) {
+    var src = ev.source || 'direct';
+    sourceCounts[src] = (sourceCounts[src] || 0) + 1;
+    if (ev.campaign) {
+      var key = src + ':' + ev.campaign;
+      if (!campaignCounts[key]) campaignCounts[key] = { source: src, campaign: ev.campaign, count: 0 };
+      campaignCounts[key].count++;
+    }
+  });
+
+  var sorted = Object.entries(sourceCounts).map(function(kv) {
+    return { source: kv[0], count: kv[1], pct: total > 0 ? (kv[1] / total * 100) : 0 };
+  }).sort(function(a, b) { return b.count - a.count; });
+
+  // Total text
+  var totalEl = document.getElementById('ts-total');
+  if (totalEl) totalEl.textContent = total + ' sayfa görüntüleme · ' + sorted.length + ' farklı kanal';
+
+  // Pie chart (vanilla canvas)
+  var canvas = document.getElementById('ts-pie');
+  if (canvas && canvas.getContext) {
+    var ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (total === 0) {
+      ctx.fillStyle = '#A0AEC0';
+      ctx.font = '13px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Veri yok', canvas.width / 2, canvas.height / 2);
+    } else {
+      var cx = canvas.width / 2, cy = canvas.height / 2;
+      var radius = Math.min(cx, cy) - 10;
+      var inner = radius * 0.55;
+      var start = -Math.PI / 2;
+      sorted.forEach(function(s) {
+        var info = _tsChannelInfo(s.source);
+        var angle = (s.count / total) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, radius, start, start + angle);
+        ctx.closePath();
+        ctx.fillStyle = info.color;
+        ctx.fill();
+        start += angle;
+      });
+      // Donut hole
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.arc(cx, cy, inner, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalCompositeOperation = 'source-over';
+      // Center text
+      ctx.fillStyle = '#1A2744';
+      ctx.font = 'bold 24px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(total, cx, cy - 8);
+      ctx.font = '11px system-ui, sans-serif';
+      ctx.fillStyle = '#718096';
+      ctx.fillText('ziyaret', cx, cy + 14);
+    }
+  }
+
+  // List — sıralı
+  var listEl = document.getElementById('ts-list');
+  if (listEl) {
+    if (sorted.length === 0) {
+      listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:.82rem">Bu dönemde ziyaret yok.</div>';
+    } else {
+      listEl.innerHTML = sorted.slice(0, 12).map(function(s) {
+        var info = _tsChannelInfo(s.source);
+        return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--card-border)">' +
+          '<span style="width:10px;height:10px;border-radius:50%;background:' + info.color + ';flex-shrink:0"></span>' +
+          '<span style="font-size:1rem">' + info.icon + '</span>' +
+          '<span style="flex:1;font-size:.82rem;font-weight:600;color:var(--text)">' + esc(info.label) + '</span>' +
+          '<span style="font-size:.78rem;color:var(--text-light);font-weight:600;min-width:44px;text-align:right">' + s.count + '</span>' +
+          '<span style="font-size:.7rem;color:var(--text-muted);min-width:42px;text-align:right">' + s.pct.toFixed(1) + '%</span>' +
+          '<div style="flex-shrink:0;width:80px;height:6px;background:var(--cream-dark);border-radius:3px;overflow:hidden"><div style="height:100%;width:' + s.pct.toFixed(1) + '%;background:' + info.color + ';border-radius:3px;transition:width .4s"></div></div>' +
+        '</div>';
+      }).join('');
+    }
+  }
+
+  // En başarılı kampanyalar
+  var campaignEl = document.getElementById('ts-campaigns');
+  if (campaignEl) {
+    var campaigns = Object.values(campaignCounts).sort(function(a, b) { return b.count - a.count; }).slice(0, 6);
+    if (campaigns.length === 0) {
+      campaignEl.innerHTML = '<div style="color:var(--text-muted);font-size:.78rem;padding:10px 0">Henüz utm_campaign parametresiyle gelen ziyaretçi yok. Mini Araçlar → UTM Link Üretici ile kampanya linkleri oluşturabilirsiniz.</div>';
+    } else {
+      campaignEl.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px">' +
+        campaigns.map(function(c) {
+          var info = _tsChannelInfo(c.source);
+          return '<div style="padding:10px 12px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;border-left:3px solid ' + info.color + '">' +
+            '<div style="font-size:.72rem;color:' + info.color + ';font-weight:700;margin-bottom:3px">' + info.icon + ' ' + esc(info.label) + '</div>' +
+            '<div style="font-size:.88rem;font-weight:700;color:var(--navy);margin-bottom:2px">' + esc(c.campaign) + '</div>' +
+            '<div style="font-size:.72rem;color:var(--text-muted)">' + c.count + ' ziyaret</div>' +
+          '</div>';
+        }).join('') +
+      '</div>';
+    }
+  }
 }
 
 // ═══ MİNİ ARAÇLAR ═══
@@ -8775,6 +8938,8 @@ async function renderAnalytics() {
     }
 
     renderDailyBreakdown();
+    // Trafik kaynakları panelini render et (aynı events verisini kullanır)
+    try { renderTrafficSources(events); } catch(e) { console.warn('TS render:', e); }
 
     // Mekan performans listesi (sadece mevcut ve yayinda olanlar)
     const venueList = Object.entries(venueViews).map(([id, views]) => {
