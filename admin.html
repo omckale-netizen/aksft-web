@@ -190,7 +190,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .admin-wrap{display:flex;min-height:100vh}
 
 /* ── SIDEBAR ── */
-.admin-sidebar{width:var(--sidebar-w);background:var(--sidebar-bg);color:#fff;position:fixed;top:0;left:0;bottom:0;z-index:100;display:flex;flex-direction:column;transition:transform .3s ease,background .3s;overflow-y:auto}
+.admin-sidebar{width:var(--sidebar-w);background:var(--sidebar-bg);color:#fff;position:fixed;top:0;left:0;bottom:0;z-index:400;display:flex;flex-direction:column;transition:transform .3s ease,background .3s;overflow-y:auto}
 .admin-logo{padding:28px 24px 8px;font-size:1.15rem;font-weight:800;line-height:1.3}
 .admin-logo small{font-weight:500;font-size:.72rem;color:var(--terra-light);letter-spacing:.5px;text-transform:uppercase}
 .admin-nav{flex:1;padding:20px 12px}
@@ -221,7 +221,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 /* ── HAMBURGER ── */
 .hamburger{display:none;position:fixed;top:14px;left:14px;z-index:200;background:var(--navy);border:none;color:#fff;width:38px;height:38px;border-radius:10px;font-size:1.1rem;cursor:pointer;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.2)}
 [data-theme="dark"] .hamburger{background:var(--card-bg);color:var(--text);border:1px solid var(--card-border)}
-.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:350}
 
 /* ── STATS CARDS ── */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:32px}
@@ -530,6 +530,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
   .admin-sidebar.open{transform:translateX(0)}
   .admin-main{margin-left:0;padding:68px 20px 32px}
   .hamburger{display:flex}
+  body.sidebar-open{overflow:hidden}
   body.sidebar-open .hamburger{display:none}
   .sidebar-overlay.show{display:block}
   .form-row{grid-template-columns:1fr}
