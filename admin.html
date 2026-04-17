@@ -4065,8 +4065,8 @@ async function loadLogoPreview() {
       if (doc.data().aiDailyLimit) { var aiInp = document.getElementById('ai-limit-input'); if (aiInp) aiInp.value = doc.data().aiDailyLimit; }
     }
   } catch(e) {}
-  // Profil bilgilerini doldur
-  const adminName = localStorage.getItem('admin_name') || '';
+  // Profil bilgilerini doldur — users koleksiyonundaki isim öncelikli
+  const adminName = (window._currentUser && window._currentUser.name) || localStorage.getItem('admin_name') || '';
   const nameInput = document.getElementById('settings-name');
   const displayEl = document.getElementById('settings-display-name');
   const avatarEl = document.getElementById('settings-avatar');
@@ -7106,19 +7106,19 @@ function updateDashClock() {
 setInterval(updateDashClock, 10000);
 
 function renderDashboard() {
-  // Hoşgeldin
-  const adminName = localStorage.getItem('admin_name') || '';
+  // Hoşgeldin — users koleksiyonundaki isim öncelikli, sonra localStorage
+  const userName = (window._currentUser && window._currentUser.name) || localStorage.getItem('admin_name') || '';
   const greetEl = document.getElementById('dash-greeting');
   if (greetEl) {
     const hour = getTRDate().getHours();
     const greet = hour >= 6 && hour < 12 ? 'Günaydın' : hour >= 12 && hour < 18 ? 'İyi günler' : 'İyi akşamlar';
-    greetEl.textContent = adminName ? greet + ', ' + adminName + ' 👋' : greet + ' 👋';
+    greetEl.textContent = userName ? greet + ', ' + userName + ' 👋' : greet + ' 👋';
   }
   updateDashClock();
 
   // Settings name input sync
   const nameInput = document.getElementById('settings-name');
-  if (nameInput && adminName) nameInput.value = adminName;
+  if (nameInput && userName) nameInput.value = userName;
 
   const v = draftData.venues || [];
   const r = draftData.routes || [];
