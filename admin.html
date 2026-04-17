@@ -2673,6 +2673,17 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                 <input type="text" id="settings-name" placeholder="Adınızı girin" value="" oninput="updateAdminName(this.value)">
               </div>
               <div style="font-size:.68rem;color:var(--text-muted);margin-top:6px">"Hoş geldiniz" mesajında görünür. Fotoğraf max 1MB olmalı.</div>
+
+              <!-- Gizlilik: Online görünme -->
+              <div style="margin-top:16px;padding-top:14px;border-top:1px dashed rgba(0,0,0,.08)">
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+                  <input type="checkbox" id="presence-toggle" onchange="togglePresenceSetting(this.checked)" style="accent-color:var(--green);width:16px;height:16px;flex-shrink:0">
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:.82rem;font-weight:600;color:var(--navy)">🟢 Online görünür ol</div>
+                    <div style="font-size:.68rem;color:var(--text-muted);line-height:1.4">Kapatınca siz diğerlerine online görünmezsiniz ve diğer kullanıcıların online listesini görmezsiniz.</div>
+                  </div>
+                </label>
+              </div>
             </div>
           </div>
 
@@ -3851,14 +3862,26 @@ async function adminRevokeUserSessions(uid, name) {
 // ═══ PRESENCE (Kim online) ═══
 // Kendi presence doc'una her 60 saniyede heartbeat yazar
 // Sekme kapanınca onbeforeunload ile temizler
+// Kullanıcı localStorage'dan kapatabilir (presence_enabled = 'false')
 var _presenceInterval = null;
 var _presenceListener = null;
 var _allPresence = {};
 var PRESENCE_THRESHOLD = 2 * 60 * 1000; // 2dk
 
+function isPresenceEnabled() {
+  // Default true — sadece kullanıcı kapatmışsa false
+  return localStorage.getItem('presence_enabled') !== 'false';
+}
+
 async function startPresence() {
   var user = window._currentUser;
   if (!user || !user.uid) return;
+  if (!isPresenceEnabled()) {
+    // Özellik kapalı — hiçbir şey yapma
+    var wrap = document.getElementById('sidebar-online-wrap');
+    if (wrap) wrap.style.display = 'none';
+    return;
+  }
   var ref = db.collection('presence').doc(user.uid);
   var heartbeat = async function() {
     try {
@@ -3888,6 +3911,37 @@ async function startPresence() {
     snap.docs.forEach(function(d) { _allPresence[d.id] = d.data(); });
     renderSidebarOnline();
   }, function(err) { console.warn('Presence listener:', err); });
+}
+
+// Presence'ı tamamen durdurur — heartbeat + listener + sidebar temizliği + doc sil
+async function stopPresence() {
+  if (_presenceInterval) { clearInterval(_presenceInterval); _presenceInterval = null; }
+  if (_presenceListener) { try { _presenceListener(); } catch(e) {} _presenceListener = null; }
+  _allPresence = {};
+  var wrap = document.getElementById('sidebar-online-wrap');
+  if (wrap) wrap.style.display = 'none';
+  var user = window._currentUser;
+  if (user && user.uid) {
+    try { await db.collection('presence').doc(user.uid).delete(); } catch(e) {}
+  }
+}
+
+// Ayarlar sayfası açıldığında checkbox durumunu senkronize et
+function syncPresenceToggle() {
+  var cb = document.getElementById('presence-toggle');
+  if (cb) cb.checked = isPresenceEnabled();
+}
+
+// Ayarlar'daki toggle — açık/kapalı
+async function togglePresenceSetting(enabled) {
+  localStorage.setItem('presence_enabled', enabled ? 'true' : 'false');
+  if (enabled) {
+    await startPresence();
+    showToast('🟢 Online görünür modu açık', 'success');
+  } else {
+    await stopPresence();
+    showToast('🔒 Online görünür modu kapalı', 'info');
+  }
 }
 
 function isUserOnline(uid) {
@@ -7044,7 +7098,7 @@ showPage = function(page) {
   _origShowPage(page);
   if (page === 'gallery' && galItems.length === 0) galLoadItems();
   if (page === 'categories') { renderCatList(); renderPlaceCatList(); }
-  if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); loadHeroHistory(); loadOgHistory(); updatePasswordDate(); loadLoginHistory(); }
+  if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); loadHeroHistory(); loadOgHistory(); updatePasswordDate(); loadLoginHistory(); syncPresenceToggle(); }
   if (page === 'security') runSecurityCheck();
   if (page === 'export') { loadBackupList(); updateAutoBackupUI(); }
 };
