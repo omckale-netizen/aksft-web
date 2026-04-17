@@ -1800,7 +1800,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <h2 style="margin:0">Mesajlar</h2>
           <p class="page-sub" style="margin:4px 0 0">İletişim formundan gelen mesajlar ve mail gönderimi.</p>
         </div>
-        <button class="btn btn-primary" onclick="openComposeMail()">✉️ Yeni Mail Gönder</button>
+        <button class="btn btn-primary" data-requires-perm="canSendMail" onclick="openComposeMail()">✉️ Yeni Mail Gönder</button>
       </div>
 
       <!-- Compose Mail Panel -->
@@ -5584,9 +5584,10 @@ function openSentMail(id) {
   var toFirst = (s.to || [])[0] || '';
 
   // Toolbar — gönderilen mail için
+  var canMail = typeof canSendMail === 'function' ? canSendMail() : true;
   document.getElementById('msg-detail-toolbar').innerHTML =
-    '<button class="msg-action-btn" data-tip="Tekrar Gönder" onclick="openComposeMail(\'' + esc(toFirst) + '\')">↩</button>' +
-    '<button class="msg-action-btn" data-tip="İlet" onclick="forwardSentMail(\'' + esc(id) + '\')">➡</button>' +
+    (canMail ? '<button class="msg-action-btn" data-tip="Tekrar Gönder" onclick="openComposeMail(\'' + esc(toFirst) + '\')">↩</button>' +
+               '<button class="msg-action-btn" data-tip="İlet" onclick="forwardSentMail(\'' + esc(id) + '\')">➡</button>' : '') +
     '<button class="msg-action-btn" data-tip="HTML Önizleme" onclick="previewSentMailHtml(\'' + esc(id) + '\')">👁</button>' +
     '<div style="flex:1"></div>' +
     '<button class="msg-action-btn danger" data-tip="Sil" onclick="deleteSentMail(\'' + esc(id) + '\')">🗑</button>' +
@@ -5633,8 +5634,8 @@ function openSentMail(id) {
   document.getElementById('msg-detail-consent').innerHTML = consentHtml;
 
   document.getElementById('msg-detail-actions').innerHTML =
-    '<button class="btn btn-sm btn-secondary" onclick="openComposeMail(\'' + toFirst + '\')">↩ Tekrar Gönder</button>' +
-    '<button class="btn btn-sm btn-secondary" onclick="forwardSentMail(\'' + id + '\')">➡ İlet</button>' +
+    (canMail ? '<button class="btn btn-sm btn-secondary" onclick="openComposeMail(\'' + toFirst + '\')">↩ Tekrar Gönder</button>' +
+               '<button class="btn btn-sm btn-secondary" onclick="forwardSentMail(\'' + id + '\')">➡ İlet</button>' : '') +
     '<button class="btn btn-sm btn-danger" style="margin-left:auto" onclick="deleteSentMail(\'' + id + '\')">🗑 Sil</button>';
 
   if (window.innerWidth <= 900) document.getElementById('msg-close-mobile').style.display = '';
@@ -5697,13 +5698,14 @@ async function openMessage(docId) {
     return '<div class="msg-avatar msg-avatar-lg" style="background:' + color + '">' + esc(init) + '</div>';
   }
 
+  var canMail2 = typeof canSendMail === 'function' ? canSendMail() : true;
   document.getElementById('msg-detail-toolbar').innerHTML = isTrashed
     ? '<button class="msg-action-btn" data-tip="Geri Yükle" onclick="restoreMessage(\'' + esc(docId) + '\')">↩</button>' +
       '<button class="msg-action-btn danger" data-tip="Kalıcı Sil" onclick="permanentDeleteMessage(\'' + esc(docId) + '\')">🗑</button>' +
       '<div style="flex:1"></div>' +
       '<button class="msg-action-btn" data-tip="Kapat" onclick="closeMsgDetail()">✕</button>'
-    : '<button class="msg-action-btn" data-tip="Yanıtla" onclick="openReplyMail(\'' + esc(docId) + '\')">↩</button>' +
-      '<button class="msg-action-btn" data-tip="Yeni Mail" onclick="openComposeMail(\'' + esc(m.email || '') + '\')">✉️</button>' +
+    : (canMail2 ? '<button class="msg-action-btn" data-tip="Yanıtla" onclick="openReplyMail(\'' + esc(docId) + '\')">↩</button>' +
+                  '<button class="msg-action-btn" data-tip="Yeni Mail" onclick="openComposeMail(\'' + esc(m.email || '') + '\')">✉️</button>' : '') +
       (m.phone ? '<a class="msg-action-btn" data-tip="Ara" href="tel:' + esc(m.phone.replace(/\s/g,'')) + '" style="text-decoration:none">📞</a>' : '') +
       '<button class="msg-action-btn" data-tip="Okunmadı İşaretle" onclick="toggleReadStatus(\'' + esc(docId) + '\')">👁</button>' +
       '<button class="msg-action-btn" data-tip="Görev Ekle" onclick="addTodoForMessage(\'' + esc(docId) + '\')">✓</button>' +
@@ -5760,7 +5762,7 @@ async function openMessage(docId) {
   document.getElementById('msg-detail-consent').innerHTML = consentHtml;
 
   // Alt actions — sadece büyük yanıtla butonu (toolbar'da da var ama primary CTA burada)
-  document.getElementById('msg-detail-actions').innerHTML = isTrashed ? '' :
+  document.getElementById('msg-detail-actions').innerHTML = (isTrashed || !canMail2) ? '' :
     '<button class="btn btn-primary" onclick="openReplyMail(\'' + esc(docId) + '\')" style="flex:1">✉️ Yanıtla</button>';
 
   // Mobilde geri butonunu göster
@@ -5786,6 +5788,7 @@ var REPLY_TEMPLATES = {
   hata_bildirim: { label: 'Hata Düzeltildi', body: 'Merhaba {name},\n\nBildirdiğiniz hata düzeltilmiştir. Platformumuzun kalitesini artırmamıza yardımcı olduğunuz için teşekkür ederiz.\n\nBaşka bir sorunla karşılaşırsanız lütfen bize bildirin.' }
 };
 function openReplyMail(docId) {
+  if (typeof canSendMail === 'function' && !canSendMail()) { showToast('Mail gönderme yetkiniz yok.', 'error'); return; }
   var m = allMessages.find(x => x._id === docId);
   if (!m || !m.email) { showToast('E-posta adresi bulunamadı', 'error'); return; }
   var tplOptions = Object.entries(REPLY_TEMPLATES).map(function(e) {
@@ -5817,6 +5820,9 @@ function applyReplyTemplate(key, name) {
   document.getElementById('reply-mail-body').focus();
 }
 async function sendReplyMail(docId) {
+  if (typeof canSendMail === 'function' && !canSendMail()) {
+    showToast('Mail gönderme yetkiniz yok.', 'error'); return;
+  }
   var m = allMessages.find(x => x._id === docId);
   if (!m) return;
   var body = document.getElementById('reply-mail-body').value.trim();
@@ -5859,6 +5865,7 @@ async function sendReplyMail(docId) {
 }
 // ── Yeni Mail Gönder ──
 function openComposeMail(toEmail) {
+  if (typeof canSendMail === 'function' && !canSendMail()) { showToast('Mail gönderme yetkiniz yok.', 'error'); return; }
   var panel = document.getElementById('compose-mail-panel');
   panel.style.display = 'block';
   document.getElementById('compose-to').value = toEmail || '';
@@ -6199,6 +6206,7 @@ function clearComposeMail() {
 }
 
 async function sendComposeMail() {
+  if (typeof canSendMail === 'function' && !canSendMail()) { showToast('Mail gönderme yetkiniz yok.', 'error'); return; }
   var isBulk = document.getElementById('compose-bulk').checked;
   var toRaw = document.getElementById('compose-to').value.trim();
   var subject = document.getElementById('compose-subject').value.trim();
