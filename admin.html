@@ -2159,6 +2159,40 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       </div>
     </div>
 
+    <!-- Admin Şifre Atama Modal (başka kullanıcı için) -->
+    <div id="admin-set-password-overlay" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeAdminSetPasswordModal()">
+      <div style="background:var(--card-bg,#fff);border-radius:16px;max-width:520px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid rgba(0,0,0,.06)">
+          <h3 style="margin:0;font-size:1rem;color:var(--navy)">🔐 Kullanıcı Şifresi Ata</h3>
+          <button onclick="closeAdminSetPasswordModal()" style="border:none;background:none;font-size:1.3rem;cursor:pointer;color:var(--text-muted)">&times;</button>
+        </div>
+        <div style="padding:20px 24px">
+          <div style="padding:12px 14px;background:rgba(229,62,62,.06);border:1px solid rgba(229,62,62,.15);border-radius:8px;margin-bottom:14px;font-size:.78rem;color:#C53030">
+            ⚠️ Bu özellik kullanıcının şifresini <strong>direkt</strong> değiştirir. Yeni şifreyi kullanıcıya güvenli bir şekilde iletin ve ilk girişte değiştirmesini isteyin.
+          </div>
+          <div id="admin-sp-target" style="padding:10px 14px;background:rgba(0,0,0,.02);border-radius:8px;margin-bottom:14px;font-size:.82rem"></div>
+          <input type="hidden" id="admin-sp-uid">
+          <div class="form-group" style="margin-bottom:14px">
+            <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:4px">Yeni Şifre *</label>
+            <div style="display:flex;gap:8px">
+              <input type="text" id="admin-sp-password" placeholder="Min 8 karakter" minlength="8" style="flex:1;padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.9rem;background:var(--input-bg,#fff);color:var(--text);font-family:monospace">
+              <button type="button" class="btn btn-sm btn-secondary" onclick="generateAdminSetPassword()">🎲 Üret</button>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:14px">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.8rem;color:var(--text)">
+              <input type="checkbox" id="admin-sp-copy" checked style="width:16px;height:16px;accent-color:var(--terra);cursor:pointer"> Kaydettikten sonra panoya kopyala
+            </label>
+          </div>
+          <div id="admin-sp-status" style="font-size:.75rem;margin-bottom:10px;min-height:16px"></div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-primary" onclick="submitAdminSetPassword()" style="flex:1">🔐 Şifreyi Değiştir</button>
+            <button class="btn btn-secondary" onclick="closeAdminSetPasswordModal()">İptal</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Şifre Değiştirme Modal -->
     <div id="change-password-overlay" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeChangePasswordModal()">
       <div style="background:var(--card-bg,#fff);border-radius:16px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)">
@@ -10332,6 +10366,7 @@ function renderUsers() {
       '<div class="user-actions">' +
         (isSelf ? '<button class="btn btn-sm btn-secondary" onclick="openChangePasswordModal()" title="Şifremi Değiştir">🔑</button>' : '') +
         (!isSuper ? '<button class="btn btn-sm btn-secondary" onclick="openUserModal(\'' + esc(u.uid) + '\')" title="Düzenle">✏️</button>' : '') +
+        (!isSelf && !isSuper && isCurrentAdmin() ? '<button class="btn btn-sm btn-secondary" onclick="openAdminSetPasswordModal(\'' + esc(u.uid) + '\',\'' + esc(u.email) + '\',\'' + esc(u.name || u.email) + '\')" title="Direkt şifre ata">🔐</button>' : '') +
         (!isSelf && !isSuper && isCurrentAdmin() ? '<button class="btn btn-sm btn-secondary" onclick="sendPasswordReset(\'' + esc(u.email) + '\')" title="Şifre sıfırlama e-postası gönder">📧</button>' : '') +
         (!isSelf && !isSuper ? '<button class="btn btn-sm btn-secondary" onclick="toggleUserActive(\'' + esc(u.uid) + '\')" title="' + (isActive ? 'Pasife Al' : 'Aktifleştir') + '">' + (isActive ? '⏸' : '▶') + '</button>' : '') +
         (!isSelf && !isSuper ? '<button class="btn btn-sm btn-danger" onclick="deleteUser(\'' + esc(u.uid) + '\')" title="Sil">🗑</button>' : '') +
@@ -10469,6 +10504,62 @@ async function toggleUserActive(uid) {
     showToast(newActive ? 'Kullanıcı aktifleştirildi' : 'Kullanıcı pasife alındı', 'success');
     logActivity(newActive ? 'user_activate' : 'user_deactivate', uid, u.name || u.email);
   } catch(e) { showToast('Hata: ' + e.message, 'error'); }
+}
+
+// Admin: başka kullanıcı için direkt şifre atama modalı
+function openAdminSetPasswordModal(uid, email, name) {
+  document.getElementById('admin-sp-uid').value = uid;
+  document.getElementById('admin-sp-target').innerHTML = '<strong>' + esc(name) + '</strong><br><span style="color:var(--text-muted);font-size:.75rem">' + esc(email) + '</span>';
+  document.getElementById('admin-sp-password').value = '';
+  document.getElementById('admin-sp-status').innerHTML = '';
+  document.getElementById('admin-set-password-overlay').style.display = 'flex';
+  setTimeout(function() { document.getElementById('admin-sp-password').focus(); }, 100);
+}
+
+function closeAdminSetPasswordModal() {
+  document.getElementById('admin-set-password-overlay').style.display = 'none';
+}
+
+function generateAdminSetPassword() {
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#';
+  var pw = '';
+  for (var i = 0; i < 12; i++) pw += chars[Math.floor(Math.random() * chars.length)];
+  document.getElementById('admin-sp-password').value = pw;
+}
+
+async function submitAdminSetPassword() {
+  var uid = document.getElementById('admin-sp-uid').value;
+  var password = document.getElementById('admin-sp-password').value;
+  var copyAfter = document.getElementById('admin-sp-copy').checked;
+  var statusEl = document.getElementById('admin-sp-status');
+  statusEl.innerHTML = '';
+
+  if (!uid || !password) { statusEl.innerHTML = '<span style="color:#E53E3E">Şifre gerekli</span>'; return; }
+  if (password.length < 8) { statusEl.innerHTML = '<span style="color:#E53E3E">Şifre en az 8 karakter olmalı</span>'; return; }
+
+  try {
+    statusEl.innerHTML = '<span style="color:var(--text-muted)">Gönderiliyor...</span>';
+    var resp = await fetch('/api/reset-user-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ uid: uid, newPassword: password })
+    });
+    var data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'İstek başarısız');
+
+    statusEl.innerHTML = '<span style="color:var(--green)">✓ Şifre değiştirildi</span>';
+    showToast('Şifre başarıyla atandı', 'success');
+    logActivity('admin_set_password', uid, 'Admin yeni şifre atadı');
+
+    // Panoya kopyala
+    if (copyAfter && navigator.clipboard) {
+      try { await navigator.clipboard.writeText(password); showToast('Şifre panoya kopyalandı', 'success'); } catch(e) {}
+    }
+
+    setTimeout(closeAdminSetPasswordModal, 1500);
+  } catch(e) {
+    statusEl.innerHTML = '<span style="color:#E53E3E">' + esc(e.message || 'Hata oluştu') + '</span>';
+  }
 }
 
 // Şifre değiştirme modalı
