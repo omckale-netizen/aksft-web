@@ -2146,6 +2146,35 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:4px">Not (opsiyonel)</label>
             <input type="text" id="user-notes" placeholder="Hangi amaçla ekleniyor..." style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.85rem;background:var(--input-bg,#fff);color:var(--text);width:100%" maxlength="200">
           </div>
+
+          <!-- Custom Pages & Permissions (sadece editor/viewer için) -->
+          <div id="user-custom-perms" style="display:none;margin-top:6px;padding:16px;background:rgba(49,130,206,.04);border:1px solid rgba(49,130,206,.12);border-radius:10px;margin-bottom:14px">
+            <div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#2B6CB0;margin-bottom:10px">🔐 Özel Yetkiler</div>
+
+            <div style="margin-bottom:14px">
+              <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:8px;display:block">Erişebileceği Sayfalar</label>
+              <div id="user-pages-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px 12px">
+                <!-- Dynamic filled via JS -->
+              </div>
+            </div>
+
+            <div style="border-top:1px solid rgba(0,0,0,.06);padding-top:12px">
+              <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:8px;display:block">Özel Yetkiler (Editor için)</label>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.8rem;color:var(--text)"><input type="checkbox" id="perm-canDelete" style="accent-color:var(--red)"> 🗑 Silme yetkisi (normalde admin-only)</label>
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.8rem;color:var(--text)"><input type="checkbox" id="perm-canManagePremium" style="accent-color:var(--terra)"> ⭐ Premium verme/kaldırma</label>
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.8rem;color:var(--text)"><input type="checkbox" id="perm-canBulkMail" style="accent-color:var(--navy)"> 📨 Toplu mail gönderme</label>
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.8rem;color:var(--text)"><input type="checkbox" id="perm-canExport" style="accent-color:#38A169"> 📦 Yedek/dışa aktarma</label>
+              </div>
+            </div>
+
+            <div style="border-top:1px solid rgba(0,0,0,.06);padding-top:12px;margin-top:12px">
+              <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:8px;display:block">Aktivite Log Görünürlüğü</label>
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.8rem;color:var(--text)"><input type="checkbox" id="perm-viewAllLogs" style="accent-color:var(--navy)"> 👁 Tüm kullanıcıların aktivitelerini görebilir</label>
+              <div style="font-size:.68rem;color:var(--text-muted);margin-top:4px;margin-left:24px">Kapalıysa: sadece kendi yaptığı işlemleri görür</div>
+            </div>
+          </div>
+
           <div class="form-group" style="margin-bottom:14px">
             <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.82rem;font-weight:600;color:var(--text)">
               <input type="checkbox" id="user-active" checked style="width:16px;height:16px;accent-color:var(--green);cursor:pointer"> Aktif (giriş yapabilir)
@@ -4407,45 +4436,63 @@ function isCurrentAdmin() { return currentRole() === 'admin'; }
 function isCurrentEditor() { var r = currentRole(); return r === 'admin' || r === 'editor'; }
 function isCurrentViewer() { var r = currentRole(); return r === 'admin' || r === 'editor' || r === 'viewer'; }
 
-// Sadece belirli rollerin erişebileceği sayfalar
-var ROLE_PAGES = {
-  admin: ['users','settings','security','export','ai'], // sadece admin
-  editor: [] // ek kısıt yok; viewer'ın erişemediği herşey
-};
+// Admin-only sayfalar (her zaman sadece admin)
+var ADMIN_ONLY_PAGES = ['users','settings','security','ai'];
+
 function canAccessPage(page) {
   if (!window._currentUser) return false;
   var role = currentRole();
-  // Admin-only sayfalar
-  if (ROLE_PAGES.admin.indexOf(page) > -1) return role === 'admin';
-  // Viewer sadece okuma — listeleme sayfaları OK, action olanlar hayır
-  if (role === 'viewer') {
-    // Viewer erişemeyeceği sayfalar (sadece yazma odaklı)
-    var viewerBlocked = ['export','security','users','settings','ai','todos'];
-    return viewerBlocked.indexOf(page) === -1;
+  if (role === 'admin') return true;
+  // Admin-only sayfalar her koşulda kapalı
+  if (ADMIN_ONLY_PAGES.indexOf(page) > -1) return false;
+  // Custom allowedPages varsa onu kullan
+  if (Array.isArray(window._currentUser.allowedPages) && window._currentUser.allowedPages.length > 0) {
+    return window._currentUser.allowedPages.indexOf(page) > -1;
   }
-  return true; // editor + admin her sayfaya girer
+  // Yoksa default davranış (editor tümü, viewer okuma odaklı)
+  if (role === 'viewer') {
+    return ['export','security','users','settings','ai','todos'].indexOf(page) === -1;
+  }
+  return true;
 }
 
 function canEditContent() { return isCurrentEditor(); }
-function canDeleteContent() { return isCurrentAdmin(); }
+function canDeleteContent() {
+  if (isCurrentAdmin()) return true;
+  var perms = (window._currentUser && window._currentUser.permissions) || {};
+  return !!perms.canDelete;
+}
+function canManagePremium() {
+  if (isCurrentAdmin()) return true;
+  var perms = (window._currentUser && window._currentUser.permissions) || {};
+  return !!perms.canManagePremium;
+}
+function canBulkMail() {
+  if (isCurrentAdmin()) return true;
+  var perms = (window._currentUser && window._currentUser.permissions) || {};
+  return !!perms.canBulkMail;
+}
+function canExport() {
+  if (isCurrentAdmin()) return true;
+  var perms = (window._currentUser && window._currentUser.permissions) || {};
+  return !!perms.canExport;
+}
+function canViewAllLogs() {
+  if (isCurrentAdmin()) return true;
+  var perms = (window._currentUser && window._currentUser.permissions) || {};
+  return !!perms.viewAllLogs;
+}
 function canManageUsers() { return isCurrentAdmin(); }
 
-// Rol bazlı UI güncelleme — sidebar, butonlar, menüler
+// Rol ve yetki bazlı UI güncelleme — sidebar, butonlar, menüler
 function applyRoleBasedUI() {
   if (!window._currentUser) return;
   var role = currentRole();
-  // Sidebar — admin-only sayfaları gizle
-  ROLE_PAGES.admin.forEach(function(page) {
-    var el = document.querySelector('.admin-nav-item[data-page="' + page + '"]');
-    if (el) el.style.display = (role === 'admin') ? '' : 'none';
+  // Tüm sidebar item'larını kontrol et
+  document.querySelectorAll('.admin-nav-item[data-page]').forEach(function(el) {
+    var page = el.getAttribute('data-page');
+    el.style.display = canAccessPage(page) ? '' : 'none';
   });
-  // Viewer için daha fazla kısıt
-  if (role === 'viewer') {
-    ['export','security','users','settings','ai','todos'].forEach(function(page) {
-      var el = document.querySelector('.admin-nav-item[data-page="' + page + '"]');
-      if (el) el.style.display = 'none';
-    });
-  }
   // Kullanıcı adını bir yerde göster (varsa)
   var userLabel = document.getElementById('admin-user-label');
   if (userLabel) userLabel.textContent = window._currentUser.name + ' · ' + role;
@@ -10348,6 +10395,19 @@ function renderUsers() {
     var isSelf = window._currentUser && u.uid === window._currentUser.uid;
     var isSuper = u.email === SUPER_ADMIN_EMAIL;
     var lastLogin = u.lastLogin ? new Date(u.lastLogin).toLocaleDateString('tr-TR', {day:'numeric',month:'short',year:'numeric'}) : '—';
+    // Yetki özeti (sadece editor/viewer için)
+    var permsInfo = '';
+    if (u.role !== 'admin' && !isSuper) {
+      var pages = Array.isArray(u.allowedPages) ? u.allowedPages.length : 'default';
+      var p = u.permissions || {};
+      var extras = [];
+      if (p.canDelete) extras.push('🗑 Silme');
+      if (p.canManagePremium) extras.push('⭐ Premium');
+      if (p.canBulkMail) extras.push('📨 Toplu mail');
+      if (p.canExport) extras.push('📦 Export');
+      if (p.viewAllLogs) extras.push('👁 Tüm loglar');
+      permsInfo = '<span>📄 ' + pages + ' sayfa</span>' + (extras.length > 0 ? '<span>' + extras.join(' · ') + '</span>' : '');
+    }
     return '<div class="user-card' + (isActive ? '' : ' inactive') + '">' +
       '<div class="user-avatar">' + esc(initials) + '</div>' +
       '<div class="user-info">' +
@@ -10360,6 +10420,7 @@ function renderUsers() {
         '<div class="user-email">' + esc(u.email || '') + '</div>' +
         '<div class="user-meta">' +
           '<span>📅 Son giriş: ' + lastLogin + '</span>' +
+          permsInfo +
           (u.notes ? '<span>📝 ' + esc(u.notes) + '</span>' : '') +
         '</div>' +
       '</div>' +
@@ -10386,13 +10447,70 @@ function generateUserPassword() {
 // Rol açıklamaları
 var USER_ROLE_DESCRIPTIONS = {
   admin: '👑 Tam yetki: Kullanıcı yönetimi, ayarlar, silme, AI limit, güvenlik dahil her şey.',
-  editor: '✏️ İçerik yönetimi: Mekan/blog/rota CRUD, mesaj yanıtla, mekan talebi onayla. Silme ve ayarlar yetkisi YOK.',
+  editor: '✏️ İçerik yönetimi: Mekan/blog/rota CRUD, mesaj yanıtla, mekan talebi onayla. Varsayılan olarak silme yok, ama özel yetki verilebilir.',
   viewer: '👁 Sadece okuma: İçerikleri ve istatistikleri görüntüleyebilir. Düzenleme yapamaz.'
 };
+
+// Admin panelinde mevcut sayfalar (key, label, icon, adminOnly?)
+var ALL_ADMIN_PAGES = [
+  { key: 'dashboard', label: 'Dashboard', icon: '📊', default: true },
+  { key: 'venues', label: 'Mekanlar', icon: '🏪', default: true },
+  { key: 'pending', label: 'Mekan Talepleri', icon: '📋', default: true },
+  { key: 'routes', label: 'Rotalar', icon: '🗺', default: true },
+  { key: 'villages', label: 'Yerleşimler & Yerler', icon: '🏘', default: true },
+  { key: 'categories', label: 'Kategoriler', icon: '📂', default: false },
+  { key: 'imgcompress', label: 'Görsel Sıkıştır', icon: '🖼', default: true },
+  { key: 'socialgen', label: 'Sosyal Medya', icon: '📱', default: true },
+  { key: 'fileconvert', label: 'Dosya Dönüştür', icon: '🔄', default: true },
+  { key: 'messages', label: 'Mesajlar & Mail', icon: '✉️', default: true },
+  { key: 'analytics', label: 'İstatistikler', icon: '📈', default: true },
+  { key: 'gallery', label: 'Galeri', icon: '🖼', default: true },
+  { key: 'blog', label: 'Blog', icon: '✍️', default: true },
+  { key: 'todos', label: 'Görevlerim', icon: '✓', default: true },
+  { key: 'activity', label: 'Aktivite Logu', icon: '📋', default: true },
+  { key: 'users', label: 'Kullanıcılar', icon: '👥', default: false, adminOnly: true },
+  { key: 'export', label: 'Yedekleme', icon: '📦', default: false, adminOnly: true },
+  { key: 'security', label: 'Güvenlik', icon: '🔐', default: false, adminOnly: true },
+  { key: 'settings', label: 'Ayarlar', icon: '⚙️', default: false, adminOnly: true }
+];
+
+// Default allowed pages for editor role
+function defaultEditorPages() {
+  return ALL_ADMIN_PAGES.filter(function(p) { return p.default && !p.adminOnly; }).map(function(p) { return p.key; });
+}
+// Default allowed pages for viewer role (sadece okuma odaklı)
+function defaultViewerPages() {
+  return ['dashboard','venues','pending','routes','villages','analytics','activity','blog'];
+}
+
+// Pages grid'i doldur
+function renderUserPagesGrid(selected) {
+  var grid = document.getElementById('user-pages-grid');
+  if (!grid) return;
+  var role = document.getElementById('user-role').value;
+  var list = ALL_ADMIN_PAGES.filter(function(p) {
+    // Viewer rolünde adminOnly sayfalar ve bazı düzenleme sayfaları gizlensin
+    if (role === 'viewer' && p.adminOnly) return false;
+    if (role === 'viewer' && ['todos','export','security','settings','users'].indexOf(p.key) > -1) return false;
+    // Editor rolünde sadece adminOnly hariç
+    if (role === 'editor' && p.adminOnly) return false;
+    return true;
+  });
+  grid.innerHTML = list.map(function(p) {
+    var isChecked = selected ? selected.indexOf(p.key) > -1 : (p.default && role === 'editor') || (role === 'viewer' && defaultViewerPages().indexOf(p.key) > -1);
+    return '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.78rem;color:var(--text);padding:4px 0"><input type="checkbox" class="user-page-cb" data-page="' + p.key + '"' + (isChecked ? ' checked' : '') + ' style="accent-color:var(--terra);cursor:pointer">' + p.icon + ' ' + p.label + '</label>';
+  }).join('');
+}
 document.addEventListener('change', function(e) {
   if (e.target && e.target.id === 'user-role') {
+    var role = e.target.value;
     var el = document.getElementById('user-role-desc');
-    if (el) el.textContent = USER_ROLE_DESCRIPTIONS[e.target.value] || '';
+    if (el) el.textContent = USER_ROLE_DESCRIPTIONS[role] || '';
+    // Custom perms bölümünü admin için gizle (admin'e zaten tam yetki)
+    var customWrap = document.getElementById('user-custom-perms');
+    if (customWrap) customWrap.style.display = role === 'admin' ? 'none' : '';
+    // Pages grid'i rol değişiminde yeniden render et
+    renderUserPagesGrid();
   }
 });
 
@@ -10410,6 +10528,15 @@ function openUserModal(uid) {
   document.querySelector('.user-email-hint').style.display = 'none';
   document.getElementById('user-modal-title').textContent = '👤 Yeni Kullanıcı';
   document.getElementById('user-role-desc').textContent = USER_ROLE_DESCRIPTIONS.editor;
+  document.getElementById('user-custom-perms').style.display = ''; // Varsayılan editor için göster
+  // Permission checkbox'ları sıfırla (yeni kullanıcı için default off)
+  document.getElementById('perm-canDelete').checked = false;
+  document.getElementById('perm-canManagePremium').checked = false;
+  document.getElementById('perm-canBulkMail').checked = false;
+  document.getElementById('perm-canExport').checked = false;
+  document.getElementById('perm-viewAllLogs').checked = false;
+  // Pages grid
+  renderUserPagesGrid(); // default seçili
 
   if (uid) {
     var u = _allUsers.find(function(x) { return x.uid === uid; });
@@ -10426,6 +10553,17 @@ function openUserModal(uid) {
     document.getElementById('user-password-wrap').style.display = 'none';
     document.querySelector('.user-email-hint').style.display = '';
     document.getElementById('user-role-desc').textContent = USER_ROLE_DESCRIPTIONS[u.role] || '';
+    // Admin için custom perms gizli
+    document.getElementById('user-custom-perms').style.display = u.role === 'admin' ? 'none' : '';
+    // Permission değerlerini set et
+    var perms = u.permissions || {};
+    document.getElementById('perm-canDelete').checked = !!perms.canDelete;
+    document.getElementById('perm-canManagePremium').checked = !!perms.canManagePremium;
+    document.getElementById('perm-canBulkMail').checked = !!perms.canBulkMail;
+    document.getElementById('perm-canExport').checked = !!perms.canExport;
+    document.getElementById('perm-viewAllLogs').checked = !!perms.viewAllLogs;
+    // Allowed pages
+    renderUserPagesGrid(u.allowedPages || null);
   }
   setTimeout(function() { document.getElementById('user-name').focus(); }, 100);
 }
@@ -10447,11 +10585,29 @@ async function saveUser() {
     showToast('Geçerli bir e-posta girin', 'error'); return;
   }
 
+  // Allowed pages ve permissions'ı topla (admin için null/varsayılan)
+  var allowedPages = [];
+  var permissions = {};
+  if (role !== 'admin') {
+    document.querySelectorAll('.user-page-cb:checked').forEach(function(cb) {
+      allowedPages.push(cb.getAttribute('data-page'));
+    });
+    permissions = {
+      canDelete: document.getElementById('perm-canDelete').checked,
+      canManagePremium: document.getElementById('perm-canManagePremium').checked,
+      canBulkMail: document.getElementById('perm-canBulkMail').checked,
+      canExport: document.getElementById('perm-canExport').checked,
+      viewAllLogs: document.getElementById('perm-viewAllLogs').checked
+    };
+  }
+
   try {
     if (editUid) {
       // Düzenleme — sadece Firestore belgesi güncelle
       await db.collection('users').doc(editUid).update({
         name: name, role: role, notes: notes, active: active,
+        allowedPages: allowedPages,
+        permissions: permissions,
         updatedAt: new Date().toISOString(),
         updatedBy: window._currentUser.email
       });
@@ -10479,6 +10635,8 @@ async function saveUser() {
 
       await db.collection('users').doc(newUid).set({
         email: email, name: name, role: role, notes: notes, active: active,
+        allowedPages: allowedPages,
+        permissions: permissions,
         createdAt: new Date().toISOString(),
         createdBy: window._currentUser.email
       });
@@ -10610,11 +10768,19 @@ async function submitChangePassword() {
 }
 
 // Admin başka kullanıcıya şifre sıfırlama e-postası gönder
+// /api/forgot-password endpoint'i: kayıt kontrolü + rate limit ile güvenli gönderim
 async function sendPasswordReset(email) {
   if (!confirm(email + ' adresine şifre sıfırlama linki gönderilsin mi?')) return;
   try {
-    await fbAuth.sendPasswordResetEmail(email);
-    showToast('Sıfırlama e-postası gönderildi', 'success');
+    var resp = await fetch('/api/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email })
+    });
+    var data = await resp.json();
+    if (resp.status === 429) { showToast(data.error || 'Çok fazla istek', 'error'); return; }
+    if (!resp.ok) throw new Error(data.error || 'Hata');
+    showToast('Sıfırlama e-postası gönderildi (kayıtlıysa)', 'success');
     logActivity('password_reset_sent', email, email);
   } catch(e) {
     showToast('Hata: ' + (e.message || e.code), 'error');
@@ -11240,6 +11406,12 @@ async function renderActivityLog() {
     let query = db.collection('activity_logs').orderBy('timestamp', 'desc').limit(200);
     const snap = await query.get();
     let logs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // Yetki filtresi: canViewAllLogs yoksa sadece kendi yaptığı işlemler
+    if (!canViewAllLogs()) {
+      var myEmail = window._currentUser && window._currentUser.email;
+      logs = logs.filter(function(l) { return l.user === myEmail; });
+    }
 
     if (filter === 'sil') {
       logs = logs.filter(l => l.action && l.action.includes('sil'));

@@ -156,18 +156,26 @@ async function forgotPassword() {
     return;
   }
   try {
-    await fbAuth.sendPasswordResetEmail(email);
+    errEl.style.color = '#A0AEC0';
+    errEl.textContent = 'Gönderiliyor...';
+    var resp = await fetch('/api/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email })
+    });
+    var data = await resp.json();
+    if (resp.status === 429) {
+      errEl.style.color = '#E53E3E';
+      errEl.textContent = data.error || 'Çok fazla istek. Lütfen 5 dakika sonra tekrar deneyin.';
+      return;
+    }
+    if (!resp.ok) throw new Error(data.error || 'Hata');
+    // Güvenlik: kayıtlı olsun olmasın aynı mesaj (user enumeration önleme)
     errEl.style.color = '#38A169';
-    errEl.textContent = '✓ Sıfırlama linki ' + email + ' adresine gönderildi. E-postanızı kontrol edin.';
+    errEl.textContent = '✓ Eğer bu e-posta sistemde kayıtlıysa, sıfırlama linki gönderildi. E-postanızı kontrol edin.';
   } catch(err) {
     errEl.style.color = '#E53E3E';
-    if (err.code === 'auth/user-not-found') {
-      errEl.textContent = 'Bu e-posta ile kayıtlı hesap bulunamadı.';
-    } else if (err.code === 'auth/too-many-requests') {
-      errEl.textContent = 'Çok fazla istek. Lütfen biraz bekleyin.';
-    } else {
-      errEl.textContent = 'Bir hata oluştu: ' + (err.message || err.code);
-    }
+    errEl.textContent = 'Bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
   }
 }
 
