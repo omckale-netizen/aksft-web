@@ -24,29 +24,32 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ error: 'Geçerli bir e-posta girin' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
   }
 
-  // Debug modu: ?debug=1 query parametresi varsa detaylı hata döner
+  // Debug modu: ?debug=1 query parametresi varsa detaylı hata döner + rate limit bypass (sadece gate cookie'si olan admin)
   const url = new URL(request.url);
   const debug = url.searchParams.get('debug') === '1';
+  const cookies = request.headers.get('Cookie') || '';
+  const hasAdminGate = env.ADMIN_GATE_KEY && cookies.includes('admin_gate=' + env.ADMIN_GATE_KEY);
+  const bypassRateLimit = debug && hasAdminGate;
   const steps = [];
 
-  // IP bazlı rate limit — 5 dk'da max 3 istek
+  // IP bazlı rate limit — 5 dk'da max 5 istek
   const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
-  if (env.CHAT_KV) {
+  if (env.CHAT_KV && !bypassRateLimit) {
     try {
       const winKey = 'forgot_ip_' + ip + '_' + Math.floor(Date.now() / 300000); // 5 dk pencere
       const count = parseInt(await env.CHAT_KV.get(winKey) || '0');
-      if (count >= 3) {
+      if (count >= 5) {
         return new Response(JSON.stringify({ error: 'Çok fazla istek. Lütfen 5 dakika sonra tekrar deneyin.' }), { status: 429, headers: { 'Content-Type': 'application/json' } });
       }
       await env.CHAT_KV.put(winKey, String(count + 1), { expirationTtl: 300 });
 
-      // E-posta bazlı rate limit — aynı e-postaya günlük max 3
+      // E-posta bazlı rate limit — aynı e-postaya günlük max 10
       const emailHash = await sha256(email);
       const dayKey = 'forgot_email_' + emailHash + '_' + new Date().toISOString().split('T')[0];
       const emailCount = parseInt(await env.CHAT_KV.get(dayKey) || '0');
-      if (emailCount >= 3) {
+      if (emailCount >= 10) {
         if (debug) {
-          return new Response(JSON.stringify({ error: 'Email rate limit (günlük 3)', emailCount, dayKey }), { status: 429, headers: { 'Content-Type': 'application/json' } });
+          return new Response(JSON.stringify({ error: 'Email rate limit (günlük 10)', emailCount, dayKey }), { status: 429, headers: { 'Content-Type': 'application/json' } });
         }
         // Sessizce başarılı yanıt dön — saldırgan rate limit var anlayamasın
         return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
@@ -54,6 +57,8 @@ export async function onRequestPost(context) {
       await env.CHAT_KV.put(dayKey, String(emailCount + 1), { expirationTtl: 86400 });
       steps.push({ step: 'rateLimit', ipCount: count + 1, emailCount: emailCount + 1 });
     } catch(e) { steps.push({ step: 'rateLimit', error: e.message }); }
+  } else if (bypassRateLimit) {
+    steps.push({ step: 'rateLimit', bypassed: true, reason: 'debug + admin gate' });
   }
 
   try {
