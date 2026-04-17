@@ -5344,9 +5344,14 @@ async function permanentDeletePendingVenue(id) {
 
 async function renderMessages() {
   try {
+    // Admin sent_mails'in hepsini okur; editor sadece KENDİ gönderdiklerini (firestore rules)
+    var myEmail = (window._currentUser && window._currentUser.email) || '';
+    var sentQuery = isCurrentAdmin()
+      ? db.collection('sent_mails').orderBy('timestamp', 'desc').limit(100)
+      : db.collection('sent_mails').where('user', '==', myEmail).orderBy('timestamp', 'desc').limit(100);
     const [msgSnap, sentSnap] = await Promise.all([
       db.collection('messages').orderBy('timestamp', 'desc').limit(200).get(),
-      db.collection('sent_mails').orderBy('timestamp', 'desc').limit(100).get()
+      sentQuery.get()
     ]);
     allMessages = msgSnap.docs.map(d => ({ _id: d.id, ...d.data() }));
     allSentMails = sentSnap.docs.map(d => ({ _id: d.id, ...d.data() }));
@@ -11017,24 +11022,62 @@ async function deleteUser(uid) {
 var _allTodos = [];
 var _todosListener = null;
 
+var _todoSubUnsubs = [];
 function startTodosListener() {
-  if (_todosListener) return; // zaten dinleniyor
-  _todosListener = db.collection('admin_todos').orderBy('createdAt', 'desc').onSnapshot(function(snap) {
-    _allTodos = snap.docs.map(function(d) { return { _id: d.id, ...d.data() }; });
+  if (_todosListener || _todoSubUnsubs.length) return; // zaten dinleniyor
+
+  var onUpdate = function() {
     updateTodoBadge();
-    // Aktif sayfa todo sayfasıysa render et
     if (document.getElementById('page-todos') && document.getElementById('page-todos').classList.contains('active')) {
       renderTodos();
     }
-    // Dashboard widget varsa güncelle
     renderDashboardTodoWidget();
-    // Editor dashboard varsa yeni görev + haftalık takvim güncellensin
     try { if (!isCurrentAdmin()) { renderEditorNewTaskAlert(); renderEditorWeekCalendar(); } } catch(e) {}
-    // Bildirim rozeti de güncellensin (yeni atanan görev)
-    if (typeof initNotifBadge === 'function') {
-      try { initNotifBadge(); } catch(e) {}
-    }
-  }, function(err) { console.warn('Todo listener error:', err); });
+    if (typeof initNotifBadge === 'function') { try { initNotifBadge(); } catch(e) {} }
+  };
+  var onError = function(err) { console.warn('Todo listener error:', err); };
+
+  // Admin hepsini görür — tek sorgu yeter
+  if (isCurrentAdmin()) {
+    _todosListener = db.collection('admin_todos').orderBy('createdAt', 'desc').onSnapshot(function(snap) {
+      _allTodos = snap.docs.map(function(d) { return { _id: d.id, ...d.data() }; });
+      onUpdate();
+    }, onError);
+    return;
+  }
+
+  // Non-admin: firestore rules her doc için ayrı değerlendirir,
+  // tek sorgu tüm collection'ı taramaya çalışırsa reddedilir.
+  // Bu yüzden 3 ayrı filtre ile okuyoruz: atanmış | oluşturan | atanmamış
+  var myUid = (window._currentUser && window._currentUser.uid) || '';
+  var myEmail = (window._currentUser && window._currentUser.email) || '';
+  var byAssigned = {}, byCreated = {}, byNull = {};
+  var mergeAndEmit = function() {
+    var map = {};
+    Object.values(byAssigned).forEach(function(t) { map[t._id] = t; });
+    Object.values(byCreated).forEach(function(t) { map[t._id] = t; });
+    Object.values(byNull).forEach(function(t) { map[t._id] = t; });
+    _allTodos = Object.values(map).sort(function(a, b) { return (b.createdAt || '').localeCompare(a.createdAt || ''); });
+    onUpdate();
+  };
+
+  if (myUid) {
+    _todoSubUnsubs.push(db.collection('admin_todos').where('assignedTo', '==', myUid).onSnapshot(function(snap) {
+      byAssigned = {}; snap.docs.forEach(function(d) { byAssigned[d.id] = { _id: d.id, ...d.data() }; });
+      mergeAndEmit();
+    }, onError));
+  }
+  if (myEmail) {
+    _todoSubUnsubs.push(db.collection('admin_todos').where('createdBy', '==', myEmail).onSnapshot(function(snap) {
+      byCreated = {}; snap.docs.forEach(function(d) { byCreated[d.id] = { _id: d.id, ...d.data() }; });
+      mergeAndEmit();
+    }, onError));
+  }
+  // Atanmamış (genel) görevler
+  _todoSubUnsubs.push(db.collection('admin_todos').where('assignedTo', '==', null).onSnapshot(function(snap) {
+    byNull = {}; snap.docs.forEach(function(d) { byNull[d.id] = { _id: d.id, ...d.data() }; });
+    mergeAndEmit();
+  }, onError));
 }
 
 // Mevcut kullanıcının görebileceği görevleri filtrele
@@ -11812,15 +11855,17 @@ async function renderActivityLog() {
   try {
     const filter = document.getElementById('activity-filter')?.value || 'all';
     const search = (document.getElementById('activity-search')?.value || '').toLowerCase().trim();
-    let query = db.collection('activity_logs').orderBy('timestamp', 'desc').limit(200);
+    // Firestore rules: admin tümünü, editor/viewer sadece kendi aksiyonlarını okuyabilir.
+    // Non-admin için sorguyu server-side filtrelemeliyiz yoksa query komple reddedilir.
+    var myEmail = (window._currentUser && window._currentUser.email) || '';
+    var query;
+    if (isCurrentAdmin()) {
+      query = db.collection('activity_logs').orderBy('timestamp', 'desc').limit(200);
+    } else {
+      query = db.collection('activity_logs').where('user', '==', myEmail).orderBy('timestamp', 'desc').limit(200);
+    }
     const snap = await query.get();
     let logs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-    // Yetki filtresi: canViewAllLogs yoksa sadece kendi yaptığı işlemler
-    if (!canViewAllLogs()) {
-      var myEmail = window._currentUser && window._currentUser.email;
-      logs = logs.filter(function(l) { return l.user === myEmail; });
-    }
 
     if (filter === 'sil') {
       logs = logs.filter(l => l.action && l.action.includes('sil'));
