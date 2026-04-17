@@ -59,7 +59,8 @@
     .ara-card{display:block;background:#fff;border-radius:16px;overflow:hidden;border:1px solid rgba(26,39,68,.06);text-decoration:none;color:inherit;transition:transform .25s cubic-bezier(.16,1,.3,1),box-shadow .25s;cursor:pointer;}
     .ara-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(26,39,68,.1);}
     .ara-card-img{position:relative;aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;overflow:hidden;}
-    .ara-card-img::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08) 50%,transparent);background-size:200% 100%;animation:araShimmer 1.8s infinite ease-in-out;pointer-events:none;z-index:0;}
+    /* Shimmer sadece görseli olan ve henüz yüklenmemiş kartlarda — emoji-only kartlarda efekt yok */
+    .ara-card-img.has-img:not(.is-loaded)::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08) 50%,transparent);background-size:200% 100%;animation:araShimmer 1.8s infinite ease-in-out;pointer-events:none;z-index:0;}
     .ara-card-img img{width:100%;height:100%;object-fit:cover;position:relative;z-index:1;opacity:0;transition:opacity .5s ease;}
     .ara-card-img img.loaded{opacity:1;}
     @keyframes araShimmer{0%{background-position:-100% 0;}100%{background-position:200% 0;}}
@@ -313,8 +314,8 @@
             statusHtml = '<span class="ara-card-status" style="background:' + it.status.bg + ';color:' + it.status.color + ';border:1px solid ' + it.status.color + '66"><span class="ara-status-dot" style="background:' + it.status.color + '"></span>' + escHtml(it.status.label) + '</span>';
           }
           html += '<a class="ara-card" href="/' + detailPath[t] + '?id=' + encodeURIComponent(it.id) + '">' +
-            '<div class="ara-card-img" style="background:linear-gradient(135deg,#243255,#1A2744)">' +
-              (it.image ? '<img src="' + escAttr(it.image) + '" alt="' + escAttr(it.title) + '" loading="lazy" onload="this.classList.add(\'loaded\')">' : '<span class="ara-card-emoji">' + it.emoji + '</span>') +
+            '<div class="ara-card-img' + (it.image ? ' has-img' : '') + '" style="background:linear-gradient(135deg,#243255,#1A2744)">' +
+              (it.image ? '<img src="' + escAttr(it.image) + '" alt="' + escAttr(it.title) + '" loading="lazy" onload="this.classList.add(\'loaded\');this.parentElement.classList.add(\'is-loaded\')">' : '<span class="ara-card-emoji">' + it.emoji + '</span>') +
               catHtml +
               statusHtml +
             '</div>' +
@@ -329,7 +330,10 @@
       wrap.innerHTML = html;
       // Cache'ten anında gelen görseller için fallback — onload tetiklenmeyebilir
       wrap.querySelectorAll('.ara-card-img img').forEach(function(img) {
-        if (img.complete && img.naturalHeight > 0) img.classList.add('loaded');
+        if (img.complete && img.naturalHeight > 0) {
+          img.classList.add('loaded');
+          if (img.parentElement) img.parentElement.classList.add('is-loaded');
+        }
       });
     }
 
