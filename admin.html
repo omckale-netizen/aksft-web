@@ -2600,7 +2600,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
     <div class="admin-page" id="page-settings">
       <h2>Ayarlar</h2>
-      <p class="page-sub">Profil, site görselleri ve güvenlik ayarları.</p>
+      <p class="page-sub">Profil, şifre ve hesap ayarları.</p>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
 
@@ -2634,8 +2634,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             </div>
           </div>
 
-          <!-- Logo + Favicon yan yana -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <!-- Logo + Favicon yan yana (admin-only) -->
+          <div data-admin-only style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
             <div class="panel-card">
               <div class="panel-card-head"><h3>🖼 Logo</h3></div>
               <div style="padding:16px">
@@ -2665,8 +2665,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             </div>
           </div>
 
-          <!-- OG Image -->
-          <div class="panel-card">
+          <!-- OG Image (admin-only) -->
+          <div class="panel-card" data-admin-only>
             <div class="panel-card-head"><h3>🌐 Sosyal Medya Görseli (OG Image)</h3></div>
             <div style="padding:20px">
               <div id="og-preview" style="margin-bottom:14px;border-radius:10px;overflow:hidden;background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.08)">
@@ -2700,8 +2700,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             </div>
           </div>
 
-          <!-- Anasayfa Hero Görseli -->
-          <div class="panel-card">
+          <!-- Anasayfa Hero Görseli (admin-only) -->
+          <div class="panel-card" data-admin-only>
             <div class="panel-card-head"><h3>🏞 Anasayfa Hero Görseli</h3></div>
             <div style="padding:20px">
               <div id="hero-img-preview" style="margin-bottom:10px;border-radius:10px;overflow:hidden;background:linear-gradient(160deg,#0D1829,#1A2744);aspect-ratio:21/9;position:relative">
@@ -2798,8 +2798,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             </div>
           </div>
 
-          <!-- AI Chatbot Ayarları -->
-          <div class="panel-card" style="margin-bottom:20px">
+          <!-- AI Chatbot Ayarları (admin-only) -->
+          <div class="panel-card" data-admin-only style="margin-bottom:20px">
             <div class="panel-card-head"><h3>🤖 AI Chatbot</h3></div>
             <div style="padding:20px">
               <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
@@ -2812,8 +2812,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             </div>
           </div>
 
-          <!-- AI İçerik Durumu -->
-          <div class="panel-card" style="margin-bottom:20px">
+          <!-- AI İçerik Durumu (admin-only) -->
+          <div class="panel-card" data-admin-only style="margin-bottom:20px">
             <div class="panel-card-head"><h3>📄 AI İçerik Dosyası</h3></div>
             <div style="padding:20px">
               <div style="display:flex;flex-direction:column;gap:12px">
@@ -2833,8 +2833,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             </div>
           </div>
 
-          <!-- API & Servisler -->
-          <div class="panel-card">
+          <!-- API & Servisler (admin-only) -->
+          <div class="panel-card" data-admin-only>
             <div class="panel-card-head"><h3>🔗 API & Servisler</h3></div>
             <div style="padding:20px">
               <div style="display:flex;flex-direction:column;gap:10px">
@@ -4646,7 +4646,7 @@ function isCurrentEditor() { var r = currentRole(); return r === 'admin' || r ==
 function isCurrentViewer() { var r = currentRole(); return r === 'admin' || r === 'editor' || r === 'viewer'; }
 
 // Admin-only sayfalar (her zaman sadece admin)
-var ADMIN_ONLY_PAGES = ['users','settings','security','ai','export'];
+var ADMIN_ONLY_PAGES = ['users','security','ai','export'];
 
 function canAccessPage(page) {
   if (!window._currentUser) return false;
@@ -10805,7 +10805,7 @@ var ALL_ADMIN_PAGES = [
   { key: 'users', label: 'Kullanıcılar', icon: '👥', default: false, adminOnly: true },
   { key: 'export', label: 'Yedekleme', icon: '📦', default: false, adminOnly: true },
   { key: 'security', label: 'Güvenlik', icon: '🔐', default: false, adminOnly: true },
-  { key: 'settings', label: 'Ayarlar', icon: '⚙️', default: false, adminOnly: true }
+  { key: 'settings', label: 'Ayarlar', icon: '⚙️', default: true }
 ];
 
 // Default allowed pages for editor role
@@ -10814,7 +10814,7 @@ function defaultEditorPages() {
 }
 // Default allowed pages for viewer role (sadece okuma odaklı)
 function defaultViewerPages() {
-  return ['dashboard','venues','pending','routes','villages','analytics','activity','blog'];
+  return ['dashboard','venues','pending','routes','villages','analytics','activity','blog','settings'];
 }
 
 // Pages grid'i doldur
