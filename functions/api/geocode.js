@@ -73,12 +73,13 @@ export async function onRequestGet(context) {
       if (!lat) { const m1 = finalUrl.match(/@(-?\d+\.?\d+),(-?\d+\.?\d+)/); if (m1) { lat = parseFloat(m1[1]); lng = parseFloat(m1[2]); } }
 
       if (lat && lng) {
-        return new Response(JSON.stringify({ lat, lng, resolvedUrl: finalUrl }), {
+        // resolvedUrl döndürmüyoruz — open-redirect / veri sızıntı riski
+        return new Response(JSON.stringify({ lat, lng }), {
           status: 200,
           headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': corsOrigin }
         });
       }
-      return new Response(JSON.stringify({ error: 'Koordinat bulunamadı', resolvedUrl: finalUrl }), {
+      return new Response(JSON.stringify({ error: 'Koordinat bulunamadı' }), {
         status: 200,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': corsOrigin }
       });

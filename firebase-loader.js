@@ -34,6 +34,8 @@
 
     var s3 = document.createElement('script');
     s3.src = 'https://www.gstatic.com/firebasejs/11.6.0/firebase-app-check-compat.js';
+    s3.crossOrigin = 'anonymous';
+    s3.integrity = 'sha384-eV3PO0BITEvFTiTj+Lx8nlBz6wF9b6ARxrCuTiZSo6giPhCoWzr1tNN6KKHdPHfa';
     s3.onload = onSubLoad;
     s3.onerror = onSubLoad; // App Check yuklenemezse de devam et
 

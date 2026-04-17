@@ -291,9 +291,9 @@ a{color:var(--terra);text-decoration:none}
   <div>© <script>document.write(new Date().getFullYear())</script> Assos'u Keşfet · <a href="/">assosukesfet.com</a></div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js" crossorigin="anonymous" integrity="sha384-4DnN3LMk363cZnO0ZZ+46dvN6+1On5ODUbq/68J4ZeSDAghncVXodw2jecSmTyAe"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js" crossorigin="anonymous" integrity="sha384-OWv+RYFfLxKnRm2S6RYMcxn1Un3vxC0dbSWy7XC9DKsJGGHMWBCbDV27k62l/2XK"></script>
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-storage-compat.js" crossorigin="anonymous" integrity="sha384-5RO7AQJ51T1u3BV84KGn4xVulsFE2gbaUebkDJe5jPVSm0+NN34/wzUp/vZugodK"></script>
 <script>
 firebase.initializeApp({apiKey:"AIzaSyCXqgczplchzjClAZt-Wl2eqgqmUMhLVJs",authDomain:"assosu-kesfet.firebaseapp.com",projectId:"assosu-kesfet",storageBucket:"assosu-kesfet.firebasestorage.app",messagingSenderId:"225032191860",appId:"1:225032191860:web:61ac6ba36764b530be3621"});
 var db=firebase.firestore();
@@ -310,6 +310,8 @@ var CAT_LABELS={kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'
   document.getElementById('f-seasonStart').min=new Date().toISOString().split('T')[0];
   // Konumları Firebase'den yükle
   try{
+    // HTML escape helper — village title'ları için XSS koruması
+    function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
     var snap=await db.collection('villages').get();
     var villages=snap.docs.map(function(d){return{title:d.data().title,type:d.data().type||'koy'};}).sort(function(a,b){return(a.title||'').localeCompare(b.title||'','tr');});
     var sel=document.getElementById('f-location');
@@ -323,13 +325,13 @@ var CAT_LABELS={kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'
     html+='</optgroup>';
     // Köyler
     var koyler=villages.filter(function(v){return v.type==='koy';});
-    if(koyler.length>0){html+='<optgroup label="🏘 Köyler ('+koyler.length+')">';koyler.forEach(function(v){html+='<option value="'+v.title+'">'+v.title+'</option>';});html+='</optgroup>';}
+    if(koyler.length>0){html+='<optgroup label="🏘 Köyler ('+koyler.length+')">';koyler.forEach(function(v){html+='<option value="'+escH(v.title)+'">'+escH(v.title)+'</option>';});html+='</optgroup>';}
     // Beldeler
     var beldeler=villages.filter(function(v){return v.type==='belde';});
-    if(beldeler.length>0){html+='<optgroup label="🏛 Beldeler ('+beldeler.length+')">';beldeler.forEach(function(v){html+='<option value="'+v.title+'">'+v.title+'</option>';});html+='</optgroup>';}
+    if(beldeler.length>0){html+='<optgroup label="🏛 Beldeler ('+beldeler.length+')">';beldeler.forEach(function(v){html+='<option value="'+escH(v.title)+'">'+escH(v.title)+'</option>';});html+='</optgroup>';}
     // Mahalleler
     var mahalleler=villages.filter(function(v){return v.type==='mahalle';});
-    if(mahalleler.length>0){html+='<optgroup label="🏠 Mahalleler ('+mahalleler.length+')">';mahalleler.forEach(function(v){html+='<option value="'+v.title+'">'+v.title+'</option>';});html+='</optgroup>';}
+    if(mahalleler.length>0){html+='<optgroup label="🏠 Mahalleler ('+mahalleler.length+')">';mahalleler.forEach(function(v){html+='<option value="'+escH(v.title)+'">'+escH(v.title)+'</option>';});html+='</optgroup>';}
     sel.innerHTML=html;
   }catch(e){
     document.getElementById('f-location').innerHTML='<option value="">Seçin</option><option value="Behramkale (Assos)">Behramkale (Assos)</option><option value="Kadırga Koyu">Kadırga Koyu</option><option value="Ayvacık Merkez">Ayvacık Merkez</option>';
