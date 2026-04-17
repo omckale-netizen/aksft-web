@@ -743,6 +743,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       <a class="admin-nav-item" onclick="logout()">
         <span class="nav-icon">🚪</span> Çıkış
       </a>
+
+      <!-- Online kullanıcılar -->
+      <div id="sidebar-online-wrap" style="margin-top:18px;padding:12px 14px;border-top:1px solid rgba(255,255,255,.08);display:none">
+        <div style="font-size:.62rem;font-weight:700;color:rgba(245,237,224,.45);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">🟢 Şu an Online</div>
+        <div id="sidebar-online-list" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
     </div>
   </nav>
 
@@ -3748,6 +3754,79 @@ async function changePassword() {
 }
 
 // ── Şifre Tarih Kontrolü ──
+// ═══ PRESENCE (Kim online) ═══
+// Kendi presence doc'una her 60 saniyede heartbeat yazar
+// Sekme kapanınca onbeforeunload ile temizler
+var _presenceInterval = null;
+var _presenceListener = null;
+var _allPresence = {};
+var PRESENCE_THRESHOLD = 2 * 60 * 1000; // 2dk
+
+async function startPresence() {
+  var user = window._currentUser;
+  if (!user || !user.uid) return;
+  var ref = db.collection('presence').doc(user.uid);
+  var heartbeat = async function() {
+    try {
+      await ref.set({
+        uid: user.uid,
+        email: user.email || '',
+        name: user.name || '',
+        photoURL: user.photoURL || null,
+        lastHeartbeat: new Date().toISOString()
+      }, { merge: false });
+    } catch(e) { /* sessizce geç — yetki vb. */ }
+  };
+  // İlk heartbeat + her 60sn
+  heartbeat();
+  if (_presenceInterval) clearInterval(_presenceInterval);
+  _presenceInterval = setInterval(heartbeat, 60 * 1000);
+
+  // Sekme kapanınca lastHeartbeat'i eski bir değere çek (online olmayı kapatır)
+  window.addEventListener('beforeunload', function() {
+    try { ref.update({ lastHeartbeat: new Date(0).toISOString() }); } catch(e) {}
+  });
+
+  // Tüm presence listener'ı
+  if (_presenceListener) { _presenceListener(); _presenceListener = null; }
+  _presenceListener = db.collection('presence').onSnapshot(function(snap) {
+    _allPresence = {};
+    snap.docs.forEach(function(d) { _allPresence[d.id] = d.data(); });
+    renderSidebarOnline();
+  }, function(err) { console.warn('Presence listener:', err); });
+}
+
+function isUserOnline(uid) {
+  var p = _allPresence[uid];
+  if (!p || !p.lastHeartbeat) return false;
+  var t = new Date(p.lastHeartbeat).getTime();
+  return (Date.now() - t) < PRESENCE_THRESHOLD;
+}
+
+function renderSidebarOnline() {
+  var wrap = document.getElementById('sidebar-online-wrap');
+  var list = document.getElementById('sidebar-online-list');
+  if (!wrap || !list) return;
+  var currentUid = (window._currentUser && window._currentUser.uid) || '';
+  var onlineList = Object.values(_allPresence).filter(function(p) {
+    if (!p.uid || p.uid === currentUid) return false;
+    if (!p.lastHeartbeat) return false;
+    return (Date.now() - new Date(p.lastHeartbeat).getTime()) < PRESENCE_THRESHOLD;
+  });
+  if (onlineList.length === 0) { wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+  list.innerHTML = onlineList.slice(0, 8).map(function(p) {
+    return '<div style="display:flex;align-items:center;gap:8px" title="' + esc(p.email || '') + '">' +
+      userAvatar(p, 24) +
+      '<span style="flex:1;font-size:.72rem;color:rgba(245,237,224,.8);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(p.name || p.email || '') + '</span>' +
+      '<span style="width:8px;height:8px;border-radius:50%;background:#38A169;flex-shrink:0;box-shadow:0 0 6px #38A169"></span>' +
+    '</div>';
+  }).join('');
+}
+
+// Her dakika sidebar'ı yeniden render et (threshold kontrolü için)
+setInterval(function() { try { renderSidebarOnline(); } catch(e) {} }, 60 * 1000);
+
 // Son giriş geçmişi — activity_logs'tan kullanıcının kendi giris/giris_basarisiz aksiyonları
 async function loadLoginHistory() {
   var listEl = document.getElementById('login-history-list');
@@ -4830,6 +4909,8 @@ fbAuth.onAuthStateChanged(async (user) => {
     startSessionTimer();
     // Giriş loglarını Firebase'e aktar
     syncLoginLogs();
+    // Presence (online durum) tracking başlat
+    try { startPresence(); } catch(e) { console.warn('Presence start:', e); }
   } else {
     // Giris yapilmamis — login sayfasina yonlendir
     window.location.replace('admin-login.html');
