@@ -5345,16 +5345,23 @@ async function permanentDeletePendingVenue(id) {
 async function renderMessages() {
   try {
     // Admin sent_mails'in hepsini okur; editor sadece KENDİ gönderdiklerini (firestore rules)
+    // Non-admin'de where + orderBy composite index gerektireceği için orderBy'ı çıkarıyoruz,
+    // sonra client-side sıralıyoruz
     var myEmail = (window._currentUser && window._currentUser.email) || '';
     var sentQuery = isCurrentAdmin()
       ? db.collection('sent_mails').orderBy('timestamp', 'desc').limit(100)
-      : db.collection('sent_mails').where('user', '==', myEmail).orderBy('timestamp', 'desc').limit(100);
+      : db.collection('sent_mails').where('user', '==', myEmail).limit(200);
     const [msgSnap, sentSnap] = await Promise.all([
       db.collection('messages').orderBy('timestamp', 'desc').limit(200).get(),
       sentQuery.get()
     ]);
     allMessages = msgSnap.docs.map(d => ({ _id: d.id, ...d.data() }));
     allSentMails = sentSnap.docs.map(d => ({ _id: d.id, ...d.data() }));
+    // Non-admin için client-side sort + kesim
+    if (!isCurrentAdmin()) {
+      allSentMails.sort(function(a, b) { return (b.timestamp || '').localeCompare(a.timestamp || ''); });
+      allSentMails = allSentMails.slice(0, 100);
+    }
     updateMsgBadge();
     autoCleanTrash();
     renderMessageList();
@@ -11856,16 +11863,22 @@ async function renderActivityLog() {
     const filter = document.getElementById('activity-filter')?.value || 'all';
     const search = (document.getElementById('activity-search')?.value || '').toLowerCase().trim();
     // Firestore rules: admin tümünü, editor/viewer sadece kendi aksiyonlarını okuyabilir.
-    // Non-admin için sorguyu server-side filtrelemeliyiz yoksa query komple reddedilir.
+    // Non-admin'de where + orderBy composite index gerektireceği için orderBy'ı çıkarıp
+    // client-side sıralıyoruz.
     var myEmail = (window._currentUser && window._currentUser.email) || '';
     var query;
     if (isCurrentAdmin()) {
       query = db.collection('activity_logs').orderBy('timestamp', 'desc').limit(200);
     } else {
-      query = db.collection('activity_logs').where('user', '==', myEmail).orderBy('timestamp', 'desc').limit(200);
+      query = db.collection('activity_logs').where('user', '==', myEmail).limit(500);
     }
     const snap = await query.get();
     let logs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    // Non-admin için client-side sort + kesim
+    if (!isCurrentAdmin()) {
+      logs.sort(function(a, b) { return (b.timestamp || '').localeCompare(a.timestamp || ''); });
+      logs = logs.slice(0, 200);
+    }
 
     if (filter === 'sil') {
       logs = logs.filter(l => l.action && l.action.includes('sil'));
