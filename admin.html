@@ -778,6 +778,30 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .ana-bar{flex:1;min-width:8px;border-radius:3px 3px 0 0;background:var(--terra);transition:height .4s;position:relative;cursor:default}
 .ana-bar:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:4px 8px;border-radius:6px;font-size:.65rem;white-space:nowrap;z-index:5}
 
+/* Kullanıcı modal: hoş geldin maili onay kutusu */
+.welcome-mail-box{
+  display:flex;align-items:center;gap:10px;
+  margin-top:10px;padding:10px 14px;
+  width:100%;max-width:100%;
+  box-sizing:border-box;
+  background:rgba(56,161,105,.06);
+  border:1px solid rgba(56,161,105,.2);
+  border-radius:10px;
+  cursor:pointer;
+  font-size:.8rem;color:var(--text);
+  line-height:1.4;
+  transition:background .15s,border-color .15s;
+}
+.welcome-mail-box:hover{background:rgba(56,161,105,.1);border-color:rgba(56,161,105,.3)}
+.welcome-mail-box input[type="checkbox"]{
+  accent-color:var(--green);flex-shrink:0;
+  width:16px;height:16px;margin:0;cursor:pointer;
+}
+.welcome-mail-box > span{
+  flex:1 1 auto;min-width:0;
+  overflow-wrap:break-word;word-break:normal;white-space:normal;
+}
+
 /* Todo modal: opsiyonel mail bildirim kutusu */
 .todo-notify-box{
   display:none;
@@ -2453,10 +2477,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <button type="button" class="btn btn-sm btn-secondary" onclick="generateUserPassword()">🎲 Üret</button>
             </div>
             <div style="font-size:.65rem;color:var(--text-muted);margin-top:4px">Kullanıcı ilk girişte şifreyi değiştirmek zorunda</div>
-            <label style="display:flex;align-items:center;gap:8px;margin-top:10px;padding:10px 12px;background:rgba(56,161,105,.06);border:1px solid rgba(56,161,105,.2);border-radius:8px;cursor:pointer;font-size:.78rem">
-              <input type="checkbox" id="user-send-welcome-mail" checked style="accent-color:var(--green);flex-shrink:0">
-              <span style="flex:1">📧 Hoş geldin maili gönder (giriş linki + şifre + rehber)</span>
-            </label>
+            <div class="welcome-mail-box" onclick="var c=document.getElementById('user-send-welcome-mail');if(event.target!==c){c.checked=!c.checked;}">
+              <input type="checkbox" id="user-send-welcome-mail" checked>
+              <span>📧 Hoş geldin maili gönder (giriş linki + şifre + rehber)</span>
+            </div>
           </div>
           <div class="form-group" style="margin-bottom:14px">
             <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:4px">Rol *</label>
