@@ -282,6 +282,9 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     #site-footer .ft-legal{font-size:.62rem;}
     #site-footer .ft-legal a{color:rgba(245,237,224,.2);text-decoration:none;transition:color .15s;}
     #site-footer .ft-legal a:hover{color:rgba(245,237,224,.5);}
+    #site-footer .ft-consent{font-size:.58rem;color:rgba(245,237,224,.15);text-align:center;padding:8px 0 0;border-top:1px solid rgba(245,237,224,.04);margin-top:8px;line-height:1.6;}
+    #site-footer .ft-consent a{color:rgba(245,237,224,.3);text-decoration:underline;}
+    #site-footer .ft-consent a:hover{color:rgba(245,237,224,.55);}
     @media(max-width:768px){
       #site-footer .ft-top{flex-direction:row;gap:12px;}
       #site-footer .ft-logo-area{gap:8px;}
@@ -1203,6 +1206,7 @@ function renderFooter(opts = {}) {
           <span class="ft-copy">© ${new Date().getFullYear()} Assos'u Keşfet · Tüm hakları saklıdır</span>
           <span class="ft-legal"><a href="${basePath}gizlilik.html">Gizlilik Politikası</a> · <a href="${basePath}kullanim-kosullari.html">Kullanım Koşulları</a></span>
         </div>
+        <div class="ft-consent">Sitemizi kullanarak <a href="${basePath}kullanim-kosullari.html">Kullanım Koşulları</a> ve <a href="${basePath}gizlilik.html">Gizlilik Politikası</a>'nı kabul etmiş sayılırsınız.</div>
       </div>
     </footer>
   `;
