@@ -7640,37 +7640,59 @@ var _chatReadsUnsub = null;
 var _chatMentionState = { active: false, startIdx: -1, query: '' };
 
 function startChatListener() {
-  if (typeof firebase === 'undefined' || !firebase.firestore) return;
+  if (typeof firebase === 'undefined' || !firebase.firestore) {
+    console.warn('[chat] firebase not ready, retry in 500ms');
+    setTimeout(startChatListener, 500);
+    return;
+  }
+  var u = firebase.auth().currentUser;
+  if (!u) {
+    console.warn('[chat] auth not ready, retry in 500ms');
+    setTimeout(startChatListener, 500);
+    return;
+  }
   var db = firebase.firestore();
   // Zaten dinliyorsa yeniden başlatma
   if (_chatUnsub) {
+    console.log('[chat] listener already active, re-rendering');
+    setupChatInput();
     renderChatMessages();
+    renderChatOnlineStack();
     scrollChatToBottom();
     markChatAsRead();
     return;
   }
+  console.log('[chat] starting listener for uid:', u.uid);
   _chatUnsub = db.collection('team_chat').orderBy('timestamp', 'asc').limit(500).onSnapshot(function(snap) {
     var wasAtBottom = isChatAtBottom();
+    var fromCache = snap.metadata.fromCache;
+    var hasPending = snap.metadata.hasPendingWrites;
+    console.log('[chat] snapshot:', snap.size, 'msgs', fromCache ? '(cache)' : '(server)', hasPending ? '[pending write]' : '');
     _chatAllMessages = [];
     snap.forEach(function(doc) {
-      // serverTimestamps:'estimate' → pending write'larda da timestamp gelsin (anlık görünsün)
       _chatAllMessages.push(Object.assign({ id: doc.id }, doc.data({ serverTimestamps: 'estimate' })));
     });
     renderChatMessages();
     renderChatOnlineStack();
     if (document.getElementById('page-chat') && document.getElementById('page-chat').classList.contains('active')) {
-      if (wasAtBottom) { scrollChatToBottom(); markChatAsRead(); }
+      if (wasAtBottom || hasPending) { scrollChatToBottom(); markChatAsRead(); }
       updateChatJumpBtn();
     }
     updateChatBadge();
   }, function(err) {
-    console.error('[chat] listener error:', err);
+    console.error('[chat] listener error:', err.code, err.message, err);
     var wrap = document.getElementById('chat-messages');
     if (wrap) {
-      wrap.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--red);font-size:.88rem">' +
-        '<div style="font-size:2rem;margin-bottom:10px">⚠️</div>' +
-        '<strong>Sohbet yüklenemedi:</strong> ' + escHtml(err.message || '') +
-        '<div style="margin-top:10px;font-size:.76rem;color:var(--text-muted)">Firebase Console → Firestore → Rules güncel sürümü yayınlandı mı?</div>' +
+      var hint = '';
+      if (err.code === 'permission-denied') {
+        hint = '<div style="margin-top:12px;padding:12px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:10px;font-size:.76rem;text-align:left;color:var(--text);line-height:1.6"><strong>🔑 Firestore kuralları güncel değil.</strong><br>Firebase Console → Firestore → <em>Rules</em> sekmesine git → yeni <code>team_chat</code> ve <code>team_chat_reads</code> kurallarını yayınla (Publish).</div>';
+      }
+      wrap.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:60px 20px;margin:auto;max-width:500px">' +
+        '<div style="font-size:3rem;margin-bottom:16px">⚠️</div>' +
+        '<h3 style="font-size:1.1rem;font-weight:800;color:var(--navy);margin-bottom:8px">Sohbet yüklenemedi</h3>' +
+        '<p style="font-size:.86rem;color:var(--text-muted);margin-bottom:12px">Hata: <code style="background:rgba(0,0,0,.05);padding:2px 6px;border-radius:4px;font-size:.78rem">' + escHtml(err.code || 'unknown') + '</code></p>' +
+        '<p style="font-size:.82rem;color:var(--text);margin-bottom:0">' + escHtml(err.message || '') + '</p>' +
+        hint +
       '</div>';
     }
   });
@@ -7771,25 +7793,38 @@ function sendChatMessage() {
     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
     mentions: mentionUids
   };
+  console.log('[chat] sending message:', { text: text.slice(0, 80), uid: u.uid });
   var btn = document.getElementById('chat-send-btn');
-  btn.disabled = true; btn.textContent = '...';
-  firebase.firestore().collection('team_chat').add(msg).then(function() {
+  btn.disabled = true;
+  btn.style.opacity = '.5';
+  firebase.firestore().collection('team_chat').add(msg).then(function(docRef) {
+    console.log('[chat] message written:', docRef.id);
     ta.value = '';
     ta.style.height = 'auto';
     document.getElementById('chat-char-count').textContent = '0 / 2000';
     ta.focus();
-    // Gönderim sonrası alt'a kaydır — local write anlık gelmese bile kısa sürede görünür
-    setTimeout(scrollChatToBottom, 120);
+    // Safety net: listener'ın fire etmesini bekleyelim ama bir fallback de olsun
+    // Listener zaten aynı ID ile snapshot gelince _chatAllMessages'i yeniden dolduruyor — duplicate olmaz
+    setTimeout(function() {
+      scrollChatToBottom(true);
+      // Eğer 2 saniye içinde mesaj görünmediyse manuel push (listener sorunlu olabilir)
+      if (!_chatAllMessages.find(function(m) { return m.id === docRef.id; })) {
+        console.warn('[chat] listener geç kaldı, manuel push yapılıyor:', docRef.id);
+        _chatAllMessages.push({ id: docRef.id, ...msg, timestamp: { toDate: function() { return new Date(); } } });
+        renderChatMessages();
+        scrollChatToBottom(true);
+      }
+    }, 2000);
   }).catch(function(err) {
     console.error('[chat] send failed:', err);
-    var errMsg = 'Mesaj gönderilemedi: ' + (err.message || err);
+    var errMsg = '⚠️ Mesaj gönderilemedi: ' + (err.message || err);
     if (err.code === 'permission-denied') {
-      errMsg += ' (Firestore rules güncel mi? Console → Rules → Publish kontrolü)';
+      errMsg = '⚠️ Firestore yetki reddedildi.\n\nFirebase Console → Firestore → Rules sekmesinde güncel rules yayınlandı mı?\n\nYeni eklenen: team_chat ve team_chat_reads kuralları.';
     }
-    if (typeof showToast === 'function') showToast(errMsg, 'error');
-    else alert(errMsg);
+    alert(errMsg);
   }).finally(function() {
-    btn.disabled = false; btn.textContent = 'Gönder';
+    btn.disabled = !ta.value.trim();
+    btn.style.opacity = '';
   });
 }
 
