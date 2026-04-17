@@ -4371,9 +4371,6 @@ function renderPlacePage(placeId) {
     try {
       var hist = JSON.parse(localStorage.getItem(AI_HISTORY_KEY) || '[]');
       if (hist.length === 0) return;
-      // Önerileri gizle
-      var sug = document.getElementById('ai-suggestions');
-      if (sug) sug.style.display = 'none';
       // Geçmişi render et
       hist.forEach(function(m) { addMsg(m.text, m.type, true); });
     } catch {}
@@ -4386,15 +4383,33 @@ function renderPlacePage(placeId) {
   }
   updateLimit();
 
-  // Site context — optimize edilmiş (kısa tutarak token tasarrufu)
+  // Site context — optimize edilmiş (token tasarrufu + premium önceliklendirme)
   var _cachedContext = null;
   var _contextTime = 0;
   function buildContext() {
     // 5 dakikada bir yenile, her sorguda tekrar oluşturma
     if (_cachedContext && Date.now() - _contextTime < 300000) return _cachedContext;
-    if (!window.DATA) return '';
+    // DATA yüklenmediyse cache'leme — geçici boş string dön, sonraki sorguda tekrar dene
+    if (!window.DATA || !DATA.venues || DATA.venues.length === 0) return '';
+
+    // İlk telefonu çıkar (phone dizisinden veya tek string'ten)
+    function primaryPhone(v) {
+      if (v.phones && v.phones.length > 0) return v.phones[0].number || '';
+      if (v.phone) return typeof v.phone === 'string' ? v.phone : '';
+      return '';
+    }
+
+    // Premium aktif olanları öne al — iş açısından kritik
+    var allVenues = (DATA.venues || []).slice();
+    allVenues.sort(function(a, b) {
+      var pa = (typeof isPremiumActive === 'function' && isPremiumActive(a)) ? 0 : 1;
+      var pb = (typeof isPremiumActive === 'function' && isPremiumActive(b)) ? 0 : 1;
+      if (pa !== pb) return pa - pb;
+      return (a.sortOrder || 999) - (b.sortOrder || 999);
+    });
+    var venues = allVenues.slice(0, 40); // 30 → 40 (daha fazla kapsama)
+
     var ctx = '';
-    var venues = (DATA.venues || []).slice(0, 30);
     if (venues.length) ctx += 'MEKANLAR:\n' + venues.map(function(v) {
       var prem = (typeof isPremiumActive === 'function' && isPremiumActive(v)) ? '⭐' : '';
       var open = typeof isVenueOpen === 'function' ? isVenueOpen(v) : null;
@@ -4404,17 +4419,19 @@ function renderPlacePage(placeId) {
       if (v.weeklyHours && v.weeklyHours.length > 0) {
         hrs = '|' + v.weeklyHours.map(function(wh) { return (wh.days||'').substring(0,3) + ':' + (wh.closed ? 'Kapalı' : (wh.hours || ((wh.open||'') + '-' + (wh.close||'')))); }).join(',');
       } else if (v.hours) { hrs = '|' + v.hours; }
-      return '- ' + v.id + '|' + prem + v.title + '|' + (v.category||'') + '|' + (v.location||'') + '|' + (v.shortDesc||'').substring(0,80) + st + sea + hrs;
+      var tel = primaryPhone(v);
+      var phonePart = tel ? '|Tel:' + tel : '';
+      return '- ' + v.id + '|' + prem + v.title + '|' + (v.category||'') + '|' + (v.location||'') + '|' + (v.shortDesc||'').substring(0,80) + phonePart + st + sea + hrs;
     }).join('\n') + '\n';
-    var places = (DATA.places || []).slice(0, 15);
+    var places = (DATA.places || []).slice(0, 20);
     if (places.length) ctx += 'YERLER:\n' + places.map(function(p) {
       return '- ' + p.id + '|' + p.title + '|' + (p.category||'') + '|' + (p.location||'') + '|' + (p.shortDesc||'').substring(0,60);
     }).join('\n') + '\n';
-    var villages = (DATA.villages || []).slice(0, 15);
+    var villages = (DATA.villages || []).slice(0, 20);
     if (villages.length) ctx += 'KÖYLER:\n' + villages.map(function(v) {
       return '- ' + v.id + '|' + v.title + '|' + (v.shortDesc||'').substring(0,50);
     }).join('\n') + '\n';
-    var routes = (DATA.routes || []).slice(0, 8);
+    var routes = (DATA.routes || []).slice(0, 10);
     if (routes.length) ctx += 'ROTALAR:\n' + routes.map(function(r) {
       return '- ' + r.id + '|' + r.title + '|' + (r.sure||'') + '|' + (r.stops ? r.stops.length + ' durak' : '');
     }).join('\n');
@@ -4491,13 +4508,66 @@ function renderPlacePage(placeId) {
     var timeoutId = setTimeout(function() { controller.abort(); }, 15000);
 
     try {
-      var resp = await fetch('/api/chat', {
+      // STREAMING mod: daha hızlı algılanan yanıt
+      var resp = await fetch('/api/chat?stream=1', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: msg, context: buildContext(), history: aiChatMemory.slice(-6) }),
+        body: JSON.stringify({ message: msg, context: buildContext(), history: aiChatMemory.slice(-6), stream: true }),
         signal: controller.signal
       });
       clearTimeout(timeoutId);
+
+      // Streaming yanıtı mı non-streaming mi?
+      var contentType = resp.headers.get('Content-Type') || '';
+      if (contentType.indexOf('text/event-stream') > -1 && resp.body && resp.body.getReader) {
+        // Streaming modu — SSE parse
+        typing.remove();
+        var remaining = parseInt(resp.headers.get('X-Remaining') || '-1');
+        // Bot mesaj container'ı oluştur (boş başlat, parçaları ekle)
+        var botDiv = document.createElement('div');
+        botDiv.className = 'ai-msg bot';
+        body.appendChild(botDiv);
+        var reader = resp.body.getReader();
+        var decoder = new TextDecoder();
+        var buffer = '';
+        var fullText = '';
+        while (true) {
+          var chunk;
+          try { chunk = await reader.read(); } catch(e) { break; }
+          if (chunk.done) break;
+          buffer += decoder.decode(chunk.value, { stream: true });
+          var lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+          for (var i = 0; i < lines.length; i++) {
+            var line = lines[i].trim();
+            if (!line.startsWith('data: ')) continue;
+            try {
+              var ev = JSON.parse(line.slice(6));
+              if (ev.type === 'content_block_delta' && ev.delta && ev.delta.text) {
+                fullText += ev.delta.text;
+                botDiv.innerHTML = mdToHtml(fullText);
+                body.scrollTop = body.scrollHeight;
+              }
+            } catch(e) {}
+          }
+        }
+        if (!fullText) {
+          botDiv.remove();
+          addMsg('Üzgünüm, yanıt oluşturamadım. Tekrar dener misiniz?', 'bot');
+        } else {
+          // Geçmişe kaydet
+          saveHistory(fullText, 'bot');
+          aiChatMemory.push({ role: 'assistant', content: fullText });
+          if (aiChatMemory.length > 8) aiChatMemory = aiChatMemory.slice(-8);
+          if (remaining >= 0) state.count = getAiDailyLimit() - remaining;
+          else state.count++;
+          saveAiState(state);
+          updateLimit();
+        }
+        return; // Stream bittikten sonra normal akışa dönme
+      }
+
+      // NON-STREAMING fallback — eski davranış
       var data;
       try { data = await resp.json(); } catch(je) { data = { error: 'Sunucudan geçersiz yanıt' }; }
       typing.remove();
@@ -4533,15 +4603,23 @@ function renderPlacePage(placeId) {
     } catch(err) {
       clearTimeout(timeoutId);
       typing.remove();
-      var retryHtml = ' <button onclick="document.getElementById(\'ai-chat-input\').value=\'' + msg.replace(/'/g,"\\'") + '\';aiChatSend()" style="background:var(--terra);color:#fff;border:none;border-radius:8px;padding:4px 10px;font-size:.7rem;font-weight:600;cursor:pointer;margin-top:6px;font-family:inherit;">Tekrar Dene</button>';
       if (err.name === 'AbortError') {
         addMsg('Yanıt süresi doldu. Sunucu yoğun olabilir ⏳', 'bot');
       } else {
         addMsg('Bağlantı hatası oluştu.', 'bot');
       }
-      // Tekrar dene butonu ekle
+      // Tekrar dene butonu — DOM API + event listener ile güvenli (XSS koruması)
       var lastMsg = document.getElementById('ai-chat-body').lastElementChild;
-      if (lastMsg) lastMsg.innerHTML += retryHtml;
+      if (lastMsg) {
+        var retryBtn = document.createElement('button');
+        retryBtn.textContent = 'Tekrar Dene';
+        retryBtn.style.cssText = 'background:var(--terra);color:#fff;border:none;border-radius:8px;padding:4px 10px;font-size:.7rem;font-weight:600;cursor:pointer;margin-top:6px;margin-left:6px;font-family:inherit;';
+        retryBtn.addEventListener('click', function() {
+          var inp = document.getElementById('ai-chat-input');
+          if (inp) { inp.value = msg; aiChatSend(); }
+        });
+        lastMsg.appendChild(retryBtn);
+      }
     }
     sendBtn.disabled = false;
   };
@@ -4549,12 +4627,35 @@ function renderPlacePage(placeId) {
   function sanitizeHtml(text) {
     return text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
+  // AI'ın ürettiği link ID'sini site verisiyle doğrula — halüsinasyon/404 önleme
+  function isValidContentId(path, id) {
+    if (!id || typeof id !== 'string') return false;
+    if (!window.DATA) return true; // DATA yüklenmediyse doğrulama atla (geriye uyumlu)
+    if (path.indexOf('mekan-detay') > -1) return (DATA.venues || []).some(function(v){ return v.id === id; });
+    if (path.indexOf('yer-detay') > -1) return (DATA.places || []).some(function(p){ return p.id === id; });
+    if (path.indexOf('koy-detay') > -1) return (DATA.villages || []).some(function(k){ return k.id === id; });
+    if (path.indexOf('rota-detay') > -1) return (DATA.routes || []).some(function(r){ return r.id === id; });
+    return true; // Detay olmayan sayfalar (mekanlar.html vs) her zaman geçerli
+  }
+  function extractIdFromUrl(url) {
+    var m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    return m ? m[1] : null;
+  }
+
   function mdToHtml(text) {
     // Önce HTML tag'lerini escape et (XSS koruması)
     text = sanitizeHtml(text);
     var linkStyle = 'color:var(--terra);font-weight:600;text-decoration:underline;';
     // 1. Markdown linkleri — SADECE assosukesfet.com (dış site linkleri engellenir)
-    var result = text.replace(/\[([^\]]+)\]\((https?:\/\/)?assosukesfet\.com\/([^)]+)\)/g, '<a href="https://assosukesfet.com/$3" target="_blank" rel="noopener" style="' + linkStyle + '">$1</a>');
+    //    + AI hallucinated ID doğrulama (detay sayfaları için)
+    var result = text.replace(/\[([^\]]+)\]\((https?:\/\/)?assosukesfet\.com\/([^)]+)\)/g, function(match, label, proto, path) {
+      var id = extractIdFromUrl('?' + path);
+      if (id && !isValidContentId(path, id)) {
+        // Geçersiz ID — link yerine düz metin göster
+        return label;
+      }
+      return '<a href="https://assosukesfet.com/' + path + '" target="_blank" rel="noopener" style="' + linkStyle + '">' + label + '</a>';
+    });
     // Dış site markdown linklerini düz metin yap (tıklanamaz)
     result = result.replace(/\[([^\]]+)\]\(https?:\/\/(?!assosukesfet\.com)[^)]+\)/g, '$1');
     // 2. Düz URL'leri tıklanabilir yap (https:// olsun olmasın)
@@ -4563,6 +4664,12 @@ function renderPlacePage(placeId) {
       // Sondaki noktalama temizle
       var clean = url.replace(/[.)]+$/, '');
       if (clean.indexOf('https://') !== 0) clean = 'https://' + clean;
+      // ID doğrulaması
+      var pathPart = clean.replace(/^https?:\/\/assosukesfet\.com\//, '');
+      var id = extractIdFromUrl('?' + pathPart);
+      if (id && !isValidContentId(pathPart, id)) {
+        return url; // Link yapma, düz metin bırak
+      }
       var name = 'Detayı Gör →';
       if (clean.indexOf('mekan-detay') > -1) name = '🏪 Mekana Git →';
       else if (clean.indexOf('yer-detay') > -1) name = '📍 Yeri Gör →';
@@ -4605,8 +4712,5 @@ function renderPlacePage(placeId) {
     body.scrollTop = body.scrollHeight;
     // Geçmişe kaydet
     if (!skipSave) saveHistory(text, type);
-    // Önerileri gizle
-    var sug = document.getElementById('ai-suggestions');
-    if (sug && !skipSave) sug.style.display = 'none';
   }
 })();
