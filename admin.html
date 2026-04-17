@@ -522,6 +522,58 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .todo-related-link{display:inline-flex;align-items:center;gap:4px;font-size:.68rem;color:var(--terra);text-decoration:none;padding:2px 8px;border-radius:6px;background:rgba(196,82,26,.06)}
 .todo-related-link:hover{background:rgba(196,82,26,.12)}
 
+/* View Switcher */
+.todo-view-switcher{display:inline-flex;background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:3px;gap:2px}
+.todo-view-btn{padding:7px 14px;border-radius:7px;border:none;background:transparent;cursor:pointer;font-size:.78rem;font-weight:600;color:var(--text-muted);transition:all .15s;font-family:inherit}
+.todo-view-btn:hover{background:rgba(0,0,0,.04)}
+.todo-view-btn.active{background:var(--navy);color:#fff}
+
+/* Kanban */
+.kanban-board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;min-height:500px}
+.kanban-col{background:rgba(0,0,0,.02);border:1px solid var(--card-border);border-radius:12px;padding:14px;display:flex;flex-direction:column}
+.kanban-col.drag-over{background:rgba(196,82,26,.08);border-color:var(--terra);border-style:dashed}
+.kanban-col-header{display:flex;align-items:center;justify-content:space-between;padding:0 6px 12px;border-bottom:1px solid rgba(0,0,0,.06);margin-bottom:10px}
+.kanban-col-title{font-size:.82rem;font-weight:800;color:var(--navy);letter-spacing:.02em}
+.kanban-col-count{font-size:.65rem;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--card-bg);color:var(--text-muted)}
+.kanban-col[data-status="pending"] .kanban-col-title{color:#DD6B20}
+.kanban-col[data-status="inprogress"] .kanban-col-title{color:#3182CE}
+.kanban-col[data-status="completed"] .kanban-col-title{color:#38A169}
+.kanban-cards{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;min-height:100px;padding-right:2px}
+.kanban-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:10px 12px;cursor:grab;transition:all .15s;user-select:none}
+.kanban-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08);transform:translateY(-1px)}
+.kanban-card.dragging{opacity:.4;cursor:grabbing}
+.kanban-card-title{font-size:.82rem;font-weight:700;color:var(--navy);margin-bottom:6px;word-break:break-word}
+.kanban-card-meta{display:flex;gap:6px;flex-wrap:wrap;font-size:.65rem}
+.kanban-add-btn{border:1.5px dashed rgba(0,0,0,.15);border-radius:10px;padding:10px;font-size:.75rem;color:var(--text-muted);cursor:pointer;background:transparent;width:100%;text-align:center;transition:all .15s;font-family:inherit}
+.kanban-add-btn:hover{border-color:var(--terra);color:var(--terra);background:rgba(196,82,26,.04)}
+@media(max-width:900px){.kanban-board{grid-template-columns:1fr}}
+
+/* Takvim */
+.calendar-wrap{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:20px}
+.calendar-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.calendar-title{font-size:1.1rem;font-weight:800;color:var(--navy)}
+.calendar-nav{display:flex;gap:6px;align-items:center}
+.calendar-nav button{width:32px;height:32px;border-radius:8px;border:1px solid var(--card-border);background:var(--card-bg);cursor:pointer;font-size:.9rem;color:var(--text);transition:all .15s;font-family:inherit}
+.calendar-nav button:hover{background:rgba(0,0,0,.04)}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.calendar-weekday{text-align:center;font-size:.68rem;font-weight:700;color:var(--text-muted);padding:8px 0;text-transform:uppercase;letter-spacing:.08em}
+.calendar-day{min-height:90px;background:rgba(0,0,0,.015);border:1px solid transparent;border-radius:8px;padding:6px 8px;cursor:pointer;transition:all .15s;position:relative;display:flex;flex-direction:column;gap:4px}
+.calendar-day:hover{border-color:var(--terra);background:rgba(196,82,26,.04)}
+.calendar-day.other-month{opacity:.35}
+.calendar-day.today{background:rgba(196,82,26,.08);border-color:var(--terra)}
+.calendar-day.today .calendar-day-num{color:var(--terra);font-weight:800}
+.calendar-day.weekend{background:rgba(0,0,0,.03)}
+.calendar-day-num{font-size:.8rem;font-weight:700;color:var(--navy)}
+.calendar-day-events{display:flex;flex-direction:column;gap:2px;overflow:hidden}
+.calendar-event{font-size:.62rem;padding:1px 5px;border-radius:4px;background:var(--terra);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.calendar-event.priority-urgent{background:#E53E3E}
+.calendar-event.priority-high{background:#DD6B20}
+.calendar-event.priority-medium{background:#D69E2E}
+.calendar-event.priority-low{background:#718096}
+.calendar-event.completed{background:#38A169;text-decoration:line-through;opacity:.6}
+.calendar-more{font-size:.6rem;color:var(--text-muted);font-weight:600;padding:1px 5px}
+@media(max-width:700px){.calendar-day{min-height:60px;padding:4px}.calendar-day-num{font-size:.72rem}.calendar-event{font-size:.55rem}}
+
 .gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
 .gal-card{position:relative;border-radius:10px;overflow:hidden;background:#f5f0ea;border:1px solid rgba(0,0,0,.06);transition:transform .15s,box-shadow .15s}
 .gal-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.08)}
@@ -2036,6 +2088,15 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       <!-- Stats -->
       <div class="stats-grid" id="todos-stats" style="grid-template-columns:repeat(auto-fill,minmax(120px,1fr));margin-bottom:16px"></div>
 
+      <!-- View Switcher -->
+      <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap">
+        <div class="todo-view-switcher">
+          <button class="todo-view-btn active" data-view="list" onclick="setTodoView('list',this)">☰ Liste</button>
+          <button class="todo-view-btn" data-view="kanban" onclick="setTodoView('kanban',this)">▥ Kanban</button>
+          <button class="todo-view-btn" data-view="calendar" onclick="setTodoView('calendar',this)">📅 Takvim</button>
+        </div>
+      </div>
+
       <!-- Filtreler -->
       <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
         <div class="search-bar" style="flex:1;min-width:200px"><span>🔍</span><input type="text" id="todos-search" placeholder="Görevlerde ara..." oninput="renderTodos()"></div>
@@ -2056,6 +2117,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <option value="meeting">💼 Toplantı</option>
           <option value="other">📌 Diğer</option>
         </select>
+        <select id="todos-filter-tag" onchange="renderTodos()" class="admin-filter-select" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:var(--input-bg,#fff);color:var(--text);cursor:pointer;min-width:110px">
+          <option value="">Tüm Etiketler</option>
+        </select>
         <select id="todos-filter-status" onchange="renderTodos()" class="admin-filter-select" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:var(--input-bg,#fff);color:var(--text);cursor:pointer">
           <option value="active">Aktif</option>
           <option value="completed">Tamamlanan</option>
@@ -2064,6 +2128,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       </div>
 
       <div id="todos-list"></div>
+      <div id="todos-kanban" style="display:none"></div>
+      <div id="todos-calendar" style="display:none"></div>
     </div>
 
     <!-- Todo Modal -->
@@ -2113,6 +2179,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:4px">Saat (opsiyonel)</label>
               <input type="time" id="todo-due-time" style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.85rem;background:var(--input-bg,#fff);color:var(--text);width:100%;font-family:inherit">
             </div>
+          </div>
+          <!-- Etiketler -->
+          <div class="form-group" style="margin-top:14px">
+            <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:4px">🏷 Etiketler (virgülle ayırın)</label>
+            <input type="text" id="todo-tags" placeholder="acil, telefon, toplantı" style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.85rem;background:var(--input-bg,#fff);color:var(--text);width:100%" maxlength="200">
+            <div style="font-size:.65rem;color:var(--text-muted);margin-top:4px">Örn: acil, telefon, ofis</div>
           </div>
           <!-- Bağlı mekan/mesaj (read-only, bilgi amaçlı) -->
           <div id="todo-related-info" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(196,82,26,.04);border:1px solid rgba(196,82,26,.15);border-radius:8px;font-size:.78rem;color:var(--text-muted)"></div>
@@ -9991,6 +10063,7 @@ function openTodoModal(prefill) {
   document.getElementById('todo-category').value = 'general';
   document.getElementById('todo-due-date').value = new Date().toISOString().split('T')[0]; // bugün
   document.getElementById('todo-due-time').value = '';
+  document.getElementById('todo-tags').value = '';
   document.getElementById('todo-related-venue').value = '';
   document.getElementById('todo-related-message').value = '';
   document.getElementById('todo-related-info').style.display = 'none';
@@ -10003,6 +10076,7 @@ function openTodoModal(prefill) {
     if (prefill.priority) document.getElementById('todo-priority').value = prefill.priority;
     if (prefill.category) document.getElementById('todo-category').value = prefill.category;
     if (prefill.dueDate) document.getElementById('todo-due-date').value = prefill.dueDate;
+    if (prefill.tags) document.getElementById('todo-tags').value = Array.isArray(prefill.tags) ? prefill.tags.join(', ') : prefill.tags;
     if (prefill.venueId) {
       document.getElementById('todo-related-venue').value = prefill.venueId;
       var v = (draftData.venues || []).find(function(x) { return x.id === prefill.venueId; });
@@ -10035,6 +10109,7 @@ function openTodoEditModal(id) {
   document.getElementById('todo-category').value = t.category || 'general';
   document.getElementById('todo-due-date').value = t.dueDate || '';
   document.getElementById('todo-due-time').value = t.dueTime || '';
+  document.getElementById('todo-tags').value = Array.isArray(t.tags) ? t.tags.join(', ') : '';
   document.getElementById('todo-related-venue').value = t.relatedVenueId || '';
   document.getElementById('todo-related-message').value = t.relatedMessageId || '';
   if (t.relatedVenueId) {
@@ -10052,6 +10127,9 @@ async function saveTodo() {
   var title = document.getElementById('todo-title').value.trim();
   if (!title) { showToast('Başlık zorunlu', 'error'); return; }
   var editId = document.getElementById('todo-edit-id').value;
+  // Etiketleri virgülle ayır, temizle, lowercase
+  var tagsRaw = document.getElementById('todo-tags').value.trim();
+  var tags = tagsRaw ? tagsRaw.split(',').map(function(t) { return t.trim().toLowerCase(); }).filter(function(t) { return t && t.length <= 30; }).slice(0, 10) : [];
   var data = {
     title: title,
     description: document.getElementById('todo-description').value.trim() || '',
@@ -10060,6 +10138,7 @@ async function saveTodo() {
     status: 'pending',
     dueDate: document.getElementById('todo-due-date').value || null,
     dueTime: document.getElementById('todo-due-time').value || null,
+    tags: tags,
     relatedVenueId: document.getElementById('todo-related-venue').value || null,
     relatedMessageId: document.getElementById('todo-related-message').value || null,
     createdBy: (firebase.auth().currentUser && firebase.auth().currentUser.email) || 'admin'
@@ -10106,19 +10185,29 @@ function renderTodos() {
   var statsEl = document.getElementById('todos-stats');
   if (!listEl) return;
 
+  // Etiket filter dropdown'u güncelle
+  populateTagFilter();
+
   var searchQ = (document.getElementById('todos-search')?.value || '').toLowerCase().trim();
   var priorityF = document.getElementById('todos-filter-priority')?.value || '';
   var categoryF = document.getElementById('todos-filter-category')?.value || '';
+  var tagF = document.getElementById('todos-filter-tag')?.value || '';
   var statusF = document.getElementById('todos-filter-status')?.value || 'active';
 
   var todos = _allTodos.slice();
-  // Status filter
-  if (statusF === 'active') todos = todos.filter(function(t) { return t.status !== 'completed'; });
-  else if (statusF === 'completed') todos = todos.filter(function(t) { return t.status === 'completed'; });
+  // Status filter — kanban görünümünde tüm status'leri göster (kanban kolonları bunu halleder)
+  if (_todoView !== 'kanban') {
+    if (statusF === 'active') todos = todos.filter(function(t) { return t.status !== 'completed'; });
+    else if (statusF === 'completed') todos = todos.filter(function(t) { return t.status === 'completed'; });
+  }
   if (priorityF) todos = todos.filter(function(t) { return t.priority === priorityF; });
   if (categoryF) todos = todos.filter(function(t) { return t.category === categoryF; });
+  if (tagF) todos = todos.filter(function(t) { return Array.isArray(t.tags) && t.tags.includes(tagF); });
   if (searchQ) todos = todos.filter(function(t) {
-    return (t.title || '').toLowerCase().includes(searchQ) || (t.description || '').toLowerCase().includes(searchQ);
+    var tagStr = (t.tags || []).join(' ').toLowerCase();
+    return (t.title || '').toLowerCase().includes(searchQ) ||
+           (t.description || '').toLowerCase().includes(searchQ) ||
+           tagStr.includes(searchQ);
   });
 
   // Stats
@@ -10145,8 +10234,20 @@ function renderTodos() {
       '<div class="stat-card"><div class="stat-label">Toplam Aktif</div><div class="stat-val">' + allActive.length + '</div></div>';
   }
 
+  // View'e göre render
+  if (_todoView === 'kanban') {
+    listEl.innerHTML = '';
+    renderKanban(todos);
+    return;
+  }
+  if (_todoView === 'calendar') {
+    listEl.innerHTML = '';
+    renderCalendar(todos);
+    return;
+  }
+
   if (todos.length === 0) {
-    listEl.innerHTML = '<div class="todo-empty"><div class="todo-empty-icon">✓</div><div style="font-size:.95rem;font-weight:600">' + (searchQ || priorityF || categoryF ? 'Eşleşen görev yok' : 'Henüz görev yok') + '</div><div style="font-size:.8rem;margin-top:4px">' + (searchQ ? 'Farklı arama yapın' : '“Yeni Görev” butonuyla ekleyebilirsiniz') + '</div></div>';
+    listEl.innerHTML = '<div class="todo-empty"><div class="todo-empty-icon">✓</div><div style="font-size:.95rem;font-weight:600">' + (searchQ || priorityF || categoryF || tagF ? 'Eşleşen görev yok' : 'Henüz görev yok') + '</div><div style="font-size:.8rem;margin-top:4px">' + (searchQ ? 'Farklı arama yapın' : '“Yeni Görev” butonuyla ekleyebilirsiniz') + '</div></div>';
     return;
   }
 
@@ -10214,6 +10315,10 @@ function renderTodoItem(t) {
     relatedLink = '<a class="todo-related-link" onclick="event.stopPropagation();showPage(\'messages\');setTimeout(function(){openMessage(\'' + esc(t.relatedMessageId) + '\')},300)">✉️ Mesaj</a>';
   }
 
+  var tagsHtml = (t.tags || []).map(function(tag) {
+    return '<span class="todo-tag" style="background:rgba(107,70,193,.1);color:#553C9A">#' + esc(tag) + '</span>';
+  }).join('');
+
   return '<div class="todo-item ' + (isCompleted ? 'completed' : '') + (isOverdue ? ' overdue' : '') + '" onclick="openTodoEditModal(\'' + esc(t._id) + '\')">' +
     '<div class="todo-priority todo-priority-' + (t.priority || 'medium') + '"></div>' +
     '<div class="todo-checkbox" onclick="event.stopPropagation();toggleTodoComplete(\'' + esc(t._id) + '\')"></div>' +
@@ -10224,6 +10329,7 @@ function renderTodoItem(t) {
         '<span class="todo-tag todo-cat-' + (t.category || 'general') + '">' + (catLabels[t.category] || catLabels.general) + '</span>' +
         '<span class="todo-tag">' + (prioLabels[t.priority] || prioLabels.medium) + '</span>' +
         dueMeta +
+        tagsHtml +
         relatedLink +
       '</div>' +
     '</div>' +
@@ -10277,6 +10383,200 @@ function renderDashboardTodoWidget() {
     '</div>';
   }).join('') +
   '<div style="padding:10px 0 0;display:flex;justify-content:space-between;align-items:center"><span style="font-size:.72rem;color:var(--text-muted)">⏰ ' + overdue.length + ' gecikmiş · 📆 ' + week.length + ' bu hafta</span><a onclick="showPage(\'todos\')" style="font-size:.72rem;color:var(--terra);font-weight:600;cursor:pointer">Tümünü Gör →</a></div>';
+}
+
+// View state
+var _todoView = 'list'; // list | kanban | calendar
+var _calendarMonth = new Date(); // Takvim için mevcut ay
+
+function setTodoView(view, btn) {
+  _todoView = view;
+  document.querySelectorAll('.todo-view-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('todos-list').style.display = view === 'list' ? '' : 'none';
+  document.getElementById('todos-kanban').style.display = view === 'kanban' ? '' : 'none';
+  document.getElementById('todos-calendar').style.display = view === 'calendar' ? '' : 'none';
+  renderTodos();
+}
+
+// Etiket filtresini doldur (tüm mevcut etiketlerden)
+function populateTagFilter() {
+  var sel = document.getElementById('todos-filter-tag');
+  if (!sel) return;
+  var currentVal = sel.value;
+  var allTags = new Set();
+  _allTodos.forEach(function(t) {
+    if (Array.isArray(t.tags)) t.tags.forEach(function(tag) { if (tag) allTags.add(tag); });
+  });
+  sel.innerHTML = '<option value="">Tüm Etiketler</option>' + Array.from(allTags).sort().map(function(tag) {
+    return '<option value="' + esc(tag) + '">🏷 ' + esc(tag) + '</option>';
+  }).join('');
+  sel.value = currentVal;
+}
+
+// Kanban görünümü
+function renderKanban(todos) {
+  var kanbanEl = document.getElementById('todos-kanban');
+  if (!kanbanEl) return;
+
+  var cols = {
+    pending: { title: '⏳ Yapılacak', todos: [] },
+    inprogress: { title: '🔄 Devam Ediyor', todos: [] },
+    completed: { title: '✅ Tamamlandı', todos: [] }
+  };
+  todos.forEach(function(t) {
+    var s = t.status || 'pending';
+    if (cols[s]) cols[s].todos.push(t);
+  });
+
+  var html = '<div class="kanban-board">';
+  ['pending', 'inprogress', 'completed'].forEach(function(status) {
+    var col = cols[status];
+    html += '<div class="kanban-col" data-status="' + status + '" ondragover="event.preventDefault();this.classList.add(\'drag-over\')" ondragleave="this.classList.remove(\'drag-over\')" ondrop="kanbanDrop(event,\'' + status + '\')">';
+    html += '<div class="kanban-col-header">';
+    html += '<span class="kanban-col-title">' + col.title + '</span>';
+    html += '<span class="kanban-col-count">' + col.todos.length + '</span>';
+    html += '</div>';
+    html += '<div class="kanban-cards">';
+    html += col.todos.map(renderKanbanCard).join('');
+    html += '</div>';
+    if (status === 'pending') {
+      html += '<button class="kanban-add-btn" onclick="openTodoModal()">+ Yeni Görev</button>';
+    }
+    html += '</div>';
+  });
+  html += '</div>';
+  kanbanEl.innerHTML = html;
+}
+
+function renderKanbanCard(t) {
+  var catLabels = { general:'📋', call:'📞', email:'✉️', followup:'🔄', premium:'⭐', meeting:'💼', other:'📌' };
+  var prioDot = '<span class="todo-priority-' + (t.priority || 'medium') + '" style="display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px"></span>';
+  var dueBadge = '';
+  if (t.dueDate) {
+    var todayStr = new Date().toISOString().split('T')[0];
+    var isOverdue = t.dueDate < todayStr && t.status !== 'completed';
+    var isToday = t.dueDate === todayStr;
+    dueBadge = '<span class="todo-tag" style="' + (isOverdue ? 'background:rgba(229,62,62,.12);color:#C53030' : (isToday ? 'background:rgba(221,107,32,.12);color:#9C4221' : '')) + '">📅 ' + (isToday ? 'Bugün' : formatDate(t.dueDate)) + '</span>';
+  }
+  var tagsHtml = (t.tags || []).slice(0, 2).map(function(tag) {
+    return '<span class="todo-tag" style="background:rgba(107,70,193,.1);color:#553C9A">#' + esc(tag) + '</span>';
+  }).join('');
+  return '<div class="kanban-card" draggable="true" data-id="' + esc(t._id) + '" ondragstart="kanbanDragStart(event,\'' + esc(t._id) + '\')" ondragend="this.classList.remove(\'dragging\')" onclick="openTodoEditModal(\'' + esc(t._id) + '\')">' +
+    '<div class="kanban-card-title">' + prioDot + esc(t.title) + '</div>' +
+    '<div class="kanban-card-meta">' +
+      '<span class="todo-tag todo-cat-' + (t.category || 'general') + '">' + (catLabels[t.category] || catLabels.general) + '</span>' +
+      dueBadge +
+      tagsHtml +
+    '</div>' +
+  '</div>';
+}
+
+var _draggingTodoId = null;
+function kanbanDragStart(e, id) {
+  _draggingTodoId = id;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+async function kanbanDrop(e, newStatus) {
+  e.preventDefault();
+  document.querySelectorAll('.kanban-col').forEach(c => c.classList.remove('drag-over'));
+  if (!_draggingTodoId) return;
+  var t = _allTodos.find(function(x) { return x._id === _draggingTodoId; });
+  if (!t || t.status === newStatus) { _draggingTodoId = null; return; }
+  try {
+    var update = { status: newStatus };
+    if (newStatus === 'completed') update.completedAt = new Date().toISOString();
+    else update.completedAt = null;
+    await db.collection('admin_todos').doc(_draggingTodoId).update(update);
+  } catch(err) { showToast('Güncelleme hatası: ' + err.message, 'error'); }
+  _draggingTodoId = null;
+}
+
+// Takvim görünümü
+function renderCalendar(todos) {
+  var calEl = document.getElementById('todos-calendar');
+  if (!calEl) return;
+
+  var year = _calendarMonth.getFullYear();
+  var month = _calendarMonth.getMonth();
+  var monthNames = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  var weekdayNames = ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
+
+  // Ayın ilk günü (Pzt=0, Paz=6)
+  var firstDay = new Date(year, month, 1);
+  var firstWeekday = (firstDay.getDay() + 6) % 7; // Pazartesi 0
+  var daysInMonth = new Date(year, month + 1, 0).getDate();
+  var daysInPrevMonth = new Date(year, month, 0).getDate();
+  var todayStr = new Date().toISOString().split('T')[0];
+
+  // Her güne todo'ları grupla
+  var todosByDate = {};
+  todos.forEach(function(t) {
+    if (t.dueDate) {
+      if (!todosByDate[t.dueDate]) todosByDate[t.dueDate] = [];
+      todosByDate[t.dueDate].push(t);
+    }
+  });
+
+  var html = '<div class="calendar-wrap">';
+  html += '<div class="calendar-header">';
+  html += '<div class="calendar-title">' + monthNames[month] + ' ' + year + '</div>';
+  html += '<div class="calendar-nav">';
+  html += '<button onclick="changeCalendarMonth(-1)" title="Önceki Ay">‹</button>';
+  html += '<button onclick="changeCalendarMonth(0)" title="Bugün">•</button>';
+  html += '<button onclick="changeCalendarMonth(1)" title="Sonraki Ay">›</button>';
+  html += '</div>';
+  html += '</div>';
+  html += '<div class="calendar-grid">';
+  // Haftalık başlıklar
+  weekdayNames.forEach(function(w) { html += '<div class="calendar-weekday">' + w + '</div>'; });
+
+  // Önceki ayın son günleri (dolgu)
+  for (var i = firstWeekday - 1; i >= 0; i--) {
+    var dn = daysInPrevMonth - i;
+    html += '<div class="calendar-day other-month"><div class="calendar-day-num">' + dn + '</div></div>';
+  }
+
+  // Bu ayın günleri
+  for (var d = 1; d <= daysInMonth; d++) {
+    var dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    var dayTodos = todosByDate[dateStr] || [];
+    var dowIndex = (new Date(year, month, d).getDay() + 6) % 7;
+    var isWeekend = dowIndex === 5 || dowIndex === 6;
+    var cls = 'calendar-day';
+    if (dateStr === todayStr) cls += ' today';
+    if (isWeekend) cls += ' weekend';
+    html += '<div class="' + cls + '" onclick="openTodoModal({dueDate:\'' + dateStr + '\'})">';
+    html += '<div class="calendar-day-num">' + d + '</div>';
+    html += '<div class="calendar-day-events">';
+    dayTodos.slice(0, 3).forEach(function(t) {
+      var evCls = 'calendar-event priority-' + (t.priority || 'medium') + (t.status === 'completed' ? ' completed' : '');
+      html += '<div class="' + evCls + '" onclick="event.stopPropagation();openTodoEditModal(\'' + esc(t._id) + '\')" title="' + esc(t.title) + '">' + esc(t.title) + '</div>';
+    });
+    if (dayTodos.length > 3) html += '<div class="calendar-more">+' + (dayTodos.length - 3) + ' daha</div>';
+    html += '</div>';
+    html += '</div>';
+  }
+
+  // Sonraki ayın ilk günleri (dolgu) — 6 haftayı tamamla
+  var totalCells = firstWeekday + daysInMonth;
+  var remaining = (7 - (totalCells % 7)) % 7;
+  for (var n = 1; n <= remaining; n++) {
+    html += '<div class="calendar-day other-month"><div class="calendar-day-num">' + n + '</div></div>';
+  }
+
+  html += '</div></div>';
+  calEl.innerHTML = html;
+}
+
+function changeCalendarMonth(dir) {
+  if (dir === 0) {
+    _calendarMonth = new Date();
+  } else {
+    _calendarMonth.setMonth(_calendarMonth.getMonth() + dir);
+  }
+  renderTodos();
 }
 
 // Global keyboard shortcut — Ctrl+T hızlı todo ekleme
