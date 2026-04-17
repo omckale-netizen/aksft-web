@@ -39,9 +39,11 @@ export async function onRequestPost(context) {
     });
   }
 
-  // Service account kontrol
-  if (!env.FIREBASE_SERVICE_ACCOUNT) {
-    return new Response(JSON.stringify({ error: 'Firebase service account tanımlı değil. Cloudflare env\'e FIREBASE_SERVICE_ACCOUNT ekleyin.' }), {
+  // Service account kontrol — JSON veya (client_email + private_key) ikilisi
+  var hasJson = !!env.FIREBASE_SERVICE_ACCOUNT;
+  var hasSplit = !!(env.FIREBASE_CLIENT_EMAIL && env.FIREBASE_PRIVATE_KEY);
+  if (!hasJson && !hasSplit) {
+    return new Response(JSON.stringify({ error: 'Firebase service account tanımlı değil. Cloudflare env\'e FIREBASE_SERVICE_ACCOUNT (tam JSON) veya FIREBASE_CLIENT_EMAIL + FIREBASE_PRIVATE_KEY (ayrı ayrı) ekleyin.' }), {
       status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
@@ -71,14 +73,21 @@ export async function onRequestPost(context) {
   }
 
   try {
-    // Service account JSON'u parse et — birden fazla formatı destekle
+    // Service account — önce split env (CLIENT_EMAIL + PRIVATE_KEY), yoksa JSON parse
     let sa;
-    try {
-      sa = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
-    } catch(e) {
-      return new Response(JSON.stringify({ error: 'Service account JSON geçersiz: ' + (e.message || 'parse hatası') + '. Cloudflare env\'e JSON\'u tek satır halinde yapıştırın veya base64 encode edip ekleyin.' }), {
-        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+    if (hasSplit) {
+      sa = {
+        client_email: String(env.FIREBASE_CLIENT_EMAIL).trim(),
+        private_key: String(env.FIREBASE_PRIVATE_KEY).replace(/\\n/g, '\n')
+      };
+    } else {
+      try {
+        sa = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
+      } catch(e) {
+        return new Response(JSON.stringify({ error: 'Service account JSON geçersiz: ' + (e.message || 'parse hatası') + '. Çözüm: JSON yerine FIREBASE_CLIENT_EMAIL ve FIREBASE_PRIVATE_KEY env var\'larını ayrı ekleyin.' }), {
+          status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
     }
 
     // Google OAuth access token al (service account JWT ile)

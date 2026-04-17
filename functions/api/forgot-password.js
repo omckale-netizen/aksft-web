@@ -50,14 +50,22 @@ export async function onRequestPost(context) {
   // Service account varsa: önce lookup, sonra link al, sonra Resend ile gönder
   // Yoksa: Firebase default mail (kayıtsız ise Firebase EMAIL_NOT_FOUND dönecek)
   try {
-    const hasSA = !!env.FIREBASE_SERVICE_ACCOUNT;
+    const hasSplit = !!(env.FIREBASE_CLIENT_EMAIL && env.FIREBASE_PRIVATE_KEY);
+    const hasSA = !!env.FIREBASE_SERVICE_ACCOUNT || hasSplit;
     const hasResend = !!env.RESEND_API_KEY;
 
     if (hasSA) {
       // 1) Service account JWT → OAuth access token
       let sa, accessToken;
       try {
-        sa = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
+        if (hasSplit) {
+          sa = {
+            client_email: String(env.FIREBASE_CLIENT_EMAIL).trim(),
+            private_key: String(env.FIREBASE_PRIVATE_KEY).replace(/\\n/g, '\n')
+          };
+        } else {
+          sa = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
+        }
         accessToken = await getAccessToken(sa);
       } catch(e) {
         // Service account parse edilemedi → kayıtsız muamelesi yapma, hata dön
