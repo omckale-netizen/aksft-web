@@ -41,6 +41,21 @@ Disallow: /blog-seed*
 Disallow: /blog-update*
 Disallow: /mekan-ekle.html
 
+# Vanity tracking redirects (UTM'li ana sayfaya yönlendiriyor — SEO dışında tut)
+Disallow: /ig
+Disallow: /ig-post
+Disallow: /ig-story
+Disallow: /ig-reel
+Disallow: /fb
+Disallow: /yt
+Disallow: /tt
+Disallow: /tw
+Disallow: /li
+Disallow: /gs
+Disallow: /mail
+Disallow: /qr
+Disallow: /wa
+
 Sitemap: https://assosukesfet.com/sitemap.xml
 
 # AI Content Index

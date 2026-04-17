@@ -1,6 +1,4 @@
-// Vanity redirect: assosukesfet.com/ig → /?utm_source=instagram&utm_medium=bio
+import { vanityRedirect } from './_vanity.js';
 export function onRequest(context) {
-  const url = new URL(context.request.url);
-  const target = url.origin + '/?utm_source=instagram&utm_medium=bio&utm_campaign=profile';
-  return Response.redirect(target, 302);
+  return vanityRedirect(context.request, { source: 'instagram', medium: 'bio', campaign: 'profile' });
 }

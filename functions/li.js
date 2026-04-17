@@ -1,4 +1,4 @@
+import { vanityRedirect } from './_vanity.js';
 export function onRequest(context) {
-  const url = new URL(context.request.url);
-  return Response.redirect(url.origin + '/?utm_source=linkedin&utm_medium=profile', 302);
+  return vanityRedirect(context.request, { source: 'linkedin', medium: 'profile' });
 }

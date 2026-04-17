@@ -4572,14 +4572,15 @@ function renderTrafficSources(events) {
       ctx.arc(cx, cy, inner, 0, Math.PI * 2);
       ctx.fill();
       ctx.globalCompositeOperation = 'source-over';
-      // Center text
-      ctx.fillStyle = '#1A2744';
+      // Center text — dark mode uyumlu
+      var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      ctx.fillStyle = isDark ? '#E2E8F0' : '#1A2744';
       ctx.font = 'bold 24px system-ui, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(total, cx, cy - 8);
       ctx.font = '11px system-ui, sans-serif';
-      ctx.fillStyle = '#718096';
+      ctx.fillStyle = isDark ? '#A0AEC0' : '#718096';
       ctx.fillText('ziyaret', cx, cy + 14);
     }
   }
@@ -4641,17 +4642,18 @@ function showMtTab(tab, btn) {
 }
 
 // --- UTM LİNK ÜRETİCİ ---
-// source → kısa link eşleştirmesi (vanity redirects için)
+// source → kısa link eşleştirmesi (gerçekten var olan vanity redirects)
+// Her entry: functions/ klasöründe karşılığı bir .js dosyası olmalı
 var VANITY_LINKS = {
   instagram: { bio: '/ig', post: '/ig-post', story: '/ig-story', reel: '/ig-reel' },
-  facebook: { bio: '/fb', post: '/fb-post', ad: '/fb-ad' },
-  youtube: { bio: '/yt', post: '/yt-video' },
+  facebook: { bio: '/fb' },
+  youtube: { bio: '/yt' },
   tiktok: { bio: '/tt' },
   twitter: { bio: '/tw' },
   linkedin: { bio: '/li' },
-  google: { bio: '/gs', organic: '/g' },
+  google: { bio: '/gs' },
   email: { newsletter: '/mail' },
-  qr: { qr: '/qr' },
+  qr: { qr: '/qr', print: '/qr' },
   whatsapp: { bio: '/wa' }
 };
 
