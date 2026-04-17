@@ -898,35 +898,45 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         </div>
       </div>
 
-      <!-- Orta grid: Kategori + Güvenlik + Görselsiz (admin-only) -->
-      <div data-admin-only style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;" class="dash-3col">
-        <div class="panel-card" style="margin:0">
-          <div class="panel-card-head"><h3>📊 Kategori Dağılımı</h3></div>
-          <div id="dash-categories"></div>
-        </div>
-        <div class="panel-card" style="margin:0">
-          <div class="panel-card-head" style="justify-content:space-between"><h3>🛡️ Güvenlik</h3><a data-requires-page="security" onclick="showPage('security')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Detay →</a></div>
-          <div id="dash-security"></div>
-        </div>
-        <div class="panel-card" style="margin:0">
-          <div class="panel-card-head"><h3>📷 Görselsiz Mekanlar</h3></div>
-          <div id="dash-no-images"></div>
-        </div>
-      </div>
+      <!-- Genişletilebilir detay alanı (admin-only) — default kapalı, tıklayınca açılır -->
+      <div data-admin-only style="margin-top:8px">
+        <button id="dash-more-toggle" type="button" onclick="toggleDashMore()" style="width:100%;padding:12px 16px;background:var(--card-bg);border:1px dashed var(--card-border);border-radius:12px;cursor:pointer;font-size:.82rem;font-weight:600;color:var(--text-light);display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s" onmouseover="this.style.borderColor='var(--terra)';this.style.color='var(--terra)'" onmouseout="this.style.borderColor='var(--card-border)';this.style.color='var(--text-light)'">
+          <i data-lucide="chevron-down" id="dash-more-chevron" style="width:16px;height:16px;transition:transform .2s"></i>
+          <span id="dash-more-label">Detaylı istatistikleri göster</span>
+        </button>
 
-      <!-- Alt grid: Öne Çıkanlar + Premium + Favori İstatistik (admin-only) -->
-      <div data-admin-only style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;" class="dash-3col">
-        <div class="panel-card" style="margin:0">
-          <div class="panel-card-head"><h3>⭐ Öne Çıkanlar</h3></div>
-          <div id="dash-featured"></div>
-        </div>
-        <div class="panel-card" style="margin:0">
-          <div class="panel-card-head"><h3>👑 Premium Mekanlar</h3></div>
-          <div id="dash-premium"></div>
-        </div>
-        <div class="panel-card" style="margin:0">
-          <div class="panel-card-head"><h3>📈 İçerik Özeti</h3></div>
-          <div id="dash-content-summary"></div>
+        <div id="dash-more-content" style="display:none;margin-top:16px">
+          <!-- Orta grid: Kategori + Güvenlik + Görselsiz -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;" class="dash-3col">
+            <div class="panel-card" style="margin:0">
+              <div class="panel-card-head"><h3>📊 Kategori Dağılımı</h3></div>
+              <div id="dash-categories"></div>
+            </div>
+            <div class="panel-card" style="margin:0">
+              <div class="panel-card-head" style="justify-content:space-between"><h3>🛡️ Güvenlik</h3><a data-requires-page="security" onclick="showPage('security')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Detay →</a></div>
+              <div id="dash-security"></div>
+            </div>
+            <div class="panel-card" style="margin:0">
+              <div class="panel-card-head"><h3>📷 Görselsiz Mekanlar</h3></div>
+              <div id="dash-no-images"></div>
+            </div>
+          </div>
+
+          <!-- Alt grid: Öne Çıkanlar + Premium + İçerik Özeti -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;" class="dash-3col">
+            <div class="panel-card" style="margin:0">
+              <div class="panel-card-head"><h3>⭐ Öne Çıkanlar</h3></div>
+              <div id="dash-featured"></div>
+            </div>
+            <div class="panel-card" style="margin:0">
+              <div class="panel-card-head"><h3>👑 Premium Mekanlar</h3></div>
+              <div id="dash-premium"></div>
+            </div>
+            <div class="panel-card" style="margin:0">
+              <div class="panel-card-head"><h3>📈 İçerik Özeti</h3></div>
+              <div id="dash-content-summary"></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -3863,6 +3873,31 @@ async function changePassword() {
 }
 
 // ── Şifre Tarih Kontrolü ──
+// Dashboard "Detaylı İstatistikler" açılır/kapanır
+function toggleDashMore() {
+  var content = document.getElementById('dash-more-content');
+  var label = document.getElementById('dash-more-label');
+  var chevron = document.getElementById('dash-more-chevron');
+  if (!content) return;
+  var isOpen = content.style.display !== 'none';
+  content.style.display = isOpen ? 'none' : '';
+  if (label) label.textContent = isOpen ? 'Detaylı istatistikleri göster' : 'Detaylı istatistikleri gizle';
+  if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+  localStorage.setItem('dashMoreOpen', isOpen ? '0' : '1');
+}
+
+// Dashboard açıldığında tercih edilen durumu uygula
+function applyDashMoreState() {
+  if (localStorage.getItem('dashMoreOpen') === '1') {
+    var content = document.getElementById('dash-more-content');
+    var label = document.getElementById('dash-more-label');
+    var chevron = document.getElementById('dash-more-chevron');
+    if (content) content.style.display = '';
+    if (label) label.textContent = 'Detaylı istatistikleri gizle';
+    if (chevron) chevron.style.transform = 'rotate(180deg)';
+  }
+}
+
 // ═══ FORCE LOGOUT (Tüm cihazlardan çıkış) ═══
 async function logoutAllDevices() {
   if (!confirm('Tüm cihazlarda açık oturumlarınız kapatılacak. Devam etmek istiyor musunuz?')) return;
@@ -7791,6 +7826,8 @@ function renderDashboard() {
 
   // Editor/viewer görünümü (admin ise gizli kalır)
   try { renderEditorDashboard(); } catch(e) {}
+  // Admin için 'Detaylı İstatistikler' açık/kapalı tercihini uygula
+  try { applyDashMoreState(); } catch(e) {}
 
   // Settings name input sync
   const nameInput = document.getElementById('settings-name');
