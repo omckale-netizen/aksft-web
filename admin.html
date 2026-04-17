@@ -2197,6 +2197,24 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <div id="user-pages-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px 12px">
                 <!-- Dynamic filled via JS -->
               </div>
+              <!-- Geçici erişim (admin bir sayfayı N saatliğine açar) -->
+              <div style="margin-top:12px;padding:10px 12px;background:rgba(196,82,26,.04);border:1px solid rgba(196,82,26,.12);border-radius:8px">
+                <div style="font-size:.7rem;font-weight:700;color:var(--terra);margin-bottom:6px">🕐 Geçici Erişim Ver</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+                  <select id="temp-access-page" style="flex:1;min-width:120px;padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.72rem;background:var(--input-bg,#fff);color:var(--text)">
+                    <option value="">— Sayfa seç —</option>
+                  </select>
+                  <select id="temp-access-duration" style="padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.72rem;background:var(--input-bg,#fff);color:var(--text)">
+                    <option value="3600000">1 saat</option>
+                    <option value="14400000">4 saat</option>
+                    <option value="86400000" selected>24 saat</option>
+                    <option value="172800000">48 saat</option>
+                    <option value="604800000">1 hafta</option>
+                  </select>
+                  <button type="button" class="btn btn-sm btn-secondary" onclick="addTempAccess()" style="font-size:.7rem;padding:5px 10px">+ Ekle</button>
+                </div>
+                <div id="temp-access-list" style="margin-top:8px;display:flex;flex-direction:column;gap:4px"></div>
+              </div>
             </div>
 
             <div style="border-top:1px solid rgba(0,0,0,.06);padding-top:12px">
@@ -4692,6 +4710,7 @@ async function loadCurrentUserRole(firebaseUser) {
     role: null,
     active: true,
     allowedPages: null,
+    allowedPagesExpiry: null,
     permissions: {},
     photoURL: null
   };
@@ -4735,9 +4754,12 @@ async function loadCurrentUserRole(firebaseUser) {
     baseUser.role = data.role || 'viewer';
     baseUser.active = data.active !== false;
     baseUser.allowedPages = Array.isArray(data.allowedPages) ? data.allowedPages : null;
+    baseUser.allowedPagesExpiry = data.allowedPagesExpiry || null;
     baseUser.permissions = data.permissions || {};
     baseUser.photoURL = data.photoURL || null;
     window._currentUser = baseUser;
+    // Geçici erişim süresi dolmuşsa temizle (asenkron, UI'ı bloklamaz)
+    cleanupExpiredTempAccess(firebaseUser.uid, data).catch(function() {});
     // Son giriş güncelle
     try { db.collection('users').doc(firebaseUser.uid).update({ lastLogin: new Date().toISOString() }); } catch(e) {}
     attachCurrentUserListener(firebaseUser.uid);
@@ -4746,6 +4768,50 @@ async function loadCurrentUserRole(firebaseUser) {
     console.error('User role fetch error:', e);
     return null;
   }
+}
+
+// Kullanıcı login olduğunda allowedPagesExpiry içindeki süresi dolanları
+// allowedPages'ten çıkar ve ilgili expiry entry'lerini sil.
+// Rule: kullanıcı sadece name/photoURL değiştirebiliyor, bu yüzden cleanup'ı super admin/admin yapmalı.
+// Kolay çözüm: kullanıcının kendisi admin ise kendi doc'unu cleanup edebilir (rule izin veriyor).
+// Non-admin için: süresi dolmuş page'ler allowedPages'te kalır ama client side canAccessPage'de
+// allowedPagesExpiry kontrol edilir (expired ise false döner). Periyodik cleanup admin panelde yapılır.
+async function cleanupExpiredTempAccess(uid, data) {
+  try {
+    if (!uid || !data) return;
+    var expiry = data.allowedPagesExpiry;
+    if (!expiry || typeof expiry !== 'object') return;
+    var now = Date.now();
+    var expiredPages = Object.entries(expiry).filter(function(kv) {
+      return kv[1] && new Date(kv[1]).getTime() <= now;
+    }).map(function(kv) { return kv[0]; });
+    if (expiredPages.length === 0) return;
+    // Bu admin ise kendi doc'unu temizleyebilir
+    var isSuper = data.email === 'info@onyedimedya.com';
+    var currentRole = data.role;
+    if (currentRole !== 'admin' && !isSuper) return; // sadece admin cleanup yapar
+    var newPages = (data.allowedPages || []).filter(function(p) { return expiredPages.indexOf(p) === -1; });
+    var newExpiry = {};
+    Object.entries(expiry).forEach(function(kv) {
+      if (expiredPages.indexOf(kv[0]) === -1) newExpiry[kv[0]] = kv[1];
+    });
+    await db.collection('users').doc(uid).update({
+      allowedPages: newPages,
+      allowedPagesExpiry: newExpiry,
+      updatedAt: new Date().toISOString()
+    });
+    console.log('[tempAccess] Süresi dolan sayfalar temizlendi:', expiredPages);
+  } catch(e) { console.warn('cleanupExpiredTempAccess:', e); }
+}
+
+// canAccessPage içinde geçici erişim kontrolü — süresi dolmuşsa reddet
+function isTempAccessExpired(page) {
+  if (!window._currentUser) return false;
+  var expiry = window._currentUser.allowedPagesExpiry;
+  if (!expiry || typeof expiry !== 'object') return false;
+  var exp = expiry[page];
+  if (!exp) return false;
+  return new Date(exp).getTime() <= Date.now();
 }
 
 // Real-time: admin kullanıcının yetkilerini değiştirirse anında yansıt
@@ -4774,6 +4840,7 @@ function attachCurrentUserListener(uid) {
       if (!isSuper) window._currentUser.role = data.role || 'viewer';
       window._currentUser.name = data.name || window._currentUser.name;
       window._currentUser.allowedPages = Array.isArray(data.allowedPages) ? data.allowedPages : null;
+      window._currentUser.allowedPagesExpiry = data.allowedPagesExpiry || null;
       window._currentUser.permissions = data.permissions || {};
       window._currentUser.photoURL = data.photoURL || null;
       var changed = prevRole !== window._currentUser.role
@@ -4807,9 +4874,13 @@ function canAccessPage(page) {
   if (ADMIN_ONLY_PAGES.indexOf(page) > -1) return false;
   // Ayarlar ve kişisel sayfalar her yetkili kullanıcıya açık (self-service)
   if (page === 'settings') return true;
-  // Custom allowedPages varsa onu kullan
+  // Custom allowedPages varsa onu kullan — geçici erişim ise süresini kontrol et
   if (Array.isArray(window._currentUser.allowedPages) && window._currentUser.allowedPages.length > 0) {
-    return window._currentUser.allowedPages.indexOf(page) > -1;
+    var hasPage = window._currentUser.allowedPages.indexOf(page) > -1;
+    if (!hasPage) return false;
+    // Süresi dolmuşsa reddet
+    if (isTempAccessExpired(page)) return false;
+    return true;
   }
   // Yoksa default davranış (editor tümü, viewer okuma odaklı)
   if (role === 'viewer') {
@@ -10972,6 +11043,70 @@ function defaultViewerPages() {
   return ['dashboard','venues','pending','routes','villages','analytics','activity','blog','settings'];
 }
 
+// Geçici erişim — admin editör için bir sayfayı N ms süreyle açar
+// _tempAccessDraft: { venues: 'ISO_DATE', blog: 'ISO_DATE', ... } — modal state
+var _tempAccessDraft = {};
+
+function renderTempAccessSelect() {
+  var sel = document.getElementById('temp-access-page');
+  if (!sel) return;
+  var role = document.getElementById('user-role').value;
+  var list = ALL_ADMIN_PAGES.filter(function(p) {
+    if (p.adminOnly) return false;
+    if (role === 'viewer' && ['todos','export','security','users'].indexOf(p.key) > -1) return false;
+    return true;
+  });
+  sel.innerHTML = '<option value="">— Sayfa seç —</option>' + list.map(function(p) {
+    return '<option value="' + p.key + '">' + p.icon + ' ' + esc(p.label) + '</option>';
+  }).join('');
+}
+
+function renderTempAccessList() {
+  var listEl = document.getElementById('temp-access-list');
+  if (!listEl) return;
+  var entries = Object.entries(_tempAccessDraft).filter(function(kv) {
+    return kv[1] && new Date(kv[1]).getTime() > Date.now();
+  });
+  if (entries.length === 0) {
+    listEl.innerHTML = '<div style="font-size:.62rem;color:var(--text-muted);font-style:italic">Henüz geçici erişim yok</div>';
+    return;
+  }
+  listEl.innerHTML = entries.map(function(kv) {
+    var page = kv[0];
+    var expiry = new Date(kv[1]);
+    var info = ALL_ADMIN_PAGES.find(function(p) { return p.key === page; }) || { icon: '📄', label: page };
+    var diffMs = expiry.getTime() - Date.now();
+    var hours = Math.floor(diffMs / 3600000);
+    var remaining = hours >= 48 ? Math.floor(hours/24) + ' gün' : hours + ' saat';
+    return '<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:#fff;border-radius:6px;font-size:.7rem">' +
+      '<span>' + info.icon + '</span>' +
+      '<span style="flex:1;font-weight:600;color:var(--navy)">' + esc(info.label) + '</span>' +
+      '<span style="font-size:.62rem;color:var(--terra);font-weight:700">~' + remaining + ' kaldı</span>' +
+      '<button type="button" onclick="removeTempAccess(\'' + esc(page) + '\')" style="border:none;background:none;cursor:pointer;color:var(--red);font-size:.7rem">✕</button>' +
+    '</div>';
+  }).join('');
+}
+
+function addTempAccess() {
+  var pageSel = document.getElementById('temp-access-page');
+  var durSel = document.getElementById('temp-access-duration');
+  var page = pageSel && pageSel.value;
+  var durMs = parseInt((durSel && durSel.value) || '86400000', 10);
+  if (!page) { showToast('Sayfa seçin', 'error'); return; }
+  _tempAccessDraft[page] = new Date(Date.now() + durMs).toISOString();
+  // Otomatik olarak allowedPages'e de ekle (checkbox olarak işaretle)
+  var cb = document.querySelector('.user-page-cb[data-page="' + page + '"]');
+  if (cb) cb.checked = true;
+  renderTempAccessList();
+  pageSel.value = '';
+  showToast('Geçici erişim eklendi (' + page + ')', 'success');
+}
+
+function removeTempAccess(page) {
+  delete _tempAccessDraft[page];
+  renderTempAccessList();
+}
+
 // Pages grid'i doldur
 function renderUserPagesGrid(selected) {
   var grid = document.getElementById('user-pages-grid');
@@ -11056,6 +11191,20 @@ function openUserModal(uid) {
     document.getElementById('perm-viewAllLogs').checked = !!perms.viewAllLogs;
     // Allowed pages
     renderUserPagesGrid(u.allowedPages || null);
+    // Geçici erişim state'ini yükle (süresi geçenler filtrelenir)
+    _tempAccessDraft = {};
+    if (u.allowedPagesExpiry && typeof u.allowedPagesExpiry === 'object') {
+      Object.entries(u.allowedPagesExpiry).forEach(function(kv) {
+        if (kv[1] && new Date(kv[1]).getTime() > Date.now()) _tempAccessDraft[kv[0]] = kv[1];
+      });
+    }
+    renderTempAccessSelect();
+    renderTempAccessList();
+  } else {
+    // Yeni kullanıcı — temp access temiz
+    _tempAccessDraft = {};
+    renderTempAccessSelect();
+    renderTempAccessList();
   }
   setTimeout(function() { document.getElementById('user-name').focus(); }, 100);
 }
@@ -11112,6 +11261,11 @@ async function saveUser() {
   // Allowed pages ve permissions'ı topla (admin için null/varsayılan)
   var allowedPages = [];
   var permissions = {};
+  // Geçici erişim — expired olanları at, kalanları koru
+  var allowedPagesExpiry = {};
+  Object.entries(_tempAccessDraft || {}).forEach(function(kv) {
+    if (kv[1] && new Date(kv[1]).getTime() > Date.now()) allowedPagesExpiry[kv[0]] = kv[1];
+  });
   if (role !== 'admin') {
     document.querySelectorAll('.user-page-cb:checked').forEach(function(cb) {
       allowedPages.push(cb.getAttribute('data-page'));
@@ -11132,6 +11286,7 @@ async function saveUser() {
       await db.collection('users').doc(editUid).update({
         name: name, role: role, notes: notes, active: active,
         allowedPages: allowedPages,
+        allowedPagesExpiry: allowedPagesExpiry,
         permissions: permissions,
         updatedAt: new Date().toISOString(),
         updatedBy: window._currentUser.email
@@ -11161,6 +11316,7 @@ async function saveUser() {
       await db.collection('users').doc(newUid).set({
         email: email, name: name, role: role, notes: notes, active: active,
         allowedPages: allowedPages,
+        allowedPagesExpiry: allowedPagesExpiry,
         permissions: permissions,
         createdAt: new Date().toISOString(),
         createdBy: window._currentUser.email
