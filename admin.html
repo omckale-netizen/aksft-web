@@ -287,12 +287,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .panel-table tbody tr:hover td{background:var(--table-hover)}
 [data-theme="dark"] .panel-table tbody tr:nth-child(even) td{background:rgba(255,255,255,.015)}
 [data-theme="dark"] .panel-table tbody tr:hover td{background:rgba(255,255,255,.04)}
-/* Tablo içindeki aksiyon butonları */
-.panel-table .row-actions{display:inline-flex;gap:var(--space-1);align-items:center}
-.panel-table .row-actions button,.panel-table .row-actions a{width:30px;height:30px;padding:0;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px solid transparent;border-radius:var(--radius-sm);color:var(--text-light);cursor:pointer;transition:all var(--transition-fast);text-decoration:none}
-.panel-table .row-actions button:hover,.panel-table .row-actions a:hover{background:var(--card-bg);border-color:var(--card-border);color:var(--terra);box-shadow:var(--shadow-xs)}
-.panel-table .row-actions button.danger:hover,.panel-table .row-actions a.danger:hover{color:var(--red);border-color:rgba(229,62,62,.2);background:rgba(229,62,62,.05)}
-.panel-table .row-actions svg{width:15px;height:15px}
+/* Row actions — tablo satırları ve kart aksiyonları için */
+.row-actions{display:inline-flex;gap:var(--space-1);align-items:center;flex-wrap:wrap}
+.row-actions button,.row-actions a{width:32px;height:32px;padding:0;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px solid transparent;border-radius:var(--radius-sm);color:var(--text-light);cursor:pointer;transition:all var(--transition-fast);text-decoration:none}
+.row-actions button:hover,.row-actions a:hover{background:var(--card-bg);border-color:var(--card-border);color:var(--terra);box-shadow:var(--shadow-xs)}
+.row-actions button.danger:hover,.row-actions a.danger:hover{color:var(--red);border-color:rgba(229,62,62,.2);background:rgba(229,62,62,.05)}
+.row-actions svg{width:16px;height:16px}
+[data-theme="dark"] .row-actions button:hover,[data-theme="dark"] .row-actions a:hover{background:var(--input-bg)}
 .drag-handle{cursor:grab;color:var(--text-muted);font-size:1rem;user-select:none;padding:0 4px;opacity:.4;transition:opacity .15s}
 .drag-handle:hover{opacity:.8}
 .drag-handle:active{cursor:grabbing}
@@ -11745,17 +11746,19 @@ function renderUsers() {
           (u.notes ? '<span>📝 ' + esc(u.notes) + '</span>' : '') +
         '</div>' +
       '</div>' +
-      '<div class="user-actions">' +
-        (isSelf ? '<button class="btn btn-sm btn-secondary" onclick="openChangePasswordModal()" title="Şifremi Değiştir">🔑</button>' : '') +
-        (!isSuper ? '<button class="btn btn-sm btn-secondary" onclick="openUserModal(\'' + esc(u.uid) + '\')" title="Düzenle">✏️</button>' : '') +
-        (!isSelf && !isSuper && isCurrentAdmin() ? '<button class="btn btn-sm btn-secondary" onclick="openAdminSetPasswordModal(\'' + esc(u.uid) + '\',\'' + esc(u.email) + '\',\'' + esc(u.name || u.email) + '\')" title="Direkt şifre ata">🔐</button>' : '') +
-        (!isSelf && !isSuper && isCurrentAdmin() ? '<button class="btn btn-sm btn-secondary" onclick="sendPasswordReset(\'' + esc(u.email) + '\')" title="Şifre sıfırlama e-postası gönder">📧</button>' : '') +
-        (!isSelf && !isSuper && isCurrentAdmin() ? '<button class="btn btn-sm btn-secondary" onclick="adminRevokeUserSessions(\'' + esc(u.uid) + '\',\'' + esc(u.name || u.email) + '\')" title="Tüm cihazlardan çıkarır">🚪</button>' : '') +
-        (!isSelf && !isSuper ? '<button class="btn btn-sm btn-secondary" onclick="toggleUserActive(\'' + esc(u.uid) + '\')" title="' + (isActive ? 'Pasife Al' : 'Aktifleştir') + '">' + (isActive ? '⏸' : '▶') + '</button>' : '') +
-        (!isSelf && !isSuper ? '<button class="btn btn-sm btn-danger" onclick="deleteUser(\'' + esc(u.uid) + '\')" title="Sil">🗑</button>' : '') +
+      '<div class="row-actions">' +
+        (isSelf ? '<button onclick="openChangePasswordModal()" title="Şifremi Değiştir"><i data-lucide="key-round"></i></button>' : '') +
+        (!isSuper ? '<button onclick="openUserModal(\'' + esc(u.uid) + '\')" title="Düzenle"><i data-lucide="pencil"></i></button>' : '') +
+        (!isSelf && !isSuper && isCurrentAdmin() ? '<button onclick="openAdminSetPasswordModal(\'' + esc(u.uid) + '\',\'' + esc(u.email) + '\',\'' + esc(u.name || u.email) + '\')" title="Direkt şifre ata"><i data-lucide="lock-keyhole"></i></button>' : '') +
+        (!isSelf && !isSuper && isCurrentAdmin() ? '<button onclick="sendPasswordReset(\'' + esc(u.email) + '\')" title="Şifre sıfırlama e-postası gönder"><i data-lucide="mail"></i></button>' : '') +
+        (!isSelf && !isSuper && isCurrentAdmin() ? '<button onclick="adminRevokeUserSessions(\'' + esc(u.uid) + '\',\'' + esc(u.name || u.email) + '\')" title="Tüm cihazlardan çıkarır"><i data-lucide="log-out"></i></button>' : '') +
+        (!isSelf && !isSuper ? '<button onclick="toggleUserActive(\'' + esc(u.uid) + '\')" title="' + (isActive ? 'Pasife Al' : 'Aktifleştir') + '"><i data-lucide="' + (isActive ? 'pause' : 'play') + '"></i></button>' : '') +
+        (!isSelf && !isSuper ? '<button class="danger" onclick="deleteUser(\'' + esc(u.uid) + '\')" title="Sil"><i data-lucide="trash-2"></i></button>' : '') +
       '</div>' +
     '</div>';
   }).join('');
+  // Yeni render sonrası lucide ikonları etkinleştir
+  if (window.lucide && typeof lucide.createIcons === 'function') try { lucide.createIcons(); } catch(e) {}
 }
 
 // Şifre üretici
