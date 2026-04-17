@@ -259,6 +259,27 @@ service cloud.firestore {
           || resource.data.assignedTo == request.auth.uid
         )
       );
+
+      // Görev yorumları — parent todo'ya erişimi olan editor+ yorum yazabilir
+      // Yorum dokümanı: text, authorUid, authorEmail, authorName, timestamp, mentions(list)
+      match /comments/{commentId} {
+        allow read: if isAdmin() || (
+          isEditor() && (
+            get(/databases/$(database)/documents/admin_todos/$(docId)).data.assignedTo == null
+            || get(/databases/$(database)/documents/admin_todos/$(docId)).data.assignedTo == request.auth.uid
+            || get(/databases/$(database)/documents/admin_todos/$(docId)).data.createdBy == myEmail()
+          )
+        );
+        allow create: if isEditor()
+          && request.resource.data.authorUid == request.auth.uid
+          && request.resource.data.authorEmail == myEmail()
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 2000;
+        allow update, delete: if isAdmin() || (
+          isEditor() && resource.data.authorUid == request.auth.uid
+        );
+      }
     }
 
     // Diger tum koleksiyonlar: varsayilan olarak engelle

@@ -2420,6 +2420,21 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <div id="todo-related-info" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(196,82,26,.04);border:1px solid rgba(196,82,26,.15);border-radius:8px;font-size:.78rem;color:var(--text-muted)"></div>
           <input type="hidden" id="todo-related-venue">
           <input type="hidden" id="todo-related-message">
+
+          <!-- Yorumlar (sadece düzenlemede görünür) -->
+          <div id="todo-comments-section" style="display:none;margin-top:20px;padding-top:18px;border-top:1px solid rgba(0,0,0,.08)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+              <span style="font-size:.85rem;font-weight:700;color:var(--navy)">💬 Yorumlar</span>
+              <span id="todo-comments-count" style="font-size:.65rem;color:var(--text-muted);font-weight:600"></span>
+            </div>
+            <div id="todo-comments-list" style="max-height:260px;overflow-y:auto;margin-bottom:10px"></div>
+            <div style="position:relative">
+              <textarea id="todo-comment-input" placeholder="Yorum yaz... @isim ile etiketle" rows="2" oninput="handleCommentInput(event)" style="width:100%;padding:10px 70px 10px 12px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:10px;font-size:.82rem;font-family:inherit;resize:vertical;background:var(--input-bg,#fff);color:var(--text)" maxlength="2000"></textarea>
+              <button type="button" class="btn btn-primary btn-sm" onclick="submitTodoComment()" style="position:absolute;right:8px;bottom:8px;padding:5px 14px;font-size:.72rem">Gönder</button>
+              <div id="todo-mention-popup" style="display:none;position:absolute;left:12px;right:12px;bottom:100%;margin-bottom:6px;background:var(--card-bg,#fff);border:1px solid rgba(0,0,0,.1);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:180px;overflow-y:auto;z-index:10"></div>
+            </div>
+          </div>
+
           <div style="display:flex;gap:10px;margin-top:20px">
             <button class="btn btn-primary" onclick="saveTodo()" style="flex:1">Kaydet</button>
             <button class="btn btn-secondary" onclick="closeTodoModal()">İptal</button>
@@ -11405,6 +11420,9 @@ function updateTodoBadge() {
 
 function openTodoModal(prefill) {
   document.getElementById('todo-modal-overlay').style.display = 'flex';
+  // Yorumlar bölümünü yeni görevde gizle (sadece edit'te aktif)
+  openTodoCommentsFor(null);
+  var ci = document.getElementById('todo-comment-input'); if (ci) { ci.value = ''; ci.dataset.mentions = ''; }
   document.getElementById('todo-edit-id').value = '';
   document.getElementById('todo-title').value = '';
   document.getElementById('todo-description').value = '';
@@ -11446,6 +11464,11 @@ function openTodoModal(prefill) {
 
 function closeTodoModal() {
   document.getElementById('todo-modal-overlay').style.display = 'none';
+  // Yorumlar listener'ını kapat
+  if (_todoCommentsUnsub) { _todoCommentsUnsub(); _todoCommentsUnsub = null; }
+  _currentTodoId = null;
+  var popup = document.getElementById('todo-mention-popup');
+  if (popup) popup.style.display = 'none';
 }
 
 function openTodoEditModal(id) {
@@ -11464,6 +11487,8 @@ function openTodoEditModal(id) {
   document.getElementById('todo-related-venue').value = t.relatedVenueId || '';
   document.getElementById('todo-related-message').value = t.relatedMessageId || '';
   populateTodoAssignedSelect(t.assignedTo || '');
+  // Yorumları aç (düzenleme modunda)
+  openTodoCommentsFor(id);
   if (t.relatedVenueId) {
     var v = (draftData.venues || []).find(function(x) { return x.id === t.relatedVenueId; });
     document.getElementById('todo-related-info').style.display = '';
@@ -11472,6 +11497,184 @@ function openTodoEditModal(id) {
   if (t.relatedMessageId) {
     document.getElementById('todo-related-info').style.display = '';
     document.getElementById('todo-related-info').innerHTML = '✉️ Bağlı mesaj';
+  }
+}
+
+// ═══ TODO YORUMLARI + @MENTION ═══
+var _todoCommentsUnsub = null;
+var _currentTodoId = null;
+
+function openTodoCommentsFor(todoId) {
+  _currentTodoId = todoId;
+  var section = document.getElementById('todo-comments-section');
+  if (!section) return;
+  if (!todoId) { section.style.display = 'none'; return; }
+  section.style.display = '';
+  var listEl = document.getElementById('todo-comments-list');
+  if (listEl) listEl.innerHTML = '<div style="padding:12px;text-align:center;color:var(--text-muted);font-size:.72rem">Yorumlar yükleniyor...</div>';
+  // Mevcut listener'ı kapat
+  if (_todoCommentsUnsub) { _todoCommentsUnsub(); _todoCommentsUnsub = null; }
+  _todoCommentsUnsub = db.collection('admin_todos').doc(todoId).collection('comments')
+    .orderBy('timestamp', 'asc')
+    .onSnapshot(function(snap) {
+      var comments = snap.docs.map(function(d) { return { _id: d.id, ...d.data() }; });
+      renderTodoComments(comments);
+    }, function(err) {
+      console.warn('Comments listener:', err);
+      if (listEl) listEl.innerHTML = '<div style="padding:12px;color:var(--red);font-size:.72rem">Yüklenemedi.</div>';
+    });
+}
+
+function renderTodoComments(comments) {
+  var listEl = document.getElementById('todo-comments-list');
+  var countEl = document.getElementById('todo-comments-count');
+  if (!listEl) return;
+  if (countEl) countEl.textContent = comments.length ? '(' + comments.length + ')' : '';
+  if (comments.length === 0) {
+    listEl.innerHTML = '<div style="padding:18px;text-align:center;color:var(--text-muted);font-size:.75rem">Henüz yorum yok.</div>';
+    return;
+  }
+  var myEmail = (window._currentUser && window._currentUser.email) || '';
+  var isAdmin = isCurrentAdmin();
+  listEl.innerHTML = comments.map(function(c) {
+    var when = c.timestamp ? formatNotifTime(c.timestamp) : '';
+    var canDelete = isAdmin || c.authorEmail === myEmail;
+    var body = esc(c.text || '');
+    // @mention highlight — @Ad Soyad veya @mail
+    body = body.replace(/@([\w.\-@]+(?:\s[\wğüşıöçĞÜŞİÖÇ]+)*)/g, '<span style="color:var(--terra);font-weight:600;background:rgba(196,82,26,.08);padding:1px 5px;border-radius:4px">@$1</span>');
+    return '<div style="display:flex;gap:10px;padding:10px 12px;border-bottom:1px solid rgba(0,0,0,.04)">' +
+      userAvatar({ name: c.authorName, email: c.authorEmail, photoURL: c.authorPhotoURL }, 28) +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:2px">' +
+          '<span style="font-size:.76rem;font-weight:700;color:var(--navy)">' + esc(c.authorName || c.authorEmail || 'Anonim') + '</span>' +
+          '<span style="font-size:.62rem;color:var(--text-muted)">' + esc(when) + '</span>' +
+          (canDelete ? '<button type="button" onclick="deleteTodoComment(\'' + esc(c._id) + '\')" style="margin-left:auto;border:none;background:none;color:var(--text-muted);cursor:pointer;font-size:.7rem" title="Sil">🗑</button>' : '') +
+        '</div>' +
+        '<div style="font-size:.82rem;color:var(--text);line-height:1.5;white-space:pre-wrap;word-break:break-word">' + body + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  listEl.scrollTop = listEl.scrollHeight;
+}
+
+// Yorum input'unda @ tuşlanınca kullanıcı listesi aç
+function handleCommentInput(event) {
+  var input = document.getElementById('todo-comment-input');
+  var popup = document.getElementById('todo-mention-popup');
+  if (!input || !popup) return;
+  var val = input.value;
+  var caret = input.selectionStart || 0;
+  var before = val.substring(0, caret);
+  var match = before.match(/@(\S*)$/);
+  if (!match) { popup.style.display = 'none'; return; }
+  var q = match[1].toLowerCase();
+  var users = (_allUsers || []).filter(function(u) {
+    if (u.active === false) return false;
+    if (u.uid === (window._currentUser && window._currentUser.uid)) return false;
+    var n = (u.name || '').toLowerCase();
+    var e = (u.email || '').toLowerCase();
+    return n.indexOf(q) > -1 || e.indexOf(q) > -1;
+  }).slice(0, 6);
+  if (users.length === 0) { popup.style.display = 'none'; return; }
+  popup.innerHTML = users.map(function(u) {
+    return '<div onclick="insertMention(\'' + esc(u.name || u.email) + '\',\'' + esc(u.uid) + '\')" style="display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;border-bottom:1px solid rgba(0,0,0,.04);transition:background .12s" onmouseover="this.style.background=\'rgba(0,0,0,.03)\'" onmouseout="this.style.background=\'transparent\'">' +
+      userAvatar(u, 24) +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:.76rem;font-weight:600;color:var(--navy)">' + esc(u.name || u.email) + '</div>' +
+        '<div style="font-size:.62rem;color:var(--text-muted)">' + esc(u.email || '') + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  popup.style.display = 'block';
+}
+
+function insertMention(name, uid) {
+  var input = document.getElementById('todo-comment-input');
+  var popup = document.getElementById('todo-mention-popup');
+  if (!input) return;
+  var val = input.value;
+  var caret = input.selectionStart || 0;
+  var before = val.substring(0, caret);
+  var after = val.substring(caret);
+  var newBefore = before.replace(/@\S*$/, '@' + name + ' ');
+  input.value = newBefore + after;
+  input.focus();
+  input.setSelectionRange(newBefore.length, newBefore.length);
+  if (popup) popup.style.display = 'none';
+  // Mention'ı listeye ekle (gizli dataset'te)
+  input.dataset.mentions = (input.dataset.mentions || '') + uid + ',';
+}
+
+async function submitTodoComment() {
+  if (!_currentTodoId) { showToast('Önce görevi kaydedin', 'error'); return; }
+  var input = document.getElementById('todo-comment-input');
+  if (!input) return;
+  var text = input.value.trim();
+  if (!text) { showToast('Yorum boş olamaz', 'error'); return; }
+  var user = firebase.auth().currentUser;
+  if (!user) return;
+  var mentionsList = (input.dataset.mentions || '').split(',').filter(Boolean);
+  // Text'ten mention isimlerini alıp gerçek uid'lere çevir (güven için ek pas)
+  var mentionedUids = Array.from(new Set(mentionsList));
+  try {
+    await db.collection('admin_todos').doc(_currentTodoId).collection('comments').add({
+      text: text,
+      authorUid: user.uid,
+      authorEmail: user.email,
+      authorName: (window._currentUser && window._currentUser.name) || user.email.split('@')[0],
+      authorPhotoURL: (window._currentUser && window._currentUser.photoURL) || null,
+      timestamp: new Date().toISOString(),
+      mentions: mentionedUids
+    });
+    input.value = '';
+    input.dataset.mentions = '';
+    // Mention edilen kişilere mail gönder (opsiyonel — admin + canSendMail ise çalışır)
+    if (mentionedUids.length > 0) {
+      sendMentionMails(mentionedUids, text, _currentTodoId).catch(function(e) { console.warn('Mention mail:', e); });
+    }
+  } catch(e) {
+    showToast('Yorum eklenemedi: ' + (e.message || ''), 'error');
+  }
+}
+
+async function sendMentionMails(uids, text, todoId) {
+  try {
+    var todo = _allTodos.find(function(t) { return t._id === todoId; }) || {};
+    var token = await firebase.auth().currentUser.getIdToken();
+    var senderName = (window._currentUser && window._currentUser.name) || 'Biri';
+    var panelUrl = 'https://assosukesfet.com/admin.html#todos';
+    for (var i = 0; i < uids.length; i++) {
+      var u = (_allUsers || []).find(function(x) { return x.uid === uids[i]; });
+      if (!u || !u.email) continue;
+      if (u.uid === (window._currentUser && window._currentUser.uid)) continue;
+      var html = '<div style="font-family:-apple-system,sans-serif;max-width:540px;margin:20px auto;padding:24px;background:#fff;border-radius:12px">' +
+        '<h2 style="color:#C4521A;margin:0 0 14px">💬 ' + esc(senderName) + ' sizi bir görevde etiketledi</h2>' +
+        '<div style="background:#FAF7F2;padding:12px 14px;border-radius:8px;border-left:3px solid #C4521A;margin-bottom:16px"><strong>' + esc(todo.title || '') + '</strong><br><span style="color:#4A5568;font-size:.88rem">' + esc(text).replace(/\n/g, '<br>') + '</span></div>' +
+        '<a href="' + panelUrl + '" style="display:inline-block;background:#C4521A;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:600">Görevi Aç →</a>' +
+        '</div>';
+      try {
+        await fetch('/api/send-mail', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({
+            to: u.email,
+            subject: '💬 ' + senderName + ' sizi etiketledi — ' + (todo.title || 'Görev'),
+            html: html,
+            type: 'mention'
+          })
+        });
+      } catch(e) { /* sessizce geç */ }
+    }
+  } catch(e) { console.warn('sendMentionMails:', e); }
+}
+
+async function deleteTodoComment(commentId) {
+  if (!_currentTodoId || !commentId) return;
+  if (!confirm('Yorum silinsin mi?')) return;
+  try {
+    await db.collection('admin_todos').doc(_currentTodoId).collection('comments').doc(commentId).delete();
+  } catch(e) {
+    showToast('Silinemedi: ' + (e.message || ''), 'error');
   }
 }
 
