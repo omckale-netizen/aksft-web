@@ -3309,6 +3309,78 @@ function renderVenuePage(venueId) {
    ANALYTICS TRACKER
 ═══════════════════ */
 (function() {
+  // UTM + referrer yakalama — sayfa yüklenir yüklenmez çalışır
+  // First-touch attribution: kullanıcının ilk geldiği kaynağı localStorage'da saklarız
+  function captureTrafficSource() {
+    try {
+      var params = new URLSearchParams(location.search);
+      var utmSource = params.get('utm_source');
+      var utmMedium = params.get('utm_medium');
+      var utmCampaign = params.get('utm_campaign');
+      var utmContent = params.get('utm_content');
+
+      // Referrer'dan source guess (UTM yoksa)
+      function guessFromReferrer() {
+        var r = (document.referrer || '').toLowerCase();
+        if (!r) return { source: 'direct', medium: '(none)' };
+        try {
+          var host = new URL(document.referrer).hostname.toLowerCase();
+          // Kendi site alt sayfalarından geliş — internal
+          if (host.indexOf('assosukesfet.com') > -1) return { source: 'internal', medium: 'link' };
+          if (host.indexOf('instagram') > -1) return { source: 'instagram', medium: 'referral' };
+          if (host.indexOf('facebook') > -1 || host.indexOf('fb.') > -1) return { source: 'facebook', medium: 'referral' };
+          if (host.indexOf('google') > -1) return { source: 'google', medium: 'organic' };
+          if (host.indexOf('youtube') > -1 || host.indexOf('youtu.be') > -1) return { source: 'youtube', medium: 'referral' };
+          if (host.indexOf('t.co') > -1 || host.indexOf('twitter') > -1 || host.indexOf('x.com') > -1) return { source: 'twitter', medium: 'referral' };
+          if (host.indexOf('whatsapp') > -1 || host.indexOf('wa.me') > -1) return { source: 'whatsapp', medium: 'referral' };
+          if (host.indexOf('linkedin') > -1 || host.indexOf('lnkd.') > -1) return { source: 'linkedin', medium: 'referral' };
+          if (host.indexOf('tiktok') > -1) return { source: 'tiktok', medium: 'referral' };
+          if (host.indexOf('bing') > -1) return { source: 'bing', medium: 'organic' };
+          if (host.indexOf('yandex') > -1) return { source: 'yandex', medium: 'organic' };
+          if (host.indexOf('duckduckgo') > -1) return { source: 'duckduckgo', medium: 'organic' };
+          return { source: host, medium: 'referral' };
+        } catch(e) { return { source: 'direct', medium: '(none)' }; }
+      }
+
+      var current = {};
+      if (utmSource) {
+        current = {
+          source: utmSource,
+          medium: utmMedium || 'unknown',
+          campaign: utmCampaign || null,
+          content: utmContent || null
+        };
+      } else {
+        var guess = guessFromReferrer();
+        current = { source: guess.source, medium: guess.medium, campaign: null, content: null };
+      }
+
+      // İlk kez geldiği kaynağı sakla (first-touch attribution)
+      // 30 gün sonra yenilenir
+      var storedRaw = localStorage.getItem('traffic_first_source');
+      var stored = null;
+      try { stored = storedRaw ? JSON.parse(storedRaw) : null; } catch(e) {}
+      var expired = !stored || (stored.ts && (Date.now() - stored.ts > 30 * 24 * 60 * 60 * 1000));
+      if (!stored || expired) {
+        localStorage.setItem('traffic_first_source', JSON.stringify({
+          source: current.source, medium: current.medium, campaign: current.campaign,
+          ts: Date.now()
+        }));
+      }
+
+      // Son geldiği kaynak — her oturum güncellenir (last-touch attribution)
+      localStorage.setItem('traffic_last_source', JSON.stringify({
+        source: current.source, medium: current.medium, campaign: current.campaign,
+        ts: Date.now()
+      }));
+
+      window._trafficSource = current;
+    } catch(e) { /* sessizce geç */ }
+  }
+
+  // Sayfa yüklenir yüklenmez UTM capture
+  captureTrafficSource();
+
   // Wait for Firebase to be ready
   function initAnalytics() {
     if (typeof firebase === 'undefined' || !firebase.firestore) {
@@ -3331,7 +3403,7 @@ function renderVenuePage(venueId) {
         }).catch(() => null);
     }
 
-    // Log event with timestamp + weather (non-blocking)
+    // Log event with timestamp + weather + traffic source (non-blocking)
     function logEvent(type, target, action) {
       const run = function() {
         const now = new Date();
@@ -3343,6 +3415,14 @@ function renderVenuePage(venueId) {
           date: now.toISOString().split('T')[0],
           hour: now.getHours()
         };
+        // UTM / trafik kaynağı ekle
+        var ts = window._trafficSource;
+        if (ts && ts.source) {
+          ev.source = String(ts.source).slice(0, 60);
+          ev.medium = String(ts.medium || '').slice(0, 60);
+          if (ts.campaign) ev.campaign = String(ts.campaign).slice(0, 100);
+          if (ts.content) ev.content = String(ts.content).slice(0, 100);
+        }
         getWeather().then(w => {
           if (w) { ev.weather = w.label; ev.temp = w.temp; }
           adb.collection('analytics_events').add(ev).catch(() => {});
