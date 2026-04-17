@@ -758,11 +758,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         </div>
       </div>
 
-      <!-- Uyarılar -->
-      <div id="dash-alerts" style="margin-bottom:16px;"></div>
+      <!-- Uyarılar (admin-only) -->
+      <div id="dash-alerts" data-admin-only style="margin-bottom:16px;"></div>
 
-      <!-- Stats — ana kartlar -->
-      <div class="stats-grid" id="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));margin-bottom:20px"></div>
+      <!-- Stats — ana kartlar (admin-only) -->
+      <div class="stats-grid" id="stats-grid" data-admin-only style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));margin-bottom:20px"></div>
 
       <!-- Hızlı İşlemler -->
       <div id="dash-quick-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;">
@@ -780,19 +780,19 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         </button>
       </div>
 
-      <!-- Üst grid: Görevler + Mesajlar + Son Eklenenler + Blog -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+      <!-- Görevler — herkese görünür (kendi atanan görevleri) -->
+      <div id="dash-tasks-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
         <div class="panel-card" style="margin:0">
           <div class="panel-card-head" style="justify-content:space-between"><h3>✓ Bugünkü Görevler</h3><a data-requires-page="todos" onclick="showPage('todos')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Tümü →</a></div>
           <div id="dashboard-todo-widget" style="padding:14px 18px"></div>
         </div>
-        <div class="panel-card" style="margin:0">
+        <div class="panel-card" data-admin-only style="margin:0">
           <div class="panel-card-head" style="justify-content:space-between"><h3>✉️ Son Mesajlar</h3><a data-requires-page="messages" onclick="showPage('messages')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Tümü →</a></div>
           <div id="dash-messages"></div>
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+      <div data-admin-only style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
         <div class="panel-card" style="margin:0">
           <div class="panel-card-head" style="justify-content:space-between"><h3>🕐 Son Eklenenler</h3><a data-requires-page="venues" onclick="showPage('venues')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Tümü →</a></div>
           <div id="recent-venues"></div>
@@ -803,8 +803,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         </div>
       </div>
 
-      <!-- Orta grid: Kategori + Güvenlik + Görselsiz -->
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;" class="dash-3col">
+      <!-- Orta grid: Kategori + Güvenlik + Görselsiz (admin-only) -->
+      <div data-admin-only style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;" class="dash-3col">
         <div class="panel-card" style="margin:0">
           <div class="panel-card-head"><h3>📊 Kategori Dağılımı</h3></div>
           <div id="dash-categories"></div>
@@ -819,8 +819,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         </div>
       </div>
 
-      <!-- Alt grid: Öne Çıkanlar + Premium + Favori İstatistik -->
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;" class="dash-3col">
+      <!-- Alt grid: Öne Çıkanlar + Premium + Favori İstatistik (admin-only) -->
+      <div data-admin-only style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;" class="dash-3col">
         <div class="panel-card" style="margin:0">
           <div class="panel-card-head"><h3>⭐ Öne Çıkanlar</h3></div>
           <div id="dash-featured"></div>
@@ -4553,6 +4553,13 @@ function applyRoleBasedUI() {
     var page = el.getAttribute('data-requires-page');
     el.style.display = canAccessPage(page) ? '' : 'none';
   });
+  // Sadece admin görsün
+  document.querySelectorAll('[data-admin-only]').forEach(function(el) {
+    el.style.display = isCurrentAdmin() ? '' : 'none';
+  });
+  // Dashboard görev satırında sadece admin ise 2 kolon, diğer kullanıcılarda görev tek başına
+  var tasksRow = document.getElementById('dash-tasks-row');
+  if (tasksRow) tasksRow.style.gridTemplateColumns = isCurrentAdmin() ? '1fr 1fr' : '1fr';
   // Özel yetki gerektiren UI öğeleri (canDelete, canManagePremium, vb.)
   document.querySelectorAll('[data-requires-perm]').forEach(function(el) {
     var perm = el.getAttribute('data-requires-perm');
