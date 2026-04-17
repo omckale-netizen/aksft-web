@@ -644,11 +644,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 <div class="notif-dropdown" id="notif-dropdown">
   <div class="notif-dd-head">
     <span style="font-weight:700;font-size:.88rem;color:var(--navy)">Bildirimler</span>
-    <button style="background:none;border:none;font-size:.72rem;color:var(--terra);cursor:pointer;font-weight:600" onclick="markAllNotifsRead()">Tümünü okundu işaretle</button>
+    <button style="background:none;border:none;font-size:.72rem;color:var(--terra);cursor:pointer;font-weight:600" onclick="clearAllNotifs()">🧹 Temizle</button>
   </div>
   <div class="notif-dd-tabs">
     <button class="notif-dd-tab active" onclick="filterNotifs('all',this)">Tümü</button>
     <button class="notif-dd-tab" onclick="filterNotifs('message',this)">Mesajlar</button>
+    <button class="notif-dd-tab" onclick="filterNotifs('todo',this)">Görevler</button>
   </div>
   <div id="notif-list" style="max-height:400px;overflow-y:auto"></div>
 </div>
@@ -10207,6 +10208,48 @@ function markAllNotifsRead() {
   updateNotifBadge();
   renderNotifList();
   showToast('Tüm bildirimler okundu olarak işaretlendi.', 'success');
+}
+
+// Bildirimleri tamamen temizle — tüm ilgili kayıtları readNotifs'e ekle, rozeti sıfırla
+async function clearAllNotifs() {
+  try {
+    var readNotifs = JSON.parse(localStorage.getItem('readNotifs') || '[]');
+    var readSet = new Set(readNotifs);
+    // Dropdown'da yüklü olanları da işaretle
+    if (Array.isArray(allNotifs)) allNotifs.forEach(function(n) { n.read = true; readSet.add(n.id); });
+    // Mesajlar (erişim varsa)
+    if (typeof canAccessPage !== 'function' || canAccessPage('messages')) {
+      try {
+        var msgSnap = await db.collection('messages').where('read', '==', false).get();
+        msgSnap.docs.forEach(function(d) { readSet.add(d.id); });
+      } catch(e) {}
+    }
+    // Bekleyen talepler (erişim varsa)
+    if (typeof canAccessPage !== 'function' || canAccessPage('pending')) {
+      try {
+        var botSnap = await db.collection('pending_venues').get();
+        botSnap.docs.forEach(function(d) { readSet.add('bot_' + d.id); });
+        var plSnap = await db.collection('pending_places').get();
+        plSnap.docs.forEach(function(d) { readSet.add('pbot_' + d.id); });
+      } catch(e) {}
+    }
+    // Atanmış aktif görevler
+    var myUid = window._currentUser && window._currentUser.uid;
+    if (myUid && Array.isArray(_allTodos)) {
+      _allTodos.forEach(function(t) {
+        if (t.assignedTo === myUid && t.status !== 'completed') readSet.add('todo_' + t._id);
+      });
+    }
+    localStorage.setItem('readNotifs', JSON.stringify(Array.from(readSet)));
+    // Rozeti ve dropdown listesini sıfırla
+    var badge = document.getElementById('notif-badge');
+    if (badge) { badge.textContent = '0'; badge.style.display = 'none'; }
+    if (typeof renderNotifList === 'function') renderNotifList();
+    showToast('Bildirimler temizlendi.', 'success');
+  } catch(e) {
+    console.warn('clearAllNotifs error:', e);
+    showToast('Temizlenemedi: ' + (e.message || 'bilinmeyen hata'), 'error');
+  }
 }
 
 function updateNotifBadge() {
