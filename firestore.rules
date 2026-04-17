@@ -77,14 +77,48 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // Bot onay bekleyenler: herkes yazabilir, sadece admin yonetebilir
+    // Bot onay bekleyenler: herkes yazabilir (sema + boyut kisiti ile), sadece admin yonetebilir
+    // Mekan ekleme formundan gelen veri — tum alanlar validate edilir (storage abuse + XSS payload onleme)
+    function isValidPendingVenue() {
+      let d = request.resource.data;
+      let allowedKeys = ['ownerName','ownerEmail','ownerPhone','title','category','location','address','mapsLink','shortDesc','description','phones','tags','website','instagram','weeklyHours','checkin','checkout','rooms','facilities','seasonal','seasonStart','seasonEnd','images','consentGiven','consentDate','userAgent','submittedAt','status','refNo','updatedAt','editedAt'];
+      return d.keys().hasOnly(allowedKeys)
+        // Zorunlu alanlar
+        && d.ownerName is string && d.ownerName.size() > 0 && d.ownerName.size() <= 100
+        && d.ownerEmail is string && d.ownerEmail.size() > 0 && d.ownerEmail.size() <= 100
+        && d.ownerPhone is string && d.ownerPhone.size() > 0 && d.ownerPhone.size() <= 30
+        && d.title is string && d.title.size() > 0 && d.title.size() <= 150
+        && d.category is string && d.category.size() <= 30
+        && d.location is string && d.location.size() <= 100
+        && d.shortDesc is string && d.shortDesc.size() <= 300
+        && d.description is string && d.description.size() <= 5000
+        // Opsiyonel alanlar (varsa) tip ve boyut
+        && (!('address' in d) || (d.address is string && d.address.size() <= 300))
+        && (!('mapsLink' in d) || (d.mapsLink is string && d.mapsLink.size() <= 500))
+        && (!('website' in d) || (d.website is string && d.website.size() <= 200))
+        && (!('instagram' in d) || (d.instagram is string && d.instagram.size() <= 100))
+        && (!('userAgent' in d) || (d.userAgent is string && d.userAgent.size() <= 300))
+        && (!('refNo' in d) || (d.refNo is string && d.refNo.size() <= 20))
+        && (!('status' in d) || (d.status is string && d.status in ['pending','updated','revision','approved','rejected','trashed']))
+        // Array alanlarin element sayisi
+        && (!('phones' in d) || (d.phones is list && d.phones.size() <= 10))
+        && (!('tags' in d) || (d.tags is list && d.tags.size() <= 10))
+        && (!('weeklyHours' in d) || (d.weeklyHours is list && d.weeklyHours.size() <= 10))
+        && (!('rooms' in d) || (d.rooms is list && d.rooms.size() <= 20))
+        && (!('facilities' in d) || (d.facilities is list && d.facilities.size() <= 30))
+        && (!('images' in d) || (d.images is list && d.images.size() <= 10));
+    }
     match /pending_venues/{docId} {
-      allow create: if true;
+      allow create: if isValidPendingVenue();
       allow read, update, delete: if isAdmin();
     }
 
     match /pending_places/{docId} {
-      allow create: if true;
+      allow create: if
+        request.resource.data.keys().hasOnly(['ownerName','ownerEmail','ownerPhone','title','category','location','description','images','consentGiven','consentDate','submittedAt','status','refNo','userAgent'])
+        && request.resource.data.ownerName is string && request.resource.data.ownerName.size() > 0 && request.resource.data.ownerName.size() <= 100
+        && request.resource.data.ownerEmail is string && request.resource.data.ownerEmail.size() > 0 && request.resource.data.ownerEmail.size() <= 100
+        && request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 150;
       allow read, update, delete: if isAdmin();
     }
 

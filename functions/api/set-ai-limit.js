@@ -1,3 +1,5 @@
+import { requireAdmin } from './_verify.js';
+
 export async function onRequestPost(context) {
   const { request, env } = context;
 
@@ -8,19 +10,16 @@ export async function onRequestPost(context) {
   const corsHeaders = {
     'Access-Control-Allow-Origin': isAllowed ? origin : allowedOrigins[0],
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   };
 
   if (!isAllowed) {
     return new Response(JSON.stringify({ error: 'Yetkisiz erişim' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 
-  // Admin doğrulama — cookie veya header
-  const cookies = request.headers.get('Cookie') || '';
-  const adminKey = request.headers.get('X-Admin-Key') || '';
-  const hasGateCookie = env.ADMIN_GATE_KEY && cookies.includes('admin_gate=' + env.ADMIN_GATE_KEY);
-  const hasGateHeader = env.ADMIN_GATE_KEY && adminKey === env.ADMIN_GATE_KEY;
-  if (!hasGateCookie && !hasGateHeader) {
+  // Admin doğrulama — cookie + Firebase ID token (çift kontrol)
+  const isAdmin = await requireAdmin(request, env);
+  if (!isAdmin) {
     return new Response(JSON.stringify({ error: 'Yetkisiz' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 

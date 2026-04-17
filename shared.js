@@ -943,6 +943,15 @@ function renderNav(opts = {}) {
       let venues, places;
       try { venues = JSON.parse(localStorage.getItem(SD_KEY) || '[]'); } catch { venues = []; }
       try { places = JSON.parse(localStorage.getItem(SD_PLACE_KEY) || '[]'); } catch { places = []; }
+      // Sanitize: sadece string ID'ler kabul, max 50 eleman, her ID max 100 karakter, alfanumerik + tire
+      function sanitizeIds(arr) {
+        if (!Array.isArray(arr)) return [];
+        return arr
+          .filter(function(id) { return typeof id === 'string' && id.length > 0 && id.length <= 100 && /^[a-zA-Z0-9_-]+$/.test(id); })
+          .slice(0, 50);
+      }
+      venues = sanitizeIds(venues);
+      places = sanitizeIds(places);
       firebase.firestore().collection('favorites').doc(code).set({
         venues: venues,
         places: places,
@@ -977,12 +986,21 @@ function renderNav(opts = {}) {
       const doc = await firebase.firestore().collection('favorites').doc(code).get();
       if (!doc.exists) { if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Bu kodla eşleşen liste bulunamadı.</span>'; return; }
       const data = doc.data();
-      const venueCount = (data.venues && Array.isArray(data.venues)) ? data.venues.length : 0;
-      const placeCount = (data.places && Array.isArray(data.places)) ? data.places.length : 0;
+      // Sanitize — başkasından gelen listedeki ID'leri güvenli hale getir
+      function sanitizeIds(arr) {
+        if (!Array.isArray(arr)) return [];
+        return arr
+          .filter(function(id) { return typeof id === 'string' && id.length > 0 && id.length <= 100 && /^[a-zA-Z0-9_-]+$/.test(id); })
+          .slice(0, 50);
+      }
+      const safeVenues = sanitizeIds(data.venues);
+      const safePlaces = sanitizeIds(data.places);
+      const venueCount = safeVenues.length;
+      const placeCount = safePlaces.length;
       if (venueCount === 0 && placeCount === 0) { if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">Bu liste boş.</span>'; return; }
-      // Mevcut listeyi sıfırla, kodun listesini yükle
-      localStorage.setItem(SD_KEY, JSON.stringify(data.venues || []));
-      localStorage.setItem(SD_PLACE_KEY, JSON.stringify(data.places || []));
+      // Mevcut listeyi sıfırla, kodun listesini yükle (sanitize edilmiş)
+      localStorage.setItem(SD_KEY, JSON.stringify(safeVenues));
+      localStorage.setItem(SD_PLACE_KEY, JSON.stringify(safePlaces));
       localStorage.setItem(FAV_CODE_KEY, code);
       localStorage.setItem('assos_last_loaded_code', code);
       window._sdFilter = 'all';

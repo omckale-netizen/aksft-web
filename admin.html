@@ -2804,6 +2804,21 @@ function escapeHtml(s) {
 // Kısa alias — sık kullanılacak
 var esc = escapeHtml;
 
+// onclick='fn("...")' içine JS string gömmek için — tek tırnaklı attribute değeri için güvenli
+// Kullanım: onclick='fn("${escJs(value)}")'
+function escJs(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, '\\x27')
+    .replace(/"/g, '\\x22')
+    .replace(/</g, '\\x3c')
+    .replace(/>/g, '\\x3e')
+    .replace(/&/g, '\\x26')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r');
+}
+
 /* ══════════════════════════════════════════════════
    DATA MANAGEMENT — Firebase
 ══════════════════════════════════════════════════ */
@@ -2823,6 +2838,35 @@ appCheck.activate('6LdfCqwsAAAAAGECNBwhjW0fCC3lIsvCwZZxrurI', true);
 const db = firebase.firestore();
 const fbAuth = firebase.auth();
 const fbStorage = firebase.storage();
+
+/* ══════════════════════════════════════════════════
+   ADMIN FETCH INTERCEPTOR
+   Tüm /api/* çağrılarına otomatik Firebase ID token ekler.
+   Cloudflare Worker tarafında cookie + token çift kontrol.
+══════════════════════════════════════════════════ */
+(function() {
+  const ORIGINAL_FETCH = window.fetch.bind(window);
+  const ADMIN_API_PREFIX = '/api/';
+  // Bu tipler açık endpoint (notify.js'te PROTECTED_TYPES dışında) — token zorunlu değil ama sorun değil
+  // Token varsa Worker reddedmez, sadece doğrular
+  window.fetch = async function(url, options) {
+    options = options || {};
+    const urlStr = typeof url === 'string' ? url : (url && url.url) || '';
+    const isAdminApi = urlStr.indexOf(ADMIN_API_PREFIX) !== -1 && !/\/api\/(chat|geocode)(\?|$)/.test(urlStr);
+    if (isAdminApi && fbAuth.currentUser) {
+      try {
+        const token = await fbAuth.currentUser.getIdToken(false); // cached token
+        options.headers = new Headers(options.headers || {});
+        if (!options.headers.has('Authorization')) {
+          options.headers.set('Authorization', 'Bearer ' + token);
+        }
+      } catch(e) {
+        // Token alınamazsa sessizce geç — cookie fallback devreye girer
+      }
+    }
+    return ORIGINAL_FETCH(url, options);
+  };
+})();
 
 let draftData = { venues: [], places: [], villages: [], routes: [] };
 let ORIGINAL_DATA = { venues: [], places: [], villages: [], routes: [] };
@@ -4015,17 +4059,18 @@ function renderPendingList(items) {
       (imgCount > 0 ? '<div style="padding:0 20px 16px;display:flex;gap:6px;flex-wrap:wrap">' + item.images.slice(0, 4).map(function(url) { var safeUrl = /^https?:\/\//i.test(url) ? url : ''; return safeUrl ? '<img src="' + esc(safeUrl) + '" style="width:60px;height:42px;object-fit:cover;border-radius:6px;border:1px solid rgba(0,0,0,.06)" loading="lazy">' : ''; }).join('') + (imgCount > 4 ? '<span style="font-size:.72rem;color:var(--text-muted);align-self:center">+' + (imgCount - 4) + '</span>' : '') + '</div>' : '') +
       '<div style="padding:12px 20px;border-top:1px solid rgba(0,0,0,.04);display:flex;gap:8px;flex-wrap:wrap">' +
         (item.status === 'pending' || item.status === 'revision' ? '' : '') +
-        (item.status === 'pending' || item.status === 'updated' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla & Mekan Ekle</button><button class="btn btn-sm" style="background:rgba(49,130,206,.1);color:#2B6CB0;border:1px solid rgba(49,130,206,.2)" onclick="showRevisionModal(\'' + item._id + '\')">📝 Revizyon İste</button><button class="btn btn-danger btn-sm" onclick="showRejectModal(\'' + item._id + '\')">❌ Reddet</button>' : '') +
+        (item.status === 'pending' || item.status === 'updated' ? '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + escJs(item._id) + '\')">✅ Onayla & Mekan Ekle</button><button class="btn btn-sm" style="background:rgba(49,130,206,.1);color:#2B6CB0;border:1px solid rgba(49,130,206,.2)" onclick="showRevisionModal(\'' + escJs(item._id) + '\')">📝 Revizyon İste</button><button class="btn btn-danger btn-sm" onclick="showRejectModal(\'' + escJs(item._id) + '\')">❌ Reddet</button>' : '') +
         (item.status === 'revision' ? (function(){
           var daysSince = item.rejectedAt ? Math.floor((Date.now() - new Date(item.rejectedAt).getTime()) / 86400000) : 0;
           var urgBg = daysSince >= 7 ? 'rgba(229,62,62,.08)' : daysSince >= 3 ? 'rgba(212,147,90,.08)' : 'rgba(49,130,206,.06)';
           var urgColor = daysSince >= 7 ? '#C53030' : daysSince >= 3 ? '#975A16' : '#2B6CB0';
           var urgIcon = daysSince >= 7 ? '🔴' : daysSince >= 3 ? '🟡' : '🔵';
           var urgText = daysSince > 0 ? daysSince + ' gündür bekleniyor' : 'Bugün istendi';
-          return '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + item._id + '\')">✅ Onayla</button><button class="btn btn-sm" style="background:rgba(212,147,90,.1);color:#975A16;border:1px solid rgba(212,147,90,.2)" onclick="remindPendingVenue(\'' + item._id + '\')">🔔 Hatırlat</button><button class="btn btn-danger btn-sm" onclick="showRejectModal(\'' + item._id + '\')">❌ Reddet</button><span style="font-size:.65rem;font-weight:600;padding:4px 10px;border-radius:8px;background:' + urgBg + ';color:' + urgColor + ';display:inline-flex;align-items:center;gap:4px">' + urgIcon + ' ' + urgText + '</span>';
+          var safeId = escJs(item._id);
+          return '<button class="btn btn-primary btn-sm" onclick="approvePendingVenue(\'' + safeId + '\')">✅ Onayla</button><button class="btn btn-sm" style="background:rgba(212,147,90,.1);color:#975A16;border:1px solid rgba(212,147,90,.2)" onclick="remindPendingVenue(\'' + safeId + '\')">🔔 Hatırlat</button><button class="btn btn-danger btn-sm" onclick="showRejectModal(\'' + safeId + '\')">❌ Reddet</button><span style="font-size:.65rem;font-weight:600;padding:4px 10px;border-radius:8px;background:' + urgBg + ';color:' + urgColor + ';display:inline-flex;align-items:center;gap:4px">' + urgIcon + ' ' + esc(urgText) + '</span>';
         })() : '') +
-        (item.status !== 'trashed' ? '<button class="btn btn-secondary btn-sm" onclick="pendingMailTo(\'' + (item.ownerEmail || '') + '\')">✉️ Mail</button><button class="btn btn-secondary btn-sm" onclick="previewPendingVenue(\'' + item._id + '\')">👁 Detaylı İncele</button><button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="deletePendingVenue(\'' + item._id + '\')">🗑 Sil</button>' :
-        '<button class="btn btn-primary btn-sm" onclick="restorePendingVenue(\'' + item._id + '\')">↩ Geri Al</button><button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="permanentDeletePendingVenue(\'' + item._id + '\')">✕ Kalıcı Sil</button>') +
+        (item.status !== 'trashed' ? '<button class="btn btn-secondary btn-sm" onclick="pendingMailTo(\'' + escJs(item.ownerEmail || '') + '\')">✉️ Mail</button><button class="btn btn-secondary btn-sm" onclick="previewPendingVenue(\'' + escJs(item._id) + '\')">👁 Detaylı İncele</button><button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="deletePendingVenue(\'' + escJs(item._id) + '\')">🗑 Sil</button>' :
+        '<button class="btn btn-primary btn-sm" onclick="restorePendingVenue(\'' + escJs(item._id) + '\')">↩ Geri Al</button><button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="permanentDeletePendingVenue(\'' + escJs(item._id) + '\')">✕ Kalıcı Sil</button>') +
       '</div>' +
     '</div>';
   }).join('');
@@ -4997,7 +5042,7 @@ function updateBulkCount() {
   var listEl = document.getElementById('compose-bulk-list');
   countEl.textContent = recipients.length + ' mekan sahibine gönderilecek';
   listEl.innerHTML = recipients.map(function(v) {
-    return (v.emoji || '') + ' ' + v.title + ' → <span style="color:var(--terra)">' + v.ownerEmail + '</span>' + (v.ownerName ? ' (' + v.ownerName + ')' : '');
+    return esc(v.emoji || '') + ' ' + esc(v.title || '') + ' → <span style="color:var(--terra)">' + esc(v.ownerEmail || '') + '</span>' + (v.ownerName ? ' (' + esc(v.ownerName) + ')' : '');
   }).join('<br>');
 }
 
