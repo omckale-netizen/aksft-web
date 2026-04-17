@@ -214,16 +214,26 @@ function parseServiceAccount(raw) {
   if (!raw) throw new Error('FIREBASE_SERVICE_ACCOUNT tanımlı değil');
   if (typeof raw === 'object') return raw;
   const str = String(raw).trim();
-  try { return JSON.parse(str); } catch(e1) {
-    try { return JSON.parse(atob(str)); } catch(e2) {}
-    try {
-      const repaired = str.replace(/("private_key"\s*:\s*")([\s\S]*?)(",)/, (m, a, body, c) => {
-        return a + body.replace(/\r?\n/g, '\\n') + c;
-      });
-      return JSON.parse(repaired);
-    } catch(e3) {}
-    throw new Error(e1.message);
-  }
+  const repairNewlines = (s) => s.replace(/("private_key"\s*:\s*")([\s\S]*?)(",)/, (m, a, body, c) => a + body.replace(/\r?\n/g, '\\n') + c);
+  const tryVariants = (s) => {
+    const variants = [
+      s, repairNewlines(s),
+      s.startsWith('{') ? null : '{' + s + '}',
+      s.startsWith('{') ? null : repairNewlines('{' + s + '}'),
+      (() => { const f = s.indexOf('{'), l = s.lastIndexOf('}'); return (f >= 0 && l > f) ? s.slice(f, l + 1) : null; })(),
+      (() => { const f = s.indexOf('{'), l = s.lastIndexOf('}'); return (f >= 0 && l > f) ? repairNewlines(s.slice(f, l + 1)) : null; })(),
+    ].filter(Boolean);
+    for (const v of variants) { try { return JSON.parse(v); } catch(e) {} }
+    return null;
+  };
+  const parsed = tryVariants(str);
+  if (parsed) return parsed;
+  try {
+    const decoded = atob(str.replace(/\s/g, ''));
+    const parsedB64 = tryVariants(decoded);
+    if (parsedB64) return parsedB64;
+  } catch(e) {}
+  throw new Error(`parse edilemedi. İlk 40 karakter: "${str.slice(0, 40).replace(/\n/g, '\\n')}..."`);
 }
 
 // ═══ Service Account JWT → Google OAuth Access Token ═══

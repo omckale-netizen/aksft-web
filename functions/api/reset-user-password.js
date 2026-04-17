@@ -138,27 +138,47 @@ function parseServiceAccount(raw) {
   if (typeof raw === 'object') return raw;
   const str = String(raw).trim();
 
-  // 1) Doğrudan JSON parse
+  const repairNewlines = (s) => s.replace(/("private_key"\s*:\s*")([\s\S]*?)(",)/, (m, a, body, c) => a + body.replace(/\r?\n/g, '\\n') + c);
+
+  const tryVariants = (s) => {
+    const variants = [
+      s,
+      repairNewlines(s),
+      // Outer { } eksikse ekle
+      s.startsWith('{') ? null : '{' + s + '}',
+      s.startsWith('{') ? null : repairNewlines('{' + s + '}'),
+      // İlk { ile son } arasını çıkar
+      (() => {
+        const first = s.indexOf('{');
+        const last = s.lastIndexOf('}');
+        return (first >= 0 && last > first) ? s.slice(first, last + 1) : null;
+      })(),
+      (() => {
+        const first = s.indexOf('{');
+        const last = s.lastIndexOf('}');
+        return (first >= 0 && last > first) ? repairNewlines(s.slice(first, last + 1)) : null;
+      })(),
+    ].filter(Boolean);
+    for (const v of variants) {
+      try { return JSON.parse(v); } catch(e) {}
+    }
+    return null;
+  };
+
+  // 1) Çeşitli varyasyonları dene
+  const parsed = tryVariants(str);
+  if (parsed) return parsed;
+
+  // 2) Base64 decode edip aynı varyasyonları dene
   try {
-    return JSON.parse(str);
-  } catch(e1) {
-    // 2) Base64 encoded olabilir mi?
-    try {
-      const decoded = atob(str);
-      return JSON.parse(decoded);
-    } catch(e2) { /* devam */ }
+    const decoded = atob(str.replace(/\s/g, ''));
+    const parsedB64 = tryVariants(decoded);
+    if (parsedB64) return parsedB64;
+  } catch(e) { /* base64 değil */ }
 
-    // 3) private_key içinde gerçek newline varsa kaçır (en sık hata)
-    try {
-      // private_key'in değerindeki gerçek \n karakterlerini \\n'e çevir
-      const repaired = str.replace(/("private_key"\s*:\s*")([\s\S]*?)(",)/, (m, a, body, c) => {
-        return a + body.replace(/\r?\n/g, '\\n') + c;
-      });
-      return JSON.parse(repaired);
-    } catch(e3) { /* devam */ }
-
-    throw new Error(e1.message);
-  }
+  // Hata mesajı — ilk 40 karakteri göster (debug için)
+  const preview = str.slice(0, 40).replace(/\n/g, '\\n');
+  throw new Error(`parse edilemedi. İlk 40 karakter: "${preview}..."`);
 }
 
 // ═══ Service Account JWT → Google OAuth Access Token ═══
