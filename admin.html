@@ -817,7 +817,17 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
   <!-- SIDEBAR -->
   <nav class="admin-sidebar" id="admin-sidebar">
     <div class="admin-logo">Assos'u Keşfet<br><small>Yönetim Paneli</small></div>
-    <div style="display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.08);">
+
+    <!-- Kullanıcı profil chip'i -->
+    <div id="sidebar-user-chip" style="padding:12px 18px 14px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:12px">
+      <div id="sidebar-user-avatar" style="flex-shrink:0;width:40px;height:40px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:.95rem;overflow:hidden;background:linear-gradient(135deg,var(--terra),var(--terra-dark));border:2px solid rgba(255,255,255,.12);box-shadow:0 2px 8px rgba(0,0,0,.2)">?</div>
+      <div style="flex:1;min-width:0;overflow:hidden">
+        <div id="sidebar-user-greet" style="font-size:.82rem;font-weight:700;color:#F5EDE0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.25">Merhaba</div>
+        <div id="sidebar-user-date" style="font-size:.62rem;color:rgba(245,237,224,.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;margin-top:2px"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.08);">
       <div class="sidebar-notif-bell" id="notif-bell" onclick="toggleNotifDropdown()" title="Bildirimler" style="position:relative;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s;color:rgba(245,237,224,.9)">
         <i data-lucide="bell" style="width:16px;height:16px"></i>
         <span class="notif-bell-badge" id="notif-badge" style="display:none"></span>
@@ -919,14 +929,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
     <!-- ══════ DASHBOARD ══════ -->
     <div class="admin-page active" id="page-dashboard">
-      <!-- Hoşgeldin bar -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
-        <div>
-          <h2 style="margin:0;font-size:1.5rem;" id="dash-greeting">Hoş Geldiniz</h2>
-          <p class="page-sub" style="margin:0;margin-top:4px;" id="dash-date"></p>
-        </div>
-      </div>
-
       <!-- Uyarılar (admin-only) -->
       <div id="dash-alerts" data-admin-only style="margin-bottom:16px;"></div>
 
@@ -4608,6 +4610,8 @@ function updateAdminName(val) {
   if (window._currentUser) window._currentUser.name = val;
   // Avatar görseli userAvatar helper'ı ile yeniden oluştur
   refreshSettingsAvatar();
+  // Sidebar kullanıcı chip'ini güncelle
+  try { updateSidebarUserChip(); } catch(e) {}
   // Dashboard hoşgeldin mesajını da güncelle
   const greetEl = document.getElementById('dash-greeting');
   if (greetEl) {
@@ -4672,6 +4676,7 @@ async function uploadProfilePhoto(file) {
     await db.collection('users').doc(user.uid).set({ photoURL: url }, { merge: true });
     if (window._currentUser) window._currentUser.photoURL = url;
     refreshSettingsAvatar();
+    try { updateSidebarUserChip(); } catch(e) {}
     if (statusEl) { statusEl.textContent = '✓ Yüklendi'; statusEl.style.color = 'var(--green)'; }
     setTimeout(function() { if (statusEl) statusEl.textContent = ''; }, 2500);
   } catch(e) {
@@ -4689,6 +4694,7 @@ async function removeProfilePhoto() {
     await db.collection('users').doc(user.uid).set({ photoURL: firebase.firestore.FieldValue.delete() }, { merge: true });
     if (window._currentUser) delete window._currentUser.photoURL;
     refreshSettingsAvatar();
+    try { updateSidebarUserChip(); } catch(e) {}
     showToast('Fotoğraf kaldırıldı', 'success');
   } catch(e) {
     showToast('Hata: ' + e.message, 'error');
@@ -5311,6 +5317,8 @@ fbAuth.onAuthStateChanged(async (user) => {
       var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
       if (typeof setDarkModeIcon === 'function') setDarkModeIcon(isDark);
     } catch(e) {}
+    // Sidebar kullanıcı chip'ini güncelle (selamlama + avatar + saat)
+    try { updateSidebarUserChip(); } catch(e) {}
     // Giriş loglarını Firebase'e aktar
     syncLoginLogs();
     // Presence (online durum) tracking başlat
@@ -7913,6 +7921,13 @@ function updateDashClock() {
   const now = getTRDate();
   const h = now.getHours().toString().padStart(2,'0');
   const m = now.getMinutes().toString().padStart(2,'0');
+  // Sidebar kullanıcı chip'ine tarih + saat yaz
+  const sbDate = document.getElementById('sidebar-user-date');
+  if (sbDate) {
+    const short = now.toLocaleDateString('tr-TR', { day:'numeric', month:'short' });
+    sbDate.textContent = short + ' · ' + h + ':' + m;
+  }
+  // Eski dashboard ögeleri için backward compat
   const dateEl = document.getElementById('dash-date');
   if (dateEl) {
     const dateStr = now.toLocaleDateString('tr-TR', { day:'numeric', month:'long', year:'numeric', weekday:'long' });
@@ -7921,9 +7936,39 @@ function updateDashClock() {
 }
 setInterval(updateDashClock, 10000);
 
+// Sidebar kullanıcı chip'i: avatar + selamlama güncelleme
+function updateSidebarUserChip() {
+  if (!window._currentUser) return;
+  const u = window._currentUser;
+  const userName = u.name || localStorage.getItem('admin_name') || u.email || '';
+  const hour = getTRDate().getHours();
+  const greet = hour >= 6 && hour < 12 ? 'Günaydın' : hour >= 12 && hour < 18 ? 'İyi günler' : 'İyi akşamlar';
+  const greetEl = document.getElementById('sidebar-user-greet');
+  if (greetEl) greetEl.innerHTML = userName ? esc(greet + ', ' + userName) + ' 👋' : esc(greet) + ' 👋';
+  // Avatar: photoURL varsa img, yoksa ilk harfi renkli daire
+  const avatarEl = document.getElementById('sidebar-user-avatar');
+  if (avatarEl) {
+    if (u.photoURL) {
+      avatarEl.innerHTML = '<img src="' + esc(u.photoURL) + '" alt="" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .3s" onload="this.style.opacity=1" onerror="this.style.opacity=1">';
+      avatarEl.style.background = 'rgba(255,255,255,.08)';
+    } else {
+      const init = (userName || '?').trim().charAt(0).toUpperCase();
+      avatarEl.textContent = init;
+      const colors = ['#C4521A','#1A6B8A','#5A7A56','#D4935A','#9F7AEA','#38A169','#D69E2E','#E53E3E','#2B6CB0','#805AD5'];
+      let hash = 0;
+      const seed = userName + (u.email || '');
+      for (let i = 0; i < seed.length; i++) hash = ((hash << 5) - hash + seed.charCodeAt(i)) & 0xffffffff;
+      const color = colors[Math.abs(hash) % colors.length];
+      avatarEl.style.background = 'linear-gradient(135deg,' + color + ',' + color + 'dd)';
+    }
+  }
+  updateDashClock();
+}
+
 function renderDashboard() {
-  // Hoşgeldin — users koleksiyonundaki isim öncelikli, sonra localStorage
+  // Hoşgeldin: sidebar chip'e taşındı — backward compat için dash-greeting de doldur
   const userName = (window._currentUser && window._currentUser.name) || localStorage.getItem('admin_name') || '';
+  updateSidebarUserChip();
   const greetEl = document.getElementById('dash-greeting');
   if (greetEl) {
     const hour = getTRDate().getHours();
