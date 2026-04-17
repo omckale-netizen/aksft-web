@@ -3056,12 +3056,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         </div>
         <div style="padding:18px 20px">
           <div style="display:grid;grid-template-columns:260px 1fr;gap:24px;align-items:start" class="ts-grid">
-            <!-- Pie chart / bar summary -->
             <div>
               <canvas id="ts-pie" width="240" height="240" style="max-width:100%"></canvas>
               <div id="ts-total" style="text-align:center;font-size:.72rem;color:var(--text-muted);margin-top:8px"></div>
             </div>
-            <!-- List -->
             <div id="ts-list" style="min-height:120px"></div>
           </div>
           <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--card-border)">
@@ -3070,7 +3068,65 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
         </div>
       </div>
-      <style>@media(max-width:700px){.ts-grid{grid-template-columns:1fr !important}}</style>
+
+      <!-- Kaynak × Aksiyon Matrisi -->
+      <div class="panel-card" style="margin-bottom:20px">
+        <div class="panel-card-head">
+          <h3>🎯 Kaynak × Dönüşüm Matrisi</h3>
+          <span style="font-size:.68rem;color:var(--text-muted)">Hangi kanal daha çok aksiyon getiriyor</span>
+        </div>
+        <div class="panel-table-wrap">
+          <table class="panel-table">
+            <thead><tr>
+              <th>Kaynak</th><th>👁 Ziyaret</th><th>📞 Arama</th><th>💬 WhatsApp</th><th>📋 Rez.</th><th>🗺 Yol Tarifi</th><th>Dönüşüm %</th>
+            </tr></thead>
+            <tbody id="ts-matrix-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Cihaz + Ülke + Landing -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px" class="ts-3col">
+        <div class="panel-card" style="margin:0">
+          <div class="panel-card-head"><h3>📱 Cihaz</h3></div>
+          <div id="ts-device" style="padding:16px 20px;min-height:100px"></div>
+        </div>
+        <div class="panel-card" style="margin:0">
+          <div class="panel-card-head"><h3>🌍 Ülke</h3></div>
+          <div id="ts-country" style="padding:16px 20px;min-height:100px"></div>
+        </div>
+        <div class="panel-card" style="margin:0">
+          <div class="panel-card-head"><h3>🏁 Giriş Sayfaları</h3></div>
+          <div id="ts-landing" style="padding:16px 20px;min-height:100px"></div>
+        </div>
+      </div>
+
+      <!-- Zaman Serisi -->
+      <div class="panel-card" style="margin-bottom:20px">
+        <div class="panel-card-head">
+          <h3>📈 Zaman Serisi (Kaynak Bazlı)</h3>
+          <span style="font-size:.68rem;color:var(--text-muted)">Günlük ziyaret trendi</span>
+        </div>
+        <div style="padding:16px 20px">
+          <canvas id="ts-timeseries" width="800" height="220" style="max-width:100%;width:100%;height:220px"></canvas>
+          <div id="ts-timeseries-legend" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;font-size:.7rem"></div>
+        </div>
+      </div>
+
+      <!-- Oturum Metrikleri -->
+      <div class="panel-card" style="margin-bottom:20px">
+        <div class="panel-card-head">
+          <h3>⏱️ Oturum Metrikleri</h3>
+          <span style="font-size:.68rem;color:var(--text-muted)">Bounce rate, ort. süre, sayfa/oturum</span>
+        </div>
+        <div id="ts-sessions" style="padding:16px 20px"></div>
+      </div>
+
+      <style>
+        @media(max-width:900px){.ts-3col{grid-template-columns:1fr 1fr !important}}
+        @media(max-width:600px){.ts-3col{grid-template-columns:1fr !important}}
+        @media(max-width:700px){.ts-grid{grid-template-columns:1fr !important}}
+      </style>
 
       <!-- Günlük Aksiyon Detayı -->
       <div class="panel-card" style="margin-bottom:20px">
@@ -4517,11 +4573,20 @@ function renderTrafficSources(events) {
   if (!events || !Array.isArray(events)) return;
   // Sadece pageview eventleri say (aksiyonlar duplicate sayılmasın)
   var pageviews = events.filter(function(ev) { return ev.type === 'pageview'; });
+  var actions = events.filter(function(ev) { return ev.type === 'action'; });
+  var durations = events.filter(function(ev) { return ev.type === 'duration'; });
   var total = pageviews.length;
 
   // Source gruplama
   var sourceCounts = {};
   var campaignCounts = {};
+  var sourceActions = {}; // { source: { call, whatsapp, reservation, directions } }
+  var deviceCounts = {};
+  var countryCounts = {};
+  var landingCounts = {}; // { path: count }
+  var sessionMap = {}; // { sessionId: { pageviews, source, durationTotal, durationCount } }
+  var dateSourceCounts = {}; // { date: { source: count } }
+
   pageviews.forEach(function(ev) {
     var src = ev.source || 'direct';
     sourceCounts[src] = (sourceCounts[src] || 0) + 1;
@@ -4529,6 +4594,42 @@ function renderTrafficSources(events) {
       var key = src + ':' + ev.campaign;
       if (!campaignCounts[key]) campaignCounts[key] = { source: src, campaign: ev.campaign, count: 0 };
       campaignCounts[key].count++;
+    }
+    // Cihaz
+    if (ev.device) deviceCounts[ev.device] = (deviceCounts[ev.device] || 0) + 1;
+    // Ülke
+    if (ev.country) countryCounts[ev.country] = (countryCounts[ev.country] || 0) + 1;
+    // Landing (sadece ilk pageview)
+    if (ev.landing && ev.landingPath) {
+      landingCounts[ev.landingPath] = (landingCounts[ev.landingPath] || 0) + 1;
+    }
+    // Session
+    if (ev.sessionId) {
+      if (!sessionMap[ev.sessionId]) sessionMap[ev.sessionId] = { pageviews: 0, source: src, duration: 0 };
+      sessionMap[ev.sessionId].pageviews++;
+    }
+    // Date × source
+    var date = ev.date || (ev.timestamp ? ev.timestamp.split('T')[0] : '');
+    if (date) {
+      if (!dateSourceCounts[date]) dateSourceCounts[date] = {};
+      dateSourceCounts[date][src] = (dateSourceCounts[date][src] || 0) + 1;
+    }
+  });
+
+  // Aksiyon → source map'i (session üzerinden bağla)
+  actions.forEach(function(ev) {
+    var src = ev.source || (ev.sessionId && sessionMap[ev.sessionId] && sessionMap[ev.sessionId].source) || 'direct';
+    if (!sourceActions[src]) sourceActions[src] = { call: 0, whatsapp: 0, reservation: 0, directions: 0 };
+    if (ev.action === 'call' || ev.action === 'phone') sourceActions[src].call++;
+    else if (ev.action === 'whatsapp') sourceActions[src].whatsapp++;
+    else if (ev.action === 'reservation') sourceActions[src].reservation++;
+    else if (ev.action === 'directions') sourceActions[src].directions++;
+  });
+
+  // Duration'ları session'lara ekle
+  durations.forEach(function(ev) {
+    if (ev.sessionId && sessionMap[ev.sessionId] && ev.duration) {
+      sessionMap[ev.sessionId].duration += ev.duration;
     }
   });
 
@@ -4623,6 +4724,218 @@ function renderTrafficSources(events) {
         }).join('') +
       '</div>';
     }
+  }
+
+  // === Kaynak × Aksiyon Matrisi ===
+  var matrixBody = document.getElementById('ts-matrix-body');
+  if (matrixBody) {
+    var rows = Object.keys(sourceCounts).map(function(src) {
+      var acts = sourceActions[src] || { call: 0, whatsapp: 0, reservation: 0, directions: 0 };
+      var totalActs = acts.call + acts.whatsapp + acts.reservation + acts.directions;
+      var visits = sourceCounts[src];
+      var convRate = visits > 0 ? ((totalActs / visits) * 100) : 0;
+      return { src: src, visits: visits, acts: acts, totalActs: totalActs, convRate: convRate };
+    }).sort(function(a, b) { return b.visits - a.visits; });
+    if (rows.length === 0) {
+      matrixBody.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:var(--text-muted);font-size:.82rem">Veri yok</td></tr>';
+    } else {
+      matrixBody.innerHTML = rows.map(function(r) {
+        var info = _tsChannelInfo(r.src);
+        var convColor = r.convRate >= 10 ? 'var(--green)' : r.convRate >= 5 ? '#DD6B20' : 'var(--text-muted)';
+        return '<tr>' +
+          '<td><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:' + info.color + '"></span>' + info.icon + ' ' + esc(info.label) + '</span></td>' +
+          '<td><strong>' + r.visits + '</strong></td>' +
+          '<td>' + (r.acts.call || '—') + '</td>' +
+          '<td>' + (r.acts.whatsapp || '—') + '</td>' +
+          '<td>' + (r.acts.reservation || '—') + '</td>' +
+          '<td>' + (r.acts.directions || '—') + '</td>' +
+          '<td style="color:' + convColor + ';font-weight:700">' + r.convRate.toFixed(1) + '%</td>' +
+        '</tr>';
+      }).join('');
+    }
+  }
+
+  // === Cihaz Dağılımı ===
+  var deviceEl = document.getElementById('ts-device');
+  if (deviceEl) {
+    var devIcons = { mobile: '📱', desktop: '🖥', tablet: '📲' };
+    var devEntries = Object.entries(deviceCounts).sort(function(a, b) { return b[1] - a[1]; });
+    var devTotal = devEntries.reduce(function(s, e) { return s + e[1]; }, 0);
+    if (devTotal === 0) {
+      deviceEl.innerHTML = '<div style="color:var(--text-muted);font-size:.78rem;padding:10px 0">Cihaz verisi yok (tracking henüz yeni başladı)</div>';
+    } else {
+      deviceEl.innerHTML = devEntries.map(function(e) {
+        var pct = (e[1] / devTotal * 100).toFixed(1);
+        var label = e[0].charAt(0).toUpperCase() + e[0].slice(1);
+        return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">' +
+          '<span style="font-size:1.2rem">' + (devIcons[e[0]] || '📟') + '</span>' +
+          '<div style="flex:1;min-width:0">' +
+            '<div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:3px"><span style="color:var(--text);font-weight:600">' + esc(label) + '</span><span style="color:var(--text-muted)">' + e[1] + ' · ' + pct + '%</span></div>' +
+            '<div style="height:6px;background:var(--cream-dark);border-radius:3px;overflow:hidden"><div style="height:100%;width:' + pct + '%;background:var(--terra);border-radius:3px"></div></div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+  }
+
+  // === Ülke Dağılımı ===
+  var countryEl = document.getElementById('ts-country');
+  if (countryEl) {
+    var countryEntries = Object.entries(countryCounts).sort(function(a, b) { return b[1] - a[1] }).slice(0, 8);
+    var countryTotal = countryEntries.reduce(function(s, e) { return s + e[1]; }, 0);
+    var countryNames = { TR:'🇹🇷 Türkiye', US:'🇺🇸 ABD', DE:'🇩🇪 Almanya', GB:'🇬🇧 İngiltere', FR:'🇫🇷 Fransa', NL:'🇳🇱 Hollanda', BE:'🇧🇪 Belçika', IT:'🇮🇹 İtalya', ES:'🇪🇸 İspanya', AU:'🇦🇺 Avustralya', XX:'❓ Bilinmiyor' };
+    if (countryTotal === 0) {
+      countryEl.innerHTML = '<div style="color:var(--text-muted);font-size:.78rem;padding:10px 0">Ülke verisi yok</div>';
+    } else {
+      countryEl.innerHTML = countryEntries.map(function(e) {
+        var pct = (e[1] / countryTotal * 100).toFixed(1);
+        var label = countryNames[e[0]] || ('🏳 ' + e[0]);
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(0,0,0,.04);font-size:.78rem">' +
+          '<span style="color:var(--text);font-weight:600">' + esc(label) + '</span>' +
+          '<span><strong>' + e[1] + '</strong> <span style="color:var(--text-muted);font-size:.7rem">' + pct + '%</span></span>' +
+        '</div>';
+      }).join('');
+    }
+  }
+
+  // === Landing sayfaları ===
+  var landingEl = document.getElementById('ts-landing');
+  if (landingEl) {
+    var landings = Object.entries(landingCounts).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 8);
+    if (landings.length === 0) {
+      landingEl.innerHTML = '<div style="color:var(--text-muted);font-size:.78rem;padding:10px 0">Landing verisi yok</div>';
+    } else {
+      landingEl.innerHTML = landings.map(function(e) {
+        var path = e[0].length > 40 ? e[0].slice(0, 40) + '…' : e[0];
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(0,0,0,.04);font-size:.78rem">' +
+          '<span style="color:var(--text);font-family:\'SF Mono\',Consolas,monospace;font-size:.72rem">' + esc(path) + '</span>' +
+          '<span style="color:var(--terra);font-weight:700">' + e[1] + '</span>' +
+        '</div>';
+      }).join('');
+    }
+  }
+
+  // === Zaman Serisi (Date × Source) ===
+  renderTsTimeseries(dateSourceCounts);
+
+  // === Oturum Metrikleri ===
+  var sessionsEl = document.getElementById('ts-sessions');
+  if (sessionsEl) {
+    var sessions = Object.values(sessionMap);
+    var sessCount = sessions.length;
+    var bouncedCount = sessions.filter(function(s) { return s.pageviews === 1; }).length;
+    var bounceRate = sessCount > 0 ? (bouncedCount / sessCount * 100) : 0;
+    var avgPages = sessCount > 0 ? (sessions.reduce(function(a, s) { return a + s.pageviews; }, 0) / sessCount) : 0;
+    var withDuration = sessions.filter(function(s) { return s.duration > 0; });
+    var avgDuration = withDuration.length > 0 ? (withDuration.reduce(function(a, s) { return a + s.duration; }, 0) / withDuration.length) : 0;
+    var minutes = Math.floor(avgDuration / 60);
+    var seconds = Math.round(avgDuration % 60);
+    var durStr = minutes > 0 ? (minutes + 'd ' + seconds + 'sn') : (seconds + ' saniye');
+
+    sessionsEl.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px">' +
+      '<div class="stat-card" style="padding:14px"><div class="stat-label">🔢 Oturum</div><div class="stat-val" style="font-size:1.5rem">' + sessCount + '</div></div>' +
+      '<div class="stat-card" style="padding:14px"><div class="stat-label">📈 Bounce Rate</div><div class="stat-val" style="font-size:1.5rem;color:' + (bounceRate < 50 ? 'var(--green)' : bounceRate < 70 ? '#DD6B20' : 'var(--red)') + '">' + bounceRate.toFixed(1) + '%</div><div style="font-size:.62rem;color:var(--text-muted);margin-top:2px">' + bouncedCount + ' tek sayfa</div></div>' +
+      '<div class="stat-card" style="padding:14px"><div class="stat-label">📄 Sayfa/Oturum</div><div class="stat-val" style="font-size:1.5rem">' + avgPages.toFixed(1) + '</div></div>' +
+      '<div class="stat-card" style="padding:14px"><div class="stat-label">⏱ Ort. Süre</div><div class="stat-val" style="font-size:1.5rem">' + durStr + '</div><div style="font-size:.62rem;color:var(--text-muted);margin-top:2px">' + withDuration.length + ' ölçüm</div></div>' +
+    '</div>';
+  }
+}
+
+// Zaman serisi çizimi — kaynaklara göre renkli stacked bar
+function renderTsTimeseries(dateSourceCounts) {
+  var canvas = document.getElementById('ts-timeseries');
+  var legendEl = document.getElementById('ts-timeseries-legend');
+  if (!canvas || !canvas.getContext) return;
+  var dates = Object.keys(dateSourceCounts).sort();
+  if (dates.length === 0) {
+    var ctx2 = canvas.getContext('2d');
+    ctx2.clearRect(0, 0, canvas.width, canvas.height);
+    ctx2.fillStyle = '#A0AEC0';
+    ctx2.font = '13px system-ui,sans-serif';
+    ctx2.textAlign = 'center';
+    ctx2.fillText('Zaman serisi için henüz veri yok', canvas.width / 2, canvas.height / 2);
+    if (legendEl) legendEl.innerHTML = '';
+    return;
+  }
+  // Tüm kaynakları topla
+  var allSources = {};
+  dates.forEach(function(d) { Object.keys(dateSourceCounts[d]).forEach(function(s) { allSources[s] = (allSources[s] || 0) + dateSourceCounts[d][s]; }); });
+  var topSources = Object.entries(allSources).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 6).map(function(e) { return e[0]; });
+  // Max günlük toplam
+  var maxTotal = 0;
+  dates.forEach(function(d) {
+    var t = 0; Object.values(dateSourceCounts[d]).forEach(function(v) { t += v; });
+    if (t > maxTotal) maxTotal = t;
+  });
+  if (maxTotal === 0) maxTotal = 1;
+
+  // Canvas'a çizim
+  var DPR = window.devicePixelRatio || 1;
+  var cssW = canvas.clientWidth || 800;
+  var cssH = 220;
+  canvas.width = cssW * DPR;
+  canvas.height = cssH * DPR;
+  var ctx = canvas.getContext('2d');
+  ctx.scale(DPR, DPR);
+  ctx.clearRect(0, 0, cssW, cssH);
+
+  var padL = 40, padR = 20, padT = 10, padB = 30;
+  var chartW = cssW - padL - padR;
+  var chartH = cssH - padT - padB;
+  var barW = Math.max(4, chartW / dates.length - 3);
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  var gridColor = isDark ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.06)';
+  var textColor = isDark ? '#A0AEC0' : '#718096';
+
+  // Y axis grid
+  ctx.strokeStyle = gridColor;
+  ctx.lineWidth = 1;
+  ctx.font = '10px system-ui,sans-serif';
+  ctx.fillStyle = textColor;
+  ctx.textAlign = 'right';
+  for (var i = 0; i <= 4; i++) {
+    var y = padT + (chartH / 4) * i;
+    ctx.beginPath();
+    ctx.moveTo(padL, y);
+    ctx.lineTo(padL + chartW, y);
+    ctx.stroke();
+    var val = Math.round(maxTotal * (1 - i / 4));
+    ctx.fillText(val, padL - 4, y + 3);
+  }
+
+  // Stacked bars
+  dates.forEach(function(d, di) {
+    var x = padL + di * (chartW / dates.length) + 2;
+    var cumH = 0;
+    topSources.forEach(function(s) {
+      var cnt = dateSourceCounts[d][s] || 0;
+      if (cnt === 0) return;
+      var h = (cnt / maxTotal) * chartH;
+      var y = padT + chartH - cumH - h;
+      var info = _tsChannelInfo(s);
+      ctx.fillStyle = info.color;
+      ctx.fillRect(x, y, barW, h);
+      cumH += h;
+    });
+  });
+
+  // X axis labels — her 5. tarih
+  ctx.fillStyle = textColor;
+  ctx.textAlign = 'center';
+  var skip = Math.max(1, Math.floor(dates.length / 8));
+  dates.forEach(function(d, di) {
+    if (di % skip !== 0 && di !== dates.length - 1) return;
+    var x = padL + di * (chartW / dates.length) + barW / 2;
+    var short = d.slice(5); // MM-DD
+    ctx.fillText(short, x, padT + chartH + 15);
+  });
+
+  // Legend
+  if (legendEl) {
+    legendEl.innerHTML = topSources.map(function(s) {
+      var info = _tsChannelInfo(s);
+      return '<span style="display:inline-flex;align-items:center;gap:5px"><span style="width:10px;height:10px;background:' + info.color + ';border-radius:2px"></span>' + info.icon + ' ' + esc(info.label) + '</span>';
+    }).join('');
   }
 }
 

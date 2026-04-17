@@ -126,14 +126,17 @@ service cloud.firestore {
 
     match /analytics_events/{docId} {
       allow create: if
-        // İzin verilen alanlar — UTM tracking + weather/time metadata
-        request.resource.data.keys().hasOnly(['type','target','meta','action','pageId','venueId','ts','timestamp','userAgent','referrer','path','date','hour','weather','temp','source','medium','campaign','content'])
+        // İzin verilen alanlar — UTM + session + device + geo tracking
+        request.resource.data.keys().hasOnly(['type','target','meta','action','pageId','venueId','ts','timestamp','userAgent','referrer','path','date','hour','weather','temp','source','medium','campaign','content','sessionId','landing','landingPath','device','browser','os','inApp','country','duration'])
         && (!('type' in request.resource.data) || (request.resource.data.type is string && request.resource.data.type.size() < 50))
         && (!('target' in request.resource.data) || (request.resource.data.target is string && request.resource.data.target.size() < 200))
         && (!('userAgent' in request.resource.data) || (request.resource.data.userAgent is string && request.resource.data.userAgent.size() < 300))
         && (!('source' in request.resource.data) || (request.resource.data.source is string && request.resource.data.source.size() < 60))
         && (!('medium' in request.resource.data) || (request.resource.data.medium is string && request.resource.data.medium.size() < 60))
-        && (!('campaign' in request.resource.data) || (request.resource.data.campaign is string && request.resource.data.campaign.size() < 100));
+        && (!('campaign' in request.resource.data) || (request.resource.data.campaign is string && request.resource.data.campaign.size() < 100))
+        && (!('sessionId' in request.resource.data) || (request.resource.data.sessionId is string && request.resource.data.sessionId.size() < 50))
+        && (!('device' in request.resource.data) || (request.resource.data.device is string && request.resource.data.device.size() < 20))
+        && (!('country' in request.resource.data) || (request.resource.data.country is string && request.resource.data.country.size() < 10));
       allow read, delete: if isAdmin();
     }
 

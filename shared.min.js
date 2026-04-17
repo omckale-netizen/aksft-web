@@ -3309,6 +3309,126 @@ function renderVenuePage(venueId) {
    ANALYTICS TRACKER
 ═══════════════════ */
 (function() {
+  // ═══ SESSION + DEVICE TRACKING ═══
+  // Session ID: 30 dakika inaktivite sonrası yenilenir
+  // Landing page: session'ın ilk pageview'i
+  // Device: userAgent parse edilerek mobile/desktop/tablet
+  var SESSION_TTL = 30 * 60 * 1000; // 30 dk
+  function ensureSession() {
+    try {
+      var now = Date.now();
+      var stored = localStorage.getItem('session_meta');
+      var s = null;
+      try { s = stored ? JSON.parse(stored) : null; } catch(e) {}
+      if (!s || !s.id || (now - (s.lastActivity || 0) > SESSION_TTL)) {
+        // Yeni session başlat
+        s = {
+          id: 's_' + now + '_' + Math.random().toString(36).slice(2, 10),
+          startedAt: now,
+          lastActivity: now,
+          pageviews: 0,
+          landing: location.pathname + location.search
+        };
+      } else {
+        s.lastActivity = now;
+      }
+      s.pageviews = (s.pageviews || 0) + 1;
+      localStorage.setItem('session_meta', JSON.stringify(s));
+      window._session = s;
+      return s;
+    } catch(e) { return null; }
+  }
+
+  // Device / browser / OS parse
+  function parseDevice() {
+    var ua = navigator.userAgent || '';
+    var uaLower = ua.toLowerCase();
+    // Device type
+    var device = 'desktop';
+    if (/iphone|ipod|android.*mobile|windows phone|blackberry|bb\d+/i.test(ua)) device = 'mobile';
+    else if (/ipad|android(?!.*mobile)|tablet/i.test(ua)) device = 'tablet';
+    // Browser
+    var browser = 'other';
+    if (uaLower.indexOf('edg/') > -1) browser = 'edge';
+    else if (uaLower.indexOf('chrome/') > -1 && uaLower.indexOf('edg') === -1) browser = 'chrome';
+    else if (uaLower.indexOf('safari/') > -1 && uaLower.indexOf('chrome') === -1) browser = 'safari';
+    else if (uaLower.indexOf('firefox/') > -1) browser = 'firefox';
+    else if (uaLower.indexOf('opr/') > -1 || uaLower.indexOf('opera') > -1) browser = 'opera';
+    // OS
+    var os = 'other';
+    if (/windows/i.test(ua)) os = 'windows';
+    else if (/android/i.test(ua)) os = 'android';
+    else if (/iphone|ipad|ipod/i.test(ua)) os = 'ios';
+    else if (/mac os x|macintosh/i.test(ua)) os = 'macos';
+    else if (/linux/i.test(ua)) os = 'linux';
+    // In-app browsers (IG/FB özel tespit)
+    var inApp = null;
+    if (/instagram/i.test(ua)) inApp = 'instagram';
+    else if (/fbav|fb_iab|facebook/i.test(ua)) inApp = 'facebook';
+    else if (/twitter/i.test(ua)) inApp = 'twitter';
+    else if (/tiktok/i.test(ua)) inApp = 'tiktok';
+    return { device: device, browser: browser, os: os, inApp: inApp };
+  }
+  window._device = parseDevice();
+  ensureSession();
+
+  // Coğrafi veri — Cloudflare cf headers'dan (/api/geo)
+  // Cache: 24 saat, localStorage
+  (function fetchGeo() {
+    try {
+      var cached = localStorage.getItem('geo_data');
+      if (cached) {
+        var g = JSON.parse(cached);
+        if (g && g.country && g.ts && (Date.now() - g.ts < 24 * 60 * 60 * 1000)) {
+          window._geoCountry = g.country;
+          return;
+        }
+      }
+      fetch('/api/geo').then(function(r) { return r.json(); }).then(function(d) {
+        if (d && d.country) {
+          window._geoCountry = d.country;
+          localStorage.setItem('geo_data', JSON.stringify({ country: d.country, ts: Date.now() }));
+        }
+      }).catch(function() {});
+    } catch(e) {}
+  })();
+
+  // Session süresi tracking — sayfa kapanınca duration event'i at
+  // beforeunload'da fetch async bitmez, sendBeacon kullanıyoruz
+  var _pageLoadTime = Date.now();
+  window.addEventListener('beforeunload', function() {
+    try {
+      var duration = Math.round((Date.now() - _pageLoadTime) / 1000);
+      // Çok kısa (1sn altı) veya çok uzun (10dk üstü) sapmaları atla
+      if (duration < 1 || duration > 600) return;
+      var ss = window._session;
+      var ts = window._trafficSource;
+      var dv = window._device;
+      var ev = {
+        type: 'duration',
+        target: location.pathname,
+        duration: duration,
+        timestamp: new Date().toISOString(),
+        date: new Date().toISOString().split('T')[0]
+      };
+      if (ss && ss.id) ev.sessionId = ss.id;
+      if (ts && ts.source) { ev.source = ts.source; ev.medium = ts.medium || ''; }
+      if (dv) { ev.device = dv.device; }
+      if (window._geoCountry) ev.country = window._geoCountry;
+      if (navigator.sendBeacon && typeof firebase !== 'undefined') {
+        // Firestore REST ile sendBeacon (unload sırasında güvenilir)
+        var body = { fields: {} };
+        Object.keys(ev).forEach(function(k) {
+          if (typeof ev[k] === 'string') body.fields[k] = { stringValue: ev[k] };
+          else if (typeof ev[k] === 'number') body.fields[k] = { integerValue: ev[k] };
+          else if (typeof ev[k] === 'boolean') body.fields[k] = { booleanValue: ev[k] };
+        });
+        var fsUrl = 'https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents/analytics_events';
+        navigator.sendBeacon(fsUrl, JSON.stringify(body));
+      }
+    } catch(e) {}
+  });
+
   // UTM + referrer yakalama — sayfa yüklenir yüklenmez çalışır
   // First-touch attribution: kullanıcının ilk geldiği kaynağı localStorage'da saklarız
   function captureTrafficSource() {
@@ -3423,6 +3543,25 @@ function renderVenuePage(venueId) {
           if (ts.campaign) ev.campaign = String(ts.campaign).slice(0, 100);
           if (ts.content) ev.content = String(ts.content).slice(0, 100);
         }
+        // Session ID + pageview sırası
+        var ss = window._session;
+        if (ss && ss.id) {
+          ev.sessionId = ss.id;
+          // İlk pageview → landing bayrağı
+          if (type === 'pageview' && ss.pageviews === 1) ev.landing = true;
+        }
+        // Device bilgisi
+        var dv = window._device;
+        if (dv) {
+          ev.device = dv.device;
+          ev.browser = dv.browser;
+          ev.os = dv.os;
+          if (dv.inApp) ev.inApp = dv.inApp;
+        }
+        // Coğrafi veri (lazy load, cache'li)
+        if (window._geoCountry) ev.country = window._geoCountry;
+        // Landing path (session'ın ilk sayfası)
+        if (ss && ss.landing) ev.landingPath = String(ss.landing).slice(0, 200);
         getWeather().then(w => {
           if (w) { ev.weather = w.label; ev.temp = w.temp; }
           adb.collection('analytics_events').add(ev).catch(() => {});
