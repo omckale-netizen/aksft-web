@@ -64,9 +64,8 @@
     .ara-card-img img.loaded{opacity:1;}
     @keyframes araShimmer{0%{background-position:-100% 0;}100%{background-position:200% 0;}}
     .ara-card-emoji{font-size:2.4rem;}
-    .ara-card-type{position:absolute;top:10px;left:10px;font-size:.58rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:3px 10px;border-radius:999px;backdrop-filter:blur(8px);z-index:2;}
-    .ara-card-cat{position:absolute;top:10px;right:10px;font-size:.58rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 10px;border-radius:999px;color:#fff;backdrop-filter:blur(8px);z-index:2;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15);}
-    .ara-card-status{position:absolute;bottom:10px;left:10px;display:inline-flex;align-items:center;gap:5px;font-size:.58rem;font-weight:700;letter-spacing:.05em;padding:3px 9px;border-radius:999px;backdrop-filter:blur(8px);z-index:2;}
+    .ara-card-cat{position:absolute;top:10px;left:10px;font-size:.58rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 10px;border-radius:999px;color:#fff;backdrop-filter:blur(8px);z-index:2;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15);}
+    .ara-card-status{position:absolute;top:10px;right:10px;display:inline-flex;align-items:center;gap:5px;font-size:.58rem;font-weight:700;letter-spacing:.05em;padding:3px 9px;border-radius:999px;backdrop-filter:blur(8px);z-index:2;}
     .ara-status-dot{width:5px;height:5px;border-radius:50%;box-shadow:0 0 4px currentColor;}
     .ara-card-body{padding:12px 16px 14px;}
     .ara-card-title{font-weight:700;font-size:.92rem;color:var(--navy);margin-bottom:4px;line-height:1.3;}
@@ -316,7 +315,6 @@
           html += '<a class="ara-card" href="/' + detailPath[t] + '?id=' + encodeURIComponent(it.id) + '">' +
             '<div class="ara-card-img" style="background:linear-gradient(135deg,#243255,#1A2744)">' +
               (it.image ? '<img src="' + escAttr(it.image) + '" alt="' + escAttr(it.title) + '" loading="lazy" onload="this.classList.add(\'loaded\')">' : '<span class="ara-card-emoji">' + it.emoji + '</span>') +
-              '<span class="ara-card-type" style="background:' + tc.bg + ';color:' + tc.color + '">' + it.badge + '</span>' +
               catHtml +
               statusHtml +
             '</div>' +
