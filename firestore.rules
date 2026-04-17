@@ -41,10 +41,20 @@ service cloud.firestore {
 
     // Kullanici yonetimi: sadece admin yonetir, her kullanici kendi belgesini okuyabilir (role vb.)
     // ÖNEMLİ: Rol değeri validate edilir — 'admin'/'editor'/'viewer' dışı kabul edilmez
+    // İstisna: kullanıcı kendi dokümanında sadece 'name' ve 'photoURL' alanlarını değiştirebilir
     match /users/{uid} {
       allow read: if request.auth != null && (request.auth.uid == uid || isAdmin());
-      allow create, update: if isAdmin()
+      allow create: if isAdmin()
         && request.resource.data.role in ['admin','editor','viewer'];
+      allow update: if (
+          isAdmin()
+          && request.resource.data.role in ['admin','editor','viewer']
+        ) || (
+          // Kullanıcı kendi ismini/fotoğrafını güncelleyebilir — başka alan değiştiremez
+          request.auth != null
+          && request.auth.uid == uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'photoURL'])
+        );
       allow delete: if isAdmin();
     }
 

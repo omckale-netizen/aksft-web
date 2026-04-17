@@ -4119,11 +4119,15 @@ function showLogoPreview(url) {
   }
 }
 
+// updateAdminName'in debounce timer'ı — her tuş vuruşunda Firestore yazmamak için
+var _nameUpdateTimer = null;
 function updateAdminName(val) {
   localStorage.setItem('admin_name', val);
   // Avatar ve görünen ad anında güncelle
   const displayEl = document.getElementById('settings-display-name');
   if (displayEl) displayEl.textContent = val || 'Admin';
+  // window._currentUser.name'i de güncelle (refreshSettingsAvatar'ın doğru çalışması için)
+  if (window._currentUser) window._currentUser.name = val;
   // Avatar görseli userAvatar helper'ı ile yeniden oluştur
   refreshSettingsAvatar();
   // Dashboard hoşgeldin mesajını da güncelle
@@ -4133,6 +4137,14 @@ function updateAdminName(val) {
     const greet = hour >= 6 && hour < 12 ? 'Günaydın' : hour >= 12 && hour < 18 ? 'İyi günler' : 'İyi akşamlar';
     greetEl.textContent = val ? greet + ', ' + val + ' 👋' : greet + ' 👋';
   }
+  // Firestore users/{uid}.name'i debounce'lu olarak güncelle (her tuşta değil)
+  if (_nameUpdateTimer) clearTimeout(_nameUpdateTimer);
+  _nameUpdateTimer = setTimeout(function() {
+    var user = fbAuth.currentUser;
+    if (!user) return;
+    db.collection('users').doc(user.uid).set({ name: val }, { merge: true })
+      .catch(function(e) { console.warn('Name update failed:', e); });
+  }, 800);
 }
 
 // Settings avatar önizlemesini güncelle (photoURL veya initials)
