@@ -2,36 +2,67 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Yardimci: Admin mi kontrol et
-    function isAdmin() {
+    // Yardimci: Rol tabanli yetki kontrolu
+    // Super admin — email bazli, her zaman tam yetki (kurtarma)
+    function isSuperAdmin() {
       return request.auth != null && request.auth.token.email == 'info@onyedimedya.com';
     }
+    // Kullanici rolunu users koleksiyonundan oku
+    function getUserRole() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
+        : null;
+    }
+    function isUserActive() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.active == true;
+    }
+    function isAdmin() {
+      return isSuperAdmin() || (request.auth != null && isUserActive() && getUserRole() == 'admin');
+    }
+    function isEditor() {
+      return isAdmin() || (request.auth != null && isUserActive() && getUserRole() == 'editor');
+    }
+    function isViewer() {
+      return isEditor() || (request.auth != null && isUserActive() && getUserRole() == 'viewer');
+    }
 
-    // Herkes okuyabilir, sadece admin yazabilir
+    // Kullanici yonetimi: sadece admin yonetir, her kullanici kendi belgesini okuyabilir (role vb.)
+    match /users/{uid} {
+      allow read: if request.auth != null && (request.auth.uid == uid || isAdmin());
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Icerik yonetimi: herkes okuyabilir, editor ve admin yazabilir, silme sadece admin
     match /venues/{docId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update: if isEditor();
+      allow delete: if isAdmin();
     }
 
     match /places/{docId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update: if isEditor();
+      allow delete: if isAdmin();
     }
 
     match /villages/{docId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update: if isEditor();
+      allow delete: if isAdmin();
     }
 
     match /routes/{docId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update: if isEditor();
+      allow delete: if isAdmin();
     }
 
-    // Iletisim mesajlari: herkes yazabilir, sadece admin okuyabilir/silebilir
+    // Iletisim mesajlari: herkes yazabilir; editor okur ve update edebilir (label vb.), sadece admin siler
     match /messages/{docId} {
       allow create: if true;
-      allow read, update, delete: if isAdmin();
+      allow read, update: if isEditor();
+      allow delete: if isAdmin();
     }
 
     // Analitik: herkes yazabilir (anonim kullanici izleme), sadece admin okuyabilir
@@ -110,7 +141,8 @@ service cloud.firestore {
     }
     match /pending_venues/{docId} {
       allow create: if isValidPendingVenue();
-      allow read, update, delete: if isAdmin();
+      allow read, update: if isEditor();
+      allow delete: if isAdmin();
     }
 
     match /pending_places/{docId} {
@@ -119,7 +151,8 @@ service cloud.firestore {
         && request.resource.data.ownerName is string && request.resource.data.ownerName.size() > 0 && request.resource.data.ownerName.size() <= 100
         && request.resource.data.ownerEmail is string && request.resource.data.ownerEmail.size() > 0 && request.resource.data.ownerEmail.size() <= 100
         && request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 150;
-      allow read, update, delete: if isAdmin();
+      allow read, update: if isEditor();
+      allow delete: if isAdmin();
     }
 
     // Site ayarlari: herkes okuyabilir (logo vb.), sadece admin yazabilir
@@ -128,25 +161,30 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Galeri: sadece admin
+    // Galeri: editor okur/yazar, admin siler
     match /gallery/{docId} {
-      allow read, write: if isAdmin();
+      allow read: if isViewer();
+      allow create, update: if isEditor();
+      allow delete: if isAdmin();
     }
 
-    // Blog: herkes okuyabilir, sadece admin yazabilir
+    // Blog: herkes okuyabilir, editor yazar, sadece admin siler
     match /blog_posts/{docId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update: if isEditor();
+      allow delete: if isAdmin();
     }
 
-    // Aktivite logu: sadece admin
+    // Aktivite logu: tum yetkili kullanicilar okuyabilir, sistem yazar
     match /activity_logs/{docId} {
-      allow read, write: if isAdmin();
+      allow read: if isViewer();
+      allow create: if isEditor();
+      allow update, delete: if isAdmin();
     }
 
-    // Admin todo/hatırlatma sistemi — sadece admin
+    // Admin todo/hatirlatma sistemi: editor+ kullanabilir
     match /admin_todos/{docId} {
-      allow read, write: if isAdmin();
+      allow read, write: if isEditor();
     }
 
     // Diger tum koleksiyonlar: varsayilan olarak engelle

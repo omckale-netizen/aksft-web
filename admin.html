@@ -475,6 +475,22 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .msg-device-box .device-label{font-weight:700;color:var(--navy);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
 @media(max-width:1100px){.msg-layout{grid-template-columns:180px 1fr !important}.msg-detail-panel{display:none}.msg-detail-panel.show{display:block;position:fixed;inset:0;z-index:200;background:var(--page-bg);overflow-y:auto;padding:16px}}
 @media(max-width:700px){.msg-layout{grid-template-columns:1fr !important}.msg-sidebar{display:none}.msg-sidebar.show{display:flex;position:fixed;inset:0;z-index:201;border-radius:0}}
+/* ══════ KULLANICILAR ══════ */
+.user-card{display:flex;gap:14px;padding:16px 18px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;margin-bottom:10px;align-items:center}
+.user-card.inactive{opacity:.5}
+.user-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--terra),var(--amber));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;flex-shrink:0;font-family:'Plus Jakarta Sans',sans-serif}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:.95rem;font-weight:700;color:var(--navy);margin-bottom:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.user-email{font-size:.75rem;color:var(--text-muted);word-break:break-all}
+.user-role-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:.68rem;font-weight:700}
+.user-role-admin{background:rgba(229,62,62,.12);color:#C53030}
+.user-role-editor{background:rgba(49,130,206,.12);color:#2B6CB0}
+.user-role-viewer{background:rgba(113,128,150,.12);color:#4A5568}
+.user-status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block}
+.user-status-dot.inactive{background:var(--text-muted)}
+.user-meta{font-size:.68rem;color:var(--text-muted);margin-top:4px;display:flex;gap:12px;flex-wrap:wrap}
+.user-actions{display:flex;gap:6px;flex-shrink:0}
+
 /* ══════ TODO / GÖREVLER ══════ */
 .todo-group{margin-bottom:24px}
 .todo-group-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:0 4px}
@@ -711,6 +727,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       </a>
 
       <div class="admin-nav-sep"></div>
+      <a class="admin-nav-item" data-page="users" onclick="showPage('users')">
+        <span class="nav-icon">👥</span> Kullanıcılar
+      </a>
       <a class="admin-nav-item" data-page="export" onclick="showPage('export')">
         <span class="nav-icon">📦</span> Yedekleme
       </a>
@@ -2075,6 +2094,71 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       </div>
     </div>
 
+    <!-- ══════ KULLANICILAR ══════ -->
+    <div class="admin-page" id="page-users">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px">
+        <div>
+          <h2 style="margin:0">Kullanıcılar</h2>
+          <p class="page-sub" style="margin:4px 0 0">Editör ve yönetici hesapları — rol bazlı yetki yönetimi.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openUserModal()">+ Yeni Kullanıcı</button>
+      </div>
+      <div class="stats-grid" id="users-stats" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));margin-bottom:16px"></div>
+      <div id="users-list"></div>
+    </div>
+
+    <!-- Kullanıcı Modal -->
+    <div id="user-modal-overlay" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeUserModal()">
+      <div style="background:var(--card-bg,#fff);border-radius:16px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid rgba(0,0,0,.06);position:sticky;top:0;background:var(--card-bg,#fff);z-index:1;border-radius:16px 16px 0 0">
+          <h3 id="user-modal-title" style="margin:0;font-size:1rem;color:var(--navy)">👤 Yeni Kullanıcı</h3>
+          <button onclick="closeUserModal()" style="border:none;background:none;font-size:1.3rem;cursor:pointer;color:var(--text-muted)">&times;</button>
+        </div>
+        <div style="padding:20px 24px">
+          <input type="hidden" id="user-edit-uid">
+          <div class="form-group" style="margin-bottom:14px">
+            <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:4px">Ad Soyad *</label>
+            <input type="text" id="user-name" placeholder="Ahmet Yılmaz" style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.9rem;background:var(--input-bg,#fff);color:var(--text);width:100%" maxlength="100">
+          </div>
+          <div class="form-group" style="margin-bottom:14px">
+            <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:4px">E-posta *</label>
+            <input type="email" id="user-email" placeholder="editor@assosukesfet.com" style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.9rem;background:var(--input-bg,#fff);color:var(--text);width:100%" maxlength="100">
+            <div class="user-email-hint" style="font-size:.65rem;color:var(--text-muted);margin-top:4px">Düzenlemede değiştirilemez</div>
+          </div>
+          <div class="form-group" id="user-password-wrap" style="margin-bottom:14px">
+            <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:4px">Geçici Şifre *</label>
+            <div style="display:flex;gap:8px">
+              <input type="text" id="user-password" placeholder="Min 8 karakter" style="flex:1;padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.9rem;background:var(--input-bg,#fff);color:var(--text);font-family:monospace" minlength="8">
+              <button type="button" class="btn btn-sm btn-secondary" onclick="generateUserPassword()">🎲 Üret</button>
+            </div>
+            <div style="font-size:.65rem;color:var(--text-muted);margin-top:4px">Kullanıcıya şifreyi iletin ve ilk girişte değiştirmesini söyleyin</div>
+          </div>
+          <div class="form-group" style="margin-bottom:14px">
+            <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:4px">Rol *</label>
+            <select id="user-role" style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.9rem;background:var(--input-bg,#fff);color:var(--text);width:100%;cursor:pointer">
+              <option value="viewer">👁 Viewer — sadece okuma</option>
+              <option value="editor" selected>✏️ Editor — içerik yönetimi</option>
+              <option value="admin">👑 Admin — tam yetki</option>
+            </select>
+            <div id="user-role-desc" style="font-size:.68rem;color:var(--text-muted);margin-top:6px;line-height:1.5"></div>
+          </div>
+          <div class="form-group" style="margin-bottom:14px">
+            <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:4px">Not (opsiyonel)</label>
+            <input type="text" id="user-notes" placeholder="Hangi amaçla ekleniyor..." style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.85rem;background:var(--input-bg,#fff);color:var(--text);width:100%" maxlength="200">
+          </div>
+          <div class="form-group" style="margin-bottom:14px">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.82rem;font-weight:600;color:var(--text)">
+              <input type="checkbox" id="user-active" checked style="width:16px;height:16px;accent-color:var(--green);cursor:pointer"> Aktif (giriş yapabilir)
+            </label>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:20px">
+            <button class="btn btn-primary" onclick="saveUser()" style="flex:1">Kaydet</button>
+            <button class="btn btn-secondary" onclick="closeUserModal()">İptal</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ══════ TODOS / GÖREVLER ══════ -->
     <div class="admin-page" id="page-todos">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px">
@@ -3206,11 +3290,14 @@ function pingIndexNow(url) {
 function logActivity(action, target, details, changes) {
   try {
     const user = firebase.auth().currentUser;
+    const current = window._currentUser || {};
     const entry = {
       action: action,
       target: target,
       details: details || '',
       user: user ? user.email : 'bilinmeyen',
+      userName: current.name || (user ? user.email.split('@')[0] : 'bilinmeyen'),
+      userRole: current.role || 'unknown',
       timestamp: new Date().toISOString()
     };
     if (changes) entry.changes = changes;
@@ -4188,6 +4275,119 @@ async function removeHeroImage() {
 
 
 // Auto-login if session exists (+ oturum zamanlayici kontrolu)
+// ═══════════════════════════════════════════
+// KULLANICI ROL SİSTEMİ (Multi-admin / Editor / Viewer)
+// ═══════════════════════════════════════════
+const SUPER_ADMIN_EMAIL = 'info@onyedimedya.com';
+window._currentUser = null; // { uid, email, name, role, active }
+
+async function loadCurrentUserRole(firebaseUser) {
+  if (!firebaseUser) { window._currentUser = null; return null; }
+  var baseUser = {
+    uid: firebaseUser.uid,
+    email: firebaseUser.email,
+    name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+    role: null,
+    active: true
+  };
+  // Super admin email — her zaman tam yetki (kurtarma)
+  if (firebaseUser.email === SUPER_ADMIN_EMAIL) {
+    baseUser.role = 'admin';
+    window._currentUser = baseUser;
+    // Users koleksiyonunda yoksa otomatik ekle
+    try {
+      var snap = await db.collection('users').doc(firebaseUser.uid).get();
+      if (!snap.exists) {
+        await db.collection('users').doc(firebaseUser.uid).set({
+          email: firebaseUser.email, name: baseUser.name, role: 'admin', active: true,
+          createdAt: new Date().toISOString(), createdBy: 'system'
+        });
+      } else {
+        var data = snap.data();
+        baseUser.name = data.name || baseUser.name;
+      }
+    } catch(e) {}
+    return window._currentUser;
+  }
+  // Diğer kullanıcılar için users koleksiyonundan rol oku
+  try {
+    var doc = await db.collection('users').doc(firebaseUser.uid).get();
+    if (!doc.exists) {
+      showToast('Hesabınız yönetici tarafından tanımlanmamış. Lütfen yetkili ile iletişime geçin.', 'error');
+      await fbAuth.signOut();
+      setTimeout(function(){ window.location.replace('admin-login.html'); }, 1500);
+      return null;
+    }
+    var data = doc.data();
+    if (data.active === false) {
+      showToast('Hesabınız pasif durumda. Yönetici ile iletişime geçin.', 'error');
+      await fbAuth.signOut();
+      setTimeout(function(){ window.location.replace('admin-login.html'); }, 1500);
+      return null;
+    }
+    baseUser.name = data.name || baseUser.name;
+    baseUser.role = data.role || 'viewer';
+    baseUser.active = data.active !== false;
+    window._currentUser = baseUser;
+    // Son giriş güncelle
+    try { db.collection('users').doc(firebaseUser.uid).update({ lastLogin: new Date().toISOString() }); } catch(e) {}
+    return window._currentUser;
+  } catch(e) {
+    console.error('User role fetch error:', e);
+    return null;
+  }
+}
+
+// Yetki helper'ları
+function currentRole() { return (window._currentUser && window._currentUser.role) || null; }
+function isCurrentAdmin() { return currentRole() === 'admin'; }
+function isCurrentEditor() { var r = currentRole(); return r === 'admin' || r === 'editor'; }
+function isCurrentViewer() { var r = currentRole(); return r === 'admin' || r === 'editor' || r === 'viewer'; }
+
+// Sadece belirli rollerin erişebileceği sayfalar
+var ROLE_PAGES = {
+  admin: ['users','settings','security','export','ai'], // sadece admin
+  editor: [] // ek kısıt yok; viewer'ın erişemediği herşey
+};
+function canAccessPage(page) {
+  if (!window._currentUser) return false;
+  var role = currentRole();
+  // Admin-only sayfalar
+  if (ROLE_PAGES.admin.indexOf(page) > -1) return role === 'admin';
+  // Viewer sadece okuma — listeleme sayfaları OK, action olanlar hayır
+  if (role === 'viewer') {
+    // Viewer erişemeyeceği sayfalar (sadece yazma odaklı)
+    var viewerBlocked = ['export','security','users','settings','ai','todos'];
+    return viewerBlocked.indexOf(page) === -1;
+  }
+  return true; // editor + admin her sayfaya girer
+}
+
+function canEditContent() { return isCurrentEditor(); }
+function canDeleteContent() { return isCurrentAdmin(); }
+function canManageUsers() { return isCurrentAdmin(); }
+
+// Rol bazlı UI güncelleme — sidebar, butonlar, menüler
+function applyRoleBasedUI() {
+  if (!window._currentUser) return;
+  var role = currentRole();
+  // Sidebar — admin-only sayfaları gizle
+  ROLE_PAGES.admin.forEach(function(page) {
+    var el = document.querySelector('.admin-nav-item[data-page="' + page + '"]');
+    if (el) el.style.display = (role === 'admin') ? '' : 'none';
+  });
+  // Viewer için daha fazla kısıt
+  if (role === 'viewer') {
+    ['export','security','users','settings','ai','todos'].forEach(function(page) {
+      var el = document.querySelector('.admin-nav-item[data-page="' + page + '"]');
+      if (el) el.style.display = 'none';
+    });
+  }
+  // Kullanıcı adını bir yerde göster (varsa)
+  var userLabel = document.getElementById('admin-user-label');
+  if (userLabel) userLabel.textContent = window._currentUser.name + ' · ' + role;
+}
+
 fbAuth.onAuthStateChanged(async (user) => {
   if (user) {
     // Oturum suresi kontrolu
@@ -4199,6 +4399,9 @@ fbAuth.onAuthStateChanged(async (user) => {
       window.location.replace('admin-login.html');
       return;
     }
+    // Kullanıcı rolünü yükle — yoksa login'e yönlendirilir
+    var userInfo = await loadCurrentUserRole(user);
+    if (!userInfo) return; // loadCurrentUserRole zaten signOut ve redirect yaptı
     document.getElementById('admin-wrap').style.display = 'flex';
     try {
       await Promise.race([
@@ -4214,6 +4417,7 @@ fbAuth.onAuthStateChanged(async (user) => {
     }
     document.getElementById('admin-loading').classList.add('hidden');
     initApp();
+    applyRoleBasedUI();
     startSessionTimer();
     // Giriş loglarını Firebase'e aktar
     syncLoginLogs();
@@ -4252,6 +4456,7 @@ function showPage(page) {
   if (page === 'activity') renderActivityLog();
   if (page === 'blog') renderBlogTable();
   if (page === 'todos') { startTodosListener(); renderTodos(); }
+  if (page === 'users') { startUsersListener(); renderUsers(); }
 }
 
 function toggleSidebar() {
@@ -4270,7 +4475,7 @@ function initApp() {
   // Hash'ten son kaldığı sekmeyi aç
   const hash = window.location.hash.replace('#', '');
   loadCategories();
-  const validPages = ['dashboard','venues','categories','bot','placebot','routes','villages','export','settings','security','analytics','messages','pending','gallery','activity','blog','todos'];
+  const validPages = ['dashboard','venues','categories','bot','placebot','routes','villages','export','settings','security','analytics','messages','pending','gallery','activity','blog','todos','users'];
   if (hash && validPages.includes(hash)) {
     showPage(hash);
   } else {
@@ -5945,15 +6150,20 @@ async function restoreMessage(docId) {
   showToast('Mesaj geri yüklendi.', 'success');
 }
 
-// Kalıcı sil
+// Kalıcı sil — sadece admin
 async function permanentDeleteMessage(docId) {
+  if (!canDeleteContent()) { showToast('Bu işlem için admin yetkisi gerekli', 'error'); return; }
   if (!confirm('Bu mesaj kalıcı olarak silinecek. Emin misiniz?')) return;
-  await db.collection('messages').doc(docId).delete();
-  allMessages = allMessages.filter(m => m._id !== docId);
-  closeMsgDetail();
-  renderMessageList();
-  updateMsgBadge();
-  showToast('Mesaj kalıcı olarak silindi.', 'success');
+  try {
+    await db.collection('messages').doc(docId).delete();
+    allMessages = allMessages.filter(m => m._id !== docId);
+    closeMsgDetail();
+    renderMessageList();
+    updateMsgBadge();
+    showToast('Mesaj kalıcı olarak silindi.', 'success');
+  } catch(e) {
+    showToast('Silinemedi: ' + e.message, 'error');
+  }
 }
 
 // Çöp kutusunu boşalt
@@ -10018,6 +10228,228 @@ const ACTIVITY_LABELS = {
   mekan_talep_onayla: { icon: '✅', label: 'Mekan Talebi Onaylandı', color: 'rgba(56,161,105,.1)' },
   mekan_talep_revizyon: { icon: '📝', label: 'Mekan Talebi Revizyon', color: 'rgba(49,130,206,.1)' }
 };
+
+/* ══════════════════════════════════════════════════
+   KULLANICI YÖNETİMİ (Multi-admin)
+══════════════════════════════════════════════════ */
+var _allUsers = [];
+var _usersListener = null;
+
+function startUsersListener() {
+  if (_usersListener) return;
+  _usersListener = db.collection('users').onSnapshot(function(snap) {
+    _allUsers = snap.docs.map(function(d) { return { uid: d.id, ...d.data() }; });
+    if (document.getElementById('page-users') && document.getElementById('page-users').classList.contains('active')) {
+      renderUsers();
+    }
+  }, function(err) { console.warn('Users listener error:', err); });
+}
+
+function renderUsers() {
+  var listEl = document.getElementById('users-list');
+  var statsEl = document.getElementById('users-stats');
+  if (!listEl) return;
+
+  // Stats
+  var admins = _allUsers.filter(function(u) { return u.role === 'admin'; }).length;
+  var editors = _allUsers.filter(function(u) { return u.role === 'editor'; }).length;
+  var viewers = _allUsers.filter(function(u) { return u.role === 'viewer'; }).length;
+  var activeCount = _allUsers.filter(function(u) { return u.active !== false; }).length;
+  if (statsEl) {
+    statsEl.innerHTML =
+      '<div class="stat-card"><div class="stat-label">Toplam</div><div class="stat-val">' + _allUsers.length + '</div></div>' +
+      '<div class="stat-card terra"><div class="stat-label">👑 Admin</div><div class="stat-val">' + admins + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">✏️ Editor</div><div class="stat-val" style="color:#2B6CB0">' + editors + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">👁 Viewer</div><div class="stat-val" style="color:#4A5568">' + viewers + '</div></div>' +
+      '<div class="stat-card green"><div class="stat-label">Aktif</div><div class="stat-val">' + activeCount + '</div></div>';
+  }
+
+  if (_allUsers.length === 0) {
+    listEl.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted)">Henüz kullanıcı yok.</div>';
+    return;
+  }
+
+  // Sırala: admin → editor → viewer, sonra isim
+  var sorted = _allUsers.slice().sort(function(a, b) {
+    var order = { admin: 0, editor: 1, viewer: 2 };
+    var ra = order[a.role] || 3;
+    var rb = order[b.role] || 3;
+    if (ra !== rb) return ra - rb;
+    return (a.name || a.email || '').localeCompare(b.name || b.email || '', 'tr');
+  });
+
+  listEl.innerHTML = sorted.map(function(u) {
+    var initials = (u.name || u.email || '?').split(/\s+/).map(function(w){ return w[0]; }).join('').toUpperCase().slice(0, 2);
+    var roleBadge = { admin: '👑 Admin', editor: '✏️ Editor', viewer: '👁 Viewer' }[u.role] || u.role;
+    var isActive = u.active !== false;
+    var isSelf = window._currentUser && u.uid === window._currentUser.uid;
+    var isSuper = u.email === SUPER_ADMIN_EMAIL;
+    var lastLogin = u.lastLogin ? new Date(u.lastLogin).toLocaleDateString('tr-TR', {day:'numeric',month:'short',year:'numeric'}) : '—';
+    return '<div class="user-card' + (isActive ? '' : ' inactive') + '">' +
+      '<div class="user-avatar">' + esc(initials) + '</div>' +
+      '<div class="user-info">' +
+        '<div class="user-name">' + esc(u.name || '—') +
+          '<span class="user-role-badge user-role-' + (u.role || 'viewer') + '">' + roleBadge + '</span>' +
+          '<span class="user-status-dot' + (isActive ? '' : ' inactive') + '" title="' + (isActive ? 'Aktif' : 'Pasif') + '"></span>' +
+          (isSelf ? '<span style="font-size:.65rem;color:var(--text-muted);font-weight:600">(siz)</span>' : '') +
+          (isSuper ? '<span style="font-size:.65rem;color:var(--terra);font-weight:700">⚡ SUPER ADMIN</span>' : '') +
+        '</div>' +
+        '<div class="user-email">' + esc(u.email || '') + '</div>' +
+        '<div class="user-meta">' +
+          '<span>📅 Son giriş: ' + lastLogin + '</span>' +
+          (u.notes ? '<span>📝 ' + esc(u.notes) + '</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="user-actions">' +
+        (!isSuper ? '<button class="btn btn-sm btn-secondary" onclick="openUserModal(\'' + esc(u.uid) + '\')" title="Düzenle">✏️</button>' : '') +
+        (!isSelf && !isSuper ? '<button class="btn btn-sm btn-secondary" onclick="toggleUserActive(\'' + esc(u.uid) + '\')" title="' + (isActive ? 'Pasife Al' : 'Aktifleştir') + '">' + (isActive ? '⏸' : '▶') + '</button>' : '') +
+        (!isSelf && !isSuper ? '<button class="btn btn-sm btn-danger" onclick="deleteUser(\'' + esc(u.uid) + '\')" title="Sil">🗑</button>' : '') +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// Şifre üretici
+function generateUserPassword() {
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#';
+  var pw = '';
+  for (var i = 0; i < 12; i++) pw += chars[Math.floor(Math.random() * chars.length)];
+  document.getElementById('user-password').value = pw;
+}
+
+// Rol açıklamaları
+var USER_ROLE_DESCRIPTIONS = {
+  admin: '👑 Tam yetki: Kullanıcı yönetimi, ayarlar, silme, AI limit, güvenlik dahil her şey.',
+  editor: '✏️ İçerik yönetimi: Mekan/blog/rota CRUD, mesaj yanıtla, mekan talebi onayla. Silme ve ayarlar yetkisi YOK.',
+  viewer: '👁 Sadece okuma: İçerikleri ve istatistikleri görüntüleyebilir. Düzenleme yapamaz.'
+};
+document.addEventListener('change', function(e) {
+  if (e.target && e.target.id === 'user-role') {
+    var el = document.getElementById('user-role-desc');
+    if (el) el.textContent = USER_ROLE_DESCRIPTIONS[e.target.value] || '';
+  }
+});
+
+function openUserModal(uid) {
+  document.getElementById('user-modal-overlay').style.display = 'flex';
+  document.getElementById('user-edit-uid').value = '';
+  document.getElementById('user-name').value = '';
+  document.getElementById('user-email').value = '';
+  document.getElementById('user-email').disabled = false;
+  document.getElementById('user-password').value = '';
+  document.getElementById('user-role').value = 'editor';
+  document.getElementById('user-notes').value = '';
+  document.getElementById('user-active').checked = true;
+  document.getElementById('user-password-wrap').style.display = '';
+  document.querySelector('.user-email-hint').style.display = 'none';
+  document.getElementById('user-modal-title').textContent = '👤 Yeni Kullanıcı';
+  document.getElementById('user-role-desc').textContent = USER_ROLE_DESCRIPTIONS.editor;
+
+  if (uid) {
+    var u = _allUsers.find(function(x) { return x.uid === uid; });
+    if (!u) return;
+    document.getElementById('user-modal-title').textContent = '✏️ Kullanıcı Düzenle';
+    document.getElementById('user-edit-uid').value = uid;
+    document.getElementById('user-name').value = u.name || '';
+    document.getElementById('user-email').value = u.email || '';
+    document.getElementById('user-email').disabled = true;
+    document.getElementById('user-role').value = u.role || 'viewer';
+    document.getElementById('user-notes').value = u.notes || '';
+    document.getElementById('user-active').checked = u.active !== false;
+    // Düzenlemede şifre gizli (ayrı reset)
+    document.getElementById('user-password-wrap').style.display = 'none';
+    document.querySelector('.user-email-hint').style.display = '';
+    document.getElementById('user-role-desc').textContent = USER_ROLE_DESCRIPTIONS[u.role] || '';
+  }
+  setTimeout(function() { document.getElementById('user-name').focus(); }, 100);
+}
+
+function closeUserModal() {
+  document.getElementById('user-modal-overlay').style.display = 'none';
+}
+
+async function saveUser() {
+  var editUid = document.getElementById('user-edit-uid').value;
+  var name = document.getElementById('user-name').value.trim();
+  var email = document.getElementById('user-email').value.trim();
+  var role = document.getElementById('user-role').value;
+  var notes = document.getElementById('user-notes').value.trim();
+  var active = document.getElementById('user-active').checked;
+
+  if (!name) { showToast('Ad Soyad zorunlu', 'error'); return; }
+  if (!email || !/^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$/.test(email)) {
+    showToast('Geçerli bir e-posta girin', 'error'); return;
+  }
+
+  try {
+    if (editUid) {
+      // Düzenleme — sadece Firestore belgesi güncelle
+      await db.collection('users').doc(editUid).update({
+        name: name, role: role, notes: notes, active: active,
+        updatedAt: new Date().toISOString(),
+        updatedBy: window._currentUser.email
+      });
+      showToast('Kullanıcı güncellendi', 'success');
+      logActivity('user_update', editUid, name + ' (' + role + ')');
+    } else {
+      // Yeni kullanıcı — Firebase Auth'ta hesap oluştur + users belgesi yaz
+      var password = document.getElementById('user-password').value;
+      if (!password || password.length < 8) { showToast('Şifre en az 8 karakter olmalı', 'error'); return; }
+      // Secondary Firebase App kullan — mevcut admin logout olmasın
+      var secondaryApp = firebase.apps.find(function(a) { return a.name === 'UserCreate'; });
+      if (!secondaryApp) {
+        secondaryApp = firebase.initializeApp({
+          apiKey: "AIzaSyCXqgczplchzjClAZt-Wl2eqgqmUMhLVJs",
+          authDomain: "assosu-kesfet.firebaseapp.com",
+          projectId: "assosu-kesfet",
+          storageBucket: "assosu-kesfet.firebasestorage.app",
+          messagingSenderId: "225032191860",
+          appId: "1:225032191860:web:61ac6ba36764b530be3621"
+        }, 'UserCreate');
+      }
+      var cred = await secondaryApp.auth().createUserWithEmailAndPassword(email, password);
+      var newUid = cred.user.uid;
+      await secondaryApp.auth().signOut();
+
+      await db.collection('users').doc(newUid).set({
+        email: email, name: name, role: role, notes: notes, active: active,
+        createdAt: new Date().toISOString(),
+        createdBy: window._currentUser.email
+      });
+      showToast('✓ Kullanıcı oluşturuldu. Şifre: ' + password, 'success');
+      logActivity('user_create', newUid, name + ' (' + role + ')');
+    }
+    closeUserModal();
+  } catch(e) {
+    var msg = e.message || 'Bilinmeyen hata';
+    if (msg.includes('email-already-in-use')) msg = 'Bu e-posta zaten kullanımda';
+    else if (msg.includes('weak-password')) msg = 'Şifre çok zayıf (min 6 karakter)';
+    else if (msg.includes('invalid-email')) msg = 'Geçersiz e-posta';
+    showToast('Hata: ' + msg, 'error');
+  }
+}
+
+async function toggleUserActive(uid) {
+  var u = _allUsers.find(function(x) { return x.uid === uid; });
+  if (!u) return;
+  var newActive = u.active === false;
+  try {
+    await db.collection('users').doc(uid).update({ active: newActive, updatedAt: new Date().toISOString(), updatedBy: window._currentUser.email });
+    showToast(newActive ? 'Kullanıcı aktifleştirildi' : 'Kullanıcı pasife alındı', 'success');
+    logActivity(newActive ? 'user_activate' : 'user_deactivate', uid, u.name || u.email);
+  } catch(e) { showToast('Hata: ' + e.message, 'error'); }
+}
+
+async function deleteUser(uid) {
+  var u = _allUsers.find(function(x) { return x.uid === uid; });
+  if (!u) return;
+  if (!confirm(u.name + ' (' + u.email + ') kullanıcısını silmek istediğinize emin misiniz?\n\nUYARI: Firestore belgesi silinir ama Firebase Auth hesabı Firebase Console\'dan manuel silinmelidir.')) return;
+  try {
+    await db.collection('users').doc(uid).delete();
+    showToast('Kullanıcı silindi (Auth hesabını Console\'dan silin)', 'success');
+    logActivity('user_delete', uid, u.name || u.email);
+  } catch(e) { showToast('Hata: ' + e.message, 'error'); }
+}
 
 /* ══════════════════════════════════════════════════
    TODOS / GÖREVLER & HATIRLATMALAR
