@@ -65,6 +65,13 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Gonderilen mailler arsivi: editor okur/yazar (yanit gonderme), admin siler
+    match /sent_mails/{docId} {
+      allow read, create: if isEditor();
+      allow update: if isEditor();
+      allow delete: if isAdmin();
+    }
+
     // Analitik: herkes yazabilir (anonim kullanici izleme), sadece admin okuyabilir
     // Sema validasyonu + boyut kisiti ile spam/storage abuse onleme
     // Izin verilen alanlar: views, lastViewed, id + action_count/action_last (phone, whatsapp, directions, share, website, instagram)
