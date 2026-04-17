@@ -802,6 +802,35 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
   overflow-wrap:break-word;word-break:normal;white-space:normal;
 }
 
+/* ═══ MİNİ ARAÇLAR ═══ */
+.mt-tab{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:none;background:transparent;color:var(--text-light);font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;border-radius:8px;transition:all var(--transition-fast);flex:1;justify-content:center}
+.mt-tab:hover{color:var(--text);background:var(--cream-dark)}
+.mt-tab.active{background:var(--terra);color:#fff}
+.mt-tab.active:hover{background:var(--terra-dark);color:#fff}
+
+/* Maps parser result */
+.mt-maps-field-label{font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+.mt-maps-field-val{font-family:'SF Mono',Consolas,monospace;color:var(--navy);font-weight:600;word-break:break-all}
+
+/* Emoji picker */
+.mt-emoji-cat{padding:6px 12px;border:1px solid var(--card-border);background:var(--card-bg);color:var(--text-light);border-radius:999px;cursor:pointer;font-size:.72rem;font-weight:600;font-family:inherit;transition:all var(--transition-fast)}
+.mt-emoji-cat:hover{border-color:var(--terra);color:var(--terra)}
+.mt-emoji-cat.active{background:var(--terra);color:#fff;border-color:var(--terra)}
+.mt-emoji-btn{display:flex;align-items:center;justify-content:center;width:44px;height:44px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;cursor:pointer;font-size:1.4rem;transition:all var(--transition-fast);padding:0}
+.mt-emoji-btn:hover{background:var(--cream-dark);border-color:var(--terra);transform:scale(1.08)}
+.mt-emoji-btn:active{transform:scale(.95)}
+
+/* Color palette */
+.mt-swatch{width:32px;height:32px;border:2px solid rgba(0,0,0,.06);border-radius:8px;cursor:pointer;transition:transform var(--transition-fast),box-shadow var(--transition-fast);padding:0}
+.mt-swatch:hover{transform:scale(1.15);box-shadow:var(--shadow-sm)}
+.mt-color-group{background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:14px;box-shadow:var(--shadow-xs)}
+.mt-color-group-title{font-size:.7rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.mt-color-row{display:flex;gap:8px;flex-wrap:wrap}
+.mt-color-chip{flex:1;min-width:80px;height:64px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;padding:8px 4px;transition:transform var(--transition-fast);position:relative;border:none;color:#fff;font-family:inherit}
+.mt-color-chip:hover{transform:translateY(-2px)}
+.mt-color-chip-hex{font-family:'SF Mono',Consolas,monospace;font-size:.7rem;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.mt-color-chip-role{font-size:.6rem;opacity:.85;margin-top:2px;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+
 /* Todo modal: opsiyonel mail bildirim kutusu */
 .todo-notify-box{
   display:none;
@@ -1016,6 +1045,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       </a>
       <a class="admin-nav-item" data-page="fileconvert" onclick="showPage('fileconvert')">
         <span class="nav-icon"><i data-lucide="refresh-cw"></i></span> Dosya Dönüştür
+      </a>
+      <a class="admin-nav-item" data-page="minitools" onclick="showPage('minitools')">
+        <span class="nav-icon"><i data-lucide="wand-2"></i></span> Mini Araçlar
       </a>
 
       <!-- YÖNETİM: sistem/erişim kontrol (admin-only) -->
@@ -2100,6 +2132,119 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
         </div>
 
+      </div>
+    </div>
+
+    <!-- ══════ MİNİ ARAÇLAR ══════ -->
+    <div class="admin-page" id="page-minitools">
+      <h2>Mini Araçlar</h2>
+      <p class="page-sub">Maps koordinat çıkarıcı, emoji arama ve renk paleti üretici — tek yerde.</p>
+
+      <!-- Tab navigation -->
+      <div style="display:flex;gap:6px;padding:6px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;margin-bottom:20px;max-width:520px;box-shadow:var(--shadow-xs)">
+        <button class="mt-tab active" onclick="showMtTab('maps',this)"><i data-lucide="map-pin" style="width:15px;height:15px"></i> Maps Parser</button>
+        <button class="mt-tab" onclick="showMtTab('emoji',this)"><i data-lucide="smile" style="width:15px;height:15px"></i> Emoji</button>
+        <button class="mt-tab" onclick="showMtTab('color',this)"><i data-lucide="palette" style="width:15px;height:15px"></i> Renk Paleti</button>
+      </div>
+
+      <!-- === MAPS PARSER === -->
+      <div class="mt-pane" data-pane="maps">
+        <div class="panel-card" style="max-width:720px">
+          <div class="panel-card-head"><h3>📍 Google Maps Parser</h3></div>
+          <div style="padding:20px">
+            <div class="form-group">
+              <label>Google Maps Linki veya Paylaşım Metni</label>
+              <textarea id="mt-maps-input" rows="3" placeholder="https://www.google.com/maps/@40.123,26.456,15z veya harita linkini yapıştırın" oninput="mtMapsParse()" style="font-family:'SF Mono',Consolas,monospace;font-size:.82rem"></textarea>
+              <div style="font-size:.68rem;color:var(--text-muted);margin-top:4px">Desteklenen: maps.google.com, goo.gl/maps, maps.app.goo.gl, ya da direkt "40.123, 26.456" koordinat</div>
+            </div>
+
+            <div id="mt-maps-result" style="display:none;margin-top:16px;padding:16px;background:rgba(56,161,105,.05);border:1px solid rgba(56,161,105,.2);border-radius:10px">
+              <div style="font-size:.72rem;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">✓ Çıkarılan Veri</div>
+              <div id="mt-maps-fields" style="display:grid;grid-template-columns:120px 1fr;gap:8px;font-size:.85rem;align-items:center"></div>
+              <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap">
+                <button class="btn btn-sm btn-primary" onclick="mtMapsCopyCoords()"><i data-lucide="copy" style="width:13px;height:13px"></i> Koordinatları Kopyala</button>
+                <button class="btn btn-sm btn-secondary" onclick="mtMapsOpenInMaps()"><i data-lucide="external-link" style="width:13px;height:13px"></i> Maps'te Aç</button>
+                <button class="btn btn-sm btn-secondary" onclick="mtMapsEmbed()"><i data-lucide="code" style="width:13px;height:13px"></i> Embed Kodu</button>
+              </div>
+              <div id="mt-maps-embed" style="display:none;margin-top:12px"></div>
+            </div>
+
+            <div id="mt-maps-hint" style="margin-top:16px;padding:12px 14px;background:rgba(49,130,206,.06);border-left:3px solid var(--blue);border-radius:6px;font-size:.75rem;color:var(--text-light);line-height:1.55">
+              💡 <strong>İpucu:</strong> Kısa linkler (goo.gl) genişlememeli — Google Maps'te adresi açıp URL çubuğundan tam linki kopyalayın (@koordinat içerir). Ya da direkt <strong>40.1234, 26.5678</strong> formatında yapıştırabilirsiniz.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- === EMOJI PICKER === -->
+      <div class="mt-pane" data-pane="emoji" style="display:none">
+        <div class="panel-card" style="max-width:720px">
+          <div class="panel-card-head"><h3>😀 Emoji Arama</h3></div>
+          <div style="padding:20px">
+            <div class="form-group">
+              <label>Ara (Türkçe veya İngilizce)</label>
+              <input type="text" id="mt-emoji-search" placeholder="örn: yemek, kahve, yıldız, food, coffee..." oninput="mtEmojiRender()" autocomplete="off">
+            </div>
+
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px">
+              <button class="mt-emoji-cat active" onclick="mtEmojiCat('all',this)">Tümü</button>
+              <button class="mt-emoji-cat" onclick="mtEmojiCat('seyahat',this)">🏛 Seyahat</button>
+              <button class="mt-emoji-cat" onclick="mtEmojiCat('yemek',this)">🍽 Yemek</button>
+              <button class="mt-emoji-cat" onclick="mtEmojiCat('dogal',this)">🌿 Doğa</button>
+              <button class="mt-emoji-cat" onclick="mtEmojiCat('simge',this)">⭐ Simge</button>
+              <button class="mt-emoji-cat" onclick="mtEmojiCat('yer',this)">🏠 Yer</button>
+              <button class="mt-emoji-cat" onclick="mtEmojiCat('aktivite',this)">⚽ Aktivite</button>
+            </div>
+
+            <div id="mt-emoji-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px;min-height:120px"></div>
+            <div id="mt-emoji-empty" style="display:none;padding:24px;text-align:center;color:var(--text-muted);font-size:.82rem">🔍 Sonuç yok</div>
+
+            <div style="margin-top:14px;padding:10px 14px;background:var(--cream-dark);border-radius:8px;font-size:.72rem;color:var(--text-light);line-height:1.55">
+              💡 Emojiye tıklayınca panoya kopyalanır. Kategori + arama birlikte çalışır.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- === RENK PALETİ === -->
+      <div class="mt-pane" data-pane="color" style="display:none">
+        <div class="panel-card" style="max-width:720px">
+          <div class="panel-card-head"><h3>🎨 Renk Paleti Üretici</h3></div>
+          <div style="padding:20px">
+            <div style="display:flex;gap:16px;align-items:center;margin-bottom:18px;flex-wrap:wrap">
+              <div>
+                <input type="color" id="mt-color-input" value="#C4521A" oninput="mtColorUpdate()" style="width:60px;height:60px;border:2px solid var(--card-border);border-radius:14px;cursor:pointer;padding:4px;background:var(--card-bg)">
+              </div>
+              <div style="flex:1;min-width:200px">
+                <label style="font-size:.7rem;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Ana Renk</label>
+                <input type="text" id="mt-color-hex" value="#C4521A" oninput="mtColorHexInput()" maxlength="7" style="font-family:'SF Mono',Consolas,monospace;font-size:.95rem;text-transform:uppercase;font-weight:700">
+                <div id="mt-color-info" style="font-size:.7rem;color:var(--text-muted);margin-top:6px"></div>
+              </div>
+            </div>
+
+            <!-- Hazır brand renkleri -->
+            <div style="margin-bottom:18px">
+              <label style="font-size:.72rem;font-weight:700;color:var(--text-light);margin-bottom:8px;display:block">Brand Renkleri</label>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="mt-swatch" style="background:#C4521A" onclick="mtColorSet('#C4521A')" title="Terra"></button>
+                <button class="mt-swatch" style="background:#1A2744" onclick="mtColorSet('#1A2744')" title="Navy"></button>
+                <button class="mt-swatch" style="background:#1A6B8A" onclick="mtColorSet('#1A6B8A')" title="Mavi"></button>
+                <button class="mt-swatch" style="background:#5A7A56" onclick="mtColorSet('#5A7A56')" title="Yeşil"></button>
+                <button class="mt-swatch" style="background:#D4935A" onclick="mtColorSet('#D4935A')" title="Bej"></button>
+                <button class="mt-swatch" style="background:#9F7AEA" onclick="mtColorSet('#9F7AEA')" title="Mor"></button>
+                <button class="mt-swatch" style="background:#38A169" onclick="mtColorSet('#38A169')" title="Yeşil"></button>
+                <button class="mt-swatch" style="background:#E53E3E" onclick="mtColorSet('#E53E3E')" title="Kırmızı"></button>
+                <button class="mt-swatch" style="background:#D69E2E" onclick="mtColorSet('#D69E2E')" title="Sarı"></button>
+              </div>
+            </div>
+
+            <!-- Palet sonuçları -->
+            <div id="mt-color-palettes" style="display:flex;flex-direction:column;gap:18px"></div>
+
+            <!-- Kontrast sonuçları -->
+            <div id="mt-color-contrast" style="margin-top:18px;padding:14px 16px;background:var(--cream-dark);border-radius:10px;font-size:.78rem"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -4224,6 +4369,493 @@ function skeletonList(count) {
   return '<div style="padding:10px 18px">' + skeletonRows(count) + '</div>';
 }
 
+// ═══ MİNİ ARAÇLAR ═══
+function showMtTab(tab, btn) {
+  document.querySelectorAll('#page-minitools .mt-tab').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('#page-minitools .mt-pane').forEach(function(p) {
+    p.style.display = (p.getAttribute('data-pane') === tab) ? '' : 'none';
+  });
+  // Emoji tab'ı ilk açılışta doldur
+  if (tab === 'emoji' && !window._emojiInitialized) { mtEmojiRender(); window._emojiInitialized = true; }
+  if (tab === 'color' && !window._colorInitialized) { mtColorUpdate(); window._colorInitialized = true; }
+}
+
+// --- MAPS PARSER ---
+var _mtMapsData = null;
+function mtMapsParse() {
+  var input = document.getElementById('mt-maps-input').value.trim();
+  var resultEl = document.getElementById('mt-maps-result');
+  var fieldsEl = document.getElementById('mt-maps-fields');
+  if (!input) { resultEl.style.display = 'none'; _mtMapsData = null; return; }
+
+  var lat = null, lng = null, placeName = null, zoom = null;
+
+  // 1) Format: "40.1234, 26.5678" — direkt koordinat
+  var direct = input.match(/^(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)$/);
+  if (direct) { lat = parseFloat(direct[1]); lng = parseFloat(direct[2]); }
+
+  // 2) Google Maps URL: @lat,lng,zoomz
+  if (!lat) {
+    var atMatch = input.match(/@(-?\d+\.\d+),(-?\d+\.\d+)(?:,(\d+(?:\.\d+)?)z)?/);
+    if (atMatch) { lat = parseFloat(atMatch[1]); lng = parseFloat(atMatch[2]); zoom = atMatch[3] || null; }
+  }
+
+  // 3) URL query: ?q=lat,lng veya ?ll=lat,lng veya ?center=lat,lng
+  if (!lat) {
+    var qMatch = input.match(/[?&](?:q|ll|center|destination)=(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (qMatch) { lat = parseFloat(qMatch[1]); lng = parseFloat(qMatch[2]); }
+  }
+
+  // 4) !3dLAT!4dLNG formatı (Google Maps place URL'lerinde)
+  if (!lat) {
+    var placeMatch = input.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+    if (placeMatch) { lat = parseFloat(placeMatch[1]); lng = parseFloat(placeMatch[2]); }
+  }
+
+  // Place name (varsa URL'den)
+  var placeUrlMatch = input.match(/maps\/place\/([^\/@]+)/);
+  if (placeUrlMatch) {
+    placeName = decodeURIComponent(placeUrlMatch[1].replace(/\+/g, ' '));
+  }
+
+  if (!lat || !lng) {
+    fieldsEl.innerHTML = '<span class="mt-maps-field-label">DURUM</span><span style="color:var(--red);font-weight:600">❌ Koordinat çıkarılamadı</span>' +
+      '<span class="mt-maps-field-label">İPUCU</span><span style="color:var(--text-light);font-size:.75rem">Linki Google Maps\'te açıp adres çubuğundan tam URL\'yi kopyalayın (goo.gl kısaltmaları burada genişlemiyor)</span>';
+    resultEl.style.display = '';
+    _mtMapsData = null;
+    return;
+  }
+
+  _mtMapsData = { lat: lat, lng: lng, name: placeName, zoom: zoom };
+  var lat6 = lat.toFixed(6);
+  var lng6 = lng.toFixed(6);
+
+  var html = '';
+  if (placeName) html += '<span class="mt-maps-field-label">YER</span><span class="mt-maps-field-val" style="color:var(--terra)">' + esc(placeName) + '</span>';
+  html += '<span class="mt-maps-field-label">ENLEM</span><span class="mt-maps-field-val">' + lat6 + '</span>';
+  html += '<span class="mt-maps-field-label">BOYLAM</span><span class="mt-maps-field-val">' + lng6 + '</span>';
+  html += '<span class="mt-maps-field-label">TAM KOORDİNAT</span><span class="mt-maps-field-val" style="color:var(--green)">' + lat6 + ', ' + lng6 + '</span>';
+  if (zoom) html += '<span class="mt-maps-field-label">ZOOM</span><span class="mt-maps-field-val">' + zoom + '</span>';
+  fieldsEl.innerHTML = html;
+  resultEl.style.display = '';
+
+  // Embed alanını temizle
+  document.getElementById('mt-maps-embed').style.display = 'none';
+
+  // Lucide icons re-render
+  if (window.lucide && typeof lucide.createIcons === 'function') try { lucide.createIcons(); } catch(e) {}
+}
+
+function mtMapsCopyCoords() {
+  if (!_mtMapsData) return;
+  var txt = _mtMapsData.lat.toFixed(6) + ', ' + _mtMapsData.lng.toFixed(6);
+  navigator.clipboard.writeText(txt).then(function() {
+    showToast('✓ Kopyalandı: ' + txt, 'success');
+  }).catch(function() { showToast('Kopyalanamadı', 'error'); });
+}
+
+function mtMapsOpenInMaps() {
+  if (!_mtMapsData) return;
+  var url = 'https://www.google.com/maps/place/' + _mtMapsData.lat + ',' + _mtMapsData.lng;
+  window.open(url, '_blank');
+}
+
+function mtMapsEmbed() {
+  if (!_mtMapsData) return;
+  var lat = _mtMapsData.lat.toFixed(6);
+  var lng = _mtMapsData.lng.toFixed(6);
+  var embed = '<iframe src="https://www.google.com/maps?q=' + lat + ',' + lng + '&z=15&output=embed" width="100%" height="350" style="border:0;border-radius:12px" allowfullscreen loading="lazy"></iframe>';
+  var box = document.getElementById('mt-maps-embed');
+  box.style.display = '';
+  box.innerHTML = '<div style="font-size:.7rem;font-weight:700;color:var(--text-light);text-transform:uppercase;margin-bottom:6px">📋 Embed HTML</div>' +
+    '<textarea readonly onclick="this.select()" style="width:100%;font-family:\'SF Mono\',Consolas,monospace;font-size:.72rem;padding:10px;background:var(--cream-dark);border:1px solid var(--card-border);border-radius:8px;resize:vertical;min-height:80px">' + embed + '</textarea>' +
+    '<button class="btn btn-sm btn-secondary" style="margin-top:6px" onclick="navigator.clipboard.writeText(this.previousElementSibling.value);showToast(\'Kopyalandı\',\'success\')">📋 HTML\'i Kopyala</button>';
+}
+
+// --- EMOJI PICKER ---
+var EMOJI_DATA = [
+  // Seyahat & Ulaşım (Assos'a özel olarak zengin)
+  { e: '🏛️', k: 'tapınak antik yer historic temple', c: 'seyahat' },
+  { e: '🗿', k: 'moai taş heykel stone head', c: 'seyahat' },
+  { e: '⛩️', k: 'mabet shrine japanese', c: 'seyahat' },
+  { e: '🏰', k: 'kale castle şato', c: 'seyahat' },
+  { e: '🏯', k: 'saray palace asya', c: 'seyahat' },
+  { e: '🗼', k: 'kule tower', c: 'seyahat' },
+  { e: '🎡', k: 'dönme dolap ferris wheel', c: 'aktivite' },
+  { e: '✈️', k: 'uçak airplane plane', c: 'seyahat' },
+  { e: '🚗', k: 'araba car vehicle', c: 'seyahat' },
+  { e: '🚕', k: 'taksi taxi', c: 'seyahat' },
+  { e: '🚌', k: 'otobüs bus', c: 'seyahat' },
+  { e: '🚂', k: 'tren train lokomotif', c: 'seyahat' },
+  { e: '🚢', k: 'gemi ship tekne', c: 'seyahat' },
+  { e: '⛵', k: 'yelkenli sail sailboat', c: 'seyahat' },
+  { e: '🚤', k: 'sürat teknesi speedboat', c: 'seyahat' },
+  { e: '🏨', k: 'otel hotel', c: 'yer' },
+  { e: '🏪', k: 'dükkan shop market', c: 'yer' },
+  { e: '🏠', k: 'ev home house', c: 'yer' },
+  { e: '🏘️', k: 'köy village evler', c: 'yer' },
+  { e: '🏕️', k: 'kamp camping çadır', c: 'yer' },
+  { e: '🗺️', k: 'harita map', c: 'seyahat' },
+  { e: '📍', k: 'konum pin location', c: 'seyahat' },
+  { e: '🧭', k: 'pusula compass', c: 'seyahat' },
+  { e: '🚘', k: 'araba car', c: 'seyahat' },
+  { e: '🏖️', k: 'plaj beach kumsal', c: 'seyahat' },
+  { e: '⚓', k: 'çapa anchor iskele', c: 'seyahat' },
+  { e: '🛥️', k: 'motorlu tekne motorboat yat', c: 'seyahat' },
+
+  // Yemek & İçecek
+  { e: '🍽️', k: 'yemek food fine dining restaurant', c: 'yemek' },
+  { e: '🍴', k: 'çatal bıçak fork knife', c: 'yemek' },
+  { e: '🥢', k: 'chopsticks', c: 'yemek' },
+  { e: '🍕', k: 'pizza', c: 'yemek' },
+  { e: '🍔', k: 'hamburger burger', c: 'yemek' },
+  { e: '🍟', k: 'patates kızartması fries', c: 'yemek' },
+  { e: '🌭', k: 'sosisli hot dog', c: 'yemek' },
+  { e: '🥐', k: 'kruvasan croissant kahvaltı', c: 'yemek' },
+  { e: '🥖', k: 'baget ekmek bread', c: 'yemek' },
+  { e: '🍳', k: 'yumurta egg kahvaltı breakfast', c: 'yemek' },
+  { e: '🥞', k: 'pancake krep kahvaltı', c: 'yemek' },
+  { e: '🧇', k: 'waffle', c: 'yemek' },
+  { e: '🥪', k: 'sandwich', c: 'yemek' },
+  { e: '🌮', k: 'taco', c: 'yemek' },
+  { e: '🥙', k: 'döner kebap wrap', c: 'yemek' },
+  { e: '🍜', k: 'noodle ramen çorba', c: 'yemek' },
+  { e: '🍲', k: 'güveç pot çorba', c: 'yemek' },
+  { e: '🥘', k: 'paella tava', c: 'yemek' },
+  { e: '🍝', k: 'spagetti pasta', c: 'yemek' },
+  { e: '🍣', k: 'suşi sushi', c: 'yemek' },
+  { e: '🍤', k: 'karides shrimp', c: 'yemek' },
+  { e: '🐟', k: 'balık fish', c: 'yemek' },
+  { e: '🦐', k: 'karides prawn', c: 'yemek' },
+  { e: '🦞', k: 'ıstakoz lobster', c: 'yemek' },
+  { e: '🥩', k: 'biftek steak et', c: 'yemek' },
+  { e: '🍖', k: 'et meat', c: 'yemek' },
+  { e: '🍗', k: 'tavuk chicken', c: 'yemek' },
+  { e: '🥗', k: 'salata salad', c: 'yemek' },
+  { e: '🍰', k: 'pasta cake', c: 'yemek' },
+  { e: '🧁', k: 'cupcake', c: 'yemek' },
+  { e: '🍦', k: 'dondurma ice cream', c: 'yemek' },
+  { e: '🍩', k: 'donut', c: 'yemek' },
+  { e: '🍪', k: 'kurabiye cookie', c: 'yemek' },
+  { e: '🍫', k: 'çikolata chocolate', c: 'yemek' },
+  { e: '☕', k: 'kahve coffee café', c: 'yemek' },
+  { e: '🍵', k: 'çay tea', c: 'yemek' },
+  { e: '🧋', k: 'bubble tea', c: 'yemek' },
+  { e: '🍺', k: 'bira beer', c: 'yemek' },
+  { e: '🍷', k: 'şarap wine', c: 'yemek' },
+  { e: '🥂', k: 'şampanya champagne cheers', c: 'yemek' },
+  { e: '🍹', k: 'kokteyl cocktail', c: 'yemek' },
+  { e: '🥤', k: 'cola drink meşrubat', c: 'yemek' },
+
+  // Doğa
+  { e: '🌊', k: 'dalga wave deniz sea', c: 'dogal' },
+  { e: '🌿', k: 'yaprak leaf bitki', c: 'dogal' },
+  { e: '🌳', k: 'ağaç tree', c: 'dogal' },
+  { e: '🌲', k: 'çam pine tree', c: 'dogal' },
+  { e: '🌴', k: 'palmiye palm tree', c: 'dogal' },
+  { e: '🌵', k: 'kaktüs cactus', c: 'dogal' },
+  { e: '🌺', k: 'çiçek flower hibiscus', c: 'dogal' },
+  { e: '🌸', k: 'kiraz çiçeği cherry blossom', c: 'dogal' },
+  { e: '🌻', k: 'ayçiçeği sunflower', c: 'dogal' },
+  { e: '🌹', k: 'gül rose', c: 'dogal' },
+  { e: '🍁', k: 'sonbahar maple leaf', c: 'dogal' },
+  { e: '🍂', k: 'sonbahar yaprak autumn', c: 'dogal' },
+  { e: '🍃', k: 'yaprak leaf', c: 'dogal' },
+  { e: '🌱', k: 'fide seedling yeni', c: 'dogal' },
+  { e: '🏔️', k: 'dağ mountain', c: 'dogal' },
+  { e: '⛰️', k: 'dağ mountain', c: 'dogal' },
+  { e: '🌋', k: 'volkan volcano', c: 'dogal' },
+  { e: '🏜️', k: 'çöl desert', c: 'dogal' },
+  { e: '🏞️', k: 'park milli doğa national park', c: 'dogal' },
+  { e: '☀️', k: 'güneş sun', c: 'dogal' },
+  { e: '🌤️', k: 'az bulutlu sun clouds', c: 'dogal' },
+  { e: '⛅', k: 'bulutlu cloudy', c: 'dogal' },
+  { e: '🌧️', k: 'yağmur rain', c: 'dogal' },
+  { e: '⛈️', k: 'fırtına storm', c: 'dogal' },
+  { e: '🌩️', k: 'yıldırım lightning', c: 'dogal' },
+  { e: '❄️', k: 'kar snow', c: 'dogal' },
+  { e: '🌙', k: 'ay moon gece', c: 'dogal' },
+  { e: '⭐', k: 'yıldız star', c: 'simge' },
+  { e: '🌟', k: 'parlayan yıldız glowing star', c: 'simge' },
+  { e: '🌅', k: 'gündoğumu sunrise', c: 'dogal' },
+  { e: '🌄', k: 'dağ gündoğumu', c: 'dogal' },
+  { e: '🌆', k: 'şehir city akşam', c: 'yer' },
+  { e: '🌇', k: 'şehir city gündoğumu', c: 'yer' },
+  { e: '🌃', k: 'gece night şehir', c: 'yer' },
+
+  // Simge
+  { e: '⭐', k: 'yıldız star featured', c: 'simge' },
+  { e: '✨', k: 'parıltı sparkle yıldız', c: 'simge' },
+  { e: '💎', k: 'elmas diamond', c: 'simge' },
+  { e: '👑', k: 'taç crown premium', c: 'simge' },
+  { e: '🏆', k: 'kupa trophy', c: 'simge' },
+  { e: '🥇', k: 'altın gold madalya', c: 'simge' },
+  { e: '🔥', k: 'ateş fire hot popüler', c: 'simge' },
+  { e: '💯', k: 'yüz hundred perfect', c: 'simge' },
+  { e: '❤️', k: 'kalp heart', c: 'simge' },
+  { e: '💛', k: 'sarı kalp yellow heart', c: 'simge' },
+  { e: '💚', k: 'yeşil kalp green heart', c: 'simge' },
+  { e: '💙', k: 'mavi kalp blue heart', c: 'simge' },
+  { e: '💜', k: 'mor kalp purple heart', c: 'simge' },
+  { e: '✅', k: 'onay check tik', c: 'simge' },
+  { e: '❌', k: 'çarpı x cross', c: 'simge' },
+  { e: '⚠️', k: 'uyarı warning', c: 'simge' },
+  { e: '🔒', k: 'kilit lock güvenlik', c: 'simge' },
+  { e: '🔓', k: 'açık kilit unlock', c: 'simge' },
+  { e: '🔑', k: 'anahtar key', c: 'simge' },
+  { e: '🎯', k: 'hedef target', c: 'simge' },
+  { e: '📣', k: 'megafon announcement', c: 'simge' },
+  { e: '📢', k: 'hoparlör loudspeaker', c: 'simge' },
+  { e: '🎉', k: 'parti celebration kutlama', c: 'simge' },
+  { e: '🎊', k: 'konfeti confetti', c: 'simge' },
+  { e: '🎁', k: 'hediye gift', c: 'simge' },
+  { e: '🏷️', k: 'etiket tag label', c: 'simge' },
+  { e: '💡', k: 'ampul idea fikir', c: 'simge' },
+  { e: '⚡', k: 'şimşek bolt hızlı', c: 'simge' },
+  { e: '🌈', k: 'gökkuşağı rainbow', c: 'simge' },
+  { e: '📌', k: 'pin raptiye', c: 'simge' },
+  { e: '📝', k: 'not note yazı', c: 'simge' },
+  { e: '📋', k: 'pano clipboard', c: 'simge' },
+  { e: '📅', k: 'takvim calendar', c: 'simge' },
+  { e: '⏰', k: 'saat alarm clock', c: 'simge' },
+  { e: '⏱️', k: 'kronometre timer', c: 'simge' },
+
+  // Aktivite
+  { e: '⚽', k: 'futbol soccer', c: 'aktivite' },
+  { e: '🏀', k: 'basketbol basketball', c: 'aktivite' },
+  { e: '🎾', k: 'tenis tennis', c: 'aktivite' },
+  { e: '🏐', k: 'voleybol volleyball', c: 'aktivite' },
+  { e: '🏊', k: 'yüzme swim', c: 'aktivite' },
+  { e: '🏄', k: 'sörf surf', c: 'aktivite' },
+  { e: '🚴', k: 'bisiklet cyclist', c: 'aktivite' },
+  { e: '🏃', k: 'koşu running', c: 'aktivite' },
+  { e: '🧗', k: 'tırmanış climbing', c: 'aktivite' },
+  { e: '⛺', k: 'çadır tent kamp', c: 'aktivite' },
+  { e: '🎣', k: 'balık tutma fishing', c: 'aktivite' },
+  { e: '🎿', k: 'kayak ski', c: 'aktivite' },
+  { e: '🏂', k: 'snowboard', c: 'aktivite' },
+  { e: '🎭', k: 'tiyatro theater', c: 'aktivite' },
+  { e: '🎨', k: 'sanat art boya', c: 'aktivite' },
+  { e: '🎵', k: 'müzik music', c: 'aktivite' },
+  { e: '🎸', k: 'gitar guitar', c: 'aktivite' },
+  { e: '📸', k: 'fotoğraf camera', c: 'aktivite' },
+  { e: '🎬', k: 'film movie cinema', c: 'aktivite' },
+  { e: '🎮', k: 'oyun game', c: 'aktivite' }
+];
+
+var _emojiCat = 'all';
+function mtEmojiCat(cat, btn) {
+  _emojiCat = cat;
+  document.querySelectorAll('#page-minitools .mt-emoji-cat').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  mtEmojiRender();
+}
+
+function mtEmojiRender() {
+  var q = (document.getElementById('mt-emoji-search').value || '').toLowerCase().trim();
+  var grid = document.getElementById('mt-emoji-grid');
+  var empty = document.getElementById('mt-emoji-empty');
+  var list = EMOJI_DATA.filter(function(item) {
+    if (_emojiCat !== 'all' && item.c !== _emojiCat) return false;
+    if (q && item.k.indexOf(q) === -1) return false;
+    return true;
+  });
+  if (list.length === 0) {
+    grid.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+  grid.innerHTML = list.map(function(item) {
+    return '<button class="mt-emoji-btn" title="' + esc(item.k) + '" onclick="mtEmojiCopy(\'' + esc(item.e) + '\')">' + item.e + '</button>';
+  }).join('');
+}
+
+function mtEmojiCopy(emoji) {
+  navigator.clipboard.writeText(emoji).then(function() {
+    showToast('✓ Kopyalandı: ' + emoji, 'success');
+  }).catch(function() { showToast('Kopyalanamadı', 'error'); });
+}
+
+// --- RENK PALETİ ---
+function mtColorSet(hex) {
+  document.getElementById('mt-color-input').value = hex;
+  document.getElementById('mt-color-hex').value = hex.toUpperCase();
+  mtColorUpdate();
+}
+
+function mtColorHexInput() {
+  var val = document.getElementById('mt-color-hex').value.trim().toUpperCase();
+  if (!/^#[0-9A-F]{6}$/.test(val)) return; // Henüz geçerli değil
+  document.getElementById('mt-color-input').value = val.toLowerCase();
+  mtColorUpdate();
+}
+
+function mtColorUpdate() {
+  var base = document.getElementById('mt-color-input').value;
+  var hexEl = document.getElementById('mt-color-hex');
+  if (hexEl.value.toLowerCase() !== base.toLowerCase()) hexEl.value = base.toUpperCase();
+
+  var rgb = hexToRgb(base);
+  var hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+
+  // Info satırı
+  document.getElementById('mt-color-info').textContent =
+    'RGB(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ') · ' +
+    'HSL(' + Math.round(hsl.h) + '°, ' + Math.round(hsl.s*100) + '%, ' + Math.round(hsl.l*100) + '%)';
+
+  // Paletler
+  var palettes = [
+    { title: 'Monokromatik (aynı ton, farklı parlaklık)', colors: generateMonochromatic(hsl) },
+    { title: 'Analog (±30° hue)', colors: generateAnalogous(hsl) },
+    { title: 'Tamamlayıcı (karşıt 180°)', colors: generateComplementary(hsl) },
+    { title: 'Üçlü (Triadic 120°)', colors: generateTriadic(hsl) },
+    { title: 'Tint & Shade', colors: generateTintShade(rgb) }
+  ];
+
+  document.getElementById('mt-color-palettes').innerHTML = palettes.map(function(p) {
+    return '<div class="mt-color-group">' +
+      '<div class="mt-color-group-title">' + esc(p.title) + '</div>' +
+      '<div class="mt-color-row">' +
+        p.colors.map(function(c) {
+          var textColor = getContrastColor(c.hex);
+          return '<button class="mt-color-chip" style="background:' + c.hex + ';color:' + textColor + '" onclick="mtColorCopy(\'' + c.hex + '\')" title="Kopyalamak için tıkla">' +
+            '<span class="mt-color-chip-hex" style="color:' + textColor + '">' + c.hex.toUpperCase() + '</span>' +
+            '<span class="mt-color-chip-role" style="color:' + textColor + '">' + esc(c.role) + '</span>' +
+          '</button>';
+        }).join('') +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  // Kontrast kontrolü
+  var whiteContrast = contrastRatio(base, '#FFFFFF');
+  var blackContrast = contrastRatio(base, '#000000');
+  var bestText = whiteContrast > blackContrast ? 'Beyaz' : 'Siyah';
+  var bestRatio = Math.max(whiteContrast, blackContrast);
+  var wcagLevel = bestRatio >= 7 ? '<span style="color:var(--green);font-weight:700">AAA</span>'
+    : bestRatio >= 4.5 ? '<span style="color:var(--green);font-weight:700">AA</span>'
+    : bestRatio >= 3 ? '<span style="color:#DD6B20;font-weight:700">AA (büyük metin)</span>'
+    : '<span style="color:var(--red);font-weight:700">❌ Yetersiz</span>';
+
+  document.getElementById('mt-color-contrast').innerHTML =
+    '<div style="font-weight:700;color:var(--navy);margin-bottom:8px">🎯 Metin Okunabilirliği (WCAG)</div>' +
+    '<div style="display:flex;gap:16px;flex-wrap:wrap">' +
+      '<div>Bu renk üzerine <strong>' + bestText + '</strong> metin: ' + wcagLevel + ' (oran ' + bestRatio.toFixed(2) + ')</div>' +
+      '<div style="flex:1;min-width:200px;padding:10px 14px;background:' + base + ';color:' + (whiteContrast > blackContrast ? '#fff' : '#000') + ';border-radius:8px;text-align:center;font-weight:600">Örnek metin</div>' +
+    '</div>';
+}
+
+function mtColorCopy(hex) {
+  navigator.clipboard.writeText(hex.toUpperCase()).then(function() {
+    showToast('✓ Kopyalandı: ' + hex.toUpperCase(), 'success');
+  }).catch(function() { showToast('Kopyalanamadı', 'error'); });
+}
+
+// Renk yardımcıları
+function hexToRgb(hex) {
+  hex = hex.replace('#', '');
+  return { r: parseInt(hex.substr(0,2), 16), g: parseInt(hex.substr(2,2), 16), b: parseInt(hex.substr(4,2), 16) };
+}
+function rgbToHex(r, g, b) {
+  return '#' + [r, g, b].map(function(v) {
+    v = Math.max(0, Math.min(255, Math.round(v)));
+    return v.toString(16).padStart(2, '0');
+  }).join('');
+}
+function rgbToHsl(r, g, b) {
+  r/=255; g/=255; b/=255;
+  var max = Math.max(r,g,b), min = Math.min(r,g,b);
+  var h, s, l = (max+min)/2;
+  if (max === min) { h = s = 0; }
+  else {
+    var d = max-min;
+    s = l > 0.5 ? d/(2-max-min) : d/(max+min);
+    switch(max){
+      case r: h = (g-b)/d + (g<b?6:0); break;
+      case g: h = (b-r)/d + 2; break;
+      case b: h = (r-g)/d + 4; break;
+    }
+    h *= 60;
+  }
+  return { h: h, s: s, l: l };
+}
+function hslToHex(h, s, l) {
+  h = ((h % 360) + 360) % 360;
+  s = Math.max(0, Math.min(1, s));
+  l = Math.max(0, Math.min(1, l));
+  var c = (1 - Math.abs(2*l-1)) * s;
+  var x = c * (1 - Math.abs((h/60)%2 - 1));
+  var m = l - c/2;
+  var r, g, b;
+  if (h<60)      { r=c; g=x; b=0; }
+  else if (h<120){ r=x; g=c; b=0; }
+  else if (h<180){ r=0; g=c; b=x; }
+  else if (h<240){ r=0; g=x; b=c; }
+  else if (h<300){ r=x; g=0; b=c; }
+  else            { r=c; g=0; b=x; }
+  return rgbToHex((r+m)*255, (g+m)*255, (b+m)*255);
+}
+function generateMonochromatic(hsl) {
+  return [
+    { hex: hslToHex(hsl.h, hsl.s, 0.25), role: 'Koyu 25%' },
+    { hex: hslToHex(hsl.h, hsl.s, 0.40), role: 'Koyu 40%' },
+    { hex: hslToHex(hsl.h, hsl.s, hsl.l), role: 'Ana' },
+    { hex: hslToHex(hsl.h, hsl.s, 0.70), role: 'Açık 70%' },
+    { hex: hslToHex(hsl.h, hsl.s, 0.85), role: 'Açık 85%' }
+  ];
+}
+function generateAnalogous(hsl) {
+  return [
+    { hex: hslToHex(hsl.h - 30, hsl.s, hsl.l), role: '-30°' },
+    { hex: hslToHex(hsl.h - 15, hsl.s, hsl.l), role: '-15°' },
+    { hex: hslToHex(hsl.h, hsl.s, hsl.l), role: 'Ana' },
+    { hex: hslToHex(hsl.h + 15, hsl.s, hsl.l), role: '+15°' },
+    { hex: hslToHex(hsl.h + 30, hsl.s, hsl.l), role: '+30°' }
+  ];
+}
+function generateComplementary(hsl) {
+  return [
+    { hex: hslToHex(hsl.h, hsl.s, hsl.l), role: 'Ana' },
+    { hex: hslToHex(hsl.h + 180, hsl.s, hsl.l), role: 'Tamamlayıcı' }
+  ];
+}
+function generateTriadic(hsl) {
+  return [
+    { hex: hslToHex(hsl.h, hsl.s, hsl.l), role: 'Ana' },
+    { hex: hslToHex(hsl.h + 120, hsl.s, hsl.l), role: '+120°' },
+    { hex: hslToHex(hsl.h + 240, hsl.s, hsl.l), role: '+240°' }
+  ];
+}
+function generateTintShade(rgb) {
+  return [
+    { hex: rgbToHex(rgb.r * 0.5, rgb.g * 0.5, rgb.b * 0.5), role: 'Shade 50%' },
+    { hex: rgbToHex(rgb.r * 0.75, rgb.g * 0.75, rgb.b * 0.75), role: 'Shade 75%' },
+    { hex: rgbToHex(rgb.r, rgb.g, rgb.b), role: 'Ana' },
+    { hex: rgbToHex(rgb.r + (255-rgb.r) * 0.4, rgb.g + (255-rgb.g) * 0.4, rgb.b + (255-rgb.b) * 0.4), role: 'Tint 40%' },
+    { hex: rgbToHex(rgb.r + (255-rgb.r) * 0.7, rgb.g + (255-rgb.g) * 0.7, rgb.b + (255-rgb.b) * 0.7), role: 'Tint 70%' }
+  ];
+}
+function getLuminance(hex) {
+  var rgb = hexToRgb(hex);
+  var sr = rgb.r/255, sg = rgb.g/255, sb = rgb.b/255;
+  var r = sr <= 0.03928 ? sr/12.92 : Math.pow((sr+0.055)/1.055, 2.4);
+  var g = sg <= 0.03928 ? sg/12.92 : Math.pow((sg+0.055)/1.055, 2.4);
+  var b = sb <= 0.03928 ? sb/12.92 : Math.pow((sb+0.055)/1.055, 2.4);
+  return 0.2126*r + 0.7152*g + 0.0722*b;
+}
+function contrastRatio(hex1, hex2) {
+  var l1 = getLuminance(hex1);
+  var l2 = getLuminance(hex2);
+  var light = Math.max(l1, l2);
+  var dark = Math.min(l1, l2);
+  return (light + 0.05) / (dark + 0.05);
+}
+function getContrastColor(hex) {
+  return contrastRatio(hex, '#FFFFFF') > contrastRatio(hex, '#000000') ? '#FFFFFF' : '#1A2744';
+}
+
 // ═══ COMMAND PALETTE (⌘K / Ctrl+K) ═══
 var _cmdActiveIndex = 0;
 var _cmdFilteredItems = [];
@@ -4257,7 +4889,7 @@ function iconForPage(key) {
   var map = {
     dashboard:'layout-dashboard', venues:'store', pending:'inbox', routes:'route',
     villages:'home', categories:'folder-tree', imgcompress:'image', socialgen:'smartphone',
-    fileconvert:'refresh-cw', messages:'mail', analytics:'bar-chart-3', gallery:'images',
+    fileconvert:'refresh-cw', minitools:'wand-2', messages:'mail', analytics:'bar-chart-3', gallery:'images',
     blog:'edit-3', todos:'check-square', activity:'history', users:'users',
     export:'database-backup', security:'shield-check', settings:'settings'
   };
@@ -7751,6 +8383,7 @@ showPage = function(page) {
   if (page === 'gallery' && galItems.length === 0) galLoadItems();
   if (page === 'categories') { renderCatList(); renderPlaceCatList(); }
   if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); loadHeroHistory(); loadOgHistory(); updatePasswordDate(); loadLoginHistory(); syncPresenceToggle(); }
+  if (page === 'minitools') { if (window.lucide && lucide.createIcons) try { lucide.createIcons(); } catch(e) {} }
   if (page === 'security') runSecurityCheck();
   if (page === 'export') { loadBackupList(); updateAutoBackupUI(); }
 };
@@ -11879,6 +12512,7 @@ var ALL_ADMIN_PAGES = [
   { key: 'imgcompress', label: 'Görsel Sıkıştır', icon: '🖼', default: true },
   { key: 'socialgen', label: 'Sosyal Medya', icon: '📱', default: true },
   { key: 'fileconvert', label: 'Dosya Dönüştür', icon: '🔄', default: true },
+  { key: 'minitools', label: 'Mini Araçlar', icon: '🪄', default: true },
   { key: 'messages', label: 'Mesajlar & Mail', icon: '✉️', default: true },
   { key: 'analytics', label: 'İstatistikler', icon: '📈', default: true },
   { key: 'gallery', label: 'Galeri', icon: '🖼', default: true },
