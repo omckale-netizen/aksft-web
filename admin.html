@@ -13034,7 +13034,7 @@ async function sendPasswordReset(email) {
 async function deleteUser(uid) {
   var u = _allUsers.find(function(x) { return x.uid === uid; });
   if (!u) return;
-  if (!confirm(u.name + ' (' + u.email + ') kullanıcısını tamamen silmek istediğinize emin misiniz?\n\n• Firebase Auth hesabı silinecek (bir daha giriş yapamaz)\n• Firestore dokümanı silinecek\n• Presence ve oturum bilgileri temizlenecek\n\nBu işlem geri alınamaz.')) return;
+  if (!confirm(u.name + ' (' + u.email + ') kullanıcısını tamamen silmek istediğinize emin misiniz?\n\n• Firebase Auth hesabı silinecek (bir daha giriş yapamaz)\n• Firestore users belgesi silinecek\n• Presence + oturum bilgileri temizlenecek\n• Bu kullanıcıya ait aktivite logları silinecek\n• Bu kullanıcının gönderdiği mailler silinecek\n\nBu işlem geri alınamaz. Aynı e-posta ile daha sonra tekrar kullanıcı oluşturulabilir.')) return;
   try {
     var token = await firebase.auth().currentUser.getIdToken();
     var resp = await fetch('/api/delete-user', {
@@ -13050,7 +13050,9 @@ async function deleteUser(uid) {
     var parts = [];
     if (data.authDeleted) parts.push('Auth');
     if (data.firestoreDeleted) parts.push('Firestore');
-    showToast('✓ Kullanıcı tamamen silindi (' + parts.join(' + ') + ')', 'success');
+    if (data.logsCleared > 0) parts.push(data.logsCleared + ' log');
+    if (data.mailsCleared > 0) parts.push(data.mailsCleared + ' mail');
+    showToast('✓ Tamamen silindi (' + parts.join(' + ') + ')', 'success');
     logActivity('user_delete', uid, u.name || u.email);
   } catch(e) { showToast('Hata: ' + (e.message || ''), 'error'); }
 }

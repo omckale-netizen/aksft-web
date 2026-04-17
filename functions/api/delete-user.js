@@ -57,6 +57,20 @@ export async function onRequestPost(context) {
 
     const accessToken = await getAccessToken(sa);
 
+    // 0) Önce users/{uid} belgesini okuyup email'i al (activity_logs temizliği için)
+    let deletedEmail = '';
+    try {
+      const userGetResp = await fetch('https://firestore.googleapis.com/v1/projects/' + FIRESTORE_PROJECT + '/databases/(default)/documents/users/' + uid, {
+        headers: { 'Authorization': 'Bearer ' + accessToken }
+      });
+      if (userGetResp.ok) {
+        const userData = await userGetResp.json();
+        if (userData.fields && userData.fields.email && userData.fields.email.stringValue) {
+          deletedEmail = userData.fields.email.stringValue;
+        }
+      }
+    } catch(e) { console.warn('[delete-user] user get:', e); }
+
     // 1) Firebase Auth hesabını sil
     const authDelResp = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:delete?key=' + FIREBASE_API_KEY, {
       method: 'POST',
@@ -64,11 +78,9 @@ export async function onRequestPost(context) {
       body: JSON.stringify({ localId: uid })
     });
     const authDelData = await authDelResp.json().catch(() => ({}));
-    // USER_NOT_FOUND hatası OK — zaten silinmiş olabilir
     const authDeleted = authDelResp.ok || (authDelData.error && authDelData.error.message === 'USER_NOT_FOUND');
     if (!authDeleted && authDelResp.status !== 404) {
       console.warn('[delete-user] auth delete error:', authDelData);
-      // Auth silinemese de Firestore temizlensin — devam et
     }
 
     // 2) Firestore: users/{uid} belgesini sil
@@ -81,7 +93,7 @@ export async function onRequestPost(context) {
       firestoreDeleted = fsResp.ok || fsResp.status === 404;
     } catch(e) { console.warn('[delete-user] firestore users delete:', e); }
 
-    // 3) Presence belgesini temizle (varsa)
+    // 3) Presence belgesini temizle
     try {
       await fetch('https://firestore.googleapis.com/v1/projects/' + FIRESTORE_PROJECT + '/databases/(default)/documents/presence/' + uid, {
         method: 'DELETE',
@@ -89,7 +101,20 @@ export async function onRequestPost(context) {
       });
     } catch(e) {}
 
-    // 4) Audit log — activity_logs'a yaz
+    // 4) activity_logs temizliği — bu email'in geçmiş loglarını sil
+    //    Aynı email ile yeni kullanıcı oluşturulunca eski logları görmesin
+    let logsCleared = 0;
+    if (deletedEmail) {
+      logsCleared = await deleteDocsWhere(accessToken, 'activity_logs', 'user', deletedEmail);
+    }
+
+    // 5) sent_mails temizliği — bu email'in gönderdikleri (admin silindi, onun mailleri de yok)
+    let mailsCleared = 0;
+    if (deletedEmail) {
+      mailsCleared = await deleteDocsWhere(accessToken, 'sent_mails', 'user', deletedEmail);
+    }
+
+    // 6) Audit log — admin'in email'iyle yeni kayıt
     try {
       await fetch('https://firestore.googleapis.com/v1/projects/' + FIRESTORE_PROJECT + '/databases/(default)/documents/activity_logs', {
         method: 'POST',
@@ -98,7 +123,7 @@ export async function onRequestPost(context) {
           fields: {
             action: { stringValue: 'admin_delete_user' },
             target: { stringValue: uid },
-            details: { stringValue: 'Kullanıcı tamamen silindi (Auth + Firestore + Presence)' },
+            details: { stringValue: 'Kullanıcı tamamen silindi: ' + (deletedEmail || uid) + ' (logs: ' + logsCleared + ', mails: ' + mailsCleared + ')' },
             user: { stringValue: auth.email || 'unknown' },
             userRole: { stringValue: auth.role || 'admin' },
             timestamp: { stringValue: new Date().toISOString() }
@@ -111,6 +136,9 @@ export async function onRequestPost(context) {
       ok: true,
       authDeleted,
       firestoreDeleted,
+      logsCleared,
+      mailsCleared,
+      deletedEmail,
       uid
     }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch(err) {
@@ -127,6 +155,54 @@ export async function onRequestOptions(context) {
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   }});
+}
+
+// ═══ Firestore koleksiyonundan field==value eşleşen dokümanları toplu sil ═══
+async function deleteDocsWhere(accessToken, collection, field, value) {
+  try {
+    // 1) Query with runQuery (structuredQuery)
+    const queryBody = {
+      structuredQuery: {
+        from: [{ collectionId: collection }],
+        where: {
+          fieldFilter: {
+            field: { fieldPath: field },
+            op: 'EQUAL',
+            value: { stringValue: value }
+          }
+        },
+        limit: 500
+      }
+    };
+    const queryResp = await fetch('https://firestore.googleapis.com/v1/projects/' + FIRESTORE_PROJECT + '/databases/(default)/documents:runQuery', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
+      body: JSON.stringify(queryBody)
+    });
+    if (!queryResp.ok) {
+      console.warn('[deleteDocsWhere] query fail:', collection, await queryResp.text().catch(() => ''));
+      return 0;
+    }
+    const rows = await queryResp.json();
+    const docPaths = (rows || []).filter(r => r.document && r.document.name).map(r => r.document.name);
+
+    // 2) Her dokümanı tek tek sil (paralel)
+    let deleted = 0;
+    await Promise.all(docPaths.map(async function(path) {
+      try {
+        // path = 'projects/xxx/databases/(default)/documents/activity_logs/abc123'
+        const delResp = await fetch('https://firestore.googleapis.com/v1/' + path, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + accessToken }
+        });
+        if (delResp.ok) deleted++;
+      } catch(e) {}
+    }));
+    return deleted;
+  } catch(e) {
+    console.warn('[deleteDocsWhere] error:', e);
+    return 0;
+  }
 }
 
 // ═══ Service Account JWT → Google OAuth Access Token ═══
