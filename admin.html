@@ -686,6 +686,35 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .chat-hint kbd{display:inline-block;padding:1px 5px;border-radius:4px;background:rgba(26,39,68,.06);border:1px solid rgba(26,39,68,.08);font-size:.62rem;font-family:inherit;font-weight:600;color:var(--text-muted)}
 [data-theme="dark"] .chat-hint kbd{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.08)}
 
+/* Emoji button + popup */
+.chat-emoji-btn{width:36px;height:36px;border-radius:10px;border:none;background:transparent;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s,color .15s}
+.chat-emoji-btn:hover{background:rgba(196,82,26,.08);color:var(--terra)}
+.chat-emoji-btn.active{background:rgba(196,82,26,.12);color:var(--terra)}
+.chat-emoji-popup{position:absolute;bottom:100%;left:22px;width:340px;margin-bottom:8px;background:rgba(255,255,255,.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(26,39,68,.1);border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,.15);z-index:10;overflow:hidden;animation:emojiPopIn .15s cubic-bezier(.16,1,.3,1)}
+[data-theme="dark"] .chat-emoji-popup{background:rgba(26,31,46,.98);border-color:rgba(255,255,255,.08)}
+@keyframes emojiPopIn{from{opacity:0;transform:translateY(6px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.chat-emoji-search{padding:10px 12px 6px;border-bottom:1px solid rgba(26,39,68,.06)}
+[data-theme="dark"] .chat-emoji-search{border-bottom-color:rgba(255,255,255,.06)}
+.chat-emoji-search input{width:100%;padding:8px 12px;border:1px solid rgba(26,39,68,.08);border-radius:8px;font-size:.82rem;font-family:inherit;background:rgba(26,39,68,.02);color:var(--text);outline:none;transition:border-color .15s}
+.chat-emoji-search input:focus{border-color:var(--terra)}
+[data-theme="dark"] .chat-emoji-search input{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08)}
+.chat-emoji-cats{display:flex;gap:2px;padding:6px 10px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid rgba(26,39,68,.06)}
+[data-theme="dark"] .chat-emoji-cats{border-bottom-color:rgba(255,255,255,.06)}
+.chat-emoji-cats::-webkit-scrollbar{display:none}
+.chat-emoji-cat{flex:0 0 auto;padding:5px 10px;border:none;background:none;font-size:1rem;cursor:pointer;border-radius:6px;opacity:.55;transition:opacity .15s,background .15s}
+.chat-emoji-cat:hover{opacity:1;background:rgba(26,39,68,.04)}
+.chat-emoji-cat.active{opacity:1;background:rgba(196,82,26,.1)}
+.chat-emoji-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;padding:8px;max-height:260px;overflow-y:auto}
+.chat-emoji-grid::-webkit-scrollbar{width:6px}
+.chat-emoji-grid::-webkit-scrollbar-thumb{background:rgba(0,0,0,.1);border-radius:3px}
+.chat-emoji-item{width:36px;height:36px;border:none;background:none;cursor:pointer;font-size:1.25rem;border-radius:8px;transition:background .12s,transform .12s;display:flex;align-items:center;justify-content:center;padding:0}
+.chat-emoji-item:hover{background:rgba(196,82,26,.08);transform:scale(1.25)}
+.chat-emoji-empty{grid-column:1/-1;text-align:center;padding:30px 20px;color:var(--text-muted);font-size:.82rem}
+@media(max-width:640px){
+  .chat-emoji-popup{left:14px;right:14px;width:auto;max-width:none}
+  .chat-emoji-grid{grid-template-columns:repeat(7,1fr)}
+}
+
 /* Mention popup */
 .chat-mention-popup{position:absolute;bottom:100%;left:22px;right:22px;max-width:340px;margin-bottom:6px;background:rgba(255,255,255,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(26,39,68,.1);border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,.15);max-height:240px;overflow-y:auto;z-index:10;padding:6px}
 [data-theme="dark"] .chat-mention-popup{background:rgba(26,31,46,.95);border-color:rgba(255,255,255,.08)}
@@ -3208,7 +3237,17 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         <!-- Composer -->
         <div class="chat-composer">
           <div id="chat-mention-popup" class="chat-mention-popup" style="display:none"></div>
+          <div id="chat-emoji-popup" class="chat-emoji-popup" style="display:none">
+            <div class="chat-emoji-search">
+              <input type="text" id="chat-emoji-search" placeholder="Emoji ara... (kalp, gül, yemek)" autocomplete="off" oninput="renderChatEmojiPicker()">
+            </div>
+            <div class="chat-emoji-cats" id="chat-emoji-cats"></div>
+            <div class="chat-emoji-grid" id="chat-emoji-grid"></div>
+          </div>
           <div class="chat-composer-box">
+            <button class="chat-emoji-btn" onclick="toggleChatEmoji(event)" aria-label="Emoji" title="Emoji">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            </button>
             <textarea id="chat-input" placeholder="Mesaj yaz... (@ ile etiketle)" maxlength="2000" rows="1"></textarea>
             <button id="chat-send-btn" onclick="sendChatMessage()" class="chat-send-btn" aria-label="Gönder" title="Gönder (Enter)">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
@@ -8147,6 +8186,144 @@ function closeMentionPopup() {
   var popup = document.getElementById('chat-mention-popup');
   if (popup) popup.style.display = 'none';
   _chatMentionState.active = false;
+}
+
+/* ── CHAT EMOJI PICKER ── */
+var _chatEmojiCat = 'recent';
+var CHAT_EMOJI_CATS = [
+  { key: 'recent', icon: '🕐', label: 'Son kullanılan' },
+  { key: 'smiley', icon: '😀', label: 'Yüzler' },
+  { key: 'insan', icon: '👋', label: 'İnsanlar' },
+  { key: 'kalp', icon: '❤️', label: 'Kalpler' },
+  { key: 'hayvan', icon: '🐶', label: 'Hayvanlar' },
+  { key: 'yemek', icon: '🍕', label: 'Yemek' },
+  { key: 'aktivite', icon: '⚽', label: 'Aktivite' },
+  { key: 'seyahat', icon: '✈️', label: 'Seyahat' },
+  { key: 'obje', icon: '💡', label: 'Objeler' },
+  { key: 'sembol', icon: '✨', label: 'Semboller' },
+  { key: 'bayrak', icon: '🇹🇷', label: 'Bayraklar' }
+];
+// Chat için özel emoji seti — kategoriye göre
+var CHAT_EMOJIS = {
+  smiley: ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','😚','😙','🥲','😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','🤥','😔','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤥','😶‍🌫️','😴','🤤','😪','😵','😵‍💫','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕'],
+  insan: ['👋','🤚','🖐','✋','🖖','👌','🤌','🤏','✌️','🤞','🫰','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦾','🦵','🦿','🦶','👂','🦻','👃','🧠','🫀','🫁','🦷','🦴','👀','👁','👅','👄','💋','👶','🧒','👦','👧','🧑','👱','👨','🧔','👩','🧓','👴','👵'],
+  kalp: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','💌','💋','💘','❣️','💔','🔥','💫','⭐','✨','🌟','💥','💢','💦','💧','💨','🕳','💣','💬','👁‍🗨','🗨','🗯','💭','💤'],
+  hayvan: ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐻‍❄️','🐨','🐯','🦁','🐮','🐷','🐽','🐸','🐵','🙈','🙉','🙊','🐒','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🪰','🪲','🪳','🦟','🦗','🕷','🦂','🐢','🐍','🦎','🦖','🦕','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🐘','🦛','🦏','🐪','🐫','🦙','🦒','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🐐','🦌','🐕','🐩','🦮','🐈','🐓','🦃','🦚','🦜','🦢','🦩','🕊','🐇','🦝','🦨','🦡','🦦','🦥','🐁','🐀','🐿','🦔'],
+  yemek: ['🍏','🍎','🍐','🍊','🍋','🍌','🍉','🍇','🍓','🫐','🍈','🍒','🍑','🥭','🍍','🥥','🥝','🍅','🍆','🥑','🥦','🥬','🥒','🌶','🫑','🌽','🥕','🫒','🧄','🧅','🥔','🍠','🥐','🥯','🍞','🥖','🥨','🧀','🥚','🍳','🧈','🥞','🧇','🥓','🥩','🍗','🍖','🌭','🍔','🍟','🍕','🫓','🥪','🥙','🧆','🌮','🌯','🫔','🥗','🥘','🫕','🥫','🍝','🍜','🍲','🍛','🍣','🍱','🥟','🦪','🍤','🍙','🍚','🍘','🍥','🥠','🥮','🍢','🍡','🍧','🍨','🍦','🥧','🧁','🍰','🎂','🍮','🍭','🍬','🍫','🍿','🍩','🍪','🌰','🥜','🍯','🥛','🍼','☕','🫖','🍵','🍶','🍾','🍷','🍸','🍹','🍺','🍻','🥂','🥃','🥤','🧋','🧃','🧉','🧊'],
+  aktivite: ['⚽','🏀','🏈','⚾','🥎','🎾','🏐','🏉','🥏','🎱','🪀','🏓','🏸','🏒','🏑','🥍','🏏','🪃','🥅','⛳','🪁','🏹','🎣','🤿','🥊','🥋','🎽','🛹','🛼','🛷','⛸','🥌','🎿','⛷','🏂','🏋️','🤼','🤸','⛹️','🤺','🤾','🏌️','🏇','🧘','🏄','🏊','🤽','🚣','🧗','🚵','🚴','🏆','🥇','🥈','🥉','🏅','🎖','🏵','🎗','🎫','🎟','🎪','🤹','🎭','🩰','🎨','🎬','🎤','🎧','🎼','🎹','🥁','🪘','🎷','🎺','🪗','🎸','🪕','🎻','🎲','♟','🎯','🎳','🎮','🎰','🧩'],
+  seyahat: ['🚗','🚕','🚙','🚌','🚎','🏎','🚓','🚑','🚒','🚐','🛻','🚚','🚛','🚜','🦯','🦽','🦼','🛴','🚲','🛵','🏍','🛺','🚔','🚘','🚖','🚡','🚠','🚟','🚃','🚋','🚞','🚝','🚄','🚅','🚈','🚂','🚆','🚇','🚊','🚉','✈️','🛫','🛬','🛩','💺','🛰','🚀','🛸','🚁','🛶','⛵','🚤','🛥','🛳','⛴','🚢','⚓','⛽','🚧','🚦','🚥','🚏','🗺','🗿','🗽','🗼','🏰','🏯','🏟','🎡','🎢','🎠','⛲','⛱','🏖','🏝','🏜','🌋','⛰','🏔','🗻','🏕','⛺','🏠','🏡','🏘','🏚','🏗','🏭','🏢','🏬','🏣','🏤','🏥','🏦','🏨','🏪','🏫','🏩','💒','🏛','⛪','🕌','🛕','🕍','⛩','🕋'],
+  obje: ['💡','🔦','🕯','🪔','🧯','🛢','💸','💵','💴','💶','💷','🪙','💰','💳','💎','⚖️','🪜','🧰','🔧','🔨','⚒','🛠','⛏','🪚','🔩','⚙️','🪤','🧱','⛓','🧲','🔫','💣','🧨','🪓','🔪','🗡','⚔️','🛡','🚬','⚰️','🪦','⚱️','🏺','🔮','📿','🧿','💈','⚗️','🔭','🔬','🕳','🩹','🩺','💊','💉','🩸','🧬','🦠','🧫','🧪','🌡','🧹','🧺','🧻','🚽','🚰','🚿','🛁','🛀','🧼','🪒','🧽','🪣','🧴','🛎','🔑','🗝','🚪','🪑','🛋','🛏','🛌','🧸','🪆','🖼','🪞','🪟','🛍','🛒','🎁','🎈','🎏','🎀','🪄','🪅','🎊','🎉','🎎','🏮','🎐','🧧','✉️','📩','📨','📧','💌','📥','📤','📦','🏷','📪','📫','📬','📭','📮','📯','📜','📃','📄','📑','🧾','📊','📈','📉','🗒','🗓','📆','📅','🗑','📇','🗃','🗳','🗄','📋','📁','📂','🗂','🗞','📰','📓','📔','📒','📕','📗','📘','📙','📚','📖','🔖','🧷','🔗','📎','🖇','📐','📏','🧮','📌','📍','✂️','🖊','🖋','✒️','🖌','🖍','📝','✏️','🔍','🔎','🔏','🔐','🔒','🔓'],
+  sembol: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','☮️','✝️','☪️','🕉','☸️','✡️','🔯','🕎','☯️','☦️','🛐','⛎','♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓','🆔','⚛️','🉑','☢️','☣️','📴','📳','🈶','🈚','🈸','🈺','🈷️','✴️','🆚','💮','🉐','㊙️','㊗️','🈴','🈵','🈹','🈲','🅰️','🅱️','🆎','🆑','🅾️','🆘','❌','⭕','🛑','⛔','📛','🚫','💯','💢','♨️','🚷','🚯','🚳','🚱','🔞','📵','🚭','❗','❕','❓','❔','‼️','⁉️','🔅','🔆','〽️','⚠️','🚸','🔱','⚜️','🔰','♻️','✅','🈯','💹','❇️','✳️','❎','🌐','💠','Ⓜ️','🌀','💤','🏧','🚾','♿','🅿️','🛗','🈳','🈂️','🛂','🛃','🛄','🛅','🚹','🚺','🚼','🚻','🚮','🎦','📶','🈁','🔣','ℹ️','🔤','🔡','🔠','🆖','🆗','🆙','🆒','🆕','🆓','0️⃣','1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟','🔢','#️⃣','*️⃣','⏏️','▶️','⏸','⏯','⏹','⏺','⏭','⏮','⏩','⏪','⏫','⏬','◀️','🔼','🔽','➡️','⬅️','⬆️','⬇️','↗️','↘️','↙️','↖️','↕️','↔️','↪️','↩️','⤴️','⤵️','🔀','🔁','🔂','🔄','🔃','🎵','🎶','➕','➖','➗','✖️','💲','💱','™️','©️','®️','〰️','➰','➿','🔚','🔙','🔛','🔝','🔜','✔️','☑️','🔘','🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪','🟤','🔺','🔻','🔸','🔹','🔶','🔷','🔳','🔲','▪️','▫️','◾','◽','◼️','◻️','⬛','⬜','🟧','🟦','🟨','🟩','🟥','🟫','🔈','🔇','🔉','🔊','🔔','🔕','📣','📢','👁‍🗨','💬','💭','🗯','♠️','♣️','♥️','♦️','🃏','🎴','🀄','🕐','🕑','🕒','🕓','🕔','🕕','🕖','🕗','🕘','🕙','🕚','🕛'],
+  bayrak: ['🇹🇷','🇺🇸','🇬🇧','🇩🇪','🇫🇷','🇮🇹','🇪🇸','🇳🇱','🇧🇪','🇷🇺','🇯🇵','🇨🇳','🇰🇷','🇮🇳','🇦🇺','🇨🇦','🇧🇷','🇦🇷','🇲🇽','🇬🇷','🇵🇹','🇨🇭','🇦🇹','🇸🇪','🇳🇴','🇫🇮','🇩🇰','🇵🇱','🇨🇿','🇭🇺','🇺🇦','🇷🇴','🇧🇬','🇮🇪','🇮🇸','🇪🇪','🇱🇻','🇱🇹','🇸🇰','🇸🇮','🇭🇷','🇷🇸','🇲🇰','🇦🇱','🇲🇹','🇨🇾','🇱🇺','🏳️','🏴','🏁','🚩','🏳️‍🌈','🏳️‍⚧️','🏴‍☠️']
+};
+
+function toggleChatEmoji(e) {
+  if (e) e.stopPropagation();
+  var popup = document.getElementById('chat-emoji-popup');
+  var btn = document.querySelector('.chat-emoji-btn');
+  if (!popup) return;
+  if (popup.style.display === 'none') {
+    popup.style.display = 'block';
+    btn.classList.add('active');
+    renderChatEmojiCats();
+    renderChatEmojiPicker();
+    // Dış tıklamada kapan
+    setTimeout(function() {
+      document.addEventListener('click', _closeChatEmojiOnOutside);
+    }, 0);
+  } else {
+    closeChatEmoji();
+  }
+}
+
+function closeChatEmoji() {
+  var popup = document.getElementById('chat-emoji-popup');
+  var btn = document.querySelector('.chat-emoji-btn');
+  if (popup) popup.style.display = 'none';
+  if (btn) btn.classList.remove('active');
+  document.removeEventListener('click', _closeChatEmojiOnOutside);
+}
+
+function _closeChatEmojiOnOutside(e) {
+  var popup = document.getElementById('chat-emoji-popup');
+  var btn = document.querySelector('.chat-emoji-btn');
+  if (!popup) return;
+  if (popup.contains(e.target) || (btn && btn.contains(e.target))) return;
+  closeChatEmoji();
+}
+
+function renderChatEmojiCats() {
+  var el = document.getElementById('chat-emoji-cats');
+  if (!el) return;
+  el.innerHTML = CHAT_EMOJI_CATS.map(function(c) {
+    return '<button class="chat-emoji-cat ' + (_chatEmojiCat === c.key ? 'active' : '') + '" onclick="setChatEmojiCat(\'' + c.key + '\')" title="' + c.key + '">' + c.icon + '</button>';
+  }).join('');
+}
+
+function setChatEmojiCat(cat) {
+  _chatEmojiCat = cat;
+  // Kategori seçince aramayı da temizle
+  var s = document.getElementById('chat-emoji-search');
+  if (s) s.value = '';
+  renderChatEmojiCats();
+  renderChatEmojiPicker();
+}
+
+function getRecentEmojis() {
+  try {
+    var arr = JSON.parse(localStorage.getItem('chat_recent_emoji') || '[]');
+    return Array.isArray(arr) ? arr.slice(0, 32) : [];
+  } catch(e) { return []; }
+}
+
+function pushRecentEmoji(emoji) {
+  try {
+    var arr = getRecentEmojis().filter(function(x) { return x !== emoji; });
+    arr.unshift(emoji);
+    localStorage.setItem('chat_recent_emoji', JSON.stringify(arr.slice(0, 32)));
+  } catch(e) {}
+}
+
+function renderChatEmojiPicker() {
+  var grid = document.getElementById('chat-emoji-grid');
+  if (!grid) return;
+  var q = (document.getElementById('chat-emoji-search').value || '').toLowerCase().trim();
+  var items = [];
+  if (q) {
+    // Arama: EMOJI_DATA'daki anahtar kelimelerle (Türkçe desteği var)
+    var seen = {};
+    (typeof EMOJI_DATA !== 'undefined' ? EMOJI_DATA : []).forEach(function(it) {
+      if (it.k && it.k.indexOf(q) > -1 && !seen[it.e]) { seen[it.e] = 1; items.push(it.e); }
+    });
+  } else if (_chatEmojiCat === 'recent') {
+    items = getRecentEmojis();
+    if (items.length === 0) items = CHAT_EMOJIS.smiley.slice(0, 40);
+  } else if (CHAT_EMOJIS[_chatEmojiCat]) {
+    items = CHAT_EMOJIS[_chatEmojiCat];
+  }
+  if (items.length === 0) {
+    grid.innerHTML = '<div class="chat-emoji-empty">Emoji bulunamadı</div>';
+    return;
+  }
+  grid.innerHTML = items.map(function(e) {
+    return '<button class="chat-emoji-item" onclick="insertChatEmoji(\'' + escAttr(e) + '\')">' + e + '</button>';
+  }).join('');
+}
+
+function insertChatEmoji(emoji) {
+  var ta = document.getElementById('chat-input');
+  if (!ta) return;
+  var start = ta.selectionStart;
+  var end = ta.selectionEnd;
+  var before = ta.value.slice(0, start);
+  var after = ta.value.slice(end);
+  ta.value = before + emoji + after;
+  ta.focus();
+  var newPos = start + emoji.length;
+  ta.setSelectionRange(newPos, newPos);
+  // Input event tetikle — character count, send btn state, autogrow güncellensin
+  ta.dispatchEvent(new Event('input'));
+  pushRecentEmoji(emoji);
 }
 
 function toggleSidebar() {
