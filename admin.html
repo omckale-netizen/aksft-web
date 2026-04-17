@@ -2362,6 +2362,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             <input type="text" id="todo-tags" placeholder="acil, telefon, toplantı" style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.85rem;background:var(--input-bg,#fff);color:var(--text);width:100%" maxlength="200">
             <div style="font-size:.65rem;color:var(--text-muted);margin-top:4px">Örn: acil, telefon, ofis</div>
           </div>
+          <!-- Atanan Kullanıcı (admin) -->
+          <div class="form-group" id="todo-assigned-group" style="margin-top:14px;display:none">
+            <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:4px">👤 Atanan Kullanıcı</label>
+            <select id="todo-assigned-to" style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.85rem;background:var(--input-bg,#fff);color:var(--text);width:100%;cursor:pointer">
+              <option value="">— Genel (herkese açık) —</option>
+            </select>
+            <div style="font-size:.65rem;color:var(--text-muted);margin-top:4px">Seçili kullanıcı bildirim alır ve görev panelinde görür</div>
+          </div>
           <!-- Bağlı mekan/mesaj (read-only, bilgi amaçlı) -->
           <div id="todo-related-info" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(196,82,26,.04);border:1px solid rgba(196,82,26,.15);border-radius:8px;font-size:.78rem;color:var(--text-muted)"></div>
           <input type="hidden" id="todo-related-venue">
@@ -4665,6 +4673,8 @@ function initApp() {
   try { initNotifBadge(); } catch(e) {}
   // Todo listener'ı başlat — her sayfada badge ve dashboard widget güncellensin
   try { startTodosListener(); } catch(e) {}
+  // Admin ise users listener'ı başlat — todo atama select'inde kullanılacak
+  try { if (isCurrentAdmin()) startUsersListener(); } catch(e) {}
   // Süresi dolan premium mekanları otomatik temizle
   cleanExpiredPremiums();
   // Haftalık llms-full.txt otomatik güncelleme kontrolü (8sn sonra)
@@ -10006,21 +10016,39 @@ async function renderNotifications() {
   try {
     allNotifs = [];
 
-    // 1. Mesajlar
-    const msgSnap = await db.collection('messages').orderBy('timestamp', 'desc').limit(50).get();
-    msgSnap.docs.forEach(d => {
-      const m = d.data();
-      allNotifs.push({
-        id: d.id, type: 'message', read: !!m.read,
-        icon: '✉️', iconBg: 'rgba(26,107,138,.1)',
-        title: (m.name || 'Anonim') + ' mesaj gonderdi',
-        desc: (m.subject ? m.subject + ': ' : '') + (m.message || '').substring(0, 100),
-        time: m.timestamp || '',
-        action: function() { showPage('messages'); }
+    // 1. Mesajlar (sadece erişim yetkisi olan görsün)
+    if (canAccessPage('messages')) {
+      const msgSnap = await db.collection('messages').orderBy('timestamp', 'desc').limit(50).get();
+      msgSnap.docs.forEach(d => {
+        const m = d.data();
+        allNotifs.push({
+          id: d.id, type: 'message', read: !!m.read,
+          icon: '✉️', iconBg: 'rgba(26,107,138,.1)',
+          title: (m.name || 'Anonim') + ' mesaj gonderdi',
+          desc: (m.subject ? m.subject + ': ' : '') + (m.message || '').substring(0, 100),
+          time: m.timestamp || '',
+          action: function() { showPage('messages'); }
+        });
       });
-    });
+    }
 
-
+    // 2. Kullanıcıya atanan görevler
+    var myUid = window._currentUser && window._currentUser.uid;
+    if (myUid && Array.isArray(_allTodos)) {
+      _allTodos.forEach(function(t) {
+        if (t.assignedTo !== myUid) return;
+        if (t.status === 'completed') return;
+        var prio = { urgent:'🔴', high:'🟠', medium:'🟡', low:'🔵' }[t.priority || 'medium'];
+        allNotifs.push({
+          id: 'todo_' + t._id, type: 'todo', read: false,
+          icon: '✓', iconBg: 'rgba(56,161,105,.1)',
+          title: prio + ' Size atanan görev: ' + (t.title || ''),
+          desc: (t.description || '').substring(0, 100) || (t.dueDate ? 'Son tarih: ' + t.dueDate : 'Görevlerinize eklendi'),
+          time: t.createdAt || '',
+          action: function() { showPage('todos'); }
+        });
+      });
+    }
 
     // 4. Sistem — son giris bilgileri
     const readNotifs = JSON.parse(localStorage.getItem('readNotifs') || '[]');
@@ -10883,12 +10911,32 @@ function startTodosListener() {
     }
     // Dashboard widget varsa güncelle
     renderDashboardTodoWidget();
+    // Bildirim rozeti de güncellensin (yeni atanan görev)
+    if (typeof initNotifBadge === 'function') {
+      try { initNotifBadge(); } catch(e) {}
+    }
   }, function(err) { console.warn('Todo listener error:', err); });
+}
+
+// Mevcut kullanıcının görebileceği görevleri filtrele
+// Admin her şeyi görür, diğerleri: kendilerine atanmış + genel (atanmamış) + kendi oluşturdukları
+function filterTodosForCurrentUser(todos) {
+  if (!window._currentUser) return todos;
+  if (isCurrentAdmin()) return todos;
+  var myUid = window._currentUser.uid;
+  var myEmail = window._currentUser.email;
+  return todos.filter(function(t) {
+    if (t.assignedTo && t.assignedTo === myUid) return true;
+    if (t.createdBy && t.createdBy === myEmail) return true;
+    if (!t.assignedTo) return true; // genel görev (atanmamış)
+    return false;
+  });
 }
 
 function updateTodoBadge() {
   var todayStr = new Date().toISOString().split('T')[0];
-  var activeCount = _allTodos.filter(function(t) {
+  var visibleTodos = filterTodosForCurrentUser(_allTodos);
+  var activeCount = visibleTodos.filter(function(t) {
     if (t.status === 'completed') return false;
     // Gecikmiş VEYA bugün zamanı gelen
     if (t.dueDate && t.dueDate <= todayStr) return true;
@@ -10915,6 +10963,8 @@ function openTodoModal(prefill) {
   document.getElementById('todo-related-message').value = '';
   document.getElementById('todo-related-info').style.display = 'none';
   document.getElementById('todo-modal-title').textContent = '✓ Yeni Görev';
+  // Atama alanı sadece admin görür
+  populateTodoAssignedSelect('');
 
   // Prefill (mekan veya mesajdan gelince)
   if (prefill) {
@@ -10959,6 +11009,7 @@ function openTodoEditModal(id) {
   document.getElementById('todo-tags').value = Array.isArray(t.tags) ? t.tags.join(', ') : '';
   document.getElementById('todo-related-venue').value = t.relatedVenueId || '';
   document.getElementById('todo-related-message').value = t.relatedMessageId || '';
+  populateTodoAssignedSelect(t.assignedTo || '');
   if (t.relatedVenueId) {
     var v = (draftData.venues || []).find(function(x) { return x.id === t.relatedVenueId; });
     document.getElementById('todo-related-info').style.display = '';
@@ -10970,6 +11021,22 @@ function openTodoEditModal(id) {
   }
 }
 
+// Atama select'ini doldur (sadece admin görür)
+function populateTodoAssignedSelect(selectedUid) {
+  var group = document.getElementById('todo-assigned-group');
+  var select = document.getElementById('todo-assigned-to');
+  if (!group || !select) return;
+  if (!isCurrentAdmin()) { group.style.display = 'none'; return; }
+  group.style.display = '';
+  var users = (_allUsers || []).filter(function(u) { return u.active !== false; });
+  var opts = '<option value="">— Genel (herkese açık) —</option>';
+  users.forEach(function(u) {
+    var label = (u.name || u.email) + ' (' + (u.role || '?') + ')';
+    opts += '<option value="' + u.uid + '" data-name="' + esc(u.name || u.email) + '"' + (u.uid === selectedUid ? ' selected' : '') + '>' + esc(label) + '</option>';
+  });
+  select.innerHTML = opts;
+}
+
 async function saveTodo() {
   var title = document.getElementById('todo-title').value.trim();
   if (!title) { showToast('Başlık zorunlu', 'error'); return; }
@@ -10977,6 +11044,16 @@ async function saveTodo() {
   // Etiketleri virgülle ayır, temizle, lowercase
   var tagsRaw = document.getElementById('todo-tags').value.trim();
   var tags = tagsRaw ? tagsRaw.split(',').map(function(t) { return t.trim().toLowerCase(); }).filter(function(t) { return t && t.length <= 30; }).slice(0, 10) : [];
+  // Atama (sadece admin ise)
+  var assignedTo = null, assignedToName = null;
+  if (isCurrentAdmin()) {
+    var sel = document.getElementById('todo-assigned-to');
+    if (sel && sel.value) {
+      assignedTo = sel.value;
+      var opt = sel.options[sel.selectedIndex];
+      assignedToName = opt ? (opt.getAttribute('data-name') || opt.textContent) : null;
+    }
+  }
   var data = {
     title: title,
     description: document.getElementById('todo-description').value.trim() || '',
@@ -10988,6 +11065,8 @@ async function saveTodo() {
     tags: tags,
     relatedVenueId: document.getElementById('todo-related-venue').value || null,
     relatedMessageId: document.getElementById('todo-related-message').value || null,
+    assignedTo: assignedTo,
+    assignedToName: assignedToName,
     createdBy: (firebase.auth().currentUser && firebase.auth().currentUser.email) || 'admin'
   };
   try {
@@ -11041,7 +11120,8 @@ function renderTodos() {
   var tagF = document.getElementById('todos-filter-tag')?.value || '';
   var statusF = document.getElementById('todos-filter-status')?.value || 'active';
 
-  var todos = _allTodos.slice();
+  var visibleTodos = filterTodosForCurrentUser(_allTodos);
+  var todos = visibleTodos.slice();
   // Status filter — kanban görünümünde tüm status'leri göster (kanban kolonları bunu halleder)
   if (_todoView !== 'kanban') {
     if (statusF === 'active') todos = todos.filter(function(t) { return t.status !== 'completed'; });
@@ -11059,7 +11139,7 @@ function renderTodos() {
 
   // Stats
   var todayStr = new Date().toISOString().split('T')[0];
-  var allActive = _allTodos.filter(function(t) { return t.status !== 'completed'; });
+  var allActive = visibleTodos.filter(function(t) { return t.status !== 'completed'; });
   var overdue = allActive.filter(function(t) { return t.dueDate && t.dueDate < todayStr; });
   var today = allActive.filter(function(t) { return t.dueDate === todayStr; });
   var week = allActive.filter(function(t) {
@@ -11069,7 +11149,7 @@ function renderTodos() {
     var w = new Date(now.getTime() + 7*86400000);
     return d > now && d <= w;
   });
-  var completedToday = _allTodos.filter(function(t) {
+  var completedToday = visibleTodos.filter(function(t) {
     return t.status === 'completed' && t.completedAt && t.completedAt.startsWith(todayStr);
   });
   if (statsEl) {
@@ -11207,7 +11287,8 @@ function renderDashboardTodoWidget() {
   var widget = document.getElementById('dashboard-todo-widget');
   if (!widget) return;
   var todayStr = new Date().toISOString().split('T')[0];
-  var active = _allTodos.filter(function(t) { return t.status !== 'completed'; });
+  var visibleTodos = filterTodosForCurrentUser(_allTodos);
+  var active = visibleTodos.filter(function(t) { return t.status !== 'completed'; });
   var overdue = active.filter(function(t) { return t.dueDate && t.dueDate < todayStr; });
   var today = active.filter(function(t) { return t.dueDate === todayStr; });
   var show = overdue.concat(today).slice(0, 5);
@@ -11252,7 +11333,7 @@ function populateTagFilter() {
   if (!sel) return;
   var currentVal = sel.value;
   var allTags = new Set();
-  _allTodos.forEach(function(t) {
+  filterTodosForCurrentUser(_allTodos).forEach(function(t) {
     if (Array.isArray(t.tags)) t.tags.forEach(function(tag) { if (tag) allTags.add(tag); });
   });
   sel.innerHTML = '<option value="">Tüm Etiketler</option>' + Array.from(allTags).sort().map(function(tag) {
@@ -11553,16 +11634,38 @@ async function renderActivityLog() {
 // Sayfa yuklendiginde badge guncelle
 async function initNotifBadge() {
   try {
-    const [msgSnap, botSnap, plSnap] = await Promise.all([
-      db.collection('messages').where('read', '==', false).get(),
-      db.collection('pending_venues').get(),
-      db.collection('pending_places').get()
-    ]);
     const readNotifs = JSON.parse(localStorage.getItem('readNotifs') || '[]');
     let unread = 0;
-    msgSnap.docs.forEach(d => { if (!readNotifs.includes(d.id)) unread++; });
-    botSnap.docs.forEach(d => { if (!readNotifs.includes('bot_' + d.id)) unread++; });
-    plSnap.docs.forEach(d => { if (!readNotifs.includes('pbot_' + d.id)) unread++; });
+
+    // Mesajlar — sadece erişim yetkisi varsa say
+    if (typeof canAccessPage !== 'function' || canAccessPage('messages')) {
+      try {
+        const msgSnap = await db.collection('messages').where('read', '==', false).get();
+        msgSnap.docs.forEach(d => { if (!readNotifs.includes(d.id)) unread++; });
+      } catch(e) {}
+    }
+    // Bekleyen talepler — admin/editor
+    if (typeof canAccessPage !== 'function' || canAccessPage('pending')) {
+      try {
+        const [botSnap, plSnap] = await Promise.all([
+          db.collection('pending_venues').get(),
+          db.collection('pending_places').get()
+        ]);
+        botSnap.docs.forEach(d => { if (!readNotifs.includes('bot_' + d.id)) unread++; });
+        plSnap.docs.forEach(d => { if (!readNotifs.includes('pbot_' + d.id)) unread++; });
+      } catch(e) {}
+    }
+    // Atanmış görevler — kullanıcının kendi görevleri
+    var myUid = window._currentUser && window._currentUser.uid;
+    if (myUid && Array.isArray(_allTodos)) {
+      _allTodos.forEach(function(t) {
+        if (t.assignedTo !== myUid) return;
+        if (t.status === 'completed') return;
+        if (readNotifs.includes('todo_' + t._id)) return;
+        unread++;
+      });
+    }
+
     const badge = document.getElementById('notif-badge');
     if (badge) { badge.textContent = unread; badge.style.display = unread > 0 ? '' : 'none'; }
   } catch(e) {}
