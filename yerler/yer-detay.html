@@ -70,7 +70,7 @@ function pageInit() {
     var twI = document.querySelector('meta[name="twitter:image"]');
     if (ogT) ogT.content = seoTitle;
     if (ogD) ogD.content = seoDesc;
-    if (ogU) ogU.content = 'https://assosukesfet.com/yerler/yer-detay?id=' + placeId;
+    if (ogU) ogU.content = 'https://assosukesfet.com/yerler/yer-detay.html?id=' + placeId;
     if (place.image) {
       if (ogI) ogI.content = place.image;
       if (twI) twI.content = place.image;
@@ -79,7 +79,7 @@ function pageInit() {
     if (twD) twD.content = seoDesc;
 
     // Canonical URL
-    var canonicalUrl = 'https://assosukesfet.com/yerler/yer-detay?id=' + placeId;
+    var canonicalUrl = 'https://assosukesfet.com/yerler/yer-detay.html?id=' + placeId;
     var canonicalEl = document.querySelector('link[rel="canonical"]');
     if (!canonicalEl) { canonicalEl = document.createElement('link'); canonicalEl.rel = 'canonical'; document.head.appendChild(canonicalEl); }
     canonicalEl.href = canonicalUrl;
@@ -92,7 +92,7 @@ function pageInit() {
       'itemListElement':[
         {'@type':'ListItem','position':1,'name':'Anasayfa','item':'https://assosukesfet.com'},
         {'@type':'ListItem','position':2,'name':'Gezilecek Yerler','item':'https://assosukesfet.com/yerler'},
-        {'@type':'ListItem','position':3,'name':place.title,'item':'https://assosukesfet.com/yerler/yer-detay?id='+placeId}
+        {'@type':'ListItem','position':3,'name':place.title,'item':'https://assosukesfet.com/yerler/yer-detay.html?id='+placeId}
       ]
     });
     document.head.appendChild(bcSchema);
@@ -103,7 +103,7 @@ function pageInit() {
       '@type': 'Place',
       'name': place.title,
       'description': place.description || place.shortDesc || '',
-      'url': 'https://assosukesfet.com/yerler/yer-detay?id=' + placeId,
+      'url': 'https://assosukesfet.com/yerler/yer-detay.html?id=' + placeId,
       'address': {
         '@type': 'PostalAddress',
         'addressLocality': place.location || 'Ayvacık',

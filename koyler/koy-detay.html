@@ -75,7 +75,7 @@ function pageInit() {
     var twI = document.querySelector('meta[name="twitter:image"]');
     if (ogT) ogT.content = seoTitle;
     if (ogD) ogD.content = seoDesc;
-    if (ogU) ogU.content = 'https://assosukesfet.com/koyler/koy-detay?id=' + villageId;
+    if (ogU) ogU.content = 'https://assosukesfet.com/koyler/koy-detay.html?id=' + villageId;
     if (village.image) {
       if (ogI) ogI.content = village.image;
       if (twI) twI.content = village.image;
@@ -84,7 +84,7 @@ function pageInit() {
     if (twD) twD.content = seoDesc;
 
     // Canonical URL
-    var canonicalUrl = 'https://assosukesfet.com/koyler/koy-detay?id=' + villageId;
+    var canonicalUrl = 'https://assosukesfet.com/koyler/koy-detay.html?id=' + villageId;
     var canonicalEl = document.querySelector('link[rel="canonical"]');
     if (!canonicalEl) { canonicalEl = document.createElement('link'); canonicalEl.rel = 'canonical'; document.head.appendChild(canonicalEl); }
     canonicalEl.href = canonicalUrl;
@@ -97,7 +97,7 @@ function pageInit() {
       'itemListElement':[
         {'@type':'ListItem','position':1,'name':'Anasayfa','item':'https://assosukesfet.com'},
         {'@type':'ListItem','position':2,'name':'Köyler','item':'https://assosukesfet.com/koyler'},
-        {'@type':'ListItem','position':3,'name':village.title,'item':'https://assosukesfet.com/koyler/koy-detay?id='+villageId}
+        {'@type':'ListItem','position':3,'name':village.title,'item':'https://assosukesfet.com/koyler/koy-detay.html?id='+villageId}
       ]
     });
     document.head.appendChild(bcSchema);
@@ -108,7 +108,7 @@ function pageInit() {
       '@type': 'Place',
       'name': village.title,
       'description': village.description || village.shortDesc || '',
-      'url': 'https://assosukesfet.com/koyler/koy-detay?id=' + villageId,
+      'url': 'https://assosukesfet.com/koyler/koy-detay.html?id=' + villageId,
       'address': {
         '@type': 'PostalAddress',
         'addressLocality': village.title,
