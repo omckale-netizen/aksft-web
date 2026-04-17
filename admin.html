@@ -1654,18 +1654,43 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <select id="compose-template" onchange="applyMailTemplate()" style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.85rem;background:var(--input-bg,#fff);color:var(--text);width:100%;cursor:pointer">
                 <option value="">— Şablon seçin veya serbest yazın —</option>
                 <optgroup label="🏪 Mekan İşlemleri">
-                  <option value="mekan_onay">Mekan Ekleme Onayı</option>
-                  <option value="mekan_red">Mekan Ekleme Reddi</option>
-                  <option value="mekan_bilgi">Mekan Bilgi Güncelleme Talebi</option>
-                  <option value="mekan_premium">Premium Üyelik Bilgilendirme</option>
-                  <option value="mekan_premium_bitis">Premium Süre Dolum Uyarısı</option>
+                  <option value="mekan_onay">✅ Mekan Ekleme Onayı</option>
+                  <option value="mekan_red">❌ Mekan Ekleme Reddi</option>
+                  <option value="mekan_revizyon">📝 Revizyon İsteği</option>
+                  <option value="mekan_bilgi">🔄 Bilgi Güncelleme Talebi</option>
+                  <option value="mekan_fotograf">📸 Fotoğraf Güncellemesi</option>
+                  <option value="mekan_kaldirma">🗑 Mekan Kaldırma Onayı</option>
                   <option value="mekan_ekleme_yonlendirme">📋 Mekan Ekleme Formu Yönlendirme</option>
+                  <option value="mekan_hatirlatma">⏳ Başvuru Tamamlama Hatırlatma</option>
                 </optgroup>
-                <optgroup label="📋 Genel">
-                  <option value="hosgeldin">Hoşgeldin Mesajı</option>
-                  <option value="tesekkur">Teşekkür Mesajı</option>
-                  <option value="isbirligi">İşbirliği Teklifi</option>
-                  <option value="bilgilendirme">Genel Bilgilendirme</option>
+                <optgroup label="⭐ Premium & Üyelik">
+                  <option value="mekan_premium">⭐ Premium Tanıtımı</option>
+                  <option value="mekan_premium_bitis">⏰ Premium Süre Dolum Uyarısı</option>
+                  <option value="mekan_premium_yenileme">🔄 Premium Yenileme Teklifi</option>
+                </optgroup>
+                <optgroup label="💬 İletişim & Geri Bildirim">
+                  <option value="hosgeldin">👋 Hoş Geldin Mesajı</option>
+                  <option value="tesekkur">🙏 Teşekkür Mesajı</option>
+                  <option value="geri_bildirim_teskur">⭐ Geri Bildirim Teşekkürü</option>
+                  <option value="oneri_tesekkur">💡 Öneri Teşekkürü</option>
+                  <option value="sikayet_yanit">⚠️ Şikayet Yanıtı</option>
+                  <option value="hata_yanit">🐛 Hata Bildirimi Yanıtı</option>
+                </optgroup>
+                <optgroup label="🤝 İşbirliği & Pazarlama">
+                  <option value="isbirligi">🤝 İşbirliği Teklifi</option>
+                  <option value="isbirligi_yanit">↩ İşbirliği Teklif Yanıtı</option>
+                  <option value="basin_medya">📰 Basın & Medya</option>
+                  <option value="sponsor_teklif">💼 Sponsorluk Teklifi</option>
+                </optgroup>
+                <optgroup label="📣 Duyuru & Etkinlik">
+                  <option value="yeni_ozellik">🚀 Yeni Özellik Duyurusu</option>
+                  <option value="sezon_acilis">☀️ Yaz Sezonu Açılışı</option>
+                  <option value="sezon_kapanis">🍂 Kış Sezonu Duyurusu</option>
+                  <option value="etkinlik_davet">🎉 Etkinlik Daveti</option>
+                </optgroup>
+                <optgroup label="📄 Genel">
+                  <option value="bilgilendirme">📢 Genel Bilgilendirme</option>
+                  <option value="bos_sablon">✨ Boş Şablon (Temizle)</option>
                 </optgroup>
               </select>
             </div>
@@ -1702,8 +1727,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <textarea id="compose-body" rows="8" placeholder="Mail içeriğini yazın..." style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.88rem;font-family:inherit;resize:vertical;background:var(--input-bg,#fff);color:var(--text);width:100%;line-height:1.7"></textarea>
             </div>
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-              <button class="btn btn-primary" onclick="sendComposeMail()">Gönder</button>
-              <button class="btn btn-secondary" onclick="previewComposeMail()">Önizleme</button>
+              <button class="btn btn-primary" onclick="sendComposeMail()">✉️ Gönder</button>
+              <button class="btn btn-secondary" onclick="previewComposeMail()">👁 Önizleme</button>
+              <button class="btn btn-secondary" onclick="clearComposeMail()" style="background:rgba(229,62,62,.08);color:#C53030;border-color:rgba(229,62,62,.2)">🗑 Temizle</button>
               <span id="compose-status" style="font-size:.75rem;color:var(--text-muted);margin-left:auto"></span>
             </div>
           </div>
@@ -1735,17 +1761,17 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <button class="msg-sidebar-item" data-filter="trash" onclick="setMsgFilter('trash',this)"><span class="msg-sb-icon">🗑</span>Çöp Kutusu<span class="msg-sb-count" id="msg-count-trash">0</span></button>
 
           <div class="msg-sidebar-label">🏷 Etiketler</div>
-          <button class="msg-sidebar-item" data-label="cevaplanacak" onclick="setLabelFilter('cevaplanacak',this)"><span class="msg-sb-icon">🔴</span>Cevaplanacak</button>
-          <button class="msg-sidebar-item" data-label="beklemede" onclick="setLabelFilter('beklemede',this)"><span class="msg-sb-icon">🟡</span>Beklemede</button>
-          <button class="msg-sidebar-item" data-label="tamamlandi" onclick="setLabelFilter('tamamlandi',this)"><span class="msg-sb-icon">🟢</span>Tamamlandı</button>
+          <button class="msg-sidebar-item" data-label="cevaplanacak" onclick="setLabelFilter('cevaplanacak',this)"><span class="msg-sb-icon">🔴</span>Cevaplanacak<span class="msg-sb-count" id="msg-count-label-cevaplanacak">0</span></button>
+          <button class="msg-sidebar-item" data-label="beklemede" onclick="setLabelFilter('beklemede',this)"><span class="msg-sb-icon">🟡</span>Beklemede<span class="msg-sb-count" id="msg-count-label-beklemede">0</span></button>
+          <button class="msg-sidebar-item" data-label="tamamlandi" onclick="setLabelFilter('tamamlandi',this)"><span class="msg-sb-icon">🟢</span>Tamamlandı<span class="msg-sb-count" id="msg-count-label-tamamlandi">0</span></button>
 
           <div class="msg-sidebar-label">📂 Kategoriler</div>
-          <button class="msg-sidebar-item" data-cat="Öneri" onclick="setCatFilter('Öneri',this)"><span class="msg-sb-icon">💡</span>Öneri</button>
-          <button class="msg-sidebar-item" data-cat="Şikayet" onclick="setCatFilter('Şikayet',this)"><span class="msg-sb-icon">⚠️</span>Şikayet</button>
-          <button class="msg-sidebar-item" data-cat="İşbirliği" onclick="setCatFilter('İşbirliği',this)"><span class="msg-sb-icon">🤝</span>İşbirliği</button>
-          <button class="msg-sidebar-item" data-cat="Mekan Ekleme Talebi" onclick="setCatFilter('Mekan Ekleme Talebi',this)"><span class="msg-sb-icon">🏪</span>Mekan Ekleme</button>
-          <button class="msg-sidebar-item" data-cat="Hata Bildirimi" onclick="setCatFilter('Hata Bildirimi',this)"><span class="msg-sb-icon">🐛</span>Hata Bildirimi</button>
-          <button class="msg-sidebar-item" data-cat="Genel" onclick="setCatFilter('Genel',this)"><span class="msg-sb-icon">📋</span>Genel</button>
+          <button class="msg-sidebar-item" data-cat="Öneri" onclick="setCatFilter('Öneri',this)"><span class="msg-sb-icon">💡</span>Öneri<span class="msg-sb-count" id="msg-count-cat-oneri">0</span></button>
+          <button class="msg-sidebar-item" data-cat="Şikayet" onclick="setCatFilter('Şikayet',this)"><span class="msg-sb-icon">⚠️</span>Şikayet<span class="msg-sb-count" id="msg-count-cat-sikayet">0</span></button>
+          <button class="msg-sidebar-item" data-cat="İşbirliği" onclick="setCatFilter('İşbirliği',this)"><span class="msg-sb-icon">🤝</span>İşbirliği<span class="msg-sb-count" id="msg-count-cat-isbirligi">0</span></button>
+          <button class="msg-sidebar-item" data-cat="Mekan Ekleme Talebi" onclick="setCatFilter('Mekan Ekleme Talebi',this)"><span class="msg-sb-icon">🏪</span>Mekan Ekleme<span class="msg-sb-count" id="msg-count-cat-mekan">0</span></button>
+          <button class="msg-sidebar-item" data-cat="Hata Bildirimi" onclick="setCatFilter('Hata Bildirimi',this)"><span class="msg-sb-icon">🐛</span>Hata Bildirimi<span class="msg-sb-count" id="msg-count-cat-hata">0</span></button>
+          <button class="msg-sidebar-item" data-cat="Genel" onclick="setCatFilter('Genel',this)"><span class="msg-sb-icon">📋</span>Genel<span class="msg-sb-count" id="msg-count-cat-genel">0</span></button>
         </aside>
 
         <!-- Orta: Liste -->
@@ -4033,40 +4059,47 @@ let msgFilter = 'all';
 let allMessages = [];
 let allSentMails = [];
 
+// Klasör filtre — sadece klasör item'ları arasında active'i yönetir, kategori/etiket'e dokunmaz
 function setMsgFilter(f, btn) {
   msgFilter = f;
-  // Tüm sidebar item'larının active'ini kaldır
-  document.querySelectorAll('.msg-sidebar-item').forEach(b => b.classList.remove('active'));
+  // Sadece klasör (data-filter) item'ların active'ini değiştir
+  document.querySelectorAll('.msg-sidebar-item[data-filter]').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.msg-tab').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  // Kategori ve etiket filtrelerini sıfırla (klasör değiştirildiğinde)
-  var catF = document.getElementById('msg-cat-filter');
-  var lblF = document.getElementById('msg-label-filter');
-  if (catF) catF.value = '';
-  if (lblF) lblF.value = '';
   renderMessageList();
 }
 
+// Kategori filtre — toggle, sadece kategori item'ları arasında active yönetir
 function setCatFilter(cat, btn) {
-  document.querySelectorAll('.msg-sidebar-item').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  // Klasör filtresini "Tümü" yap ki kategori görünsün
-  msgFilter = 'all';
   var catF = document.getElementById('msg-cat-filter');
-  var lblF = document.getElementById('msg-label-filter');
-  if (catF) catF.value = cat;
-  if (lblF) lblF.value = '';
+  var currentActive = document.querySelector('.msg-sidebar-item[data-cat].active');
+  var isAlreadyActive = btn && currentActive === btn;
+  // Kategori item'larını temizle
+  document.querySelectorAll('.msg-sidebar-item[data-cat]').forEach(b => b.classList.remove('active'));
+  if (isAlreadyActive) {
+    // Aynı tıklandı — filtre kapat
+    if (catF) catF.value = '';
+  } else {
+    // Yeni kategori aç
+    if (btn) btn.classList.add('active');
+    if (catF) catF.value = cat;
+  }
   renderMessageList();
 }
 
+// Etiket filtre — toggle, sadece etiket item'ları arasında active yönetir
 function setLabelFilter(label, btn) {
-  document.querySelectorAll('.msg-sidebar-item').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  msgFilter = 'all';
-  var catF = document.getElementById('msg-cat-filter');
   var lblF = document.getElementById('msg-label-filter');
-  if (catF) catF.value = '';
-  if (lblF) lblF.value = label;
+  var currentActive = document.querySelector('.msg-sidebar-item[data-label].active');
+  var isAlreadyActive = btn && currentActive === btn;
+  // Etiket item'larını temizle
+  document.querySelectorAll('.msg-sidebar-item[data-label]').forEach(b => b.classList.remove('active'));
+  if (isAlreadyActive) {
+    if (lblF) lblF.value = '';
+  } else {
+    if (btn) btn.classList.add('active');
+    if (lblF) lblF.value = label;
+  }
   renderMessageList();
 }
 
@@ -4694,9 +4727,10 @@ function getMsgCatClass(subject) {
 }
 
 function updateMsgTabCounts() {
-  var all = allMessages.filter(m => !m.trashed).length;
-  var unread = allMessages.filter(m => !m.read && !m.trashed).length;
-  var read = allMessages.filter(m => m.read && !m.trashed).length;
+  var active = allMessages.filter(m => !m.trashed);
+  var all = active.length;
+  var unread = active.filter(m => !m.read).length;
+  var read = active.filter(m => m.read).length;
   var trash = allMessages.filter(m => m.trashed).length;
   var el;
   el = document.getElementById('msg-count-all'); if (el) el.textContent = all;
@@ -4704,6 +4738,22 @@ function updateMsgTabCounts() {
   el = document.getElementById('msg-count-read'); if (el) el.textContent = read;
   el = document.getElementById('msg-count-trash'); if (el) el.textContent = trash;
   el = document.getElementById('msg-count-sent'); if (el) el.textContent = allSentMails.length;
+
+  // Etiket sayaçları
+  var labels = ['cevaplanacak', 'beklemede', 'tamamlandi'];
+  labels.forEach(function(lbl) {
+    var cnt = active.filter(m => m.label === lbl).length;
+    var e = document.getElementById('msg-count-label-' + lbl);
+    if (e) e.textContent = cnt;
+  });
+
+  // Kategori sayaçları (ID'de ASCII, değerde Türkçe)
+  var cats = { 'oneri': 'Öneri', 'sikayet': 'Şikayet', 'isbirligi': 'İşbirliği', 'mekan': 'Mekan Ekleme Talebi', 'hata': 'Hata Bildirimi', 'genel': 'Genel' };
+  Object.keys(cats).forEach(function(key) {
+    var cnt = active.filter(m => (m.subject || 'Genel') === cats[key]).length;
+    var e = document.getElementById('msg-count-cat-' + key);
+    if (e) e.textContent = cnt;
+  });
 }
 
 function renderMessageList() {
@@ -5183,46 +5233,125 @@ function updateBulkCount() {
 
 // ── Hazır Mail Şablonları ──
 var MAIL_TEMPLATES = {
+  // ═══ MEKAN İŞLEMLERİ ═══
   mekan_onay: {
-    subject: 'Mekan Ekleme Talebiniz Onaylandı',
+    subject: 'Mekan Ekleme Talebiniz Onaylandı 🎉',
     body: 'Merhaba,\n\nMekan ekleme talebiniz incelendi ve onaylandı. Mekanınız artık assosukesfet.com üzerinde yayında!\n\nMekan bilgilerinizi güncel tutmak için bizimle iletişime geçebilirsiniz.\n\nTeşekkür ederiz.'
   },
   mekan_red: {
     subject: 'Mekan Ekleme Talebiniz Hakkında',
     body: 'Merhaba,\n\nMekan ekleme talebiniz incelendi ancak şu an için onaylanamamıştır.\n\nBunun nedeni eksik bilgi veya bölge dışı konum olabilir. Lütfen bilgilerinizi kontrol edip tekrar başvurunuz.\n\nSorularınız için info@assosukesfet.com adresine yazabilirsiniz.'
   },
+  mekan_revizyon: {
+    subject: 'Mekan Başvurunuzda Düzenleme Gerekiyor',
+    body: 'Merhaba,\n\nMekan başvurunuzu inceledik ve aşağıdaki konularda güncelleme yapmanız gerektiğini belirledik:\n\n- [Eksik bilgi buraya]\n- [Düzeltilmesi gereken alan]\n\nGönderdiğimiz düzenleme linkinden bilgileri tamamlayıp tekrar gönderebilirsiniz. Sıfırdan doldurmak zorunda değilsiniz.\n\nTeşekkürler.'
+  },
   mekan_bilgi: {
     subject: 'Mekan Bilgilerinizi Güncelleme Talebi',
     body: 'Merhaba,\n\nAssosukesfet.com üzerinde kayıtlı mekanınızın bilgilerinin güncel olduğundan emin olmak istiyoruz.\n\nAşağıdaki bilgileri kontrol edip bize güncel halini iletir misiniz?\n\n- Çalışma saatleri\n- Telefon numarası\n- Menü/fiyat değişiklikleri\n- Fotoğraflar\n\nTeşekkürler.'
   },
   mekan_premium: {
-    subject: 'Premium Üyelik Hakkında Bilgilendirme',
-    body: 'Merhaba,\n\nAssos\'u Keşfet platformundaki Premium üyelik avantajlarından yararlanmak ister misiniz?\n\nPremium mekanlar:\n- Arama sonuçlarında üst sıralarda\n- Öne çıkan badge ile vurgulanır\n- Detaylı istatistik raporları alır\n- Özel kampanya alanına sahip olur\n\nDetaylı bilgi için yanıt yazabilirsiniz.'
+    subject: 'Premium Üyelik — Mekanınızı Öne Çıkarın ⭐',
+    body: 'Merhaba,\n\nAssos\'u Keşfet platformundaki Premium üyelik avantajlarından yararlanmak ister misiniz?\n\nPremium mekanlar:\n- Arama sonuçlarında üst sıralarda\n- Öne çıkan ⭐ badge ile vurgulanır\n- Detaylı istatistik raporları alır\n- Özel kampanya alanına sahip olur\n- AI asistanımızın önerilerinde öncelikli görünür\n\nDetaylı bilgi için yanıt yazabilirsiniz.'
   },
   mekan_premium_bitis: {
-    subject: 'Premium Üyeliğiniz Sona Eriyor',
+    subject: 'Premium Üyeliğiniz Sona Eriyor ⏰',
     body: 'Merhaba,\n\nAssos\'u Keşfet platformundaki Premium üyeliğinizin süresi yakında dolacaktır.\n\nÜyeliğinizi yenilemek ve avantajlardan yararlanmaya devam etmek için bizimle iletişime geçebilirsiniz.\n\nTeşekkürler.'
   },
+  mekan_premium_yenileme: {
+    subject: 'Premium Üyelik Yenileme Teklifi',
+    body: 'Merhaba,\n\nMekanınızın Premium süresi dolmak üzere. Avantajlardan kesintisiz yararlanmak için yenileme yapmanızı öneriyoruz.\n\nGeçen dönemde mekanınız:\n- [X] kez görüntülendi\n- [X] kez yön tarifi alındı\n- [X] kez telefon tıklaması oldu\n\nYenileme için yanıt yazabilirsiniz.\n\nSaygılarımızla.'
+  },
+  mekan_fotograf: {
+    subject: 'Mekan Fotoğraflarınız Hakkında 📸',
+    body: 'Merhaba,\n\nMekanınızın fotoğraflarını inceledik. Daha iyi görünürlük için şunları öneriyoruz:\n\n- Yatay (1200x800px) fotoğraflar daha iyi görünür\n- İç mekandan parlak ve doğal ışıklı kareler\n- Öne çıkan yemek/hizmet fotoğrafları\n- Mekan girişi / cephe fotoğrafı\n\nGüncel fotoğrafları bu maile yanıt olarak gönderebilirsiniz.\n\nTeşekkürler.'
+  },
+  mekan_kaldirma: {
+    subject: 'Mekanınızın Platformdan Kaldırılması',
+    body: 'Merhaba,\n\nTalebiniz üzerine mekanınız Assos\'u Keşfet platformundan kaldırılmıştır.\n\nTekrar yayına almak veya yeniden listelenmek isterseniz bu maile yanıt yazabilirsiniz.\n\nAnlayışınız için teşekkür ederiz.'
+  },
+
+  // ═══ İLETİŞİM & GERİ BİLDİRİM ═══
   hosgeldin: {
-    subject: 'Assos\'u Keşfet\'e Hoşgeldiniz',
-    body: 'Merhaba,\n\nAssos\'u Keşfet platformuna ilginiz için teşekkür ederiz!\n\nAssos çevresindeki en güzel mekanları, gezilecek yerleri ve rotaları keşfetmek için assosukesfet.com adresini ziyaret edebilirsiniz.\n\nSorularınız için her zaman buradayız.'
+    subject: 'Assos\'u Keşfet\'e Hoş Geldiniz! 🏛️',
+    body: 'Merhaba,\n\nAssos\'u Keşfet platformuna ilginiz için teşekkür ederiz!\n\nAssos çevresindeki en güzel mekanları, gezilecek yerleri ve rotaları keşfetmek için assosukesfet.com adresini ziyaret edebilirsiniz.\n\nAyrıca AI asistanımız size bölge hakkında sorular sorabilir ve kişiselleştirilmiş öneriler alabilirsiniz.\n\nSorularınız için her zaman buradayız.'
   },
   tesekkur: {
     subject: 'Teşekkür Ederiz',
     body: 'Merhaba,\n\nBize ulaştığınız için teşekkür ederiz. Geri bildiriminiz bizim için çok değerli.\n\nAssos\'u Keşfet olarak sizlere en iyi deneyimi sunmak için çalışmaya devam ediyoruz.\n\nİyi günler dileriz.'
   },
+  geri_bildirim_teskur: {
+    subject: 'Geri Bildiriminiz İçin Teşekkürler',
+    body: 'Merhaba,\n\nSite deneyiminiz hakkındaki geri bildiriminiz için çok teşekkür ederiz. Bu tür geri dönüşler bizim için çok değerli.\n\nÖnerilerinizi inceleyip mümkün olan en kısa sürede değerlendireceğiz.\n\nKeşfetmeye devam edin!'
+  },
+  oneri_tesekkur: {
+    subject: 'Öneriniz Alındı',
+    body: 'Merhaba,\n\nBize ilettiğiniz öneri için teşekkür ederiz. Ekibimiz önerinizi inceleyerek uygun olduğu takdirde platforma ekleyecektir.\n\nAssos\'u Keşfet\'i birlikte büyütüyoruz, katkınız için sağolun!\n\nSaygılarımızla.'
+  },
+  sikayet_yanit: {
+    subject: 'Şikayetiniz Hakkında',
+    body: 'Merhaba,\n\nBize ilettiğiniz şikayet için üzgünüz. Konuyu ciddiye alıyor ve detaylı inceleme başlatmış bulunuyoruz.\n\nGelişmelerle ilgili sizi bilgilendireceğiz. Anlayışınız için teşekkür ederiz.\n\nSaygılarımızla.'
+  },
+  hata_yanit: {
+    subject: 'Hata Bildiriminiz İçin Teşekkürler 🐛',
+    body: 'Merhaba,\n\nSite üzerindeki hatayı bildirdiğiniz için teşekkür ederiz. Teknik ekibimiz sorunu incelemeye başladı.\n\nDüzeltme yayına alındığında size bilgi vereceğiz.\n\nPlatformun iyileşmesine katkınız için sağolun!'
+  },
+
+  // ═══ İŞBİRLİĞİ & PAZARLAMA ═══
   isbirligi: {
     subject: 'İşbirliği Teklifi',
     body: 'Merhaba,\n\nAssos\'u Keşfet olarak bölgedeki işletmelerle işbirliği yapmaktan mutluluk duyarız.\n\nPlatformumuz aylık binlerce ziyaretçiye ulaşmakta ve Assos bölgesinin en kapsamlı dijital rehberi konumundadır.\n\nBirlikte neler yapabileceğimizi konuşmak isterseniz, bu maile yanıt yazabilirsiniz.\n\nSaygılarımızla.'
   },
+  isbirligi_yanit: {
+    subject: 'İşbirliği Teklifinize Yanıt',
+    body: 'Merhaba,\n\nİşbirliği teklifiniz için teşekkür ederiz. Teklifinizi inceledik ve sizinle görüşmek istiyoruz.\n\nMüsait olduğunuz bir tarih/saat belirtirseniz, detayları konuşmak üzere iletişime geçebiliriz.\n\nSaygılarımızla.'
+  },
+  basin_medya: {
+    subject: 'Basın & Medya Talepleri',
+    body: 'Merhaba,\n\nBasın/medya talebiniz için teşekkür ederiz.\n\nKurumsal materyal, röportaj veya görsel talepleriniz için aşağıdaki bilgileri iletir misiniz?\n\n- Yayın/mecra adı\n- Yayın tarihi\n- Talep edilen içerik türü\n- İletişim bilgileri\n\nEn kısa sürede dönüş yapacağız.'
+  },
+  sponsor_teklif: {
+    subject: 'Sponsorluk Fırsatları',
+    body: 'Merhaba,\n\nAssos\'u Keşfet platformunda sponsor olmak ister misiniz?\n\nSponsorluk paketlerimiz:\n- Premium vitrin (sayfa başları, detay sayfaları)\n- Blog içerik sponsorluğu\n- Özel rota/rehber sponsorluğu\n- Sosyal medya içerik işbirliği\n\nDetaylı paket bilgileri ve fiyatlandırma için yanıt yazabilirsiniz.'
+  },
+
+  // ═══ MEKAN EKLEME & BAŞVURU ═══
   mekan_ekleme_yonlendirme: {
     subject: 'Mekanınız Keşfedilmeyi Bekliyor',
     body: 'Merhaba,\n\nAssos\'u Keşfet platformuna gösterdiğiniz ilgi için teşekkür ederiz.\n\nMekanınızı Assos bölgesinin en kapsamlı dijital rehberine eklemek için aşağıdaki formu doldurmanız yeterlidir. Form üzerinden mekanınızın tüm bilgilerini (çalışma saatleri, telefon numaraları, fotoğraflar, açıklama vb.) adım adım girebilirsiniz.\n\nFormu doldurduktan sonra ekibimiz başvurunuzu 1-3 iş günü içinde değerlendirecek ve size e-posta ile dönüş yapacaktır.\n\nBaşvuru süreciyle ilgili sorularınız için bu maile yanıt yazabilirsiniz.\n\nSaygılarımızla,\nAssos\'u Keşfet Ekibi',
     cta: { text: 'Mekan Ekleme Formunu Doldurun', url: 'https://assosukesfet.com/mekan-ekle' }
   },
+  mekan_hatirlatma: {
+    subject: 'Mekan Başvurunuzu Tamamlayın ⏳',
+    body: 'Merhaba,\n\nMekan başvuru sürecinde olduğunuzu fark ettik. Süreci tamamlamak için birkaç bilgi daha gerekiyor.\n\nDüzenleme linkinden devam ederek işlemi tamamlayabilirsiniz. 30 gün içinde tamamlanmayan başvurular otomatik olarak arşivlenir.\n\nYardıma ihtiyacınız olursa yanıt yazmanız yeterli.\n\nSaygılarımızla.'
+  },
+
+  // ═══ DUYURU & ETKİNLİK ═══
+  yeni_ozellik: {
+    subject: 'Yeni Özellik Duyurusu 🚀',
+    body: 'Merhaba,\n\nAssos\'u Keşfet\'e yeni bir özellik ekledik!\n\n[Yeni özellik açıklaması buraya]\n\nBu özelliği denemek için assosukesfet.com adresini ziyaret edebilirsiniz.\n\nGörüşleriniz bizim için değerli — geri bildirimlerinizi bekliyoruz!\n\nSaygılarımızla.'
+  },
+  sezon_acilis: {
+    subject: 'Yaz Sezonu Başladı! ☀️',
+    body: 'Merhaba,\n\nYaz sezonu Assos\'ta başladı! Koylar, sahiller ve açık hava mekanları sizi bekliyor.\n\nAssos\'u Keşfet\'te sezona özel:\n- Güncellenmiş koy rehberleri\n- Plaj önerileri\n- Yaz mekanları ve çalışma saatleri\n\nKeşfetmek için assosukesfet.com adresine göz atın.\n\nKeyifli bir yaz dileriz!'
+  },
+  sezon_kapanis: {
+    subject: 'Kış Sezonunda Assos — Yeni Deneyimler',
+    body: 'Merhaba,\n\nYaz sezonu kapanırken Assos\'un farklı yüzünü keşfetmek için ideal zaman!\n\nKış ayları için:\n- Zeytin hasadı dönemi\n- Köy kahvaltıları ve sıcak yemekler\n- Sakin ören yeri ziyaretleri\n- Doğa yürüyüşleri\n\nassosukesfet.com\'dan sonbahar/kış mekanlarını görebilirsiniz.'
+  },
+  etkinlik_davet: {
+    subject: 'Etkinlik Daveti 🎉',
+    body: 'Merhaba,\n\nAssos\'u Keşfet olarak düzenlediğimiz etkinliğe sizi davet etmekten mutluluk duyarız.\n\n📅 Tarih: [Tarih]\n📍 Yer: [Konum]\n⏰ Saat: [Saat]\n\nKatılımınız için aşağıdaki maile yanıt verebilirsiniz.\n\nSizi görmek bizi mutlu edecek!'
+  },
+
+  // ═══ GENEL ═══
   bilgilendirme: {
     subject: 'Bilgilendirme',
     body: 'Merhaba,\n\n\n\nSaygılarımızla,\nAssos\'u Keşfet Ekibi'
+  },
+  bos_sablon: {
+    subject: '',
+    body: ''
   }
 };
 
@@ -5366,6 +5495,28 @@ function previewComposeMail() {
   document.getElementById('compose-preview-body').innerHTML = '<iframe srcdoc="' + html.replace(/"/g,'&quot;') + '" style="width:100%;height:70vh;border:none;"></iframe>';
   overlay.style.display = 'flex';
 }
+// Mail compose temizle — tüm alanları sıfırla
+function clearComposeMail() {
+  if (!confirm('Tüm alanları temizlemek istediğinize emin misiniz?')) return;
+  var toEl = document.getElementById('compose-to');
+  var subjEl = document.getElementById('compose-subject');
+  var bodyEl = document.getElementById('compose-body');
+  var tplEl = document.getElementById('compose-template');
+  var bulkEl = document.getElementById('compose-bulk');
+  var bulkOpts = document.getElementById('compose-bulk-options');
+  var statusEl = document.getElementById('compose-status');
+  if (toEl) toEl.value = '';
+  if (subjEl) subjEl.value = '';
+  if (bodyEl) bodyEl.value = '';
+  if (tplEl) tplEl.value = '';
+  if (bulkEl) bulkEl.checked = false;
+  if (bulkOpts) bulkOpts.style.display = 'none';
+  if (statusEl) statusEl.innerHTML = '';
+  window._composeTemplateCta = null;
+  showToast('Form temizlendi', 'success');
+  if (toEl) toEl.focus();
+}
+
 async function sendComposeMail() {
   var isBulk = document.getElementById('compose-bulk').checked;
   var toRaw = document.getElementById('compose-to').value.trim();
