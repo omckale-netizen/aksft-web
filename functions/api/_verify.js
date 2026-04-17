@@ -15,7 +15,7 @@ export async function verifyFirebaseToken(token, env) {
     return { valid: false, error: 'Token eksik veya geçersiz' };
   }
 
-  // KV cache — aynı token tekrar tekrar Google'a gitmesin (5 dk)
+  // KV cache — aynı token tekrar tekrar Google'a gitmesin (1 dk — rol değişiklikleri hızlı yansısın)
   const tokenHash = await sha256(token);
   if (env && env.CHAT_KV) {
     try {
@@ -47,7 +47,7 @@ export async function verifyFirebaseToken(token, env) {
     if (!user) return { valid: false, error: 'Kullanıcı bulunamadı' };
 
     if (env && env.CHAT_KV) {
-      try { await env.CHAT_KV.put('tok_' + tokenHash, user.email + '|' + user.localId, { expirationTtl: 300 }); } catch(e) {}
+      try { await env.CHAT_KV.put('tok_' + tokenHash, user.email + '|' + user.localId, { expirationTtl: 60 }); } catch(e) {}
     }
     return { valid: true, email: user.email, uid: user.localId };
   } catch (err) {

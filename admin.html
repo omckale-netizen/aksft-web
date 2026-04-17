@@ -10791,6 +10791,11 @@ async function saveUser() {
   if (!email || !/^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$/.test(email)) {
     showToast('Geçerli bir e-posta girin', 'error'); return;
   }
+  // Rol whitelist — sadece izin verilen değerler kabul (defense in depth; rules da kontrol eder)
+  var ALLOWED_ROLES = ['admin', 'editor', 'viewer'];
+  if (!ALLOWED_ROLES.includes(role)) {
+    showToast('Geçersiz rol: ' + role + '. Sadece admin/editor/viewer kabul edilir.', 'error'); return;
+  }
 
   // Allowed pages ve permissions'ı topla (admin için null/varsayılan)
   var allowedPages = [];

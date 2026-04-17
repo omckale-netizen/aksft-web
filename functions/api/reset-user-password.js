@@ -10,7 +10,7 @@
 // Body: { uid: "USER_UID", newPassword: "yeniŞifre" }
 // Auth: Admin gate cookie + Firebase ID token (sadece admin rolündeki kullanıcı çağırabilir)
 
-import { requireAdmin } from './_verify.js';
+import { checkAuth } from './_verify.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -31,10 +31,10 @@ export async function onRequestPost(context) {
     });
   }
 
-  // Admin doğrulama — cookie + Firebase ID token
-  const isAdmin = await requireAdmin(request, env);
-  if (!isAdmin) {
-    return new Response(JSON.stringify({ error: 'Yetkisiz' }), {
+  // Admin doğrulama + caller bilgisi (audit için)
+  const auth = await checkAuth(request, env, 'admin');
+  if (!auth.ok) {
+    return new Response(JSON.stringify({ error: 'Yetkisiz', detail: auth.error }), {
       status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
@@ -70,6 +70,34 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ error: 'Şifre en az 8 karakter olmalı' }), {
       status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
+  }
+
+  // Rate limit — aynı hedef kullanıcı için saatte max 3 reset, aynı admin için dakikada max 5 reset
+  if (env.CHAT_KV) {
+    try {
+      const hour = Math.floor(Date.now() / 3600000);
+      const minute = Math.floor(Date.now() / 60000);
+      const targetKey = 'reset_target_' + uid + '_' + hour;
+      const adminKey = 'reset_admin_' + (auth.uid || 'unknown') + '_' + minute;
+      const [tCount, aCount] = await Promise.all([
+        env.CHAT_KV.get(targetKey).then(v => parseInt(v || '0')),
+        env.CHAT_KV.get(adminKey).then(v => parseInt(v || '0')),
+      ]);
+      if (tCount >= 3) {
+        return new Response(JSON.stringify({ error: 'Bu kullanıcı için saatte max 3 şifre sıfırlama yapılabilir. Lütfen bekleyin.' }), {
+          status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      if (aCount >= 5) {
+        return new Response(JSON.stringify({ error: 'Dakikada max 5 şifre sıfırlama yapabilirsiniz. Lütfen yavaşlayın.' }), {
+          status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      await Promise.all([
+        env.CHAT_KV.put(targetKey, String(tCount + 1), { expirationTtl: 3600 }),
+        env.CHAT_KV.put(adminKey, String(aCount + 1), { expirationTtl: 60 }),
+      ]);
+    } catch(e) { console.warn('Rate limit KV error:', e); }
   }
 
   try {
@@ -114,6 +142,27 @@ export async function onRequestPost(context) {
         status: resp.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
+
+    // AUDIT LOG — Firestore'a service account ile yaz (admin işlemini iz bırakır)
+    try {
+      const PROJECT = 'assosu-kesfet';
+      const logBody = {
+        fields: {
+          action: { stringValue: 'admin_reset_password' },
+          target: { stringValue: uid },
+          details: { stringValue: 'Admin kullanıcı şifresini sıfırladı (hedef UID: ' + uid + ')' },
+          user: { stringValue: auth.email || 'unknown' },
+          userRole: { stringValue: auth.role || 'admin' },
+          timestamp: { stringValue: new Date().toISOString() },
+          ipHash: { stringValue: (request.headers.get('CF-Connecting-IP') || '').substring(0, 16) }
+        }
+      };
+      await fetch('https://firestore.googleapis.com/v1/projects/' + PROJECT + '/databases/(default)/documents/activity_logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
+        body: JSON.stringify(logBody)
+      }).catch(e => console.warn('Audit log yazılamadı:', e));
+    } catch(e) { console.warn('Audit log exception:', e); }
 
     return new Response(JSON.stringify({ ok: true, message: 'Şifre başarıyla değiştirildi' }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -195,7 +244,7 @@ async function getAccessToken(serviceAccount) {
   const now = Math.floor(Date.now() / 1000);
   const payload = {
     iss: serviceAccount.client_email,
-    scope: 'https://www.googleapis.com/auth/firebase https://www.googleapis.com/auth/identitytoolkit',
+    scope: 'https://www.googleapis.com/auth/firebase https://www.googleapis.com/auth/identitytoolkit https://www.googleapis.com/auth/datastore',
     aud: 'https://oauth2.googleapis.com/token',
     exp: now + 3600,
     iat: now,
