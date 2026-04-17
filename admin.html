@@ -4466,19 +4466,12 @@ function attachCurrentUserListener(uid) {
       var changed = prevRole !== window._currentUser.role
         || prevPages !== JSON.stringify(window._currentUser.allowedPages || null)
         || prevPerms !== JSON.stringify(window._currentUser.permissions || {});
-      if (changed) {
-        if (typeof applyRoleBasedUI === 'function') applyRoleBasedUI();
-        // Aktif sayfa artık erişilebilir değilse dashboard'a yönlendir
-        try {
-          var active = document.querySelector('.admin-page.active');
-          var activeKey = active ? active.id.replace('page-','') : null;
-          if (activeKey && !canAccessPage(activeKey)) {
-            showToast('Sayfa yetkiniz güncellendi. Dashboard\'a yönlendiriliyorsunuz.', 'info');
-            showPage('dashboard');
-          } else {
-            showToast('Yetkileriniz güncellendi.', 'info');
-          }
-        } catch(e) {}
+      // İlk snapshot'ı (sayfa yüklenirken) atla — prevRole null oluyor, değişiklik sayılmasın
+      if (changed && prevRole !== null) {
+        console.log('[permissions] güncellendi, sayfa yenileniyor', { role: data.role, allowedPages: data.allowedPages });
+        showToast('Yetkileriniz güncellendi. Sayfa yenileniyor...', 'info');
+        // Tüm UI öğelerinin tutarlı yüklenmesi için tam reload
+        setTimeout(function() { window.location.reload(); }, 1200);
       }
     }, function(err) { console.warn('User listener error:', err); });
   } catch(e) { console.warn('attachCurrentUserListener failed:', e); }
