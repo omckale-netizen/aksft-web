@@ -1,5 +1,17 @@
 // Vanity redirect helper — shared logic for all short links (/ig, /fb, /yt, etc.)
 // _ prefix: Cloudflare Pages bu dosyayı route'lamaz (sadece helper)
+//
+// Davranış:
+// - Sosyal medya crawler'ları (WhatsApp, Facebook, Twitter vb.): OG tag'li HTML döner → link önizlemesi çalışır
+// - Gerçek kullanıcılar: meta refresh + JS redirect → UTM'li hedef sayfaya yönlendirilir (anlık)
+const OG_IMAGE = 'https://firebasestorage.googleapis.com/v0/b/assosu-kesfet.firebasestorage.app/o/site%2Fog-image.jpg?alt=media&token=70d62a44-9142-43d8-aee4-de790f5c7dcd';
+const SITE_TITLE = "Assos'u Keşfet — Gezi Rehberi | Mekanlar, Rotalar, Köyler";
+const SITE_DESC = "Assos gezilecek yerler, oteller, kafeler, restoranlar, koylar ve gezi rotaları. Harita ve mekan önerileri.";
+
+function escHtml(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 export function vanityRedirect(context, utm) {
   const request = context.request || context;
   const waitUntil = (context && typeof context.waitUntil === 'function')
@@ -15,8 +27,7 @@ export function vanityRedirect(context, utm) {
   if (utm.content) params.set('utm_content', utm.content);
   const target = url.origin + '/?' + params.toString();
 
-  // Tıklama sayacı — yönlendirmeden önce Firestore'a "vanity_click" eventi yaz
-  // (biyografi linkine tıklama vs. siteye gerçek giriş — dropout ölçümü için)
+  // Tıklama sayacı — Firestore'a "vanity_click" eventi (dropout ölçümü için)
   try {
     const now = new Date();
     const cf = request.cf || {};
@@ -46,14 +57,55 @@ export function vanityRedirect(context, utm) {
       body: JSON.stringify(clickEvent)
     }).catch(() => {});
     waitUntil(writePromise);
-  } catch(e) { /* sessizce geç — log yazımı redirect'i bloklamamalı */ }
+  } catch(e) { /* sessizce geç */ }
 
-  return new Response(null, {
-    status: 302,
+  // OG tag'li HTML döndür — WhatsApp/FB/Twitter vb. link önizlemesi için şart
+  // Gerçek kullanıcı meta refresh + JS ile anlık yönlendirilir (~100ms)
+  const targetEsc = escHtml(target);
+  const vanityUrl = url.origin + url.pathname;
+  const html = `<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="refresh" content="0;url=${targetEsc}">
+<title>${escHtml(SITE_TITLE)}</title>
+<meta name="description" content="${escHtml(SITE_DESC)}">
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="${escHtml(url.origin + '/')}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="${escHtml(SITE_TITLE)}">
+<meta property="og:description" content="${escHtml(SITE_DESC)}">
+<meta property="og:url" content="${escHtml(vanityUrl)}">
+<meta property="og:image" content="${escHtml(OG_IMAGE)}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="tr_TR">
+<meta property="og:site_name" content="Assos'u Keşfet">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${escHtml(SITE_TITLE)}">
+<meta name="twitter:description" content="${escHtml(SITE_DESC)}">
+<meta name="twitter:image" content="${escHtml(OG_IMAGE)}">
+<style>html,body{margin:0;padding:0;background:#06101E;color:#F5EDE0;font-family:system-ui,-apple-system,sans-serif;height:100%;}.wrap{display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;padding:24px;}a{color:#D4935A;text-decoration:underline;font-weight:600;}</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <div style="font-size:2rem;margin-bottom:12px;">✨</div>
+    <div style="font-size:.9rem;opacity:.7;margin-bottom:8px;">Yönlendiriliyorsunuz…</div>
+    <a href="${targetEsc}">Buraya tıklayın</a>
+  </div>
+</div>
+<script>window.location.replace(${JSON.stringify(target)});</script>
+</body>
+</html>`;
+
+  return new Response(html, {
+    status: 200,
     headers: {
-      'Location': target,
+      'Content-Type': 'text/html; charset=utf-8',
       'X-Robots-Tag': 'noindex, nofollow',
-      'Cache-Control': 'no-store',
+      'Cache-Control': 'public, max-age=300',
       'Referrer-Policy': 'no-referrer-when-downgrade'
     }
   });
