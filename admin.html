@@ -530,6 +530,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
   .admin-sidebar.open{transform:translateX(0)}
   .admin-main{margin-left:0;padding:68px 20px 32px}
   .hamburger{display:flex}
+  body.sidebar-open .hamburger{display:none}
   .sidebar-overlay.show{display:block}
   .form-row{grid-template-columns:1fr}
   .stats-grid{grid-template-columns:repeat(2,1fr)}
@@ -7408,6 +7409,7 @@ function showPage(page) {
   if (window.innerWidth <= 900) {
     document.getElementById('admin-sidebar').classList.remove('open');
     document.getElementById('sidebar-overlay').classList.remove('show');
+    document.body.classList.remove('sidebar-open');
   }
   // Refresh page data
   if (page === 'dashboard') { renderDashboard(); updatePasswordDate(); }
@@ -7428,10 +7430,9 @@ function showPage(page) {
 function toggleSidebar() {
   var sb = document.getElementById('admin-sidebar');
   var ov = document.getElementById('sidebar-overlay');
-  var hb = document.getElementById('hamburger');
   sb.classList.toggle('open');
   ov.classList.toggle('show');
-  if (hb) hb.style.display = sb.classList.contains('open') ? 'none' : 'flex';
+  document.body.classList.toggle('sidebar-open', sb.classList.contains('open'));
 }
 
 /* ══════════════════════════════════════════════════
