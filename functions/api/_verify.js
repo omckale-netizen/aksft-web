@@ -61,20 +61,26 @@ export async function verifyFirebaseToken(token, env) {
  * Firebase ID token ile authenticated istek atar — kullanıcı kendi dokümanını okuyabilir (firestore rules).
  */
 export async function getUserRole(uid, email, idToken) {
-  if (email === SUPER_ADMIN_EMAIL) return { role: 'admin', active: true };
-  if (!uid || !idToken) return { role: null, active: false };
+  if (email === SUPER_ADMIN_EMAIL) return { role: 'admin', active: true, permissions: {} };
+  if (!uid || !idToken) return { role: null, active: false, permissions: {} };
   try {
     const resp = await fetch(`https://firestore.googleapis.com/v1/projects/${FIRESTORE_PROJECT}/databases/(default)/documents/users/${uid}`, {
       headers: { 'Authorization': 'Bearer ' + idToken }
     });
-    if (!resp.ok) return { role: null, active: false };
+    if (!resp.ok) return { role: null, active: false, permissions: {} };
     const data = await resp.json();
     const fields = data.fields || {};
     const role = fields.role && fields.role.stringValue;
     const active = fields.active && fields.active.booleanValue;
-    return { role: role || null, active: active !== false };
+    // permissions map
+    const permissions = {};
+    if (fields.permissions && fields.permissions.mapValue && fields.permissions.mapValue.fields) {
+      const pf = fields.permissions.mapValue.fields;
+      Object.keys(pf).forEach(k => { permissions[k] = pf[k].booleanValue !== undefined ? pf[k].booleanValue : pf[k].stringValue; });
+    }
+    return { role: role || null, active: active !== false, permissions };
   } catch (e) {
-    return { role: null, active: false };
+    return { role: null, active: false, permissions: {} };
   }
 }
 
@@ -101,7 +107,7 @@ export async function requireRole(request, env, minRole) {
   if (!tokenResult.valid) return { ok: false, error: tokenResult.error || 'Token geçersiz' };
 
   // Rol kontrolü
-  const { role, active } = await getUserRole(tokenResult.uid, tokenResult.email, token);
+  const { role, active, permissions } = await getUserRole(tokenResult.uid, tokenResult.email, token);
   if (!active) return { ok: false, error: 'Hesap pasif' };
 
   const roleRank = { admin: 3, editor: 2, viewer: 1 };
@@ -109,7 +115,7 @@ export async function requireRole(request, env, minRole) {
   const have = roleRank[role] || 0;
   if (have < need) return { ok: false, error: 'Yetki yetersiz (minRole=' + minRole + ', role=' + role + ')' };
 
-  return { ok: true, email: tokenResult.email, uid: tokenResult.uid, role };
+  return { ok: true, email: tokenResult.email, uid: tokenResult.uid, role, permissions: permissions || {} };
 }
 
 /**
@@ -127,6 +133,13 @@ export async function requireAdmin(request, env, opts) {
 export async function requireEditor(request, env) {
   const res = await requireRole(request, env, 'editor');
   return res.ok;
+}
+
+/**
+ * Detaylı sonuç — permissions dahil
+ */
+export async function checkAuth(request, env, minRole) {
+  return await requireRole(request, env, minRole || 'editor');
 }
 
 async function sha256(text) {

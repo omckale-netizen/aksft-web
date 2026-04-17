@@ -2198,6 +2198,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <div style="display:flex;flex-direction:column;gap:6px">
                 <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.8rem;color:var(--text)"><input type="checkbox" id="perm-canDelete" style="accent-color:var(--red)"> 🗑 Silme yetkisi (normalde admin-only)</label>
                 <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.8rem;color:var(--text)"><input type="checkbox" id="perm-canManagePremium" style="accent-color:var(--terra)"> ⭐ Premium verme/kaldırma</label>
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.8rem;color:var(--text)"><input type="checkbox" id="perm-canSendMail" style="accent-color:var(--blue)" checked> ✉️ Mail gönderme (yanıt, hoşgeldin, vb.)</label>
                 <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.8rem;color:var(--text)"><input type="checkbox" id="perm-canBulkMail" style="accent-color:var(--navy)"> 📨 Toplu mail gönderme</label>
                 <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.8rem;color:var(--text)"><input type="checkbox" id="perm-canExport" style="accent-color:#38A169"> 📦 Yedek/dışa aktarma</label>
               </div>
@@ -4562,6 +4563,12 @@ function canBulkMail() {
   var perms = (window._currentUser && window._currentUser.permissions) || {};
   return !!perms.canBulkMail;
 }
+function canSendMail() {
+  if (isCurrentAdmin()) return true;
+  var perms = (window._currentUser && window._currentUser.permissions) || {};
+  // Default true (eski kayıtlar ve admin için)
+  return perms.canSendMail !== false;
+}
 function canExport() {
   if (isCurrentAdmin()) return true;
   var perms = (window._currentUser && window._currentUser.permissions) || {};
@@ -4605,6 +4612,7 @@ function applyRoleBasedUI() {
     else if (perm === 'canManagePremium') allowed = canManagePremium();
     else if (perm === 'canBulkMail') allowed = canBulkMail();
     else if (perm === 'canExport') allowed = canExport();
+    else if (perm === 'canSendMail') allowed = canSendMail();
     el.style.display = allowed ? '' : 'none';
   });
   // Kullanıcı adını bir yerde göster (varsa)
@@ -10717,6 +10725,7 @@ function openUserModal(uid) {
   // Permission checkbox'ları sıfırla (yeni kullanıcı için default off)
   document.getElementById('perm-canDelete').checked = false;
   document.getElementById('perm-canManagePremium').checked = false;
+  document.getElementById('perm-canSendMail').checked = true;
   document.getElementById('perm-canBulkMail').checked = false;
   document.getElementById('perm-canExport').checked = false;
   document.getElementById('perm-viewAllLogs').checked = false;
@@ -10744,6 +10753,8 @@ function openUserModal(uid) {
     var perms = u.permissions || {};
     document.getElementById('perm-canDelete').checked = !!perms.canDelete;
     document.getElementById('perm-canManagePremium').checked = !!perms.canManagePremium;
+    // Mail gönderme: eski kayıtlar için default true (çünkü önceden izin vardı)
+    document.getElementById('perm-canSendMail').checked = perms.canSendMail !== false;
     document.getElementById('perm-canBulkMail').checked = !!perms.canBulkMail;
     document.getElementById('perm-canExport').checked = !!perms.canExport;
     document.getElementById('perm-viewAllLogs').checked = !!perms.viewAllLogs;
@@ -10780,6 +10791,7 @@ async function saveUser() {
     permissions = {
       canDelete: document.getElementById('perm-canDelete').checked,
       canManagePremium: document.getElementById('perm-canManagePremium').checked,
+      canSendMail: document.getElementById('perm-canSendMail').checked,
       canBulkMail: document.getElementById('perm-canBulkMail').checked,
       canExport: document.getElementById('perm-canExport').checked,
       viewAllLogs: document.getElementById('perm-viewAllLogs').checked

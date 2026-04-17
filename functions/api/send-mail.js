@@ -1,4 +1,4 @@
-import { requireEditor } from './_verify.js';
+import { checkAuth } from './_verify.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -17,10 +17,17 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ error: 'Yetkisiz erişim' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 
-  // Editor veya admin doğrulama — cookie + Firebase ID token + Firestore rol
-  const isOk = await requireEditor(request, env);
-  if (!isOk) {
-    return new Response(JSON.stringify({ error: 'Yetkisiz' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  // Editor veya admin doğrulama — cookie + Firebase ID token + Firestore rol + permission
+  const auth = await checkAuth(request, env, 'editor');
+  if (!auth.ok) {
+    return new Response(JSON.stringify({ error: 'Yetkisiz', detail: auth.error }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+  // Admin her zaman gönderebilir; editörün canSendMail yetkisi olmalı
+  if (auth.role !== 'admin') {
+    var perms = auth.permissions || {};
+    if (perms.canSendMail === false) {
+      return new Response(JSON.stringify({ error: 'Mail gönderme yetkiniz yok. Yönetici ile iletişime geçin.' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
   }
 
   // Rate limit — günde max 50 mail
