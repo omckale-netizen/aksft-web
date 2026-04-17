@@ -3,6 +3,48 @@
    Nav, Footer, Search, Utilities
 ═══════════════════════════════════════════ */
 
+/* ═══════════════════════════════════════════
+   3rd-PARTY ANALYTICS LAZY LOADER
+   Facebook Pixel + Clarity + GA4 ertelenerek yüklenir.
+   FCP/TBT iyileştirmesi: İlk kullanıcı etkileşiminde veya 3s idle sonra yüklenir.
+═══════════════════════════════════════════ */
+(function(){
+  if (window._analyticsLoaded) return;
+  var loaded = false;
+  function loadAnalytics() {
+    if (loaded) return;
+    loaded = true;
+    window._analyticsLoaded = true;
+    try {
+      // Facebook Pixel
+      !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init','1703800084126190'); fbq('track','PageView');
+    } catch(e) {}
+    try {
+      // Microsoft Clarity
+      (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","w8k2ttk14q");
+    } catch(e) {}
+    try {
+      // Google Analytics (GA4)
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function(){ dataLayer.push(arguments); };
+      gtag('js', new Date());
+      gtag('config', 'G-7XN86NYD1S');
+      var gs = document.createElement('script');
+      gs.async = true;
+      gs.src = 'https://www.googletagmanager.com/gtag/js?id=G-7XN86NYD1S';
+      document.head.appendChild(gs);
+    } catch(e) {}
+  }
+  // Kullanıcı etkileşiminde hemen yükle
+  var events = ['mousemove','touchstart','scroll','keydown','click'];
+  function onInteract(){ events.forEach(function(e){ window.removeEventListener(e, onInteract); }); loadAnalytics(); }
+  events.forEach(function(e){ window.addEventListener(e, onInteract, { passive: true, once: true }); });
+  // Fallback: 3 saniye sonra idle'da yükle
+  if (window.requestIdleCallback) requestIdleCallback(loadAnalytics, { timeout: 3000 });
+  else setTimeout(loadAnalytics, 3000);
+})();
+
 // Türkçe bulunma eki (-da/-de/-ta/-te) — son ünlüye göre
 function bulunmaEki(s) {
   if (!s) return "'da";
