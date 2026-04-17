@@ -14118,8 +14118,14 @@ function filterTodosForCurrentUser(todos) {
   });
 }
 
+// Yerel saat dilimine göre YYYY-MM-DD (UTC kullanmaz — Türkiye gece saatlerinde bir gün geri göstermesin)
+function todayLocalISO() {
+  var d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
 function updateTodoBadge() {
-  var todayStr = new Date().toISOString().split('T')[0];
+  var todayStr = todayLocalISO();
   var visibleTodos = filterTodosForCurrentUser(_allTodos);
   var activeCount = visibleTodos.filter(function(t) {
     if (t.status === 'completed') return false;
@@ -14144,7 +14150,7 @@ function openTodoModal(prefill) {
   document.getElementById('todo-description').value = '';
   document.getElementById('todo-priority').value = 'medium';
   document.getElementById('todo-category').value = 'general';
-  document.getElementById('todo-due-date').value = new Date().toISOString().split('T')[0]; // bugün
+  document.getElementById('todo-due-date').value = todayLocalISO(); // bugün (yerel saat)
   document.getElementById('todo-due-time').value = '';
   document.getElementById('todo-tags').value = '';
   document.getElementById('todo-related-venue').value = '';
@@ -14597,7 +14603,7 @@ function renderTodos() {
   });
 
   // Stats
-  var todayStr = new Date().toISOString().split('T')[0];
+  var todayStr = todayLocalISO();
   var allActive = visibleTodos.filter(function(t) { return t.status !== 'completed'; });
   var overdue = allActive.filter(function(t) { return t.dueDate && t.dueDate < todayStr; });
   var today = allActive.filter(function(t) { return t.dueDate === todayStr; });
