@@ -2286,11 +2286,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
     </div>
 
     <!-- Şifre Değiştirme Modal -->
-    <div id="change-password-overlay" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeChangePasswordModal()">
+    <div id="change-password-overlay" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this && !_forceChangePassword)closeChangePasswordModal()">
       <div style="background:var(--card-bg,#fff);border-radius:16px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)">
         <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid rgba(0,0,0,.06)">
           <h3 style="margin:0;font-size:1rem;color:var(--navy)">🔑 Şifremi Değiştir</h3>
-          <button onclick="closeChangePasswordModal()" style="border:none;background:none;font-size:1.3rem;cursor:pointer;color:var(--text-muted)">&times;</button>
+          <button class="cp-close-btn" onclick="closeChangePasswordModal()" style="border:none;background:none;font-size:1.3rem;cursor:pointer;color:var(--text-muted)">&times;</button>
         </div>
         <div style="padding:20px 24px">
           <div class="form-group" style="margin-bottom:14px">
@@ -2308,7 +2308,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <div id="cp-status" style="font-size:.75rem;margin-bottom:10px;min-height:16px"></div>
           <div style="display:flex;gap:10px">
             <button class="btn btn-primary" onclick="submitChangePassword()" style="flex:1">Şifreyi Değiştir</button>
-            <button class="btn btn-secondary" onclick="closeChangePasswordModal()">İptal</button>
+            <button class="btn btn-secondary cp-close-btn" onclick="closeChangePasswordModal()">İptal</button>
           </div>
         </div>
       </div>
@@ -2949,9 +2949,16 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <!-- Tehlikeli Alan -->
           <div class="panel-card" style="border:1px solid rgba(229,62,62,.15)">
             <div class="panel-card-head" style="border-bottom-color:rgba(229,62,62,.1)"><h3 style="color:var(--red)">⚠️ Tehlikeli Alan</h3></div>
-            <div style="padding:20px">
-              <div style="font-size:.78rem;color:var(--text-light);line-height:1.6;margin-bottom:14px">Oturumu sonlandırır ve giriş sayfasına yönlendirir.</div>
-              <button class="btn" style="width:100%;background:var(--red-bg);color:var(--red);border:1px solid rgba(229,62,62,.2)" onclick="if(confirm('Oturumu kapatmak istediğinize emin misiniz?'))logout()">Oturumu Kapat</button>
+            <div style="padding:20px;display:flex;flex-direction:column;gap:12px">
+              <div>
+                <div style="font-size:.78rem;color:var(--text-light);line-height:1.6;margin-bottom:10px">Oturumu sonlandırır ve giriş sayfasına yönlendirir.</div>
+                <button class="btn" style="width:100%;background:var(--red-bg);color:var(--red);border:1px solid rgba(229,62,62,.2)" onclick="if(confirm('Oturumu kapatmak istediğinize emin misiniz?'))logout()">Oturumu Kapat</button>
+              </div>
+              <div style="padding-top:12px;border-top:1px dashed rgba(229,62,62,.2)">
+                <div style="font-size:.78rem;color:var(--text-light);line-height:1.6;margin-bottom:10px">Tüm cihazlarda (başka tarayıcı, telefon, eski oturumlar) açık olan tüm oturumlarınızı kapatır. Şüpheli erişimde kullanın.</div>
+                <button class="btn" style="width:100%;background:rgba(221,107,32,.08);color:#C05621;border:1px solid rgba(221,107,32,.25)" onclick="logoutAllDevices()">🚪 Tüm Cihazlardan Çıkış Yap</button>
+                <div id="logout-all-status" style="font-size:.68rem;color:var(--text-muted);margin-top:6px;text-align:center"></div>
+              </div>
             </div>
           </div>
 
@@ -3763,6 +3770,9 @@ async function changePassword() {
     const credential = firebase.auth.EmailAuthProvider.credential(user.email, current);
     await user.reauthenticateWithCredential(credential);
     await user.updatePassword(newPw);
+    // Zorunlu şifre değişimi bayrağını kaldır
+    try { await db.collection('users').doc(user.uid).set({ mustChangePassword: false }, { merge: true }); } catch(e) {}
+    if (window._currentUser) window._currentUser.mustChangePassword = false;
     document.getElementById('pw-current').value = '';
     document.getElementById('pw-new').value = '';
     document.getElementById('pw-confirm').value = '';
@@ -3791,6 +3801,53 @@ async function changePassword() {
 }
 
 // ── Şifre Tarih Kontrolü ──
+// ═══ FORCE LOGOUT (Tüm cihazlardan çıkış) ═══
+async function logoutAllDevices() {
+  if (!confirm('Tüm cihazlarda açık oturumlarınız kapatılacak. Devam etmek istiyor musunuz?')) return;
+  var statusEl = document.getElementById('logout-all-status');
+  try {
+    if (statusEl) { statusEl.textContent = '⏳ İşleniyor...'; statusEl.style.color = 'var(--text-muted)'; }
+    var token = await firebase.auth().currentUser.getIdToken();
+    var resp = await fetch('/api/revoke-sessions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({})
+    });
+    var data = await resp.json();
+    if (!resp.ok) {
+      if (statusEl) { statusEl.textContent = '❌ ' + (data.error || 'Hata'); statusEl.style.color = 'var(--red)'; }
+      return;
+    }
+    if (statusEl) { statusEl.textContent = '✓ Tüm cihazlardan çıkış yapıldı'; statusEl.style.color = 'var(--green)'; }
+    showToast('✓ Tüm oturumlar kapatıldı. Giriş sayfasına yönlendiriliyorsunuz...', 'success');
+    setTimeout(async function() {
+      try { await fbAuth.signOut(); } catch(e) {}
+      window.location.replace('admin-login.html');
+    }, 1500);
+  } catch(e) {
+    if (statusEl) { statusEl.textContent = '❌ ' + (e.message || 'Hata'); statusEl.style.color = 'var(--red)'; }
+  }
+}
+
+// Admin başka kullanıcıyı tüm cihazlardan çıkarır
+async function adminRevokeUserSessions(uid, name) {
+  if (!confirm('⚠️ ' + (name || uid) + ' kullanıcısının TÜM oturumları kapatılacak.\nKullanıcı yeniden giriş yapmak zorunda kalacak.\n\nDevam edilsin mi?')) return;
+  try {
+    var token = await firebase.auth().currentUser.getIdToken();
+    var resp = await fetch('/api/revoke-sessions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ uid: uid })
+    });
+    var data = await resp.json();
+    if (!resp.ok) { showToast('❌ ' + (data.error || 'Hata'), 'error'); return; }
+    showToast('✓ Kullanıcının tüm oturumları kapatıldı.', 'success');
+    logActivity('admin_revoke_sessions', uid, name || uid);
+  } catch(e) {
+    showToast('❌ ' + (e.message || 'Hata'), 'error');
+  }
+}
+
 // ═══ PRESENCE (Kim online) ═══
 // Kendi presence doc'una her 60 saniyede heartbeat yazar
 // Sekme kapanınca onbeforeunload ile temizler
@@ -4763,6 +4820,7 @@ async function loadCurrentUserRole(firebaseUser) {
     baseUser.allowedPagesExpiry = data.allowedPagesExpiry || null;
     baseUser.permissions = data.permissions || {};
     baseUser.photoURL = data.photoURL || null;
+    baseUser.mustChangePassword = data.mustChangePassword === true;
     window._currentUser = baseUser;
     // Geçici erişim süresi dolmuşsa temizle (asenkron, UI'ı bloklamaz)
     cleanupExpiredTempAccess(firebaseUser.uid, data).catch(function() {});
@@ -5003,6 +5061,10 @@ fbAuth.onAuthStateChanged(async (user) => {
     syncLoginLogs();
     // Presence (online durum) tracking başlat
     try { startPresence(); } catch(e) { console.warn('Presence start:', e); }
+    // Zorunlu şifre değişimi — admin atamış + kullanıcı henüz değiştirmemiş
+    if (window._currentUser && window._currentUser.mustChangePassword) {
+      setTimeout(function() { openForcePasswordModal(); }, 400);
+    }
   } else {
     // Giris yapilmamis — login sayfasina yonlendir
     window.location.replace('admin-login.html');
@@ -10995,6 +11057,7 @@ function renderUsers() {
         (!isSuper ? '<button class="btn btn-sm btn-secondary" onclick="openUserModal(\'' + esc(u.uid) + '\')" title="Düzenle">✏️</button>' : '') +
         (!isSelf && !isSuper && isCurrentAdmin() ? '<button class="btn btn-sm btn-secondary" onclick="openAdminSetPasswordModal(\'' + esc(u.uid) + '\',\'' + esc(u.email) + '\',\'' + esc(u.name || u.email) + '\')" title="Direkt şifre ata">🔐</button>' : '') +
         (!isSelf && !isSuper && isCurrentAdmin() ? '<button class="btn btn-sm btn-secondary" onclick="sendPasswordReset(\'' + esc(u.email) + '\')" title="Şifre sıfırlama e-postası gönder">📧</button>' : '') +
+        (!isSelf && !isSuper && isCurrentAdmin() ? '<button class="btn btn-sm btn-secondary" onclick="adminRevokeUserSessions(\'' + esc(u.uid) + '\',\'' + esc(u.name || u.email) + '\')" title="Tüm cihazlardan çıkarır">🚪</button>' : '') +
         (!isSelf && !isSuper ? '<button class="btn btn-sm btn-secondary" onclick="toggleUserActive(\'' + esc(u.uid) + '\')" title="' + (isActive ? 'Pasife Al' : 'Aktifleştir') + '">' + (isActive ? '⏸' : '▶') + '</button>' : '') +
         (!isSelf && !isSuper ? '<button class="btn btn-sm btn-danger" onclick="deleteUser(\'' + esc(u.uid) + '\')" title="Sil">🗑</button>' : '') +
       '</div>' +
@@ -11324,6 +11387,7 @@ async function saveUser() {
         allowedPages: allowedPages,
         allowedPagesExpiry: allowedPagesExpiry,
         permissions: permissions,
+        mustChangePassword: true, // Kullanıcı ilk girişte şifre değiştirmeli
         createdAt: new Date().toISOString(),
         createdBy: window._currentUser.email
       });
@@ -11392,7 +11456,10 @@ async function submitAdminSetPassword() {
     var data = await resp.json();
     if (!resp.ok) throw new Error(data.error || 'İstek başarısız');
 
-    statusEl.innerHTML = '<span style="color:var(--green)">✓ Şifre değiştirildi</span>';
+    // Kullanıcı bir sonraki girişte şifre değiştirmeye zorlansın
+    try { await db.collection('users').doc(uid).update({ mustChangePassword: true }); } catch(e) {}
+
+    statusEl.innerHTML = '<span style="color:var(--green)">✓ Şifre değiştirildi — kullanıcı ilk girişte değiştirmeye zorlanacak</span>';
     showToast('Şifre başarıyla atandı', 'success');
     logActivity('admin_set_password', uid, 'Admin yeni şifre atadı');
 
@@ -11408,15 +11475,39 @@ async function submitAdminSetPassword() {
 }
 
 // Şifre değiştirme modalı
+var _forceChangePassword = false;
 function openChangePasswordModal() {
+  _forceChangePassword = false;
   document.getElementById('cp-current').value = '';
   document.getElementById('cp-new').value = '';
   document.getElementById('cp-new2').value = '';
   document.getElementById('cp-status').innerHTML = '';
   document.getElementById('change-password-overlay').style.display = 'flex';
+  // Normal modda kapatma butonları görünür
+  var ov = document.getElementById('change-password-overlay');
+  ov.querySelectorAll('.cp-close-btn').forEach(function(b) { b.style.display = ''; });
   setTimeout(function() { document.getElementById('cp-current').focus(); }, 100);
 }
+
+// Zorunlu modalı — kapatılamaz
+function openForcePasswordModal() {
+  _forceChangePassword = true;
+  document.getElementById('cp-current').value = '';
+  document.getElementById('cp-new').value = '';
+  document.getElementById('cp-new2').value = '';
+  document.getElementById('cp-status').innerHTML = '<span style="color:#C4521A;font-weight:600">⚠️ Admin size yeni bir şifre atadı. Devam etmek için şifrenizi değiştirmelisiniz.</span>';
+  document.getElementById('change-password-overlay').style.display = 'flex';
+  // Kapatma butonlarını gizle
+  var ov = document.getElementById('change-password-overlay');
+  ov.querySelectorAll('.cp-close-btn').forEach(function(b) { b.style.display = 'none'; });
+  setTimeout(function() { document.getElementById('cp-current').focus(); }, 100);
+}
+
 function closeChangePasswordModal() {
+  if (_forceChangePassword) {
+    showToast('Şifre değiştirmeden devam edemezsiniz. Bilinmeyen durumda Çıkış yapabilirsiniz.', 'error');
+    return;
+  }
   document.getElementById('change-password-overlay').style.display = 'none';
 }
 async function submitChangePassword() {
@@ -11441,6 +11532,10 @@ async function submitChangePassword() {
     await user.reauthenticateWithCredential(cred);
     // Sonra yeni şifreyi ata
     await user.updatePassword(nw);
+    // Zorunlu şifre değişimi bayrağını kaldır
+    try { await db.collection('users').doc(user.uid).set({ mustChangePassword: false }, { merge: true }); } catch(e) {}
+    if (window._currentUser) window._currentUser.mustChangePassword = false;
+    _forceChangePassword = false; // Kapatma izni
     statusEl.innerHTML = '<span style="color:var(--green)">✓ Şifreniz başarıyla güncellendi</span>';
     showToast('Şifre değiştirildi', 'success');
     logActivity('password_change', user.uid, user.email);
