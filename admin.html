@@ -4059,46 +4059,43 @@ let msgFilter = 'all';
 let allMessages = [];
 let allSentMails = [];
 
+// Filtre state — select element yerine global değişkenler (select'te option'lar yok)
+window._msgCatFilter = '';
+window._msgLabelFilter = '';
+
 // Klasör filtre — sadece klasör item'ları arasında active'i yönetir, kategori/etiket'e dokunmaz
 function setMsgFilter(f, btn) {
   msgFilter = f;
-  // Sadece klasör (data-filter) item'ların active'ini değiştir
   document.querySelectorAll('.msg-sidebar-item[data-filter]').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.msg-tab').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
   renderMessageList();
 }
 
-// Kategori filtre — toggle, sadece kategori item'ları arasında active yönetir
+// Kategori filtre — toggle
 function setCatFilter(cat, btn) {
-  var catF = document.getElementById('msg-cat-filter');
   var currentActive = document.querySelector('.msg-sidebar-item[data-cat].active');
   var isAlreadyActive = btn && currentActive === btn;
-  // Kategori item'larını temizle
   document.querySelectorAll('.msg-sidebar-item[data-cat]').forEach(b => b.classList.remove('active'));
   if (isAlreadyActive) {
-    // Aynı tıklandı — filtre kapat
-    if (catF) catF.value = '';
+    window._msgCatFilter = '';
   } else {
-    // Yeni kategori aç
     if (btn) btn.classList.add('active');
-    if (catF) catF.value = cat;
+    window._msgCatFilter = cat;
   }
   renderMessageList();
 }
 
-// Etiket filtre — toggle, sadece etiket item'ları arasında active yönetir
+// Etiket filtre — toggle
 function setLabelFilter(label, btn) {
-  var lblF = document.getElementById('msg-label-filter');
   var currentActive = document.querySelector('.msg-sidebar-item[data-label].active');
   var isAlreadyActive = btn && currentActive === btn;
-  // Etiket item'larını temizle
   document.querySelectorAll('.msg-sidebar-item[data-label]').forEach(b => b.classList.remove('active'));
   if (isAlreadyActive) {
-    if (lblF) lblF.value = '';
+    window._msgLabelFilter = '';
   } else {
     if (btn) btn.classList.add('active');
-    if (lblF) lblF.value = label;
+    window._msgLabelFilter = label;
   }
   renderMessageList();
 }
@@ -4759,8 +4756,8 @@ function updateMsgTabCounts() {
 function renderMessageList() {
   updateMsgTabCounts();
   const searchQ = (document.getElementById('msg-search')?.value || '').toLowerCase().trim();
-  const catFilter = document.getElementById('msg-cat-filter')?.value || '';
-  const labelFilter = document.getElementById('msg-label-filter')?.value || '';
+  const catFilter = window._msgCatFilter || document.getElementById('msg-cat-filter')?.value || '';
+  const labelFilter = window._msgLabelFilter || document.getElementById('msg-label-filter')?.value || '';
 
   let msgs = allMessages;
 
