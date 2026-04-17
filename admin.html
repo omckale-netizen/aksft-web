@@ -4380,7 +4380,9 @@ async function loadCurrentUserRole(firebaseUser) {
     email: firebaseUser.email,
     name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
     role: null,
-    active: true
+    active: true,
+    allowedPages: null,
+    permissions: {}
   };
   // Super admin email — her zaman tam yetki (kurtarma)
   if (firebaseUser.email === SUPER_ADMIN_EMAIL) {
@@ -4399,6 +4401,7 @@ async function loadCurrentUserRole(firebaseUser) {
         baseUser.name = data.name || baseUser.name;
       }
     } catch(e) {}
+    attachCurrentUserListener(firebaseUser.uid);
     return window._currentUser;
   }
   // Diğer kullanıcılar için users koleksiyonundan rol oku
@@ -4420,14 +4423,65 @@ async function loadCurrentUserRole(firebaseUser) {
     baseUser.name = data.name || baseUser.name;
     baseUser.role = data.role || 'viewer';
     baseUser.active = data.active !== false;
+    baseUser.allowedPages = Array.isArray(data.allowedPages) ? data.allowedPages : null;
+    baseUser.permissions = data.permissions || {};
     window._currentUser = baseUser;
     // Son giriş güncelle
     try { db.collection('users').doc(firebaseUser.uid).update({ lastLogin: new Date().toISOString() }); } catch(e) {}
+    attachCurrentUserListener(firebaseUser.uid);
     return window._currentUser;
   } catch(e) {
     console.error('User role fetch error:', e);
     return null;
   }
+}
+
+// Real-time: admin kullanıcının yetkilerini değiştirirse anında yansıt
+var _currentUserUnsub = null;
+function attachCurrentUserListener(uid) {
+  try {
+    if (_currentUserUnsub) { _currentUserUnsub(); _currentUserUnsub = null; }
+    _currentUserUnsub = db.collection('users').doc(uid).onSnapshot(function(snap) {
+      if (!snap.exists) return;
+      var data = snap.data();
+      var isSuper = window._currentUser && window._currentUser.email === SUPER_ADMIN_EMAIL;
+      // Pasif edildiyse → çıkış
+      if (data.active === false && !isSuper) {
+        showToast('Hesabınız pasif edildi. Çıkış yapılıyor...', 'error');
+        setTimeout(async function() {
+          try { await fbAuth.signOut(); } catch(e) {}
+          window.location.replace('admin-login.html');
+        }, 1500);
+        return;
+      }
+      if (!window._currentUser) return;
+      var prevRole = window._currentUser.role;
+      var prevPages = JSON.stringify(window._currentUser.allowedPages || null);
+      var prevPerms = JSON.stringify(window._currentUser.permissions || {});
+      // Super admin rol değişmesin (kurtarma)
+      if (!isSuper) window._currentUser.role = data.role || 'viewer';
+      window._currentUser.name = data.name || window._currentUser.name;
+      window._currentUser.allowedPages = Array.isArray(data.allowedPages) ? data.allowedPages : null;
+      window._currentUser.permissions = data.permissions || {};
+      var changed = prevRole !== window._currentUser.role
+        || prevPages !== JSON.stringify(window._currentUser.allowedPages || null)
+        || prevPerms !== JSON.stringify(window._currentUser.permissions || {});
+      if (changed) {
+        if (typeof applyRoleBasedUI === 'function') applyRoleBasedUI();
+        // Aktif sayfa artık erişilebilir değilse dashboard'a yönlendir
+        try {
+          var active = document.querySelector('.admin-page.active');
+          var activeKey = active ? active.id.replace('page-','') : null;
+          if (activeKey && !canAccessPage(activeKey)) {
+            showToast('Sayfa yetkiniz güncellendi. Dashboard\'a yönlendiriliyorsunuz.', 'info');
+            showPage('dashboard');
+          } else {
+            showToast('Yetkileriniz güncellendi.', 'info');
+          }
+        } catch(e) {}
+      }
+    }, function(err) { console.warn('User listener error:', err); });
+  } catch(e) { console.warn('attachCurrentUserListener failed:', e); }
 }
 
 // Yetki helper'ları
