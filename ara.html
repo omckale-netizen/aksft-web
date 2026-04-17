@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/icon.png" sizes="48x48" type="image/png"><link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=2">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@1,400&display=swap" onload="this.rel='stylesheet'">
+  <title>Arama — Assos'u Keşfet</title>
+  <meta name="description" content="Assos'ta mekan, gezilecek yer, köy ve rota arayın.">
+  <meta name="robots" content="noindex, follow">
+  <link rel="canonical" href="https://assosukesfet.com/ara.html">
+  <style>
+    :root{--navy:#1A2744;--navy-deep:#06101E;--terra:#C4521A;--terra-light:#D4935A;--cream:#F5EDE0;--cream-dark:#F0EAE0;--text-mid:#4A5568;--text-muted:#718096;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--navy);background:#FAF7F2;min-height:100vh;display:flex;flex-direction:column;}
+    main{flex:1;}
+
+    /* Search hero */
+    .ara-hero{background:linear-gradient(150deg,var(--navy-deep) 0%,#0C1A30 55%,#091420 100%);padding:110px 24px 40px;position:relative;overflow:hidden;}
+    .ara-hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(245,237,224,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(245,237,224,.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;}
+    .ara-hero-orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;}
+    .ara-orb-1{width:400px;height:400px;background:rgba(196,82,26,.12);top:-80px;right:-60px;}
+    .ara-orb-2{width:300px;height:300px;background:rgba(26,107,138,.1);bottom:-80px;left:-40px;}
+    .ara-inner{position:relative;z-index:2;max-width:900px;margin:0 auto;}
+    .ara-eyebrow{display:inline-flex;align-items:center;gap:10px;background:rgba(196,82,26,.12);border:1px solid rgba(196,82,26,.25);border-radius:999px;padding:6px 16px;margin-bottom:18px;}
+    .ara-eyebrow-dot{width:7px;height:7px;border-radius:50%;background:var(--terra);}
+    .ara-eyebrow span{font-size:.64rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--terra-light);}
+    .ara-h1{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.6rem,4vw,2.4rem);letter-spacing:-.02em;color:var(--cream);margin-bottom:6px;line-height:1.15;}
+    .ara-h1 em{font-family:'Lora',serif;font-weight:400;font-style:italic;background:linear-gradient(135deg,var(--terra-light),#E8A07A);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .ara-sub{font-size:.88rem;color:rgba(245,237,224,.55);margin-bottom:20px;}
+    .ara-count{color:var(--terra-light);font-weight:700;}
+    /* Input */
+    .ara-inputwrap{position:relative;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);border-radius:16px;padding:8px 8px 8px 20px;display:flex;align-items:center;gap:10px;backdrop-filter:blur(8px);}
+    .ara-inputwrap:focus-within{border-color:var(--terra-light);background:rgba(255,255,255,.08);}
+    .ara-input{flex:1;min-width:0;background:transparent;border:none;outline:none;color:var(--cream);font-family:inherit;font-size:.95rem;padding:10px 0;}
+    .ara-input::placeholder{color:rgba(245,237,224,.3);}
+    .ara-input-btn{border:none;background:linear-gradient(135deg,var(--terra),#A3431A);color:#fff;font-family:inherit;font-size:.82rem;font-weight:700;padding:11px 22px;border-radius:10px;cursor:pointer;transition:transform .15s;}
+    .ara-input-btn:hover{transform:translateY(-1px);}
+    .ara-clear{background:rgba(255,255,255,.08);color:rgba(245,237,224,.6);border:none;border-radius:8px;padding:6px 10px;font-size:.72rem;font-weight:600;cursor:pointer;font-family:inherit;display:none;}
+    .ara-inputwrap.has-value .ara-clear{display:inline-flex;}
+
+    /* Filter tabs */
+    .ara-filters{max-width:1200px;margin:28px auto 18px;padding:0 24px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;}
+    .ara-filters::-webkit-scrollbar{display:none;}
+    .ara-filter{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px solid rgba(26,39,68,.1);color:var(--text-mid);font-family:inherit;font-size:.78rem;font-weight:600;padding:9px 16px;border-radius:999px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+    .ara-filter:hover{border-color:var(--navy);color:var(--navy);}
+    .ara-filter.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+    .ara-filter-count{font-size:.68rem;opacity:.7;}
+    .ara-filter.active .ara-filter-count{opacity:.85;}
+
+    /* Results grid */
+    .ara-wrap{max-width:1200px;margin:0 auto;padding:0 24px 80px;}
+    .ara-group-label{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin:24px 0 12px;display:flex;align-items:center;gap:10px;}
+    .ara-group-label::after{content:'';flex:1;height:1px;background:rgba(26,39,68,.08);}
+    .ara-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+    .ara-card{display:block;background:#fff;border-radius:16px;overflow:hidden;border:1px solid rgba(26,39,68,.06);text-decoration:none;color:inherit;transition:transform .25s cubic-bezier(.16,1,.3,1),box-shadow .25s;cursor:pointer;}
+    .ara-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(26,39,68,.1);}
+    .ara-card-img{position:relative;aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+    .ara-card-img img{width:100%;height:100%;object-fit:cover;}
+    .ara-card-emoji{font-size:2.4rem;}
+    .ara-card-type{position:absolute;top:10px;left:10px;font-size:.58rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:3px 10px;border-radius:999px;backdrop-filter:blur(8px);}
+    .ara-card-body{padding:12px 16px 14px;}
+    .ara-card-title{font-weight:700;font-size:.92rem;color:var(--navy);margin-bottom:4px;line-height:1.3;}
+    .ara-card-sub{font-size:.74rem;color:var(--text-muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+
+    /* Empty state */
+    .ara-empty{text-align:center;padding:80px 24px;}
+    .ara-empty-icon{font-size:3rem;margin-bottom:18px;opacity:.4;}
+    .ara-empty-h{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.3rem;font-weight:700;color:var(--navy);margin-bottom:8px;}
+    .ara-empty-p{font-size:.88rem;color:var(--text-muted);line-height:1.7;margin-bottom:28px;max-width:420px;margin-left:auto;margin-right:auto;}
+    .ara-empty-links{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
+    .ara-empty-link{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1.5px solid rgba(26,39,68,.12);border-radius:12px;padding:12px 20px;font-size:.82rem;font-weight:600;color:var(--navy);text-decoration:none;transition:all .2s;}
+    .ara-empty-link:hover{border-color:var(--terra);color:var(--terra);transform:translateY(-2px);}
+
+    /* Popular / suggestions */
+    .ara-popular{max-width:900px;margin:40px auto 0;padding:0 24px;}
+    .ara-pop-label{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,237,224,.5);margin-bottom:10px;}
+    .ara-pop-row{display:flex;flex-wrap:wrap;gap:8px;}
+    .ara-pop-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:rgba(245,237,224,.65);font-family:inherit;font-size:.75rem;font-weight:500;padding:7px 14px;border-radius:999px;cursor:pointer;transition:all .2s;}
+    .ara-pop-pill:hover{background:rgba(255,255,255,.1);border-color:var(--terra-light);color:var(--cream);}
+
+    @media(max-width:640px){
+      .ara-hero{padding:95px 20px 30px;}
+      .ara-h1{font-size:1.45rem;}
+      .ara-input-btn{padding:10px 16px;font-size:.78rem;}
+      .ara-grid{grid-template-columns:1fr 1fr;gap:12px;}
+      .ara-card-title{font-size:.85rem;}
+    }
+    @media(max-width:400px){
+      .ara-grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+  <main>
+    <section class="ara-hero">
+      <div class="ara-hero-orb ara-orb-1"></div>
+      <div class="ara-hero-orb ara-orb-2"></div>
+      <div class="ara-inner">
+        <div class="ara-eyebrow">
+          <span class="ara-eyebrow-dot"></span>
+          <span>Arama Sonuçları</span>
+        </div>
+        <h1 class="ara-h1" id="ara-title">Ne <em>arıyorsun?</em></h1>
+        <p class="ara-sub" id="ara-sub">Mekan, gezilecek yer, köy ve rota arasında aramak için yaz.</p>
+        <div class="ara-inputwrap" id="ara-inputwrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(245,237,224,.45)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" class="ara-input" id="ara-input" placeholder="Kadırga, kahvaltı, müze..." autocomplete="off" aria-label="Arama">
+          <button class="ara-clear" onclick="araClear()" aria-label="Temizle">✕</button>
+          <button class="ara-input-btn" onclick="araSubmit()">Keşfet</button>
+        </div>
+        <div class="ara-popular" id="ara-popular" style="padding:0;margin-top:18px;display:none">
+          <div class="ara-pop-label">Popüler aramalar</div>
+          <div class="ara-pop-row">
+            <button class="ara-pop-pill" onclick="araQuick('kahvaltı')">🥐 Kahvaltı</button>
+            <button class="ara-pop-pill" onclick="araQuick('deniz')">🏖 Deniz</button>
+            <button class="ara-pop-pill" onclick="araQuick('müze')">🏛 Müze</button>
+            <button class="ara-pop-pill" onclick="araQuick('otel')">🏨 Otel</button>
+            <button class="ara-pop-pill" onclick="araQuick('restoran')">🍽 Restoran</button>
+            <button class="ara-pop-pill" onclick="araQuick('kadırga')">⛵ Kadırga</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="ara-filters" id="ara-filters" style="display:none"></div>
+    <div class="ara-wrap" id="ara-results"></div>
+  </main>
+  <div id="footer-placeholder"></div>
+
+  <script src="firebase-loader.js?v=6"></script>
+  <script src="shared.min.js?v=274"></script>
+  <script>
+    function pageInit() {
+      renderNav({ heroMode: false });
+      renderFooter();
+
+      var q = getParam('q') || '';
+      document.getElementById('ara-input').value = q;
+      updateClearBtn();
+      if (q) runSearch(q);
+      else {
+        document.getElementById('ara-popular').style.display = 'block';
+      }
+
+      document.getElementById('ara-input').addEventListener('input', updateClearBtn);
+      document.getElementById('ara-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); araSubmit(); }
+      });
+    }
+
+    function updateClearBtn() {
+      var wrap = document.getElementById('ara-inputwrap');
+      var val = document.getElementById('ara-input').value.trim();
+      if (val) wrap.classList.add('has-value'); else wrap.classList.remove('has-value');
+    }
+
+    function araClear() {
+      document.getElementById('ara-input').value = '';
+      document.getElementById('ara-input').focus();
+      updateClearBtn();
+    }
+
+    function araSubmit() {
+      var q = document.getElementById('ara-input').value.trim();
+      if (!q) { document.getElementById('ara-input').focus(); return; }
+      var newUrl = '/ara.html?q=' + encodeURIComponent(q);
+      if (location.pathname.replace(/\/$/, '').endsWith('/ara.html') || location.pathname.endsWith('/ara')) {
+        history.replaceState(null, '', newUrl);
+        runSearch(q);
+      } else {
+        location.href = newUrl;
+      }
+    }
+
+    function araQuick(term) {
+      document.getElementById('ara-input').value = term;
+      updateClearBtn();
+      araSubmit();
+    }
+
+    var _activeFilter = 'all';
+
+    function runSearch(q) {
+      if (!q || q.length < 2) return;
+      document.title = '"' + q + '" için arama — Assos\'u Keşfet';
+      document.getElementById('ara-title').innerHTML = '"<em>' + escAttr(q) + '</em>"';
+      document.getElementById('ara-popular').style.display = 'none';
+
+      var results = searchAllData(q);
+      var grouped = groupResults(results);
+      var total = results.length;
+
+      var subEl = document.getElementById('ara-sub');
+      if (total === 0) {
+        subEl.innerHTML = '0 sonuç';
+      } else {
+        subEl.innerHTML = '<span class="ara-count">' + total + '</span> sonuç bulundu';
+      }
+
+      renderFilters(grouped);
+      renderResults(grouped);
+    }
+
+    function searchAllData(q) {
+      if (!window.DATA) return [];
+      var ql = q.toLowerCase();
+      var out = [];
+      (DATA.venues || []).forEach(function(v) {
+        var score = [v.title, v.shortDesc, v.category, v.location, (v.tags || []).join(' '), (v.keywords || []).join(' ')].join(' ').toLowerCase();
+        if (score.indexOf(ql) > -1) {
+          out.push({ type: 'venue', id: v.id, title: v.title, sub: v.location || v.shortDesc || '', emoji: v.emoji || '📍', image: (v.images && v.images[0]) || '', badge: 'Mekan' });
+        }
+      });
+      (DATA.places || []).forEach(function(p) {
+        var score = [p.title, p.shortDesc, p.description, p.location, (p.tags || []).join(' '), (p.keywords || []).join(' ')].join(' ').toLowerCase();
+        if (score.indexOf(ql) > -1) {
+          out.push({ type: 'place', id: p.id, title: p.title, sub: p.location || p.shortDesc || '', emoji: p.emoji || '🏛', image: p.image || '', badge: 'Yer' });
+        }
+      });
+      (DATA.villages || []).forEach(function(v) {
+        var score = [v.title, v.shortDesc, v.description, (v.tags || []).join(' '), (v.keywords || []).join(' ')].join(' ').toLowerCase();
+        if (score.indexOf(ql) > -1) {
+          out.push({ type: 'village', id: v.id, title: v.title, sub: v.shortDesc || '', emoji: v.emoji || '🏘', image: v.image || '', badge: 'Köy' });
+        }
+      });
+      (DATA.routes || []).forEach(function(r) {
+        var score = [r.title, r.shortDesc, r.description, (r.keywords || []).join(' ')].join(' ').toLowerCase();
+        if (score.indexOf(ql) > -1) {
+          out.push({ type: 'route', id: r.id, title: r.title, sub: r.shortDesc || '', emoji: r.emoji || '🗺', image: r.image || '', badge: 'Rota' });
+        }
+      });
+      return out;
+    }
+
+    function groupResults(results) {
+      var order = ['venue', 'place', 'village', 'route'];
+      var g = { venue: [], place: [], village: [], route: [] };
+      results.forEach(function(r) { g[r.type].push(r); });
+      return { groups: g, order: order };
+    }
+
+    function renderFilters(grouped) {
+      var bar = document.getElementById('ara-filters');
+      var total = Object.keys(grouped.groups).reduce(function(s, k) { return s + grouped.groups[k].length; }, 0);
+      if (total === 0) { bar.style.display = 'none'; return; }
+      var labels = { venue: 'Mekanlar', place: 'Yerler', village: 'Köyler', route: 'Rotalar' };
+      var icons = { venue: '☕', place: '📍', village: '🏘', route: '🗺' };
+      var html = '<button class="ara-filter ' + (_activeFilter === 'all' ? 'active' : '') + '" onclick="setFilter(\'all\')">Tümü <span class="ara-filter-count">' + total + '</span></button>';
+      grouped.order.forEach(function(t) {
+        var c = grouped.groups[t].length;
+        if (c === 0) return;
+        html += '<button class="ara-filter ' + (_activeFilter === t ? 'active' : '') + '" onclick="setFilter(\'' + t + '\')">' + icons[t] + ' ' + labels[t] + ' <span class="ara-filter-count">' + c + '</span></button>';
+      });
+      bar.innerHTML = html;
+      bar.style.display = 'flex';
+    }
+
+    function setFilter(f) {
+      _activeFilter = f;
+      var q = document.getElementById('ara-input').value.trim();
+      runSearch(q);
+    }
+
+    function renderResults(grouped) {
+      var wrap = document.getElementById('ara-results');
+      var total = Object.keys(grouped.groups).reduce(function(s, k) { return s + grouped.groups[k].length; }, 0);
+      if (total === 0) {
+        wrap.innerHTML = emptyStateHTML();
+        return;
+      }
+      var labels = { venue: 'Mekanlar', place: 'Gezilecek Yerler', village: 'Köyler', route: 'Rotalar' };
+      var detailPath = { venue: 'mekanlar/mekan-detay.html', place: 'yerler/yer-detay.html', village: 'koyler/koy-detay.html', route: 'rotalar/rota-detay.html' };
+      var typeColors = { venue: { bg: 'rgba(212,147,90,.9)', color: '#fff' }, place: { bg: 'rgba(36,144,184,.9)', color: '#fff' }, village: { bg: 'rgba(127,184,123,.9)', color: '#fff' }, route: { bg: 'rgba(196,82,26,.9)', color: '#fff' } };
+      var html = '';
+      grouped.order.forEach(function(t) {
+        if (_activeFilter !== 'all' && _activeFilter !== t) return;
+        var items = grouped.groups[t];
+        if (items.length === 0) return;
+        if (_activeFilter === 'all') html += '<div class="ara-group-label">' + labels[t] + ' · ' + items.length + '</div>';
+        html += '<div class="ara-grid">';
+        items.forEach(function(it) {
+          var tc = typeColors[t];
+          html += '<a class="ara-card" href="/' + detailPath[t] + '?id=' + encodeURIComponent(it.id) + '">' +
+            '<div class="ara-card-img" style="background:linear-gradient(135deg,#243255,#1A2744)">' +
+              (it.image ? '<img src="' + escAttr(it.image) + '" alt="' + escAttr(it.title) + '" loading="lazy">' : '<span class="ara-card-emoji">' + it.emoji + '</span>') +
+              '<span class="ara-card-type" style="background:' + tc.bg + ';color:' + tc.color + '">' + it.badge + '</span>' +
+            '</div>' +
+            '<div class="ara-card-body">' +
+              '<div class="ara-card-title">' + escHtml(it.title) + '</div>' +
+              (it.sub ? '<div class="ara-card-sub">' + escHtml(it.sub) + '</div>' : '') +
+            '</div>' +
+          '</a>';
+        });
+        html += '</div>';
+      });
+      wrap.innerHTML = html;
+    }
+
+    function emptyStateHTML() {
+      var q = document.getElementById('ara-input').value.trim();
+      return '<div class="ara-empty">' +
+        '<div class="ara-empty-icon">🔍</div>' +
+        '<h2 class="ara-empty-h">"' + escHtml(q) + '" için sonuç bulunamadı</h2>' +
+        '<p class="ara-empty-p">Farklı bir kelime deneyin ya da aşağıdan keşfe başlayın.</p>' +
+        '<div class="ara-empty-links">' +
+          '<a href="/mekanlar.html" class="ara-empty-link">☕ Mekanlar</a>' +
+          '<a href="/yerler.html" class="ara-empty-link">📍 Gezilecek Yerler</a>' +
+          '<a href="/koyler.html" class="ara-empty-link">🏘 Köyler</a>' +
+          '<a href="/rotalar.html" class="ara-empty-link">🗺 Rotalar</a>' +
+        '</div>' +
+      '</div>';
+    }
+
+    // escHtml / escAttr — shared.js'den gelir ama defansif
+    if (typeof escHtml === 'undefined') window.escHtml = function(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+    if (typeof escAttr === 'undefined') window.escAttr = function(s) { return String(s).replace(/&/g,'&amp;').replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+
+    document.addEventListener('dataReady', pageInit);
+  </script>
+</body>
+</html>

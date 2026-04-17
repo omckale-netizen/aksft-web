@@ -256,6 +256,8 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     .search-result-type{font-size:.55rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px;flex-shrink:0;}
     .search-no-results{padding:24px 16px;text-align:center;color:rgba(245,237,224,.3);font-size:.82rem;}
     .search-group-label{padding:10px 16px 6px;font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,237,224,.2);}
+    .search-see-all{display:flex;align-items:center;justify-content:center;gap:6px;padding:12px 16px;margin-top:4px;border-top:1px solid rgba(245,237,224,.06);font-size:.76rem;font-weight:700;color:#D4935A;text-decoration:none;background:rgba(196,82,26,.06);transition:background .2s;border-radius:0 0 14px 14px;}
+    .search-see-all:hover{background:rgba(196,82,26,.12);color:#E8A07A;}
     @media(max-width:640px){
       .search-dropdown{position:absolute;top:calc(100% + 8px);bottom:auto;left:-8px;right:-8px;max-height:55vh;border-radius:16px;box-shadow:0 12px 48px rgba(0,0,0,.6);}
       .search-dropdown.open{animation:sdFadeIn .2s ease;}
@@ -1334,7 +1336,10 @@ function initSearch(inputId, opts = {}) {
     if (!q || q.length < 2) { dropdown.classList.remove('open'); return; }
 
     if (results.length === 0) {
-      dropdown.innerHTML = '<div class="search-no-results">Sonuç bulunamadı: "<strong style="color:var(--cream)">' + q.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') + '</strong>"</div>';
+      var qEsc = q.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      var araBase = window.location.pathname.includes('/mekanlar/') || window.location.pathname.includes('/rotalar/') || window.location.pathname.includes('/yerler/') || window.location.pathname.includes('/koyler/') ? '../' : '';
+      dropdown.innerHTML = '<div class="search-no-results">Sonuç bulunamadı: "<strong style="color:var(--cream)">' + qEsc + '</strong>"</div>' +
+        '<a class="search-see-all" href="' + araBase + 'ara.html?q=' + encodeURIComponent(q) + '">Arama sayfasında dene →</a>';
     } else {
       // Kategoriye göre grupla
       var groups = {};
@@ -1358,6 +1363,9 @@ function initSearch(inputId, opts = {}) {
           '</a>';
         }).join('');
       });
+      // "Tüm sonuçları gör" linki — sonuçların altında
+      var araBase2 = window.location.pathname.includes('/mekanlar/') || window.location.pathname.includes('/rotalar/') || window.location.pathname.includes('/yerler/') || window.location.pathname.includes('/koyler/') ? '../' : '';
+      html += '<a class="search-see-all" href="' + araBase2 + 'ara.html?q=' + encodeURIComponent(q) + '">Tüm sonuçları gör →</a>';
       dropdown.innerHTML = html;
     }
     dropdown.classList.add('open');
@@ -1401,12 +1409,15 @@ function initSearch(inputId, opts = {}) {
       e.preventDefault();
       const items2 = dropdown.querySelectorAll('.search-result-item');
       if (activeIdx >= 0 && items2[activeIdx]) {
+        // Klavyeyle seçilmiş sonuca git
         window.location.href = items2[activeIdx].href;
       } else {
-        const q = input.value.trim().toLowerCase();
-        const results = searchAll(q);
-        if (results.length > 0) window.location.href = getUrl(results[0].type, results[0].id);
-        else { dropdown.classList.remove('open'); }
+        // Enter → tam arama sayfasına git (ilk sonuca değil; kullanıcı daha çok seçenek görsün)
+        const q = input.value.trim();
+        if (q) {
+          const araBase3 = window.location.pathname.includes('/mekanlar/') || window.location.pathname.includes('/rotalar/') || window.location.pathname.includes('/yerler/') || window.location.pathname.includes('/koyler/') ? '../' : '';
+          window.location.href = araBase3 + 'ara.html?q=' + encodeURIComponent(q);
+        } else { dropdown.classList.remove('open'); }
       }
     }
   });

@@ -423,7 +423,7 @@
 <div id="footer-placeholder"></div>
 
 <script src="firebase-loader.js?v=6"></script>
-<script src="shared.min.js?v=273"></script>
+<script src="shared.min.js?v=274"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: true });
@@ -616,7 +616,8 @@ function pageInit() {
     if (!input) return;
     const q = input.value.trim();
     if (!q) { input.focus(); return; }
-    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    // Keşfet butonu → arama sayfasına git
+    window.location.href = '/ara.html?q=' + encodeURIComponent(q);
   }
 
   function heroQuickSearch(term) {
