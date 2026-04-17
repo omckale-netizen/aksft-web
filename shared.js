@@ -4671,9 +4671,13 @@ function renderPlacePage(placeId) {
     } catch { return { date: new Date().toISOString().split('T')[0], count: 0 }; }
   }
   function saveAiState(state) { try { localStorage.setItem(AI_STORAGE_KEY, JSON.stringify(state)); } catch {} }
+  var AI_HISTORY_TTL_MS = 60 * 60 * 1000; // 1 saat
   function saveHistory(msg, type) {
     try {
       var hist = JSON.parse(localStorage.getItem(AI_HISTORY_KEY) || '[]');
+      // Kaydederken de eski mesajları at (süresi dolmuş olanlar)
+      var cutoff = Date.now() - AI_HISTORY_TTL_MS;
+      hist = hist.filter(function(m) { return m.ts && m.ts >= cutoff; });
       hist.push({ text: msg, type: type, ts: Date.now() });
       if (hist.length > 30) hist = hist.slice(-30); // Son 30 mesaj
       localStorage.setItem(AI_HISTORY_KEY, JSON.stringify(hist));
@@ -4682,12 +4686,34 @@ function renderPlacePage(placeId) {
   function loadHistory() {
     try {
       var hist = JSON.parse(localStorage.getItem(AI_HISTORY_KEY) || '[]');
-      if (hist.length === 0) return;
+      // 1 saatten eski mesajları at
+      var cutoff = Date.now() - AI_HISTORY_TTL_MS;
+      var fresh = hist.filter(function(m) { return m.ts && m.ts >= cutoff; });
+      if (fresh.length !== hist.length) {
+        localStorage.setItem(AI_HISTORY_KEY, JSON.stringify(fresh));
+      }
+      if (fresh.length === 0) return;
       // Geçmişi render et
-      hist.forEach(function(m) { addMsg(m.text, m.type, true); });
+      fresh.forEach(function(m) { addMsg(m.text, m.type, true); });
     } catch {}
   }
   loadHistory();
+  // Sayfa açıkken de periyodik temizlik — 5 dakikada bir kontrol et
+  setInterval(function() {
+    try {
+      var hist = JSON.parse(localStorage.getItem(AI_HISTORY_KEY) || '[]');
+      var cutoff = Date.now() - AI_HISTORY_TTL_MS;
+      var fresh = hist.filter(function(m) { return m.ts && m.ts >= cutoff; });
+      if (fresh.length !== hist.length) {
+        localStorage.setItem(AI_HISTORY_KEY, JSON.stringify(fresh));
+        // Eğer tüm geçmiş silindiyse chat UI'ı da resetle
+        if (fresh.length === 0) {
+          var body = document.getElementById('ai-chat-body');
+          if (body) body.innerHTML = '<div class="ai-msg bot">Selam! 👋 Saklı bir koy, kahvaltı için güzel bir köy kafesi ya da gün batımında büyüleyici bir manzara mı arıyorsun? Ne istersen sor, Assos\u2019u birlikte keşfedelim 🌅</div>';
+        }
+      }
+    } catch {}
+  }, 5 * 60 * 1000);
   function updateLimit() {
     var s = getAiState();
     var el = document.getElementById('ai-chat-limit');
