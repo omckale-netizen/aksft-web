@@ -12,33 +12,114 @@
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-check-compat.js" crossorigin="anonymous" integrity="sha384-eV3PO0BITEvFTiTj+Lx8nlBz6wF9b6ARxrCuTiZSo6giPhCoWzr1tNN6KKHdPHfa"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%}
 body{
-  min-height:100vh;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(150deg,#06101E 0%,#0C1A30 55%,#091420 100%);
-  font-family:'Plus Jakarta Sans',sans-serif;color:#F5EDE0;overflow:hidden;position:relative;
+  min-height:100vh;min-height:100svh;
+  display:flex;align-items:center;justify-content:center;
+  background:#06101E;
+  font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  color:#F5EDE0;overflow:hidden;position:relative;
+  padding:20px;
 }
-body::before{content:'';position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(245,237,224,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(245,237,224,.02) 1px,transparent 1px);background-size:60px 60px;}
-.auth-orb{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none}
-.auth-orb-1{width:400px;height:400px;background:rgba(196,82,26,.12);top:-100px;left:-80px}
-.auth-orb-2{width:300px;height:300px;background:rgba(26,107,138,.1);bottom:-80px;right:-60px}
-.auth-box{position:relative;z-index:1;background:rgba(255,255,255,.04);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:48px 40px;text-align:center;max-width:400px;width:90%;box-shadow:0 24px 64px rgba(0,0,0,.3)}
-.auth-logo{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#C4521A,#D4682E);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:1.4rem;color:#fff;font-weight:800;box-shadow:0 8px 24px rgba(196,82,26,.3)}
-.auth-box h1{color:#F5EDE0;font-size:1.4rem;font-weight:800;margin-bottom:4px;letter-spacing:-.02em}
-.auth-box .auth-sub{color:rgba(245,237,224,.35);font-size:.82rem;margin-bottom:32px}
-.auth-field{position:relative;margin-bottom:14px;text-align:left}
-.auth-field label{display:block;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(245,237,224,.35);margin-bottom:6px}
-.auth-field input{width:100%;padding:12px 16px 12px 42px;border:1.5px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.04);color:#F5EDE0;font-size:.92rem;font-family:inherit;outline:none;transition:border .2s,background .2s}
-.auth-field input:focus{border-color:#C4521A;background:rgba(255,255,255,.07)}
-.auth-field input::placeholder{color:rgba(245,237,224,.2)}
-.auth-field-icon{position:absolute;left:14px;bottom:13px;color:rgba(245,237,224,.3);font-size:.9rem}
-.auth-btn{margin-top:20px;width:100%;padding:13px;border:none;border-radius:12px;background:#C4521A;color:#fff;font-size:.95rem;font-weight:700;font-family:inherit;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(196,82,26,.3)}
-.auth-btn:hover{background:#D4682E;transform:translateY(-1px);box-shadow:0 8px 24px rgba(196,82,26,.4)}
-.auth-err{color:#F87171;font-size:.78rem;margin-top:14px;min-height:18px}
-.auth-footer{margin-top:24px;font-size:.68rem;color:rgba(245,237,224,.2)}
-.loading{display:flex;align-items:center;justify-content:center;min-height:100vh;position:fixed;inset:0;z-index:10;background:linear-gradient(150deg,#06101E 0%,#0C1A30 55%,#091420 100%)}
+
+/* WebGL shader canvas (smokey background) */
+.smokey-bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:auto}
+.smokey-bg canvas{width:100%;height:100%;display:block}
+.smokey-bg::after{content:'';position:absolute;inset:0;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);pointer-events:none;background:radial-gradient(ellipse at center,rgba(6,16,30,.2) 0%,rgba(6,16,30,.55) 70%,rgba(6,16,30,.75) 100%)}
+
+/* Loading overlay */
+.loading{display:flex;align-items:center;justify-content:center;min-height:100vh;position:fixed;inset:0;z-index:100;background:linear-gradient(150deg,#06101E 0%,#0C1A30 55%,#091420 100%)}
 .ld-spinner{width:28px;height:28px;border:3px solid rgba(245,237,224,.1);border-top-color:#C4521A;border-radius:50%;animation:spin .6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .hidden{display:none!important}
+
+/* Login card — glassmorphism */
+.auth-wrap{position:relative;z-index:10;display:flex;align-items:center;justify-content:center;width:100%;max-width:400px}
+.auth-box{width:100%;background:rgba(255,255,255,.06);backdrop-filter:blur(22px) saturate(1.2);-webkit-backdrop-filter:blur(22px) saturate(1.2);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:36px 32px;box-shadow:0 20px 60px rgba(0,0,0,.35),0 0 0 1px rgba(255,255,255,.04) inset;animation:fadeUp .6s cubic-bezier(.16,1,.3,1) both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* Header */
+.auth-head{text-align:center;margin-bottom:28px}
+.auth-logo{width:54px;height:54px;border-radius:16px;background:linear-gradient(135deg,#C4521A,#D4682E);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.2rem;color:#fff;font-weight:800;box-shadow:0 8px 24px rgba(196,82,26,.35),0 0 0 1px rgba(255,255,255,.1) inset;letter-spacing:-.02em}
+.auth-head h1{color:#F5EDE0;font-size:1.45rem;font-weight:800;margin-bottom:6px;letter-spacing:-.02em}
+.auth-head .auth-sub{color:rgba(245,237,224,.55);font-size:.82rem;font-weight:500}
+
+/* Form */
+.auth-form{display:flex;flex-direction:column;gap:22px;margin-top:4px}
+
+/* Floating label input */
+.field{position:relative;z-index:0}
+.field input{
+  display:block;width:100%;
+  padding:10px 0 10px 24px;
+  font-size:.88rem;color:#F5EDE0;
+  background:transparent;
+  border:0;border-bottom:2px solid rgba(245,237,224,.2);
+  outline:none;font-family:inherit;
+  transition:border-color .25s;
+}
+.field input:focus{border-bottom-color:#D4682E}
+.field input::placeholder{color:transparent}
+.field label{
+  position:absolute;top:10px;left:24px;
+  font-size:.88rem;color:rgba(245,237,224,.55);
+  transform-origin:0 0;pointer-events:none;
+  transition:transform .25s,color .25s;
+  display:flex;align-items:center;gap:6px;
+  white-space:nowrap;
+}
+.field label svg{width:15px;height:15px;opacity:.7}
+.field input:focus + label,
+.field input:not(:placeholder-shown) + label{
+  transform:translateY(-22px) scale(.78);
+  color:#D4682E;
+}
+.field-icon{position:absolute;left:0;top:11px;color:rgba(245,237,224,.5);pointer-events:none;display:flex;align-items:center;justify-content:center;width:18px;height:18px}
+.field-icon svg{width:16px;height:16px}
+.field input:focus ~ .field-icon{color:#D4682E}
+
+/* Primary button */
+.auth-btn{
+  margin-top:4px;width:100%;
+  padding:13px 16px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,#C4521A,#A8440F);
+  color:#fff;font-size:.92rem;font-weight:700;font-family:inherit;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  transition:transform .15s,box-shadow .2s,background .2s;
+  box-shadow:0 4px 16px rgba(196,82,26,.3),0 0 0 1px rgba(255,255,255,.08) inset;
+  position:relative;overflow:hidden;
+}
+.auth-btn:hover{background:linear-gradient(135deg,#D4682E,#C4521A);box-shadow:0 6px 20px rgba(196,82,26,.45),0 0 0 1px rgba(255,255,255,.1) inset;transform:translateY(-1px)}
+.auth-btn:active{transform:translateY(0)}
+.auth-btn svg{width:18px;height:18px;transition:transform .2s}
+.auth-btn:hover svg{transform:translateX(3px)}
+
+/* Error message */
+.auth-err{color:#F87171;font-size:.78rem;min-height:18px;text-align:center;line-height:1.4}
+
+/* Divider */
+.auth-divider{display:flex;align-items:center;gap:12px;margin:2px 0}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:rgba(245,237,224,.1)}
+.auth-divider span{font-size:.62rem;color:rgba(245,237,224,.35);letter-spacing:.12em;font-weight:600;text-transform:uppercase}
+
+/* Forgot password button — alt bölüm */
+.auth-secondary{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  width:100%;padding:10px 14px;
+  background:transparent;border:1px solid rgba(245,237,224,.1);border-radius:10px;
+  color:rgba(245,237,224,.7);font-size:.78rem;font-weight:600;font-family:inherit;
+  cursor:pointer;transition:all .2s;text-decoration:none;
+}
+.auth-secondary:hover{background:rgba(255,255,255,.05);color:#D4935A;border-color:rgba(212,147,90,.3)}
+.auth-secondary svg{width:14px;height:14px}
+
+/* Footer */
+.auth-footer{margin-top:24px;font-size:.68rem;color:rgba(245,237,224,.25);text-align:center;letter-spacing:.04em}
+
+@media (max-width:480px){
+  .auth-box{padding:28px 22px}
+  .auth-head h1{font-size:1.25rem}
+}
 </style>
 </head>
 <body>
@@ -47,32 +128,147 @@ body::before{content:'';position:absolute;inset:0;pointer-events:none;background
   <div class="ld-spinner"></div>
 </div>
 
-<div class="auth-orb auth-orb-1"></div>
-<div class="auth-orb auth-orb-2"></div>
+<!-- Smokey WebGL background -->
+<div class="smokey-bg" id="smokey-bg"><canvas id="smokey-canvas"></canvas></div>
 
-<div class="auth-box hidden" id="login-box">
-  <div class="auth-logo">🏛️</div>
-  <h1>Assos'u Keşfet</h1>
-  <p class="auth-sub">Yönetim paneline giriş yapın</p>
-  <div class="auth-field">
-    <label>E-posta</label>
-    <span class="auth-field-icon">✉</span>
-    <input type="email" id="auth-email" placeholder="E-posta adresiniz" onkeydown="if(event.key==='Enter')document.getElementById('auth-pw').focus()">
+<div class="auth-wrap">
+  <div class="auth-box hidden" id="login-box">
+    <div class="auth-head">
+      <div class="auth-logo">AK</div>
+      <h1>Assos'u Keşfet</h1>
+      <p class="auth-sub">Yönetim paneline giriş yapın</p>
+    </div>
+
+    <form class="auth-form" onsubmit="event.preventDefault();checkAuth()">
+      <!-- E-posta -->
+      <div class="field">
+        <input type="email" id="auth-email" placeholder=" " autocomplete="email" required>
+        <span class="field-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </span>
+        <label for="auth-email">E-posta</label>
+      </div>
+
+      <!-- Şifre -->
+      <div class="field">
+        <input type="password" id="auth-pw" placeholder=" " autocomplete="current-password" required>
+        <span class="field-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </span>
+        <label for="auth-pw">Şifre</label>
+      </div>
+
+      <button type="submit" class="auth-btn">
+        <span>Giriş Yap</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+
+      <div class="auth-err" id="auth-err"></div>
+
+      <div class="auth-divider"><span>Yardım</span></div>
+
+      <a href="#" class="auth-secondary" onclick="forgotPassword();return false;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+        Şifremi unuttum
+      </a>
+    </form>
+
+    <div class="auth-footer">Assos'u Keşfet · Yönetim Paneli</div>
   </div>
-  <div class="auth-field">
-    <label>Şifre</label>
-    <span class="auth-field-icon">🔒</span>
-    <input type="password" id="auth-pw" placeholder="Şifreniz" onkeydown="if(event.key==='Enter')checkAuth()">
-  </div>
-  <button class="auth-btn" onclick="checkAuth()">Giriş Yap</button>
-  <div class="auth-err" id="auth-err"></div>
-  <div style="text-align:center;margin-top:14px">
-    <a href="#" onclick="forgotPassword();return false;" style="font-size:.78rem;color:rgba(245,237,224,.6);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#D4935A'" onmouseout="this.style.color='rgba(245,237,224,.6)'">🔑 Şifremi unuttum</a>
-  </div>
-  <div class="auth-footer">Assos'u Keşfet &middot; Yönetim Paneli</div>
 </div>
 
 <script>
+// ═══ WebGL Smokey Background Shader ═══
+(function initSmokey() {
+  const canvas = document.getElementById('smokey-canvas');
+  if (!canvas) return;
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) { document.getElementById('smokey-bg').style.display = 'none'; return; }
+
+  const vs = `attribute vec4 a_position;void main(){gl_Position=a_position;}`;
+  const fs = `precision mediump float;
+uniform vec2 iResolution;uniform float iTime;uniform vec2 iMouse;uniform vec3 u_color;
+void mainImage(out vec4 fragColor,in vec2 fragCoord){
+  vec2 centeredUV=(2.0*fragCoord-iResolution.xy)/min(iResolution.x,iResolution.y);
+  float time=iTime*0.5;
+  vec2 mouse=iMouse/iResolution;
+  vec2 rippleCenter=2.0*mouse-1.0;
+  vec2 distortion=centeredUV;
+  for(float i=1.0;i<8.0;i++){
+    distortion.x+=0.5/i*cos(i*2.0*distortion.y+time+rippleCenter.x*3.1415);
+    distortion.y+=0.5/i*cos(i*2.0*distortion.x+time+rippleCenter.y*3.1415);
+  }
+  float wave=abs(sin(distortion.x+distortion.y+time));
+  float glow=smoothstep(0.9,0.2,wave);
+  fragColor=vec4(u_color*glow,1.0);
+}
+void main(){mainImage(gl_FragColor,gl_FragCoord.xy);}`;
+
+  function compile(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+      console.error('Shader:', gl.getShaderInfoLog(s));
+      gl.deleteShader(s); return null;
+    }
+    return s;
+  }
+  const vShader = compile(gl.VERTEX_SHADER, vs);
+  const fShader = compile(gl.FRAGMENT_SHADER, fs);
+  if (!vShader || !fShader) return;
+  const prog = gl.createProgram();
+  gl.attachShader(prog, vShader); gl.attachShader(prog, fShader); gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { console.error('Link:', gl.getProgramInfoLog(prog)); return; }
+  gl.useProgram(prog);
+
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+  const posLoc = gl.getAttribLocation(prog, 'a_position');
+  gl.enableVertexAttribArray(posLoc);
+  gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+  const resLoc = gl.getUniformLocation(prog, 'iResolution');
+  const timeLoc = gl.getUniformLocation(prog, 'iTime');
+  const mouseLoc = gl.getUniformLocation(prog, 'iMouse');
+  const colorLoc = gl.getUniformLocation(prog, 'u_color');
+
+  // Terra rengi — brand uyumlu (0.77, 0.32, 0.10)
+  gl.uniform3f(colorLoc, 0.77, 0.32, 0.10);
+
+  let startTime = Date.now();
+  let mousePos = { x: 0, y: 0 };
+  let isHovering = false;
+
+  canvas.addEventListener('mousemove', function(e) {
+    const rect = canvas.getBoundingClientRect();
+    mousePos.x = e.clientX - rect.left;
+    mousePos.y = e.clientY - rect.top;
+  });
+  canvas.addEventListener('mouseenter', function() { isHovering = true; });
+  canvas.addEventListener('mouseleave', function() { isHovering = false; });
+
+  function render() {
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w; canvas.height = h;
+      gl.viewport(0, 0, w, h);
+    }
+    const t = (Date.now() - startTime) / 1000;
+    gl.uniform2f(resLoc, w, h);
+    gl.uniform1f(timeLoc, t);
+    gl.uniform2f(mouseLoc,
+      isHovering ? mousePos.x : w / 2,
+      isHovering ? (h - mousePos.y) : h / 2);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    requestAnimationFrame(render);
+  }
+  render();
+})();
+
+// ═══ Firebase + Authentication ═══
 firebase.initializeApp({
   apiKey: "AIzaSyCXqgczplchzjClAZt-Wl2eqgqmUMhLVJs",
   authDomain: "assosu-kesfet.firebaseapp.com",
@@ -145,18 +341,18 @@ async function forgotPassword() {
   var email = (document.getElementById('auth-email').value || '').trim();
   var errEl = document.getElementById('auth-err');
   if (!email) {
-    errEl.style.color = '#E53E3E';
+    errEl.style.color = '#F87171';
     errEl.textContent = 'Önce e-posta adresinizi girin, sonra "Şifremi Unuttum"a tıklayın.';
     document.getElementById('auth-email').focus();
     return;
   }
   if (!/^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$/.test(email)) {
-    errEl.style.color = '#E53E3E';
+    errEl.style.color = '#F87171';
     errEl.textContent = 'Geçerli bir e-posta adresi girin.';
     return;
   }
   try {
-    errEl.style.color = '#A0AEC0';
+    errEl.style.color = 'rgba(245,237,224,.55)';
     errEl.textContent = 'Gönderiliyor...';
     var resp = await fetch('/api/forgot-password', {
       method: 'POST',
@@ -165,20 +361,20 @@ async function forgotPassword() {
     });
     var data = await resp.json();
     if (resp.status === 429) {
-      errEl.style.color = '#E53E3E';
+      errEl.style.color = '#F87171';
       errEl.textContent = data.error || 'Çok fazla istek. Lütfen 5 dakika sonra tekrar deneyin.';
       return;
     }
     if (resp.status === 404 || data.registered === false) {
-      errEl.style.color = '#E53E3E';
+      errEl.style.color = '#F87171';
       errEl.textContent = '❌ ' + (data.error || 'Bu e-posta adresiyle kayıtlı bir hesap bulunamadı.');
       return;
     }
     if (!resp.ok) throw new Error(data.error || 'Hata');
-    errEl.style.color = '#38A169';
+    errEl.style.color = '#86EFAC';
     errEl.textContent = '✓ Şifre sıfırlama linki gönderildi. E-postanızı kontrol edin.';
   } catch(err) {
-    errEl.style.color = '#E53E3E';
+    errEl.style.color = '#F87171';
     errEl.textContent = 'Bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
   }
 }
@@ -187,6 +383,7 @@ async function checkAuth() {
   const email = (document.getElementById('auth-email').value || '').trim();
   const pw = document.getElementById('auth-pw').value;
   const errEl = document.getElementById('auth-err');
+  errEl.style.color = '#F87171';
 
   if (!email) { errEl.textContent = 'E-posta adresinizi girin.'; return; }
   if (!pw) { errEl.textContent = 'Şifrenizi girin.'; return; }
@@ -218,7 +415,7 @@ async function checkAuth() {
     clearLoginAttempts();
     // Server-side email sayacını sıfırla
     try { fetch('/api/login-attempt', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, action: 'success' }) }); } catch(e) {}
-    errEl.style.color = '#38A169';
+    errEl.style.color = '#86EFAC';
     errEl.textContent = '✓ Giriş başarılı! Yönlendiriliyorsunuz...';
     localStorage.setItem('lastActivity', Date.now().toString());
     // Başarılı girişi localStorage'a kaydet
