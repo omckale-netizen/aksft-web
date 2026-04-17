@@ -144,6 +144,11 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    // Admin todo/hatırlatma sistemi — sadece admin
+    match /admin_todos/{docId} {
+      allow read, write: if isAdmin();
+    }
+
     // Diger tum koleksiyonlar: varsayilan olarak engelle
     match /{document=**} {
       allow read, write: if false;
