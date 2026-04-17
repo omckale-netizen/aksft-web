@@ -169,10 +169,14 @@ async function forgotPassword() {
       errEl.textContent = data.error || 'Çok fazla istek. Lütfen 5 dakika sonra tekrar deneyin.';
       return;
     }
+    if (resp.status === 404 || data.registered === false) {
+      errEl.style.color = '#E53E3E';
+      errEl.textContent = '❌ ' + (data.error || 'Bu e-posta adresiyle kayıtlı bir hesap bulunamadı.');
+      return;
+    }
     if (!resp.ok) throw new Error(data.error || 'Hata');
-    // Güvenlik: kayıtlı olsun olmasın aynı mesaj (user enumeration önleme)
     errEl.style.color = '#38A169';
-    errEl.textContent = '✓ Eğer bu e-posta sistemde kayıtlıysa, sıfırlama linki gönderildi. E-postanızı kontrol edin.';
+    errEl.textContent = '✓ Şifre sıfırlama linki gönderildi. E-postanızı kontrol edin.';
   } catch(err) {
     errEl.style.color = '#E53E3E';
     errEl.textContent = 'Bir hata oluştu. Lütfen daha sonra tekrar deneyin.';

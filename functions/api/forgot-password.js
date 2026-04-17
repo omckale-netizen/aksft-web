@@ -64,9 +64,9 @@ export async function onRequestPost(context) {
   // Super admin e-postasına her zaman izin ver (kurtarma)
   if (!isRegistered && email === 'info@onyedimedya.com') isRegistered = true;
 
-  // Kayıtlı DEĞİLSE — sessizce başarılı dön (user enumeration önleme)
+  // Kayıtlı DEĞİLSE — kullanıcıya bildir
   if (!isRegistered) {
-    return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ ok: false, registered: false, error: 'Bu e-posta adresiyle kayıtlı bir hesap bulunamadı.' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
   }
 
   // Service account ile reset link al (mail Firebase tarafından gönderilmesin)
