@@ -8936,18 +8936,22 @@ function renderVenueTable(resetPage) {
         </select>`}</td>
         <td>${sBadge}</td>
         <td>
+          <div class="row-actions">
           ${statusKey === 'trashed' ? `
-          <button class="btn-icon" title="Geri Al" onclick="restoreVenue('${v.id}')" style="color:var(--green)">↩</button>
-          <button class="btn-icon" title="Kalıcı Sil" onclick="permanentDeleteVenue('${v.id}')" style="margin-left:4px;color:var(--red)">✕</button>
+          <button title="Geri Al" onclick="restoreVenue('${v.id}')"><i data-lucide="rotate-ccw"></i></button>
+          <button class="danger" title="Kalıcı Sil" onclick="permanentDeleteVenue('${v.id}')"><i data-lucide="x"></i></button>
           ` : `
-          <a class="btn-icon" href="https://assosukesfet.com/mekanlar/mekan-detay?id=${v.id}" target="_blank" title="Sayfayı Görüntüle" style="text-decoration:none;color:var(--terra)">↗</a>
-          <button class="btn-icon" title="Düzenle" onclick="openVenueModal('${v.id}')" style="margin-left:4px">&#9998;</button>
-          ${v.ownerEmail ? '<button class="btn-icon" title="Sahibine mail gönder: ' + v.ownerEmail + '" onclick="sendWelcomeMailToVenue(\'' + v.id + '\')" style="margin-left:4px;color:#6B46C1">✉</button>' : ''}
-          <button class="btn-icon" title="Çöp Kutusuna Taşı" onclick="confirmDeleteVenue('${v.id}')" style="margin-left:4px;color:var(--red)">&#128465;</button>
+          <a href="https://assosukesfet.com/mekanlar/mekan-detay?id=${v.id}" target="_blank" title="Sayfayı Görüntüle"><i data-lucide="external-link"></i></a>
+          <button title="Düzenle" onclick="openVenueModal('${v.id}')"><i data-lucide="pencil"></i></button>
+          ${v.ownerEmail ? '<button title="Sahibine mail gönder: ' + esc(v.ownerEmail) + '" onclick="sendWelcomeMailToVenue(\'' + v.id + '\')"><i data-lucide="mail"></i></button>' : ''}
+          <button class="danger" title="Çöp Kutusuna Taşı" onclick="confirmDeleteVenue('${v.id}')"><i data-lucide="trash-2"></i></button>
           `}
+          </div>
         </td>
       </tr>`;
     }).join('');
+  // Lucide ikonları etkinleştir
+  if (window.lucide && typeof lucide.createIcons === 'function') try { lucide.createIcons(); } catch(e) {}
   updateBulkBar();
 }
 
