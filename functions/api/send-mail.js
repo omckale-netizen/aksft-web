@@ -1,4 +1,4 @@
-import { requireAdmin } from './_verify.js';
+import { requireEditor } from './_verify.js';
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -17,9 +17,9 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ error: 'Yetkisiz erişim' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 
-  // Admin doğrulama — cookie + Firebase ID token (çift kontrol)
-  const isAdmin = await requireAdmin(request, env);
-  if (!isAdmin) {
+  // Editor veya admin doğrulama — cookie + Firebase ID token + Firestore rol
+  const isOk = await requireEditor(request, env);
+  if (!isOk) {
     return new Response(JSON.stringify({ error: 'Yetkisiz' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 
