@@ -2452,7 +2452,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <input type="text" id="user-password" placeholder="Min 8 karakter" style="flex:1;padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.9rem;background:var(--input-bg,#fff);color:var(--text);font-family:monospace" minlength="8">
               <button type="button" class="btn btn-sm btn-secondary" onclick="generateUserPassword()">🎲 Üret</button>
             </div>
-            <div style="font-size:.65rem;color:var(--text-muted);margin-top:4px">Kullanıcıya şifreyi iletin ve ilk girişte değiştirmesini söyleyin</div>
+            <div style="font-size:.65rem;color:var(--text-muted);margin-top:4px">Kullanıcı ilk girişte şifreyi değiştirmek zorunda</div>
+            <label style="display:flex;align-items:center;gap:8px;margin-top:10px;padding:10px 12px;background:rgba(56,161,105,.06);border:1px solid rgba(56,161,105,.2);border-radius:8px;cursor:pointer;font-size:.78rem">
+              <input type="checkbox" id="user-send-welcome-mail" checked style="accent-color:var(--green);flex-shrink:0">
+              <span style="flex:1">📧 Hoş geldin maili gönder (giriş linki + şifre + rehber)</span>
+            </label>
           </div>
           <div class="form-group" style="margin-bottom:14px">
             <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:4px">Rol *</label>
@@ -11795,6 +11799,32 @@ function renderUsers() {
   if (window.lucide && typeof lucide.createIcons === 'function') try { lucide.createIcons(); } catch(e) {}
 }
 
+// Yeni kullanıcıya hoş geldin maili — /api/send-welcome-user
+async function sendWelcomeMailToNewUser(info) {
+  try {
+    var token = await firebase.auth().currentUser.getIdToken();
+    var resp = await fetch('/api/send-welcome-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({
+        email: info.email,
+        name: info.name,
+        role: info.role,
+        tempPassword: info.tempPassword
+      })
+    });
+    var data = await resp.json();
+    if (resp.ok) {
+      showToast('📧 Hoş geldin maili gönderildi: ' + info.email, 'success');
+    } else {
+      showToast('Hoş geldin maili gönderilemedi: ' + (data.error || resp.status), 'error');
+    }
+  } catch(e) {
+    console.warn('sendWelcomeMailToNewUser:', e);
+    showToast('Mail gönderim hatası', 'error');
+  }
+}
+
 // Şifre üretici
 function generateUserPassword() {
   var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#';
@@ -12123,6 +12153,14 @@ async function saveUser() {
       });
       showToast('✓ Kullanıcı oluşturuldu. Şifre: ' + password, 'success');
       logActivity('user_create', newUid, name + ' (' + role + ')');
+
+      // Hoş geldin maili (checkbox işaretliyse)
+      var sendWelcome = document.getElementById('user-send-welcome-mail');
+      if (sendWelcome && sendWelcome.checked) {
+        sendWelcomeMailToNewUser({
+          email: email, name: name, role: role, tempPassword: password
+        }).catch(function(e) { console.warn('Welcome mail error:', e); });
+      }
     }
     closeUserModal();
   } catch(e) {
