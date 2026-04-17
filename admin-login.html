@@ -23,8 +23,8 @@ body{
 }
 
 /* WebGL shader canvas (smokey background) */
-.smokey-bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:auto}
-.smokey-bg canvas{width:100%;height:100%;display:block}
+.smokey-bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.smokey-bg canvas{width:100%;height:100%;display:block;pointer-events:none}
 .smokey-bg::after{content:'';position:absolute;inset:0;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);pointer-events:none;background:radial-gradient(ellipse at center,rgba(6,16,30,.2) 0%,rgba(6,16,30,.55) 70%,rgba(6,16,30,.75) 100%)}
 
 /* Loading overlay */
@@ -69,12 +69,14 @@ body{
   white-space:nowrap;
 }
 .field label svg{width:15px;height:15px;opacity:.7}
-.field input:focus + label,
-.field input:not(:placeholder-shown) + label{
+/* Label yukarı kayması için general sibling (~) kullanmamız lazım
+   çünkü input ve label arasında .field-icon span var */
+.field input:focus ~ label,
+.field input:not(:placeholder-shown) ~ label{
   transform:translateY(-22px) scale(.78);
   color:#D4682E;
 }
-.field-icon{position:absolute;left:0;top:11px;color:rgba(245,237,224,.5);pointer-events:none;display:flex;align-items:center;justify-content:center;width:18px;height:18px}
+.field-icon{position:absolute;left:0;top:11px;color:rgba(245,237,224,.5);pointer-events:none;display:flex;align-items:center;justify-content:center;width:18px;height:18px;transition:color .25s}
 .field-icon svg{width:16px;height:16px}
 .field input:focus ~ .field-icon{color:#D4682E}
 
@@ -238,16 +240,6 @@ void main(){mainImage(gl_FragColor,gl_FragCoord.xy);}`;
   gl.uniform3f(colorLoc, 0.77, 0.32, 0.10);
 
   let startTime = Date.now();
-  let mousePos = { x: 0, y: 0 };
-  let isHovering = false;
-
-  canvas.addEventListener('mousemove', function(e) {
-    const rect = canvas.getBoundingClientRect();
-    mousePos.x = e.clientX - rect.left;
-    mousePos.y = e.clientY - rect.top;
-  });
-  canvas.addEventListener('mouseenter', function() { isHovering = true; });
-  canvas.addEventListener('mouseleave', function() { isHovering = false; });
 
   function render() {
     const w = canvas.clientWidth;
@@ -259,9 +251,11 @@ void main(){mainImage(gl_FragColor,gl_FragCoord.xy);}`;
     const t = (Date.now() - startTime) / 1000;
     gl.uniform2f(resLoc, w, h);
     gl.uniform1f(timeLoc, t);
-    gl.uniform2f(mouseLoc,
-      isHovering ? mousePos.x : w / 2,
-      isHovering ? (h - mousePos.y) : h / 2);
+    // "Fare" pozisyonunu zamanla hareket ettir — yavaş otonom dolaşım
+    // Böylece shader kendi akışında sürekli değişir, fareyle takip etmez
+    const cx = w * 0.5 + Math.cos(t * 0.17) * w * 0.22;
+    const cy = h * 0.5 + Math.sin(t * 0.23) * h * 0.22;
+    gl.uniform2f(mouseLoc, cx, cy);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
     requestAnimationFrame(render);
   }
