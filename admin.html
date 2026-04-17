@@ -361,6 +361,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .dash-action-btn{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--radius-sm);border:1px solid rgba(0,0,0,.05);background:#fff;cursor:pointer;transition:all .15s;font-family:inherit;font-size:.82rem;font-weight:600;color:var(--text);text-align:left}
 .dash-action-btn:hover{background:var(--cream-dark);transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,.06)}
 .da-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.85rem;font-weight:700;flex-shrink:0}
+.da-icon svg{stroke-width:2.2}
 .dash-cat-row{display:flex;align-items:center;gap:12px;padding:10px 20px;border-bottom:1px solid rgba(0,0,0,.03)}
 .dash-cat-row:last-child{border-bottom:none}
 .dash-cat-emoji{font-size:1rem;width:24px;text-align:center;flex-shrink:0}
@@ -806,16 +807,16 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       <!-- Hızlı İşlemler -->
       <div id="dash-quick-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;">
         <button class="dash-action-btn" data-requires-page="venues" onclick="showPage('venues');openVenueModal()" style="flex:1;min-width:120px">
-          <span class="da-icon" style="background:var(--terra)">+</span><span>Yeni Mekan</span>
+          <span class="da-icon" style="background:var(--terra)"><i data-lucide="plus" style="width:16px;height:16px;stroke-width:2.5"></i></span><span>Yeni Mekan</span>
         </button>
         <button class="dash-action-btn" data-requires-page="villages" onclick="showPage('villages');openVillageModal()" style="flex:1;min-width:120px">
-          <span class="da-icon" style="background:var(--green)">🏘</span><span>Yeni Yerleşim</span>
+          <span class="da-icon" style="background:var(--green)"><i data-lucide="building-2" style="width:16px;height:16px"></i></span><span>Yeni Yerleşim</span>
         </button>
         <button class="dash-action-btn" data-requires-page="blog" onclick="showPage('blog');openBlogModal()" style="flex:1;min-width:120px">
-          <span class="da-icon" style="background:#8B5CF6">✍️</span><span>Yeni Yazı</span>
+          <span class="da-icon" style="background:#8B5CF6"><i data-lucide="pen-line" style="width:16px;height:16px"></i></span><span>Yeni Yazı</span>
         </button>
         <button class="dash-action-btn" data-requires-page="imgcompress" onclick="showPage('imgcompress')" style="flex:1;min-width:120px">
-          <span class="da-icon" style="background:var(--blue)">🖼</span><span>Görsel Sıkıştır</span>
+          <span class="da-icon" style="background:var(--blue)"><i data-lucide="image-down" style="width:16px;height:16px"></i></span><span>Görsel Sıkıştır</span>
         </button>
       </div>
 
