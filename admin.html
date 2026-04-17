@@ -248,7 +248,30 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 @media(max-width:768px){.notif-dropdown{left:12px !important;right:12px;width:auto;margin-left:0 !important}}
 
 /* ── TABLE ── */
-.panel-card{background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--card-shadow);border:1px solid var(--card-border);overflow:hidden;margin-bottom:24px;transition:background .3s}
+.panel-card{background:var(--card-bg);border-radius:var(--radius-md);box-shadow:var(--shadow-sm);border:1px solid var(--card-border);overflow:hidden;margin-bottom:24px;transition:background .3s,box-shadow .2s}
+.panel-card:hover{box-shadow:var(--shadow)}
+
+/* Custom scrollbar — tüm admin paneli için şık görünüm */
+.admin-main::-webkit-scrollbar,
+.admin-sidebar::-webkit-scrollbar,
+.notif-dropdown::-webkit-scrollbar,
+#notif-list::-webkit-scrollbar,
+.modal-overlay::-webkit-scrollbar,
+#user-modal-overlay::-webkit-scrollbar,
+#change-password-overlay::-webkit-scrollbar,
+#todo-modal-overlay::-webkit-scrollbar,
+#admin-set-password-overlay::-webkit-scrollbar,
+#venue-modal::-webkit-scrollbar,
+#route-modal::-webkit-scrollbar,
+#blog-modal::-webkit-scrollbar,
+.panel-card ::-webkit-scrollbar{width:8px;height:8px}
+*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12);border-radius:4px;border:2px solid transparent;background-clip:padding-box;transition:background .15s}
+*::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.25);background-clip:padding-box}
+[data-theme="dark"] *::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);background-clip:padding-box}
+[data-theme="dark"] *::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.2);background-clip:padding-box}
+*{scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.15) transparent}
+[data-theme="dark"] *{scrollbar-color:rgba(255,255,255,.15) transparent}
 .panel-card-head{padding:18px 22px;border-bottom:1px solid var(--cream-dark);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
 .panel-card-head h3{font-size:1.05rem;font-weight:700;color:var(--navy)}
 .panel-table{width:100%;border-collapse:collapse}
