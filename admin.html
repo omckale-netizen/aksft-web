@@ -774,6 +774,34 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .ana-bar{flex:1;min-width:8px;border-radius:3px 3px 0 0;background:var(--terra);transition:height .4s;position:relative;cursor:default}
 .ana-bar:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:4px 8px;border-radius:6px;font-size:.65rem;white-space:nowrap;z-index:5}
 
+/* ═══ COMMAND PALETTE ═══ */
+.cmd-overlay{position:fixed;inset:0;z-index:var(--z-popover);background:rgba(10,15,25,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:flex-start;justify-content:center;padding:10vh 20px;opacity:0;transition:opacity var(--transition)}
+.cmd-overlay.show{display:flex;opacity:1}
+.cmd-panel{width:100%;max-width:580px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-xl);overflow:hidden;transform:translateY(-10px);transition:transform var(--transition)}
+.cmd-overlay.show .cmd-panel{transform:translateY(0)}
+.cmd-search-wrap{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-4) var(--space-5);border-bottom:1px solid var(--card-border)}
+.cmd-search-wrap svg{width:20px;height:20px;color:var(--text-muted);flex-shrink:0}
+.cmd-search{flex:1;border:none;outline:none;background:transparent;font-size:var(--text-lg);color:var(--text);font-family:inherit}
+.cmd-search::placeholder{color:var(--text-muted)}
+.cmd-kbd{display:inline-flex;align-items:center;gap:2px;padding:2px 6px;border:1px solid var(--card-border);border-radius:var(--radius-sm);background:var(--page-bg);font-size:var(--text-xs);color:var(--text-light);font-family:inherit;flex-shrink:0}
+.cmd-list{max-height:50vh;overflow-y:auto;padding:var(--space-2) 0}
+.cmd-group{padding:var(--space-1) 0}
+.cmd-group-label{padding:var(--space-2) var(--space-5);font-size:var(--text-2xs);font-weight:var(--font-bold);color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em}
+.cmd-item{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-2) var(--space-5);cursor:pointer;transition:background var(--transition-fast);user-select:none}
+.cmd-item:hover,.cmd-item.active{background:var(--table-hover)}
+.cmd-item.active{background:rgba(196,82,26,.08)}
+[data-theme="dark"] .cmd-item.active{background:rgba(196,82,26,.15)}
+.cmd-item-icon{width:28px;height:28px;border-radius:var(--radius-sm);display:inline-flex;align-items:center;justify-content:center;background:var(--cream-dark);color:var(--text-light);flex-shrink:0}
+[data-theme="dark"] .cmd-item-icon{background:var(--input-bg)}
+.cmd-item.active .cmd-item-icon{background:var(--terra);color:#fff}
+.cmd-item-icon svg{width:15px;height:15px}
+.cmd-item-label{flex:1;font-size:var(--text-base);font-weight:var(--font-medium);color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmd-item-hint{font-size:var(--text-xs);color:var(--text-muted);flex-shrink:0}
+.cmd-footer{padding:var(--space-2) var(--space-5);border-top:1px solid var(--card-border);display:flex;gap:var(--space-4);font-size:var(--text-xs);color:var(--text-muted);background:var(--page-bg)}
+.cmd-footer span{display:flex;align-items:center;gap:var(--space-1)}
+.cmd-empty{padding:var(--space-6) var(--space-5);text-align:center;color:var(--text-muted);font-size:var(--text-base)}
+@media (max-width:600px){.cmd-overlay{padding:5vh 12px}.cmd-panel{max-width:100%}}
+
 /* ── STOP ROWS ── */
 .stop-row{background:rgba(0,0,0,.02);border:1px solid rgba(0,0,0,.06);border-radius:var(--radius-sm);padding:14px;margin-bottom:8px;position:relative}
 .stop-row-head{display:flex;gap:8px;margin-bottom:8px;align-items:center}
@@ -811,6 +839,23 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 </div>
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
+<!-- Command Palette (⌘K / Ctrl+K) -->
+<div class="cmd-overlay" id="cmd-overlay" onclick="if(event.target===this)closeCmdPalette()">
+  <div class="cmd-panel" role="dialog" aria-label="Komut Paleti">
+    <div class="cmd-search-wrap">
+      <i data-lucide="search"></i>
+      <input type="text" class="cmd-search" id="cmd-search" placeholder="Ara veya komut yaz..." autocomplete="off" oninput="renderCmdResults()" onkeydown="handleCmdKey(event)">
+      <span class="cmd-kbd">ESC</span>
+    </div>
+    <div class="cmd-list" id="cmd-list"></div>
+    <div class="cmd-footer">
+      <span><span class="cmd-kbd">↑</span><span class="cmd-kbd">↓</span> gezin</span>
+      <span><span class="cmd-kbd">⏎</span> seç</span>
+      <span style="margin-left:auto"><span class="cmd-kbd">⌘K</span> aç/kapat</span>
+    </div>
+  </div>
+</div>
+
 <!-- APP -->
 <div class="admin-wrap" id="admin-wrap" style="display:none">
 
@@ -832,9 +877,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         <i data-lucide="bell" style="width:16px;height:16px"></i>
         <span class="notif-bell-badge" id="notif-badge" style="display:none"></span>
       </div>
-      <div class="sidebar-notif-bell" onclick="toggleDarkMode()" title="Tema değiştir" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.08);cursor:pointer;transition:background .2s;color:rgba(245,237,224,.9)">
+      <div onclick="openCmdPalette()" title="Hızlı arama (⌘K / Ctrl+K)" style="flex:1;display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.06);cursor:pointer;transition:background .2s;color:rgba(245,237,224,.65);font-size:.72rem" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">
+        <i data-lucide="search" style="width:14px;height:14px"></i>
+        <span style="flex:1">Ara</span>
+        <span style="padding:1px 5px;border-radius:4px;background:rgba(255,255,255,.1);font-size:.6rem;font-family:'SF Mono',Consolas,monospace">⌘K</span>
+      </div>
+      <div class="sidebar-notif-bell" onclick="toggleDarkMode()" title="Tema değiştir" style="display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.08);cursor:pointer;transition:background .2s;color:rgba(245,237,224,.9)">
         <span id="dark-mode-label" style="display:inline-flex;align-items:center;justify-content:center"><i data-lucide="moon" style="width:14px;height:14px"></i></span>
-        <div class="dm-track" style="width:30px;height:16px;border-radius:8px;position:relative;transition:background .3s;"><div class="dm-thumb" style="width:12px;height:12px;top:2px;left:2px;"></div></div>
       </div>
     </div>
     <div class="admin-nav">
@@ -4007,6 +4056,146 @@ function applyDashMoreState() {
     if (chevron) chevron.style.transform = 'rotate(180deg)';
   }
 }
+
+// ═══ COMMAND PALETTE (⌘K / Ctrl+K) ═══
+var _cmdActiveIndex = 0;
+var _cmdFilteredItems = [];
+
+function getCmdItems() {
+  // Tüm komut + navigasyon öğeleri
+  var items = [];
+  // Sayfalar (kullanıcının erişebildikleri)
+  ALL_ADMIN_PAGES.forEach(function(p) {
+    if (typeof canAccessPage === 'function' && !canAccessPage(p.key)) return;
+    items.push({
+      group: 'Sayfalar', icon: iconForPage(p.key), label: p.label,
+      keywords: p.label.toLowerCase() + ' ' + p.key,
+      action: function() { showPage(p.key); }
+    });
+  });
+  // Hızlı eylemler
+  if (canAccessPage('venues')) items.push({ group:'Hızlı İşlem', icon:'plus', label:'Yeni Mekan Ekle', keywords:'yeni mekan ekle venue', action:function(){ showPage('venues'); setTimeout(openVenueModal,200); } });
+  if (canAccessPage('villages')) items.push({ group:'Hızlı İşlem', icon:'building-2', label:'Yeni Yerleşim Ekle', keywords:'yeni yerleşim yer village', action:function(){ showPage('villages'); setTimeout(openVillageModal,200); } });
+  if (canAccessPage('blog')) items.push({ group:'Hızlı İşlem', icon:'pen-line', label:'Yeni Blog Yazısı', keywords:'yeni blog yazı post', action:function(){ showPage('blog'); setTimeout(openBlogModal,200); } });
+  if (canAccessPage('todos')) items.push({ group:'Hızlı İşlem', icon:'check-square', label:'Yeni Görev Ekle', keywords:'yeni görev todo task', action:function(){ showPage('todos'); setTimeout(openTodoModal,200); } });
+  // Komutlar
+  items.push({ group:'Komut', icon:'sun', label:'Tema Değiştir (Light/Dark)', keywords:'tema dark light mode karanlık açık', action:toggleDarkMode });
+  items.push({ group:'Komut', icon:'key', label:'Şifremi Değiştir', keywords:'şifre değiştir password', action:openChangePasswordModal });
+  items.push({ group:'Komut', icon:'log-out', label:'Oturumu Kapat', keywords:'çıkış logout oturum', action:function(){ if(confirm('Oturumu kapatmak istediğinize emin misiniz?')) logout(); } });
+  return items;
+}
+
+// Her sayfa için Lucide ikonu
+function iconForPage(key) {
+  var map = {
+    dashboard:'layout-dashboard', venues:'store', pending:'inbox', routes:'route',
+    villages:'home', categories:'folder-tree', imgcompress:'image', socialgen:'smartphone',
+    fileconvert:'refresh-cw', messages:'mail', analytics:'bar-chart-3', gallery:'images',
+    blog:'edit-3', todos:'check-square', activity:'history', users:'users',
+    export:'database-backup', security:'shield-check', settings:'settings'
+  };
+  return map[key] || 'circle';
+}
+
+function openCmdPalette() {
+  var ov = document.getElementById('cmd-overlay');
+  if (!ov) return;
+  ov.classList.add('show');
+  var input = document.getElementById('cmd-search');
+  if (input) { input.value = ''; setTimeout(function(){ input.focus(); }, 50); }
+  _cmdActiveIndex = 0;
+  renderCmdResults();
+}
+
+function closeCmdPalette() {
+  var ov = document.getElementById('cmd-overlay');
+  if (ov) ov.classList.remove('show');
+}
+
+function renderCmdResults() {
+  var input = document.getElementById('cmd-search');
+  var list = document.getElementById('cmd-list');
+  if (!list) return;
+  var query = (input && input.value || '').trim().toLowerCase();
+  var all = getCmdItems();
+  _cmdFilteredItems = query
+    ? all.filter(function(it) { return (it.keywords || it.label.toLowerCase()).indexOf(query) > -1; })
+    : all;
+  if (_cmdFilteredItems.length === 0) {
+    list.innerHTML = '<div class="cmd-empty">🔍 "' + esc(query) + '" için sonuç yok</div>';
+    return;
+  }
+  if (_cmdActiveIndex >= _cmdFilteredItems.length) _cmdActiveIndex = 0;
+  // Grupla
+  var groups = {};
+  _cmdFilteredItems.forEach(function(it, i) {
+    var g = it.group || 'Diğer';
+    if (!groups[g]) groups[g] = [];
+    groups[g].push({ item: it, index: i });
+  });
+  var html = '';
+  Object.keys(groups).forEach(function(g) {
+    html += '<div class="cmd-group"><div class="cmd-group-label">' + esc(g) + '</div>';
+    groups[g].forEach(function(entry) {
+      var isActive = entry.index === _cmdActiveIndex;
+      html += '<div class="cmd-item' + (isActive ? ' active' : '') + '" data-idx="' + entry.index + '" onclick="selectCmdItem(' + entry.index + ')" onmouseenter="setCmdActive(' + entry.index + ')">' +
+        '<div class="cmd-item-icon"><i data-lucide="' + esc(entry.item.icon || 'circle') + '"></i></div>' +
+        '<span class="cmd-item-label">' + esc(entry.item.label) + '</span>' +
+        '</div>';
+    });
+    html += '</div>';
+  });
+  list.innerHTML = html;
+  // Lucide re-render
+  if (window.lucide && lucide.createIcons) try { lucide.createIcons(); } catch(e) {}
+  // Active item'ı görünür alana scroll et
+  var active = list.querySelector('.cmd-item.active');
+  if (active) active.scrollIntoView({ block: 'nearest' });
+}
+
+function setCmdActive(idx) {
+  _cmdActiveIndex = idx;
+  document.querySelectorAll('#cmd-list .cmd-item').forEach(function(el) {
+    el.classList.toggle('active', parseInt(el.getAttribute('data-idx')) === idx);
+  });
+  // Sadece CSS'te icon rengi değişiyor — lucide re-init gerekmez
+}
+
+function selectCmdItem(idx) {
+  var it = _cmdFilteredItems[idx];
+  if (!it) return;
+  closeCmdPalette();
+  setTimeout(function() { try { it.action(); } catch(e) { console.warn('cmd action:', e); } }, 100);
+}
+
+function handleCmdKey(e) {
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    _cmdActiveIndex = Math.min(_cmdActiveIndex + 1, _cmdFilteredItems.length - 1);
+    renderCmdResults();
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    _cmdActiveIndex = Math.max(_cmdActiveIndex - 1, 0);
+    renderCmdResults();
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    selectCmdItem(_cmdActiveIndex);
+  } else if (e.key === 'Escape') {
+    e.preventDefault();
+    closeCmdPalette();
+  }
+}
+
+// Global kısayol: Cmd+K / Ctrl+K
+document.addEventListener('keydown', function(e) {
+  var isK = e.key === 'k' || e.key === 'K';
+  if (isK && (e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey) {
+    e.preventDefault();
+    var ov = document.getElementById('cmd-overlay');
+    if (ov && ov.classList.contains('show')) closeCmdPalette();
+    else openCmdPalette();
+  }
+});
 
 // ═══ FORCE LOGOUT (Tüm cihazlardan çıkış) ═══
 async function logoutAllDevices() {
