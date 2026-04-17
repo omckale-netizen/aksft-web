@@ -2798,6 +2798,18 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             </div>
           </div>
 
+          <!-- Son Giriş Geçmişi -->
+          <div class="panel-card">
+            <div class="panel-card-head" style="justify-content:space-between">
+              <h3>🕐 Son Giriş Geçmişi</h3>
+              <button class="btn btn-sm btn-secondary" onclick="loadLoginHistory()" style="font-size:.68rem;padding:4px 10px">Yenile</button>
+            </div>
+            <div style="padding:16px 20px">
+              <div id="login-history-list" style="font-size:.8rem"></div>
+              <div style="font-size:.62rem;color:var(--text-muted);margin-top:10px">Şüpheli bir giriş görürseniz şifrenizi değiştirin.</div>
+            </div>
+          </div>
+
           <!-- AI Chatbot Ayarları (admin-only) -->
           <div class="panel-card" data-admin-only style="margin-bottom:20px">
             <div class="panel-card-head"><h3>🤖 AI Chatbot</h3></div>
@@ -3736,6 +3748,51 @@ async function changePassword() {
 }
 
 // ── Şifre Tarih Kontrolü ──
+// Son giriş geçmişi — activity_logs'tan kullanıcının kendi giris/giris_basarisiz aksiyonları
+async function loadLoginHistory() {
+  var listEl = document.getElementById('login-history-list');
+  if (!listEl) return;
+  listEl.innerHTML = '<div style="padding:12px;text-align:center;color:var(--text-muted);font-size:.75rem">Yükleniyor...</div>';
+  try {
+    var myEmail = (window._currentUser && window._currentUser.email) || '';
+    if (!myEmail) { listEl.innerHTML = ''; return; }
+    // activity_logs rules: non-admin sadece user==myEmail olanları okur, admin tümünü
+    // Admin'de kendi email'ine filtre at — client-side
+    var snap = await db.collection('activity_logs')
+      .where('user', '==', myEmail)
+      .limit(500).get();
+    var logs = snap.docs.map(function(d) { return d.data(); })
+      .filter(function(l) { return l.action === 'giris' || l.action === 'giris_basarisiz'; });
+    logs.sort(function(a, b) { return (b.timestamp || '').localeCompare(a.timestamp || ''); });
+    logs = logs.slice(0, 10);
+    if (logs.length === 0) {
+      listEl.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:.72rem">Giriş kaydı bulunamadı.</div>';
+      return;
+    }
+    listEl.innerHTML = logs.map(function(l) {
+      var isFailed = l.action === 'giris_basarisiz';
+      var when = l.timestamp ? new Date(l.timestamp).toLocaleString('tr-TR', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+      var details = l.details || '';
+      var parts = details.split('·').map(function(s) { return s.trim(); });
+      var device = parts[0] || '';
+      var ip = parts[1] ? parts[1].replace(/^IP:\s*/i, '') : '';
+      return '<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.04)">' +
+        '<span style="font-size:1rem;flex-shrink:0">' + (isFailed ? '❌' : '✓') + '</span>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-weight:600;color:' + (isFailed ? 'var(--red)' : 'var(--navy)') + ';font-size:.78rem">' +
+            (isFailed ? 'Başarısız giriş denemesi' : 'Başarılı giriş') + '</div>' +
+          '<div style="font-size:.7rem;color:var(--text-muted);margin-top:2px">' + esc(when) + '</div>' +
+          (device || ip ? '<div style="font-size:.65rem;color:var(--text-muted);margin-top:2px">' + (device ? '💻 ' + esc(device) : '') + (ip ? ' · IP: ' + esc(ip) : '') + '</div>' : '') +
+          (isFailed && details.indexOf('IP') < 0 && details.length > 0 ? '<div style="font-size:.65rem;color:var(--red);margin-top:2px">' + esc(details) + '</div>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } catch(e) {
+    console.warn('Login history error:', e);
+    listEl.innerHTML = '<div style="padding:12px;text-align:center;color:var(--red);font-size:.72rem">Yüklenemedi: ' + esc(e.message || '') + '</div>';
+  }
+}
+
 async function updatePasswordDate() {
   try {
     var doc = await db.collection('settings').doc('security').get();
@@ -6752,7 +6809,7 @@ showPage = function(page) {
   _origShowPage(page);
   if (page === 'gallery' && galItems.length === 0) galLoadItems();
   if (page === 'categories') { renderCatList(); renderPlaceCatList(); }
-  if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); loadHeroHistory(); loadOgHistory(); updatePasswordDate(); }
+  if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); loadHeroHistory(); loadOgHistory(); updatePasswordDate(); loadLoginHistory(); }
   if (page === 'security') runSecurityCheck();
   if (page === 'export') { loadBackupList(); updateAutoBackupUI(); }
 };
