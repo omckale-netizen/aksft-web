@@ -765,17 +765,17 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       <div class="stats-grid" id="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));margin-bottom:20px"></div>
 
       <!-- Hızlı İşlemler -->
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;">
-        <button class="dash-action-btn" onclick="showPage('venues');openVenueModal()" style="flex:1;min-width:120px">
+      <div id="dash-quick-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;">
+        <button class="dash-action-btn" data-requires-page="venues" onclick="showPage('venues');openVenueModal()" style="flex:1;min-width:120px">
           <span class="da-icon" style="background:var(--terra)">+</span><span>Yeni Mekan</span>
         </button>
-        <button class="dash-action-btn" onclick="showPage('villages');openVillageModal()" style="flex:1;min-width:120px">
+        <button class="dash-action-btn" data-requires-page="villages" onclick="showPage('villages');openVillageModal()" style="flex:1;min-width:120px">
           <span class="da-icon" style="background:var(--green)">🏘</span><span>Yeni Yerleşim</span>
         </button>
-        <button class="dash-action-btn" onclick="showPage('blog');openBlogModal()" style="flex:1;min-width:120px">
+        <button class="dash-action-btn" data-requires-page="blog" onclick="showPage('blog');openBlogModal()" style="flex:1;min-width:120px">
           <span class="da-icon" style="background:#8B5CF6">✍️</span><span>Yeni Yazı</span>
         </button>
-        <button class="dash-action-btn" onclick="showPage('imgcompress')" style="flex:1;min-width:120px">
+        <button class="dash-action-btn" data-requires-page="imgcompress" onclick="showPage('imgcompress')" style="flex:1;min-width:120px">
           <span class="da-icon" style="background:var(--blue)">🖼</span><span>Görsel Sıkıştır</span>
         </button>
       </div>
@@ -783,22 +783,22 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       <!-- Üst grid: Görevler + Mesajlar + Son Eklenenler + Blog -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
         <div class="panel-card" style="margin:0">
-          <div class="panel-card-head" style="justify-content:space-between"><h3>✓ Bugünkü Görevler</h3><a onclick="showPage('todos')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Tümü →</a></div>
+          <div class="panel-card-head" style="justify-content:space-between"><h3>✓ Bugünkü Görevler</h3><a data-requires-page="todos" onclick="showPage('todos')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Tümü →</a></div>
           <div id="dashboard-todo-widget" style="padding:14px 18px"></div>
         </div>
         <div class="panel-card" style="margin:0">
-          <div class="panel-card-head" style="justify-content:space-between"><h3>✉️ Son Mesajlar</h3><a onclick="showPage('messages')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Tümü →</a></div>
+          <div class="panel-card-head" style="justify-content:space-between"><h3>✉️ Son Mesajlar</h3><a data-requires-page="messages" onclick="showPage('messages')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Tümü →</a></div>
           <div id="dash-messages"></div>
         </div>
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
         <div class="panel-card" style="margin:0">
-          <div class="panel-card-head" style="justify-content:space-between"><h3>🕐 Son Eklenenler</h3><a onclick="showPage('venues')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Tümü →</a></div>
+          <div class="panel-card-head" style="justify-content:space-between"><h3>🕐 Son Eklenenler</h3><a data-requires-page="venues" onclick="showPage('venues')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Tümü →</a></div>
           <div id="recent-venues"></div>
         </div>
         <div class="panel-card" style="margin:0">
-          <div class="panel-card-head" style="justify-content:space-between"><h3>✍️ Blog</h3><a onclick="showPage('blog')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Tümü →</a></div>
+          <div class="panel-card-head" style="justify-content:space-between"><h3>✍️ Blog</h3><a data-requires-page="blog" onclick="showPage('blog')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Tümü →</a></div>
           <div id="dash-blog"></div>
         </div>
       </div>
@@ -810,7 +810,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <div id="dash-categories"></div>
         </div>
         <div class="panel-card" style="margin:0">
-          <div class="panel-card-head" style="justify-content:space-between"><h3>🛡️ Güvenlik</h3><a onclick="showPage('security')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Detay →</a></div>
+          <div class="panel-card-head" style="justify-content:space-between"><h3>🛡️ Güvenlik</h3><a data-requires-page="security" onclick="showPage('security')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Detay →</a></div>
           <div id="dash-security"></div>
         </div>
         <div class="panel-card" style="margin:0">
@@ -4540,6 +4540,21 @@ function applyRoleBasedUI() {
     var page = el.getAttribute('data-page');
     el.style.display = canAccessPage(page) ? '' : 'none';
   });
+  // Dashboard (ve diğer yerlerdeki) sayfaya yönlendiren UI öğeleri
+  document.querySelectorAll('[data-requires-page]').forEach(function(el) {
+    var page = el.getAttribute('data-requires-page');
+    el.style.display = canAccessPage(page) ? '' : 'none';
+  });
+  // Özel yetki gerektiren UI öğeleri (canDelete, canManagePremium, vb.)
+  document.querySelectorAll('[data-requires-perm]').forEach(function(el) {
+    var perm = el.getAttribute('data-requires-perm');
+    var allowed = false;
+    if (perm === 'canDelete') allowed = canDeleteContent();
+    else if (perm === 'canManagePremium') allowed = canManagePremium();
+    else if (perm === 'canBulkMail') allowed = canBulkMail();
+    else if (perm === 'canExport') allowed = canExport();
+    el.style.display = allowed ? '' : 'none';
+  });
   // Kullanıcı adını bir yerde göster (varsa)
   var userLabel = document.getElementById('admin-user-label');
   if (userLabel) userLabel.textContent = window._currentUser.name + ' · ' + role;
@@ -4588,6 +4603,12 @@ fbAuth.onAuthStateChanged(async (user) => {
    NAVIGATION
 ══════════════════════════════════════════════════ */
 function showPage(page) {
+  // Yetki kontrolü — erişimi olmayan kullanıcı sayfayı açamaz
+  if (typeof canAccessPage === 'function' && window._currentUser && !canAccessPage(page)) {
+    if (typeof showToast === 'function') showToast('Bu sayfaya erişim yetkiniz yok.', 'error');
+    if (canAccessPage('dashboard')) page = 'dashboard';
+    else return;
+  }
   document.querySelectorAll('.admin-page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   document.querySelectorAll('.admin-nav-item[data-page]').forEach(n => {
