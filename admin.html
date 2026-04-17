@@ -793,23 +793,49 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         <span class="nav-icon"><i data-lucide="layout-dashboard"></i></span> Genel Bakış
       </a>
 
-      <div class="nav-group-label">İçerik Yönetimi</div>
+      <!-- İÇERİK: site üzerindeki tüm yayın içerikleri -->
+      <div class="nav-group-label">İçerik</div>
       <a class="admin-nav-item" data-page="venues" onclick="showPage('venues')">
         <span class="nav-icon"><i data-lucide="store"></i></span> Mekanlar
       </a>
-      <a class="admin-nav-item" data-page="pending" onclick="showPage('pending')">
-        <span class="nav-icon"><i data-lucide="inbox"></i></span> Mekan Talepleri <span id="pending-badge" style="background:var(--terra);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;display:none"></span>
+      <a class="admin-nav-item" data-page="villages" onclick="showPage('villages')">
+        <span class="nav-icon"><i data-lucide="home"></i></span> Yerleşimler & Yerler
       </a>
       <a class="admin-nav-item" data-page="routes" onclick="showPage('routes')">
         <span class="nav-icon"><i data-lucide="route"></i></span> Rotalar
       </a>
-      <a class="admin-nav-item" data-page="villages" onclick="showPage('villages')">
-        <span class="nav-icon"><i data-lucide="home"></i></span> Yerleşimler & Yerler
+      <a class="admin-nav-item" data-page="blog" onclick="showPage('blog')">
+        <span class="nav-icon"><i data-lucide="edit-3"></i></span> Blog
+      </a>
+      <a class="admin-nav-item" data-page="gallery" onclick="showPage('gallery')">
+        <span class="nav-icon"><i data-lucide="images"></i></span> Galeri
       </a>
       <a class="admin-nav-item" data-page="categories" onclick="showPage('categories')">
         <span class="nav-icon"><i data-lucide="folder-tree"></i></span> Kategoriler
       </a>
 
+      <!-- İLETİŞİM: kullanıcılarla etkileşim -->
+      <div class="nav-group-label">İletişim</div>
+      <a class="admin-nav-item" data-page="messages" onclick="showPage('messages')">
+        <span class="nav-icon"><i data-lucide="mail"></i></span> Mesajlar & Mail <span id="msg-badge" style="background:var(--red);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;display:none"></span>
+      </a>
+      <a class="admin-nav-item" data-page="pending" onclick="showPage('pending')">
+        <span class="nav-icon"><i data-lucide="inbox"></i></span> Mekan Talepleri <span id="pending-badge" style="background:var(--terra);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;display:none"></span>
+      </a>
+
+      <!-- ORGANİZASYON: ekip işleri -->
+      <div class="nav-group-label">Organizasyon</div>
+      <a class="admin-nav-item" data-page="todos" onclick="showPage('todos')">
+        <span class="nav-icon"><i data-lucide="check-square"></i></span> Görevlerim <span id="todos-badge" style="background:var(--terra);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;display:none"></span>
+      </a>
+      <a class="admin-nav-item" data-page="activity" onclick="showPage('activity')">
+        <span class="nav-icon"><i data-lucide="history"></i></span> Aktivite Logu
+      </a>
+      <a class="admin-nav-item" data-page="analytics" onclick="showPage('analytics')">
+        <span class="nav-icon"><i data-lucide="bar-chart-3"></i></span> İstatistikler
+      </a>
+
+      <!-- ARAÇLAR: yardımcı utility'ler -->
       <div class="nav-group-label">Araçlar</div>
       <a class="admin-nav-item" data-page="imgcompress" onclick="showPage('imgcompress')">
         <span class="nav-icon"><i data-lucide="image"></i></span> Görsel Sıkıştır
@@ -821,37 +847,17 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         <span class="nav-icon"><i data-lucide="refresh-cw"></i></span> Dosya Dönüştür
       </a>
 
-      <div class="nav-group-label">İletişim & Analiz</div>
-      <a class="admin-nav-item" data-page="messages" onclick="showPage('messages')">
-        <span class="nav-icon"><i data-lucide="mail"></i></span> Mesajlar & Mail <span id="msg-badge" style="background:var(--red);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;display:none"></span>
-      </a>
-      <a class="admin-nav-item" data-page="analytics" onclick="showPage('analytics')">
-        <span class="nav-icon"><i data-lucide="bar-chart-3"></i></span> İstatistikler
-      </a>
-
-      <a class="admin-nav-item" data-page="gallery" onclick="showPage('gallery')">
-        <span class="nav-icon"><i data-lucide="images"></i></span> Galeri
-      </a>
-
-      <a class="admin-nav-item" data-page="blog" onclick="showPage('blog')">
-        <span class="nav-icon"><i data-lucide="edit-3"></i></span> Blog
-      </a>
-      <a class="admin-nav-item" data-page="todos" onclick="showPage('todos')">
-        <span class="nav-icon"><i data-lucide="check-square"></i></span> Görevlerim <span id="todos-badge" style="background:var(--terra);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;display:none"></span>
-      </a>
-      <a class="admin-nav-item" data-page="activity" onclick="showPage('activity')">
-        <span class="nav-icon"><i data-lucide="history"></i></span> Aktivite Logu
-      </a>
-
+      <!-- YÖNETİM: sistem/erişim kontrol (admin-only) -->
       <div class="admin-nav-sep"></div>
+      <div class="nav-group-label">Yönetim</div>
       <a class="admin-nav-item" data-page="users" onclick="showPage('users')">
         <span class="nav-icon"><i data-lucide="users"></i></span> Kullanıcılar
       </a>
-      <a class="admin-nav-item" data-page="export" onclick="showPage('export')">
-        <span class="nav-icon"><i data-lucide="database-backup"></i></span> Yedekleme
-      </a>
       <a class="admin-nav-item" data-page="security" onclick="showPage('security')">
         <span class="nav-icon"><i data-lucide="shield-check"></i></span> Güvenlik
+      </a>
+      <a class="admin-nav-item" data-page="export" onclick="showPage('export')">
+        <span class="nav-icon"><i data-lucide="database-backup"></i></span> Yedekleme
       </a>
       <a class="admin-nav-item" data-page="settings" onclick="showPage('settings')">
         <span class="nav-icon"><i data-lucide="settings"></i></span> Ayarlar
