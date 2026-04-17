@@ -547,16 +547,37 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .admin-page{display:none}
 .admin-page.active{display:block}
 
-/* Sidebar unread badge — "3 okunmamış" pill */
-.chat-sidebar-badge{margin-left:auto;display:inline-flex;align-items:center;gap:4px;background:var(--terra);color:#fff;padding:2px 8px;border-radius:999px;font-size:.62rem;font-weight:700;letter-spacing:.01em;animation:chatBadgePulse 2s ease-in-out infinite;white-space:nowrap}
-.chat-sidebar-badge .chat-badge-count{background:rgba(255,255,255,.25);padding:0 5px;border-radius:999px;font-size:.64rem;min-width:14px;text-align:center}
-.chat-sidebar-badge .chat-badge-label{opacity:.95;font-weight:600}
-.admin-nav-item.has-unread{animation:chatNavShimmer 3s ease-in-out infinite}
-.admin-nav-item.has-unread > *:first-child{color:var(--terra-light)}
-@keyframes chatBadgePulse{0%,100%{box-shadow:0 0 0 0 rgba(196,82,26,.6)}50%{box-shadow:0 0 0 5px rgba(196,82,26,0)}}
-@keyframes chatNavShimmer{0%,100%{background:transparent}50%{background:rgba(196,82,26,.05)}}
-/* Mobil — sadece sayı, "okunmamış" yazısını gizle */
-@media(max-width:900px){.chat-sidebar-badge .chat-badge-label{display:none}}
+/* Sidebar chat label (normal durum) */
+.chat-nav-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-unread-desktop{display:inline}
+.chat-unread-mobile{display:none}
+
+/* Sidebar unread badge — mobil için kırmızı sayı pill */
+.chat-sidebar-badge{margin-left:auto;display:none;align-items:center;justify-content:center;background:#EF4444;color:#fff;padding:1px 7px;border-radius:999px;font-size:.62rem;font-weight:800;min-width:18px;text-align:center}
+
+/* Has-unread durumu — sidebar item kırmızı + vurgulu (masaüstü) */
+.admin-nav-item.has-unread{
+  background:linear-gradient(135deg,#EF4444,#DC2626);
+  color:#fff !important;
+  font-weight:700;
+  box-shadow:0 2px 10px rgba(239,68,68,.35);
+  animation:chatRedPulse 1.8s ease-in-out infinite;
+}
+.admin-nav-item.has-unread > *{color:#fff !important}
+.admin-nav-item.has-unread .nav-icon{color:#fff !important}
+.admin-nav-item.has-unread:hover{background:linear-gradient(135deg,#F87171,#EF4444);transform:translateX(2px)}
+
+@keyframes chatRedPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.55),0 2px 10px rgba(239,68,68,.35)}
+  50%{box-shadow:0 0 0 6px rgba(239,68,68,0),0 2px 14px rgba(239,68,68,.5)}
+}
+
+/* Mobil (<900px): label "Ekip Sohbeti" kalır, sağda sayı badge'i göster */
+@media(max-width:900px){
+  .chat-unread-desktop{display:none}
+  .chat-unread-mobile{display:inline}
+  .admin-nav-item.has-unread .chat-sidebar-badge{display:inline-flex}
+}
 
 /* ─────────────────────
    EKİP SOHBETİ — Modern UI
@@ -1243,7 +1264,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         <span class="nav-icon"><i data-lucide="check-square"></i></span> Görevlerim <span id="todos-badge" style="background:var(--terra);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;display:none"></span>
       </a>
       <a class="admin-nav-item" data-page="chat" onclick="showPage('chat')">
-        <span class="nav-icon"><i data-lucide="message-circle"></i></span> Ekip Sohbeti
+        <span class="nav-icon"><i data-lucide="message-circle"></i></span>
+        <span class="chat-nav-label">Ekip Sohbeti</span>
         <span id="chat-badge" class="chat-sidebar-badge" style="display:none"></span>
       </a>
       <a class="admin-nav-item" data-page="activity" onclick="showPage('activity')">
@@ -8123,8 +8145,15 @@ function markChatAsRead() {
 function updateChatBadge() {
   var badge = document.getElementById('chat-badge');
   if (!badge) return;
+  var label = document.querySelector('.chat-nav-label');
+  var navItem = badge.closest('.admin-nav-item');
   var u = firebase.auth().currentUser;
-  if (!u) { badge.style.display = 'none'; return; }
+  if (!u) {
+    badge.style.display = 'none';
+    if (label) label.textContent = 'Ekip Sohbeti';
+    if (navItem) navItem.classList.remove('has-unread');
+    return;
+  }
   var lastRead = _chatLastReadAt && _chatLastReadAt.toDate ? _chatLastReadAt.toDate().getTime() : 0;
   var unread = _chatAllMessages.filter(function(m) {
     if (m.authorUid === u.uid) return false;
@@ -8133,17 +8162,17 @@ function updateChatBadge() {
   }).length;
   if (unread > 0) {
     var countStr = unread > 99 ? '99+' : String(unread);
-    // "3 yeni · okunmamış" — sayı + yazı birlikte (anlam netliği)
-    badge.innerHTML = '<span class="chat-badge-count">' + countStr + '</span> <span class="chat-badge-label">okunmamış</span>';
+    // Masaüstü: label'ı değiştir → "3 Okunmamış Mesaj"
+    // Mobil: label kısa kalır ("Ekip Sohbeti"), badge sayıyı gösterir (CSS ile ayrılır)
+    if (label) label.innerHTML = '<span class="chat-unread-desktop">' + countStr + ' Okunmamış Mesaj</span><span class="chat-unread-mobile">Ekip Sohbeti</span>';
+    badge.innerHTML = '<span class="chat-badge-count">' + countStr + '</span>';
     badge.style.display = '';
-    // Sidebar item'ı da vurgula (class ekle)
-    var navItem = badge.closest('.admin-nav-item');
     if (navItem) navItem.classList.add('has-unread');
   } else {
     badge.style.display = 'none';
     badge.innerHTML = '';
-    var navItem2 = badge.closest('.admin-nav-item');
-    if (navItem2) navItem2.classList.remove('has-unread');
+    if (label) label.textContent = 'Ekip Sohbeti';
+    if (navItem) navItem.classList.remove('has-unread');
   }
 }
 
