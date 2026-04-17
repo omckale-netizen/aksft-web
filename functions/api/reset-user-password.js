@@ -71,14 +71,12 @@ export async function onRequestPost(context) {
   }
 
   try {
-    // Service account JSON'u parse et
+    // Service account JSON'u parse et — birden fazla formatı destekle
     let sa;
     try {
-      sa = typeof env.FIREBASE_SERVICE_ACCOUNT === 'string'
-        ? JSON.parse(env.FIREBASE_SERVICE_ACCOUNT)
-        : env.FIREBASE_SERVICE_ACCOUNT;
+      sa = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
     } catch(e) {
-      return new Response(JSON.stringify({ error: 'Service account JSON geçersiz' }), {
+      return new Response(JSON.stringify({ error: 'Service account JSON geçersiz: ' + (e.message || 'parse hatası') + '. Cloudflare env\'e JSON\'u tek satır halinde yapıştırın veya base64 encode edip ekleyin.' }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
@@ -131,6 +129,36 @@ export async function onRequestOptions(context) {
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     }
   });
+}
+
+// ═══ Service Account JSON Parser (çoklu format desteği) ═══
+// Cloudflare env'e yapıştırırken JSON bozulabiliyor — farklı formatları dene
+function parseServiceAccount(raw) {
+  if (!raw) throw new Error('FIREBASE_SERVICE_ACCOUNT tanımlı değil');
+  if (typeof raw === 'object') return raw;
+  const str = String(raw).trim();
+
+  // 1) Doğrudan JSON parse
+  try {
+    return JSON.parse(str);
+  } catch(e1) {
+    // 2) Base64 encoded olabilir mi?
+    try {
+      const decoded = atob(str);
+      return JSON.parse(decoded);
+    } catch(e2) { /* devam */ }
+
+    // 3) private_key içinde gerçek newline varsa kaçır (en sık hata)
+    try {
+      // private_key'in değerindeki gerçek \n karakterlerini \\n'e çevir
+      const repaired = str.replace(/("private_key"\s*:\s*")([\s\S]*?)(",)/, (m, a, body, c) => {
+        return a + body.replace(/\r?\n/g, '\\n') + c;
+      });
+      return JSON.parse(repaired);
+    } catch(e3) { /* devam */ }
+
+    throw new Error(e1.message);
+  }
 }
 
 // ═══ Service Account JWT → Google OAuth Access Token ═══

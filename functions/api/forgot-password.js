@@ -85,9 +85,7 @@ export async function onRequestPost(context) {
     // 1) Service account JWT → OAuth access token
     let sa;
     try {
-      sa = typeof env.FIREBASE_SERVICE_ACCOUNT === 'string'
-        ? JSON.parse(env.FIREBASE_SERVICE_ACCOUNT)
-        : env.FIREBASE_SERVICE_ACCOUNT;
+      sa = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
     } catch(e) {
       // Fallback Firebase mail
       await fetch('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=' + FIREBASE_API_KEY, {
@@ -209,6 +207,23 @@ function buildResetMailHtml(resetLink, email) {
   </table>
 </body>
 </html>`;
+}
+
+// ═══ Service Account JSON Parser (çoklu format desteği) ═══
+function parseServiceAccount(raw) {
+  if (!raw) throw new Error('FIREBASE_SERVICE_ACCOUNT tanımlı değil');
+  if (typeof raw === 'object') return raw;
+  const str = String(raw).trim();
+  try { return JSON.parse(str); } catch(e1) {
+    try { return JSON.parse(atob(str)); } catch(e2) {}
+    try {
+      const repaired = str.replace(/("private_key"\s*:\s*")([\s\S]*?)(",)/, (m, a, body, c) => {
+        return a + body.replace(/\r?\n/g, '\\n') + c;
+      });
+      return JSON.parse(repaired);
+    } catch(e3) {}
+    throw new Error(e1.message);
+  }
 }
 
 // ═══ Service Account JWT → Google OAuth Access Token ═══
