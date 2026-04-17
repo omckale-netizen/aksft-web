@@ -225,7 +225,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
 /* ── STATS CARDS ── */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:32px}
-.stat-card{background:var(--card-bg);border-radius:var(--radius);padding:22px 20px;box-shadow:var(--card-shadow);border:1px solid var(--card-border);transition:background .3s}
+.stat-card{background:var(--card-bg);border-radius:var(--radius-md);padding:22px 20px;box-shadow:var(--shadow-xs);border:1px solid var(--card-border);transition:all var(--transition);position:relative}
+.stat-card[onclick]:hover{box-shadow:var(--shadow);border-color:rgba(196,82,26,.2);transform:translateY(-1px)}
+.stat-card[onclick]:hover::after{content:'→';position:absolute;top:12px;right:14px;color:var(--terra);font-weight:700;font-size:.9rem;opacity:0;transition:opacity var(--transition)}
+.stat-card[onclick]:hover::after{opacity:.8}
 .stat-card .stat-label{font-size:.78rem;color:var(--text-light);font-weight:500;margin-bottom:6px;text-transform:uppercase;letter-spacing:.3px}
 .stat-card .stat-val{font-size:1.8rem;font-weight:800;color:var(--navy)}
 .stat-card.terra .stat-val{color:var(--terra)}
@@ -1099,7 +1102,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <div id="dash-security"></div>
             </div>
             <div class="panel-card" style="margin:0">
-              <div class="panel-card-head"><h3>📷 Görselsiz Mekanlar</h3></div>
+              <div class="panel-card-head" style="justify-content:space-between"><h3>📷 Görselsiz Mekanlar</h3><a onclick="goToVenuesFilter('noimg')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Düzelt →</a></div>
               <div id="dash-no-images"></div>
             </div>
           </div>
@@ -1107,15 +1110,15 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <!-- Alt grid: Öne Çıkanlar + Premium + İçerik Özeti -->
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;" class="dash-3col">
             <div class="panel-card" style="margin:0">
-              <div class="panel-card-head"><h3>⭐ Öne Çıkanlar</h3></div>
+              <div class="panel-card-head" style="justify-content:space-between"><h3>⭐ Öne Çıkanlar</h3><a onclick="goToVenuesFilter('featured')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Tümü →</a></div>
               <div id="dash-featured"></div>
             </div>
             <div class="panel-card" style="margin:0">
-              <div class="panel-card-head"><h3>👑 Premium Mekanlar</h3></div>
+              <div class="panel-card-head" style="justify-content:space-between"><h3>👑 Premium Mekanlar</h3><a onclick="goToVenuesFilter('premium')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Tümü →</a></div>
               <div id="dash-premium"></div>
             </div>
             <div class="panel-card" style="margin:0">
-              <div class="panel-card-head"><h3>📈 İçerik Özeti</h3></div>
+              <div class="panel-card-head" style="justify-content:space-between"><h3>📈 İçerik Özeti</h3><a onclick="showPage('analytics')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Detay →</a></div>
               <div id="dash-content-summary"></div>
             </div>
           </div>
@@ -4078,6 +4081,54 @@ function applyDashMoreState() {
     if (label) label.textContent = 'Detaylı istatistikleri gizle';
     if (chevron) chevron.style.transform = 'rotate(180deg)';
   }
+}
+
+// ═══ PROGRESSIVE DISCLOSURE HELPERS ═══
+// Dashboard'dan ilgili sayfa+filtre'ye hızlı geçiş
+
+function goToVenuesFilter(type) {
+  // type: 'featured' | 'premium' | 'noimg' | 'draft' | 'trashed'
+  showPage('venues');
+  setTimeout(function() {
+    // Diğer filtreleri sıfırla
+    var activeSel = document.getElementById('venue-active-filter');
+    var catSel = document.getElementById('venue-cat-filter');
+    if (typeof showFeaturedOnly !== 'undefined') showFeaturedOnly = false;
+    if (typeof showPremiumOnly !== 'undefined') showPremiumOnly = false;
+    if (activeSel) activeSel.value = 'all';
+
+    if (type === 'featured' && typeof showFeaturedOnly !== 'undefined') showFeaturedOnly = true;
+    else if (type === 'premium' && typeof showPremiumOnly !== 'undefined') showPremiumOnly = true;
+    else if (type === 'draft' && activeSel) activeSel.value = 'draft';
+    else if (type === 'trashed' && activeSel) activeSel.value = 'trashed';
+    else if (type === 'noimg') window._venuePrefilter = 'noimg';
+    else window._venuePrefilter = null;
+
+    if (typeof renderVenueTable === 'function') renderVenueTable(true);
+  }, 100);
+}
+
+function goToVenuesCategory(cat) {
+  showPage('venues');
+  setTimeout(function() {
+    var sel = document.getElementById('venue-cat-filter');
+    if (sel) { sel.value = cat; renderVenueTable(true); }
+  }, 100);
+}
+
+function goToPlaces() {
+  showPage('villages');
+  setTimeout(function() {
+    // Villages sayfasının Yerler tab'ına geç
+    if (typeof switchVillageTab === 'function') switchVillageTab('places');
+  }, 120);
+}
+
+function goToVillages() {
+  showPage('villages');
+  setTimeout(function() {
+    if (typeof switchVillageTab === 'function') switchVillageTab('villages');
+  }, 120);
 }
 
 // ═══ SKELETON LOADING HELPERS ═══
@@ -8338,17 +8389,17 @@ function renderDashboard() {
   var blogCount = (typeof blogPosts !== 'undefined' ? blogPosts.length : 0);
 
   document.getElementById('stats-grid').innerHTML =
-    '<div class="stat-card"><div class="stat-label">🏪 Mekanlar</div><div class="stat-val">' + published + '<span style="font-size:.6rem;color:var(--text-muted);font-weight:400">/' + v.length + '</span></div><div style="font-size:.6rem;color:var(--text-muted);margin-top:2px">' + published + ' yayında' + (draft ? ', ' + draft + ' taslak' : '') + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">🏛 Yerler</div><div class="stat-val">' + p.length + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">🏘 Köyler</div><div class="stat-val">' + vi.length + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">🗺 Rotalar</div><div class="stat-val">' + r.length + '</div></div>' +
-    '<div class="stat-card"><div class="stat-label">✍️ Blog</div><div class="stat-val">' + blogCount + '</div></div>' +
-    '<div class="stat-card green"><div class="stat-label">Şu An Açık</div><div class="stat-val">' + openCount + '<span style="font-size:.6rem;color:var(--text-muted);font-weight:400">/' + published + '</span></div></div>' +
-    (premiumCount > 0 ? '<div class="stat-card"><div class="stat-label">👑 Premium</div><div class="stat-val" style="color:#D4935A">' + premiumCount + '</div></div>' : '') +
-    '<div class="stat-card terra"><div class="stat-label">⭐ Öne Çıkan</div><div class="stat-val">' + featured + '</div></div>';
+    '<div class="stat-card" onclick="showPage(\'venues\')" style="cursor:pointer"><div class="stat-label">🏪 Mekanlar</div><div class="stat-val">' + published + '<span style="font-size:.6rem;color:var(--text-muted);font-weight:400">/' + v.length + '</span></div><div style="font-size:.6rem;color:var(--text-muted);margin-top:2px">' + published + ' yayında' + (draft ? ', ' + draft + ' taslak' : '') + '</div></div>' +
+    '<div class="stat-card" onclick="goToPlaces()" style="cursor:pointer"><div class="stat-label">🏛 Yerler</div><div class="stat-val">' + p.length + '</div></div>' +
+    '<div class="stat-card" onclick="goToVillages()" style="cursor:pointer"><div class="stat-label">🏘 Köyler</div><div class="stat-val">' + vi.length + '</div></div>' +
+    '<div class="stat-card" onclick="showPage(\'routes\')" style="cursor:pointer"><div class="stat-label">🗺 Rotalar</div><div class="stat-val">' + r.length + '</div></div>' +
+    '<div class="stat-card" onclick="showPage(\'blog\')" style="cursor:pointer"><div class="stat-label">✍️ Blog</div><div class="stat-val">' + blogCount + '</div></div>' +
+    '<div class="stat-card green" onclick="showPage(\'analytics\')" style="cursor:pointer"><div class="stat-label">Şu An Açık</div><div class="stat-val">' + openCount + '<span style="font-size:.6rem;color:var(--text-muted);font-weight:400">/' + published + '</span></div></div>' +
+    (premiumCount > 0 ? '<div class="stat-card" onclick="goToVenuesFilter(\'premium\')" style="cursor:pointer"><div class="stat-label">👑 Premium</div><div class="stat-val" style="color:#D4935A">' + premiumCount + '</div></div>' : '') +
+    '<div class="stat-card terra" onclick="goToVenuesFilter(\'featured\')" style="cursor:pointer"><div class="stat-label">⭐ Öne Çıkan</div><div class="stat-val">' + featured + '</div></div>';
 
 
-  /* Kategori dağılımı */
+  /* Kategori dağılımı — her satır tıklanınca o kategoriyle filtrelenmiş venues sayfasına */
   const catCounts = {};
   v.forEach(x => { catCounts[x.category] = (catCounts[x.category] || 0) + 1; });
   const maxCat = Math.max(...Object.values(catCounts), 1);
@@ -8357,7 +8408,7 @@ function renderDashboard() {
     catEl.innerHTML = Object.keys(catLabels).map(cat => {
       const count = catCounts[cat] || 0;
       const pct = Math.round(count / maxCat * 100);
-      return '<div class="dash-cat-row">' +
+      return '<div class="dash-cat-row" style="cursor:pointer" onclick="goToVenuesCategory(\'' + cat + '\')" title="' + esc(catLabels[cat]||cat) + ' mekanlarını göster">' +
         '<span class="dash-cat-emoji">' + (catEmojis[cat]||'') + '</span>' +
         '<span class="dash-cat-name">' + (catLabels[cat]||cat) + '</span>' +
         '<div class="dash-cat-bar"><div class="dash-cat-fill" style="width:' + pct + '%;background:' + (catColors[cat]||'#718096') + '"></div></div>' +
@@ -8804,6 +8855,8 @@ function renderVenueTable(resetPage) {
   if (locFilter !== 'all') venues = venues.filter(v => v.location === locFilter);
   if (showFeaturedOnly) venues = venues.filter(v => v.featured);
   if (showPremiumOnly) venues = venues.filter(v => isPremiumActive(v));
+  // Dashboard'dan 'görselsiz' filtresi geldiyse
+  if (window._venuePrefilter === 'noimg') venues = venues.filter(v => !v.images || v.images.length === 0);
   if (activeFilter === 'all') venues = venues.filter(v => getVenueStatusKey(v) !== 'trashed');
   else if (activeFilter === 'trashed') venues = venues.filter(v => getVenueStatusKey(v) === 'trashed');
   else venues = venues.filter(v => getVenueStatusKey(v) === activeFilter);
