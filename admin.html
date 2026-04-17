@@ -774,6 +774,20 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .ana-bar{flex:1;min-width:8px;border-radius:3px 3px 0 0;background:var(--terra);transition:height .4s;position:relative;cursor:default}
 .ana-bar:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:4px 8px;border-radius:6px;font-size:.65rem;white-space:nowrap;z-index:5}
 
+/* ═══ SKELETON LOADER ═══ */
+.skel{display:inline-block;background:linear-gradient(90deg,var(--cream-dark) 0%,rgba(0,0,0,.04) 50%,var(--cream-dark) 100%);background-size:200% 100%;animation:skelShimmer 1.4s ease-in-out infinite;border-radius:var(--radius-sm)}
+[data-theme="dark"] .skel{background:linear-gradient(90deg,rgba(255,255,255,.04) 0%,rgba(255,255,255,.08) 50%,rgba(255,255,255,.04) 100%);background-size:200% 100%}
+@keyframes skelShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel-text{height:14px;width:100%;margin:4px 0;border-radius:4px}
+.skel-text.short{width:60%}
+.skel-text.tiny{width:30%;height:10px}
+.skel-avatar{width:40px;height:40px;border-radius:50%}
+.skel-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--card-border)}
+.skel-row:last-child{border-bottom:none}
+.skel-row-body{flex:1;min-width:0}
+.skel-card{padding:var(--space-4);border-radius:var(--radius);background:var(--card-bg);border:1px solid var(--card-border)}
+.skel-stat{display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:10px;background:var(--card-bg);border:1px solid var(--card-border)}
+
 /* ═══ COMMAND PALETTE ═══ */
 .cmd-overlay{position:fixed;inset:0;z-index:var(--z-popover);background:rgba(10,15,25,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:flex-start;justify-content:center;padding:10vh 20px;opacity:0;transition:opacity var(--transition)}
 .cmd-overlay.show{display:flex;opacity:1}
@@ -4057,6 +4071,40 @@ function applyDashMoreState() {
   }
 }
 
+// ═══ SKELETON LOADING HELPERS ═══
+// Liste yüklenirken gösterilecek placeholder satırları
+function skeletonRows(count) {
+  count = count || 5;
+  var rows = '';
+  for (var i = 0; i < count; i++) {
+    rows += '<div class="skel-row">' +
+      '<div class="skel skel-avatar"></div>' +
+      '<div class="skel-row-body">' +
+        '<div class="skel skel-text short"></div>' +
+        '<div class="skel skel-text tiny"></div>' +
+      '</div>' +
+    '</div>';
+  }
+  return rows;
+}
+
+function skeletonCards(count, width) {
+  count = count || 3;
+  width = width || 100;
+  var cards = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px">';
+  for (var i = 0; i < count; i++) {
+    cards += '<div class="skel-stat">' +
+      '<div class="skel skel-text tiny"></div>' +
+      '<div class="skel skel-text" style="height:22px;width:40%"></div>' +
+    '</div>';
+  }
+  return cards + '</div>';
+}
+
+function skeletonList(count) {
+  return '<div style="padding:10px 18px">' + skeletonRows(count) + '</div>';
+}
+
 // ═══ COMMAND PALETTE (⌘K / Ctrl+K) ═══
 var _cmdActiveIndex = 0;
 var _cmdFilteredItems = [];
@@ -4364,7 +4412,7 @@ setInterval(function() { try { renderSidebarOnline(); } catch(e) {} }, 60 * 1000
 async function loadLoginHistory() {
   var listEl = document.getElementById('login-history-list');
   if (!listEl) return;
-  listEl.innerHTML = '<div style="padding:12px;text-align:center;color:var(--text-muted);font-size:.75rem">Yükleniyor...</div>';
+  listEl.innerHTML = skeletonRows(4);
   try {
     var myEmail = (window._currentUser && window._currentUser.email) || '';
     if (!myEmail) { listEl.innerHTML = ''; return; }
@@ -10996,7 +11044,7 @@ let notifFilter = 'all';
 async function renderNotifications() {
   const list = document.getElementById('notif-list');
   if (!list) return;
-  list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted)">Yükleniyor...</div>';
+  list.innerHTML = skeletonRows(4);
 
   try {
     allNotifs = [];
@@ -12860,7 +12908,7 @@ async function renderEditorPendingList() {
   var el = document.getElementById('editor-pending-list');
   if (!el) return;
   if (typeof canAccessPage === 'function' && !canAccessPage('pending')) { el.innerHTML = ''; return; }
-  el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:.82rem">Yükleniyor...</div>';
+  el.innerHTML = skeletonList(4);
   try {
     var snap = await db.collection('pending_venues').orderBy('submittedAt', 'desc').limit(6).get();
     var items = snap.docs.map(function(d) { return { _id: d.id, ...d.data() }; });
@@ -12897,7 +12945,7 @@ async function renderEditorMsgList() {
   var el = document.getElementById('editor-msg-list');
   if (!el) return;
   if (typeof canAccessPage === 'function' && !canAccessPage('messages')) { el.innerHTML = ''; return; }
-  el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:.82rem">Yükleniyor...</div>';
+  el.innerHTML = skeletonList(4);
   try {
     var snap = await db.collection('messages').orderBy('timestamp', 'desc').limit(20).get();
     var msgs = snap.docs.map(function(d) { return { _id: d.id, ...d.data() }; }).filter(function(m) { return !m.trashed; }).slice(0, 6);
@@ -13187,7 +13235,7 @@ function addTodoForMessage(msgId) {
 async function renderActivityLog() {
   const list = document.getElementById('activity-list');
   if (!list) return;
-  list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--text-muted)">Yükleniyor...</div>';
+  list.innerHTML = skeletonRows(8);
 
   try {
     const filter = document.getElementById('activity-filter')?.value || 'all';
