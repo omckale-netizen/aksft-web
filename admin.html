@@ -2611,8 +2611,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             <input type="password" id="cp-new2" placeholder="Tekrar yazın" minlength="8" style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.9rem;background:var(--input-bg,#fff);color:var(--text);width:100%;font-family:monospace">
           </div>
           <div id="cp-status" style="font-size:.75rem;margin-bottom:10px;min-height:16px"></div>
-          <div style="display:flex;gap:10px">
-            <button class="btn btn-primary" onclick="submitChangePassword()" style="flex:1">Şifreyi Değiştir</button>
+          <div class="cp-footer-actions" style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-primary" onclick="submitChangePassword()" style="flex:1;min-width:160px">Şifreyi Değiştir</button>
             <button class="btn btn-secondary cp-close-btn" onclick="closeChangePasswordModal()">İptal</button>
           </div>
         </div>
@@ -5515,6 +5515,7 @@ async function loadCurrentUserRole(firebaseUser) {
     baseUser.permissions = data.permissions || {};
     baseUser.photoURL = data.photoURL || null;
     baseUser.mustChangePassword = data.mustChangePassword === true;
+    baseUser.mustChangePasswordSnoozeUntil = data.mustChangePasswordSnoozeUntil || null;
     window._currentUser = baseUser;
     // Geçici erişim süresi dolmuşsa temizle (asenkron, UI'ı bloklamaz)
     cleanupExpiredTempAccess(firebaseUser.uid, data).catch(function() {});
@@ -5764,8 +5765,11 @@ fbAuth.onAuthStateChanged(async (user) => {
     // Presence (online durum) tracking başlat
     try { startPresence(); } catch(e) { console.warn('Presence start:', e); }
     // Zorunlu şifre değişimi — admin atamış + kullanıcı henüz değiştirmemiş
+    // Snooze aktifse (24 saat) modal gösterilmez
     if (window._currentUser && window._currentUser.mustChangePassword) {
-      setTimeout(function() { openForcePasswordModal(); }, 400);
+      var snooze = window._currentUser.mustChangePasswordSnoozeUntil;
+      var snoozeActive = snooze && new Date(snooze).getTime() > Date.now();
+      if (!snoozeActive) setTimeout(function() { openForcePasswordModal(); }, 400);
     }
   } else {
     // Giris yapilmamis — login sayfasina yonlendir
@@ -12281,23 +12285,55 @@ function openChangePasswordModal() {
   setTimeout(function() { document.getElementById('cp-current').focus(); }, 100);
 }
 
-// Zorunlu modalı — kapatılamaz
+// Zorunlu modalı — açıklayıcı + 'sonra hatırlat' opsiyonu
 function openForcePasswordModal() {
   _forceChangePassword = true;
   document.getElementById('cp-current').value = '';
   document.getElementById('cp-new').value = '';
   document.getElementById('cp-new2').value = '';
-  document.getElementById('cp-status').innerHTML = '<span style="color:#C4521A;font-weight:600">⚠️ Admin size yeni bir şifre atadı. Devam etmek için şifrenizi değiştirmelisiniz.</span>';
+  document.getElementById('cp-status').innerHTML =
+    '<div style="background:rgba(196,82,26,.07);border-left:3px solid var(--terra);padding:12px 14px;border-radius:8px;margin-bottom:4px">' +
+      '<div style="font-size:.82rem;font-weight:700;color:var(--terra);margin-bottom:6px">🔐 Güvenlik için şifre değiştirin</div>' +
+      '<div style="font-size:.74rem;color:var(--text);line-height:1.55">Yönetici size yeni bir geçici şifre atadı. Bu şifre sadece ilk girişiniz içindir ve başkaları tarafından görülmüş olabilir. Kendi belirleyeceğiniz güçlü bir şifreyle değiştirmeniz önerilir.</div>' +
+      '<div style="font-size:.68rem;color:var(--text-muted);margin-top:8px;line-height:1.5">💡 <strong>Mevcut şifre</strong> alanına size verilen geçici şifreyi yazın. <strong>Yeni şifre</strong> min 8 karakter olmalı, başka yerde kullanmadığınız bir şey olsun.</div>' +
+    '</div>';
   document.getElementById('change-password-overlay').style.display = 'flex';
-  // Kapatma butonlarını gizle
+  // İptal/X butonlarını gizle, yerine "Sonra Hatırlat" butonunu göster
   var ov = document.getElementById('change-password-overlay');
   ov.querySelectorAll('.cp-close-btn').forEach(function(b) { b.style.display = 'none'; });
+  // "Sonra hatırlat" butonu ekle (yoksa)
+  var footer = ov.querySelector('.cp-footer-actions');
+  if (footer && !footer.querySelector('.cp-snooze-btn')) {
+    var btn = document.createElement('button');
+    btn.className = 'btn btn-secondary cp-snooze-btn';
+    btn.type = 'button';
+    btn.textContent = '24 saat sonra hatırlat';
+    btn.onclick = snoozePasswordChange;
+    footer.appendChild(btn);
+  }
   setTimeout(function() { document.getElementById('cp-current').focus(); }, 100);
+}
+
+// Kullanıcı "sonra hatırlat" derse 24 saat snooze
+async function snoozePasswordChange() {
+  if (!confirm('Şifre değiştirmeyi 24 saat erteleyebilirsiniz. Güvenliğiniz için mümkün olan en kısa sürede değiştirmenizi öneriyoruz.\n\nDevam edilsin mi?')) return;
+  try {
+    var user = firebase.auth().currentUser;
+    if (!user) return;
+    var snoozeUntil = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    await db.collection('users').doc(user.uid).set({ mustChangePasswordSnoozeUntil: snoozeUntil }, { merge: true });
+    if (window._currentUser) window._currentUser.mustChangePasswordSnoozeUntil = snoozeUntil;
+    _forceChangePassword = false;
+    document.getElementById('change-password-overlay').style.display = 'none';
+    showToast('Hatırlatma 24 saat ertelendi. Lütfen en kısa sürede şifrenizi değiştirin.', 'info');
+  } catch(e) {
+    showToast('Erteleme başarısız: ' + (e.message || ''), 'error');
+  }
 }
 
 function closeChangePasswordModal() {
   if (_forceChangePassword) {
-    showToast('Şifre değiştirmeden devam edemezsiniz. Bilinmeyen durumda Çıkış yapabilirsiniz.', 'error');
+    showToast('"24 saat sonra hatırlat" butonunu kullanabilir veya şifrenizi şimdi değiştirebilirsiniz.', 'info');
     return;
   }
   document.getElementById('change-password-overlay').style.display = 'none';

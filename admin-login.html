@@ -94,6 +94,19 @@ body{
 .field-icon svg{width:16px;height:16px}
 .field input:focus ~ .field-icon{color:#D4682E}
 
+/* Şifre göz ikonu (göster/gizle) */
+.field-password input{padding-right:36px}
+.pw-toggle{
+  position:absolute;right:0;top:6px;
+  display:flex;align-items:center;justify-content:center;
+  width:30px;height:30px;border:none;background:transparent;cursor:pointer;
+  color:rgba(245,237,224,.5);padding:0;
+  transition:color .2s,background .15s;border-radius:6px;
+}
+.pw-toggle:hover{color:#D4682E;background:rgba(255,255,255,.05)}
+.pw-toggle:focus{outline:none;color:#D4682E}
+.pw-toggle svg{width:18px;height:18px}
+
 /* Primary button */
 .auth-btn{
   margin-top:4px;width:100%;
@@ -166,12 +179,16 @@ body{
       </div>
 
       <!-- Şifre -->
-      <div class="field">
+      <div class="field field-password">
         <input type="password" id="auth-pw" placeholder=" " autocomplete="current-password" required>
         <span class="field-icon">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         </span>
         <label for="auth-pw">Şifre</label>
+        <button type="button" class="pw-toggle" id="pw-toggle" onclick="togglePasswordVisibility()" title="Şifreyi göster/gizle" aria-label="Şifreyi göster/gizle">
+          <svg id="pw-eye-on" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg id="pw-eye-off" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+        </button>
       </div>
 
       <button type="submit" class="auth-btn">
@@ -275,6 +292,20 @@ void main(){mainImage(gl_FragColor,gl_FragCoord.xy);}`;
   }
   render();
 })();
+
+// Şifre göster/gizle toggle
+function togglePasswordVisibility() {
+  var input = document.getElementById('auth-pw');
+  var on = document.getElementById('pw-eye-on');
+  var off = document.getElementById('pw-eye-off');
+  if (!input) return;
+  var show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  if (on) on.style.display = show ? 'none' : '';
+  if (off) off.style.display = show ? '' : 'none';
+  // Odağı kaybetmesin
+  input.focus();
+}
 
 // ═══ Firebase + Authentication ═══
 firebase.initializeApp({

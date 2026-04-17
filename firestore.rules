@@ -51,9 +51,10 @@ service cloud.firestore {
           && request.resource.data.role in ['admin','editor','viewer']
         ) || (
           // Kullanıcı kendi ismini/fotoğrafını güncelleyebilir — başka alan değiştiremez
+          // + mustChangePassword/mustChangePasswordSnoozeUntil (kendi şifre akışı)
           request.auth != null
           && request.auth.uid == uid
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'photoURL'])
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'photoURL', 'mustChangePassword', 'mustChangePasswordSnoozeUntil'])
         );
       allow delete: if isAdmin();
     }
