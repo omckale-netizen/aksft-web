@@ -47,99 +47,93 @@ export async function onRequestPost(context) {
     } catch(e) {}
   }
 
-  // Firebase Auth'ta bu e-posta kayıtlı mı? (createAuthUri endpoint)
-  let isRegistered = false;
+  // Service account varsa: önce lookup, sonra link al, sonra Resend ile gönder
+  // Yoksa: Firebase default mail (kayıtsız ise Firebase EMAIL_NOT_FOUND dönecek)
   try {
-    const checkResp = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:createAuthUri?key=' + FIREBASE_API_KEY, {
+    const hasSA = !!env.FIREBASE_SERVICE_ACCOUNT;
+    const hasResend = !!env.RESEND_API_KEY;
+
+    if (hasSA) {
+      // 1) Service account JWT → OAuth access token
+      let sa, accessToken;
+      try {
+        sa = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
+        accessToken = await getAccessToken(sa);
+      } catch(e) {
+        // Service account parse edilemedi → kayıtsız muamelesi yapma, hata dön
+        return new Response(JSON.stringify({ error: 'Sunucu yapılandırma hatası. Lütfen yönetici ile iletişime geçin.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+      }
+
+      // 2) E-posta kayıtlı mı? accounts:lookup (service account ile authenticated)
+      const lookupResp = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=' + FIREBASE_API_KEY, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
+        body: JSON.stringify({ email: [email] })
+      });
+      const lookupData = await lookupResp.json();
+      const users = (lookupData && lookupData.users) || [];
+      if (users.length === 0) {
+        return new Response(JSON.stringify({ ok: false, registered: false, error: 'Bu e-posta adresiyle kayıtlı bir hesap bulunamadı.' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+      }
+
+      // 3) Reset link al (Firebase mail göndermesin — returnOobLink: true)
+      const oobResp = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=' + FIREBASE_API_KEY, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
+        body: JSON.stringify({ requestType: 'PASSWORD_RESET', email: email, returnOobLink: true })
+      });
+      const oobData = await oobResp.json().catch(() => ({}));
+      const resetLink = oobData.oobLink;
+
+      if (!oobResp.ok || !resetLink) {
+        // Link alınamadı — Firebase default mailine düş
+        await fetch('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=' + FIREBASE_API_KEY, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ requestType: 'PASSWORD_RESET', email: email })
+        });
+        return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
+
+      // 4) Resend varsa özel HTML mail, yoksa Firebase default mail gönder
+      if (hasResend) {
+        const html = buildResetMailHtml(resetLink, email);
+        const text = `Merhaba,\n\nAssos'u Keşfet yönetim paneli için şifre sıfırlama talebi aldık.\n\nYeni şifre belirlemek için aşağıdaki linke tıklayın (1 saat geçerli):\n\n${resetLink}\n\nBu talebi siz yapmadıysanız bu maili görmezden gelebilirsiniz, hesabınız güvende.\n\nAssos'u Keşfet Ekibi\ninfo@assosukesfet.com`;
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: 'Assos\'u Keşfet <info@assosukesfet.com>',
+            to: [email],
+            subject: '🔑 Şifre Sıfırlama — Assos\'u Keşfet',
+            html: html, text: text,
+            reply_to: 'info@assosukesfet.com'
+          })
+        });
+      } else {
+        // Resend yok → Firebase default maili gönder
+        await fetch('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=' + FIREBASE_API_KEY, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ requestType: 'PASSWORD_RESET', email: email })
+        });
+      }
+      return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    // Service account yoksa: Firebase default mail (kayıtsız ise Firebase hata döner)
+    const fallbackResp = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=' + FIREBASE_API_KEY, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ identifier: email, continueUri: 'https://assosukesfet.com/admin-login' })
+      body: JSON.stringify({ requestType: 'PASSWORD_RESET', email: email })
     });
-    if (checkResp.ok) {
-      const checkData = await checkResp.json();
-      isRegistered = checkData.registered === true;
+    if (!fallbackResp.ok) {
+      const errData = await fallbackResp.json().catch(() => ({}));
+      const msg = (errData.error && errData.error.message) || '';
+      if (msg === 'EMAIL_NOT_FOUND') {
+        return new Response(JSON.stringify({ ok: false, registered: false, error: 'Bu e-posta adresiyle kayıtlı bir hesap bulunamadı.' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+      }
     }
-  } catch(e) { /* sessizce geç */ }
-
-  // Super admin e-postasına her zaman izin ver (kurtarma)
-  if (!isRegistered && email === 'info@onyedimedya.com') isRegistered = true;
-
-  // Kayıtlı DEĞİLSE — kullanıcıya bildir
-  if (!isRegistered) {
-    return new Response(JSON.stringify({ ok: false, registered: false, error: 'Bu e-posta adresiyle kayıtlı bir hesap bulunamadı.' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
-  }
-
-  // Service account ile reset link al (mail Firebase tarafından gönderilmesin)
-  // ve Resend ile bizim tasarımımızla info@assosukesfet.com'dan gönder
-  try {
-    if (!env.FIREBASE_SERVICE_ACCOUNT || !env.RESEND_API_KEY) {
-      // Service account veya Resend yoksa Firebase'in default mailine düş
-      await fetch('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=' + FIREBASE_API_KEY, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requestType: 'PASSWORD_RESET', email: email })
-      });
-      return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-    }
-
-    // 1) Service account JWT → OAuth access token
-    let sa;
-    try {
-      sa = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
-    } catch(e) {
-      // Fallback Firebase mail
-      await fetch('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=' + FIREBASE_API_KEY, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requestType: 'PASSWORD_RESET', email: email })
-      });
-      return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-    }
-
-    const accessToken = await getAccessToken(sa);
-
-    // 2) Reset link al (Firebase mail göndermesin — returnOobLink: true)
-    const oobResp = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=' + FIREBASE_API_KEY, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + accessToken
-      },
-      body: JSON.stringify({
-        requestType: 'PASSWORD_RESET',
-        email: email,
-        returnOobLink: true
-      })
-    });
-    if (!oobResp.ok) {
-      return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-    }
-    const oobData = await oobResp.json();
-    const resetLink = oobData.oobLink;
-    if (!resetLink) {
-      return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-    }
-
-    // 3) Resend ile özel HTML mail gönder
-    const html = buildResetMailHtml(resetLink, email);
-    const text = `Merhaba,\n\nAssos'u Keşfet yönetim paneli için şifre sıfırlama talebi aldık.\n\nYeni şifre belirlemek için aşağıdaki linke tıklayın (1 saat geçerli):\n\n${resetLink}\n\nBu talebi siz yapmadıysanız bu maili görmezden gelebilirsiniz, hesabınız güvende.\n\nAssos'u Keşfet Ekibi\ninfo@assosukesfet.com`;
-
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + env.RESEND_API_KEY,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        from: 'Assos\'u Keşfet <info@assosukesfet.com>',
-        to: [email],
-        subject: '🔑 Şifre Sıfırlama — Assos\'u Keşfet',
-        html: html,
-        text: text,
-        reply_to: 'info@assosukesfet.com'
-      })
-    });
-
     return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch(e) {
     console.error('Password reset email error:', e);
