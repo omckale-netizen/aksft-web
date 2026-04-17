@@ -426,14 +426,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .msg-search{flex:1;min-width:180px;padding:8px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.82rem;font-family:inherit;background:var(--cream);color:var(--navy);outline:none;transition:border .2s}
 .msg-search:focus{border-color:var(--terra)}
 .msg-cat-filter{padding:8px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.82rem;font-family:inherit;background:var(--cream);color:var(--navy);outline:none;cursor:pointer}
-.msg-item{display:flex;gap:14px;padding:16px 20px;border-bottom:1px solid rgba(0,0,0,.04);cursor:pointer;transition:background .15s;position:relative}
+.msg-item{display:flex;gap:12px;padding:14px 18px;border-bottom:1px solid rgba(0,0,0,.04);cursor:pointer;transition:background .15s;position:relative;align-items:flex-start}
 .msg-item:hover{background:rgba(0,0,0,.02)}
 .msg-item:last-child{border-bottom:none}
 .msg-item.unread{background:rgba(196,82,26,.03);border-left:3px solid var(--terra)}
+.msg-item.unread .msg-avatar::after{content:'';position:absolute;top:-2px;right:-2px;width:10px;height:10px;border-radius:50%;background:var(--terra);border:2px solid var(--card-bg)}
+.msg-item .msg-avatar{position:relative}
 .msg-item.trashed{opacity:.55}
-.msg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:6px}
-.msg-dot.unread{background:var(--terra)}
-.msg-dot.read{background:transparent}
+.msg-dot{display:none}
 .msg-cat-badge{display:inline-block;font-size:.65rem;padding:2px 8px;border-radius:20px;font-weight:600;margin-top:4px}
 .msg-cat-Genel{background:rgba(26,39,68,.08);color:var(--navy)}
 .msg-cat-Oneri{background:rgba(76,175,80,.12);color:#2E7D32}
@@ -443,7 +443,27 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .msg-cat-Hata{background:rgba(255,152,0,.12);color:#E65100}
 .msg-trash-banner{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:rgba(244,67,54,.06);border-radius:8px;margin-bottom:12px;font-size:.82rem;color:#C62828}
 .msg-trash-banner button{font-size:.78rem}
-.msg-layout{display:grid;grid-template-columns:380px 1fr;gap:20px;align-items:start;min-height:calc(100vh - 200px)}
+.msg-layout{display:grid;grid-template-columns:220px 380px 1fr;gap:16px;align-items:start;min-height:calc(100vh - 200px)}
+.msg-sidebar{background:var(--card-bg);border-radius:var(--radius);border:1px solid var(--card-border);padding:12px 10px;height:100%;display:flex;flex-direction:column;gap:3px}
+.msg-sidebar-label{font-size:.62rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);padding:10px 12px 6px;margin-top:4px}
+.msg-sidebar-label:first-child{margin-top:0}
+.msg-sidebar-item{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:.82rem;color:var(--text);transition:background .15s;border:none;background:none;text-align:left;font-family:inherit;font-weight:500}
+.msg-sidebar-item:hover{background:rgba(196,82,26,.06)}
+.msg-sidebar-item.active{background:rgba(196,82,26,.1);color:var(--terra);font-weight:700}
+.msg-sidebar-item .msg-sb-icon{font-size:1rem;width:18px;text-align:center;flex-shrink:0}
+.msg-sidebar-item .msg-sb-count{margin-left:auto;font-size:.68rem;font-weight:700;padding:1px 7px;border-radius:999px;background:rgba(0,0,0,.08);color:var(--text-muted);min-width:20px;text-align:center}
+.msg-sidebar-item.active .msg-sb-count{background:var(--terra);color:#fff}
+.msg-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.78rem;color:#fff;flex-shrink:0;font-family:'Plus Jakarta Sans',sans-serif}
+.msg-avatar-lg{width:52px;height:52px;font-size:1.05rem}
+.msg-priority{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-right:4px}
+.msg-priority-urgent{background:#E53E3E;box-shadow:0 0 0 3px rgba(229,62,62,.2)}
+.msg-priority-high{background:#DD6B20}
+.msg-priority-normal{background:#718096}
+.msg-actions-toolbar{display:flex;gap:4px;padding:10px 18px;border-bottom:1px solid rgba(0,0,0,.06);background:rgba(0,0,0,.015);flex-wrap:wrap}
+.msg-action-btn{width:34px;height:34px;border-radius:8px;border:1px solid transparent;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.95rem;color:var(--text);transition:all .15s;position:relative}
+.msg-action-btn:hover{background:var(--cream);border-color:rgba(0,0,0,.08)}
+.msg-action-btn.danger:hover{background:rgba(229,62,62,.08);color:#E53E3E}
+.msg-action-btn[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:-28px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:3px 8px;border-radius:6px;font-size:.68rem;white-space:nowrap;z-index:10}
 .msg-item.msg-active{background:rgba(196,82,26,.06) !important;border-left:3px solid var(--terra)}
 .msg-consent-box{background:rgba(56,161,105,.04);border:1px solid rgba(56,161,105,.12);border-radius:10px;padding:14px 16px;font-size:.78rem}
 .msg-consent-box .consent-label{font-weight:700;color:var(--green);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
@@ -453,7 +473,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .msg-consent-row span:last-child{color:var(--navy)}
 .msg-device-box{background:rgba(26,39,68,.03);border:1px solid rgba(26,39,68,.06);border-radius:10px;padding:14px 16px;margin-top:12px;font-size:.78rem}
 .msg-device-box .device-label{font-weight:700;color:var(--navy);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
-@media(max-width:900px){.msg-layout{grid-template-columns:1fr !important}.msg-detail-panel{display:none}.msg-detail-panel.show{display:block;position:fixed;inset:0;z-index:200;background:var(--page-bg);overflow-y:auto}}
+@media(max-width:1100px){.msg-layout{grid-template-columns:180px 1fr !important}.msg-detail-panel{display:none}.msg-detail-panel.show{display:block;position:fixed;inset:0;z-index:200;background:var(--page-bg);overflow-y:auto;padding:16px}}
+@media(max-width:700px){.msg-layout{grid-template-columns:1fr !important}.msg-sidebar{display:none}.msg-sidebar.show{display:flex;position:fixed;inset:0;z-index:201;border-radius:0}}
 .gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
 .gal-card{position:relative;border-radius:10px;overflow:hidden;background:#f5f0ea;border:1px solid rgba(0,0,0,.06);transition:transform .15s,box-shadow .15s}
 .gal-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.08)}
@@ -570,7 +591,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
       <div class="nav-group-label">İletişim & Analiz</div>
       <a class="admin-nav-item" data-page="messages" onclick="showPage('messages')">
-        <span class="nav-icon">✉️</span> Mesajlar <span id="msg-badge" style="background:var(--red);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;display:none"></span>
+        <span class="nav-icon">✉️</span> Mesajlar & Mail <span id="msg-badge" style="background:var(--red);color:#fff;font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;display:none"></span>
       </a>
       <a class="admin-nav-item" data-page="analytics" onclick="showPage('analytics')">
         <span class="nav-icon">📈</span> İstatistikler
@@ -1704,38 +1725,40 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       <div class="stats-grid" id="msg-stats" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px"></div>
 
       <div class="msg-layout">
-        <!-- Sol: Liste -->
+        <!-- Sol: Sidebar (Klasörler + Etiketler + Kategoriler) -->
+        <aside class="msg-sidebar">
+          <div class="msg-sidebar-label">📥 Gelen Kutusu</div>
+          <button class="msg-sidebar-item active" data-filter="all" onclick="setMsgFilter('all',this)"><span class="msg-sb-icon">📨</span>Tümü<span class="msg-sb-count" id="msg-count-all">0</span></button>
+          <button class="msg-sidebar-item" data-filter="unread" onclick="setMsgFilter('unread',this)"><span class="msg-sb-icon">🔵</span>Okunmamış<span class="msg-sb-count" id="msg-count-unread">0</span></button>
+          <button class="msg-sidebar-item" data-filter="read" onclick="setMsgFilter('read',this)"><span class="msg-sb-icon">✓</span>Okunmuş<span class="msg-sb-count" id="msg-count-read">0</span></button>
+          <button class="msg-sidebar-item" data-filter="sent" onclick="setMsgFilter('sent',this)"><span class="msg-sb-icon">📤</span>Gönderilenler<span class="msg-sb-count" id="msg-count-sent">0</span></button>
+          <button class="msg-sidebar-item" data-filter="trash" onclick="setMsgFilter('trash',this)"><span class="msg-sb-icon">🗑</span>Çöp Kutusu<span class="msg-sb-count" id="msg-count-trash">0</span></button>
+
+          <div class="msg-sidebar-label">🏷 Etiketler</div>
+          <button class="msg-sidebar-item" data-label="cevaplanacak" onclick="setLabelFilter('cevaplanacak',this)"><span class="msg-sb-icon">🔴</span>Cevaplanacak</button>
+          <button class="msg-sidebar-item" data-label="beklemede" onclick="setLabelFilter('beklemede',this)"><span class="msg-sb-icon">🟡</span>Beklemede</button>
+          <button class="msg-sidebar-item" data-label="tamamlandi" onclick="setLabelFilter('tamamlandi',this)"><span class="msg-sb-icon">🟢</span>Tamamlandı</button>
+
+          <div class="msg-sidebar-label">📂 Kategoriler</div>
+          <button class="msg-sidebar-item" data-cat="Öneri" onclick="setCatFilter('Öneri',this)"><span class="msg-sb-icon">💡</span>Öneri</button>
+          <button class="msg-sidebar-item" data-cat="Şikayet" onclick="setCatFilter('Şikayet',this)"><span class="msg-sb-icon">⚠️</span>Şikayet</button>
+          <button class="msg-sidebar-item" data-cat="İşbirliği" onclick="setCatFilter('İşbirliği',this)"><span class="msg-sb-icon">🤝</span>İşbirliği</button>
+          <button class="msg-sidebar-item" data-cat="Mekan Ekleme Talebi" onclick="setCatFilter('Mekan Ekleme Talebi',this)"><span class="msg-sb-icon">🏪</span>Mekan Ekleme</button>
+          <button class="msg-sidebar-item" data-cat="Hata Bildirimi" onclick="setCatFilter('Hata Bildirimi',this)"><span class="msg-sb-icon">🐛</span>Hata Bildirimi</button>
+          <button class="msg-sidebar-item" data-cat="Genel" onclick="setCatFilter('Genel',this)"><span class="msg-sb-icon">📋</span>Genel</button>
+        </aside>
+
+        <!-- Orta: Liste -->
         <div class="msg-list-panel">
           <div class="panel-card" style="height:100%;display:flex;flex-direction:column">
-            <div class="panel-card-head" style="flex-shrink:0">
-              <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;flex:1">
-                <button class="btn btn-sm btn-secondary msg-tab active" onclick="setMsgFilter('all',this)">Tümü <span class="msg-tab-count" id="msg-count-all"></span></button>
-                <button class="btn btn-sm btn-secondary msg-tab" onclick="setMsgFilter('unread',this)">Okunmamış <span class="msg-tab-count" id="msg-count-unread"></span></button>
-                <button class="btn btn-sm btn-secondary msg-tab" onclick="setMsgFilter('read',this)">Okunmuş <span class="msg-tab-count" id="msg-count-read"></span></button>
-                <button class="btn btn-sm btn-secondary msg-tab" onclick="setMsgFilter('trash',this)">🗑 Çöp <span class="msg-tab-count" id="msg-count-trash"></span></button>
-                <button class="btn btn-sm btn-secondary msg-tab" onclick="setMsgFilter('sent',this)">📤 Gönderilenler <span class="msg-tab-count" id="msg-count-sent"></span></button>
-              </div>
+            <div style="padding:12px 14px;flex-shrink:0;display:flex;gap:8px;align-items:center;border-bottom:1px solid rgba(0,0,0,.04)">
+              <input type="text" class="msg-search" id="msg-search" placeholder="🔍 Mesajlarda ara..." oninput="renderMessageList()" style="flex:1">
+              <button class="msg-action-btn" onclick="renderMessageList()" data-tip="Yenile">🔄</button>
+              <button class="msg-action-btn" onclick="exportMessages()" data-tip="CSV İndir">📥</button>
             </div>
-            <div style="padding:10px 14px 0;flex-shrink:0;display:flex;gap:8px;flex-wrap:wrap">
-              <input type="text" class="msg-search" id="msg-search" placeholder="Mesajlarda ara..." oninput="renderMessageList()" style="flex:1;min-width:140px">
-              <select class="msg-cat-filter" id="msg-cat-filter" onchange="renderMessageList()" style="width:120px">
-                <option value="">Tüm Konular</option>
-                <option value="Genel">Genel</option>
-                <option value="Öneri">Öneri</option>
-                <option value="Şikayet">Şikayet</option>
-                <option value="İşbirliği">İşbirliği</option>
-                <option value="Mekan Ekleme Talebi">Mekan Ekleme</option>
-                <option value="Hata Bildirimi">Hata Bildirimi</option>
-              </select>
-              <select class="msg-cat-filter" id="msg-label-filter" onchange="renderMessageList()" style="width:120px">
-                <option value="">Tüm Etiketler</option>
-                <option value="cevaplanacak">🔴 Cevaplanacak</option>
-                <option value="beklemede">🟡 Beklemede</option>
-                <option value="tamamlandi">🟢 Tamamlandı</option>
-                <option value="none">Etiketsiz</option>
-              </select>
-              <button class="btn btn-sm btn-secondary" onclick="exportMessages()" title="Dışa Aktar" style="font-size:.72rem;padding:4px 10px">📥 CSV</button>
-            </div>
+            <!-- Gizli filtre uyum alanları (kod uyumluluğu için) -->
+            <select class="msg-cat-filter" id="msg-cat-filter" onchange="renderMessageList()" style="display:none"><option value=""></option></select>
+            <select class="msg-cat-filter" id="msg-label-filter" onchange="renderMessageList()" style="display:none"><option value=""></option></select>
             <div id="messages-list" style="flex:1;overflow-y:auto;max-height:calc(100vh - 320px)"></div>
           </div>
         </div>
@@ -1753,13 +1776,15 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             </div>
             <!-- Dolu durum -->
             <div id="msg-detail-content" style="display:none;flex:1;overflow-y:auto">
+              <!-- Action Toolbar (üst) -->
+              <div id="msg-detail-toolbar" class="msg-actions-toolbar"></div>
               <!-- Header -->
               <div id="msg-detail-header" style="padding:20px 24px;border-bottom:1px solid rgba(0,0,0,.06)"></div>
               <!-- Body -->
               <div id="msg-detail-body" style="padding:20px 24px"></div>
               <!-- KVKK Rıza Bilgisi -->
               <div id="msg-detail-consent" style="padding:0 24px 20px"></div>
-              <!-- Actions -->
+              <!-- Actions (alt - ekstra) -->
               <div id="msg-detail-actions" style="padding:14px 24px;border-top:1px solid rgba(0,0,0,.06);display:flex;gap:8px;flex-wrap:wrap"></div>
             </div>
           </div>
@@ -4010,8 +4035,38 @@ let allSentMails = [];
 
 function setMsgFilter(f, btn) {
   msgFilter = f;
+  // Tüm sidebar item'larının active'ini kaldır
+  document.querySelectorAll('.msg-sidebar-item').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.msg-tab').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
+  // Kategori ve etiket filtrelerini sıfırla (klasör değiştirildiğinde)
+  var catF = document.getElementById('msg-cat-filter');
+  var lblF = document.getElementById('msg-label-filter');
+  if (catF) catF.value = '';
+  if (lblF) lblF.value = '';
+  renderMessageList();
+}
+
+function setCatFilter(cat, btn) {
+  document.querySelectorAll('.msg-sidebar-item').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  // Klasör filtresini "Tümü" yap ki kategori görünsün
+  msgFilter = 'all';
+  var catF = document.getElementById('msg-cat-filter');
+  var lblF = document.getElementById('msg-label-filter');
+  if (catF) catF.value = cat;
+  if (lblF) lblF.value = '';
+  renderMessageList();
+}
+
+function setLabelFilter(label, btn) {
+  document.querySelectorAll('.msg-sidebar-item').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  msgFilter = 'all';
+  var catF = document.getElementById('msg-cat-filter');
+  var lblF = document.getElementById('msg-label-filter');
+  if (catF) catF.value = '';
+  if (lblF) lblF.value = label;
   renderMessageList();
 }
 
@@ -4708,6 +4763,27 @@ function renderMessageList() {
     return;
   }
 
+  // Avatar için isim başharflerinden renk üret (deterministic)
+  function avatarColor(name) {
+    var colors = ['#C4521A','#1A6B8A','#5A7A56','#D4935A','#9F7AEA','#38A169','#D69E2E','#E53E3E'];
+    var hash = 0;
+    for (var i = 0; i < (name || '').length; i++) hash = ((hash << 5) - hash + (name || '').charCodeAt(i)) & 0xffffffff;
+    return colors[Math.abs(hash) % colors.length];
+  }
+  function avatarInitials(name) {
+    if (!name) return '?';
+    var words = name.trim().split(/\s+/);
+    if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
+    return (words[0][0] + (words[0][1] || '')).toUpperCase();
+  }
+  // Aciliyet seviyesi — konuya göre otomatik
+  function priorityLevel(subject) {
+    if (!subject) return 'normal';
+    if (/şikayet|sikayet|acil/i.test(subject)) return 'urgent';
+    if (/hata|bug|sorun/i.test(subject)) return 'high';
+    return 'normal';
+  }
+
   listEl.innerHTML = trashBanner + msgs.map(m => {
     const date = m.timestamp ? new Date(m.timestamp) : null;
     const dateStr = date ? date.toLocaleDateString('tr-TR', { day:'2-digit', month:'short' }) : '';
@@ -4715,10 +4791,14 @@ function renderMessageList() {
     const catClass = getMsgCatClass(m.subject);
     var labelIcons = { cevaplanacak: '🔴', beklemede: '🟡', tamamlandi: '🟢' };
     var labelIcon = m.label && labelIcons[m.label] ? '<span title="' + m.label + '" style="font-size:.6rem">' + labelIcons[m.label] + '</span>' : '';
+    var initials = avatarInitials(m.name);
+    var bgColor = avatarColor(m.name || m.email || 'x');
+    var prio = priorityLevel(m.subject);
+    var prioDot = prio !== 'normal' ? '<span class="msg-priority msg-priority-' + prio + '" title="' + (prio === 'urgent' ? 'Acil' : 'Yüksek öncelik') + '"></span>' : '';
     return '<div class="msg-item ' + (m.read ? '' : 'unread') + (m.trashed ? ' trashed' : '') + '" onclick="openMessage(\'' + esc(m._id) + '\')" data-id="' + esc(m._id) + '">' +
-      '<div class="msg-dot ' + (m.read ? 'read' : 'unread') + '"></div>' +
+      '<div class="msg-avatar" style="background:' + bgColor + '">' + esc(initials) + '</div>' +
       '<div class="msg-info">' +
-        '<div class="msg-name">' + esc(m.name || 'İsimsiz') + ' ' + labelIcon + '</div>' +
+        '<div class="msg-name">' + prioDot + esc(m.name || 'İsimsiz') + ' ' + labelIcon + '</div>' +
         '<span class="msg-cat-badge ' + catClass + '">' + esc(m.subject || 'Genel') + '</span>' +
         '<div class="msg-preview">' + esc((m.message || '').substring(0, 80)) + '</div>' +
       '</div>' +
@@ -4772,6 +4852,16 @@ function openSentMail(id) {
 
   var toStr = (s.to || []).join(', ');
   var toFirst = (s.to || [])[0] || '';
+
+  // Toolbar — gönderilen mail için
+  document.getElementById('msg-detail-toolbar').innerHTML =
+    '<button class="msg-action-btn" data-tip="Tekrar Gönder" onclick="openComposeMail(\'' + esc(toFirst) + '\')">↩</button>' +
+    '<button class="msg-action-btn" data-tip="İlet" onclick="forwardSentMail(\'' + esc(id) + '\')">➡</button>' +
+    '<button class="msg-action-btn" data-tip="HTML Önizleme" onclick="previewSentMailHtml(\'' + esc(id) + '\')">👁</button>' +
+    '<div style="flex:1"></div>' +
+    '<button class="msg-action-btn danger" data-tip="Sil" onclick="deleteSentMail(\'' + esc(id) + '\')">🗑</button>' +
+    '<button class="msg-action-btn" data-tip="Kapat" onclick="closeMsgDetail()">✕</button>';
+
   document.getElementById('msg-detail-header').innerHTML =
     '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">' +
       '<div>' +
@@ -4865,17 +4955,49 @@ async function openMessage(docId) {
   const isTrashed = m.trashed;
   const catClass = getMsgCatClass(m.subject);
 
-  // Header
+  // Üst toolbar — ikon butonlar
+  function iconAvatar(name, email, size) {
+    var words = (name || '?').trim().split(/\s+/);
+    var init = words.length >= 2 ? (words[0][0] + words[1][0]).toUpperCase() : ((words[0][0] || '?') + (words[0][1] || '')).toUpperCase();
+    var colors = ['#C4521A','#1A6B8A','#5A7A56','#D4935A','#9F7AEA','#38A169','#D69E2E','#E53E3E'];
+    var seed = (name || email || 'x');
+    var hash = 0;
+    for (var i = 0; i < seed.length; i++) hash = ((hash << 5) - hash + seed.charCodeAt(i)) & 0xffffffff;
+    var color = colors[Math.abs(hash) % colors.length];
+    return '<div class="msg-avatar msg-avatar-lg" style="background:' + color + '">' + esc(init) + '</div>';
+  }
+
+  document.getElementById('msg-detail-toolbar').innerHTML = isTrashed
+    ? '<button class="msg-action-btn" data-tip="Geri Yükle" onclick="restoreMessage(\'' + esc(docId) + '\')">↩</button>' +
+      '<button class="msg-action-btn danger" data-tip="Kalıcı Sil" onclick="permanentDeleteMessage(\'' + esc(docId) + '\')">🗑</button>' +
+      '<div style="flex:1"></div>' +
+      '<button class="msg-action-btn" data-tip="Kapat" onclick="closeMsgDetail()">✕</button>'
+    : '<button class="msg-action-btn" data-tip="Yanıtla" onclick="openReplyMail(\'' + esc(docId) + '\')">↩</button>' +
+      '<button class="msg-action-btn" data-tip="Yeni Mail" onclick="openComposeMail(\'' + esc(m.email || '') + '\')">✉️</button>' +
+      (m.phone ? '<a class="msg-action-btn" data-tip="Ara" href="tel:' + esc(m.phone.replace(/\s/g,'')) + '" style="text-decoration:none">📞</a>' : '') +
+      '<button class="msg-action-btn" data-tip="Okunmadı İşaretle" onclick="toggleReadStatus(\'' + esc(docId) + '\')">👁</button>' +
+      '<div style="width:1px;background:rgba(0,0,0,.08);margin:4px 4px"></div>' +
+      '<select onchange="setMsgLabel(\'' + esc(docId) + '\',this.value)" style="padding:6px 10px;border:1px solid rgba(0,0,0,.08);border-radius:8px;font-size:.75rem;background:var(--card-bg,#fff);color:var(--text);cursor:pointer;font-family:inherit" data-tip="Etiketle">' +
+        '<option value=""' + (!m.label ? ' selected' : '') + '>🏷 Etiket</option>' +
+        '<option value="cevaplanacak"' + (m.label === 'cevaplanacak' ? ' selected' : '') + '>🔴 Cevaplanacak</option>' +
+        '<option value="beklemede"' + (m.label === 'beklemede' ? ' selected' : '') + '>🟡 Beklemede</option>' +
+        '<option value="tamamlandi"' + (m.label === 'tamamlandi' ? ' selected' : '') + '>🟢 Tamamlandı</option>' +
+      '</select>' +
+      '<div style="flex:1"></div>' +
+      '<button class="msg-action-btn danger" data-tip="Çöpe At" onclick="trashMessage(\'' + esc(docId) + '\')">🗑</button>' +
+      '<button class="msg-action-btn" data-tip="Kapat" onclick="closeMsgDetail()">✕</button>';
+
+  // Header — büyük avatar + isim + konu
   document.getElementById('msg-detail-header').innerHTML =
-    '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">' +
-      '<div>' +
-        '<div style="font-size:1.05rem;font-weight:800;color:var(--navy);margin-bottom:4px">' + esc(m.name || 'İsimsiz') + '</div>' +
+    '<div style="display:flex;align-items:flex-start;gap:14px">' +
+      iconAvatar(m.name, m.email) +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:1.1rem;font-weight:800;color:var(--navy);margin-bottom:4px;word-break:break-word">' + esc(m.name || 'İsimsiz') + '</div>' +
+        '<div style="font-size:.8rem;color:var(--text-muted);margin-bottom:8px">' + esc(m.email || '') + (m.timestamp ? ' · ' + new Date(m.timestamp).toLocaleString('tr-TR') : '') + '</div>' +
         '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
           '<span class="msg-cat-badge ' + catClass + '">' + esc(m.subject || 'Genel') + '</span>' +
-          '<span style="font-size:.72rem;color:var(--text-muted)">' + (m.timestamp ? new Date(m.timestamp).toLocaleString('tr-TR') : '') + '</span>' +
         '</div>' +
       '</div>' +
-      '<button class="btn btn-sm btn-secondary" onclick="closeMsgDetail()" style="display:none" id="msg-close-mobile">← Geri</button>' +
     '</div>';
 
   // Body — kişi bilgileri + mesaj
@@ -4906,22 +5028,9 @@ async function openMessage(docId) {
   }
   document.getElementById('msg-detail-consent').innerHTML = consentHtml;
 
-  // Actions
-  document.getElementById('msg-detail-actions').innerHTML =
-    (isTrashed
-      ? '<button class="btn btn-primary btn-sm" onclick="restoreMessage(\'' + docId + '\')">↩ Geri Yükle</button>' +
-        '<button class="btn btn-danger btn-sm" onclick="permanentDeleteMessage(\'' + docId + '\')">Kalıcı Sil</button>'
-      : '<button class="btn btn-primary btn-sm" onclick="openReplyMail(\'' + docId + '\')">✉️ Yanıtla</button>' +
-        '<button class="btn btn-secondary btn-sm" onclick="openComposeMail(\'' + (m.email || '') + '\')">📝 Yeni Mail</button>' +
-        (m.phone ? '<a href="tel:' + m.phone.replace(/\s/g,'') + '" class="btn btn-secondary btn-sm">📞 Ara</a>' : '') +
-        '<select onchange="setMsgLabel(\'' + docId + '\',this.value)" style="padding:5px 10px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:6px;font-size:.72rem;background:var(--input-bg,#fff);color:var(--text);cursor:pointer;margin-left:auto">' +
-          '<option value=""' + (!m.label ? ' selected' : '') + '>Etiket</option>' +
-          '<option value="cevaplanacak"' + (m.label === 'cevaplanacak' ? ' selected' : '') + '>🔴 Cevaplanacak</option>' +
-          '<option value="beklemede"' + (m.label === 'beklemede' ? ' selected' : '') + '>🟡 Beklemede</option>' +
-          '<option value="tamamlandi"' + (m.label === 'tamamlandi' ? ' selected' : '') + '>🟢 Tamamlandı</option>' +
-        '</select>' +
-        '<button class="btn btn-danger btn-sm" onclick="trashMessage(\'' + docId + '\')">🗑</button>'
-    );
+  // Alt actions — sadece büyük yanıtla butonu (toolbar'da da var ama primary CTA burada)
+  document.getElementById('msg-detail-actions').innerHTML = isTrashed ? '' :
+    '<button class="btn btn-primary" onclick="openReplyMail(\'' + esc(docId) + '\')" style="flex:1">✉️ Yanıtla</button>';
 
   // Mobilde geri butonunu göster
   if (window.innerWidth <= 900) {
@@ -5402,6 +5511,18 @@ function forwardSentMail(id) {
     document.getElementById('compose-body').value = '--- İletilen Mesaj ---\nKonu: ' + (s.subject || '') + '\nAlıcı: ' + (s.to || []).join(', ') + '\nTarih: ' + (s.timestamp ? new Date(s.timestamp).toLocaleString('tr-TR') : '') + '\n\n' + (s.body || '');
   }, 100);
 }
+// Okundu/Okunmadı toggle
+async function toggleReadStatus(docId) {
+  var m = allMessages.find(function(x) { return x._id === docId; });
+  if (!m) return;
+  m.read = !m.read;
+  try {
+    await db.collection('messages').doc(docId).update({ read: m.read });
+  } catch(e) {}
+  renderMessageList();
+  showToast(m.read ? 'Okundu olarak işaretlendi' : 'Okunmadı olarak işaretlendi', 'success');
+}
+
 async function setMsgLabel(docId, label) {
   var m = allMessages.find(function(x) { return x._id === docId; });
   if (!m) return;
