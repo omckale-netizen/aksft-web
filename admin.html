@@ -7513,7 +7513,8 @@ function startChatListener() {
   _chatUnsub = db.collection('team_chat').orderBy('timestamp', 'asc').limit(500).onSnapshot(function(snap) {
     _chatAllMessages = [];
     snap.forEach(function(doc) {
-      _chatAllMessages.push(Object.assign({ id: doc.id }, doc.data()));
+      // serverTimestamps:'estimate' → pending write'larda da timestamp gelsin (anlık görünsün)
+      _chatAllMessages.push(Object.assign({ id: doc.id }, doc.data({ serverTimestamps: 'estimate' })));
     });
     renderChatMessages();
     if (document.getElementById('page-chat') && document.getElementById('page-chat').classList.contains('active')) {
@@ -7522,7 +7523,15 @@ function startChatListener() {
     }
     updateChatBadge();
   }, function(err) {
-    console.warn('chat listener:', err);
+    console.error('[chat] listener error:', err);
+    var wrap = document.getElementById('chat-messages');
+    if (wrap) {
+      wrap.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--red);font-size:.88rem">' +
+        '<div style="font-size:2rem;margin-bottom:10px">⚠️</div>' +
+        '<strong>Sohbet yüklenemedi:</strong> ' + escHtml(err.message || '') +
+        '<div style="margin-top:10px;font-size:.76rem;color:var(--text-muted)">Firebase Console → Firestore → Rules güncel sürümü yayınlandı mı?</div>' +
+      '</div>';
+    }
   });
   // Kendi okuma zamanımızı da dinle (farklı cihazdan güncellenirse senkron)
   var uid = firebase.auth().currentUser && firebase.auth().currentUser.uid;
@@ -7614,8 +7623,16 @@ function sendChatMessage() {
     ta.style.height = 'auto';
     document.getElementById('chat-char-count').textContent = '0 / 2000';
     ta.focus();
+    // Gönderim sonrası alt'a kaydır — local write anlık gelmese bile kısa sürede görünür
+    setTimeout(scrollChatToBottom, 120);
   }).catch(function(err) {
-    showToast && showToast('Mesaj gönderilemedi: ' + (err.message || err), 'error');
+    console.error('[chat] send failed:', err);
+    var errMsg = 'Mesaj gönderilemedi: ' + (err.message || err);
+    if (err.code === 'permission-denied') {
+      errMsg += ' (Firestore rules güncel mi? Console → Rules → Publish kontrolü)';
+    }
+    if (typeof showToast === 'function') showToast(errMsg, 'error');
+    else alert(errMsg);
   }).finally(function() {
     btn.disabled = false; btn.textContent = 'Gönder';
   });
