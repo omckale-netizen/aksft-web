@@ -880,13 +880,78 @@ async function loadHomeBlog() {
     const snap = await firebase.firestore().collection('blog_posts').limit(50).get();
     const posts = snap.docs.filter(function(d) { return d.data().status === 'published'; });
     if (posts.length === 0) { grid.style.display = 'none'; return; }
-    // Günün tarihine göre 3 farklı yazı seç (her gün değişir)
-    const dayIndex = Math.floor(Date.now() / 86400000) % posts.length;
-    const picked = [];
-    for (var i = 0; i < 3 && i < posts.length; i++) {
-      picked.push(posts[(dayIndex + i) % posts.length]);
+
+    const PICK_COUNT = 3;
+    const today = Math.floor(Date.now() / 86400000);
+
+    // Deterministik hash (id + day seed) — aynı gün herkes aynı skoru alır
+    function hashStr(s) {
+      var h = 0;
+      for (var i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) & 0xffffffff;
+      return Math.abs(h);
     }
-    grid.innerHTML = picked.map(function(doc) {
+
+    // Belirli bir gün için puanlanmış sıralı liste üretir
+    // Puan = günlük deterministik hash + yaş bonusu + kategori çeşitliliği
+    function rankForDay(list, day) {
+      var scored = list.map(function(doc) {
+        var p = doc.data();
+        var id = doc.id;
+        // Günlük rastgelelik seed'i
+        var rand = hashStr(id + '_d' + day) / 0x7fffffff; // 0..1
+        // Yaşlılık bonusu: yeni postlar +, eski postlar az eksi
+        var pubTime = p.publishedAt ? new Date(p.publishedAt).getTime() : 0;
+        var ageDays = pubTime ? Math.floor((Date.now() - pubTime) / 86400000) : 365;
+        var freshness = Math.max(0, 1 - ageDays / 365) * 0.3; // 0..0.3
+        // Featured/pinned bonusu
+        var featBonus = p.featured ? 0.25 : 0;
+        // Toplam skor: günlük karma (0..1) + yaşlılık + featured
+        var score = rand * 0.7 + freshness + featBonus;
+        return { doc: doc, id: id, score: score, category: p.category || '_' };
+      });
+      scored.sort(function(a, b) { return b.score - a.score; });
+      return scored;
+    }
+
+    // Kategori çeşitliliği ile top-N seçimi (dün seçilenleri hariç tut)
+    function pickDiverse(ranked, n, exclude) {
+      var picked = [];
+      var catCount = {};
+      var maxPerCat = Math.max(1, Math.ceil(n / 3)); // 3 seçim için en fazla 1 kategoriden
+      // 1. Pass: çeşitlilik kuralına uygun topla
+      for (var i = 0; i < ranked.length && picked.length < n; i++) {
+        var r = ranked[i];
+        if (exclude && exclude.indexOf(r.id) > -1) continue;
+        if ((catCount[r.category] || 0) >= maxPerCat) continue;
+        picked.push(r);
+        catCount[r.category] = (catCount[r.category] || 0) + 1;
+      }
+      // 2. Pass: hala eksikse (çeşitlilik dar kaldı) kuralı gevşet
+      if (picked.length < n) {
+        for (var j = 0; j < ranked.length && picked.length < n; j++) {
+          var r2 = ranked[j];
+          if (exclude && exclude.indexOf(r2.id) > -1) continue;
+          if (picked.indexOf(r2) > -1) continue;
+          picked.push(r2);
+        }
+      }
+      return picked;
+    }
+
+    // Dün seçilenleri hesapla (aynı algoritma ile, exclude=[])
+    var yesterdayPicks = pickDiverse(rankForDay(posts, today - 1), PICK_COUNT, []).map(function(r) { return r.id; });
+
+    // Bugün: dün çıkanları exclude et, yine diversity'yi uygula
+    var todayRanked = rankForDay(posts, today);
+    var picked = pickDiverse(todayRanked, PICK_COUNT, yesterdayPicks);
+
+    // Pool küçükse (<=N), dün hariç tutulamaz → dün dahil edilmek zorunda
+    if (picked.length < Math.min(PICK_COUNT, posts.length)) {
+      picked = pickDiverse(todayRanked, PICK_COUNT, []);
+    }
+
+    grid.innerHTML = picked.map(function(r) {
+      var doc = r.doc;
       var p = doc.data();
       var imgHtml = p.image ? '<img src="' + p.image + '" alt="' + (p.title||'') + '" loading="lazy" onload="var el=this;setTimeout(function(){el.classList.add(\'loaded\')},50)">' : '<div class="hp-blog-emoji">' + (p.emoji||'📝') + '</div>';
       return '<a href="blog?yazi=' + doc.id + '" class="hp-blog-card">' +
