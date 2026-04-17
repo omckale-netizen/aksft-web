@@ -2689,7 +2689,7 @@ function renderVenuePage(venueId) {
           <div class="vp-hero-chips">
             ${openBadge}
             <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" class="vp-hero-map-btn">🗺 Yol Tarifi Al</a>
-            ${v.website ? '<a href="' + v.website + '" target="_blank" rel="noopener noreferrer" class="vp-hero-map-btn">🌐 Web Sitesi</a>' : ''}
+            ${v.website ? '<a href="' + v.website + '" target="_blank" rel="noopener noreferrer" class="vp-hero-map-btn" onclick="if(window.trackAction)trackAction(\'' + escAttr(v.id) + '\',\'website\')">🌐 Web Sitesi</a>' : ''}
           </div>
         </div>
         <div class="vp-hero-right">
@@ -2859,7 +2859,7 @@ function renderVenuePage(venueId) {
                 <div class="vp-contact-val">${ph.number}</div>
               </div>
               <div class="vp-contact-acts">
-                <a href="tel:${cleanNum}" class="vp-contact-btn-outline" onclick="event.preventDefault();if(window.trackAction)trackAction('${escAttr(v.id)}','call');setTimeout(()=>{window.location.href=this.href},300)">${isLandline ? '📞' : '📱'} Ara</a>
+                <a href="tel:${cleanNum}" class="vp-contact-btn-outline" onclick="event.preventDefault();if(window.trackAction)trackAction('${escAttr(v.id)}','phone');setTimeout(()=>{window.location.href=this.href},300)">${isLandline ? '📞' : '📱'} Ara</a>
                 <a href="${phWaUrl}" target="_blank" rel="noopener" class="vp-wa-btn" onclick="if(window.trackAction)trackAction('${escAttr(v.id)}','whatsapp');">${waIconSmall} Yaz</a>
               </div>
             </div>` : `
@@ -2870,7 +2870,7 @@ function renderVenuePage(venueId) {
                 <div class="vp-contact-val">${ph.number}</div>
               </div>
               <div class="vp-contact-acts">
-                <a href="tel:${cleanNum}" class="vp-contact-btn-outline" onclick="event.preventDefault();if(window.trackAction)trackAction('${escAttr(v.id)}','call');setTimeout(()=>{window.location.href=this.href},300)">${isLandline ? '📞' : '📱'} Ara</a>
+                <a href="tel:${cleanNum}" class="vp-contact-btn-outline" onclick="event.preventDefault();if(window.trackAction)trackAction('${escAttr(v.id)}','phone');setTimeout(()=>{window.location.href=this.href},300)">${isLandline ? '📞' : '📱'} Ara</a>
               </div>
             </div>`;
             }).join('')}
@@ -2959,7 +2959,7 @@ function renderVenuePage(venueId) {
                   '<div class="vp-ig-sub">Instagram\'da takip edin</div>' +
                 '</div>' +
               '</div>' +
-              '<a href="' + igUrl + '" target="_blank" rel="noopener" class="vp-ig-btn">Takip Et</a>' +
+              '<a href="' + igUrl + '" target="_blank" rel="noopener" class="vp-ig-btn" onclick="if(window.trackAction)trackAction(\'' + escAttr(v.id) + '\',\'instagram\')">Takip Et</a>' +
             '</div>' +
           '</div>';
         })()}
@@ -3063,7 +3063,7 @@ function renderVenuePage(venueId) {
             <span class="vp-sticky-name">${v.title}</span>
           </div>
           <div class="vp-sticky-acts">
-            ${phones.length > 0 ? '<a href="tel:' + phones[0].number.replace(/\s/g,'') + '" class="vp-sticky-btn vp-sticky-call" onclick="event.preventDefault();if(window.trackAction)trackAction(\'' + escAttr(v.id) + '\',\'call\');setTimeout(()=>{window.location.href=this.href},300)">📞 Ara</a>' : ''}
+            ${phones.length > 0 ? '<a href="tel:' + phones[0].number.replace(/\s/g,'') + '" class="vp-sticky-btn vp-sticky-call" onclick="event.preventDefault();if(window.trackAction)trackAction(\'' + escAttr(v.id) + '\',\'phone\');setTimeout(()=>{window.location.href=this.href},300)">📞 Ara</a>' : ''}
             ${waContactUrl && waPhone && waPhone.whatsapp && v.category !== 'konaklama' ? '<a href="' + waContactUrl + '" target="_blank" rel="noopener" class="vp-sticky-btn vp-sticky-wa" onclick="if(window.trackAction)trackAction(\'' + escAttr(v.id) + '\',\'whatsapp\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="#fff" style="vertical-align:middle;margin-right:3px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.528 5.855L0 24l6.335-1.52C8.034 23.46 9.98 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.846 0-3.584-.479-5.104-1.32l-.369-.21-3.76.902.948-3.668-.223-.374A9.944 9.944 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>WhatsApp</a>' : ''}
             <a href="${mapsUrl}" target="_blank" rel="noopener" class="vp-sticky-btn vp-sticky-map" onclick="if(window.trackAction)trackAction('${escAttr(v.id)}','directions')">🗺 Yol Tarifi Al</a>
           </div>
@@ -3597,6 +3597,37 @@ function renderVenuePage(venueId) {
       docRef.set(update, { merge: true }).catch(() => {});
       logEvent('action', venueId, action);
     };
+
+    // Scroll depth tracking — 25/50/75/100 eşikleri (sayfa başına 1 kez)
+    // Gerçek engagement ölçümü: Duration tek başına yanıltıcı (sekme açık bırakılmış olabilir),
+    // scroll depth kullanıcının gerçekten okuyup okumadığını gösterir.
+    (function() {
+      // Admin/auth sayfalarında scroll tracking gereksiz
+      if (/\/(admin|login|auth)/i.test(location.pathname)) return;
+      var fired = { 25: false, 50: false, 75: false, 100: false };
+      var pending = false;
+      function check() {
+        try {
+          var scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+          var docH = document.documentElement.scrollHeight - window.innerHeight;
+          if (docH <= 100) return; // kısa sayfa, ölçüm anlamsız
+          var pct = Math.floor((scrollTop / docH) * 100);
+          [25, 50, 75, 100].forEach(function(t) {
+            if (pct >= t && !fired[t]) {
+              fired[t] = true;
+              logEvent('scroll', location.pathname, String(t));
+            }
+          });
+        } catch(e) {}
+      }
+      window.addEventListener('scroll', function() {
+        if (pending) return;
+        pending = true;
+        requestAnimationFrame(function() { pending = false; check(); });
+      }, { passive: true });
+      // İlk çağrı — zaten kısa sayfada kullanıcı %100'e ulaşmış olabilir
+      setTimeout(check, 1500);
+    })();
 
     // Auto-track current page
     const path = window.location.pathname.replace(/\/$/, '') || '/';

@@ -1,4 +1,4 @@
 import { vanityRedirect } from './_vanity.js';
 export function onRequest(context) {
-  return vanityRedirect(context.request, { source: 'whatsapp', medium: 'bio' });
+  return vanityRedirect(context, { source: 'whatsapp', medium: 'bio' });
 }

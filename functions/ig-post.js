@@ -1,4 +1,4 @@
 import { vanityRedirect } from './_vanity.js';
 export function onRequest(context) {
-  return vanityRedirect(context.request, { source: 'instagram', medium: 'post' });
+  return vanityRedirect(context, { source: 'instagram', medium: 'post' });
 }

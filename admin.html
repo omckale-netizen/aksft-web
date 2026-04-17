@@ -3122,6 +3122,33 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         <div id="ts-sessions" style="padding:16px 20px"></div>
       </div>
 
+      <!-- Dönüşüm Hunisi -->
+      <div class="panel-card" style="margin-bottom:20px">
+        <div class="panel-card-head">
+          <h3>🎯 Dönüşüm Hunisi</h3>
+          <span style="font-size:.68rem;color:var(--text-muted)">Oturum bazlı — her aşamada kaç kişi kayıp</span>
+        </div>
+        <div id="ts-funnel" style="padding:20px;min-height:220px"></div>
+      </div>
+
+      <!-- Kısa Link Performansı (Vanity Click → Pageview) -->
+      <div class="panel-card" style="margin-bottom:20px">
+        <div class="panel-card-head">
+          <h3>🔗 Kısa Link Performansı</h3>
+          <span style="font-size:.68rem;color:var(--text-muted)">Biyografi linkine tıklayan kaç kişi siteye girdi?</span>
+        </div>
+        <div id="ts-vanity" style="padding:16px 20px;min-height:120px"></div>
+      </div>
+
+      <!-- Scroll Derinliği (Engagement) -->
+      <div class="panel-card" style="margin-bottom:20px">
+        <div class="panel-card-head">
+          <h3>📜 Scroll Derinliği</h3>
+          <span style="font-size:.68rem;color:var(--text-muted)">Kullanıcılar sayfanın yüzde kaçını gördü?</span>
+        </div>
+        <div id="ts-scroll" style="padding:16px 20px;min-height:120px"></div>
+      </div>
+
       <style>
         @media(max-width:900px){.ts-3col{grid-template-columns:1fr 1fr !important}}
         @media(max-width:600px){.ts-3col{grid-template-columns:1fr !important}}
@@ -4839,6 +4866,193 @@ function renderTrafficSources(events) {
       '<div class="stat-card" style="padding:14px"><div class="stat-label">⏱ Ort. Süre</div><div class="stat-val" style="font-size:1.5rem">' + durStr + '</div><div style="font-size:.62rem;color:var(--text-muted);margin-top:2px">' + withDuration.length + ' ölçüm</div></div>' +
     '</div>';
   }
+
+  // === Dönüşüm Hunisi (Funnel) ===
+  renderTsFunnel(events, sessionMap);
+  // === Kısa Link Performansı (Vanity Click Dropout) ===
+  renderTsVanity(events, pageviews);
+  // === Scroll Derinliği ===
+  renderTsScroll(events);
+}
+
+// Funnel: Oturum başladı → Engaged (2+ sayfa) → Mekan/Yer detay → Aksiyon
+function renderTsFunnel(events, sessionMap) {
+  var el = document.getElementById('ts-funnel');
+  if (!el) return;
+  var STATIC_SLUGS = {
+    'page_index':1,'page_mekanlar':1,'page_yerler':1,'page_koyler':1,
+    'page_rotalar':1,'page_blog':1,'page_hakkimizda':1,'page_iletisim':1,
+    'page_sitemap':1,'page_sss':1,'page_favoriler':1,'page_pdp':1,
+    'page_privacy-policy':1,'page_terms-of-service':1,'page_mekan-ekle':1,
+    'page_yer-ekle':1,'page_404':1
+  };
+  var pageviews = events.filter(function(e) { return e.type === 'pageview'; });
+  var actions = events.filter(function(e) { return e.type === 'action'; });
+
+  var landingSessions = new Set();
+  var detailSessions = new Set();
+  var actionSessions = new Set();
+
+  pageviews.forEach(function(e) {
+    if (!e.sessionId) return;
+    if (e.landing) landingSessions.add(e.sessionId);
+    if (e.target && e.target.indexOf('page_') === 0 && !STATIC_SLUGS[e.target]) {
+      detailSessions.add(e.sessionId);
+    }
+  });
+  actions.forEach(function(e) { if (e.sessionId) actionSessions.add(e.sessionId); });
+
+  var engagedSessions = 0;
+  Object.keys(sessionMap).forEach(function(id) {
+    if (sessionMap[id].pageviews >= 2) engagedSessions++;
+  });
+
+  var stages = [
+    { label: 'Oturum Başladı',         icon: '👋', count: landingSessions.size, color: '#3182CE' },
+    { label: '2+ Sayfa Gezdi',          icon: '📖', count: engagedSessions,      color: '#38A169' },
+    { label: 'Mekan/Yer Detay Gördü',   icon: '🔍', count: detailSessions.size,  color: '#DD6B20' },
+    { label: 'Aksiyon Yaptı',           icon: '🎯', count: actionSessions.size,  color: '#E53E3E' }
+  ];
+
+  if (stages[0].count === 0) {
+    el.innerHTML = '<div style="color:var(--text-muted);font-size:.82rem;text-align:center;padding:40px 0">Henüz oturum verisi yok. Birkaç ziyaret sonrası huni dolar.</div>';
+    return;
+  }
+
+  var max = stages[0].count;
+  var html = '<div style="display:flex;flex-direction:column;gap:6px">';
+  stages.forEach(function(s, i) {
+    var pct = max > 0 ? (s.count / max * 100) : 0;
+    var dropPct = i > 0 && stages[i-1].count > 0 ? ((stages[i-1].count - s.count) / stages[i-1].count * 100) : 0;
+    var conv = i > 0 && stages[i-1].count > 0 ? (s.count / stages[i-1].count * 100) : null;
+    html += '<div>';
+    if (i > 0) {
+      html += '<div style="font-size:.68rem;color:var(--text-muted);margin:4px 0 2px 12px">↓ ' +
+        (conv !== null ? conv.toFixed(1) + '% geçti' : '') +
+        (dropPct > 0 ? ' · <span style="color:var(--red)">' + dropPct.toFixed(1) + '% kaybı</span>' : '') +
+        '</div>';
+    }
+    html += '<div style="display:flex;align-items:center;gap:10px">' +
+      '<div style="flex:1;height:42px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:8px;position:relative;overflow:hidden">' +
+        '<div style="position:absolute;inset:0;width:' + pct.toFixed(1) + '%;background:linear-gradient(90deg,' + s.color + ' 0%,' + s.color + 'cc 100%);transition:width .6s ease"></div>' +
+        '<div style="position:relative;padding:0 14px;line-height:42px;font-size:.86rem;color:var(--text);font-weight:600;display:flex;align-items:center;gap:8px">' +
+          '<span style="font-size:1rem">' + s.icon + '</span>' +
+          '<span>' + esc(s.label) + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div style="min-width:72px;text-align:right;font-size:1.1rem;font-weight:800;color:var(--navy)">' + s.count + '</div>' +
+    '</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  // Overall funnel conversion
+  var overall = stages[0].count > 0 ? (stages[stages.length-1].count / stages[0].count * 100) : 0;
+  html += '<div style="margin-top:14px;padding-top:14px;border-top:1px dashed var(--card-border);font-size:.78rem;color:var(--text)"><strong>Baştan sona dönüşüm:</strong> <span style="color:' + (overall >= 5 ? 'var(--green)' : overall >= 2 ? '#DD6B20' : 'var(--red)') + ';font-weight:700">' + overall.toFixed(2) + '%</span> <span style="color:var(--text-muted)">— 100 oturumdan ~' + overall.toFixed(0) + ' kişi aksiyona dönüşüyor</span></div>';
+
+  el.innerHTML = html;
+}
+
+// Vanity: Kısa link tıklaması → pageview dropout
+function renderTsVanity(events, pageviews) {
+  var el = document.getElementById('ts-vanity');
+  if (!el) return;
+  var clicks = events.filter(function(e) { return e.type === 'vanity_click'; });
+  if (clicks.length === 0) {
+    el.innerHTML = '<div style="color:var(--text-muted);font-size:.82rem;padding:10px 0">Henüz kısa link tıklaması yok. Instagram biyografisinde <code>assosukesfet.com/ig</code> gibi link paylaşırsanız buraya düşer.</div>';
+    return;
+  }
+  // Source bazında tıklama sayısı
+  var clickBySrc = {};
+  clicks.forEach(function(e) {
+    var k = e.source || 'unknown';
+    clickBySrc[k] = (clickBySrc[k] || 0) + 1;
+  });
+  // Aynı source'tan pageview (utm_source ile yakalandı)
+  var pvBySrc = {};
+  pageviews.forEach(function(e) {
+    var k = e.source || 'direct';
+    if (clickBySrc[k]) pvBySrc[k] = (pvBySrc[k] || 0) + 1;
+  });
+
+  var rows = Object.keys(clickBySrc).sort(function(a, b) { return clickBySrc[b] - clickBySrc[a]; });
+  var html = '<table class="panel-table" style="width:100%"><thead><tr>' +
+    '<th>Kanal</th><th style="text-align:right">🖱 Tıklama</th><th style="text-align:right">👁 Ziyaret</th><th style="text-align:right">Dropout</th><th style="text-align:right">Başarı %</th>' +
+    '</tr></thead><tbody>';
+  rows.forEach(function(src) {
+    var info = _tsChannelInfo(src);
+    var c = clickBySrc[src];
+    var v = pvBySrc[src] || 0;
+    var drop = c - v;
+    var succ = c > 0 ? (v / c * 100) : 0;
+    var dropColor = drop < 0 ? 'var(--text-muted)' : (drop > c * 0.5 ? 'var(--red)' : '#DD6B20');
+    var succColor = succ >= 80 ? 'var(--green)' : succ >= 50 ? '#DD6B20' : 'var(--red)';
+    html += '<tr>' +
+      '<td><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:' + info.color + '"></span>' + info.icon + ' ' + esc(info.label) + '</span></td>' +
+      '<td style="text-align:right;font-weight:700">' + c + '</td>' +
+      '<td style="text-align:right">' + v + '</td>' +
+      '<td style="text-align:right;color:' + dropColor + '">' + (drop > 0 ? '-' + drop : (drop < 0 ? '+' + Math.abs(drop) : '0')) + '</td>' +
+      '<td style="text-align:right;color:' + succColor + ';font-weight:700">' + succ.toFixed(1) + '%</td>' +
+    '</tr>';
+  });
+  html += '</tbody></table>';
+  html += '<div style="margin-top:10px;font-size:.7rem;color:var(--text-muted);line-height:1.5"><strong>💡 Not:</strong> "Tıklama" kısa linke (ör. /ig) gelen istek sayısı. "Ziyaret" ise yönlendirme sonrası siteye giren kullanıcı. Aradaki fark — kullanıcının redirect\'te vazgeçmesi veya bot trafiği olabilir. Başarı &gt;80% sağlıklı kabul edilir.</div>';
+  el.innerHTML = html;
+}
+
+// Scroll depth: Ortalama + dağılım
+function renderTsScroll(events) {
+  var el = document.getElementById('ts-scroll');
+  if (!el) return;
+  var scrolls = events.filter(function(e) { return e.type === 'scroll'; });
+  if (scrolls.length === 0) {
+    el.innerHTML = '<div style="color:var(--text-muted);font-size:.82rem;padding:10px 0">Henüz scroll verisi yok. Kullanıcılar sayfa kaydırdıkça 25/50/75/100 eşiklerinde event düşer.</div>';
+    return;
+  }
+  // Session bazında en derin scroll'u bul
+  var sessionMax = {}; // sessionId → max %
+  scrolls.forEach(function(e) {
+    var pct = parseInt(e.action, 10);
+    if (!e.sessionId || isNaN(pct)) return;
+    if (!sessionMax[e.sessionId] || pct > sessionMax[e.sessionId]) {
+      sessionMax[e.sessionId] = pct;
+    }
+  });
+  var vals = Object.values(sessionMax);
+  if (vals.length === 0) {
+    el.innerHTML = '<div style="color:var(--text-muted);font-size:.82rem;padding:10px 0">Scroll verisi session ile eşleşmedi.</div>';
+    return;
+  }
+  var buckets = { 25: 0, 50: 0, 75: 0, 100: 0 };
+  vals.forEach(function(v) {
+    if (v >= 100) buckets[100]++;
+    else if (v >= 75) buckets[75]++;
+    else if (v >= 50) buckets[50]++;
+    else buckets[25]++;
+  });
+  var total = vals.length;
+  var avg = vals.reduce(function(a, b) { return a + b; }, 0) / total;
+
+  var html = '<div style="display:grid;grid-template-columns:140px 1fr;gap:20px;align-items:center">' +
+    '<div style="text-align:center">' +
+      '<div style="font-size:2.4rem;font-weight:800;color:var(--terra)">' + avg.toFixed(0) + '%</div>' +
+      '<div style="font-size:.7rem;color:var(--text-muted)">ortalama derinlik</div>' +
+      '<div style="font-size:.66rem;color:var(--text-muted);margin-top:6px">' + total + ' oturum</div>' +
+    '</div>' +
+    '<div>';
+  [100, 75, 50, 25].forEach(function(t) {
+    var cnt = buckets[t];
+    var pct = total > 0 ? (cnt / total * 100) : 0;
+    var color = t === 100 ? 'var(--green)' : t === 75 ? '#48BB78' : t === 50 ? '#DD6B20' : 'var(--red)';
+    html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">' +
+      '<div style="width:50px;font-size:.78rem;font-weight:700;color:var(--text)">' + t + '%+</div>' +
+      '<div style="flex:1;height:14px;background:var(--cream-dark);border-radius:7px;overflow:hidden"><div style="height:100%;width:' + pct.toFixed(1) + '%;background:' + color + ';border-radius:7px;transition:width .5s"></div></div>' +
+      '<div style="width:80px;text-align:right;font-size:.78rem;color:var(--text-muted)"><strong style="color:var(--text)">' + cnt + '</strong> · ' + pct.toFixed(0) + '%</div>' +
+    '</div>';
+  });
+  html += '</div></div>';
+  html += '<div style="margin-top:12px;font-size:.7rem;color:var(--text-muted);line-height:1.5"><strong>💡 Yorum:</strong> Ortalama &lt;%50 ise içeriğin başı zayıf kalıyor. &gt;%75 ise çok iyi engagement. 100% tamamlayanlar en kaliteli okuyucular — onların oturum süresi ve aksiyon oranı da yüksek olmalı.</div>';
+  el.innerHTML = html;
 }
 
 // Zaman serisi çizimi — kaynaklara göre renkli stacked bar

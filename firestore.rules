@@ -116,7 +116,8 @@ service cloud.firestore {
         'directions_count','directions_last',
         'share_count','share_last',
         'website_count','website_last',
-        'instagram_count','instagram_last']);
+        'instagram_count','instagram_last',
+        'reservation_count','reservation_last']);
     }
     match /analytics/{docId} {
       allow create: if isValidAnalyticsKeys(request.resource.data.keys());
