@@ -47,12 +47,16 @@ export async function onRequestPost(context) {
     } catch(e) {}
   }
 
-  // Service account varsa: önce lookup, sonra link al, sonra Resend ile gönder
-  // Yoksa: Firebase default mail (kayıtsız ise Firebase EMAIL_NOT_FOUND dönecek)
+  // Debug modu: ?debug=1 query parametresi varsa detaylı hata döner
+  const url = new URL(request.url);
+  const debug = url.searchParams.get('debug') === '1';
+  const steps = [];
+
   try {
     const hasSplit = !!(env.FIREBASE_CLIENT_EMAIL && env.FIREBASE_PRIVATE_KEY);
     const hasSA = !!env.FIREBASE_SERVICE_ACCOUNT || hasSplit;
     const hasResend = !!env.RESEND_API_KEY;
+    steps.push({ step: 'config', hasSplit, hasSA, hasResend });
 
     if (hasSA) {
       // 1) Service account JWT → OAuth access token
@@ -67,24 +71,29 @@ export async function onRequestPost(context) {
           sa = parseServiceAccount(env.FIREBASE_SERVICE_ACCOUNT);
         }
         accessToken = await getAccessToken(sa);
+        steps.push({ step: 'accessToken', ok: !!accessToken });
       } catch(e) {
-        // Service account parse edilemedi → kayıtsız muamelesi yapma, hata dön
-        return new Response(JSON.stringify({ error: 'Sunucu yapılandırma hatası. Lütfen yönetici ile iletişime geçin.' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+        console.error('[forgot-password] SA error:', e);
+        steps.push({ step: 'accessToken', error: e.message });
+        if (debug) return jsonResp({ error: 'SA error: ' + e.message, steps }, 500);
+        return jsonResp({ error: 'Sunucu yapılandırma hatası.' }, 500);
       }
 
-      // 2) E-posta kayıtlı mı? accounts:lookup (service account ile authenticated)
+      // 2) E-posta kayıtlı mı?
       const lookupResp = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=' + FIREBASE_API_KEY, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
         body: JSON.stringify({ email: [email] })
       });
-      const lookupData = await lookupResp.json();
+      const lookupData = await lookupResp.json().catch(() => ({}));
       const users = (lookupData && lookupData.users) || [];
+      steps.push({ step: 'lookup', status: lookupResp.status, userCount: users.length });
       if (users.length === 0) {
-        return new Response(JSON.stringify({ ok: false, registered: false, error: 'Bu e-posta adresiyle kayıtlı bir hesap bulunamadı.' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+        if (debug) return jsonResp({ error: 'Email kayıtlı değil', steps, lookupData }, 404);
+        return jsonResp({ ok: false, registered: false, error: 'Bu e-posta adresiyle kayıtlı bir hesap bulunamadı.' }, 404);
       }
 
-      // 3) Reset link al (Firebase mail göndermesin — returnOobLink: true)
+      // 3) Reset link al (returnOobLink: true → Firebase mail göndermesin)
       const oobResp = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=' + FIREBASE_API_KEY, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
@@ -92,22 +101,25 @@ export async function onRequestPost(context) {
       });
       const oobData = await oobResp.json().catch(() => ({}));
       const resetLink = oobData.oobLink;
+      steps.push({ step: 'oobLink', status: oobResp.status, hasLink: !!resetLink, err: oobData.error });
 
       if (!oobResp.ok || !resetLink) {
-        // Link alınamadı — Firebase default mailine düş
+        console.error('[forgot-password] OOB link failed:', oobData);
+        if (debug) return jsonResp({ error: 'OOB link alınamadı', steps, oobData }, 500);
+        // Son çare: Firebase default mail
         await fetch('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=' + FIREBASE_API_KEY, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ requestType: 'PASSWORD_RESET', email: email })
         });
-        return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        return jsonResp({ ok: true, fallback: 'firebase-default' }, 200);
       }
 
-      // 4) Resend varsa özel HTML mail, yoksa Firebase default mail gönder
+      // 4) Resend ile özel mail
       if (hasResend) {
         const html = buildResetMailHtml(resetLink, email);
-        const text = `Merhaba,\n\nAssos'u Keşfet yönetim paneli için şifre sıfırlama talebi aldık.\n\nYeni şifre belirlemek için aşağıdaki linke tıklayın (1 saat geçerli):\n\n${resetLink}\n\nBu talebi siz yapmadıysanız bu maili görmezden gelebilirsiniz, hesabınız güvende.\n\nAssos'u Keşfet Ekibi\ninfo@assosukesfet.com`;
-        await fetch('https://api.resend.com/emails', {
+        const text = `Merhaba,\n\nAssos'u Keşfet yönetim paneli için şifre sıfırlama talebi aldık.\n\nYeni şifre belirlemek için aşağıdaki linke tıklayın (1 saat geçerli):\n\n${resetLink}\n\nBu talebi siz yapmadıysanız bu maili görmezden gelebilirsiniz.\n\nAssos'u Keşfet Ekibi\ninfo@assosukesfet.com`;
+        const resendResp = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: { 'Authorization': 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -118,18 +130,32 @@ export async function onRequestPost(context) {
             reply_to: 'info@assosukesfet.com'
           })
         });
+        const resendData = await resendResp.json().catch(() => ({}));
+        steps.push({ step: 'resend', status: resendResp.status, id: resendData.id, err: resendData });
+        if (!resendResp.ok) {
+          console.error('[forgot-password] Resend failed:', resendData);
+          if (debug) return jsonResp({ error: 'Resend failed', steps, resendData }, 500);
+          // Resend başarısız → Firebase default mail gönder
+          await fetch('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=' + FIREBASE_API_KEY, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ requestType: 'PASSWORD_RESET', email: email })
+          });
+          return jsonResp({ ok: true, fallback: 'firebase-default', resendError: resendData.message || 'unknown' }, 200);
+        }
+        return jsonResp(debug ? { ok: true, steps, resendId: resendData.id } : { ok: true, sent: 'resend' }, 200);
       } else {
-        // Resend yok → Firebase default maili gönder
+        // Resend yok → Firebase default
         await fetch('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=' + FIREBASE_API_KEY, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ requestType: 'PASSWORD_RESET', email: email })
         });
+        return jsonResp({ ok: true, sent: 'firebase-default', reason: 'no-resend-key' }, 200);
       }
-      return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
 
-    // Service account yoksa: Firebase default mail (kayıtsız ise Firebase hata döner)
+    // Service account yoksa: Firebase default mail
     const fallbackResp = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=' + FIREBASE_API_KEY, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -139,14 +165,19 @@ export async function onRequestPost(context) {
       const errData = await fallbackResp.json().catch(() => ({}));
       const msg = (errData.error && errData.error.message) || '';
       if (msg === 'EMAIL_NOT_FOUND') {
-        return new Response(JSON.stringify({ ok: false, registered: false, error: 'Bu e-posta adresiyle kayıtlı bir hesap bulunamadı.' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+        return jsonResp({ ok: false, registered: false, error: 'Bu e-posta adresiyle kayıtlı bir hesap bulunamadı.' }, 404);
       }
     }
-    return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    return jsonResp({ ok: true, sent: 'firebase-default', reason: 'no-service-account' }, 200);
   } catch(e) {
-    console.error('Password reset email error:', e);
-    return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    console.error('[forgot-password] unexpected:', e);
+    if (debug) return jsonResp({ error: e.message, stack: e.stack, steps }, 500);
+    return jsonResp({ ok: true }, 200);
   }
+}
+
+function jsonResp(body, status) {
+  return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 }
 
 // ═══ HTML Mail Template ═══
