@@ -10105,9 +10105,10 @@ async function renderNotifications() {
       });
     }
 
-    // 4. Sistem — son giris bilgileri
+    // 4. Okunmuş/temizlenmiş olanları listeden çıkar (görünmesinler)
     const readNotifs = JSON.parse(localStorage.getItem('readNotifs') || '[]');
-    allNotifs.forEach(n => { if (readNotifs.includes(n.id)) n.read = true; });
+    const readSet = new Set(readNotifs);
+    allNotifs = allNotifs.filter(n => !readSet.has(n.id));
 
     // Zamana gore sirala
     allNotifs.sort((a, b) => (b.time || '').localeCompare(a.time || ''));
@@ -10173,10 +10174,10 @@ function openNotif(id) {
 }
 
 function markNotifRead(id) {
-  const n = allNotifs.find(x => x.id === id);
-  if (n) n.read = true;
   const readNotifs = JSON.parse(localStorage.getItem('readNotifs') || '[]');
   if (!readNotifs.includes(id)) { readNotifs.push(id); localStorage.setItem('readNotifs', JSON.stringify(readNotifs)); }
+  // Okunan bildirimi listeden çıkar (artık görünmesin)
+  allNotifs = allNotifs.filter(x => x.id !== id);
   updateNotifBadge();
   renderNotifList();
 }
@@ -10249,9 +10250,11 @@ async function clearAllNotifs() {
       });
     }
     localStorage.setItem('readNotifs', JSON.stringify(Array.from(readSet)));
-    // Rozeti ve dropdown listesini sıfırla
+    // Rozeti sıfırla
     var badge = document.getElementById('notif-badge');
     if (badge) { badge.textContent = '0'; badge.style.display = 'none'; }
+    // Dropdown listesini de boşalt
+    allNotifs = [];
     if (typeof renderNotifList === 'function') renderNotifList();
     showToast('Bildirimler temizlendi.', 'success');
   } catch(e) {
