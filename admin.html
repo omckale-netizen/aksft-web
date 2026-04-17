@@ -4234,16 +4234,100 @@ function handleCmdKey(e) {
   }
 }
 
-// Global kısayol: Cmd+K / Ctrl+K
+// Global klavye kısayolları
 document.addEventListener('keydown', function(e) {
-  var isK = e.key === 'k' || e.key === 'K';
-  if (isK && (e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey) {
+  // Input/textarea/contenteditable içinde ise sadece ⌘K ve ESC çalışsın
+  var inInput = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
+
+  // ⌘K / Ctrl+K — Command palette
+  if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey) {
     e.preventDefault();
     var ov = document.getElementById('cmd-overlay');
     if (ov && ov.classList.contains('show')) closeCmdPalette();
     else openCmdPalette();
+    return;
+  }
+
+  // ESC — açık modal veya palette kapat
+  if (e.key === 'Escape') {
+    var cmdOv = document.getElementById('cmd-overlay');
+    if (cmdOv && cmdOv.classList.contains('show')) { closeCmdPalette(); return; }
+    // Notif dropdown
+    var ddOpen = document.querySelector('.notif-dropdown.open');
+    if (ddOpen) { ddOpen.classList.remove('open'); return; }
+    // Açık modal'ları kapat (önce visible olanı bul)
+    var openModal = document.querySelector('[id$="-modal-overlay"][style*="flex"]');
+    if (openModal) {
+      var id = openModal.id;
+      if (id === 'user-modal-overlay' && typeof closeUserModal === 'function') { closeUserModal(); return; }
+      if (id === 'todo-modal-overlay' && typeof closeTodoModal === 'function') { closeTodoModal(); return; }
+      if (id === 'change-password-overlay' && typeof closeChangePasswordModal === 'function') { closeChangePasswordModal(); return; }
+    }
+  }
+
+  // Input içindeyken diğer kısayollar çalışmasın
+  if (inInput) return;
+
+  // G + [tuş] — sayfa geçişleri (sequential key)
+  // Basit yol: sadece tek tuş + shift'siz kısayollar
+  // ⌘/Ctrl+/ → Ara (palette açar)
+  if (e.key === '/' && (e.metaKey || e.ctrlKey)) {
+    e.preventDefault();
+    openCmdPalette();
+    return;
+  }
+  // ? → Kısayol yardımı (shift+/ aslında ama çoğu klavyede direkt)
+  if (e.key === '?' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+    e.preventDefault();
+    showKeyboardShortcutsHelp();
+    return;
   }
 });
+
+// Kısayol yardım modal'ı
+function showKeyboardShortcutsHelp() {
+  var shortcuts = [
+    { keys: ['⌘', 'K'], desc: 'Komut paleti / Hızlı arama' },
+    { keys: ['⌘', '/'], desc: 'Komut paleti (alternatif)' },
+    { keys: ['ESC'], desc: 'Açık modal/pencereyi kapat' },
+    { keys: ['?'], desc: 'Bu yardım penceresini aç' },
+    { keys: ['↑', '↓'], desc: 'Komut paletinde gezin' },
+    { keys: ['⏎'], desc: 'Seçili komutu çalıştır' }
+  ];
+  var html = '<div style="padding:4px 0 12px">' +
+    shortcuts.map(function(s) {
+      return '<div style="display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid var(--card-border);font-size:.82rem">' +
+        '<div style="flex:1;color:var(--text)">' + esc(s.desc) + '</div>' +
+        '<div style="display:flex;gap:3px">' +
+          s.keys.map(function(k) { return '<span class="cmd-kbd">' + esc(k) + '</span>'; }).join('') +
+        '</div>' +
+      '</div>';
+    }).join('') +
+  '</div>';
+  showHelpModal('⌨️ Klavye Kısayolları', html);
+}
+
+// Genel amaçlı yardım modal'ı (basit, tek seferlik)
+function showHelpModal(title, bodyHtml) {
+  var ov = document.getElementById('help-modal-overlay');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'help-modal-overlay';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:var(--z-popover);background:var(--overlay-bg);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:20px';
+    ov.onclick = function(e) { if (e.target === ov) ov.style.display = 'none'; };
+    ov.innerHTML = '<div style="background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-lg);max-width:440px;width:100%;box-shadow:var(--shadow-xl);overflow:hidden">' +
+      '<div style="padding:16px 20px;border-bottom:1px solid var(--card-border);display:flex;align-items:center;justify-content:space-between">' +
+        '<h3 id="help-modal-title" style="margin:0;font-size:var(--text-lg);color:var(--text);font-weight:700"></h3>' +
+        '<button onclick="document.getElementById(\'help-modal-overlay\').style.display=\'none\'" style="border:none;background:transparent;font-size:1.3rem;cursor:pointer;color:var(--text-muted);padding:2px 6px">&times;</button>' +
+      '</div>' +
+      '<div id="help-modal-body"></div>' +
+    '</div>';
+    document.body.appendChild(ov);
+  }
+  document.getElementById('help-modal-title').textContent = title;
+  document.getElementById('help-modal-body').innerHTML = bodyHtml;
+  ov.style.display = 'flex';
+}
 
 // ═══ FORCE LOGOUT (Tüm cihazlardan çıkış) ═══
 async function logoutAllDevices() {
