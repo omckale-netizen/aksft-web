@@ -79,12 +79,17 @@ export async function onRequestPost(context) {
           const gmapsMatch = html.match(/(https?:\/\/(?:www\.)?(?:maps\.)?google\.com\/maps[^"'\s<>]*)/i);
           if (gmapsMatch) finalUrl = gmapsMatch[1].replace(/&amp;/g, '&');
         }
-        // Koordinat match
-        if (!finalUrl.match(/@-?\d+\.\d+/) && !finalUrl.match(/!3d-?\d+\.\d+/)) {
-          const coordMatch = html.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/) || html.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
-          if (coordMatch) {
-            // Yapay URL oluştur
-            finalUrl = 'https://www.google.com/maps/@' + coordMatch[1] + ',' + coordMatch[2] + ',15z';
+        // Koordinat match — ÖNCELİK: pin konumu (!3d!4d), sonra kamera (@)
+        if (!finalUrl.match(/!3d-?\d+\.\d+/)) {
+          const pinMatch = html.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+          if (pinMatch) {
+            // Place URL formatında ekle
+            finalUrl = 'https://www.google.com/maps/place/?q=place&data=!3d' + pinMatch[1] + '!4d' + pinMatch[2];
+          } else if (!finalUrl.match(/@-?\d+\.\d+/)) {
+            const camMatch = html.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+            if (camMatch) {
+              finalUrl = 'https://www.google.com/maps/@' + camMatch[1] + ',' + camMatch[2] + ',15z';
+            }
           }
         }
       } catch(e) {}

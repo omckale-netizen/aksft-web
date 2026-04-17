@@ -4386,31 +4386,58 @@ var _mtMapsData = null;
 var _mtMapsExpandTimer = null;
 
 // İç parse — regex tabanlı, hazır URL verildi varsayar
+// ÖNCELİK: !3d!4d (gerçek pin koordinatı) > @lat,lng (kamera merkezi)
 function _mtMapsParseFrom(input) {
-  var lat = null, lng = null, placeName = null, zoom = null;
+  var lat = null, lng = null, placeName = null, zoom = null, source = null;
 
+  // 1) Direkt koordinat yapıştırması: "40.1234, 26.5678"
   var direct = input.match(/^(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)$/);
-  if (direct) { lat = parseFloat(direct[1]); lng = parseFloat(direct[2]); }
+  if (direct) {
+    lat = parseFloat(direct[1]); lng = parseFloat(direct[2]);
+    source = 'direkt koordinat';
+  }
 
-  if (!lat) {
-    var atMatch = input.match(/@(-?\d+\.\d+),(-?\d+\.\d+)(?:,(\d+(?:\.\d+)?)z)?/);
-    if (atMatch) { lat = parseFloat(atMatch[1]); lng = parseFloat(atMatch[2]); zoom = atMatch[3] || null; }
-  }
-  if (!lat) {
-    var qMatch = input.match(/[?&](?:q|ll|center|destination)=(-?\d+\.\d+),(-?\d+\.\d+)/);
-    if (qMatch) { lat = parseFloat(qMatch[1]); lng = parseFloat(qMatch[2]); }
-  }
+  // 2) !3dLAT!4dLNG — gerçek pin koordinatı (önce dene!)
   if (!lat) {
     var placeMatch = input.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
-    if (placeMatch) { lat = parseFloat(placeMatch[1]); lng = parseFloat(placeMatch[2]); }
+    if (placeMatch) {
+      lat = parseFloat(placeMatch[1]); lng = parseFloat(placeMatch[2]);
+      source = 'pin konumu';
+    }
   }
 
+  // 3) URL query: ?q=lat,lng veya ?destination=lat,lng (yön tarifi URL'leri)
+  if (!lat) {
+    var qMatch = input.match(/[?&](?:q|ll|center|destination)=(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (qMatch) {
+      lat = parseFloat(qMatch[1]); lng = parseFloat(qMatch[2]);
+      source = 'URL query parametresi';
+    }
+  }
+
+  // 4) @LAT,LNG — kamera merkezi (son çare; pin'den biraz sapmış olabilir)
+  if (!lat) {
+    var atMatch = input.match(/@(-?\d+\.\d+),(-?\d+\.\d+)(?:,(\d+(?:\.\d+)?)z)?/);
+    if (atMatch) {
+      lat = parseFloat(atMatch[1]); lng = parseFloat(atMatch[2]);
+      zoom = atMatch[3] || null;
+      source = 'kamera merkezi (pin olmayabilir)';
+    }
+  }
+
+  // Zoom'u her zaman yakala (kullanılmadıysa) — @ pattern'den
+  if (!zoom) {
+    var zoomMatch = input.match(/@-?\d+\.\d+,-?\d+\.\d+,(\d+(?:\.\d+)?)z/);
+    if (zoomMatch) zoom = zoomMatch[1];
+  }
+
+  // Yer adı (maps/place/ URL'den)
   var placeUrlMatch = input.match(/maps\/place\/([^\/@]+)/);
   if (placeUrlMatch) {
     try { placeName = decodeURIComponent(placeUrlMatch[1].replace(/\+/g, ' ')); } catch(e) {}
   }
 
-  return { lat: lat, lng: lng, name: placeName, zoom: zoom };
+  return { lat: lat, lng: lng, name: placeName, zoom: zoom, source: source };
 }
 
 function _mtMapsShowResult(res, sourceUrl) {
@@ -4432,7 +4459,11 @@ function _mtMapsShowResult(res, sourceUrl) {
   html += '<span class="mt-maps-field-label">BOYLAM</span><span class="mt-maps-field-val">' + lng6 + '</span>';
   html += '<span class="mt-maps-field-label">TAM KOORDİNAT</span><span class="mt-maps-field-val" style="color:var(--green)">' + lat6 + ', ' + lng6 + '</span>';
   if (res.zoom) html += '<span class="mt-maps-field-label">ZOOM</span><span class="mt-maps-field-val">' + res.zoom + '</span>';
-  if (sourceUrl && sourceUrl.length > 60) html += '<span class="mt-maps-field-label">KAYNAK URL</span><span class="mt-maps-field-val" style="font-size:.7rem;color:var(--text-muted);word-break:break-all">' + esc(sourceUrl.slice(0, 120)) + (sourceUrl.length > 120 ? '…' : '') + '</span>';
+  if (res.source) {
+    var srcColor = res.source.indexOf('kamera') > -1 ? 'color:#DD6B20' : 'color:var(--text-muted)';
+    html += '<span class="mt-maps-field-label">KAYNAK</span><span class="mt-maps-field-val" style="font-size:.72rem;' + srcColor + '">' + esc(res.source) + (res.source.indexOf('kamera') > -1 ? ' ⚠️' : '') + '</span>';
+  }
+  if (sourceUrl && sourceUrl.length > 60) html += '<span class="mt-maps-field-label">URL</span><span class="mt-maps-field-val" style="font-size:.7rem;color:var(--text-muted);word-break:break-all">' + esc(sourceUrl.slice(0, 120)) + (sourceUrl.length > 120 ? '…' : '') + '</span>';
   fieldsEl.innerHTML = html;
   resultEl.style.display = '';
   document.getElementById('mt-maps-embed').style.display = 'none';
