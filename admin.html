@@ -2159,6 +2159,35 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       </div>
     </div>
 
+    <!-- Şifre Değiştirme Modal -->
+    <div id="change-password-overlay" style="display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeChangePasswordModal()">
+      <div style="background:var(--card-bg,#fff);border-radius:16px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid rgba(0,0,0,.06)">
+          <h3 style="margin:0;font-size:1rem;color:var(--navy)">🔑 Şifremi Değiştir</h3>
+          <button onclick="closeChangePasswordModal()" style="border:none;background:none;font-size:1.3rem;cursor:pointer;color:var(--text-muted)">&times;</button>
+        </div>
+        <div style="padding:20px 24px">
+          <div class="form-group" style="margin-bottom:14px">
+            <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:4px">Mevcut Şifre *</label>
+            <input type="password" id="cp-current" style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.9rem;background:var(--input-bg,#fff);color:var(--text);width:100%;font-family:monospace">
+          </div>
+          <div class="form-group" style="margin-bottom:14px">
+            <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:4px">Yeni Şifre *</label>
+            <input type="password" id="cp-new" placeholder="Min 8 karakter" minlength="8" style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.9rem;background:var(--input-bg,#fff);color:var(--text);width:100%;font-family:monospace">
+          </div>
+          <div class="form-group" style="margin-bottom:14px">
+            <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:4px">Yeni Şifre (Tekrar) *</label>
+            <input type="password" id="cp-new2" placeholder="Tekrar yazın" minlength="8" style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.9rem;background:var(--input-bg,#fff);color:var(--text);width:100%;font-family:monospace">
+          </div>
+          <div id="cp-status" style="font-size:.75rem;margin-bottom:10px;min-height:16px"></div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-primary" onclick="submitChangePassword()" style="flex:1">Şifreyi Değiştir</button>
+            <button class="btn btn-secondary" onclick="closeChangePasswordModal()">İptal</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ══════ TODOS / GÖREVLER ══════ -->
     <div class="admin-page" id="page-todos">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px">
@@ -10301,7 +10330,9 @@ function renderUsers() {
         '</div>' +
       '</div>' +
       '<div class="user-actions">' +
+        (isSelf ? '<button class="btn btn-sm btn-secondary" onclick="openChangePasswordModal()" title="Şifremi Değiştir">🔑</button>' : '') +
         (!isSuper ? '<button class="btn btn-sm btn-secondary" onclick="openUserModal(\'' + esc(u.uid) + '\')" title="Düzenle">✏️</button>' : '') +
+        (!isSelf && !isSuper && isCurrentAdmin() ? '<button class="btn btn-sm btn-secondary" onclick="sendPasswordReset(\'' + esc(u.email) + '\')" title="Şifre sıfırlama e-postası gönder">📧</button>' : '') +
         (!isSelf && !isSuper ? '<button class="btn btn-sm btn-secondary" onclick="toggleUserActive(\'' + esc(u.uid) + '\')" title="' + (isActive ? 'Pasife Al' : 'Aktifleştir') + '">' + (isActive ? '⏸' : '▶') + '</button>' : '') +
         (!isSelf && !isSuper ? '<button class="btn btn-sm btn-danger" onclick="deleteUser(\'' + esc(u.uid) + '\')" title="Sil">🗑</button>' : '') +
       '</div>' +
@@ -10438,6 +10469,65 @@ async function toggleUserActive(uid) {
     showToast(newActive ? 'Kullanıcı aktifleştirildi' : 'Kullanıcı pasife alındı', 'success');
     logActivity(newActive ? 'user_activate' : 'user_deactivate', uid, u.name || u.email);
   } catch(e) { showToast('Hata: ' + e.message, 'error'); }
+}
+
+// Şifre değiştirme modalı
+function openChangePasswordModal() {
+  document.getElementById('cp-current').value = '';
+  document.getElementById('cp-new').value = '';
+  document.getElementById('cp-new2').value = '';
+  document.getElementById('cp-status').innerHTML = '';
+  document.getElementById('change-password-overlay').style.display = 'flex';
+  setTimeout(function() { document.getElementById('cp-current').focus(); }, 100);
+}
+function closeChangePasswordModal() {
+  document.getElementById('change-password-overlay').style.display = 'none';
+}
+async function submitChangePassword() {
+  var current = document.getElementById('cp-current').value;
+  var nw = document.getElementById('cp-new').value;
+  var nw2 = document.getElementById('cp-new2').value;
+  var statusEl = document.getElementById('cp-status');
+  statusEl.innerHTML = '';
+
+  if (!current || !nw || !nw2) { statusEl.innerHTML = '<span style="color:#E53E3E">Tüm alanları doldurun</span>'; return; }
+  if (nw.length < 8) { statusEl.innerHTML = '<span style="color:#E53E3E">Yeni şifre en az 8 karakter olmalı</span>'; return; }
+  if (nw !== nw2) { statusEl.innerHTML = '<span style="color:#E53E3E">Yeni şifreler eşleşmiyor</span>'; return; }
+  if (current === nw) { statusEl.innerHTML = '<span style="color:#E53E3E">Yeni şifre eskisinden farklı olmalı</span>'; return; }
+
+  var user = firebase.auth().currentUser;
+  if (!user) { statusEl.innerHTML = '<span style="color:#E53E3E">Oturum bulunamadı</span>'; return; }
+
+  try {
+    statusEl.innerHTML = '<span style="color:var(--text-muted)">Doğrulanıyor...</span>';
+    // Önce mevcut şifre ile yeniden doğrula (Firebase Auth güvenlik gereği)
+    var cred = firebase.auth.EmailAuthProvider.credential(user.email, current);
+    await user.reauthenticateWithCredential(cred);
+    // Sonra yeni şifreyi ata
+    await user.updatePassword(nw);
+    statusEl.innerHTML = '<span style="color:var(--green)">✓ Şifreniz başarıyla güncellendi</span>';
+    showToast('Şifre değiştirildi', 'success');
+    logActivity('password_change', user.uid, user.email);
+    setTimeout(closeChangePasswordModal, 1500);
+  } catch(e) {
+    var msg = e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential' ? 'Mevcut şifre hatalı'
+            : e.code === 'auth/weak-password' ? 'Şifre çok zayıf'
+            : e.code === 'auth/requires-recent-login' ? 'Tekrar giriş yapmanız gerekiyor (güvenlik)'
+            : (e.message || 'Şifre değiştirilemedi');
+    statusEl.innerHTML = '<span style="color:#E53E3E">' + esc(msg) + '</span>';
+  }
+}
+
+// Admin başka kullanıcıya şifre sıfırlama e-postası gönder
+async function sendPasswordReset(email) {
+  if (!confirm(email + ' adresine şifre sıfırlama linki gönderilsin mi?')) return;
+  try {
+    await fbAuth.sendPasswordResetEmail(email);
+    showToast('Sıfırlama e-postası gönderildi', 'success');
+    logActivity('password_reset_sent', email, email);
+  } catch(e) {
+    showToast('Hata: ' + (e.message || e.code), 'error');
+  }
 }
 
 async function deleteUser(uid) {

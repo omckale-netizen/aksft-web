@@ -66,6 +66,9 @@ body::before{content:'';position:absolute;inset:0;pointer-events:none;background
   </div>
   <button class="auth-btn" onclick="checkAuth()">Giriş Yap</button>
   <div class="auth-err" id="auth-err"></div>
+  <div style="text-align:center;margin-top:14px">
+    <a href="#" onclick="forgotPassword();return false;" style="font-size:.78rem;color:rgba(245,237,224,.6);text-decoration:none;transition:color .2s" onmouseover="this.style.color='#D4935A'" onmouseout="this.style.color='rgba(245,237,224,.6)'">🔑 Şifremi unuttum</a>
+  </div>
   <div class="auth-footer">Assos'u Keşfet &middot; Yönetim Paneli</div>
 </div>
 
@@ -136,6 +139,36 @@ async function getClientIP() {
     const data = await resp.json();
     return data.ip || 'Bilinmeyen';
   } catch(e) { return 'Alınamadı'; }
+}
+
+async function forgotPassword() {
+  var email = (document.getElementById('auth-email').value || '').trim();
+  var errEl = document.getElementById('auth-err');
+  if (!email) {
+    errEl.style.color = '#E53E3E';
+    errEl.textContent = 'Önce e-posta adresinizi girin, sonra "Şifremi Unuttum"a tıklayın.';
+    document.getElementById('auth-email').focus();
+    return;
+  }
+  if (!/^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$/.test(email)) {
+    errEl.style.color = '#E53E3E';
+    errEl.textContent = 'Geçerli bir e-posta adresi girin.';
+    return;
+  }
+  try {
+    await fbAuth.sendPasswordResetEmail(email);
+    errEl.style.color = '#38A169';
+    errEl.textContent = '✓ Sıfırlama linki ' + email + ' adresine gönderildi. E-postanızı kontrol edin.';
+  } catch(err) {
+    errEl.style.color = '#E53E3E';
+    if (err.code === 'auth/user-not-found') {
+      errEl.textContent = 'Bu e-posta ile kayıtlı hesap bulunamadı.';
+    } else if (err.code === 'auth/too-many-requests') {
+      errEl.textContent = 'Çok fazla istek. Lütfen biraz bekleyin.';
+    } else {
+      errEl.textContent = 'Bir hata oluştu: ' + (err.message || err.code);
+    }
+  }
 }
 
 async function checkAuth() {
