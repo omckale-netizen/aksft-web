@@ -2401,10 +2401,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <!-- Atanan Kullanıcı (admin) -->
           <div class="form-group" id="todo-assigned-group" style="margin-top:14px;display:none">
             <label style="font-size:.75rem;font-weight:700;color:var(--text-light);margin-bottom:4px">👤 Atanan Kullanıcı</label>
-            <select id="todo-assigned-to" style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.85rem;background:var(--input-bg,#fff);color:var(--text);width:100%;cursor:pointer">
+            <select id="todo-assigned-to" onchange="toggleTodoMailNotifyVisibility()" style="padding:10px 14px;border:1px solid var(--input-border,rgba(0,0,0,.1));border-radius:8px;font-size:.85rem;background:var(--input-bg,#fff);color:var(--text);width:100%;cursor:pointer">
               <option value="">— Genel (herkese açık) —</option>
             </select>
             <div style="font-size:.65rem;color:var(--text-muted);margin-top:4px">Seçili kullanıcı bildirim alır ve görev panelinde görür</div>
+            <label id="todo-notify-label" style="display:none;align-items:center;gap:8px;margin-top:10px;padding:8px 12px;background:rgba(26,107,138,.06);border:1px solid rgba(26,107,138,.15);border-radius:8px;cursor:pointer;font-size:.78rem;color:var(--text)">
+              <input type="checkbox" id="todo-notify-email" style="accent-color:var(--blue)">
+              <span>📧 Atanan kişiye mail bildirim gönder</span>
+            </label>
           </div>
           <!-- Bağlı mekan/mesaj (read-only, bilgi amaçlı) -->
           <div id="todo-related-info" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(196,82,26,.04);border:1px solid rgba(196,82,26,.15);border-radius:8px;font-size:.78rem;color:var(--text-muted)"></div>
@@ -2608,17 +2612,25 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             <div class="panel-card-head"><h3>👤 Profil</h3></div>
             <div style="padding:20px">
               <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
-                <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--terra),#D4682E);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff;font-weight:800;flex-shrink:0" id="settings-avatar">A</div>
+                <div id="settings-avatar-wrap" style="position:relative">
+                  <div id="settings-avatar-img" style="width:64px;height:64px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:1.3rem;color:#fff;font-weight:800;flex-shrink:0;overflow:hidden;background:linear-gradient(135deg,var(--terra),#D4682E)">A</div>
+                  <button type="button" onclick="document.getElementById('profile-photo-input').click()" title="Fotoğraf yükle" style="position:absolute;right:-4px;bottom:-4px;width:24px;height:24px;border-radius:50%;border:2px solid #fff;background:var(--terra);color:#fff;cursor:pointer;font-size:.7rem;padding:0;line-height:1">📷</button>
+                  <input type="file" id="profile-photo-input" accept="image/*" style="display:none" onchange="uploadProfilePhoto(this.files[0])">
+                </div>
                 <div style="flex:1">
                   <div style="font-size:.88rem;font-weight:700;color:var(--navy)" id="settings-display-name">Admin</div>
                   <div style="font-size:.72rem;color:var(--text-muted)" id="settings-email"></div>
+                  <div id="profile-photo-status" style="font-size:.68rem;color:var(--text-muted);margin-top:4px"></div>
+                  <div id="profile-photo-actions" style="display:none;margin-top:6px">
+                    <button type="button" class="btn btn-sm btn-danger" style="font-size:.65rem;padding:3px 8px" onclick="removeProfilePhoto()">🗑 Fotoğrafı Kaldır</button>
+                  </div>
                 </div>
               </div>
               <div class="form-group" style="margin-bottom:0">
                 <label>Adınız</label>
                 <input type="text" id="settings-name" placeholder="Adınızı girin" value="" oninput="updateAdminName(this.value)">
               </div>
-              <div style="font-size:.68rem;color:var(--text-muted);margin-top:6px">"Hoş geldiniz" mesajında görünür. Değişiklik anında kaydedilir.</div>
+              <div style="font-size:.68rem;color:var(--text-muted);margin-top:6px">"Hoş geldiniz" mesajında görünür. Fotoğraf max 1MB olmalı.</div>
             </div>
           </div>
 
@@ -3309,6 +3321,30 @@ function escapeHtml(s) {
 }
 // Kısa alias — sık kullanılacak
 var esc = escapeHtml;
+
+// Kullanıcı avatarı — photoURL varsa resim, yoksa renkli başharfler
+// user: { name, email, photoURL } objesi
+// size: px (default 36)
+function userAvatar(user, size) {
+  user = user || {};
+  size = size || 36;
+  var name = user.name || user.email || '?';
+  var email = user.email || '';
+  var photoURL = user.photoURL || '';
+  var style = 'width:' + size + 'px;height:' + size + 'px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:' + Math.round(size * 0.4) + 'px;color:#fff;flex-shrink:0;overflow:hidden;vertical-align:middle';
+  if (photoURL) {
+    return '<img src="' + esc(photoURL) + '" alt="" style="' + style + ';object-fit:cover" loading="lazy">';
+  }
+  // Fallback: renkli daire + initials
+  var words = String(name).trim().split(/\s+/);
+  var init = words.length >= 2 ? (words[0][0] + words[1][0]).toUpperCase() : ((words[0][0] || '?') + (words[0][1] || '')).toUpperCase();
+  var colors = ['#C4521A','#1A6B8A','#5A7A56','#D4935A','#9F7AEA','#38A169','#D69E2E','#E53E3E','#2B6CB0','#805AD5'];
+  var seed = name + email;
+  var hash = 0;
+  for (var i = 0; i < seed.length; i++) hash = ((hash << 5) - hash + seed.charCodeAt(i)) & 0xffffffff;
+  var color = colors[Math.abs(hash) % colors.length];
+  return '<div style="' + style + ';background:' + color + '">' + esc(init) + '</div>';
+}
 
 // onclick='fn("...")' içine JS string gömmek için — tek tırnaklı attribute değeri için güvenli
 // Kullanım: onclick='fn("${escJs(value)}")'
@@ -4087,15 +4123,83 @@ function updateAdminName(val) {
   localStorage.setItem('admin_name', val);
   // Avatar ve görünen ad anında güncelle
   const displayEl = document.getElementById('settings-display-name');
-  const avatarEl = document.getElementById('settings-avatar');
   if (displayEl) displayEl.textContent = val || 'Admin';
-  if (avatarEl) avatarEl.textContent = val ? val.charAt(0).toUpperCase() : 'A';
+  // Avatar görseli userAvatar helper'ı ile yeniden oluştur
+  refreshSettingsAvatar();
   // Dashboard hoşgeldin mesajını da güncelle
   const greetEl = document.getElementById('dash-greeting');
   if (greetEl) {
     const hour = getTRDate().getHours();
     const greet = hour >= 6 && hour < 12 ? 'Günaydın' : hour >= 12 && hour < 18 ? 'İyi günler' : 'İyi akşamlar';
     greetEl.textContent = val ? greet + ', ' + val + ' 👋' : greet + ' 👋';
+  }
+}
+
+// Settings avatar önizlemesini güncelle (photoURL veya initials)
+function refreshSettingsAvatar() {
+  var el = document.getElementById('settings-avatar-img');
+  if (!el) return;
+  var u = window._currentUser || {};
+  var name = (document.getElementById('settings-name') && document.getElementById('settings-name').value) || u.name || 'A';
+  var photoURL = u.photoURL || '';
+  el.innerHTML = '';
+  if (photoURL) {
+    el.style.background = 'transparent';
+    var img = document.createElement('img');
+    img.src = photoURL;
+    img.alt = '';
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover';
+    el.appendChild(img);
+    var actions = document.getElementById('profile-photo-actions');
+    if (actions) actions.style.display = '';
+  } else {
+    el.style.background = 'linear-gradient(135deg,var(--terra),#D4682E)';
+    el.textContent = name ? name.charAt(0).toUpperCase() : 'A';
+    var actions2 = document.getElementById('profile-photo-actions');
+    if (actions2) actions2.style.display = 'none';
+  }
+}
+
+// Profil fotoğrafı yükle
+async function uploadProfilePhoto(file) {
+  if (!file) return;
+  var statusEl = document.getElementById('profile-photo-status');
+  var user = fbAuth.currentUser;
+  if (!user) { if (statusEl) statusEl.textContent = 'Giriş yapmalısınız.'; return; }
+  if (file.size > 1 * 1024 * 1024) { if (statusEl) { statusEl.textContent = '❌ Max 1MB'; statusEl.style.color = 'var(--red)'; } return; }
+  if (!/^image\//.test(file.type)) { if (statusEl) { statusEl.textContent = '❌ Sadece görsel'; statusEl.style.color = 'var(--red)'; } return; }
+  try {
+    if (statusEl) { statusEl.textContent = '⏳ Yükleniyor...'; statusEl.style.color = 'var(--text-muted)'; }
+    var ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    if (['jpg','jpeg','png','webp','gif'].indexOf(ext) === -1) ext = 'jpg';
+    var path = 'avatars/' + user.uid + '/photo.' + ext;
+    var ref = firebase.storage().ref(path);
+    await ref.put(file, { contentType: file.type });
+    var url = await ref.getDownloadURL();
+    // users dokümanına photoURL yaz
+    await db.collection('users').doc(user.uid).set({ photoURL: url }, { merge: true });
+    if (window._currentUser) window._currentUser.photoURL = url;
+    refreshSettingsAvatar();
+    if (statusEl) { statusEl.textContent = '✓ Yüklendi'; statusEl.style.color = 'var(--green)'; }
+    setTimeout(function() { if (statusEl) statusEl.textContent = ''; }, 2500);
+  } catch(e) {
+    console.error('Profile photo upload error:', e);
+    if (statusEl) { statusEl.textContent = '❌ Yüklenemedi: ' + (e.message || ''); statusEl.style.color = 'var(--red)'; }
+  }
+}
+
+// Profil fotoğrafını kaldır
+async function removeProfilePhoto() {
+  var user = fbAuth.currentUser;
+  if (!user) return;
+  if (!confirm('Profil fotoğrafı kaldırılsın mı?')) return;
+  try {
+    await db.collection('users').doc(user.uid).set({ photoURL: firebase.firestore.FieldValue.delete() }, { merge: true });
+    if (window._currentUser) delete window._currentUser.photoURL;
+    refreshSettingsAvatar();
+    showToast('Fotoğraf kaldırıldı', 'success');
+  } catch(e) {
+    showToast('Hata: ' + e.message, 'error');
   }
 }
 
@@ -4113,13 +4217,12 @@ async function loadLogoPreview() {
   const adminName = (window._currentUser && window._currentUser.name) || localStorage.getItem('admin_name') || '';
   const nameInput = document.getElementById('settings-name');
   const displayEl = document.getElementById('settings-display-name');
-  const avatarEl = document.getElementById('settings-avatar');
   const emailEl = document.getElementById('settings-email');
   const emailInfoEl = document.getElementById('settings-email-info');
   const lastLoginEl = document.getElementById('settings-last-login');
   if (nameInput) nameInput.value = adminName;
   if (displayEl) displayEl.textContent = adminName || 'Admin';
-  if (avatarEl) avatarEl.textContent = adminName ? adminName.charAt(0).toUpperCase() : 'A';
+  refreshSettingsAvatar();
   const user = fbAuth.currentUser;
   if (user) {
     if (emailEl) emailEl.textContent = user.email;
@@ -4426,7 +4529,8 @@ async function loadCurrentUserRole(firebaseUser) {
     role: null,
     active: true,
     allowedPages: null,
-    permissions: {}
+    permissions: {},
+    photoURL: null
   };
   // Super admin email — her zaman tam yetki (kurtarma)
   if (firebaseUser.email === SUPER_ADMIN_EMAIL) {
@@ -4469,6 +4573,7 @@ async function loadCurrentUserRole(firebaseUser) {
     baseUser.active = data.active !== false;
     baseUser.allowedPages = Array.isArray(data.allowedPages) ? data.allowedPages : null;
     baseUser.permissions = data.permissions || {};
+    baseUser.photoURL = data.photoURL || null;
     window._currentUser = baseUser;
     // Son giriş güncelle
     try { db.collection('users').doc(firebaseUser.uid).update({ lastLogin: new Date().toISOString() }); } catch(e) {}
@@ -4507,6 +4612,7 @@ function attachCurrentUserListener(uid) {
       window._currentUser.name = data.name || window._currentUser.name;
       window._currentUser.allowedPages = Array.isArray(data.allowedPages) ? data.allowedPages : null;
       window._currentUser.permissions = data.permissions || {};
+      window._currentUser.photoURL = data.photoURL || null;
       var changed = prevRole !== window._currentUser.role
         || prevPages !== JSON.stringify(window._currentUser.allowedPages || null)
         || prevPerms !== JSON.stringify(window._currentUser.permissions || {});
@@ -10625,7 +10731,7 @@ function renderUsers() {
       permsInfo = '<span>📄 ' + pages + ' sayfa</span>' + (extras.length > 0 ? '<span>' + extras.join(' · ') + '</span>' : '');
     }
     return '<div class="user-card' + (isActive ? '' : ' inactive') + '">' +
-      '<div class="user-avatar">' + esc(initials) + '</div>' +
+      userAvatar(u, 42) +
       '<div class="user-info">' +
         '<div class="user-name">' + esc(u.name || '—') +
           '<span class="user-role-badge user-role-' + (u.role || 'viewer') + '">' + roleBadge + '</span>' +
@@ -11201,9 +11307,24 @@ function populateTodoAssignedSelect(selectedUid) {
   var opts = '<option value="">— Genel (herkese açık) —</option>';
   users.forEach(function(u) {
     var label = (u.name || u.email) + ' (' + (u.role || '?') + ')';
-    opts += '<option value="' + u.uid + '" data-name="' + esc(u.name || u.email) + '"' + (u.uid === selectedUid ? ' selected' : '') + '>' + esc(label) + '</option>';
+    opts += '<option value="' + u.uid + '" data-name="' + esc(u.name || u.email) + '" data-email="' + esc(u.email || '') + '"' + (u.uid === selectedUid ? ' selected' : '') + '>' + esc(label) + '</option>';
   });
   select.innerHTML = opts;
+  toggleTodoMailNotifyVisibility();
+}
+
+// Atanan kullanıcı seçilince mail bildirim onay kutusunu göster/gizle
+function toggleTodoMailNotifyVisibility() {
+  var select = document.getElementById('todo-assigned-to');
+  var notifyLabel = document.getElementById('todo-notify-label');
+  var notifyCb = document.getElementById('todo-notify-email');
+  if (!select || !notifyLabel) return;
+  if (select.value) {
+    notifyLabel.style.display = 'flex';
+  } else {
+    notifyLabel.style.display = 'none';
+    if (notifyCb) notifyCb.checked = false;
+  }
 }
 
 async function saveTodo() {
@@ -11214,13 +11335,17 @@ async function saveTodo() {
   var tagsRaw = document.getElementById('todo-tags').value.trim();
   var tags = tagsRaw ? tagsRaw.split(',').map(function(t) { return t.trim().toLowerCase(); }).filter(function(t) { return t && t.length <= 30; }).slice(0, 10) : [];
   // Atama (sadece admin ise)
-  var assignedTo = null, assignedToName = null;
+  var assignedTo = null, assignedToName = null, assignedToEmail = null;
+  var notifyByMail = false;
   if (isCurrentAdmin()) {
     var sel = document.getElementById('todo-assigned-to');
     if (sel && sel.value) {
       assignedTo = sel.value;
       var opt = sel.options[sel.selectedIndex];
       assignedToName = opt ? (opt.getAttribute('data-name') || opt.textContent) : null;
+      assignedToEmail = opt ? opt.getAttribute('data-email') : null;
+      var cb = document.getElementById('todo-notify-email');
+      notifyByMail = !!(cb && cb.checked);
     }
   }
   var data = {
@@ -11248,9 +11373,76 @@ async function saveTodo() {
       await db.collection('admin_todos').add(data);
       showToast('Görev eklendi', 'success');
     }
+    // Mail bildirim — sadece admin atanan kullanıcıya + checkbox işaretliyse
+    if (notifyByMail && assignedToEmail && assignedTo) {
+      sendTaskAssignmentEmail({
+        toEmail: assignedToEmail,
+        toName: assignedToName,
+        title: data.title,
+        description: data.description,
+        dueDate: data.dueDate,
+        dueTime: data.dueTime,
+        priority: data.priority,
+        assignedBy: data.createdBy
+      }).catch(function(e) { console.warn('Görev bildirim mail hatası:', e); });
+    }
     closeTodoModal();
   } catch(e) {
     showToast('Hata: ' + e.message, 'error');
+  }
+}
+
+// Atanan kullanıcıya görev bildirim maili — Resend üzerinden send-mail API
+async function sendTaskAssignmentEmail(info) {
+  try {
+    var prioLabels = { urgent:'🔴 Acil', high:'🟠 Yüksek', medium:'🟡 Orta', low:'🔵 Düşük' };
+    var prio = prioLabels[info.priority || 'medium'];
+    var dueStr = info.dueDate ? (info.dueDate + (info.dueTime ? ' ' + info.dueTime : '')) : 'Süresiz';
+    var panelUrl = 'https://assosukesfet.com/admin.html#todos';
+    var html = '<!DOCTYPE html><html><body style="margin:0;padding:0;background:#FAF7F2;font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#1A2744">' +
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#FAF7F2;padding:40px 20px"><tr><td align="center">' +
+      '<table width="560" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.06)">' +
+        '<tr><td style="background:linear-gradient(135deg,#06101E,#0C1A30);padding:32px 40px;text-align:center">' +
+          '<div style="font-family:Georgia,serif;font-size:1.5rem;font-weight:800;color:#F5EDE0">Assos\'u Keşfet</div>' +
+          '<div style="font-size:.75rem;color:rgba(245,237,224,.5);margin-top:6px">Yeni Görev Bildirimi</div>' +
+        '</td></tr>' +
+        '<tr><td style="padding:32px 40px">' +
+          '<div style="font-size:1.2rem;font-weight:800;color:#1A2744;margin-bottom:14px">🎯 Size yeni bir görev atandı</div>' +
+          '<p style="font-size:.9rem;line-height:1.7;color:#2D3748;margin:0 0 16px">Merhaba ' + esc(info.toName || '') + ',</p>' +
+          '<p style="font-size:.9rem;line-height:1.7;color:#2D3748;margin:0 0 20px">' + esc(info.assignedBy || 'Yönetici') + ' size bir görev atadı:</p>' +
+          '<div style="background:#FAF7F2;border-left:3px solid #C4521A;padding:14px 16px;border-radius:8px;margin-bottom:20px">' +
+            '<div style="font-size:1rem;font-weight:700;color:#1A2744;margin-bottom:6px">' + esc(info.title) + '</div>' +
+            (info.description ? '<div style="font-size:.82rem;color:#4A5568;margin-bottom:10px;white-space:pre-wrap">' + esc(info.description) + '</div>' : '') +
+            '<div style="font-size:.78rem;color:#718096"><strong>Öncelik:</strong> ' + prio + '</div>' +
+            '<div style="font-size:.78rem;color:#718096"><strong>Son tarih:</strong> ' + esc(dueStr) + '</div>' +
+          '</div>' +
+          '<div style="text-align:center;margin:24px 0">' +
+            '<a href="' + panelUrl + '" style="display:inline-block;background:linear-gradient(135deg,#C4521A,#A3431A);color:#fff;padding:12px 32px;border-radius:10px;text-decoration:none;font-weight:700;font-size:.9rem">Görevi Görüntüle →</a>' +
+          '</div>' +
+          '<p style="font-size:.72rem;color:#718096;text-align:center;margin:16px 0 0">Bu mail otomatik gönderilmiştir.</p>' +
+        '</td></tr>' +
+        '<tr><td style="background:#FAF7F2;padding:20px 40px;text-align:center;border-top:1px solid rgba(0,0,0,.04);font-size:.7rem;color:#A0AEC0">' +
+          'Assos\'u Keşfet · <a href="mailto:info@assosukesfet.com" style="color:#C4521A;text-decoration:none">info@assosukesfet.com</a>' +
+        '</td></tr>' +
+      '</table></td></tr></table></body></html>';
+    var token = await firebase.auth().currentUser.getIdToken();
+    var resp = await fetch('/api/send-mail', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({
+        to: info.toEmail,
+        subject: '🎯 Yeni görev: ' + info.title,
+        html: html,
+        type: 'task_assignment'
+      })
+    });
+    if (resp.ok) showToast('📧 Mail bildirim gönderildi: ' + info.toEmail, 'success');
+    else {
+      var err = await resp.json().catch(function() { return {}; });
+      showToast('Mail gönderilemedi: ' + (err.error || resp.status), 'error');
+    }
+  } catch(e) {
+    console.warn('sendTaskAssignmentEmail error:', e);
   }
 }
 

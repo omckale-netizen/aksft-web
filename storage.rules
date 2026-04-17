@@ -45,6 +45,16 @@ service firebase.storage {
         && request.resource.contentType.matches('image/.*');
     }
 
+    // Kullanıcı profil fotoğrafları — sadece kendi fotoğrafını yükler
+    // Path: avatars/{uid}/photo.jpg
+    match /avatars/{uid}/{fileName} {
+      allow read: if true; // panel içinde herkes görebilir
+      allow write: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.size < 1 * 1024 * 1024       // Maks 1MB
+        && request.resource.contentType.matches('image/.*');
+    }
+
     // Diger tum dosyalar: engelle
     match /{allPaths=**} {
       allow read, write: if false;
