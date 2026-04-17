@@ -4654,13 +4654,15 @@ function canAccessPage(page) {
   if (role === 'admin') return true;
   // Admin-only sayfalar her koşulda kapalı
   if (ADMIN_ONLY_PAGES.indexOf(page) > -1) return false;
+  // Ayarlar ve kişisel sayfalar her yetkili kullanıcıya açık (self-service)
+  if (page === 'settings') return true;
   // Custom allowedPages varsa onu kullan
   if (Array.isArray(window._currentUser.allowedPages) && window._currentUser.allowedPages.length > 0) {
     return window._currentUser.allowedPages.indexOf(page) > -1;
   }
   // Yoksa default davranış (editor tümü, viewer okuma odaklı)
   if (role === 'viewer') {
-    return ['export','security','users','settings','ai','todos'].indexOf(page) === -1;
+    return ['export','security','users','ai','todos'].indexOf(page) === -1;
   }
   return true;
 }
@@ -10825,7 +10827,7 @@ function renderUserPagesGrid(selected) {
   var list = ALL_ADMIN_PAGES.filter(function(p) {
     // Viewer rolünde adminOnly sayfalar ve bazı düzenleme sayfaları gizlensin
     if (role === 'viewer' && p.adminOnly) return false;
-    if (role === 'viewer' && ['todos','export','security','settings','users'].indexOf(p.key) > -1) return false;
+    if (role === 'viewer' && ['todos','export','security','users'].indexOf(p.key) > -1) return false;
     // Editor rolünde sadece adminOnly hariç
     if (role === 'editor' && p.adminOnly) return false;
     return true;
@@ -10925,6 +10927,33 @@ async function saveUser() {
   var ALLOWED_ROLES = ['admin', 'editor', 'viewer'];
   if (!ALLOWED_ROLES.includes(role)) {
     showToast('Geçersiz rol: ' + role + '. Sadece admin/editor/viewer kabul edilir.', 'error'); return;
+  }
+
+  // ⚠️ Yüksek yetki onayı
+  // 1) Admin rolü veriliyorsa
+  // 2) Editor için kritik özel yetkiler (silme, toplu mail, export, premium) açıksa
+  var warnings = [];
+  if (role === 'admin') {
+    warnings.push('👑 ADMIN rolü veriliyor — kullanıcı yönetimi, tüm silmeler, yedekleme, güvenlik sayfaları dahil TAM yetki olacak.');
+  }
+  if (role !== 'admin') {
+    var critical = [];
+    if (document.getElementById('perm-canDelete').checked) critical.push('🗑 Silme (venue/blog/route/village)');
+    if (document.getElementById('perm-canManagePremium').checked) critical.push('⭐ Premium verme/kaldırma');
+    if (document.getElementById('perm-canBulkMail').checked) critical.push('📨 Toplu mail gönderme');
+    if (document.getElementById('perm-canExport').checked) critical.push('📦 Yedek/dışa aktarma');
+    if (document.getElementById('perm-viewAllLogs').checked) critical.push('👁 Tüm kullanıcıların aktivite logları');
+    if (critical.length >= 3) {
+      warnings.push('⚠️ Çok sayıda kritik özel yetki açık: ' + critical.join(', '));
+    } else if (critical.length > 0 && (critical.indexOf('🗑 Silme (venue/blog/route/village)') > -1 || critical.indexOf('📦 Yedek/dışa aktarma') > -1)) {
+      warnings.push('⚠️ Hassas yetki açık: ' + critical.join(', '));
+    }
+  }
+  if (warnings.length > 0) {
+    var msg = '⚠️ YÜKSEK YETKİ ONAYI\n\n' + warnings.join('\n\n') +
+              '\n\nKullanıcı: ' + name + ' (' + email + ')' +
+              '\n\nBu yetkileri vermek istediğinize emin misiniz?';
+    if (!confirm(msg)) { showToast('İşlem iptal edildi', 'info'); return; }
   }
 
   // Allowed pages ve permissions'ı topla (admin için null/varsayılan)
