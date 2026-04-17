@@ -26,49 +26,72 @@ service cloud.firestore {
     function isViewer() {
       return isEditor() || (request.auth != null && isUserActive() && getUserRole() == 'viewer');
     }
+    // allowedPages kontrolü — editor'un yazma yetkisini sayfa bazında sınırlar
+    // Admin her şeye erişir (kısıt yok). Editor için users/{uid}.allowedPages içinde sayfa adı olmalı.
+    function hasPage(page) {
+      return isAdmin() || (
+        isEditor()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.allowedPages is list
+        && page in get(/databases/$(database)/documents/users/$(request.auth.uid)).data.allowedPages
+      );
+    }
+    // Kullanıcının kendi e-postası (token'dan) — activity log / sent_mail sahipliği için
+    function myEmail() { return request.auth.token.email; }
 
     // Kullanici yonetimi: sadece admin yonetir, her kullanici kendi belgesini okuyabilir (role vb.)
+    // ÖNEMLİ: Rol değeri validate edilir — 'admin'/'editor'/'viewer' dışı kabul edilmez
     match /users/{uid} {
       allow read: if request.auth != null && (request.auth.uid == uid || isAdmin());
-      allow create, update, delete: if isAdmin();
+      allow create, update: if isAdmin()
+        && request.resource.data.role in ['admin','editor','viewer'];
+      allow delete: if isAdmin();
     }
 
-    // Icerik yonetimi: herkes okuyabilir, editor ve admin yazabilir, silme sadece admin
+    // Icerik yonetimi: herkes okuyabilir; editor yazabilir — SAYFA YETKİSİ ŞARTI VAR
     match /venues/{docId} {
       allow read: if true;
-      allow create, update: if isEditor();
+      allow create, update: if hasPage('venues');
       allow delete: if isAdmin();
     }
 
     match /places/{docId} {
       allow read: if true;
-      allow create, update: if isEditor();
+      allow create, update: if hasPage('villages');
       allow delete: if isAdmin();
     }
 
     match /villages/{docId} {
       allow read: if true;
-      allow create, update: if isEditor();
+      allow create, update: if hasPage('villages');
       allow delete: if isAdmin();
     }
 
     match /routes/{docId} {
       allow read: if true;
-      allow create, update: if isEditor();
+      allow create, update: if hasPage('routes');
       allow delete: if isAdmin();
     }
 
-    // Iletisim mesajlari: herkes yazabilir; editor okur ve update edebilir (label vb.), sadece admin siler
+    // Iletisim mesajlari: herkes yazabilir; editor okur ve update edebilir (label vb.)
+    // messages sayfa yetkisi şart — sadece yetkili editor mesajları okuyabilir
     match /messages/{docId} {
       allow create: if true;
-      allow read, update: if isEditor();
+      allow read, update: if hasPage('messages');
       allow delete: if isAdmin();
     }
 
-    // Gonderilen mailler arsivi: editor okur/yazar (yanit gonderme), admin siler
+    // Gonderilen mailler arsivi: admin hepsini okur; editor sadece KENDİ gönderdiklerini okur/yazar
+    // sent_mails dokümanındaki 'user' alanı göndericinin e-postasıdır
     match /sent_mails/{docId} {
-      allow read, create: if isEditor();
-      allow update: if isEditor();
+      allow read: if isAdmin() || (
+        isEditor() && resource.data.user == myEmail()
+      );
+      allow create: if hasPage('messages')
+        && request.resource.data.user == myEmail();
+      allow update: if isAdmin() || (
+        isEditor() && resource.data.user == myEmail()
+      );
       allow delete: if isAdmin();
     }
 
@@ -182,16 +205,41 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // Aktivite logu: tum yetkili kullanicilar okuyabilir, sistem yazar
+    // Aktivite logu:
+    // - Admin tüm logları okur
+    // - Editor/viewer sadece KENDİ aksiyonlarını okur (resource.data.user == kendi email)
+    // - Yazma: editor+ (kendi adına)
+    // - Update/delete: sadece admin
     match /activity_logs/{docId} {
-      allow read: if isViewer();
-      allow create: if isEditor();
+      allow read: if isAdmin() || (
+        isViewer() && resource.data.user == myEmail()
+      );
+      allow create: if isEditor()
+        && request.resource.data.user == myEmail();
       allow update, delete: if isAdmin();
     }
 
-    // Admin todo/hatirlatma sistemi: editor+ kullanabilir
+    // Admin todo/hatirlatma sistemi:
+    // - Admin her şey
+    // - Editor okuma: kendine atanmış + kendi oluşturduğu + atanmamış (genel)
+    // - Editor create: kendi createdBy'siyle (kendi adına başkasına atama yapabilir, admin yetki verdiyse)
+    // - Editor update/delete: kendi oluşturduğu VEYA kendine atanmış
     match /admin_todos/{docId} {
-      allow read, write: if isEditor();
+      allow read: if isAdmin() || (
+        isEditor() && (
+          resource.data.assignedTo == null
+          || resource.data.assignedTo == request.auth.uid
+          || resource.data.createdBy == myEmail()
+        )
+      );
+      allow create: if isEditor()
+        && request.resource.data.createdBy == myEmail();
+      allow update, delete: if isAdmin() || (
+        isEditor() && (
+          resource.data.createdBy == myEmail()
+          || resource.data.assignedTo == request.auth.uid
+        )
+      );
     }
 
     // Diger tum koleksiyonlar: varsayilan olarak engelle

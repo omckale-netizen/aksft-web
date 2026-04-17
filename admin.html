@@ -12754,20 +12754,22 @@ function fcClearAll() {
 ══════════════════════════════════════════════════ */
 async function syncLoginLogs() {
   try {
+    var currentEmail = (firebase.auth().currentUser && firebase.auth().currentUser.email) || '';
+    if (!currentEmail) return;
     // Başarılı giriş kaydı
     var lastLogin = localStorage.getItem('assos_last_login');
     if (lastLogin) {
       var info = JSON.parse(lastLogin);
       await db.collection('activity_logs').add({
         action: 'giris',
-        target: info.email || '',
+        target: info.email || currentEmail,
         details: (info.device || '') + (info.ip ? ' · IP: ' + info.ip : ''),
-        user: info.email || '',
+        user: currentEmail, // Firestore rules: resource.data.user == auth email olmalı
         timestamp: info.timestamp || new Date().toISOString()
       });
       localStorage.removeItem('assos_last_login');
     }
-    // Başarısız giriş kayıtları
+    // Başarısız giriş kayıtları — denenen email target'a gider, user = authenticated user
     var failedLogs = JSON.parse(localStorage.getItem('assos_failed_logins') || '[]');
     if (failedLogs.length > 0) {
       for (var fl of failedLogs) {
@@ -12775,7 +12777,7 @@ async function syncLoginLogs() {
           action: 'giris_basarisiz',
           target: fl.email || '',
           details: fl.error || 'Hatalı şifre',
-          user: fl.email || '',
+          user: currentEmail,
           timestamp: fl.timestamp || new Date().toISOString()
         });
       }
