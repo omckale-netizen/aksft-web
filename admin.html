@@ -4383,68 +4383,107 @@ function showMtTab(tab, btn) {
 
 // --- MAPS PARSER ---
 var _mtMapsData = null;
+var _mtMapsExpandTimer = null;
+
+// İç parse — regex tabanlı, hazır URL verildi varsayar
+function _mtMapsParseFrom(input) {
+  var lat = null, lng = null, placeName = null, zoom = null;
+
+  var direct = input.match(/^(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)$/);
+  if (direct) { lat = parseFloat(direct[1]); lng = parseFloat(direct[2]); }
+
+  if (!lat) {
+    var atMatch = input.match(/@(-?\d+\.\d+),(-?\d+\.\d+)(?:,(\d+(?:\.\d+)?)z)?/);
+    if (atMatch) { lat = parseFloat(atMatch[1]); lng = parseFloat(atMatch[2]); zoom = atMatch[3] || null; }
+  }
+  if (!lat) {
+    var qMatch = input.match(/[?&](?:q|ll|center|destination)=(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (qMatch) { lat = parseFloat(qMatch[1]); lng = parseFloat(qMatch[2]); }
+  }
+  if (!lat) {
+    var placeMatch = input.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+    if (placeMatch) { lat = parseFloat(placeMatch[1]); lng = parseFloat(placeMatch[2]); }
+  }
+
+  var placeUrlMatch = input.match(/maps\/place\/([^\/@]+)/);
+  if (placeUrlMatch) {
+    try { placeName = decodeURIComponent(placeUrlMatch[1].replace(/\+/g, ' ')); } catch(e) {}
+  }
+
+  return { lat: lat, lng: lng, name: placeName, zoom: zoom };
+}
+
+function _mtMapsShowResult(res, sourceUrl) {
+  var fieldsEl = document.getElementById('mt-maps-fields');
+  var resultEl = document.getElementById('mt-maps-result');
+  if (!res.lat || !res.lng) {
+    fieldsEl.innerHTML = '<span class="mt-maps-field-label">DURUM</span><span style="color:var(--red);font-weight:600">❌ Koordinat çıkarılamadı</span>' +
+      '<span class="mt-maps-field-label">İPUCU</span><span style="color:var(--text-light);font-size:.75rem">Linki Google Maps\'te açıp adres çubuğundan tam URL\'yi kopyalayın</span>';
+    resultEl.style.display = '';
+    _mtMapsData = null;
+    return;
+  }
+  _mtMapsData = res;
+  var lat6 = res.lat.toFixed(6);
+  var lng6 = res.lng.toFixed(6);
+  var html = '';
+  if (res.name) html += '<span class="mt-maps-field-label">YER</span><span class="mt-maps-field-val" style="color:var(--terra)">' + esc(res.name) + '</span>';
+  html += '<span class="mt-maps-field-label">ENLEM</span><span class="mt-maps-field-val">' + lat6 + '</span>';
+  html += '<span class="mt-maps-field-label">BOYLAM</span><span class="mt-maps-field-val">' + lng6 + '</span>';
+  html += '<span class="mt-maps-field-label">TAM KOORDİNAT</span><span class="mt-maps-field-val" style="color:var(--green)">' + lat6 + ', ' + lng6 + '</span>';
+  if (res.zoom) html += '<span class="mt-maps-field-label">ZOOM</span><span class="mt-maps-field-val">' + res.zoom + '</span>';
+  if (sourceUrl && sourceUrl.length > 60) html += '<span class="mt-maps-field-label">KAYNAK URL</span><span class="mt-maps-field-val" style="font-size:.7rem;color:var(--text-muted);word-break:break-all">' + esc(sourceUrl.slice(0, 120)) + (sourceUrl.length > 120 ? '…' : '') + '</span>';
+  fieldsEl.innerHTML = html;
+  resultEl.style.display = '';
+  document.getElementById('mt-maps-embed').style.display = 'none';
+  if (window.lucide && typeof lucide.createIcons === 'function') try { lucide.createIcons(); } catch(e) {}
+}
+
 function mtMapsParse() {
   var input = document.getElementById('mt-maps-input').value.trim();
   var resultEl = document.getElementById('mt-maps-result');
   var fieldsEl = document.getElementById('mt-maps-fields');
   if (!input) { resultEl.style.display = 'none'; _mtMapsData = null; return; }
 
-  var lat = null, lng = null, placeName = null, zoom = null;
+  // İlk deneme: mevcut girdiden regex çıkarsa direkt göster
+  var res = _mtMapsParseFrom(input);
+  if (res.lat && res.lng) { _mtMapsShowResult(res, input); return; }
 
-  // 1) Format: "40.1234, 26.5678" — direkt koordinat
-  var direct = input.match(/^(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)$/);
-  if (direct) { lat = parseFloat(direct[1]); lng = parseFloat(direct[2]); }
+  // Kısa URL ise (maps.app.goo.gl veya goo.gl) server-side expand et
+  var isShortUrl = /maps\.app\.goo\.gl|goo\.gl\/maps|g\.co/.test(input);
+  if (!isShortUrl) { _mtMapsShowResult(res, input); return; }
 
-  // 2) Google Maps URL: @lat,lng,zoomz
-  if (!lat) {
-    var atMatch = input.match(/@(-?\d+\.\d+),(-?\d+\.\d+)(?:,(\d+(?:\.\d+)?)z)?/);
-    if (atMatch) { lat = parseFloat(atMatch[1]); lng = parseFloat(atMatch[2]); zoom = atMatch[3] || null; }
-  }
-
-  // 3) URL query: ?q=lat,lng veya ?ll=lat,lng veya ?center=lat,lng
-  if (!lat) {
-    var qMatch = input.match(/[?&](?:q|ll|center|destination)=(-?\d+\.\d+),(-?\d+\.\d+)/);
-    if (qMatch) { lat = parseFloat(qMatch[1]); lng = parseFloat(qMatch[2]); }
-  }
-
-  // 4) !3dLAT!4dLNG formatı (Google Maps place URL'lerinde)
-  if (!lat) {
-    var placeMatch = input.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
-    if (placeMatch) { lat = parseFloat(placeMatch[1]); lng = parseFloat(placeMatch[2]); }
-  }
-
-  // Place name (varsa URL'den)
-  var placeUrlMatch = input.match(/maps\/place\/([^\/@]+)/);
-  if (placeUrlMatch) {
-    placeName = decodeURIComponent(placeUrlMatch[1].replace(/\+/g, ' '));
-  }
-
-  if (!lat || !lng) {
-    fieldsEl.innerHTML = '<span class="mt-maps-field-label">DURUM</span><span style="color:var(--red);font-weight:600">❌ Koordinat çıkarılamadı</span>' +
-      '<span class="mt-maps-field-label">İPUCU</span><span style="color:var(--text-light);font-size:.75rem">Linki Google Maps\'te açıp adres çubuğundan tam URL\'yi kopyalayın (goo.gl kısaltmaları burada genişlemiyor)</span>';
-    resultEl.style.display = '';
-    _mtMapsData = null;
-    return;
-  }
-
-  _mtMapsData = { lat: lat, lng: lng, name: placeName, zoom: zoom };
-  var lat6 = lat.toFixed(6);
-  var lng6 = lng.toFixed(6);
-
-  var html = '';
-  if (placeName) html += '<span class="mt-maps-field-label">YER</span><span class="mt-maps-field-val" style="color:var(--terra)">' + esc(placeName) + '</span>';
-  html += '<span class="mt-maps-field-label">ENLEM</span><span class="mt-maps-field-val">' + lat6 + '</span>';
-  html += '<span class="mt-maps-field-label">BOYLAM</span><span class="mt-maps-field-val">' + lng6 + '</span>';
-  html += '<span class="mt-maps-field-label">TAM KOORDİNAT</span><span class="mt-maps-field-val" style="color:var(--green)">' + lat6 + ', ' + lng6 + '</span>';
-  if (zoom) html += '<span class="mt-maps-field-label">ZOOM</span><span class="mt-maps-field-val">' + zoom + '</span>';
-  fieldsEl.innerHTML = html;
+  // Debounce — kullanıcı yazmayı bitirdikten 500ms sonra genişlet
+  if (_mtMapsExpandTimer) clearTimeout(_mtMapsExpandTimer);
+  fieldsEl.innerHTML = '<span class="mt-maps-field-label">DURUM</span><span style="color:var(--text-muted)">⏳ Kısa link genişletiliyor...</span>';
   resultEl.style.display = '';
+  _mtMapsExpandTimer = setTimeout(function() { _mtMapsExpand(input); }, 500);
+}
 
-  // Embed alanını temizle
-  document.getElementById('mt-maps-embed').style.display = 'none';
-
-  // Lucide icons re-render
-  if (window.lucide && typeof lucide.createIcons === 'function') try { lucide.createIcons(); } catch(e) {}
+async function _mtMapsExpand(input) {
+  try {
+    var resp = await fetch('/api/expand-maps-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: input })
+    });
+    var data = await resp.json();
+    if (!resp.ok) {
+      document.getElementById('mt-maps-fields').innerHTML =
+        '<span class="mt-maps-field-label">DURUM</span><span style="color:var(--red);font-weight:600">❌ Link genişletilemedi</span>' +
+        '<span class="mt-maps-field-label">HATA</span><span style="color:var(--text-light);font-size:.75rem">' + esc(data.error || resp.status) + '</span>';
+      _mtMapsData = null;
+      return;
+    }
+    var expanded = data.expandedUrl || input;
+    var res = _mtMapsParseFrom(expanded);
+    _mtMapsShowResult(res, expanded);
+  } catch(e) {
+    document.getElementById('mt-maps-fields').innerHTML =
+      '<span class="mt-maps-field-label">DURUM</span><span style="color:var(--red);font-weight:600">❌ Bağlantı hatası</span>' +
+      '<span class="mt-maps-field-label">HATA</span><span style="color:var(--text-light);font-size:.75rem">' + esc(e.message || '') + '</span>';
+    _mtMapsData = null;
+  }
 }
 
 function mtMapsCopyCoords() {
