@@ -69,25 +69,197 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   }
 
-  // Firebase Identity Toolkit REST API ile şifre sıfırlama maili gönder
+  // Service account ile reset link al (mail Firebase tarafından gönderilmesin)
+  // ve Resend ile bizim tasarımımızla info@assosukesfet.com'dan gönder
   try {
-    const resp = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=' + FIREBASE_API_KEY, {
+    if (!env.FIREBASE_SERVICE_ACCOUNT || !env.RESEND_API_KEY) {
+      // Service account veya Resend yoksa Firebase'in default mailine düş
+      await fetch('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=' + FIREBASE_API_KEY, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestType: 'PASSWORD_RESET', email: email })
+      });
+      return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    // 1) Service account JWT → OAuth access token
+    let sa;
+    try {
+      sa = typeof env.FIREBASE_SERVICE_ACCOUNT === 'string'
+        ? JSON.parse(env.FIREBASE_SERVICE_ACCOUNT)
+        : env.FIREBASE_SERVICE_ACCOUNT;
+    } catch(e) {
+      // Fallback Firebase mail
+      await fetch('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=' + FIREBASE_API_KEY, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestType: 'PASSWORD_RESET', email: email })
+      });
+      return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    const accessToken = await getAccessToken(sa);
+
+    // 2) Reset link al (Firebase mail göndermesin — returnOobLink: true)
+    const oobResp = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=' + FIREBASE_API_KEY, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + accessToken
+      },
       body: JSON.stringify({
         requestType: 'PASSWORD_RESET',
-        email: email
+        email: email,
+        returnOobLink: true
       })
     });
-    if (!resp.ok) {
-      const errData = await resp.json().catch(() => ({}));
-      console.error('sendOobCode error:', errData);
-      // EMAIL_NOT_FOUND gelirse bile sessizce başarılı dön
+    if (!oobResp.ok) {
+      return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
+    const oobData = await oobResp.json();
+    const resetLink = oobData.oobLink;
+    if (!resetLink) {
+      return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    // 3) Resend ile özel HTML mail gönder
+    const html = buildResetMailHtml(resetLink, email);
+    const text = `Merhaba,\n\nAssos'u Keşfet yönetim paneli için şifre sıfırlama talebi aldık.\n\nYeni şifre belirlemek için aşağıdaki linke tıklayın (1 saat geçerli):\n\n${resetLink}\n\nBu talebi siz yapmadıysanız bu maili görmezden gelebilirsiniz, hesabınız güvende.\n\nAssos'u Keşfet Ekibi\ninfo@assosukesfet.com`;
+
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + env.RESEND_API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: 'Assos\'u Keşfet <info@assosukesfet.com>',
+        to: [email],
+        subject: '🔑 Şifre Sıfırlama — Assos\'u Keşfet',
+        html: html,
+        text: text,
+        reply_to: 'info@assosukesfet.com'
+      })
+    });
+
     return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch(e) {
+    console.error('Password reset email error:', e);
     return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   }
+}
+
+// ═══ HTML Mail Template ═══
+function buildResetMailHtml(resetLink, email) {
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Şifre Sıfırlama</title>
+</head>
+<body style="margin:0;padding:0;background:#FAF7F2;font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;color:#1A2744">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#FAF7F2;padding:40px 20px">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" border="0" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.06)">
+        <!-- Header -->
+        <tr><td style="background:linear-gradient(135deg,#06101E 0%,#0C1A30 50%,#091420 100%);padding:36px 40px;text-align:center">
+          <div style="font-family:Georgia,serif;font-size:1.6rem;font-weight:800;color:#F5EDE0;letter-spacing:-.02em">Assos'u Keşfet</div>
+          <div style="font-size:.78rem;color:rgba(245,237,224,.5);margin-top:6px">Yönetim Paneli</div>
+        </td></tr>
+        <!-- İçerik -->
+        <tr><td style="padding:36px 40px">
+          <div style="font-size:1.3rem;font-weight:800;color:#1A2744;margin-bottom:14px">🔑 Şifre Sıfırlama Talebi</div>
+          <p style="font-size:.95rem;line-height:1.7;color:#2D3748;margin:0 0 16px">Merhaba,</p>
+          <p style="font-size:.95rem;line-height:1.7;color:#2D3748;margin:0 0 16px">
+            Yönetim paneliniz için şifre sıfırlama talebi aldık. Yeni bir şifre belirlemek için aşağıdaki butona tıklayabilirsiniz.
+          </p>
+          <div style="text-align:center;margin:32px 0">
+            <a href="${resetLink}" style="display:inline-block;background:linear-gradient(135deg,#C4521A,#A3431A);color:#fff;padding:14px 36px;border-radius:12px;text-decoration:none;font-weight:700;font-size:.95rem;box-shadow:0 4px 14px rgba(196,82,26,.3)">🔑 Şifremi Sıfırla</a>
+          </div>
+          <p style="font-size:.82rem;line-height:1.6;color:#718096;margin:0 0 12px">
+            Buton çalışmazsa, aşağıdaki bağlantıyı tarayıcınıza kopyalayıp yapıştırabilirsiniz:
+          </p>
+          <div style="background:#FAF7F2;padding:12px 14px;border-radius:8px;font-family:'Courier New',monospace;font-size:.72rem;color:#4A5568;word-break:break-all;margin-bottom:24px">${resetLink}</div>
+          <div style="background:rgba(212,147,90,.08);border-left:3px solid #D4935A;padding:12px 14px;border-radius:6px;margin:20px 0">
+            <div style="font-size:.78rem;color:#9C4221;line-height:1.6">
+              <strong>⏰ Önemli:</strong> Bu link <strong>1 saat</strong> geçerlidir. Süre dolduktan sonra yeni bir sıfırlama talebi göndermeniz gerekir.
+            </div>
+          </div>
+          <div style="background:rgba(229,62,62,.05);border-left:3px solid #E53E3E;padding:12px 14px;border-radius:6px;margin:16px 0">
+            <div style="font-size:.78rem;color:#742A2A;line-height:1.6">
+              <strong>🔒 Güvenlik:</strong> Bu talebi siz yapmadıysanız bu maili görmezden gelebilirsiniz, hesabınız güvende. Şifreniz değişmeyecektir.
+            </div>
+          </div>
+        </td></tr>
+        <!-- Footer -->
+        <tr><td style="background:#FAF7F2;padding:24px 40px;text-align:center;border-top:1px solid rgba(0,0,0,.04)">
+          <div style="font-size:.78rem;color:#1A2744;font-weight:700;margin-bottom:6px">Assos'u Keşfet</div>
+          <div style="font-size:.72rem;color:#718096;margin-bottom:10px">Assos'un dijital keşif rehberi</div>
+          <div style="font-size:.7rem;color:#A0AEC0">
+            <a href="mailto:info@assosukesfet.com" style="color:#C4521A;text-decoration:none">info@assosukesfet.com</a>
+            &middot;
+            <a href="https://assosukesfet.com" style="color:#C4521A;text-decoration:none">assosukesfet.com</a>
+          </div>
+          <div style="font-size:.65rem;color:#A0AEC0;margin-top:12px">
+            Bu otomatik bir maildir, lütfen yanıtlamayın. Sorularınız için <a href="mailto:info@assosukesfet.com" style="color:#A0AEC0">info@assosukesfet.com</a>
+          </div>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+// ═══ Service Account JWT → Google OAuth Access Token ═══
+async function getAccessToken(serviceAccount) {
+  const now = Math.floor(Date.now() / 1000);
+  const payload = {
+    iss: serviceAccount.client_email,
+    scope: 'https://www.googleapis.com/auth/firebase https://www.googleapis.com/auth/identitytoolkit',
+    aud: 'https://oauth2.googleapis.com/token',
+    exp: now + 3600,
+    iat: now,
+  };
+  const jwt = await signJWT(payload, serviceAccount.private_key);
+  const resp = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=' + encodeURIComponent(jwt),
+  });
+  if (!resp.ok) throw new Error('OAuth token alınamadı');
+  const data = await resp.json();
+  return data.access_token;
+}
+
+async function signJWT(payload, privateKeyPem) {
+  const header = { alg: 'RS256', typ: 'JWT' };
+  const headerB64 = base64UrlEncode(JSON.stringify(header));
+  const payloadB64 = base64UrlEncode(JSON.stringify(payload));
+  const data = `${headerB64}.${payloadB64}`;
+  const pemContents = privateKeyPem
+    .replace(/-----BEGIN PRIVATE KEY-----/g, '')
+    .replace(/-----END PRIVATE KEY-----/g, '')
+    .replace(/\\n/g, '')
+    .replace(/\s/g, '');
+  const binaryKey = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
+  const cryptoKey = await crypto.subtle.importKey(
+    'pkcs8', binaryKey.buffer,
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false, ['sign']
+  );
+  const signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', cryptoKey, new TextEncoder().encode(data));
+  const sigB64 = base64UrlEncodeBytes(new Uint8Array(signature));
+  return `${data}.${sigB64}`;
+}
+
+function base64UrlEncode(str) {
+  return btoa(str).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+}
+function base64UrlEncodeBytes(bytes) {
+  let bin = '';
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
 }
 
 async function sha256(text) {
