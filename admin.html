@@ -632,10 +632,27 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .chat-msg.mine .chat-bubble{background:linear-gradient(135deg,var(--terra),#B3481A);color:#fff;border-color:transparent;border-radius:14px 14px 4px 14px;box-shadow:0 2px 8px rgba(196,82,26,.18)}
 .chat-msg.mine.grouped .chat-bubble{border-top-right-radius:6px}
 
-.chat-text{font-size:.88rem;line-height:1.55;color:var(--text);white-space:pre-wrap;word-break:break-word}
+.chat-text{font-size:.9rem;line-height:1.55;color:var(--text);white-space:pre-wrap;word-break:break-word}
+.chat-text img.emoji,.chat-text{font-variant-emoji:emoji}
 .chat-msg.mine .chat-text{color:#fff}
 .chat-text a{color:var(--terra);text-decoration:underline;text-underline-offset:2px}
 .chat-msg.mine .chat-text a{color:#FFE4CE;font-weight:600}
+
+/* Sadece emoji mesajları — balon yok, büyük emoji */
+.chat-msg.jumbo .chat-bubble{background:transparent !important;border:none !important;box-shadow:none !important;padding:2px 0 !important;border-radius:0 !important}
+.chat-msg.jumbo .chat-text{line-height:1.15;color:inherit !important}
+.chat-msg.jumbo.count-1 .chat-text{font-size:3.2rem}
+.chat-msg.jumbo.count-2 .chat-text{font-size:2.8rem}
+.chat-msg.jumbo.count-3 .chat-text{font-size:2.4rem}
+.chat-msg.jumbo.count-4 .chat-text{font-size:2rem}
+.chat-msg.jumbo.count-5 .chat-text{font-size:1.7rem}
+.chat-msg.jumbo .chat-edited{font-size:.58rem;display:block;margin-top:3px;opacity:.6}
+@media(max-width:640px){
+  .chat-msg.jumbo.count-1 .chat-text{font-size:2.6rem}
+  .chat-msg.jumbo.count-2 .chat-text{font-size:2.3rem}
+  .chat-msg.jumbo.count-3 .chat-text{font-size:2rem}
+  .chat-msg.jumbo.count-4 .chat-text{font-size:1.75rem}
+}
 
 /* Mention */
 .chat-mention{display:inline-block;padding:1px 7px;border-radius:6px;font-weight:600;background:rgba(196,82,26,.1);color:var(--terra)}
@@ -7944,10 +7961,12 @@ function renderChatMessages() {
     var canDelete = mine || isCurrentAdmin();
     var canEdit = mine;
     var isOnline = !!(window._allPresence && window._allPresence[m.authorUid]);
+    var emojiInfo = detectEmojiOnly(m.text);
+    var jumboCls = emojiInfo.emojiOnly ? (' jumbo count-' + Math.min(emojiInfo.count, 5)) : '';
     var textHtml = formatChatText(m.text, m.mentions || []);
     var editedMark = m.edited ? '<span class="chat-edited">düzenlendi</span>' : '';
 
-    html += '<div class="chat-msg ' + (mine ? 'mine' : '') + (groupWithPrev ? ' grouped' : '') + '" data-id="' + esc(m.id) + '">';
+    html += '<div class="chat-msg ' + (mine ? 'mine' : '') + (groupWithPrev ? ' grouped' : '') + jumboCls + '" data-id="' + esc(m.id) + '">';
     if (!groupWithPrev) {
       html += '<div class="chat-avatar' + (mine ? ' mine' : '') + '">' +
         (photo ? '<img src="' + escAttr(photo) + '" alt="">' : '<span>' + escHtml(initials) + '</span>') +
@@ -8023,6 +8042,23 @@ function formatChatText(text, mentions) {
   // Newline → <br>
   out = out.replace(/\n/g, '<br>');
   return out;
+}
+
+// Sadece emoji içeriyorsa true — kaç emoji olduğunu da döner (jumbo boyut için)
+function detectEmojiOnly(text) {
+  if (!text) return { emojiOnly: false, count: 0 };
+  var stripped = text.replace(/\s/g, '');
+  if (!stripped) return { emojiOnly: false, count: 0 };
+  try {
+    // Her bir emoji cluster'ı (ZWJ, variation selector dahil) bir birim
+    var emojiRegex = /(\p{Extended_Pictographic}(\uFE0F|\u200D\p{Extended_Pictographic})*|\p{Emoji_Component})/gu;
+    var matches = stripped.match(emojiRegex) || [];
+    var matchedLen = matches.reduce(function(a, m) { return a + m.length; }, 0);
+    if (matchedLen === stripped.length && matches.length > 0) {
+      return { emojiOnly: true, count: matches.length };
+    }
+  } catch(e) {}
+  return { emojiOnly: false, count: 0 };
 }
 
 function scrollChatToBottom(smooth) {
