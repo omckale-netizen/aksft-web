@@ -4628,7 +4628,7 @@ function renderPlacePage(placeId) {
         <button class="ai-chat-close" onclick="aiChatToggle()">✕</button>
       </div>
       <div class="ai-chat-body" id="ai-chat-body">
-        <div class="ai-msg bot">Merhaba 👋 Assos rehberinizim. Mekan, rota, köy ya da manzara — aklınızdaki soruyu yazın, size özel öneri sunayım.</div>
+        <div class="ai-msg bot">Merhaba 👋 Assos'ta bugün ne keşfedelim? Bir kahvaltı mekanı, gün batımı noktası ya da günlük rota — aklınızdakini yazın.</div>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px;">
         <div class="ai-chat-limit" id="ai-chat-limit" style="padding:0;"></div>
@@ -4653,7 +4653,7 @@ function renderPlacePage(placeId) {
     aiChatMemory = [];
     lastQuestion = '';
     var body = document.getElementById('ai-chat-body');
-    body.innerHTML = '<div class="ai-msg bot">Merhaba 👋 Assos rehberinizim. Mekan, rota, köy ya da manzara — aklınızdaki soruyu yazın, size özel öneri sunayım.</div>';
+    body.innerHTML = '<div class="ai-msg bot">Merhaba 👋 Assos'ta bugün ne keşfedelim? Bir kahvaltı mekanı, gün batımı noktası ya da günlük rota — aklınızdakini yazın.</div>';
   };
 
   // Hazır soru tıklama
@@ -4709,7 +4709,7 @@ function renderPlacePage(placeId) {
         // Eğer tüm geçmiş silindiyse chat UI'ı da resetle
         if (fresh.length === 0) {
           var body = document.getElementById('ai-chat-body');
-          if (body) body.innerHTML = '<div class="ai-msg bot">Merhaba 👋 Assos rehberinizim. Mekan, rota, köy ya da manzara — aklınızdaki soruyu yazın, size özel öneri sunayım.</div>';
+          if (body) body.innerHTML = '<div class="ai-msg bot">Merhaba 👋 Assos'ta bugün ne keşfedelim? Bir kahvaltı mekanı, gün batımı noktası ya da günlük rota — aklınızdakini yazın.</div>';
         }
       }
     } catch {}
