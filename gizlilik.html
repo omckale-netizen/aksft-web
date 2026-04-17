@@ -57,9 +57,13 @@
 <h3>2.1 Otomatik Toplanan Veriler</h3>
 <ul>
 <li><strong>Sayfa görüntüleme verileri:</strong> Hangi sayfaların ziyaret edildiği, görüntüleme sayıları</li>
-<li><strong>Etkileşim verileri:</strong> Tıklama (telefon arama, WhatsApp, yol tarifi butonları)</li>
-<li><strong>Cihaz bilgileri:</strong> Tarayıcı türü, işletim sistemi (Microsoft Clarity aracılığıyla)</li>
-<li><strong>Konum verileri:</strong> Yalnızca harita sayfasında, kullanıcı izni ile</li>
+<li><strong>Etkileşim verileri:</strong> Tıklama (telefon arama, WhatsApp, yol tarifi, web sitesi, sosyal medya butonları) ve sayfa içi etkileşimler</li>
+<li><strong>Ziyaret kaynağı bilgileri:</strong> Sitemize hangi kanaldan ulaştığınız (URL parametreleri ve yönlendirme bilgileri)</li>
+<li><strong>Anonim oturum tanımlayıcı:</strong> Ziyaretinizin farklı sayfalarını bağlamak için rastgele oluşturulan, kişisel kimlik içermeyen geçici bir kod</li>
+<li><strong>Genel coğrafi bilgi:</strong> Yalnızca ülke düzeyinde (IP adresinizden türetilir, kesin konum değildir)</li>
+<li><strong>Tarayıcı ve cihaz ortamı:</strong> Cihaz türü (mobil/masaüstü/tablet), işletim sistemi, tarayıcı ve site açıldığı uygulama ortamı</li>
+<li><strong>Kullanım davranışı:</strong> Sayfa görüntüleme süresi, sayfa içi etkileşimler ve içerik okuma yoğunluğu</li>
+<li><strong>Hassas konum verileri:</strong> Yalnızca harita sayfasında, kullanıcı izni ile</li>
 <li><strong>Çerezler:</strong> Firebase App Check (reCAPTCHA v3) tarafından güvenlik amacıyla kullanılır</li>
 </ul>
 
@@ -68,7 +72,7 @@
 <li><strong>İletişim formu:</strong> Ad, e-posta adresi, telefon numarası (opsiyonel), konu ve mesaj içeriği</li>
 <li><strong>Mekan ekleme formu:</strong> Yetkili ad-soyad, e-posta adresi, telefon numarası, mekan bilgileri (ad, adres, konum, açıklama, çalışma saatleri, görseller). KVKK onayı alınarak işlenmektedir</li>
 <li><strong>AI Asistan (Chatbot):</strong> Sohbet mesajları ve soru içerikleri. IP adresi bazlı günlük kullanım limiti uygulanmaktadır. Sohbet geçmişi yerel depolamada (localStorage) saklanır, sunucu tarafında kalıcı olarak saklanmaz</li>
-<li><strong>Favoriler:</strong> Kaydedilen mekan ve yer tercihleri (yerel depolamada saklanır)</li>
+<li><strong>Favoriler:</strong> Kaydedilen mekan ve yer tercihleri cihazınızda (yerel depolama) saklanır. Cihazlar arası aktarım için isteğe bağlı olarak paylaşılabilir bir kod üzerinden anonim aktarım seçeneği sunulur</li>
 </ul>
 
 <h2>3. Verilerin Kullanım Amaçları</h2>
@@ -92,6 +96,7 @@
 <li><strong>Meta (Facebook) Pixel:</strong> Reklam performansı ölçümü ve hedefleme (<a href="https://www.facebook.com/privacy/policy/" target="_blank" rel="noopener">Meta Gizlilik Politikası</a>)</li>
 <li><strong>Cloudflare:</strong> İçerik dağıtımı, güvenlik ve sunucu altyapısı (<a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare Gizlilik Politikası</a>)</li>
 <li><strong>Leaflet / OpenStreetMap:</strong> Harita hizmetleri</li>
+<li><strong>Open-Meteo:</strong> Hava durumu bilgisi (yalnızca bölgesel koordinat gönderilir, kişisel veri paylaşılmaz) (<a href="https://open-meteo.com/en/terms" target="_blank" rel="noopener">Open-Meteo Şartları</a>)</li>
 </ul>
 
 <h2>5. Çerezler (Cookies)</h2>
@@ -142,7 +147,7 @@
 <h2>11. İletişim</h2>
 <p>Gizlilik politikası hakkında sorularınız için <a href="iletisim.html">iletişim sayfamız</a> üzerinden veya <strong>info@assosukesfet.com</strong> e-posta adresi üzerinden bize ulaşabilirsiniz.</p>
 
-<div class="legal-date">Son güncelleme: 16 Nisan 2026</div>
+<div class="legal-date">Son güncelleme: 18 Nisan 2026</div>
 
 </article>
 
