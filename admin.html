@@ -4437,7 +4437,7 @@ function isCurrentEditor() { var r = currentRole(); return r === 'admin' || r ==
 function isCurrentViewer() { var r = currentRole(); return r === 'admin' || r === 'editor' || r === 'viewer'; }
 
 // Admin-only sayfalar (her zaman sadece admin)
-var ADMIN_ONLY_PAGES = ['users','settings','security','ai'];
+var ADMIN_ONLY_PAGES = ['users','settings','security','ai','export'];
 
 function canAccessPage(page) {
   if (!window._currentUser) return false;
