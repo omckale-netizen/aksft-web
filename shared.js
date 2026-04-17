@@ -180,6 +180,15 @@ document.addEventListener('dataReady', _fetchSiteLogo);
 (function injectStyles() {
   const style = document.createElement('style');
   style.textContent = `
+    /* iOS Safari input zoom fix — font-size 16px altındaki input'larda focus'ta zoom olur.
+       Mobilde tüm form elemanları için 16px minimum zorunlu kılınır. */
+    @media (max-width: 900px) {
+      input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]),
+      textarea,
+      select {
+        font-size: max(16px, 1em) !important;
+      }
+    }
     :root {
       --navy:#1A2744;--navy-deep:#0D1829;--navy-mid:#243255;
       --cream:#F5EDE0;--cream-light:#FAF7F2;--cream-mid:#EDE3D4;
