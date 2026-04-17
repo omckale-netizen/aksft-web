@@ -778,6 +778,36 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .ana-bar{flex:1;min-width:8px;border-radius:3px 3px 0 0;background:var(--terra);transition:height .4s;position:relative;cursor:default}
 .ana-bar:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:4px 8px;border-radius:6px;font-size:.65rem;white-space:nowrap;z-index:5}
 
+/* Todo modal: opsiyonel mail bildirim kutusu */
+.todo-notify-box{
+  display:none;
+  align-items:center;gap:10px;
+  margin-top:10px;padding:10px 14px;
+  width:100%;max-width:100%;
+  box-sizing:border-box;
+  background:rgba(26,107,138,.06);
+  border:1px solid rgba(26,107,138,.18);
+  border-radius:10px;
+  cursor:pointer;
+  font-size:.8rem;color:var(--text);
+  line-height:1.4;
+  transition:background .15s,border-color .15s;
+}
+.todo-notify-box:hover{background:rgba(26,107,138,.1);border-color:rgba(26,107,138,.28)}
+.todo-notify-box.show{display:flex}
+.todo-notify-box input[type="checkbox"]{
+  accent-color:var(--blue);
+  flex-shrink:0;
+  width:16px;height:16px;
+  margin:0;
+  cursor:pointer;
+}
+.todo-notify-box > span{
+  flex:1 1 auto;min-width:0;
+  overflow-wrap:break-word;word-break:normal;
+  white-space:normal;
+}
+
 /* ═══ SKELETON LOADER ═══ */
 .skel{display:inline-block;background:linear-gradient(90deg,var(--cream-dark) 0%,rgba(0,0,0,.04) 50%,var(--cream-dark) 100%);background-size:200% 100%;animation:skelShimmer 1.4s ease-in-out infinite;border-radius:var(--radius-sm)}
 [data-theme="dark"] .skel{background:linear-gradient(90deg,rgba(255,255,255,.04) 0%,rgba(255,255,255,.08) 50%,rgba(255,255,255,.04) 100%);background-size:200% 100%}
@@ -2679,10 +2709,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <option value="">— Genel (herkese açık) —</option>
             </select>
             <div style="font-size:.65rem;color:var(--text-muted);margin-top:4px">Seçili kullanıcı bildirim alır ve görev panelinde görür</div>
-            <label id="todo-notify-label" style="display:none;align-items:center;gap:8px;margin-top:10px;padding:8px 12px;background:rgba(26,107,138,.06);border:1px solid rgba(26,107,138,.15);border-radius:8px;cursor:pointer;font-size:.78rem;color:var(--text);width:100%;box-sizing:border-box">
-              <input type="checkbox" id="todo-notify-email" style="accent-color:var(--blue);flex-shrink:0">
-              <span style="flex:1;min-width:0">📧 Atanan kişiye mail bildirim gönder</span>
-            </label>
+            <div id="todo-notify-label" class="todo-notify-box" onclick="var c=document.getElementById('todo-notify-email');if(event.target!==c){c.checked=!c.checked;}">
+              <input type="checkbox" id="todo-notify-email">
+              <span>📧 Atanan kişiye mail bildirim gönder</span>
+            </div>
           </div>
           <!-- Bağlı mekan/mesaj (read-only, bilgi amaçlı) -->
           <div id="todo-related-info" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(196,82,26,.04);border:1px solid rgba(196,82,26,.15);border-radius:8px;font-size:.78rem;color:var(--text-muted)"></div>
@@ -12659,9 +12689,9 @@ function toggleTodoMailNotifyVisibility() {
   var notifyCb = document.getElementById('todo-notify-email');
   if (!select || !notifyLabel) return;
   if (select.value) {
-    notifyLabel.style.display = 'flex';
+    notifyLabel.classList.add('show');
   } else {
-    notifyLabel.style.display = 'none';
+    notifyLabel.classList.remove('show');
     if (notifyCb) notifyCb.checked = false;
   }
 }
