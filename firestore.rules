@@ -290,6 +290,34 @@ service cloud.firestore {
       }
     }
 
+    // Ekip sohbeti: editor+ okur/yazar
+    // - Her editor kendi mesajını siler/düzenler; admin hepsini siler/düzenler
+    // - authorUid ve authorEmail doğrulanır (başkası adına yazılamaz)
+    match /team_chat/{msgId} {
+      allow read: if isEditor();
+      allow create: if isEditor()
+        && request.resource.data.authorUid == request.auth.uid
+        && request.resource.data.authorEmail == myEmail()
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 2000
+        && request.resource.data.keys().hasOnly(['text','authorUid','authorEmail','authorName','authorPhoto','timestamp','mentions','edited','editedAt']);
+      allow update: if isAdmin() || (
+        isEditor() && resource.data.authorUid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text','edited','editedAt'])
+      );
+      allow delete: if isAdmin() || (
+        isEditor() && resource.data.authorUid == request.auth.uid
+      );
+    }
+
+    // Sohbet okuma durumu: her kullanıcı kendi lastReadAt'ını tutar (unread badge için)
+    match /team_chat_reads/{uid} {
+      allow read: if isEditor();
+      allow write: if isEditor() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['lastReadAt','uid']);
+    }
+
     // Diger tum koleksiyonlar: varsayilan olarak engelle
     match /{document=**} {
       allow read, write: if false;
