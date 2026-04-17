@@ -258,9 +258,30 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
 /* ── FORM ── */
 .form-group{margin-bottom:18px}
-.form-group label{display:block;font-size:.8rem;font-weight:600;color:var(--text);margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px}
-.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 14px;border:1.5px solid var(--cream-dark);border-radius:var(--radius-sm);font-family:inherit;font-size:.9rem;color:var(--text);background:#fff;outline:none;transition:border .2s}
-.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--terra)}
+.form-group label{display:block;font-size:.78rem;font-weight:600;color:var(--text-light);margin-bottom:6px;letter-spacing:0}
+/* Standart input stili — hem .form-group içinde, hem .input-field class'ında */
+.form-group input,.form-group select,.form-group textarea,
+.input-field{
+  width:100%;padding:10px 14px;
+  border:1.5px solid var(--input-border,rgba(0,0,0,.1));
+  border-radius:10px;
+  font-family:inherit;font-size:.88rem;
+  color:var(--text);background:var(--input-bg,#fff);
+  outline:none;
+  transition:border-color .15s,box-shadow .15s,background .15s;
+  box-sizing:border-box;
+}
+.form-group input:hover,.form-group select:hover,.form-group textarea:hover,
+.input-field:hover{border-color:rgba(196,82,26,.35)}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus,
+.input-field:focus{border-color:var(--terra);box-shadow:0 0 0 3px rgba(196,82,26,.12)}
+.form-group input::placeholder,.form-group textarea::placeholder,
+.input-field::placeholder{color:var(--text-muted);opacity:.7}
+/* Select chevron */
+.form-group select,.input-field{cursor:pointer}
+/* Dark mode focus ring biraz daha koyu */
+[data-theme="dark"] .form-group input:focus,[data-theme="dark"] .form-group select:focus,[data-theme="dark"] .form-group textarea:focus,
+[data-theme="dark"] .input-field:focus{box-shadow:0 0 0 3px rgba(212,147,90,.18)}
 .form-group input[readonly]{background:var(--cream);color:var(--text-light)}
 .form-group textarea{resize:vertical;min-height:80px}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
