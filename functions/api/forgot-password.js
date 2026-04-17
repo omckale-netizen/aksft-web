@@ -24,6 +24,11 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ error: 'Geçerli bir e-posta girin' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
   }
 
+  // Debug modu: ?debug=1 query parametresi varsa detaylı hata döner
+  const url = new URL(request.url);
+  const debug = url.searchParams.get('debug') === '1';
+  const steps = [];
+
   // IP bazlı rate limit — 5 dk'da max 3 istek
   const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
   if (env.CHAT_KV) {
@@ -40,17 +45,16 @@ export async function onRequestPost(context) {
       const dayKey = 'forgot_email_' + emailHash + '_' + new Date().toISOString().split('T')[0];
       const emailCount = parseInt(await env.CHAT_KV.get(dayKey) || '0');
       if (emailCount >= 3) {
+        if (debug) {
+          return new Response(JSON.stringify({ error: 'Email rate limit (günlük 3)', emailCount, dayKey }), { status: 429, headers: { 'Content-Type': 'application/json' } });
+        }
         // Sessizce başarılı yanıt dön — saldırgan rate limit var anlayamasın
         return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
       }
       await env.CHAT_KV.put(dayKey, String(emailCount + 1), { expirationTtl: 86400 });
-    } catch(e) {}
+      steps.push({ step: 'rateLimit', ipCount: count + 1, emailCount: emailCount + 1 });
+    } catch(e) { steps.push({ step: 'rateLimit', error: e.message }); }
   }
-
-  // Debug modu: ?debug=1 query parametresi varsa detaylı hata döner
-  const url = new URL(request.url);
-  const debug = url.searchParams.get('debug') === '1';
-  const steps = [];
 
   try {
     const hasSplit = !!(env.FIREBASE_CLIENT_EMAIL && env.FIREBASE_PRIVATE_KEY);
