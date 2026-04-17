@@ -792,6 +792,40 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         </div>
       </div>
 
+      <!-- ═══ EDITOR/VIEWER GÖRÜNÜMÜ — sadece non-admin için ═══ -->
+      <div id="dash-editor-view" style="display:none">
+        <!-- Yeni atanan görev uyarısı -->
+        <div id="editor-new-task-alert" style="display:none;margin-bottom:16px"></div>
+
+        <!-- Haftalık takvim -->
+        <div class="panel-card" style="margin:0 0 16px 0">
+          <div class="panel-card-head" style="justify-content:space-between">
+            <h3>📅 Bu Haftanın Takvimi</h3>
+            <a data-requires-page="todos" onclick="showPage('todos')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Tüm Görevler →</a>
+          </div>
+          <div id="editor-week-cal" style="padding:16px 18px"></div>
+        </div>
+
+        <!-- Talepler + Mesajlar -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px" class="dash-editor-grid">
+          <div class="panel-card" data-requires-page="pending" style="margin:0">
+            <div class="panel-card-head" style="justify-content:space-between">
+              <h3>📋 Gelen Talepler</h3>
+              <a data-requires-page="pending" onclick="showPage('pending')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Tümü →</a>
+            </div>
+            <div id="editor-pending-list"></div>
+          </div>
+          <div class="panel-card" data-requires-page="messages" style="margin:0">
+            <div class="panel-card-head" style="justify-content:space-between">
+              <h3>✉️ Gelen Mesajlar</h3>
+              <a data-requires-page="messages" onclick="showPage('messages')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Tümü →</a>
+            </div>
+            <div id="editor-msg-list"></div>
+          </div>
+        </div>
+      </div>
+      <style>@media(max-width:900px){.dash-editor-grid{grid-template-columns:1fr !important}}</style>
+
       <div data-admin-only style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
         <div class="panel-card" style="margin:0">
           <div class="panel-card-head" style="justify-content:space-between"><h3>🕐 Son Eklenenler</h3><a data-requires-page="venues" onclick="showPage('venues')" style="font-size:.7rem;color:var(--terra);cursor:pointer;font-weight:600">Tümü →</a></div>
@@ -4560,6 +4594,8 @@ function applyRoleBasedUI() {
   // Dashboard görev satırında sadece admin ise 2 kolon, diğer kullanıcılarda görev tek başına
   var tasksRow = document.getElementById('dash-tasks-row');
   if (tasksRow) tasksRow.style.gridTemplateColumns = isCurrentAdmin() ? '1fr 1fr' : '1fr';
+  // Editor dashboard'u yükle
+  try { if (typeof renderEditorDashboard === 'function') renderEditorDashboard(); } catch(e) {}
   // Özel yetki gerektiren UI öğeleri (canDelete, canManagePremium, vb.)
   document.querySelectorAll('[data-requires-perm]').forEach(function(el) {
     var perm = el.getAttribute('data-requires-perm');
@@ -7200,6 +7236,9 @@ function renderDashboard() {
     greetEl.textContent = userName ? greet + ', ' + userName + ' 👋' : greet + ' 👋';
   }
   updateDashClock();
+
+  // Editor/viewer görünümü (admin ise gizli kalır)
+  try { renderEditorDashboard(); } catch(e) {}
 
   // Settings name input sync
   const nameInput = document.getElementById('settings-name');
@@ -10918,6 +10957,8 @@ function startTodosListener() {
     }
     // Dashboard widget varsa güncelle
     renderDashboardTodoWidget();
+    // Editor dashboard varsa yeni görev + haftalık takvim güncellensin
+    try { if (!isCurrentAdmin()) { renderEditorNewTaskAlert(); renderEditorWeekCalendar(); } } catch(e) {}
     // Bildirim rozeti de güncellensin (yeni atanan görev)
     if (typeof initNotifBadge === 'function') {
       try { initNotifBadge(); } catch(e) {}
@@ -11287,6 +11328,147 @@ function formatDate(dateStr) {
     var d = new Date(dateStr);
     return d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
   } catch(e) { return dateStr; }
+}
+
+// ═══ EDITOR/VIEWER genel bakış widget'ları ═══
+function renderEditorDashboard() {
+  var root = document.getElementById('dash-editor-view');
+  if (!root) return;
+  if (isCurrentAdmin()) { root.style.display = 'none'; return; }
+  root.style.display = '';
+  renderEditorNewTaskAlert();
+  renderEditorWeekCalendar();
+  renderEditorPendingList();
+  renderEditorMsgList();
+}
+
+// Son atanan (son 24 saat) görev highlight
+function renderEditorNewTaskAlert() {
+  var el = document.getElementById('editor-new-task-alert');
+  if (!el || !window._currentUser) return;
+  var myUid = window._currentUser.uid;
+  var visibleTodos = filterTodosForCurrentUser(_allTodos);
+  var yesterday = new Date(Date.now() - 24 * 3600000).toISOString();
+  var recentAssigned = visibleTodos.filter(function(t) {
+    return t.assignedTo === myUid && t.status !== 'completed' && t.createdAt && t.createdAt > yesterday;
+  }).slice(0, 3);
+  if (recentAssigned.length === 0) { el.style.display = 'none'; return; }
+  el.style.display = '';
+  el.innerHTML = recentAssigned.map(function(t) {
+    var prio = { urgent:'🔴', high:'🟠', medium:'🟡', low:'🔵' }[t.priority || 'medium'];
+    var by = t.createdBy ? ' · ' + esc(t.createdBy) + ' atadı' : '';
+    return '<div onclick="showPage(\'todos\')" style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:linear-gradient(135deg,rgba(196,82,26,.08),rgba(212,147,90,.06));border:1.5px solid rgba(196,82,26,.18);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all .15s" onmouseover="this.style.transform=\'translateX(2px)\'" onmouseout="this.style.transform=\'\'">' +
+      '<span style="font-size:1.1rem">🎯</span>' +
+      '<div style="flex:1">' +
+        '<div style="font-size:.82rem;font-weight:700;color:var(--navy)">' + prio + ' Yeni görev: ' + esc(t.title) + '</div>' +
+        '<div style="font-size:.7rem;color:var(--text-muted);margin-top:2px">' + (t.dueDate ? '⏰ ' + t.dueDate : 'Süresiz') + by + '</div>' +
+      '</div>' +
+      '<span style="font-size:.7rem;color:var(--terra);font-weight:600">Aç →</span>' +
+    '</div>';
+  }).join('');
+}
+
+// Bu haftanın takvimi (7 günlük mini kart)
+function renderEditorWeekCalendar() {
+  var el = document.getElementById('editor-week-cal');
+  if (!el) return;
+  var todos = filterTodosForCurrentUser(_allTodos).filter(function(t) { return t.status !== 'completed' && t.dueDate; });
+  var days = [];
+  for (var i = 0; i < 7; i++) {
+    var d = new Date();
+    d.setDate(d.getDate() + i);
+    var dateStr = d.toISOString().split('T')[0];
+    var dayTodos = todos.filter(function(t) { return t.dueDate === dateStr; });
+    days.push({ date: d, dateStr: dateStr, todos: dayTodos });
+  }
+  var daysShort = ['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];
+  el.innerHTML = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px">' +
+    days.map(function(day, idx) {
+      var isToday = idx === 0;
+      var dayName = daysShort[day.date.getDay()];
+      var count = day.todos.length;
+      var prio = count > 0 ? day.todos.reduce(function(p, t) {
+        var order = { urgent: 4, high: 3, medium: 2, low: 1 };
+        return (order[t.priority] || 2) > (order[p] || 0) ? t.priority : p;
+      }, 'low') : null;
+      var prioBg = { urgent:'rgba(229,62,62,.12)', high:'rgba(221,107,32,.12)', medium:'rgba(234,179,8,.12)', low:'rgba(59,130,246,.1)' }[prio] || 'rgba(0,0,0,.03)';
+      var prioColor = { urgent:'#E53E3E', high:'#DD6B20', medium:'#B45309', low:'#3B82F6' }[prio] || '#718096';
+      return '<div onclick="showPage(\'todos\')" style="cursor:pointer;border-radius:8px;padding:8px 6px;text-align:center;background:' + (isToday ? 'var(--terra)' : prioBg) + ';color:' + (isToday ? '#fff' : 'var(--text)') + ';border:1px solid ' + (isToday ? 'var(--terra)' : 'rgba(0,0,0,.04)') + ';transition:transform .15s" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'">' +
+        '<div style="font-size:.62rem;font-weight:700;opacity:.75;text-transform:uppercase">' + dayName + '</div>' +
+        '<div style="font-size:1.15rem;font-weight:800;margin:2px 0">' + day.date.getDate() + '</div>' +
+        (count > 0
+          ? '<div style="font-size:.65rem;font-weight:700;color:' + (isToday ? '#fff' : prioColor) + '">' + count + ' görev</div>'
+          : '<div style="font-size:.62rem;opacity:.4">—</div>') +
+      '</div>';
+    }).join('') +
+  '</div>';
+}
+
+// Gelen talepler (son 5, status badge ile)
+async function renderEditorPendingList() {
+  var el = document.getElementById('editor-pending-list');
+  if (!el) return;
+  if (typeof canAccessPage === 'function' && !canAccessPage('pending')) { el.innerHTML = ''; return; }
+  el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:.82rem">Yükleniyor...</div>';
+  try {
+    var snap = await db.collection('pending_venues').orderBy('submittedAt', 'desc').limit(6).get();
+    var items = snap.docs.map(function(d) { return { _id: d.id, ...d.data() }; });
+    if (items.length === 0) {
+      el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:.82rem">Talep yok.</div>';
+      return;
+    }
+    var statusLabels = {
+      pending: { lbl: 'Bekliyor', bg: 'rgba(234,179,8,.12)', fg: '#B45309' },
+      updated: { lbl: 'Güncellendi', bg: 'rgba(59,130,246,.12)', fg: '#2B6CB0' },
+      revision: { lbl: 'Revizyon', bg: 'rgba(221,107,32,.12)', fg: '#DD6B20' },
+      approved: { lbl: 'Onaylandı', bg: 'rgba(56,161,105,.12)', fg: '#2F855A' },
+      rejected: { lbl: 'Reddedildi', bg: 'rgba(229,62,62,.12)', fg: '#E53E3E' },
+      trashed:  { lbl: 'Çöp', bg: 'rgba(113,128,150,.12)', fg: '#718096' }
+    };
+    el.innerHTML = items.map(function(p) {
+      var s = statusLabels[p.status] || statusLabels.pending;
+      var when = p.submittedAt ? formatNotifTime(p.submittedAt) : '';
+      return '<div onclick="showPage(\'pending\')" style="padding:10px 18px;border-bottom:1px solid rgba(0,0,0,.04);cursor:pointer;display:flex;align-items:center;gap:10px">' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:.82rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(p.title || p.ownerName || 'İsimsiz') + '</div>' +
+          '<div style="font-size:.68rem;color:var(--text-muted);margin-top:2px">' + esc(p.ownerName || p.ownerEmail || '') + ' · ' + when + '</div>' +
+        '</div>' +
+        '<span style="font-size:.62rem;font-weight:700;padding:3px 9px;border-radius:999px;background:' + s.bg + ';color:' + s.fg + ';white-space:nowrap">' + s.lbl + '</span>' +
+      '</div>';
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="padding:16px;color:var(--text-muted);font-size:.82rem">Talepler yüklenemedi.</div>';
+  }
+}
+
+// Gelen mesajlar (son 5, okundu/okunmadı)
+async function renderEditorMsgList() {
+  var el = document.getElementById('editor-msg-list');
+  if (!el) return;
+  if (typeof canAccessPage === 'function' && !canAccessPage('messages')) { el.innerHTML = ''; return; }
+  el.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:.82rem">Yükleniyor...</div>';
+  try {
+    var snap = await db.collection('messages').orderBy('timestamp', 'desc').limit(6).get();
+    var msgs = snap.docs.map(function(d) { return { _id: d.id, ...d.data() }; }).filter(function(m) { return !m.trashed; }).slice(0, 6);
+    if (msgs.length === 0) {
+      el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:.82rem">Mesaj yok.</div>';
+      return;
+    }
+    el.innerHTML = msgs.map(function(m) {
+      var when = m.timestamp ? formatNotifTime(m.timestamp) : '';
+      var icon = m.read ? '✉️' : '🔴';
+      return '<div onclick="showPage(\'messages\')" style="padding:10px 18px;border-bottom:1px solid rgba(0,0,0,.04);cursor:pointer;display:flex;align-items:center;gap:10px">' +
+        '<span style="font-size:.9rem">' + icon + '</span>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:.82rem;font-weight:' + (m.read ? '500' : '700') + ';color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(m.name || 'İsimsiz') + (m.subject ? ' — ' + esc(m.subject) : '') + '</div>' +
+          '<div style="font-size:.68rem;color:var(--text-muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc((m.message || '').substring(0, 80)) + '</div>' +
+        '</div>' +
+        '<span style="font-size:.62rem;color:var(--text-muted);white-space:nowrap">' + when + '</span>' +
+      '</div>';
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="padding:16px;color:var(--text-muted);font-size:.82rem">Mesajlar yüklenemedi.</div>';
+  }
 }
 
 // Dashboard widget
