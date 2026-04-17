@@ -7439,6 +7439,8 @@ function isCurrentViewer() { var r = currentRole(); return r === 'admin' || r ==
 
 // Admin-only sayfalar (her zaman sadece admin)
 var ADMIN_ONLY_PAGES = ['users','security','ai','export'];
+// Opt-in sayfalar — admin açmadan kimse erişemez (editor default'ta yok)
+var OPT_IN_PAGES = ['chat'];
 
 function canAccessPage(page) {
   if (!window._currentUser) return false;
@@ -7448,6 +7450,13 @@ function canAccessPage(page) {
   if (ADMIN_ONLY_PAGES.indexOf(page) > -1) return false;
   // Ayarlar ve kişisel sayfalar her yetkili kullanıcıya açık (self-service)
   if (page === 'settings') return true;
+  // Opt-in sayfalar — sadece allowedPages'te açıkça varsa erişim
+  if (OPT_IN_PAGES.indexOf(page) > -1) {
+    var ap = Array.isArray(window._currentUser.allowedPages) ? window._currentUser.allowedPages : [];
+    if (ap.indexOf(page) === -1) return false;
+    if (isTempAccessExpired(page)) return false;
+    return true;
+  }
   // Custom allowedPages varsa onu kullan — geçici erişim ise süresini kontrol et
   if (Array.isArray(window._currentUser.allowedPages) && window._currentUser.allowedPages.length > 0) {
     var hasPage = window._currentUser.allowedPages.indexOf(page) > -1;
@@ -7651,6 +7660,11 @@ function startChatListener() {
   if (!u) {
     console.warn('[chat] auth not ready, retry in 500ms');
     setTimeout(startChatListener, 500);
+    return;
+  }
+  // Yetki kontrolü — allowedPages'te 'chat' yoksa listener açma
+  if (typeof canAccessPage === 'function' && !canAccessPage('chat')) {
+    console.log('[chat] access denied for current user — listener not started');
     return;
   }
   var db = firebase.firestore();
@@ -14189,6 +14203,7 @@ var ALL_ADMIN_PAGES = [
   { key: 'gallery', label: 'Galeri', icon: '🖼', default: true },
   { key: 'blog', label: 'Blog', icon: '✍️', default: true },
   { key: 'todos', label: 'Görevlerim', icon: '✓', default: true },
+  { key: 'chat', label: 'Ekip Sohbeti', icon: '💬', default: false },
   { key: 'activity', label: 'Aktivite Logu', icon: '📋', default: true },
   { key: 'users', label: 'Kullanıcılar', icon: '👥', default: false, adminOnly: true },
   { key: 'export', label: 'Yedekleme', icon: '📦', default: false, adminOnly: true },
