@@ -8135,12 +8135,29 @@ function formatChatDate(d) {
 }
 
 // Online kullanıcı avatar listesi (header sağ)
+// Filtreleme: lastHeartbeat son PRESENCE_THRESHOLD icinde olmali
+// + eger _allUsers erisilebilirse silinmis/pasif kullanicilari ele
 function renderChatOnlineStack() {
   var el = document.getElementById('chat-online-stack');
   if (!el) return;
   var myUid = firebase.auth().currentUser && firebase.auth().currentUser.uid;
+  var allUsersMap = {};
+  (window._allUsers || []).forEach(function(u) {
+    if (u && u.uid) allUsersMap[u.uid] = u;
+  });
+  var hasUsersList = (window._allUsers && window._allUsers.length > 0);
   var online = Object.values(window._allPresence || {}).filter(function(p) {
-    return p && p.uid && p.uid !== myUid;
+    if (!p || !p.uid || p.uid === myUid) return false;
+    // Stale heartbeat filtrele (silinen/cevrimdisi kullanici stale presence birakir)
+    if (!p.lastHeartbeat) return false;
+    if ((Date.now() - new Date(p.lastHeartbeat).getTime()) >= PRESENCE_THRESHOLD) return false;
+    // _allUsers erisilebilirse users collection'da yoksa veya pasifse filtrele
+    if (hasUsersList) {
+      var u = allUsersMap[p.uid];
+      if (!u) return false; // users collection'da yok = silinmis
+      if (u.active === false) return false; // pasif
+    }
+    return true;
   });
   if (online.length === 0) {
     el.innerHTML = '<span style="font-size:.68rem;color:var(--text-muted);font-weight:500">Senden başka kimse çevrimiçi değil</span>';
