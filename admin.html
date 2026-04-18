@@ -2044,10 +2044,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <!-- Instagram Reels — thumbnail otomatik cekilir (Firebase Storage cache) -->
               <div class="form-group">
                 <label>📹 Instagram Reels <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(Köy hakkında videolar)</span></label>
+                <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">
+                  <input type="text" id="vpf-reel-url" placeholder="https://www.instagram.com/reel/XXXXX/" style="flex:1;min-width:200px">
+                  <input type="text" id="vpf-reel-title" placeholder="Video başlığı" style="flex:1;min-width:150px">
+                </div>
                 <div style="display:flex;gap:6px;margin-bottom:8px">
-                  <input type="text" id="vpf-reel-url" placeholder="https://www.instagram.com/reel/XXXXX/" style="flex:1">
-                  <input type="text" id="vpf-reel-title" placeholder="Video başlığı" style="flex:1">
-                  <button type="button" class="btn btn-primary btn-sm" onclick="addReel()">+ Ekle</button>
+                  <button type="button" class="btn btn-primary btn-sm" onclick="addReel()" style="flex:1">⚡ Otomatik Ekle (Thumbnail'i çek)</button>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('vpf-reel-thumb-input').click()" style="flex:1">📷 Manuel Thumbnail ile Ekle</button>
+                  <input type="file" id="vpf-reel-thumb-input" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="addReelManual(this.files[0])">
                 </div>
                 <div id="vpf-reels-list" style="display:flex;flex-direction:column;gap:6px"></div>
                 <div id="vpf-reel-status" style="font-size:.72rem;color:var(--text-muted);margin-top:6px"></div>
@@ -13087,8 +13091,54 @@ async function addReel() {
     setTimeout(function() { statusEl.textContent = ''; }, 2500);
   } catch(err) {
     console.error('Reel ekleme hatası:', err);
-    statusEl.textContent = '❌ ' + (err.message || 'Hata');
+    statusEl.textContent = '❌ ' + (err.message || 'Hata') + ' — "Manuel Thumbnail" butonunu kullanın';
     statusEl.style.color = '#E53E3E';
+  }
+}
+
+// Manuel thumbnail ile reel ekle — Instagram Cloudflare'i bloklarsa fallback
+async function addReelManual(file) {
+  if (!file) return;
+  var urlInp = document.getElementById('vpf-reel-url');
+  var titleInp = document.getElementById('vpf-reel-title');
+  var statusEl = document.getElementById('vpf-reel-status');
+  var fileInp = document.getElementById('vpf-reel-thumb-input');
+
+  var url = (urlInp.value || '').trim();
+  var title = (titleInp.value || '').trim();
+  if (!url || !/instagram\.com\/(p|reel|reels)\//i.test(url)) {
+    statusEl.textContent = '❌ Önce geçerli bir Instagram URL girin.';
+    statusEl.style.color = '#E53E3E';
+    fileInp.value = '';
+    return;
+  }
+  var match = url.match(/\/(p|reel|reels)\/([A-Za-z0-9_-]+)/);
+  var shortcode = match ? match[2] : 'manual-' + Date.now().toString(36);
+
+  try {
+    statusEl.textContent = 'Thumbnail yükleniyor...';
+    statusEl.style.color = 'var(--text-muted)';
+    var ext = (file.type.includes('png') ? 'png' : (file.type.includes('webp') ? 'webp' : 'jpg'));
+    var path = 'reels/' + shortcode + '.' + ext;
+    var thumbUrl = await uploadImageToServer(file, path);
+    _vpReels.push({
+      url: url,
+      shortcode: shortcode,
+      title: title || 'Instagram Reel',
+      thumbnailUrl: thumbUrl
+    });
+    urlInp.value = '';
+    titleInp.value = '';
+    fileInp.value = '';
+    renderReelsList();
+    statusEl.textContent = '✓ Manuel eklendi';
+    statusEl.style.color = 'var(--green)';
+    setTimeout(function() { statusEl.textContent = ''; }, 2500);
+  } catch(err) {
+    console.error('Manuel reel ekleme hatası:', err);
+    statusEl.textContent = '❌ Yükleme hatası: ' + (err.message || 'bilinmeyen');
+    statusEl.style.color = '#E53E3E';
+    fileInp.value = '';
   }
 }
 

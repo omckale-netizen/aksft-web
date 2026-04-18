@@ -100,8 +100,14 @@ export async function onRequestPost(context) {
     if (!uploadResp.ok) {
       const errText = await uploadResp.text();
       console.error('[ig-thumbnail] storage upload failed:', uploadResp.status, errText);
-      // Upload hata olursa IG CDN URL'ini direkt dondur (fallback)
-      return json({ ok: true, shortcode, title, thumbnailUrl, cached: false, warning: 'Cache yapilamadi, direkt IG CDN URL kullaniliyor' }, 200, corsHeaders);
+      // Upload hata olursa admin'e net hata mesaji don — manuel upload kullanmasini iste
+      return json({
+        error: 'Firebase Storage yukleme hatasi (HTTP ' + uploadResp.status + '). Manuel thumbnail yukleyin.',
+        uploadError: errText.substring(0, 300),
+        shortcode,
+        title,
+        thumbnailUrlRaw: thumbnailUrl
+      }, 500, corsHeaders);
     }
     const uploadData = await uploadResp.json();
     const token = uploadData.downloadTokens;
