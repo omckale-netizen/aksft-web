@@ -463,7 +463,7 @@ function renderNav(opts = {}) {
     { href: 'rotalar.html',  label: 'Rotalar',          icon: '🗺' },
     { href: 'yerler.html',   label: 'Gezilecek Yerler', icon: '📍' },
     { href: 'mekanlar.html', label: 'Mekanlar',         icon: '☕' },
-    { href: 'koyler.html',   label: 'Köyler',           icon: '🏘' },
+    { href: 'koyler.html',   label: 'Köyler',           icon: '🌿' },
   ];
   const links = [
     { href: 'index.html',    label: 'Ana Sayfa' },
