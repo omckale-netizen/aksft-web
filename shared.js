@@ -198,6 +198,9 @@ window.akBuildReelsHtml = function(reels, opts) {
   function _cleanIgTitle(s) {
     if (!s) return '';
     var str = _decodeEntities(s);
+    // "X likes, Y comments – user, Date:" prefix (og:description'dan kalma)
+    var metaPrefix = str.match(/^\s*[\d,.]+\s*likes?(?:,\s*[\d,.]+\s*comments?)?[\s\S]*?\d{4}\s*:\s*/i);
+    if (metaPrefix) str = str.substring(metaPrefix[0].length);
     var m = str.match(/Instagram\s*:\s*["'\u201C\u201D\u2018\u2019]?\s*(.+?)\s*["'\u201C\u201D\u2018\u2019]?\s*$/);
     if (m && m[1]) str = m[1];
     return str.replace(/^["'\u201C\u201D\u2018\u2019\s]+|["'\u201C\u201D\u2018\u2019\s]+$/g, '');
@@ -217,18 +220,20 @@ window.akBuildReelsHtml = function(reels, opts) {
     var titleRaw = _cleanIgTitle(reel.title || '');
     var caption = titleRaw;
     if (titleRaw) {
-      // Ilk 2 cumleyi al (backend zaten boyle kaydediyor, emniyet icin burada da)
+      // Ilk 2 cumleyi al — tek bosluga normalize et (newline'lari da)
+      var _normalized = titleRaw.replace(/\s+/g, ' ').trim();
       var _sregex = /[.!?…]+(\s|$)/g;
       var _scount = 0, _slast = 0, _m;
-      while ((_m = _sregex.exec(titleRaw)) !== null) {
+      while ((_m = _sregex.exec(_normalized)) !== null) {
         _slast = _m.index + _m[0].length;
         _scount++;
         if (_scount >= 2) break;
       }
-      if (_scount > 0) caption = titleRaw.substring(0, _slast).trim();
-      if (caption.length > 400) caption = caption.substring(0, 300).trim() + '…';
+      caption = _scount > 0 ? _normalized.substring(0, _slast).trim() : _normalized;
+      if (caption.length > 400) caption = caption.substring(0, 300).trim();
     }
-    if (caption && !/[.!?…]$/.test(caption)) caption += '…';
+    // Son noktalamayi '…' ile degistir (2 cumle bittiginde devami oldugunu ima et)
+    if (caption) caption = caption.replace(/[.!?]+$/, '').replace(/…+$/, '') + '…';
     var thumb = reel.thumbnailUrl ? _escAttr(reel.thumbnailUrl) : '';
     var videoUrl = reel.videoUrl ? _escAttr(reel.videoUrl) : '';
     var playSrc = videoUrl || embedUrl;

@@ -124,8 +124,14 @@ export async function onRequestPost(context) {
       }
     }
 
-    // og:title prefix temizle (full caption da bazen ayni prefix icerir)
+    // Instagram metadata prefix'ini temizle:
+    // "2,267 likes, 8 comments\n– assosukesfet, February 26, 2026: CAPTION"
+    // "@user on Instagram: CAPTION"
     if (fullCaption) {
+      // IG og:description formati — "X likes, Y comments..date:" sonrasini al
+      const metaPrefix = fullCaption.match(/^\s*[\d,.]+\s*likes?(?:,\s*[\d,.]+\s*comments?)?[\s\S]*?\d{4}\s*:\s*/i);
+      if (metaPrefix) fullCaption = fullCaption.substring(metaPrefix[0].length);
+      // "username on Instagram:" prefix'i temizle
       const m = fullCaption.match(/Instagram\s*:\s*["'\u201C\u201D\u2018\u2019]?\s*(.+?)\s*["'\u201C\u201D\u2018\u2019]?\s*$/s);
       if (m && m[1]) fullCaption = m[1];
       fullCaption = fullCaption.replace(/^["'\u201C\u201D\u2018\u2019\s]+|["'\u201C\u201D\u2018\u2019\s]+$/g, '');
@@ -361,11 +367,10 @@ function unescapeJsonString(s) {
     .replace(/\\\\/g, '\\');
 }
 
-// Bir metinden ilk N cumleyi cikar. maxChars ile toplam uzunluk sinirini koru.
+// Bir metinden ilk N cumleyi cikar ve sonuna '…' ekle (son noktanin yerine).
 function extractFirstNSentences(text, n, maxChars) {
   if (!text) return '';
   const clean = text.replace(/\s+/g, ' ').trim();
-  // . ! ? veya … sonrasi bosluk/son — cumle sinirlari
   const regex = /[.!?…]+(\s|$)/g;
   let count = 0;
   let lastEnd = 0;
@@ -376,7 +381,9 @@ function extractFirstNSentences(text, n, maxChars) {
     if (count >= n) break;
   }
   let result = count > 0 ? clean.substring(0, lastEnd).trim() : clean;
-  if (maxChars && result.length > maxChars) result = result.substring(0, maxChars).trim() + '…';
+  if (maxChars && result.length > maxChars) result = result.substring(0, maxChars).trim();
+  // Son noktalama isaretini '…' ile degistir (. ! ? -> …). Zaten … ise aynen kalsin.
+  result = result.replace(/[.!?]+$/, '').replace(/…+$/, '') + '…';
   return result;
 }
 
