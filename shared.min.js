@@ -177,28 +177,6 @@ function _fetchSiteLogo() {
 document.addEventListener('dataReady', _fetchSiteLogo);
 
 /* ── Inject shared CSS ── */
-// Tema tercihi — FOUC olmaması için shared.js başında hemen uygula
-(function initTheme() {
-  try {
-    var saved = localStorage.getItem('theme');
-    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    var theme = saved || (prefersDark ? 'dark' : 'light');
-    document.documentElement.setAttribute('data-theme', theme);
-  } catch(e) {}
-})();
-
-window.toggleTheme = function() {
-  var cur = document.documentElement.getAttribute('data-theme') || 'light';
-  var next = cur === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  try { localStorage.setItem('theme', next); } catch(e) {}
-  // Toggle butonu ikonunu güncelle
-  document.querySelectorAll('.theme-toggle-btn').forEach(function(btn) {
-    btn.setAttribute('aria-label', next === 'dark' ? 'Açık temaya geç' : 'Koyu temaya geç');
-    btn.title = next === 'dark' ? 'Açık temaya geç' : 'Koyu temaya geç';
-  });
-};
-
 (function injectStyles() {
   const style = document.createElement('style');
   style.textContent = `
@@ -235,60 +213,6 @@ window.toggleTheme = function() {
       outline: 2px solid var(--terra, #C4521A) !important;
       outline-offset: 2px;
     }
-
-    /* ═══════════════ DARK MODE GLOBAL OVERRIDES ═══════════════ */
-    [data-theme="dark"] body{background:var(--bg-page);color:var(--text-primary);}
-    /* Liste sayfa ana container'ları (mekanlar/yerler/koyler/rotalar) */
-    [data-theme="dark"] .mk-main,
-    [data-theme="dark"] .mk-featured,
-    [data-theme="dark"] section[style*="background:var(--cream"],
-    [data-theme="dark"] section[style*="background:#FAF7F2"],
-    [data-theme="dark"] section[style*="background:#F5EDE0"],
-    [data-theme="dark"] section[style*="background:#FEFCF8"]{background:var(--bg-page) !important;}
-    /* Kartlar — arka plan + text */
-    [data-theme="dark"] .mk-vc,[data-theme="dark"] .mk-fc,
-    [data-theme="dark"] .hp-place-card,[data-theme="dark"] .yl-card,
-    [data-theme="dark"] .kv-card,[data-theme="dark"] .route-card,
-    [data-theme="dark"] .blog-post-card{background:var(--surface) !important;border-color:var(--border-mid) !important;}
-    [data-theme="dark"] .mk-vc-body,[data-theme="dark"] .mk-fc-body,
-    [data-theme="dark"] .mk-vc-name,[data-theme="dark"] .mk-fc-name{color:var(--text-primary) !important;}
-    [data-theme="dark"] .mk-vc-desc,[data-theme="dark"] .mk-fc-desc,
-    [data-theme="dark"] .mk-vc-loc,[data-theme="dark"] .mk-fc-loc{color:var(--text-secondary) !important;}
-    [data-theme="dark"] .mk-vc-tag,[data-theme="dark"] .mk-fc-tag{background:rgba(255,255,255,.06) !important;color:var(--text-secondary) !important;}
-    [data-theme="dark"] .mk-h2,[data-theme="dark"] .mk-sub,
-    [data-theme="dark"] h1,[data-theme="dark"] h2,[data-theme="dark"] h3{color:var(--text-primary);}
-    /* Filtre pill'leri dark mode */
-    [data-theme="dark"] .mk-cat,[data-theme="dark"] .mk-status-btn,
-    [data-theme="dark"] .ara-filter,[data-theme="dark"] .hp-filter-pill,
-    [data-theme="dark"] .filter-btn{background:var(--surface) !important;color:var(--text-secondary) !important;border-color:var(--border-mid) !important;}
-    [data-theme="dark"] .mk-cat.active,[data-theme="dark"] .mk-status-btn.active,
-    [data-theme="dark"] .ara-filter.active,[data-theme="dark"] .hp-filter-pill.active{background:var(--terra) !important;color:#fff !important;border-color:var(--terra) !important;}
-    /* Form inputs */
-    [data-theme="dark"] input[type="text"],[data-theme="dark"] input[type="email"],
-    [data-theme="dark"] input[type="tel"],[data-theme="dark"] input[type="search"],
-    [data-theme="dark"] textarea,[data-theme="dark"] select{background:var(--surface) !important;color:var(--text-primary) !important;border-color:var(--border-mid) !important;}
-    [data-theme="dark"] input::placeholder,[data-theme="dark"] textarea::placeholder{color:var(--text-tertiary) !important;}
-    /* Nav — dark tema'da scroll sonrası */
-    [data-theme="dark"] #main-nav.scrolled{background:rgba(11,18,32,.85) !important;backdrop-filter:blur(16px);}
-    [data-theme="dark"] #main-nav.scrolled .nav-link{color:var(--text-secondary);}
-    [data-theme="dark"] #main-nav.scrolled .nav-link:hover,
-    [data-theme="dark"] #main-nav.scrolled .nav-link.active{color:var(--terra-light);}
-    [data-theme="dark"] .nav-hamburger.dark{color:var(--text-primary);}
-    /* Footer — zaten koyu tema uyumlu, sadece ufak ayarlama */
-    [data-theme="dark"] #site-footer{background:#050A12;}
-    /* Arama sonuç sayfası */
-    [data-theme="dark"] .ara-wrap,[data-theme="dark"] body.ara-page{background:var(--bg-page);}
-    [data-theme="dark"] .ara-card{background:var(--surface) !important;border-color:var(--border-mid) !important;}
-    [data-theme="dark"] .ara-card-title{color:var(--text-primary) !important;}
-    [data-theme="dark"] .ara-card-sub{color:var(--text-secondary) !important;}
-    [data-theme="dark"] .ara-empty-h{color:var(--text-primary);}
-    [data-theme="dark"] .ara-empty-link{background:var(--surface);color:var(--text-primary);border-color:var(--border-mid);}
-    /* Blog, içerik bloğu, vs. generic düzeltmeler */
-    [data-theme="dark"] [style*="background:#fff"]{background:var(--surface) !important;}
-    [data-theme="dark"] [style*="background:#FEFCF8"]{background:var(--surface) !important;}
-    [data-theme="dark"] [style*="color:#1A2744"]{color:var(--text-primary) !important;}
-    [data-theme="dark"] [style*="color:#4A5568"],[data-theme="dark"] [style*="color:#4A5870"]{color:var(--text-secondary) !important;}
-    [data-theme="dark"] [style*="color:#718096"]{color:var(--text-tertiary) !important;}
     /* Mouse kullanan kullanıcıları rahatsız etmesin — :focus-visible sadece klavye navigasyonunda
        görünür (modern tarayıcı davranışı). Eski Safari için fallback aşağıda. */
     input:focus:not(:focus-visible), textarea:focus:not(:focus-visible), select:focus:not(:focus-visible) {
@@ -301,24 +225,7 @@ window.toggleTheme = function() {
       --aegean:#1A6B8A;--aegean-light:#2490B8;
       --amber:#D4935A;--sage:#5A7A56;--sand:#E8D5C0;
       --text-dark:#1A2744;--text-mid:#4A5870;--text-soft:#8A9AB5;
-      /* Semantik renkler — tema değişirken bunlar flip eder */
-      --bg-page:#FAF7F2;--bg-alt:#F5EDE0;--surface:#fff;
-      --text-primary:#1A2744;--text-secondary:#4A5870;--text-tertiary:#8A9AB5;
-      --border-soft:rgba(26,39,68,.08);--border-mid:rgba(26,39,68,.14);
-      color-scheme: light;
     }
-    /* Dark mode — kullanıcı tercihi varsa aktif */
-    [data-theme="dark"] {
-      --cream:#0F1624;--cream-light:#0B1220;--cream-mid:#1A2030;
-      --bg-page:#0B1220;--bg-alt:#0F1624;--surface:#1A2030;
-      --text-primary:#E8EEFA;--text-secondary:#A0AEC0;--text-tertiary:#6B7280;
-      --text-dark:#E8EEFA;--text-mid:#C7CFE0;--text-soft:#9CA3AF;
-      --border-soft:rgba(255,255,255,.06);--border-mid:rgba(255,255,255,.12);
-      color-scheme: dark;
-    }
-    /* Tema geçişi yumuşak */
-    html{transition:background-color .3s ease;}
-    body{transition:background-color .3s ease,color .3s ease;}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
     html{scroll-behavior:smooth;}
     body{font-family:'DM Sans',sans-serif;background:var(--cream-light);color:var(--text-dark);overflow-x:hidden;line-height:1.65;}
@@ -342,18 +249,6 @@ window.toggleTheme = function() {
     #main-nav.hero-mode .nav-link:hover{opacity:1;color:var(--cream);background:rgba(245,237,224,.1);}
     #main-nav.hero-mode .nav-link.active{opacity:1;color:var(--cream);background:rgba(245,237,224,.1);}
     .nav-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
-    /* Tema değiştirme butonu */
-    .theme-toggle-btn{width:34px;height:34px;border-radius:50%;border:1.5px solid rgba(26,39,68,.12);background:transparent;color:var(--text-mid);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s ease;padding:0;}
-    .theme-toggle-btn:hover{border-color:var(--terra);color:var(--terra);transform:rotate(15deg);}
-    [data-theme="dark"] .theme-toggle-btn{border-color:rgba(245,237,224,.15);color:rgba(245,237,224,.6);}
-    [data-theme="dark"] .theme-toggle-btn:hover{border-color:var(--terra-light);color:var(--terra-light);}
-    /* Light tema: ay göster; Dark tema: güneş göster */
-    .theme-icon-sun{display:none;}
-    [data-theme="dark"] .theme-icon-sun{display:block;}
-    [data-theme="dark"] .theme-icon-moon{display:none;}
-    /* Hero modunda (şeffaf nav) toggle butonu cream rengi */
-    #main-nav:not(.scrolled) .theme-toggle-btn{border-color:rgba(245,237,224,.2);color:rgba(245,237,224,.7);}
-    #main-nav:not(.scrolled) .theme-toggle-btn:hover{border-color:var(--terra-light);color:#fff;}
     .nav-divider{width:1px;height:16px;background:rgba(26,39,68,.12);}
     #main-nav.hero-mode .nav-divider{background:rgba(245,237,224,.15);}
     .btn-terra{display:inline-flex;align-items:center;gap:8px;padding:8px 18px;border-radius:12px;background:var(--terra);color:#fff;font-weight:600;font-size:.8rem;letter-spacing:.02em;border:none;cursor:pointer;text-decoration:none;transition:background .22s,transform .22s cubic-bezier(.16,1,.3,1),box-shadow .22s;}
@@ -585,10 +480,6 @@ function renderNav(opts = {}) {
         </div>
         <div class="nav-right">
           <div class="nav-divider"></div>
-          <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Temayı değiştir" title="Tema">
-            <svg class="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
-            <svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-          </button>
           <button id="nav-save-btn" class="nav-save-btn" aria-label="Kaydedilenler">
             <span class="nav-save-icon">♡</span>
             <span id="nav-save-count" class="nav-save-count" style="display:none;">0</span>
