@@ -1272,6 +1272,12 @@ function initScrollToTop() {
 
   const style = document.createElement('style');
   style.textContent = `
+    @media (max-width: 640px) {
+      #scroll-top-btn {
+        bottom: 80px !important;
+        right: 16px !important;
+      }
+    }
     #scroll-top-btn {
       position: fixed;
       bottom: 92px;
@@ -1317,9 +1323,22 @@ function initScrollToTop() {
   btn.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>`;
   document.body.appendChild(btn);
 
-  window.addEventListener('scroll', () => {
-    btn.classList.toggle('stt-visible', window.scrollY > 320);
-  }, { passive: true });
+  // Footer görünürse stt'yi gizle (iletişim ikonlarıyla çakışmasın)
+  let _footerVisible = false;
+  const footerEl = document.getElementById('site-footer');
+  if (footerEl && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(function(entries) {
+      _footerVisible = entries[0].isIntersecting;
+      updateSttVisibility();
+    }, { threshold: 0, rootMargin: '0px 0px -20px 0px' });
+    io.observe(footerEl);
+  }
+
+  function updateSttVisibility() {
+    btn.classList.toggle('stt-visible', window.scrollY > 320 && !_footerVisible);
+  }
+
+  window.addEventListener('scroll', updateSttVisibility, { passive: true });
 
   btn.addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
