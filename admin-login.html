@@ -327,15 +327,18 @@ try {
 } catch(e) { console.warn('App Check activation failed:', e); }
 
 const fbAuth = firebase.auth();
-const fbDb = firebase.firestore();
 
-// Admin duyurusu yükle (varsa)
+// Admin duyurusu yükle — Firestore REST API (SDK yok, sadece fetch)
 (async function loadAdminAnnouncement() {
   try {
-    const doc = await fbDb.collection('settings').doc('announcement').get();
-    if (!doc.exists) return;
-    const d = doc.data() || {};
-    if (!d.active || !d.text) return;
+    const resp = await fetch('https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents/settings/announcement');
+    if (!resp.ok) return;
+    const raw = await resp.json();
+    const f = raw.fields || {};
+    const active = f.active && f.active.booleanValue === true;
+    const text = f.text ? f.text.stringValue : '';
+    const type = f.type ? f.type.stringValue : 'info';
+    if (!active || !text) return;
     const el = document.getElementById('admin-announcement');
     if (!el) return;
     const colors = {
@@ -344,11 +347,11 @@ const fbDb = firebase.firestore();
       warning: { bg:'rgba(237,137,54,.12)',  border:'rgba(237,137,54,.3)',  text:'#C05621', icon:'⚠️' },
       urgent:  { bg:'rgba(229,62,62,.12)',   border:'rgba(229,62,62,.3)',   text:'#C53030', icon:'🚨' }
     };
-    const c = colors[d.type] || colors.info;
+    const c = colors[type] || colors.info;
     el.style.background = c.bg;
     el.style.border = '1px solid ' + c.border;
     el.style.color = c.text;
-    el.innerHTML = '<div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:1rem;line-height:1.2">' + c.icon + '</span><div style="flex:1"><div style="font-weight:700;font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;opacity:.8">Admin Duyurusu</div><div>' + String(d.text).replace(/[<>]/g,'') + '</div></div></div>';
+    el.innerHTML = '<div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:1rem;line-height:1.2">' + c.icon + '</span><div style="flex:1"><div style="font-weight:700;font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;opacity:.8">Admin Duyurusu</div><div>' + String(text).replace(/[<>]/g,'') + '</div></div></div>';
     el.style.display = 'block';
   } catch(e) { /* sessiz */ }
 })();
