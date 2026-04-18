@@ -1037,6 +1037,16 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
   overflow-wrap:break-word;word-break:normal;white-space:normal;
 }
 
+/* ═══ ANALYTICS TABS ═══ */
+.ana-tabs{display:flex;gap:2px;margin-bottom:24px;border-bottom:2px solid rgba(0,0,0,.06);overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:0}
+.ana-tabs::-webkit-scrollbar{display:none}
+.ana-tab{padding:12px 18px;background:transparent;border:none;color:var(--text-light);font-family:inherit;font-size:.85rem;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:color .2s ease,border-color .2s ease;position:relative}
+.ana-tab:hover{color:var(--navy)}
+.ana-tab.active{color:var(--terra);border-bottom-color:var(--terra)}
+.ana-insight{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:rgba(196,82,26,.04);border-left:3px solid var(--terra);border-radius:0 8px 8px 0;margin-bottom:8px;font-size:.82rem;line-height:1.45}
+.ana-insight-icon{font-size:1rem;flex-shrink:0;margin-top:-2px}
+.ana-insight-text strong{color:var(--navy);font-weight:700}
+
 /* ═══ MİNİ ARAÇLAR ═══ */
 .mt-tab{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:none;background:transparent;color:var(--text-light);font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;border-radius:8px;transition:all var(--transition-fast);flex:1;justify-content:center}
 .mt-tab:hover{color:var(--text);background:var(--cream-dark)}
@@ -3349,8 +3359,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       <h2>İstatistikler</h2>
       <p class="page-sub">Sayfa goruntulenmeleri ve kullanici aksiyonlari.</p>
 
-      <!-- Tarih filtresi -->
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;align-items:center">
+      <!-- Tarih filtresi + Rapor -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center">
         <button class="btn btn-sm btn-secondary ana-filter active" onclick="setAnalyticsPeriod(7,this)">Son 7 Gun</button>
         <button class="btn btn-sm btn-secondary ana-filter" onclick="setAnalyticsPeriod(30,this)">Son 30 Gun</button>
         <button class="btn btn-sm btn-secondary ana-filter" onclick="setAnalyticsPeriod(90,this)">Son 90 Gun</button>
@@ -3360,10 +3370,28 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         <button class="btn btn-sm btn-secondary" onclick="generateReport('single')">📄 Tek Mekan Raporu</button>
       </div>
 
-      <div class="stats-grid" id="analytics-stats"></div>
+      <!-- Tab nav -->
+      <div class="ana-tabs">
+        <button class="ana-tab active" data-tab="ozet" onclick="showAnaTab('ozet',this)">📊 Özet</button>
+        <button class="ana-tab" data-tab="trafik" onclick="showAnaTab('trafik',this)">🌐 Trafik</button>
+        <button class="ana-tab" data-tab="donusum" onclick="showAnaTab('donusum',this)">🎯 Dönüşüm</button>
+        <button class="ana-tab" data-tab="icerik" onclick="showAnaTab('icerik',this)">📱 İçerik</button>
+        <button class="ana-tab" data-tab="davranis" onclick="showAnaTab('davranis',this)">⏱️ Davranış</button>
+      </div>
+
+      <!-- Auto-Insights kartı (ozet tab) -->
+      <div class="panel-card" style="margin-bottom:20px" data-ana-tab="ozet">
+        <div class="panel-card-head">
+          <h3>💡 Otomatik İçgörüler</h3>
+          <span style="font-size:.68rem;color:var(--text-muted)">Veriden otomatik çıkarımlar</span>
+        </div>
+        <div id="ts-insights" style="padding:16px 20px;min-height:80px"></div>
+      </div>
+
+      <div class="stats-grid" id="analytics-stats" data-ana-tab="ozet"></div>
 
       <!-- Trafik Kaynakları -->
-      <div class="panel-card" style="margin-bottom:20px">
+      <div class="panel-card" style="margin-bottom:20px" data-ana-tab="trafik">
         <div class="panel-card-head">
           <h3>🌐 Trafik Kaynakları</h3>
           <span style="font-size:.68rem;color:var(--text-muted)">Hangi kanaldan kaç ziyaret geldi</span>
@@ -3384,7 +3412,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       </div>
 
       <!-- Kaynak × Aksiyon Matrisi -->
-      <div class="panel-card" style="margin-bottom:20px">
+      <div class="panel-card" style="margin-bottom:20px" data-ana-tab="donusum">
         <div class="panel-card-head">
           <h3>🎯 Kaynak × Dönüşüm Matrisi</h3>
           <span style="font-size:.68rem;color:var(--text-muted)">Hangi kanal daha çok aksiyon getiriyor</span>
@@ -3400,7 +3428,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       </div>
 
       <!-- Cihaz + Ülke + Landing -->
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px" class="ts-3col">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px" class="ts-3col" data-ana-tab="trafik">
         <div class="panel-card" style="margin:0">
           <div class="panel-card-head"><h3>📱 Cihaz</h3></div>
           <div id="ts-device" style="padding:16px 20px;min-height:100px"></div>
@@ -3416,7 +3444,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       </div>
 
       <!-- Zaman Serisi -->
-      <div class="panel-card" style="margin-bottom:20px">
+      <div class="panel-card" style="margin-bottom:20px" data-ana-tab="trafik">
         <div class="panel-card-head">
           <h3>📈 Zaman Serisi (Kaynak Bazlı)</h3>
           <span style="font-size:.68rem;color:var(--text-muted)">Günlük ziyaret trendi</span>
@@ -3428,7 +3456,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       </div>
 
       <!-- Oturum Metrikleri -->
-      <div class="panel-card" style="margin-bottom:20px">
+      <div class="panel-card" style="margin-bottom:20px" data-ana-tab="davranis">
         <div class="panel-card-head">
           <h3>⏱️ Oturum Metrikleri</h3>
           <span style="font-size:.68rem;color:var(--text-muted)">Bounce rate, ort. süre, sayfa/oturum</span>
@@ -3437,7 +3465,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       </div>
 
       <!-- Dönüşüm Hunisi -->
-      <div class="panel-card" style="margin-bottom:20px">
+      <div class="panel-card" style="margin-bottom:20px" data-ana-tab="donusum">
         <div class="panel-card-head">
           <h3>🎯 Dönüşüm Hunisi</h3>
           <span style="font-size:.68rem;color:var(--text-muted)">Oturum bazlı — her aşamada kaç kişi kayıp</span>
@@ -3446,7 +3474,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       </div>
 
       <!-- Kısa Link Performansı (Vanity Click → Pageview) -->
-      <div class="panel-card" style="margin-bottom:20px">
+      <div class="panel-card" style="margin-bottom:20px" data-ana-tab="trafik">
         <div class="panel-card-head">
           <h3>🔗 Kısa Link Performansı</h3>
           <span style="font-size:.68rem;color:var(--text-muted)">Biyografi linkine tıklayan kaç kişi siteye girdi?</span>
@@ -3455,7 +3483,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       </div>
 
       <!-- Scroll Derinliği (Engagement) -->
-      <div class="panel-card" style="margin-bottom:20px">
+      <div class="panel-card" style="margin-bottom:20px" data-ana-tab="davranis">
         <div class="panel-card-head">
           <h3>📜 Scroll Derinliği</h3>
           <span style="font-size:.68rem;color:var(--text-muted)">Kullanıcılar sayfanın yüzde kaçını gördü?</span>
@@ -3470,12 +3498,15 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       </style>
 
       <!-- Günlük Aksiyon Detayı -->
-      <div class="panel-card" style="margin-bottom:20px">
-        <div class="panel-card-head">
+      <div class="panel-card" style="margin-bottom:20px" data-ana-tab="donusum">
+        <div class="panel-card-head" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
           <h3>📅 Günlük Aksiyon Detayı</h3>
-          <select id="analytics-venue-filter" onchange="renderDailyBreakdown()" style="padding:6px 12px;border:1.5px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit;background:var(--input-bg);color:var(--text);cursor:pointer;min-width:180px">
-            <option value="">Tüm Mekanlar</option>
-          </select>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select id="analytics-venue-filter" onchange="renderDailyBreakdown()" style="padding:6px 12px;border:1.5px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit;background:var(--input-bg);color:var(--text);cursor:pointer;min-width:180px">
+              <option value="">Tüm Mekanlar</option>
+            </select>
+            <button class="btn btn-sm btn-secondary" onclick="anaExportCSV('analytics-daily-table','gunluk-aksiyon')">⬇ CSV</button>
+          </div>
         </div>
         <div class="panel-table-wrap">
           <table class="panel-table" id="analytics-daily-table">
@@ -3488,25 +3519,25 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       </div>
 
       <!-- Mekan Performans -->
-      <div class="panel-card" style="margin-bottom:20px">
-        <div class="panel-card-head"><h3>🏪 Mekan Performansı</h3><span style="font-size:.68rem;color:var(--text-muted)">Görüntüleme + Aksiyon</span></div>
+      <div class="panel-card" style="margin-bottom:20px" data-ana-tab="icerik">
+        <div class="panel-card-head"><h3>🏪 Mekan Performansı</h3><span style="font-size:.68rem;color:var(--text-muted)">Görüntüleme + Aksiyon · Satır tıklayınca detay</span></div>
         <div id="analytics-venue-perf" style="padding:16px 20px"></div>
       </div>
 
       <!-- Dönüşüm Oranı -->
-      <div class="panel-card" style="margin-bottom:20px">
+      <div class="panel-card" style="margin-bottom:20px" data-ana-tab="donusum">
         <div class="panel-card-head"><h3>📈 Dönüşüm Oranı</h3><span style="font-size:.68rem;color:var(--text-muted)">Görüntüleme → Aksiyon</span></div>
         <div id="analytics-conversion" style="padding:16px 20px"></div>
       </div>
 
-      <div class="panel-card" style="margin-bottom:20px">
+      <div class="panel-card" style="margin-bottom:20px" data-ana-tab="donusum">
         <div class="panel-card-head"><h3>Aksiyonlar (Ara / WhatsApp / Rez.)</h3></div>
         <div id="analytics-actions"></div>
       </div>
 
       <!-- Tıklama Raporu -->
-      <div class="panel-card" style="margin-top:20px">
-        <div class="panel-card-head"><h3>📱 Tiklama Raporu</h3><span style="font-size:.68rem;color:var(--text-muted)">Mekan bazli tum aksiyonlar</span></div>
+      <div class="panel-card" style="margin-top:20px" data-ana-tab="donusum">
+        <div class="panel-card-head" style="justify-content:space-between"><h3>📱 Tiklama Raporu</h3><div style="display:flex;gap:8px;align-items:center"><span style="font-size:.68rem;color:var(--text-muted)">Mekan bazli tum aksiyonlar</span><button class="btn btn-sm btn-secondary" onclick="anaExportCSV('analytics-clicks-table','tiklama-raporu')">⬇ CSV</button></div></div>
         <div class="panel-table-wrap">
           <table class="panel-table" id="analytics-clicks-table">
             <thead><tr>
@@ -3518,49 +3549,49 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       </div>
 
       <!-- Dönem Karşılaştırma -->
-      <div class="panel-card" style="margin-top:20px">
+      <div class="panel-card" style="margin-top:20px" data-ana-tab="ozet">
         <div class="panel-card-head" style="justify-content:space-between"><h3>📊 Donem Karsilastirmasi</h3><span id="analytics-compare-label" style="font-size:.72rem;color:var(--text-muted);font-weight:500"></span></div>
         <div id="analytics-compare" style="padding:20px"></div>
       </div>
 
       <!-- Rota İstatistikleri -->
-      <div class="panel-card" style="margin-top:20px">
+      <div class="panel-card" style="margin-top:20px" data-ana-tab="icerik">
         <div class="panel-card-head"><h3>🗺 Rota İstatistikleri</h3></div>
         <div id="analytics-routes"></div>
       </div>
 
       <!-- Blog İstatistikleri -->
-      <div class="panel-card" style="margin-top:20px">
+      <div class="panel-card" style="margin-top:20px" data-ana-tab="icerik">
         <div class="panel-card-head"><h3>✍️ En Çok Okunan Yazılar</h3></div>
         <div id="analytics-blog"></div>
       </div>
 
       <!-- Hava Durumu Korelasyonu -->
-      <div class="panel-card" style="margin-top:20px">
+      <div class="panel-card" style="margin-top:20px" data-ana-tab="davranis">
         <div class="panel-card-head"><h3>🌤 Hava Durumu & Ziyaret Iliskisi</h3></div>
         <div id="analytics-weather" style="padding:20px"></div>
       </div>
 
       <!-- Saatlik Trafik -->
-      <div class="panel-card" style="margin-top:20px">
+      <div class="panel-card" style="margin-top:20px" data-ana-tab="davranis">
         <div class="panel-card-head"><h3>🕐 Saatlik Trafik Dağılımı</h3><span style="font-size:.68rem;color:var(--text-muted)">Ziyaretçilerin en aktif olduğu saatler</span></div>
         <div id="analytics-hourly" style="padding:20px"></div>
       </div>
 
       <!-- Yer & Köy İstatistikleri -->
-      <div class="panel-card" style="margin-top:20px">
+      <div class="panel-card" style="margin-top:20px" data-ana-tab="icerik">
         <div class="panel-card-head"><h3>🏛 Yer & Köy Görüntülenmeleri</h3></div>
         <div id="analytics-places" style="padding:20px"></div>
       </div>
 
       <!-- AI Chatbot İstatistikleri -->
-      <div class="panel-card" style="margin-top:20px">
+      <div class="panel-card" style="margin-top:20px" data-ana-tab="icerik">
         <div class="panel-card-head"><h3>🤖 AI Chatbot Kullanımı</h3></div>
         <div id="analytics-ai" style="padding:20px"></div>
       </div>
 
       <!-- Favori Kodları -->
-      <div class="panel-card" style="margin-top:20px">
+      <div class="panel-card" style="margin-top:20px" data-ana-tab="icerik">
         <div class="panel-card-head"><h3>🔗 Favori Kodlari & Kullanim</h3></div>
         <div id="analytics-favcodes" style="padding:20px"></div>
       </div>
@@ -7997,7 +8028,7 @@ function showPage(page) {
   if (page === 'villages') { switchVillageTab(currentVPTab, window._initFromHash === true); }
   if (page === 'export') renderExport();
   if (page === 'socialgen') sgUpdateList();
-  if (page === 'analytics') renderAnalytics();
+  if (page === 'analytics') { renderAnalytics(); restoreAnaTab(); }
   if (page === 'messages') renderMessages();
   if (page === 'pending') renderPendingVenues();
   if (page === 'activity') renderActivityLog();
@@ -10675,6 +10706,178 @@ function setAnalyticsPeriod(days, btn) {
   renderAnalytics();
 }
 
+// Analytics tab switching — data-ana-tab ile kartlari filtreler
+function showAnaTab(tab, btn) {
+  document.querySelectorAll('#page-analytics .ana-tab').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) {
+    btn.classList.add('active');
+  } else {
+    var targetBtn = document.querySelector('#page-analytics .ana-tab[data-tab="' + tab + '"]');
+    if (targetBtn) targetBtn.classList.add('active');
+  }
+  document.querySelectorAll('#page-analytics [data-ana-tab]').forEach(function(el) {
+    var tabs = (el.getAttribute('data-ana-tab') || '').split(',').map(function(s){return s.trim();});
+    el.style.display = tabs.indexOf(tab) > -1 ? '' : 'none';
+  });
+  try { localStorage.setItem('ana_active_tab', tab); } catch(e) {}
+}
+
+function restoreAnaTab() {
+  var saved;
+  try { saved = localStorage.getItem('ana_active_tab'); } catch(e) {}
+  var valid = ['ozet', 'trafik', 'donusum', 'icerik', 'davranis'];
+  var tab = (saved && valid.indexOf(saved) > -1) ? saved : 'ozet';
+  showAnaTab(tab);
+}
+
+// Mekan performansinda bir satira tiklayinca: Donusum tabina gec, venue filter'i ayarla, scroll et
+function anaVenueDrillDown(venueId) {
+  if (!venueId) return;
+  showAnaTab('donusum');
+  var venueFilter = document.getElementById('analytics-venue-filter');
+  if (venueFilter) {
+    venueFilter.value = venueId;
+    if (typeof renderDailyBreakdown === 'function') renderDailyBreakdown();
+    // Tabloyu ekrana getir
+    setTimeout(function() {
+      var card = venueFilter.closest('.panel-card');
+      if (card && card.scrollIntoView) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
+}
+
+// Generic CSV export — tabloyu UTF-8 BOM'lu CSV olarak indir
+function anaExportCSV(tableId, filename) {
+  var table = document.getElementById(tableId);
+  if (!table) return;
+  var rows = [];
+  table.querySelectorAll('tr').forEach(function(tr) {
+    var cells = [];
+    tr.querySelectorAll('th, td').forEach(function(cell) {
+      var txt = (cell.textContent || '').replace(/\s+/g, ' ').trim();
+      // CSV escape: icerigi '"' kacis'la ve quote'la
+      if (txt.indexOf(',') > -1 || txt.indexOf('"') > -1 || txt.indexOf('\n') > -1) {
+        txt = '"' + txt.replace(/"/g, '""') + '"';
+      }
+      cells.push(txt);
+    });
+    rows.push(cells.join(','));
+  });
+  // UTF-8 BOM for Excel Turkish char support
+  var csv = '\uFEFF' + rows.join('\n');
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  var dateStr = new Date().toISOString().split('T')[0];
+  a.href = url;
+  a.download = (filename || 'rapor') + '-' + dateStr + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+  if (typeof showToast === 'function') showToast('✓ CSV indirildi', 'success');
+}
+
+// Otomatik icgoru kartini render et — mevcut verilerden cikarim
+// Bu fonksiyon analytics_events verisi olan bir context icinde cagrilmali
+function renderAnaInsights(events, venueById) {
+  var el = document.getElementById('ts-insights');
+  if (!el) return;
+  if (!events || !events.length) {
+    el.innerHTML = '<div style="color:var(--text-muted);font-size:.82rem;padding:10px 0">Henüz yeterli veri yok.</div>';
+    return;
+  }
+  var insights = [];
+  // 1) En baskin trafik kaynagi
+  var srcCount = {};
+  events.forEach(function(e) {
+    if (e.type === 'pageview') {
+      var s = (e.source || 'direct').toLowerCase();
+      srcCount[s] = (srcCount[s] || 0) + 1;
+    }
+  });
+  var srcSorted = Object.keys(srcCount).sort(function(a,b){return srcCount[b]-srcCount[a];});
+  var totalPV = Object.keys(srcCount).reduce(function(s,k){return s+srcCount[k];}, 0);
+  if (srcSorted.length && totalPV >= 10) {
+    var topSrc = srcSorted[0];
+    var topCount = srcCount[topSrc];
+    var pct = Math.round(topCount * 100 / totalPV);
+    if (pct >= 30) {
+      insights.push({
+        icon: '🌐',
+        text: 'Trafiğin <strong>%' + pct + '\'si ' + escHtml(topSrc) + '</strong> kaynaklı (' + topCount + ' ziyaret). Bu kanalı güçlendirmeye devam edin.'
+      });
+    }
+  }
+  // 2) Peak saat
+  var hourCount = {};
+  events.forEach(function(e) {
+    if (e.type === 'pageview' && e.hour != null) {
+      hourCount[e.hour] = (hourCount[e.hour] || 0) + 1;
+    }
+  });
+  var hourSorted = Object.keys(hourCount).sort(function(a,b){return hourCount[b]-hourCount[a];});
+  if (hourSorted.length) {
+    var peak = parseInt(hourSorted[0]);
+    insights.push({
+      icon: '🕐',
+      text: 'En yoğun saat <strong>' + peak + ':00-' + (peak+1) + ':00</strong> arası (' + hourCount[peak] + ' ziyaret). Bu saatlerde sosyal medya post\'u iyi iş görür.'
+    });
+  }
+  // 3) En basarili mekan (action count)
+  var actCount = {};
+  events.forEach(function(e) {
+    if (e.type === 'action' && e.target) {
+      actCount[e.target] = (actCount[e.target] || 0) + 1;
+    }
+  });
+  var actSorted = Object.keys(actCount).sort(function(a,b){return actCount[b]-actCount[a];});
+  if (actSorted.length && venueById) {
+    var topVenueId = actSorted[0];
+    var venue = venueById[topVenueId];
+    if (venue) {
+      insights.push({
+        icon: '⭐',
+        text: '<strong>' + escHtml(venue.title) + '</strong> dönemin en çok aksiyon alan mekanı (' + actCount[topVenueId] + ' aksiyon).'
+      });
+    }
+  }
+  // 4) Mobil vs masaustu
+  var mob = 0, desk = 0;
+  events.forEach(function(e) {
+    if (e.type === 'pageview') {
+      if (e.device === 'mobile') mob++;
+      else if (e.device === 'desktop') desk++;
+    }
+  });
+  if (mob + desk > 10) {
+    var mobPct = Math.round(mob * 100 / (mob + desk));
+    if (mobPct >= 70) insights.push({ icon: '📱', text: 'Ziyaretlerin <strong>%' + mobPct + '\'i mobilden</strong>. Mobil UX öncelikli olmalı.' });
+    else if (mobPct <= 30) insights.push({ icon: '💻', text: 'Ziyaretlerin <strong>%' + (100-mobPct) + '\'i masaüstünden</strong>. Masaüstü deneyimine yatırım değerli.' });
+  }
+  // 5) Kampanya basari
+  var campCount = {};
+  events.forEach(function(e) {
+    if (e.type === 'pageview' && e.campaign) {
+      campCount[e.campaign] = (campCount[e.campaign] || 0) + 1;
+    }
+  });
+  var campSorted = Object.keys(campCount).sort(function(a,b){return campCount[b]-campCount[a];});
+  if (campSorted.length) {
+    insights.push({
+      icon: '🎯',
+      text: 'En başarılı kampanya <strong>' + escHtml(campSorted[0]) + '</strong> (' + campCount[campSorted[0]] + ' ziyaret).'
+    });
+  }
+  if (!insights.length) {
+    el.innerHTML = '<div style="color:var(--text-muted);font-size:.82rem;padding:10px 0">Henüz anlamlı içgörü için yeterli veri yok. Daha uzun bir dönem seçin.</div>';
+    return;
+  }
+  el.innerHTML = insights.map(function(i) {
+    return '<div class="ana-insight"><span class="ana-insight-icon">' + i.icon + '</span><span class="ana-insight-text">' + i.text + '</span></div>';
+  }).join('');
+}
+
 async function renderAnalytics() {
   try {
     // Toplam sayaçlar (tüm zamanlar)
@@ -10764,6 +10967,12 @@ async function renderAnalytics() {
     renderDailyBreakdown();
     // Trafik kaynakları panelini render et (aynı events verisini kullanır)
     try { renderTrafficSources(events); } catch(e) { console.warn('TS render:', e); }
+    // Otomatik icgoru kartini render et
+    try {
+      var vById = {};
+      (draftData.venues || []).forEach(function(vn) { vById[vn.id] = vn; });
+      renderAnaInsights(events, vById);
+    } catch(e) { console.warn('Insights render:', e); }
 
     // Mekan performans listesi (sadece mevcut ve yayinda olanlar)
     const venueList = Object.entries(venueViews).map(([id, views]) => {
@@ -10783,7 +10992,7 @@ async function renderAnalytics() {
       : venueList.slice(0, 10).map((v, i) => {
         const viewPct = Math.max(Math.round((v.views / maxViews) * 100), 3);
         const actPct = v.totalActs > 0 ? Math.max(Math.round((v.totalActs / maxViews) * 100), 3) : 0;
-        return '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">' +
+        return '<div onclick="anaVenueDrillDown(\'' + v.id + '\')" style="display:flex;align-items:center;gap:12px;margin-bottom:14px;padding:6px 8px;border-radius:8px;cursor:pointer;transition:background .15s" onmouseenter="this.style.background=\'rgba(26,39,68,.04)\'" onmouseleave="this.style.background=\'\'" title="Tıklayın: günlük detayı görüntüle">' +
           '<div style="width:18px;font-size:.65rem;font-weight:800;color:var(--text-muted);text-align:right">' + (i+1) + '</div>' +
           '<div style="font-size:1rem;width:24px;text-align:center">' + v.emoji + '</div>' +
           '<div style="flex:1;min-width:0">' +
