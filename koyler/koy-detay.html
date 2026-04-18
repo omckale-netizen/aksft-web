@@ -102,13 +102,15 @@ function pageInit() {
     });
     document.head.appendChild(bcSchema);
 
-    // Place Schema
+    // TouristDestination Schema — koy sayfalari turist destinasyonu olarak isaretlenir
     var placeSchema = {
       '@context': 'https://schema.org',
-      '@type': 'Place',
+      '@type': 'TouristDestination',
       'name': village.title,
       'description': village.description || village.shortDesc || '',
       'url': 'https://assosukesfet.com/koyler/koy-detay.html?id=' + villageId,
+      'touristType': ['Gezgin','Aile','Cift','Kultur Turizmi'],
+      'includesAttraction': { '@type': 'TouristAttraction', 'name': village.title + ' Koyu' },
       'address': {
         '@type': 'PostalAddress',
         'addressLocality': village.title,

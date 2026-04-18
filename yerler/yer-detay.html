@@ -97,13 +97,16 @@ function pageInit() {
     });
     document.head.appendChild(bcSchema);
 
-    // Place Schema
+    // TouristAttraction Schema — gezilecek yerler turistik cekim merkezi olarak isaretlenir
     var placeSchema = {
       '@context': 'https://schema.org',
-      '@type': 'Place',
+      '@type': 'TouristAttraction',
       'name': place.title,
       'description': place.description || place.shortDesc || '',
       'url': 'https://assosukesfet.com/yerler/yer-detay.html?id=' + placeId,
+      'touristType': ['Gezgin','Aile','Cift','Kultur Turizmi'],
+      'isAccessibleForFree': true,
+      'publicAccess': true,
       'address': {
         '@type': 'PostalAddress',
         'addressLocality': place.location || 'Ayvacık',

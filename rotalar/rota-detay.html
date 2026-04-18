@@ -87,6 +87,42 @@ function pageInit() {
       ]
     });
     document.head.appendChild(bcSchema);
+
+    // TouristTrip Schema — rota detaylari (AI/Google cevaplarinda zengin bilgi)
+    var tripSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'TouristTrip',
+      'name': route.title,
+      'description': route.description || route.shortDesc || ('Assos bolgesi icin ' + route.title + ' rotasi'),
+      'url': 'https://assosukesfet.com/rotalar/rota-detay.html?id=' + routeId,
+      'touristType': ['Gezgin','Aile','Cift','Solo'],
+      'itinerary': {
+        '@type': 'ItemList',
+        'numberOfItems': (route.stops || []).length,
+        'itemListElement': (route.stops || []).map(function(stop, idx) {
+          return {
+            '@type': 'ListItem',
+            'position': idx + 1,
+            'item': {
+              '@type': 'TouristAttraction',
+              'name': stop.title || stop.name || ('Durak ' + (idx + 1)),
+              'description': stop.description || stop.desc || ''
+            }
+          };
+        })
+      }
+    };
+    if (route.sure || route.duration) tripSchema.duration = String(route.sure || route.duration);
+    if (route.image) tripSchema.image = route.image;
+    if (route.mesafe || route.distance) {
+      tripSchema.additionalProperty = [
+        { '@type': 'PropertyValue', 'name': 'Mesafe', 'value': String(route.mesafe || route.distance) }
+      ];
+    }
+    var tripScript = document.createElement('script');
+    tripScript.type = 'application/ld+json';
+    tripScript.textContent = JSON.stringify(tripSchema);
+    document.head.appendChild(tripScript);
   }
 }
 document.addEventListener('dataReady', pageInit);

@@ -374,7 +374,47 @@ async function loadSinglePost(slug) {
 
     var url = 'https://assosukesfet.com/blog?yazi=' + slug;
     var shareTitle = p.title + ' — Assos\'u Keşfet';
-    var shareImg = p.coverImage || '';
+    var shareImg = p.coverImage || p.image || '';
+
+    // Article Schema — AI search / Google Discover icin zengin kart
+    // Author ve Publisher her ikisi de site organizasyonu (bireysel yazar yok)
+    try {
+      var assosOrg = {
+        '@type': 'Organization',
+        'name': "Assos'u Keşfet",
+        'url': 'https://assosukesfet.com',
+        'logo': { '@type': 'ImageObject', 'url': 'https://assosukesfet.com/icon-512.png' }
+      };
+      var articleSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        'headline': (p.title || '').substring(0, 110),
+        'description': (p.excerpt || p.title || '').substring(0, 200),
+        'url': url,
+        'mainEntityOfPage': { '@type': 'WebPage', '@id': url },
+        'publisher': assosOrg,
+        'author': assosOrg,
+        'inLanguage': 'tr-TR'
+      };
+      if (p.image || p.coverImage) articleSchema.image = p.image || p.coverImage;
+      if (p.publishedAt) {
+        var pubDate = (typeof p.publishedAt.toDate === 'function') ? p.publishedAt.toDate().toISOString() : new Date(p.publishedAt).toISOString();
+        articleSchema.datePublished = pubDate;
+      }
+      if (p.updatedAt) {
+        var modDate = (typeof p.updatedAt.toDate === 'function') ? p.updatedAt.toDate().toISOString() : new Date(p.updatedAt).toISOString();
+        articleSchema.dateModified = modDate;
+      } else if (articleSchema.datePublished) {
+        articleSchema.dateModified = articleSchema.datePublished;
+      }
+      if (p.category) articleSchema.articleSection = p.category;
+      if (Array.isArray(p.tags) && p.tags.length) articleSchema.keywords = p.tags.join(', ');
+
+      var articleScript = document.createElement('script');
+      articleScript.type = 'application/ld+json';
+      articleScript.textContent = JSON.stringify(articleSchema);
+      document.head.appendChild(articleScript);
+    } catch(e) { console.warn('Article schema injection failed:', e); }
 
     // OG meta tag'larını yazıya özel güncelle
     var ogTitle = document.querySelector('meta[property="og:title"]');
