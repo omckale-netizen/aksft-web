@@ -81,13 +81,27 @@ export async function onRequestPost(context) {
       if (embedResp.ok) embedHtml = await embedResp.text();
     } catch(e) { /* embed fallback hatali, sorun degil */ }
 
-    // 3b) Tam caption'i embed HTML'den cek — multi-strategy
-    // og:title ~80 karakter kesiyor; embed og:description + JSON full caption'i icerir
+    // 3b) Tam caption'i cek — multi-strategy
+    // og:title ~80 karakter kesiyor; og:description + JSON full caption'i icerir
     let fullCaption = '';
-    if (embedHtml) {
-      // Strateji 1: og:description meta — genellikle tam caption
+    // Strateji 0: MAIN page og:description — IG post sayfasinda tam caption genelde burada
+    const mainOgDesc = html.match(/<meta\s+property=["']og:description["']\s+content=["']([^"']+)["']/i);
+    if (mainOgDesc) fullCaption = decodeHtmlEntities(mainOgDesc[1]);
+    // Strateji 0b: MAIN page JSON edge_media_to_caption
+    if (!fullCaption || fullCaption.length < 100) {
+      const mainEdgeCap = html.match(/"edge_media_to_caption"\s*:\s*\{\s*"edges"\s*:\s*\[\s*\{\s*"node"\s*:\s*\{\s*"text"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+      if (mainEdgeCap) {
+        const decoded = unescapeJsonString(mainEdgeCap[1]);
+        if (decoded.length > fullCaption.length) fullCaption = decoded;
+      }
+    }
+    if (embedHtml && (!fullCaption || fullCaption.length < 100)) {
+      // Strateji 1: embed og:description
       const embOgDesc = embedHtml.match(/<meta\s+property=["']og:description["']\s+content=["']([^"']+)["']/i);
-      if (embOgDesc) fullCaption = decodeHtmlEntities(embOgDesc[1]);
+      if (embOgDesc) {
+        const decoded = decodeHtmlEntities(embOgDesc[1]);
+        if (decoded.length > fullCaption.length) fullCaption = decoded;
+      }
       // Strateji 2: edge_media_to_caption JSON
       if (!fullCaption) {
         const edgeCap = embedHtml.match(/"edge_media_to_caption"\s*:\s*\{\s*"edges"\s*:\s*\[\s*\{\s*"node"\s*:\s*\{\s*"text"\s*:\s*"((?:[^"\\]|\\.)*)"/);
@@ -301,6 +315,8 @@ export async function onRequestPost(context) {
       ok: true,
       shortcode,
       title,
+      titleLength: title ? title.length : 0,
+      fullCaptionLength: fullCaption ? fullCaption.length : 0,
       thumbnailUrl: cachedUrl,
       videoUrl: videoUrl,
       cached: true,

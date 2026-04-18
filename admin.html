@@ -13307,7 +13307,7 @@ async function refreshReels(key) {
   if (!arr.length) { statusEl.textContent = 'Yenilenecek reel yok.'; statusEl.style.color = 'var(--text-muted)'; return; }
   if (!confirm(arr.length + ' reel yeniden cekilecek. Devam edilsin mi?')) return;
 
-  var ok = 0, fail = 0;
+  var ok = 0, fail = 0, improved = 0, totalLen = 0;
   try {
     var token = await firebase.auth().currentUser.getIdToken();
     for (var i = 0; i < arr.length; i++) {
@@ -13323,10 +13323,15 @@ async function refreshReels(key) {
         });
         var data = await resp.json();
         if (resp.ok && data.thumbnailUrl) {
+          var oldLen = (reel.title || '').length;
+          var newLen = (data.title || '').length;
           // Manuel yazilmis title'i ezmeyelim; sadece IG'den cekilenleri guncelle
-          // Kisa/"Instagram Reel" gibi placeholder ise degistir, yeterince uzunsa koru
-          var looksPlaceholder = !reel.title || reel.title === 'Instagram Reel' || reel.title.length < 80;
-          if (looksPlaceholder && data.title) reel.title = data.title;
+          var looksManualLong = reel.title && reel.title.length >= 100 && !/^(Instagram Reel|Video)$/i.test(reel.title);
+          if (!looksManualLong && data.title) {
+            reel.title = data.title;
+            if (newLen > oldLen) improved++;
+            totalLen += newLen;
+          }
           reel.thumbnailUrl = data.thumbnailUrl;
           if (data.videoUrl) reel.videoUrl = data.videoUrl;
           if (data.shortcode) reel.shortcode = data.shortcode;
@@ -13340,9 +13345,10 @@ async function refreshReels(key) {
       }
     }
     renderReelsList(key);
-    statusEl.textContent = '✓ ' + ok + ' reel yenilendi' + (fail ? ' (' + fail + ' basarisiz)' : '') + ' — Kaydet\'e basmayi unutmayin';
+    var avgLen = ok > 0 ? Math.round(totalLen / ok) : 0;
+    statusEl.innerHTML = '✓ ' + ok + ' reel yenilendi (' + improved + '\'i daha uzun caption) · ort. ' + avgLen + ' karakter' + (fail ? ' · ' + fail + ' basarisiz' : '') + '<br><b>⚠️ Caption degisikliklerinin kaydedilmesi icin "Kaydet" butonuna basin.</b>';
     statusEl.style.color = fail ? '#D97706' : 'var(--green)';
-    setTimeout(function() { statusEl.textContent = ''; }, 8000);
+    setTimeout(function() { statusEl.textContent = ''; }, 15000);
   } catch(err) {
     console.error('refreshReels global hata:', err);
     statusEl.textContent = '❌ Hata: ' + (err.message || 'bilinmeyen');
