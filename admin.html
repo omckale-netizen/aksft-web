@@ -1664,6 +1664,53 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       </div>
 
       <div id="ic-results" style="max-width:800px;margin-top:16px"></div>
+
+      <!-- ══════ TOPLU WEBP MIGRASYON ══════ -->
+      <div class="panel-card" style="max-width:800px;margin-top:24px">
+        <div class="panel-card-head">
+          <h3>🔄 Toplu WebP Migrasyonu</h3>
+          <span style="font-size:.7rem;color:var(--text-muted);font-weight:500">Mevcut JPG/PNG'leri WebP'ye çevirir</span>
+        </div>
+        <div style="padding:20px">
+          <div style="background:rgba(26,107,138,.06);border-radius:8px;padding:12px;margin-bottom:16px;font-size:.74rem;line-height:1.5;color:var(--text-light)">
+            <strong>📌 Güvenli:</strong> Eski JPG dosyaları Storage'da kalır (silinmez). Sadece Firestore'daki URL'ler yeni WebP'ye çevrilir. Sorun olursa geri dönülebilir.<br>
+            <strong>🔄 İdempotent:</strong> Zaten <code>.webp</code> olan görselleri atlar — script yarıda kalırsa tekrar başlatılabilir.
+          </div>
+
+          <div class="form-group" style="max-width:360px">
+            <label>Kapsam</label>
+            <select id="wm-scope" style="padding:8px 12px">
+              <option value="venue-1">🧪 Test — ilk 1 mekan (3-4 görsel)</option>
+              <option value="venue-10">🔬 İlk 10 mekan</option>
+              <option value="venues">📍 Tüm mekanlar</option>
+              <option value="places">🏛️ Tüm yerler</option>
+              <option value="villages">🏘️ Tüm köyler</option>
+              <option value="gallery">🖼️ Tüm galeri</option>
+              <option value="all">🌍 TÜMÜ (venues + places + villages + gallery)</option>
+            </select>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+            <button class="btn btn-secondary btn-sm" onclick="wmScan()" id="wm-scan-btn">🔍 Tara (önizleme)</button>
+            <button class="btn btn-primary btn-sm" onclick="wmStart()" id="wm-start-btn" disabled>▶️ Başlat</button>
+            <button class="btn btn-secondary btn-sm" onclick="wmStop()" id="wm-stop-btn" style="display:none">⏹ Durdur</button>
+          </div>
+
+          <!-- Progress -->
+          <div id="wm-progress-wrap" style="margin-top:20px;display:none">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:.78rem;font-weight:600">
+              <span id="wm-progress-label">0 / 0</span>
+              <span id="wm-progress-stats" style="font-family:monospace;color:var(--text-muted)"></span>
+            </div>
+            <div style="width:100%;background:rgba(0,0,0,.06);border-radius:6px;height:8px;overflow:hidden">
+              <div id="wm-progress-bar" style="width:0%;height:100%;background:var(--terra);transition:width .3s"></div>
+            </div>
+          </div>
+
+          <!-- Log -->
+          <div id="wm-log" style="margin-top:16px;max-height:280px;overflow:auto;font-family:ui-monospace,monospace;font-size:.7rem;line-height:1.6;background:rgba(0,0,0,.04);border-radius:6px;padding:12px;display:none"></div>
+        </div>
+      </div>
     </div>
 
     <!-- ══════ SOSYAL MEDYA ══════ -->
@@ -18966,6 +19013,268 @@ function icFormatSize(bytes) {
   if (bytes < 1024) return bytes + ' B';
   if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
   return (bytes / 1048576).toFixed(2) + ' MB';
+}
+
+/* ══════════════════════════════════════════════════
+   TOPLU WEBP MIGRASYON — Mevcut JPG/PNG'leri WebP'ye cevirir
+   - Eski dosyalar Storage'da kalir (silinmez)
+   - Sadece Firestore URL'i guncellenir
+   - Idempotent: .webp olanlari atlar
+══════════════════════════════════════════════════ */
+var _wmState = {
+  running: false,
+  abort: false,
+  targets: [],
+  current: 0,
+  success: 0,
+  skipped: 0,
+  failed: 0,
+  savedBytes: 0
+};
+
+function wmLog(msg, type) {
+  var log = document.getElementById('wm-log');
+  if (!log) return;
+  log.style.display = '';
+  var color = type === 'error' ? '#E53E3E' : type === 'success' ? '#5A7A56' : type === 'warn' ? '#D97706' : 'var(--text-muted)';
+  var ts = new Date().toLocaleTimeString('tr-TR', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  var div = document.createElement('div');
+  div.style.color = color;
+  div.textContent = '[' + ts + '] ' + msg;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+function _wmShouldMigrate(url) {
+  if (!url || typeof url !== 'string') return false;
+  // Zaten .webp — atla
+  if (/\.webp(\?|$)/i.test(url)) return false;
+  // Sadece Firebase Storage URL'leri
+  if (!/firebasestorage\.googleapis\.com/i.test(url) && !/firebasestorage\.app/i.test(url)) return false;
+  return true;
+}
+
+function _wmExtractStoragePath(url) {
+  // https://firebasestorage.googleapis.com/v0/b/.../o/{encoded-path}?...
+  var m = url.match(/\/o\/([^?]+)/);
+  if (!m) return null;
+  return decodeURIComponent(m[1]);
+}
+
+async function wmScan() {
+  if (_wmState.running) { wmLog('Zaten çalışıyor.', 'warn'); return; }
+  var scope = document.getElementById('wm-scope').value;
+  document.getElementById('wm-log').innerHTML = '';
+  document.getElementById('wm-progress-wrap').style.display = 'none';
+  wmLog('Tarama başladı — kapsam: ' + scope, 'info');
+  _wmState.targets = [];
+
+  try {
+    var includeVenues = (scope === 'all' || scope === 'venues' || scope.startsWith('venue-'));
+    var includePlaces = (scope === 'all' || scope === 'places');
+    var includeVillages = (scope === 'all' || scope === 'villages');
+    var includeGallery = (scope === 'all' || scope === 'gallery');
+
+    if (includeVenues) {
+      var vSnap = await db.collection('venues').get();
+      var vDocs = vSnap.docs;
+      if (scope === 'venue-1') vDocs = vDocs.slice(0, 1);
+      else if (scope === 'venue-10') vDocs = vDocs.slice(0, 10);
+      vDocs.forEach(function(doc) {
+        var data = doc.data();
+        if (Array.isArray(data.images)) {
+          data.images.forEach(function(url, idx) {
+            if (_wmShouldMigrate(url)) {
+              _wmState.targets.push({ coll:'venues', docId:doc.id, field:'images', index:idx, url:url, title:data.title });
+            }
+          });
+        }
+      });
+      wmLog('Venues taraması: ' + vDocs.length + ' mekan, ' + _wmState.targets.length + ' görsel', 'info');
+    }
+
+    var beforePlaces = _wmState.targets.length;
+    if (includePlaces) {
+      var pSnap = await db.collection('places').get();
+      pSnap.docs.forEach(function(doc) {
+        var data = doc.data();
+        if (data.image && _wmShouldMigrate(data.image)) {
+          _wmState.targets.push({ coll:'places', docId:doc.id, field:'image', url:data.image, title:data.title });
+        }
+      });
+      wmLog('Places: ' + (_wmState.targets.length - beforePlaces) + ' görsel', 'info');
+    }
+
+    var beforeVillages = _wmState.targets.length;
+    if (includeVillages) {
+      var viSnap = await db.collection('villages').get();
+      viSnap.docs.forEach(function(doc) {
+        var data = doc.data();
+        if (data.image && _wmShouldMigrate(data.image)) {
+          _wmState.targets.push({ coll:'villages', docId:doc.id, field:'image', url:data.image, title:data.title });
+        }
+      });
+      wmLog('Villages: ' + (_wmState.targets.length - beforeVillages) + ' görsel', 'info');
+    }
+
+    var beforeGallery = _wmState.targets.length;
+    if (includeGallery) {
+      var gSnap = await db.collection('gallery').get();
+      gSnap.docs.forEach(function(doc) {
+        var data = doc.data();
+        if (data.url && _wmShouldMigrate(data.url)) {
+          _wmState.targets.push({ coll:'gallery', docId:doc.id, field:'url', url:data.url, title:data.name || doc.id });
+        }
+      });
+      wmLog('Gallery: ' + (_wmState.targets.length - beforeGallery) + ' görsel', 'info');
+    }
+
+    wmLog('✅ Tarama tamam — toplam ' + _wmState.targets.length + ' görsel dönüştürülmeye hazır.', 'success');
+    document.getElementById('wm-start-btn').disabled = _wmState.targets.length === 0;
+    document.getElementById('wm-progress-wrap').style.display = '';
+    _wmState.current = 0;
+    _wmState.success = 0;
+    _wmState.skipped = 0;
+    _wmState.failed = 0;
+    _wmState.savedBytes = 0;
+    _wmUpdateProgress();
+  } catch(e) {
+    wmLog('❌ Tarama hatası: ' + e.message, 'error');
+    console.error(e);
+  }
+}
+
+async function wmStart() {
+  if (_wmState.running) return;
+  if (_wmState.targets.length === 0) { wmLog('Önce tarama yapın.', 'error'); return; }
+
+  if (!confirm(_wmState.targets.length + ' görsel WebP\'ye çevrilecek.\n\nEski JPG dosyaları Storage\'da kalacak, sadece Firestore URL\'leri güncellenecek.\n\nDevam edilsin mi?')) return;
+
+  _wmState.running = true;
+  _wmState.abort = false;
+  document.getElementById('wm-start-btn').style.display = 'none';
+  document.getElementById('wm-scan-btn').disabled = true;
+  document.getElementById('wm-stop-btn').style.display = '';
+  wmLog('🚀 Migrasyon başlatıldı...', 'info');
+
+  for (var i = 0; i < _wmState.targets.length; i++) {
+    if (_wmState.abort) { wmLog('⏹ Durduruldu.', 'warn'); break; }
+    _wmState.current = i + 1;
+    var target = _wmState.targets[i];
+    try {
+      var result = await _wmMigrateOne(target);
+      if (result && result.skipped) _wmState.skipped++;
+      else if (result) { _wmState.success++; _wmState.savedBytes += result.saved || 0; }
+    } catch(e) {
+      _wmState.failed++;
+      wmLog('❌ ' + (target.title || target.docId) + ' [' + target.field + (target.index != null ? '.' + target.index : '') + ']: ' + e.message, 'error');
+      console.error('Migrate error:', target, e);
+    }
+    _wmUpdateProgress();
+  }
+
+  _wmState.running = false;
+  document.getElementById('wm-start-btn').style.display = '';
+  document.getElementById('wm-scan-btn').disabled = false;
+  document.getElementById('wm-stop-btn').style.display = 'none';
+  var totalSavedMB = (_wmState.savedBytes / 1024 / 1024).toFixed(2);
+  wmLog('✅ Bitti — ✓' + _wmState.success + ' başarılı · ⊘' + _wmState.skipped + ' atlandı · ✕' + _wmState.failed + ' hata · 💾 ' + totalSavedMB + ' MB tasarruf', 'success');
+  try { if (typeof logActivity === 'function') logActivity('webp_migrate', 'batch', _wmState.success + '/' + _wmState.targets.length + ' (' + totalSavedMB + ' MB)'); } catch(e) {}
+}
+
+function wmStop() {
+  if (!_wmState.running) return;
+  _wmState.abort = true;
+  wmLog('⏳ Durduruluyor (mevcut işlem bitene kadar bekleyin)...', 'warn');
+}
+
+function _wmUpdateProgress() {
+  var total = _wmState.targets.length;
+  var pct = total ? Math.round(_wmState.current * 100 / total) : 0;
+  document.getElementById('wm-progress-bar').style.width = pct + '%';
+  document.getElementById('wm-progress-label').textContent = _wmState.current + ' / ' + total + ' (' + pct + '%)';
+  document.getElementById('wm-progress-stats').textContent =
+    '✓' + _wmState.success + ' ⊘' + _wmState.skipped + ' ✕' + _wmState.failed + ' · ' + (_wmState.savedBytes / 1024 / 1024).toFixed(2) + ' MB';
+}
+
+async function _wmMigrateOne(target) {
+  // 1. Original blob'u indir
+  var resp = await fetch(target.url);
+  if (!resp.ok) throw new Error('HTTP ' + resp.status + ' indirme');
+  var origBlob = await resp.blob();
+  var origSize = origBlob.size;
+
+  // 2. Canvas'te WebP'ye cevir
+  var webpBlob = await _wmBlobToWebP(origBlob);
+  var newSize = webpBlob.size;
+
+  // Yeni dosya original'in %95'inden buyukse migrate etme
+  if (newSize >= origSize * 0.95) {
+    wmLog('⊘ ' + (target.title || target.docId) + ': WebP kazanc yok (%5<), atlandı', 'info');
+    return { skipped: true };
+  }
+
+  // 3. Storage path turet (eski path uzantisini .webp yap)
+  var origPath = _wmExtractStoragePath(target.url);
+  if (!origPath) throw new Error('Storage path çözülemedi');
+  var newPath = origPath.replace(/\.[^.\/]+$/, '') + '.webp';
+
+  // Eger yeni path eski path ile ayni ise (zaten .webp), atla
+  if (newPath === origPath) {
+    return { skipped: true };
+  }
+
+  // 4. Yeni .webp dosyayi Storage'a yukle
+  var ref = firebase.storage().ref(newPath);
+  await ref.put(webpBlob, { contentType: 'image/webp' });
+  var newUrl = await ref.getDownloadURL();
+
+  // 5. Firestore'u guncelle (re-read + update, concurrent editi bozmamak icin)
+  var docRef = db.collection(target.coll).doc(target.docId);
+  if (target.field === 'images') {
+    var snap = await docRef.get();
+    if (!snap.exists) throw new Error('Doc silinmiş: ' + target.docId);
+    var imgs = (snap.data().images || []).slice();
+    if (imgs[target.index] !== target.url) {
+      wmLog('⊘ ' + (target.title || target.docId) + ' [images.' + target.index + ']: URL değişmiş (manuel güncelleme), atlandı', 'warn');
+      return { skipped: true };
+    }
+    imgs[target.index] = newUrl;
+    await docRef.update({ images: imgs });
+  } else {
+    var update = {};
+    update[target.field] = newUrl;
+    await docRef.update(update);
+  }
+
+  var savedKb = Math.round((origSize - newSize) / 1024);
+  wmLog('✓ ' + (target.title || target.docId) + ' [' + target.field + (target.index != null ? '.' + target.index : '') + ']: ' + Math.round(origSize/1024) + ' → ' + Math.round(newSize/1024) + ' KB (-' + savedKb + ' KB)', 'success');
+  return { saved: origSize - newSize };
+}
+
+async function _wmBlobToWebP(blob) {
+  return new Promise(function(resolve, reject) {
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      // Orijinal boyutu koru — sadece format degisiyor
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      canvas.getContext('2d').drawImage(img, 0, 0);
+      // WebP desteklenmiyorsa reject — kullanici Chrome'a gecsin
+      var testUrl = canvas.toDataURL('image/webp');
+      if (!testUrl.startsWith('data:image/webp')) {
+        reject(new Error('Tarayıcı WebP encode edemiyor — Chrome/Firefox/Edge kullanın'));
+        return;
+      }
+      canvas.toBlob(function(b) {
+        if (b && b.size > 0) resolve(b);
+        else reject(new Error('toBlob boş döndü'));
+      }, 'image/webp', 0.82);
+    };
+    img.onerror = function() { reject(new Error('Görsel yüklenemedi (bozuk dosya veya CORS)')); };
+    img.src = URL.createObjectURL(blob);
+  });
 }
 
 /* ══════════════════════════════════════════════════
