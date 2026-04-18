@@ -13086,9 +13086,14 @@ async function addReel() {
     urlInp.value = '';
     titleInp.value = '';
     renderReelsList();
-    statusEl.textContent = '✓ Eklendi' + (data.cached ? ' (cache)' : '');
-    statusEl.style.color = 'var(--green)';
-    setTimeout(function() { statusEl.textContent = ''; }, 2500);
+    if (data.cached) {
+      statusEl.textContent = '✓ Eklendi (Firebase cache — kalıcı)';
+      statusEl.style.color = 'var(--green)';
+    } else {
+      statusEl.textContent = '⚠️ Eklendi ama IG CDN URL (~30 günde expire olabilir, manuel thumbnail önerilir)';
+      statusEl.style.color = '#D97706';
+    }
+    setTimeout(function() { statusEl.textContent = ''; }, 5000);
   } catch(err) {
     console.error('Reel ekleme hatası:', err);
     statusEl.textContent = '❌ ' + (err.message || 'Hata') + ' — "Manuel Thumbnail" butonunu kullanın';
