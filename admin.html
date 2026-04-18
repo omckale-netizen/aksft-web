@@ -7395,7 +7395,6 @@ async function loadCurrentUserRole(firebaseUser) {
     photoURL: null
   };
   // Super admin email — her zaman tam yetki (kurtarma)
-  console.log('[AUTH] loadCurrentUserRole: email=', firebaseUser.email, 'isSuperAdmin=', isSuperAdminEmail(firebaseUser.email));
   if (isSuperAdminEmail(firebaseUser.email)) {
     baseUser.role = 'admin';
     window._currentUser = baseUser;
