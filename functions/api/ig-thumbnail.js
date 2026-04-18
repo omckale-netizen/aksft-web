@@ -38,13 +38,18 @@ export async function onRequestPost(context) {
   const shortcode = match[2];
 
   try {
-    // 1) Instagram sayfasini fetch et
+    // 1) Instagram sayfasini fetch et — gercek browser User-Agent daha iyi meta dondurur
+    const IG_HEADERS = {
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+      'Accept-Language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'none',
+    };
     const igResp = await fetch('https://www.instagram.com/' + match[1] + '/' + shortcode + '/', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
-        'Accept': 'text/html,application/xhtml+xml',
-        'Accept-Language': 'tr-TR,tr;q=0.9,en;q=0.8',
-      }
+      headers: IG_HEADERS
     });
     if (!igResp.ok) {
       return json({ error: 'Instagram sayfasi yuklenemedi (HTTP ' + igResp.status + ')' }, 502, corsHeaders);
@@ -63,10 +68,47 @@ export async function onRequestPost(context) {
     const titleMatch = html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i);
     const title = titleMatch ? decodeHtmlEntities(titleMatch[1]) : '';
 
-    // 3b) Video URL'ini cekmeyi dene (og:video veya og:video:secure_url)
+    // 3b) Video URL'ini cekmeyi dene — cok katmanli fallback
+    let videoOriginalUrl = '';
+    // Strateji 1: og:video / og:video:secure_url meta tag
     const videoMatch = html.match(/<meta\s+property=["']og:video:secure_url["']\s+content=["']([^"']+)["']/i)
       || html.match(/<meta\s+property=["']og:video["']\s+content=["']([^"']+)["']/i);
-    const videoOriginalUrl = videoMatch ? videoMatch[1].replace(/&amp;/g, '&') : '';
+    if (videoMatch) {
+      videoOriginalUrl = videoMatch[1].replace(/&amp;/g, '&');
+    }
+    // Strateji 2: Inline JSON/JS icinde "video_url":"..." veya "video_versions":[{...url}]
+    if (!videoOriginalUrl) {
+      const jsonVideoMatch = html.match(/"video_url"\s*:\s*"([^"]+)"/i)
+        || html.match(/"video_versions"\s*:\s*\[\s*\{[^}]*"url"\s*:\s*"([^"]+)"/i)
+        || html.match(/"playable_url"\s*:\s*"([^"]+)"/i);
+      if (jsonVideoMatch) {
+        // JSON escape'leri decode et (\u0026 -> &, \/ -> /)
+        videoOriginalUrl = jsonVideoMatch[1]
+          .replace(/\\u0026/g, '&')
+          .replace(/\\\//g, '/')
+          .replace(/\\"/g, '"');
+      }
+    }
+    // Strateji 3: Embed sayfasindan dene (daha az koruma)
+    if (!videoOriginalUrl) {
+      try {
+        const embedResp = await fetch('https://www.instagram.com/' + match[1] + '/' + shortcode + '/embed/captioned/', {
+          headers: IG_HEADERS
+        });
+        if (embedResp.ok) {
+          const embedHtml = await embedResp.text();
+          const embedVideo = embedHtml.match(/"video_url"\s*:\s*"([^"]+)"/i)
+            || embedHtml.match(/<video[^>]+src=["']([^"']+)["']/i)
+            || embedHtml.match(/"contentUrl"\s*:\s*"([^"]+\.mp4[^"]*)"/i);
+          if (embedVideo) {
+            videoOriginalUrl = embedVideo[1]
+              .replace(/\\u0026/g, '&')
+              .replace(/\\\//g, '/')
+              .replace(/\\"/g, '"');
+          }
+        }
+      } catch(e) { /* embed fallback hatali, sorun degil */ }
+    }
 
     // 4) Gorseli indir
     const imgResp = await fetch(thumbnailUrl, {
