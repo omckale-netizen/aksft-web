@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="google-site-verification" content="xS1iyLK4Np8ihaS4Y7i2xJ5jdGYehNY0BWog7ClfsQI" />
   <meta name="yandex-verification" content="c4e0a3082096b4ef" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
-  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossorigin>
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
   <link rel="dns-prefetch" href="https://www.googletagmanager.com">
   <link rel="dns-prefetch" href="https://www.clarity.ms">
   <link rel="dns-prefetch" href="https://connect.facebook.net">
@@ -653,9 +653,14 @@ function pageInit() {
       var label = s.weatherLabel || 'Assos';
       fetchWeather(lat, lon, label);
     }
-    // dataReady firmiş mi? firmişse hemen yükle, yoksa bekle
-    if (window.DATA && window.DATA.siteSettings) loadWeather();
-    else document.addEventListener('dataReady', loadWeather);
+    // LCP'yi bozmamak icin hava durumunu 1.5s gecikmeli fetch et
+    // (widget hero'nun altinda, ilk anda gorunmuyor — acelesi yok)
+    function scheduleLoad() {
+      if (window.requestIdleCallback) requestIdleCallback(loadWeather, { timeout: 1500 });
+      else setTimeout(loadWeather, 1500);
+    }
+    if (window.DATA && window.DATA.siteSettings) scheduleLoad();
+    else document.addEventListener('dataReady', scheduleLoad);
 
     function fetchWeather(lat, lon, cityLabel) {
     var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon +
