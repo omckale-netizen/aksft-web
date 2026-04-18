@@ -4079,41 +4079,6 @@ function renderVillagePage(villageId) {
     bodyHtml += '</div>';
   }
 
-  // Instagram Reels — koy hakkinda videolar (admin panelden eklenir, thumbnail Firebase cache)
-  if (Array.isArray(v.instagramReels) && v.instagramReels.length > 0) {
-    bodyHtml += '<div style="margin-bottom:40px;">';
-    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">📹 ' + v.title + ' Hakkında Videolar</h2>';
-    bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;">';
-    v.instagramReels.forEach(function(reel, idx) {
-      var reelKey = 'reel-' + v.id + '-' + idx;
-      var sc = reel.shortcode || (reel.url.match(/\/(p|reel|reels)\/([A-Za-z0-9_-]+)/) || [])[2] || '';
-      var embedUrl = sc ? 'https://www.instagram.com/p/' + sc + '/embed' : '';
-      var title = (reel.title || 'Instagram Reel').substring(0, 80);
-      var thumb = reel.thumbnailUrl ? escAttr(reel.thumbnailUrl) : '';
-      bodyHtml += '<div class="ak-reel-card" id="' + reelKey + '" style="background:#000;border-radius:18px;overflow:hidden;position:relative;aspect-ratio:9/16;max-height:560px;">';
-      // Thumbnail + Play butonu (default state)
-      bodyHtml += '<div class="ak-reel-cover" style="position:absolute;inset:0;background:#1A2744 center/cover ' + (thumb ? 'url(\'' + thumb + '\')' : '') + ';cursor:pointer;" onclick="akPlayReel(\'' + reelKey + '\', \'' + escAttr(embedUrl) + '\')">';
-      bodyHtml += '<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7) 0%,rgba(0,0,0,.2) 50%,rgba(0,0,0,.4) 100%);"></div>';
-      // Play buton — ortada buyuk
-      bodyHtml += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">';
-      bodyHtml += '<div style="width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.95);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(0,0,0,.4);transition:transform .2s;" onmouseover="this.style.transform=\'scale(1.08)\'" onmouseout="this.style.transform=\'\'">';
-      bodyHtml += '<svg width="32" height="32" viewBox="0 0 24 24" fill="#C4521A" style="margin-left:4px"><path d="M8 5v14l11-7z"/></svg>';
-      bodyHtml += '</div></div>';
-      // Baslik alt
-      bodyHtml += '<div style="position:absolute;bottom:0;left:0;right:0;padding:14px 16px;color:#fff;">';
-      bodyHtml += '<div style="font-size:.64rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:4px;display:inline-flex;align-items:center;gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>Instagram</div>';
-      bodyHtml += '<div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-size:.92rem;font-weight:700;line-height:1.3;">' + escHtml(title) + '</div>';
-      bodyHtml += '<button type="button" class="ak-reel-watch" style="margin-top:10px;padding:8px 18px;border-radius:999px;background:#fff;color:#1A2744;border:none;font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;" onclick="event.stopPropagation();akPlayReel(\'' + reelKey + '\', \'' + escAttr(embedUrl) + '\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>İzle</button>';
-      bodyHtml += '</div>';
-      bodyHtml += '</div>'; // cover
-      // Iframe placeholder + IG link (oynatildiginda gosterilir)
-      bodyHtml += '<div class="ak-reel-player" style="position:absolute;inset:0;display:none;"></div>';
-      bodyHtml += '<div class="ak-reel-igopen" style="display:none;position:absolute;bottom:8px;right:8px;z-index:2;"><a href="' + escAttr(reel.url) + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);color:#fff;font-size:.68rem;font-weight:600;text-decoration:none;">📱 Instagram\'da Aç</a></div>';
-      bodyHtml += '</div>';
-    });
-    bodyHtml += '</div></div>';
-  }
-
   // Bu köydeki işletmeler
   var villageVenues = (DATA.venues || []).filter(function(venue) {
     // villageId eşleşmesi (admin panelden bağlanan mekanlar - places üzerinden değil venues için de)
@@ -4284,6 +4249,51 @@ function renderVillagePage(villageId) {
       bodyHtml += '</div>';
       if (distText) bodyHtml += '<span style="font-size:.65rem;font-weight:600;color:var(--terra);white-space:nowrap;">' + distText + '</span>';
       bodyHtml += '</a>';
+    });
+    bodyHtml += '</div></div>';
+  }
+
+  // Instagram Reels — koy hakkinda videolar (yakindaki koylerden sonra)
+  if (Array.isArray(v.instagramReels) && v.instagramReels.length > 0) {
+    var decodeEntities = function(s) {
+      if (!s) return '';
+      return String(s)
+        .replace(/&#x([0-9a-fA-F]+);/g, function(_, hex) { return String.fromCodePoint(parseInt(hex, 16)); })
+        .replace(/&#(\d+);/g, function(_, dec) { return String.fromCodePoint(parseInt(dec, 10)); })
+        .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&nbsp;/g, ' ');
+    };
+    bodyHtml += '<div style="margin-bottom:40px;">';
+    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">📹 ' + v.title + ' Hakkında Videolar</h2>';
+    bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;">';
+    v.instagramReels.forEach(function(reel, idx) {
+      var reelKey = 'reel-' + v.id + '-' + idx;
+      var sc = reel.shortcode || (reel.url.match(/\/(p|reel|reels)\/([A-Za-z0-9_-]+)/) || [])[2] || '';
+      var embedUrl = sc ? 'https://www.instagram.com/p/' + sc + '/embed' : '';
+      // Entity decode (eski kayitlardaki &#x2019; vb. icin)
+      var titleRaw = decodeEntities(reel.title || 'Instagram Reel');
+      var title = titleRaw.substring(0, 70) + (titleRaw.length > 70 ? '…' : '');
+      var thumb = reel.thumbnailUrl ? escAttr(reel.thumbnailUrl) : '';
+      bodyHtml += '<div class="ak-reel-card" id="' + reelKey + '" style="background:#000;border-radius:18px;overflow:hidden;position:relative;aspect-ratio:4/5;max-width:420px;margin:0 auto;width:100%;">';
+      // Thumbnail + Play butonu (default state)
+      bodyHtml += '<div class="ak-reel-cover" style="position:absolute;inset:0;background:#1A2744 center/cover ' + (thumb ? 'url(\'' + thumb + '\')' : '') + ';cursor:pointer;" onclick="akPlayReel(\'' + reelKey + '\', \'' + escAttr(embedUrl) + '\')">';
+      bodyHtml += '<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.75) 0%,rgba(0,0,0,.15) 55%,rgba(0,0,0,.35) 100%);"></div>';
+      // Play buton — ortada
+      bodyHtml += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">';
+      bodyHtml += '<div style="width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.95);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(0,0,0,.4);transition:transform .2s;" onmouseover="this.style.transform=\'scale(1.08)\'" onmouseout="this.style.transform=\'\'">';
+      bodyHtml += '<svg width="26" height="26" viewBox="0 0 24 24" fill="#C4521A" style="margin-left:3px"><path d="M8 5v14l11-7z"/></svg>';
+      bodyHtml += '</div></div>';
+      // Baslik alt
+      bodyHtml += '<div style="position:absolute;bottom:0;left:0;right:0;padding:12px 14px;color:#fff;">';
+      bodyHtml += '<div style="font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:4px;display:inline-flex;align-items:center;gap:4px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>Instagram</div>';
+      bodyHtml += '<div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-size:.85rem;font-weight:700;line-height:1.3;">' + escHtml(title) + '</div>';
+      bodyHtml += '<button type="button" class="ak-reel-watch" style="margin-top:8px;padding:6px 14px;border-radius:999px;background:#fff;color:#1A2744;border:none;font-family:inherit;font-size:.72rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;" onclick="event.stopPropagation();akPlayReel(\'' + reelKey + '\', \'' + escAttr(embedUrl) + '\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>İzle</button>';
+      bodyHtml += '</div>';
+      bodyHtml += '</div>'; // cover
+      // Iframe placeholder + IG link (oynatildiginda gosterilir)
+      bodyHtml += '<div class="ak-reel-player" style="position:absolute;inset:0;display:none;"></div>';
+      bodyHtml += '<div class="ak-reel-igopen" style="display:none;position:absolute;bottom:8px;right:8px;z-index:2;"><a href="' + escAttr(reel.url) + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);color:#fff;font-size:.68rem;font-weight:600;text-decoration:none;">📱 Instagram\'da Aç</a></div>';
+      bodyHtml += '</div>';
     });
     bodyHtml += '</div></div>';
   }
