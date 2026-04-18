@@ -455,14 +455,18 @@ async function signInWithGoogle() {
   errEl.textContent = '';
 
   try {
+    console.log('[AUTH] signInWithGoogle START — fbAuth:', !!fbAuth, 'GoogleAuthProvider:', !!firebase.auth.GoogleAuthProvider);
     btn.disabled = true;
     // Redirect akisi oldugunu isaretle — geri dondugunde yetki check calissin
     try { sessionStorage.setItem('googleSignInPending', '1'); } catch(e) {}
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
+    console.log('[AUTH] Calling signInWithRedirect...');
     await fbAuth.signInWithRedirect(provider);
+    console.log('[AUTH] After signInWithRedirect — sayfa degismeliydi!');
     // Bu noktadan sonra sayfa Google'a gider — kod calismaz
   } catch (err) {
+    console.error('[AUTH] signInWithRedirect THREW:', err);
     btn.disabled = false;
     try { sessionStorage.removeItem('googleSignInPending'); } catch(e) {}
     if (err.code === 'auth/unauthorized-domain') {
