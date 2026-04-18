@@ -8540,12 +8540,17 @@ function toggleSidebar() {
    INIT
 ══════════════════════════════════════════════════ */
 function initApp() {
-  // Hash'ten son kaldığı sekmeyi aç
-  const hash = window.location.hash.replace('#', '');
+  // Hash'ten son kaldığı sekmeyi aç (page[/subtab] formati: "villages/places" gibi)
+  const rawHash = window.location.hash.replace('#', '');
+  const [hashPage, hashSub] = rawHash.split('/');
   loadCategories();
   const validPages = ['dashboard','venues','categories','bot','placebot','routes','villages','export','settings','security','analytics','messages','pending','gallery','activity','blog','todos','users','chat','imgcompress','socialgen','fileconvert','minitools'];
-  if (hash && validPages.includes(hash)) {
-    showPage(hash);
+  if (hashPage && validPages.includes(hashPage)) {
+    // Alt-sekme (villages/places vb.) varsa ilgili state'i once set et
+    if (hashPage === 'villages' && (hashSub === 'places' || hashSub === 'villages')) {
+      currentVPTab = hashSub;
+    }
+    showPage(hashPage);
   } else {
     renderDashboard();
   }
@@ -12927,6 +12932,12 @@ function switchVillageTab(tab) {
   document.querySelectorAll('#vp-type-filters .tab').forEach(function(b) { b.classList.remove('active'); });
   document.querySelector('#vp-type-filters .tab').classList.add('active');
   document.getElementById('vp-add-btn').textContent = isPlaces ? '+ Yeni Yer Ekle' : '+ Yeni Yerleşim Ekle';
+  // Hash'e alt-sekmeyi yaz — F5'te ayni sekmede kalsin
+  // Default tab 'villages' icin sadece #villages, places icin #villages/places
+  try {
+    var newHash = tab === 'places' ? '#villages/places' : '#villages';
+    history.replaceState(null, '', newHash);
+  } catch(e) {}
   renderVPTable();
 }
 
