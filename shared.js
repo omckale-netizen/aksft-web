@@ -1274,8 +1274,7 @@ function initScrollToTop() {
   style.textContent = `
     @media (max-width: 640px) {
       #scroll-top-btn {
-        bottom: 80px !important;
-        right: 16px !important;
+        right: 16px;
       }
     }
     #scroll-top-btn {
