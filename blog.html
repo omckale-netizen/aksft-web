@@ -67,6 +67,25 @@
     .blog-card-meta{display:flex;gap:12px;font-size:.7rem;color:var(--text-muted)}
     .blog-empty{text-align:center;padding:60px 20px;color:var(--text-muted)}
 
+    /* Skeleton loader — algılanan hız için placeholder kartlar */
+    .blog-skel{display:flex;gap:20px;background:#fff;border:1px solid rgba(0,0,0,.05);border-radius:16px;overflow:hidden;position:relative}
+    .blog-skel-img{width:220px;min-height:180px;flex-shrink:0;background:#F0ECE4;position:relative;overflow:hidden}
+    .blog-skel-body{padding:22px 22px 22px 0;flex:1;display:flex;flex-direction:column;gap:10px;justify-content:center}
+    .blog-skel-line{background:#F0ECE4;border-radius:6px;position:relative;overflow:hidden}
+    .blog-skel-cat{height:10px;width:25%}
+    .blog-skel-title{height:16px;width:80%}
+    .blog-skel-title-2{height:16px;width:60%}
+    .blog-skel-desc{height:12px;width:95%}
+    .blog-skel-desc-2{height:12px;width:70%}
+    /* Shimmer animation */
+    .blog-skel-img::after,.blog-skel-line::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.6) 50%,transparent);background-size:200% 100%;animation:blogShimmer 1.6s infinite;}
+    @keyframes blogShimmer{0%{background-position:-100% 0}100%{background-position:200% 0}}
+    @media(max-width:640px){
+      .blog-skel{flex-direction:column}
+      .blog-skel-img{width:100%;min-height:160px;height:160px}
+      .blog-skel-body{padding:18px}
+    }
+
     @media(max-width:640px){
       .blog-hero{padding:110px 20px 44px}
       .blog-card{flex-direction:column}
@@ -192,38 +211,127 @@ function pageInit() {
   }
 }
 
+// Blog posts için stale-while-revalidate cache (5 dk TTL)
+var BLOG_CACHE_KEY = 'assos_blog_posts_v1';
+var BLOG_CACHE_TTL = 5 * 60 * 1000; // 5 dakika
+
+function renderBlogGrid(posts) {
+  var grid = document.getElementById('blog-grid');
+  if (!grid) return;
+  if (!posts || posts.length === 0) {
+    grid.innerHTML = '<div class="blog-empty">Henüz yazı yayınlanmadı.</div>';
+    return;
+  }
+  grid.innerHTML = posts.map(function(p, idx) {
+    var imgHtml = p.image
+      ? '<img src="' + p.image + '" alt="' + (p.title || '') + '" loading="lazy" onload="var el=this;setTimeout(function(){el.classList.add(\'loaded\')},50)">'
+      : '<div class="blog-emoji">' + (p.emoji || '📝') + '</div>';
+    return '<a href="blog?yazi=' + p.id + '" class="blog-card" style="animation-delay:' + (idx * 0.06) + 's">' +
+      '<div class="blog-card-img">' + imgHtml + '</div>' +
+      '<div class="blog-card-body">' +
+        '<div class="blog-card-cat">' + (p.category || 'Genel') + '</div>' +
+        '<h2 class="blog-card-title">' + (p.title || '') + '</h2>' +
+        '<p class="blog-card-desc">' + (p.excerpt || '') + '</p>' +
+      '</div>' +
+    '</a>';
+  }).join('');
+}
+
+function renderBlogSkeletons(count) {
+  var grid = document.getElementById('blog-grid');
+  if (!grid) return;
+  var html = '';
+  for (var i = 0; i < (count || 4); i++) {
+    html += '<div class="blog-skel">' +
+      '<div class="blog-skel-img"></div>' +
+      '<div class="blog-skel-body">' +
+        '<div class="blog-skel-line blog-skel-cat"></div>' +
+        '<div class="blog-skel-line blog-skel-title"></div>' +
+        '<div class="blog-skel-line blog-skel-title-2"></div>' +
+        '<div class="blog-skel-line blog-skel-desc"></div>' +
+        '<div class="blog-skel-line blog-skel-desc-2"></div>' +
+      '</div>' +
+    '</div>';
+  }
+  grid.innerHTML = html;
+}
+
 async function loadBlogPosts() {
   const grid = document.getElementById('blog-grid');
+
+  // 1. STALE: Cache'ten anında render (varsa, TTL geçmemişse bile ilk gösterime at)
+  var cached = null;
   try {
-    const snap = await firebase.firestore().collection('blog_posts').limit(50).get();
-
-    const publishedDocs = snap.docs.filter(function(d) { return d.data().status === 'published'; });
-    publishedDocs.sort(function(a, b) { return (b.data().publishedAt || '').localeCompare(a.data().publishedAt || ''); });
-
-    if (publishedDocs.length === 0) {
-      grid.innerHTML = '<div class="blog-empty">Henüz yazı yayınlanmadı.</div>';
-      return;
+    var raw = localStorage.getItem(BLOG_CACHE_KEY);
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      if (parsed && parsed.data && Array.isArray(parsed.data)) {
+        cached = parsed;
+        renderBlogGrid(parsed.data);
+      }
     }
+  } catch(e) {}
 
-    grid.innerHTML = publishedDocs.map(function(doc, idx) {
-      var p = doc.data();
-      var readTime = ''; var date = '';
-      var imgHtml = p.image
-        ? '<img src="' + p.image + '" alt="' + (p.title || '') + '" loading="lazy" onload="var el=this;setTimeout(function(){el.classList.add(\'loaded\')},50)">'
-        : '<div class="blog-emoji">' + (p.emoji || '📝') + '</div>';
+  // Cache yoksa skeleton göster
+  if (!cached) renderBlogSkeletons(4);
 
-      return '<a href="blog?yazi=' + doc.id + '" class="blog-card" style="animation-delay:' + (idx * 0.08) + 's">' +
-        '<div class="blog-card-img">' + imgHtml + '</div>' +
-        '<div class="blog-card-body">' +
-          '<div class="blog-card-cat">' + (p.category || 'Genel') + '</div>' +
-          '<h2 class="blog-card-title">' + (p.title || '') + '</h2>' +
-          '<p class="blog-card-desc">' + (p.excerpt || '') + '</p>' +
-        '</div>' +
-      '</a>';
-    }).join('');
-
+  // 2. REVALIDATE: Arka planda fresh veri çek
+  try {
+    var fresh = await fetchBlogPostsFresh();
+    // Fresh farklıysa tekrar render et
+    if (!cached || JSON.stringify(cached.data) !== JSON.stringify(fresh)) {
+      renderBlogGrid(fresh);
+    }
+    // Cache güncelle
+    try {
+      localStorage.setItem(BLOG_CACHE_KEY, JSON.stringify({ data: fresh, ts: Date.now() }));
+    } catch(e) {}
   } catch(err) {
-    grid.innerHTML = '<div class="blog-empty">Yazılar yüklenemedi: ' + err.message + '</div>';
+    // Fresh fetch başarısız — cache varsa zaten gösterdik, yoksa hata göster
+    if (!cached) {
+      grid.innerHTML = '<div class="blog-empty">Yazılar yüklenemedi: ' + err.message + '</div>';
+    }
+  }
+}
+
+async function fetchBlogPostsFresh() {
+  // Optimize query: sadece published + sort server-side + limit 20
+  try {
+    const snap = await firebase.firestore()
+      .collection('blog_posts')
+      .where('status', '==', 'published')
+      .orderBy('publishedAt', 'desc')
+      .limit(20)
+      .get();
+    return snap.docs.map(function(d) {
+      var data = d.data();
+      return {
+        id: d.id,
+        title: data.title || '',
+        category: data.category || 'Genel',
+        excerpt: data.excerpt || '',
+        image: data.image || '',
+        emoji: data.emoji || '📝',
+        publishedAt: data.publishedAt || ''
+      };
+    });
+  } catch(err) {
+    // Eğer index yoksa fallback: eski yöntem (client-side filter)
+    if (err.code === 'failed-precondition' || (err.message && err.message.indexOf('index') > -1)) {
+      console.warn('[blog] Firestore index eksik, client-side filter kullanılıyor');
+      const snap = await firebase.firestore().collection('blog_posts').limit(50).get();
+      var docs = snap.docs.filter(function(d) { return d.data().status === 'published'; });
+      docs.sort(function(a, b) { return (b.data().publishedAt || '').localeCompare(a.data().publishedAt || ''); });
+      return docs.map(function(d) {
+        var data = d.data();
+        return {
+          id: d.id, title: data.title || '', category: data.category || 'Genel',
+          excerpt: data.excerpt || '', image: data.image || '', emoji: data.emoji || '📝',
+          publishedAt: data.publishedAt || ''
+        };
+      });
+    }
+    throw err;
   }
 }
 
@@ -337,6 +445,26 @@ async function loadSinglePost(slug) {
 }
 
 var blogInited = false;
+
+// ERKEN cache render — Firebase beklemeden, hemen
+// Detay sayfası değilse cache'ten anında liste göster
+(function earlyBlogCacheRender() {
+  if (new URLSearchParams(window.location.search).get('yazi')) return; // detay sayfasıysa atla
+  try {
+    var raw = localStorage.getItem('assos_blog_posts_v1');
+    if (!raw) return;
+    var parsed = JSON.parse(raw);
+    if (parsed && parsed.data && Array.isArray(parsed.data) && parsed.data.length) {
+      // DOM hazır olmayabilir, bekle
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() { renderBlogGrid(parsed.data); });
+      } else {
+        renderBlogGrid(parsed.data);
+      }
+    }
+  } catch(e) {}
+})();
+
 document.addEventListener('dataReady', function() {
   if (!window._firebaseReady || blogInited) return;
   blogInited = true;
