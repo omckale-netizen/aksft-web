@@ -4036,7 +4036,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
               <!-- Bakim Modu -->
               <div style="padding:14px;background:rgba(0,0,0,.02);border-radius:10px">
-                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px">
                   <div style="flex:1;min-width:0">
                     <div style="font-size:.88rem;font-weight:700;color:var(--navy)">🚧 Bakım Modu</div>
                     <div style="font-size:.7rem;color:var(--text-muted)">Tüm ziyaretçiler "Bakımda" sayfasına yönlendirilir — admin paneli erişilebilir kalır</div>
@@ -4048,8 +4048,38 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                     </span>
                   </label>
                 </div>
+
+                <!-- Bakim Tipi -->
+                <div style="margin-bottom:10px">
+                  <label style="font-size:.68rem;font-weight:700;color:var(--text-light);display:block;margin-bottom:4px">Bakım Tipi</label>
+                  <select id="maintenance-type" style="width:100%;padding:8px 12px;border:1.5px solid rgba(0,0,0,.1);border-radius:8px;font-size:.8rem;font-family:inherit;background:var(--input-bg,#fff);color:var(--text);cursor:pointer">
+                    <option value="general">🔧 Genel Bakım</option>
+                    <option value="update">⬆️ Sistem Güncellemesi</option>
+                    <option value="backup">💾 Sunucu Yedeklemesi</option>
+                    <option value="emergency">🚨 Acil Müdahale</option>
+                    <option value="feature">✨ Yeni Özellik Yayını</option>
+                    <option value="migration">📊 Veri Göçü</option>
+                  </select>
+                </div>
+
+                <!-- Tahmini Sure -->
+                <div style="margin-bottom:10px">
+                  <label style="font-size:.68rem;font-weight:700;color:var(--text-light);display:block;margin-bottom:4px">Tahmini Dönüş</label>
+                  <select id="maintenance-eta" style="width:100%;padding:8px 12px;border:1.5px solid rgba(0,0,0,.1);border-radius:8px;font-size:.8rem;font-family:inherit;background:var(--input-bg,#fff);color:var(--text);cursor:pointer">
+                    <option value="birkaç dakika">Birkaç dakika</option>
+                    <option value="15 dakika">15 dakika</option>
+                    <option value="30 dakika">30 dakika</option>
+                    <option value="1 saat">1 saat</option>
+                    <option value="2-3 saat">2-3 saat</option>
+                    <option value="bugün içinde">Bugün içinde</option>
+                    <option value="yakında">Yakında (belirsiz)</option>
+                  </select>
+                </div>
+
+                <!-- Özel Mesaj -->
                 <div style="margin-bottom:8px">
-                  <input type="text" id="maintenance-message" maxlength="300" placeholder="Bakım mesajı (opsiyonel, ör: 'Sistem güncelleniyor, 15 dk içinde döneceğiz')" style="width:100%;padding:8px 12px;border:1.5px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit">
+                  <label style="font-size:.68rem;font-weight:700;color:var(--text-light);display:block;margin-bottom:4px">Özel Mesaj <span style="font-weight:400;color:var(--text-muted)">(opsiyonel — boş bırakırsan tipine göre otomatik metin gelir)</span></label>
+                  <input type="text" id="maintenance-message" maxlength="300" placeholder="Örn: 'Sunucu yedekleme 2 saat sürecek'" style="width:100%;padding:8px 12px;border:1.5px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit">
                 </div>
                 <div id="maintenance-status" style="font-size:.72rem;color:var(--text-muted);min-height:16px"></div>
               </div>
@@ -7272,6 +7302,10 @@ async function loadMaintenanceState() {
     var data = await resp.json();
     tog.checked = !!data.enabled;
     if (data.message && msg) msg.value = data.message;
+    var typeEl = document.getElementById('maintenance-type');
+    var etaEl = document.getElementById('maintenance-eta');
+    if (data.type && typeEl) typeEl.value = data.type;
+    if (data.eta && etaEl) etaEl.value = data.eta;
     updateMaintenanceSlider(tog.checked);
   } catch(e) { /* sessiz */ }
 }
@@ -7302,10 +7336,17 @@ async function toggleMaintenance(enable) {
   st.textContent = '⏳ Güncelleniyor...';
   try {
     var token = await firebase.auth().currentUser.getIdToken();
+    var typeEl = document.getElementById('maintenance-type');
+    var etaEl = document.getElementById('maintenance-eta');
     var resp = await fetch('/api/maintenance', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ enable: enable, message: (msgEl && msgEl.value || '').trim() })
+      body: JSON.stringify({
+        enable: enable,
+        message: (msgEl && msgEl.value || '').trim(),
+        type: typeEl ? typeEl.value : 'general',
+        eta: etaEl ? etaEl.value : 'birkaç dakika'
+      })
     });
     var data = await resp.json();
     if (!resp.ok || !data.ok) throw new Error(data.error || 'Hata');

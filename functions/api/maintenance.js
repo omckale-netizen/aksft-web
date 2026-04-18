@@ -26,12 +26,16 @@ export async function onRequestPost(context) {
 
   const enable = !!body.enable;
   const message = String(body.message || '').slice(0, 300);
+  const type = String(body.type || 'general').slice(0, 40);
+  const eta = String(body.eta || 'birkaç dakika').slice(0, 80);
 
   try {
     if (enable) {
       await env.CHAT_KV.put(KV_KEY, JSON.stringify({
         enabled: true,
-        message: message || 'Site kisa sure icinde hizmete donecek.',
+        type: type,
+        eta: eta,
+        message: message,
         since: new Date().toISOString(),
       }));
     } else {

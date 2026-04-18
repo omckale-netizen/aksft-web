@@ -141,7 +141,104 @@ export async function onRequest(context) {
       if (mRaw) {
         const m = JSON.parse(mRaw);
         if (m && m.enabled) {
-          const msg = (m.message || 'Kısa süre içinde geri döneceğiz.').replace(/[<>"']/g, '');
+          const mType = String(m.type || 'general').replace(/[^a-z_-]/gi, '');
+          const mEta = String(m.eta || 'birkaç dakika').replace(/[<>"']/g, '').slice(0, 80);
+          const customMsg = String(m.message || '').replace(/[<>"']/g, '').slice(0, 300);
+
+          // Tipe gore tema icerigi
+          const MAINT_THEMES = {
+            general: {
+              eyebrow: 'Kısa Bir Ara',
+              title: 'Sistemde <span class="accent">küçük bir bakım</span> yapıyoruz',
+              subtitle: customMsg || 'Kısa süre içinde geri döneceğiz. Sabrınız için teşekkürler.',
+              icon: `<svg width="80" height="80" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="60" cy="60" r="50" fill="rgba(212,147,90,.08)"/>
+                <path d="M75 35 L85 45 L55 75 L45 65 Z" fill="#F5EDE0" stroke="#D4935A" stroke-width="1.5"/>
+                <path d="M45 65 L38 78 L45 85 L58 78 Z" fill="#E8D5C0" stroke="#D4935A" stroke-width="1.5"/>
+                <circle cx="80" cy="40" r="4" fill="#D4935A"/>
+                <circle cx="50" cy="70" r="3" fill="#D4935A" opacity=".5"/>
+              </svg>`
+            },
+            update: {
+              eyebrow: 'Sistem Güncellemesi',
+              title: '<span class="accent">Daha iyi bir deneyim</span> için güncelliyoruz',
+              subtitle: customMsg || 'Yeni özellikler ve iyileştirmeler yükleniyor. Birazdan tekrar uğrayın.',
+              icon: `<svg width="80" height="80" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="60" cy="60" r="50" fill="rgba(26,107,138,.08)"/>
+                <path d="M60 30 L60 75 M45 60 L60 75 L75 60" stroke="#D4935A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="35" y="82" width="50" height="6" rx="3" fill="#F5EDE0" opacity=".3"/>
+                <rect x="35" y="82" width="35" height="6" rx="3" fill="#D4935A">
+                  <animate attributeName="width" values="15;50;15" dur="2s" repeatCount="indefinite"/>
+                </rect>
+              </svg>`
+            },
+            backup: {
+              eyebrow: 'Sunucu Yedeklemesi',
+              title: '<span class="accent">Verileriniz güvende</span>, yedekleme sürüyor',
+              subtitle: customMsg || 'Tüm veriler güvenli bir şekilde kopyalanıyor. İşlem tamamlanınca site açılacak.',
+              icon: `<svg width="80" height="80" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="60" cy="60" r="50" fill="rgba(90,122,86,.08)"/>
+                <ellipse cx="60" cy="42" rx="22" ry="6" fill="#F5EDE0" stroke="#D4935A" stroke-width="1.5"/>
+                <path d="M38 42 L38 58 Q38 64 60 64 Q82 64 82 58 L82 42" fill="#F5EDE0" stroke="#D4935A" stroke-width="1.5"/>
+                <path d="M38 58 L38 74 Q38 80 60 80 Q82 80 82 74 L82 58" fill="#F5EDE0" stroke="#D4935A" stroke-width="1.5"/>
+                <circle cx="60" cy="50" r="2" fill="#5A7A56"/>
+                <circle cx="60" cy="66" r="2" fill="#5A7A56"/>
+                <path d="M60 82 L60 92 M55 88 L60 92 L65 88" stroke="#5A7A56" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <animate attributeName="opacity" values="1;.3;1" dur="1.5s" repeatCount="indefinite"/>
+                </path>
+              </svg>`
+            },
+            emergency: {
+              eyebrow: 'Acil Müdahale',
+              title: 'Teknik ekip <span class="accent">çalışıyor</span>',
+              subtitle: customMsg || 'Beklenmedik bir durum oluştu. En hızlı şekilde çözüyoruz, kısa süre içinde dönecek.',
+              icon: `<svg width="80" height="80" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="60" cy="60" r="50" fill="rgba(229,62,62,.08)"/>
+                <path d="M60 28 L90 78 L30 78 Z" fill="#F5EDE0" stroke="#D4935A" stroke-width="1.5"/>
+                <rect x="57" y="48" width="6" height="20" rx="2" fill="#E53E3E"/>
+                <circle cx="60" cy="73" r="3" fill="#E53E3E">
+                  <animate attributeName="opacity" values="1;.3;1" dur="1s" repeatCount="indefinite"/>
+                </circle>
+              </svg>`
+            },
+            feature: {
+              eyebrow: 'Yeni Özellik Yayını',
+              title: '<span class="accent">Yeni şeyler</span> hazırlıyoruz',
+              subtitle: customMsg || 'Heyecan verici yenilikler yakında! Çok yakında karşınızdayız.',
+              icon: `<svg width="80" height="80" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="60" cy="60" r="50" fill="rgba(196,82,26,.08)"/>
+                <path d="M60 25 L65 50 L90 55 L65 60 L60 85 L55 60 L30 55 L55 50 Z" fill="#F5EDE0" stroke="#D4935A" stroke-width="1.5">
+                  <animateTransform attributeName="transform" type="rotate" from="0 60 60" to="360 60 60" dur="12s" repeatCount="indefinite"/>
+                </path>
+                <circle cx="85" cy="32" r="3" fill="#D4935A">
+                  <animate attributeName="opacity" values=".3;1;.3" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="30" cy="88" r="2" fill="#D4935A">
+                  <animate attributeName="opacity" values=".3;1;.3" dur="2.3s" repeatCount="indefinite"/>
+                </circle>
+              </svg>`
+            },
+            migration: {
+              eyebrow: 'Veri Göçü',
+              title: 'Verileriniz <span class="accent">yeni evine</span> taşınıyor',
+              subtitle: customMsg || 'Sistemi daha hızlı hale getirmek için veriler aktarılıyor. Sabrınız için teşekkürler.',
+              icon: `<svg width="80" height="80" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="60" cy="60" r="50" fill="rgba(26,107,138,.08)"/>
+                <rect x="22" y="45" width="28" height="32" rx="3" fill="#F5EDE0" stroke="#D4935A" stroke-width="1.5"/>
+                <rect x="70" y="45" width="28" height="32" rx="3" fill="#F5EDE0" stroke="#D4935A" stroke-width="1.5"/>
+                <path d="M52 60 L68 60 M63 55 L68 60 L63 65" stroke="#D4935A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <animate attributeName="opacity" values=".3;1;.3" dur="1.5s" repeatCount="indefinite"/>
+                </path>
+                <line x1="28" y1="53" x2="44" y2="53" stroke="#D4935A" stroke-width="1" opacity=".5"/>
+                <line x1="28" y1="60" x2="38" y2="60" stroke="#D4935A" stroke-width="1" opacity=".5"/>
+                <line x1="28" y1="67" x2="42" y2="67" stroke="#D4935A" stroke-width="1" opacity=".5"/>
+                <line x1="76" y1="53" x2="92" y2="53" stroke="#D4935A" stroke-width="1" opacity=".5"/>
+                <line x1="76" y1="60" x2="84" y2="60" stroke="#D4935A" stroke-width="1" opacity=".5"/>
+                <line x1="76" y1="67" x2="88" y2="67" stroke="#D4935A" stroke-width="1" opacity=".5"/>
+              </svg>`
+            }
+          };
+          const theme = MAINT_THEMES[mType] || MAINT_THEMES.general;
           const html = `<!DOCTYPE html>
 <html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><title>Bakımda • Assos'u Keşfet</title>
@@ -219,21 +316,17 @@ body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;backgrou
 
 <div class="wrap">
   <div class="art">
-    <!-- Antik Ionic kolonlari (Athena Tapinagi'na gonderme) -->
-    <svg width="180" height="200" viewBox="0 0 180 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Sol kolon -->
+    ${theme.icon}
+    <!-- Gizli eski SVG baslangici (kullanilmiyor) -->
+    <svg width="0" height="0" viewBox="0 0 180 200" fill="none" style="display:none" xmlns="http://www.w3.org/2000/svg">
       <g opacity=".95">
         <ellipse cx="40" cy="175" rx="28" ry="4" fill="rgba(0,0,0,.3)" filter="blur(2px)"/>
-        <!-- Basamak -->
         <rect x="15" y="165" width="50" height="8" fill="#E8D5C0" opacity=".9"/>
         <rect x="20" y="158" width="40" height="8" fill="#F5EDE0" opacity=".85"/>
-        <!-- Govde -->
         <rect x="32" y="62" width="16" height="96" fill="#F5EDE0" opacity=".9"/>
-        <!-- Oluklar -->
         <line x1="35" y1="62" x2="35" y2="158" stroke="#E8D5C0" stroke-width=".6" opacity=".7"/>
         <line x1="40" y1="62" x2="40" y2="158" stroke="#E8D5C0" stroke-width=".6" opacity=".7"/>
         <line x1="45" y1="62" x2="45" y2="158" stroke="#E8D5C0" stroke-width=".6" opacity=".7"/>
-        <!-- Iyonyen basligi volüt -->
         <path d="M22 62 Q26 54 32 54 L48 54 Q54 54 58 62 L58 56 Q54 48 48 48 L32 48 Q26 48 22 56 Z" fill="#F5EDE0" opacity=".95"/>
         <circle cx="28" cy="55" r="2.5" fill="none" stroke="#E8D5C0" stroke-width=".8" opacity=".6"/>
         <circle cx="52" cy="55" r="2.5" fill="none" stroke="#E8D5C0" stroke-width=".8" opacity=".6"/>
@@ -269,16 +362,16 @@ body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;backgrou
     </svg>
   </div>
 
-  <div class="eyebrow"><span class="dot"></span>Geçici Kesinti</div>
+  <div class="eyebrow"><span class="dot"></span>${theme.eyebrow}</div>
 
-  <h1 class="title">Antik kente <span class="accent">küçük bir dokunuş</span> yapıyoruz</h1>
+  <h1 class="title">${theme.title}</h1>
 
-  <p class="subtitle">${msg} <span class="hl">Sayfaya birazdan tekrar uğrayın — yeni halini görmeniz için sabırsızlanıyoruz.</span></p>
+  <p class="subtitle">${theme.subtitle}</p>
 
   <div class="footer-row">
     <div class="foot-item">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <span>Tahmini dönüş: <strong>birkaç dakika</strong></span>
+      <span>Tahmini dönüş: <strong>${mEta}</strong></span>
     </div>
     <div class="foot-sep"></div>
     <div class="foot-item">
