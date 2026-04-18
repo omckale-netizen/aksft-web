@@ -29,14 +29,14 @@
   <meta name="twitter:description" content="Assos gezilecek yerler, oteller, kafeler, restoranlar, koylar ve gezi rotaları. Harita ve mekan önerileri.">
   <meta name="twitter:image" content="https://firebasestorage.googleapis.com/v0/b/assosu-kesfet.firebasestorage.app/o/site%2Fog-image.jpg?alt=media&token=70d62a44-9142-43d8-aee4-de790f5c7dcd">
   <link rel="canonical" href="https://assosukesfet.com/">
-  <script type="application/ld+json">
+  <script id="org-schema" type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "Assos'u Keşfet",
     "alternateName": "Assosu Kesfet",
     "url": "https://assosukesfet.com",
-    "logo": "https://firebasestorage.googleapis.com/v0/b/assosu-kesfet.firebasestorage.app/o/site%2Fog-image.jpg?alt=media&token=70d62a44-9142-43d8-aee4-de790f5c7dcd",
+    "logo": "https://assosukesfet.com/icon-512.png",
     "description": "Assos bölgesini keşfetmek için hazırlanmış dijital bir rehber.",
     "foundingDate": "2026",
     "areaServed": {"@type": "Place", "name": "Assos, Ayvacık, Çanakkale"},
@@ -531,12 +531,26 @@ function pageInit() {
     // Firebase'den güncel URL + konum
     if (typeof firebase !== 'undefined' && firebase.firestore) {
       firebase.firestore().collection('settings').doc('site').get().then(function(doc) {
-        if (doc.exists && doc.data().heroImageUrl) {
-          heroImg.src = doc.data().heroImageUrl;
-          var posY = doc.data().heroImagePosY != null ? doc.data().heroImagePosY : 50;
+        if (!doc.exists) return;
+        var d = doc.data() || {};
+        // Hero image
+        if (d.heroImageUrl) {
+          heroImg.src = d.heroImageUrl;
+          var posY = d.heroImagePosY != null ? d.heroImagePosY : 50;
           heroImg.style.objectPosition = 'center ' + posY + '%';
-          localStorage.setItem('site_hero_image', doc.data().heroImageUrl);
+          localStorage.setItem('site_hero_image', d.heroImageUrl);
           localStorage.setItem('site_hero_pos', posY);
+        }
+        // Organization schema logo — AI/Google Knowledge Panel icin dinamik guncelleme
+        if (d.schemaLogoUrl) {
+          try {
+            var orgScript = document.getElementById('org-schema');
+            if (orgScript) {
+              var orgData = JSON.parse(orgScript.textContent);
+              orgData.logo = d.schemaLogoUrl;
+              orgScript.textContent = JSON.stringify(orgData);
+            }
+          } catch(e) { console.warn('Org schema logo update failed:', e); }
         }
       }).catch(function(){});
     }

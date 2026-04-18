@@ -3664,6 +3664,34 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             </div>
           </div>
 
+          <!-- Schema Logo (SEO / AI) — tam boyut PNG, transparent -->
+          <div class="panel-card" data-admin-only>
+            <div class="panel-card-head"><h3>🔍 SEO / AI Logo (Organization Schema)</h3></div>
+            <div style="padding:20px">
+              <div id="schema-logo-preview" style="margin-bottom:14px;text-align:center;padding:20px;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;min-height:140px;display:flex;align-items:center;justify-content:center">
+                <img id="schema-logo-preview-img" src="" alt="Schema Logo" style="max-height:120px;max-width:100%;display:none">
+                <div id="schema-logo-preview-empty" style="color:var(--text-muted);font-size:.8rem">Henüz yüklenmemiş</div>
+              </div>
+              <div style="background:rgba(196,82,26,.05);border:1px solid rgba(196,82,26,.12);border-radius:8px;padding:10px 12px;margin-bottom:14px">
+                <div style="font-size:.72rem;color:var(--text-light);line-height:1.5">
+                  <strong>512×512+ px</strong> · PNG transparent arkaplan · kare format<br>
+                  Google Knowledge Panel, AI arama (ChatGPT/Gemini), Organization schema'da kullanılır. Boyut korunur, sıkıştırma yapılmaz.
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <button class="btn btn-primary btn-sm" onclick="document.getElementById('schema-logo-file-input').click()">Logo Yükle</button>
+                <span id="schema-logo-upload-status" style="font-size:.72rem;color:var(--text-muted)"></span>
+              </div>
+              <input type="file" id="schema-logo-file-input" accept="image/png" style="display:none" onchange="uploadSchemaLogo(this.files[0])">
+              <div id="schema-logo-url-box" style="display:none;margin-top:12px">
+                <div style="display:flex;gap:6px">
+                  <input type="text" id="schema-logo-url-display" readonly style="flex:1;padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.68rem;background:rgba(0,0,0,.02);color:var(--text)">
+                  <button class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText(document.getElementById('schema-logo-url-display').value);showToast('Kopyalandı','success')">Kopyala</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- OG Image (admin-only) -->
           <div class="panel-card" data-admin-only>
             <div class="panel-card-head"><h3>🌐 Sosyal Medya Görseli (OG Image)</h3></div>
@@ -6960,6 +6988,56 @@ function showLogoPreview(url) {
   }
 }
 
+// ═══ Schema Logo (SEO/AI) — tam boyut PNG, sıkıştırma yok ═══
+async function uploadSchemaLogo(file) {
+  if (!file) return;
+  if (!file.type.includes('png')) {
+    showToast('Sadece PNG kabul edilir (transparent için).', 'error');
+    return;
+  }
+  if (file.size > 2 * 1024 * 1024) {
+    showToast('Dosya maks 2MB olmalı.', 'error');
+    return;
+  }
+  const statusEl = document.getElementById('schema-logo-upload-status');
+  statusEl.textContent = 'Yükleniyor...';
+  try {
+    const ref = firebase.storage().ref('site/schema-logo.png');
+    await ref.put(file, { contentType: 'image/png' });
+    const url = await ref.getDownloadURL();
+    await db.collection('settings').doc('site').set({
+      schemaLogoUrl: url,
+      schemaLogoUpdatedAt: new Date().toISOString()
+    }, { merge: true });
+    statusEl.textContent = 'Yüklendi!';
+    showSchemaLogoPreview(url);
+    showToast('SEO Logo güncellendi. Siteye yansıması için sayfa yenilenmelidir.', 'success');
+  } catch(err) {
+    console.error('Schema logo upload error:', err);
+    statusEl.textContent = 'Hata!';
+    showToast('Logo yüklenemedi: ' + err.message, 'error');
+  }
+}
+
+function showSchemaLogoPreview(url) {
+  const img = document.getElementById('schema-logo-preview-img');
+  const empty = document.getElementById('schema-logo-preview-empty');
+  const urlBox = document.getElementById('schema-logo-url-box');
+  const urlInput = document.getElementById('schema-logo-url-display');
+  if (!img) return;
+  if (url) {
+    img.src = url;
+    img.style.display = '';
+    empty.style.display = 'none';
+    urlBox.style.display = '';
+    urlInput.value = url;
+  } else {
+    img.style.display = 'none';
+    empty.style.display = '';
+    urlBox.style.display = 'none';
+  }
+}
+
 // updateAdminName'in debounce timer'ı — her tuş vuruşunda Firestore yazmamak için
 var _nameUpdateTimer = null;
 function updateAdminName(val) {
@@ -7067,6 +7145,7 @@ async function loadLogoPreview() {
     const doc = await db.collection('settings').doc('site').get();
     if (doc.exists) {
       if (doc.data().logoUrl) showLogoPreview(doc.data().logoUrl);
+      if (doc.data().schemaLogoUrl) showSchemaLogoPreview(doc.data().schemaLogoUrl);
       if (doc.data().ogImageUrl) showOgPreview(doc.data().ogImageUrl);
       if (doc.data().heroImageUrl) showHeroPreview(doc.data().heroImageUrl, doc.data().heroImagePosY);
       if (doc.data().aiDailyLimit) { var aiInp = document.getElementById('ai-limit-input'); if (aiInp) aiInp.value = doc.data().aiDailyLimit; }
