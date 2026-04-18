@@ -96,6 +96,10 @@ function pageInit() {
   renderNav({ heroMode: false });
   renderFooter();
 
+  // Filtre durumu — sessionStorage'dan restore (IIFE'den önce tanımlı olmalı)
+  const YL_FILTER_KEY = 'yl_filter_cat';
+  let activeFilter = sessionStorage.getItem(YL_FILTER_KEY) || 'all';
+
   /* Hero — dinamik kategori chip'leri, stats ve filtreler */
   (function() {
     if (typeof DATA === 'undefined') return;
@@ -190,9 +194,6 @@ function pageInit() {
     }).join('');
     if (typeof scrollFadeIn === 'function') scrollFadeIn();
   })();
-
-  const YL_FILTER_KEY = 'yl_filter_cat';
-  let activeFilter = sessionStorage.getItem(YL_FILTER_KEY) || 'all';
 
   function filterPlaces(btn, cat) {
     activeFilter = cat;
