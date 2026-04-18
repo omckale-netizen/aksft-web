@@ -19198,9 +19198,15 @@ function _wmUpdateProgress() {
 }
 
 async function _wmMigrateOne(target) {
-  // 1. Original blob'u indir
-  var resp = await fetch(target.url);
-  if (!resp.ok) throw new Error('HTTP ' + resp.status + ' indirme');
+  // 1. Original blob'u indir (Cloudflare proxy uzerinden — CORS bypass)
+  var token = await firebase.auth().currentUser.getIdToken();
+  var proxyUrl = '/api/webp-proxy?url=' + encodeURIComponent(target.url);
+  var resp = await fetch(proxyUrl, { headers: { 'Authorization': 'Bearer ' + token } });
+  if (!resp.ok) {
+    var errText = '';
+    try { errText = (await resp.json()).error || ''; } catch(e) {}
+    throw new Error('HTTP ' + resp.status + ' indirme' + (errText ? ' — ' + errText : ''));
+  }
   var origBlob = await resp.blob();
   var origSize = origBlob.size;
 
