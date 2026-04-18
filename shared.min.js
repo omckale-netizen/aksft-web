@@ -371,10 +371,10 @@ document.addEventListener('dataReady', _fetchSiteLogo);
       .btn-shiny{padding:6px 13px;font-size:.7rem;gap:8px;}
       .btn-shiny > span.bs-dot{width:7px;height:7px;}
     }
-    .nav-hamburger{display:none;background:rgba(245,237,224,.1);border:1.5px solid rgba(245,237,224,.2);border-radius:9px;padding:8px 13px;color:var(--cream);font-size:1rem;cursor:pointer;transition:background .2s;flex-shrink:0;}
-    #main-nav.solid .nav-hamburger,.nav-hamburger.dark{background:rgba(26,39,68,.05);border-color:rgba(26,39,68,.1);color:var(--navy);}
-    .nav-hamburger:hover{background:rgba(245,237,224,.18);}
-    #main-nav.solid .nav-hamburger:hover,.nav-hamburger.dark:hover{background:rgba(26,39,68,.1);}
+    .nav-hamburger{display:none;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);border-radius:10px;padding:8px 13px;color:var(--cream);font-size:1rem;cursor:pointer;transition:all .25s cubic-bezier(.16,1,.3,1);flex-shrink:0;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 2px 10px rgba(10,18,36,.15);}
+    #main-nav.solid .nav-hamburger,.nav-hamburger.dark{background:rgba(255,255,255,.45);border-color:rgba(26,39,68,.1);color:var(--navy);box-shadow:0 1px 2px rgba(26,39,68,.04);}
+    .nav-hamburger:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.4);box-shadow:0 4px 16px rgba(10,18,36,.25);transform:translateY(-1px);}
+    #main-nav.solid .nav-hamburger:hover,.nav-hamburger.dark:hover{background:rgba(196,82,26,.1);border-color:rgba(196,82,26,.3);box-shadow:0 4px 14px rgba(196,82,26,.15);transform:translateY(-1px);}
 
     /* MOBILE MENU */
     #mobile-menu{position:fixed;inset:0;background:var(--navy-deep);z-index:200;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .5s cubic-bezier(.16,1,.3,1);overflow:hidden;}
@@ -661,20 +661,34 @@ function renderNav(opts = {}) {
     const s = document.createElement('style');
     s.id = 'save-drawer-styles';
     s.textContent = `
-      /* Nav save button — hamburger ile aynı dil (38x38 kare ikon butonu) */
+      /* Nav save button — cam efektli dairesel ikon butonu */
       .nav-save-btn {
         position:relative; display:flex; align-items:center; justify-content:center;
         width:38px; height:38px; padding:0;
-        border-radius:9px; border:1.5px solid rgba(26,39,68,.12);
-        background:transparent; cursor:pointer; transition:all .2s;
+        border-radius:50%; border:1px solid rgba(26,39,68,.1);
+        background:rgba(255,255,255,.45);
+        backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+        cursor:pointer; transition:all .25s cubic-bezier(.16,1,.3,1);
         font-family:inherit; flex-shrink:0;
+        box-shadow:0 1px 2px rgba(26,39,68,.04);
       }
-      .nav-save-btn:hover { background:rgba(196,82,26,.06); border-color:rgba(196,82,26,.3); }
-      .nav-save-btn.has-saves { border-color:rgba(196,82,26,.35); }
-      #main-nav.hero-mode .nav-save-btn { border-color:rgba(255,255,255,.25); }
-      #main-nav.hero-mode .nav-save-btn:hover { background:rgba(255,255,255,.1); }
-      #main-nav.hero-mode .nav-save-icon { color:rgba(255,255,255,.85); }
-      #main-nav.hero-mode .nav-save-count { background:rgba(255,255,255,.92); color:#C4521A; }
+      .nav-save-btn:hover {
+        background:rgba(196,82,26,.12);
+        border-color:rgba(196,82,26,.35);
+        box-shadow:0 4px 14px rgba(196,82,26,.18);
+        transform:translateY(-1px);
+      }
+      .nav-save-btn.has-saves { border-color:rgba(196,82,26,.35); background:rgba(196,82,26,.08); }
+      #main-nav.hero-mode .nav-save-btn {
+        background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.22);
+        box-shadow:0 2px 10px rgba(10,18,36,.15);
+      }
+      #main-nav.hero-mode .nav-save-btn:hover {
+        background:rgba(255,255,255,.2); border-color:rgba(255,255,255,.4);
+        box-shadow:0 4px 16px rgba(10,18,36,.25);
+      }
+      #main-nav.hero-mode .nav-save-icon { color:rgba(255,255,255,.92); }
+      #main-nav.hero-mode .nav-save-count { background:rgba(255,255,255,.95); color:#C4521A; }
       .nav-save-icon { font-size:1rem; color:#4A5568; transition:color .2s; line-height:1; }
       .nav-save-btn.has-saves .nav-save-icon { color:#C4521A; }
       .nav-save-count {
