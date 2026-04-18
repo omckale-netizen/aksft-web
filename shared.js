@@ -189,7 +189,10 @@ window.akPlayReel = function(cardId, srcUrl, type) {
   if (!player.hasChildNodes()) {
     if (type === 'video') {
       // Native HTML5 video — tek tikla oynar, chrome yok
-      player.innerHTML = '<video src="' + srcUrl + '" style="width:100%;height:100%;object-fit:cover;background:#000;" autoplay controls playsinline></video>';
+      // controlsList: kontrol barinda indirme/remote playback butonlarini gizle
+      // oncontextmenu: sag tik indir menusunu engelle (casual deterrent)
+      // disablePictureInPicture: PiP araciyla cikarilmasin
+      player.innerHTML = '<video src="' + srcUrl + '" style="width:100%;height:100%;object-fit:cover;background:#000;" autoplay controls playsinline controlsList="nodownload noremoteplayback noplaybackrate" disablePictureInPicture oncontextmenu="return false;"></video>';
     } else {
       // IG embed fallback
       player.innerHTML = '<iframe src="' + srcUrl + '" style="width:100%;height:100%;border:0;" allow="autoplay; encrypted-media" allowfullscreen loading="lazy"></iframe>';
@@ -4378,7 +4381,7 @@ function renderVillagePage(villageId) {
       var playSrc = videoUrl || embedUrl;
       var playType = videoUrl ? 'video' : 'embed';
 
-      bodyHtml += '<div class="ak-reel-card" id="' + reelKey + '" style="background:#fff;border:1px solid rgba(26,39,68,.08);border-radius:14px;overflow:hidden;max-width:460px;margin:0 auto;width:100%;box-shadow:0 2px 12px rgba(26,39,68,.06);">';
+      bodyHtml += '<div class="ak-reel-card" id="' + reelKey + '" oncontextmenu="return false" style="background:#fff;border:1px solid rgba(26,39,68,.08);border-radius:14px;overflow:hidden;max-width:460px;margin:0 auto;width:100%;box-shadow:0 2px 12px rgba(26,39,68,.06);-webkit-user-select:none;user-select:none;">';
 
       // ═══ HEADER — Instagram post basligi ═══
       bodyHtml += '<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;">';
