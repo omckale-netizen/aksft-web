@@ -351,7 +351,7 @@ const fbAuth = firebase.auth();
     el.style.background = c.bg;
     el.style.border = '1px solid ' + c.border;
     el.style.color = c.text;
-    el.innerHTML = '<div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:1rem;line-height:1.2">' + c.icon + '</span><div style="flex:1"><div style="font-weight:700;font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;opacity:.8">Admin Duyurusu</div><div>' + String(text).replace(/[<>]/g,'') + '</div></div></div>';
+    el.innerHTML = '<div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:1rem;line-height:1.2">' + c.icon + '</span><div style="flex:1"><div style="font-weight:700;font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;opacity:.8">Yönetim Duyurusu</div><div>' + String(text).replace(/[<>]/g,'') + '</div></div></div>';
     el.style.display = 'block';
   } catch(e) { /* sessiz */ }
 })();
