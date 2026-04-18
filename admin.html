@@ -18786,21 +18786,94 @@ function renderDailyBreakdown() {
 /* ══════════════════════════════════════════════════
    PDF RAPOR OLUŞTURUCU
 ══════════════════════════════════════════════════ */
+// Mekan secici modal — Promise ile secilen venue ID doner (iptal ederse '')
+function pickVenueModal() {
+  return new Promise(function(resolve) {
+    var venues = (draftData.venues || []).slice().sort(function(a, b) {
+      return (a.title || '').localeCompare(b.title || '', 'tr');
+    });
+    if (!venues.length) { resolve(''); return; }
+
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(6,16,30,.55);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;animation:pvmFade .2s ease';
+
+    var modal = document.createElement('div');
+    modal.style.cssText = 'background:#fff;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.25);width:100%;max-width:520px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden';
+    modal.innerHTML =
+      '<div style="padding:18px 22px;border-bottom:1px solid rgba(0,0,0,.06)">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
+          '<h3 style="margin:0;font-size:1rem;color:var(--navy);font-weight:700">📄 Rapor için Mekan Seçin</h3>' +
+          '<button id="pvm-close" style="background:transparent;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-muted);padding:4px 8px;line-height:1">✕</button>' +
+        '</div>' +
+        '<input id="pvm-search" type="text" placeholder="🔍 Mekan ara..." style="width:100%;padding:10px 14px;border:1.5px solid rgba(0,0,0,.1);border-radius:10px;font-size:.88rem;font-family:inherit;outline:none">' +
+      '</div>' +
+      '<div id="pvm-list" style="flex:1;overflow-y:auto;padding:8px"></div>';
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    var searchInp = modal.querySelector('#pvm-search');
+    var listEl = modal.querySelector('#pvm-list');
+    var closeBtn = modal.querySelector('#pvm-close');
+    setTimeout(function() { searchInp.focus(); }, 50);
+
+    function renderList(filter) {
+      var q = (filter || '').toLowerCase().trim();
+      var filtered = q ? venues.filter(function(v) {
+        return (v.title || '').toLowerCase().indexOf(q) > -1 ||
+               (v.location || '').toLowerCase().indexOf(q) > -1 ||
+               (v.category || '').toLowerCase().indexOf(q) > -1;
+      }) : venues;
+      if (!filtered.length) {
+        listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:.82rem">Sonuç bulunamadı.</div>';
+        return;
+      }
+      listEl.innerHTML = filtered.map(function(v) {
+        var catLabel = { kafe:'☕ Kafe', restoran:'🍽 Restoran', kahvalti:'🌞 Kahvaltı', konaklama:'🏨 Konaklama', beach:'🏖 Beach', iskele:'⚓ İskele' }[v.category] || v.category || '';
+        var statusDot = getVenueStatusKey && getVenueStatusKey(v) === 'published' ? '<span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;margin-right:6px" title="Yayinda"></span>' : '';
+        return '<div data-venue-id="' + escAttr(v.id) + '" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;cursor:pointer;transition:background .15s" onmouseenter="this.style.background=\'rgba(26,39,68,.05)\'" onmouseleave="this.style.background=\'\'">' +
+          '<span style="font-size:1.4rem;width:32px;text-align:center">' + (v.emoji || '📍') + '</span>' +
+          '<div style="flex:1;min-width:0">' +
+            '<div style="font-size:.88rem;font-weight:700;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + statusDot + escHtml(v.title || '') + '</div>' +
+            '<div style="font-size:.72rem;color:var(--text-muted);margin-top:2px">' + escHtml(catLabel) + (v.location ? ' · ' + escHtml(v.location) : '') + '</div>' +
+          '</div>' +
+          '<span style="color:var(--text-muted);font-size:.9rem">→</span>' +
+        '</div>';
+      }).join('');
+    }
+
+    function cleanup(resultId) {
+      document.body.removeChild(overlay);
+      document.removeEventListener('keydown', onKey);
+      resolve(resultId || '');
+    }
+
+    function onKey(e) {
+      if (e.key === 'Escape') cleanup('');
+    }
+
+    document.addEventListener('keydown', onKey);
+    closeBtn.addEventListener('click', function() { cleanup(''); });
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) cleanup(''); });
+    searchInp.addEventListener('input', function() { renderList(searchInp.value); });
+    listEl.addEventListener('click', function(e) {
+      var row = e.target.closest('[data-venue-id]');
+      if (row) cleanup(row.getAttribute('data-venue-id'));
+    });
+
+    renderList('');
+  });
+}
+
 async function generateReport(type) {
-  // Tek mekan raporu ise dropdown'dan seç
+  // Tek mekan raporu ise arama yapılabilir modal picker'dan seç
   var selectedVenue = '';
   if (type === 'single') {
     var filterVal = (document.getElementById('analytics-venue-filter') || {}).value;
-    if (!filterVal) {
-      // Mekan seçimi yoksa dialog ile sor
-      var venueOpts = (draftData.venues || []).map(function(v) { return v.title; }).join('\n');
-      var picked = prompt('Rapor alınacak mekanı seçin.\nYukarıdaki filtreyi kullanın veya mekan adı yazın:');
-      if (!picked) return;
-      var found = (draftData.venues || []).find(function(v) { return v.title.toLowerCase() === picked.toLowerCase(); });
-      if (!found) { showToast('Mekan bulunamadı. Filtreden seçin.', 'error'); return; }
-      selectedVenue = found.id;
-    } else {
+    if (filterVal) {
       selectedVenue = filterVal;
+    } else {
+      selectedVenue = await pickVenueModal();
+      if (!selectedVenue) return; // Kullanici iptal etti
     }
   }
 
