@@ -7100,16 +7100,10 @@ async function revokeSession(sid) {
   }
 }
 
-// Sekme kapandiginda kendi session'unu temizle (non-blocking, best effort)
-window.addEventListener('beforeunload', function() {
-  try {
-    var sid = localStorage.getItem('admin_session_id');
-    if (sid && db) {
-      // sendBeacon ile best-effort delete (bazi tarayicilar bunu desteklemez; db ile de denemis oluyoruz)
-      db.collection('user_sessions').doc(sid).delete().catch(function() {});
-    }
-  } catch(e) {}
-});
+// NOT: beforeunload ile session dokumaninı silmiyoruz — F5/reload da beforeunload tetikler
+// ve yeni sayfa acilirken listener "doc yok" gorup yanlis logout atiyor. Logout() fonksiyonu
+// zaten cikis sirasinda doc'u siliyor. Orphan session'lar heartbeat kesildiginde idle kalir
+// ve eski loginAt timestamp'ine gore Aktif Oturumlar listesinden temizlenebilir.
 
 // ═══ FORCE LOGOUT (Tüm cihazlardan çıkış) ═══
 async function logoutAllDevices() {
