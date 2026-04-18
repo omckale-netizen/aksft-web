@@ -4077,11 +4077,15 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                 </div>
 
                 <!-- Özel Mesaj -->
-                <div style="margin-bottom:8px">
+                <div style="margin-bottom:10px">
                   <label style="font-size:.68rem;font-weight:700;color:var(--text-light);display:block;margin-bottom:4px">Özel Mesaj <span style="font-weight:400;color:var(--text-muted)">(opsiyonel — boş bırakırsan tipine göre otomatik metin gelir)</span></label>
                   <input type="text" id="maintenance-message" maxlength="300" placeholder="Örn: 'Sunucu yedekleme 2 saat sürecek'" style="width:100%;padding:8px 12px;border:1.5px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit">
                 </div>
-                <div id="maintenance-status" style="font-size:.72rem;color:var(--text-muted);min-height:16px"></div>
+
+                <!-- Guncelle butonu — sadece aktifken gorunur -->
+                <button type="button" id="maintenance-update-btn" onclick="updateMaintenance()" style="display:none;width:100%;padding:8px 12px;background:rgba(217,119,6,.1);color:#B45309;border:1.5px solid rgba(217,119,6,.3);border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s" onmouseover="this.style.background='rgba(217,119,6,.2)'" onmouseout="this.style.background='rgba(217,119,6,.1)'">💾 Bakım Sayfasını Güncelle</button>
+
+                <div id="maintenance-status" style="font-size:.72rem;color:var(--text-muted);min-height:16px;margin-top:6px"></div>
               </div>
 
             </div>
@@ -7316,6 +7320,47 @@ function updateMaintenanceSlider(enabled) {
   slider.style.background = enabled ? '#E53E3E' : '#ccc';
   var knob = slider.querySelector('span');
   if (knob) knob.style.transform = enabled ? 'translateX(20px)' : 'translateX(0)';
+  // Guncelle butonu sadece aktifken gorunur
+  var updBtn = document.getElementById('maintenance-update-btn');
+  if (updBtn) updBtn.style.display = enabled ? '' : 'none';
+}
+
+// Bakim aktifken tip/eta/mesaj degisikligini kaydet (toggle degistirmeden)
+async function updateMaintenance() {
+  var st = document.getElementById('maintenance-status');
+  var msgEl = document.getElementById('maintenance-message');
+  var typeEl = document.getElementById('maintenance-type');
+  var etaEl = document.getElementById('maintenance-eta');
+  var btn = document.getElementById('maintenance-update-btn');
+  if (!st) return;
+  btn.disabled = true;
+  st.style.color = 'var(--text-muted)';
+  st.textContent = '⏳ Güncelleniyor...';
+  try {
+    var token = await firebase.auth().currentUser.getIdToken();
+    var resp = await fetch('/api/maintenance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({
+        enable: true,
+        message: (msgEl && msgEl.value || '').trim(),
+        type: typeEl ? typeEl.value : 'general',
+        eta: etaEl ? etaEl.value : 'birkaç dakika'
+      })
+    });
+    var data = await resp.json();
+    if (!resp.ok || !data.ok) throw new Error(data.error || 'Hata');
+    st.textContent = '✓ Bakım sayfası güncellendi — anında ziyaretçilere yansır';
+    st.style.color = 'var(--green)';
+    showToast('✓ Bakım sayfası güncellendi', 'success');
+    if (typeof addBackupLog === 'function') addBackupLog('🔄', 'Bakim sayfasi guncellendi (tip/eta/mesaj)');
+  } catch(err) {
+    st.textContent = '❌ ' + err.message;
+    st.style.color = 'var(--red)';
+  } finally {
+    btn.disabled = false;
+    setTimeout(function() { st.textContent = ''; st.style.color = ''; }, 6000);
+  }
 }
 
 async function toggleMaintenance(enable) {
