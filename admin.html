@@ -1045,6 +1045,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .ana-tab.active{color:var(--terra);border-bottom-color:var(--terra)}
 .act-date-btn.active{background:var(--terra);color:#fff;border-color:var(--terra)}
 
+/* Takvim filtre chip'leri */
+.cal-chip{cursor:pointer;user-select:none}
+.cal-chip input{display:none}
+.cal-chip span{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:999px;font-size:.72rem;font-weight:600;opacity:.45;border:1px solid transparent;transition:opacity .15s}
+.cal-chip input:checked + span{opacity:1}
+.cal-chip:hover span{opacity:.85}
+
 /* Ayarlar sayfasi tab filtresi + masonry layout — !important inline style override */
 #page-settings [data-settings-tab]{display:none !important}
 #page-settings[data-settings-active="hesap"] [data-settings-tab="hesap"]{display:block !important}
@@ -3248,6 +3255,17 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <option value="completed">Tamamlanan</option>
           <option value="all">Tümü</option>
         </select>
+      </div>
+
+      <!-- Takvim filtre chip'leri (sadece calendar view'da gozukur) -->
+      <div id="cal-filters" style="display:none;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+        <span style="font-size:.7rem;font-weight:700;color:var(--text-muted);margin-right:4px">GÖSTER:</span>
+        <label class="cal-chip" data-chip="todo"><input type="checkbox" checked data-ev="todo" onchange="renderTodos()"><span style="background:rgba(26,107,138,.1);color:#1A6B8A">✓ Görev</span></label>
+        <label class="cal-chip" data-chip="premium"><input type="checkbox" checked data-ev="premium" onchange="renderTodos()"><span style="background:rgba(217,119,6,.1);color:#B45309">⭐ Premium</span></label>
+        <label class="cal-chip" data-chip="venue"><input type="checkbox" checked data-ev="venue" onchange="renderTodos()"><span style="background:rgba(56,161,105,.1);color:#2F855A">🏪 Mekan</span></label>
+        <label class="cal-chip" data-chip="blog"><input type="checkbox" checked data-ev="blog" onchange="renderTodos()"><span style="background:rgba(107,70,193,.1);color:#553C9A">✍️ Blog</span></label>
+        <label class="cal-chip" data-chip="pending"><input type="checkbox" checked data-ev="pending" onchange="renderTodos()"><span style="background:rgba(196,82,26,.1);color:#9C4221">⏳ Onay</span></label>
+        <label class="cal-chip" data-chip="message"><input type="checkbox" data-ev="message" onchange="renderTodos()"><span style="background:rgba(113,128,150,.1);color:#4A5568">✉️ Mesaj</span></label>
       </div>
 
       <div id="todos-list" style="display:none"></div>
@@ -8679,7 +8697,7 @@ function showPage(page) {
   if (page === 'pending') renderPendingVenues();
   if (page === 'activity') renderActivityLog();
   if (page === 'blog') renderBlogTable();
-  if (page === 'todos') { startTodosListener(); renderTodos(); }
+  if (page === 'todos') { startTodosListener(); renderTodos(); preloadCalendarSources(); }
   if (page === 'users') { startUsersListener(); renderUsers(); }
   if (page === 'chat') {
     // Optimistic: kullanıcı sohbet sayfasına girdi, badge'i hemen gizle
@@ -17544,7 +17562,163 @@ function setTodoView(view, btn) {
   document.getElementById('todos-list').style.display = view === 'list' ? '' : 'none';
   document.getElementById('todos-kanban').style.display = view === 'kanban' ? '' : 'none';
   document.getElementById('todos-calendar').style.display = view === 'calendar' ? '' : 'none';
+  // Takvim filtrelerini sadece calendar view'da goster
+  var cf = document.getElementById('cal-filters');
+  if (cf) cf.style.display = view === 'calendar' ? 'flex' : 'none';
   renderTodos();
+}
+
+// Takvim icin ek kaynaklari arka planda yukle (pending + blog)
+async function preloadCalendarSources() {
+  try {
+    // Pending venues — window._allPendingVenues'a cache
+    if (!window._allPendingVenues) {
+      db.collection('pending_venues').orderBy('submittedAt','desc').limit(200).get().then(function(snap) {
+        window._allPendingVenues = snap.docs.map(function(d) { return { _id: d.id, ...d.data() }; });
+      }).catch(function() {});
+    }
+    // Blog — blogPosts global
+    if (typeof blogPosts === 'undefined' || !Array.isArray(blogPosts) || blogPosts.length === 0) {
+      db.collection('blog_posts').orderBy('createdAt','desc').limit(100).get().then(function(snap) {
+        window.blogPosts = snap.docs.map(function(d) { return { id: d.id, ...d.data() }; });
+      }).catch(function() {});
+    }
+    // Messages — allMessages global (for message toggle)
+    if (typeof allMessages === 'undefined' || !Array.isArray(allMessages) || allMessages.length === 0) {
+      db.collection('messages').orderBy('timestamp','desc').limit(200).get().then(function(snap) {
+        window.allMessages = snap.docs.map(function(d) { return { _id: d.id, ...d.data() }; });
+      }).catch(function() {});
+    }
+  } catch(e) {}
+}
+
+// Takvim icin cok kaynakli event toplayici
+function buildCalendarEvents() {
+  var events = [];
+  var activeTypes = {};
+  document.querySelectorAll('#cal-filters input[type="checkbox"]').forEach(function(cb) {
+    activeTypes[cb.getAttribute('data-ev')] = cb.checked;
+  });
+
+  // 1. TODOS (dueDate)
+  if (activeTypes.todo !== false && Array.isArray(_allTodos)) {
+    filterTodosForCurrentUser(_allTodos).forEach(function(t) {
+      if (!t.dueDate) return;
+      if (t.status === 'completed') return;
+      events.push({
+        date: t.dueDate,
+        type: 'todo',
+        icon: '✓',
+        title: t.title || '',
+        color: '#1A6B8A',
+        bg: 'rgba(26,107,138,.1)',
+        onClick: 'openTodoEditModal(\'' + esc(t._id) + '\')'
+      });
+    });
+  }
+
+  // 2. PREMIUM baslangic/bitis
+  if (activeTypes.premium !== false && Array.isArray(draftData.venues)) {
+    draftData.venues.forEach(function(v) {
+      if (!v.premium) return;
+      if (v.premiumStart) {
+        events.push({
+          date: v.premiumStart,
+          type: 'premium',
+          icon: '⭐',
+          title: v.title + ' · Premium başladı',
+          color: '#B45309',
+          bg: 'rgba(217,119,6,.12)',
+          onClick: 'editVenue(\'' + esc(v.id) + '\')'
+        });
+      }
+      if (v.premiumEnd) {
+        events.push({
+          date: v.premiumEnd,
+          type: 'premium',
+          icon: '⚠️',
+          title: v.title + ' · Premium bitiyor',
+          color: '#B45309',
+          bg: 'rgba(217,119,6,.2)',
+          onClick: 'editVenue(\'' + esc(v.id) + '\')'
+        });
+      }
+    });
+  }
+
+  // 3. MEKAN eklenme (createdAt)
+  if (activeTypes.venue !== false && Array.isArray(draftData.venues)) {
+    draftData.venues.forEach(function(v) {
+      var d = v.createdAt || v.submittedAt;
+      if (!d) return;
+      var dateStr = d.split('T')[0];
+      events.push({
+        date: dateStr,
+        type: 'venue',
+        icon: '🏪',
+        title: v.title + ' eklendi',
+        color: '#2F855A',
+        bg: 'rgba(56,161,105,.1)',
+        onClick: 'editVenue(\'' + esc(v.id) + '\')'
+      });
+    });
+  }
+
+  // 4. BLOG publishedAt
+  if (activeTypes.blog !== false && typeof blogPosts !== 'undefined' && Array.isArray(blogPosts)) {
+    blogPosts.forEach(function(b) {
+      var d = b.publishedAt || b.createdAt;
+      if (!d) return;
+      var dateStr = d.split('T')[0];
+      events.push({
+        date: dateStr,
+        type: 'blog',
+        icon: '✍️',
+        title: b.title || 'Blog yazısı',
+        color: '#553C9A',
+        bg: 'rgba(107,70,193,.1)',
+        onClick: 'showPage(\'blog\')'
+      });
+    });
+  }
+
+  // 5. PENDING venue submissions
+  if (activeTypes.pending !== false) {
+    var pendingArr = window._allPendingVenues || [];
+    pendingArr.forEach(function(p) {
+      if (!p.submittedAt) return;
+      if (p.status !== 'pending' && p.status !== 'updated') return;
+      var dateStr = p.submittedAt.split('T')[0];
+      events.push({
+        date: dateStr,
+        type: 'pending',
+        icon: '⏳',
+        title: (p.title || 'Mekan') + ' onay bekliyor',
+        color: '#9C4221',
+        bg: 'rgba(196,82,26,.12)',
+        onClick: 'showPage(\'pending\')'
+      });
+    });
+  }
+
+  // 6. MESSAGES (opsiyonel — default off)
+  if (activeTypes.message && typeof allMessages !== 'undefined' && Array.isArray(allMessages)) {
+    allMessages.forEach(function(m) {
+      if (!m.timestamp || m.trashed) return;
+      var dateStr = m.timestamp.split('T')[0];
+      events.push({
+        date: dateStr,
+        type: 'message',
+        icon: '✉️',
+        title: (m.name || 'Anonim') + (m.subject ? ' · ' + m.subject.substring(0, 30) : ''),
+        color: '#4A5568',
+        bg: 'rgba(113,128,150,.1)',
+        onClick: 'showPage(\'messages\')'
+      });
+    });
+  }
+
+  return events;
 }
 
 // Etiket filtresini doldur (tüm mevcut etiketlerden)
@@ -17641,7 +17815,7 @@ async function kanbanDrop(e, newStatus) {
   _draggingTodoId = null;
 }
 
-// Takvim görünümü
+// Takvim görünümü — cok kaynakli events (todos + premium + venue + blog + pending + message)
 function renderCalendar(todos) {
   var calEl = document.getElementById('todos-calendar');
   if (!calEl) return;
@@ -17651,20 +17825,18 @@ function renderCalendar(todos) {
   var monthNames = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
   var weekdayNames = ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
 
-  // Ayın ilk günü (Pzt=0, Paz=6)
   var firstDay = new Date(year, month, 1);
-  var firstWeekday = (firstDay.getDay() + 6) % 7; // Pazartesi 0
+  var firstWeekday = (firstDay.getDay() + 6) % 7;
   var daysInMonth = new Date(year, month + 1, 0).getDate();
   var daysInPrevMonth = new Date(year, month, 0).getDate();
   var todayStr = new Date().toISOString().split('T')[0];
 
-  // Her güne todo'ları grupla
-  var todosByDate = {};
-  todos.forEach(function(t) {
-    if (t.dueDate) {
-      if (!todosByDate[t.dueDate]) todosByDate[t.dueDate] = [];
-      todosByDate[t.dueDate].push(t);
-    }
+  // Cok kaynakli event listesi
+  var allEvents = buildCalendarEvents();
+  var eventsByDate = {};
+  allEvents.forEach(function(e) {
+    if (!eventsByDate[e.date]) eventsByDate[e.date] = [];
+    eventsByDate[e.date].push(e);
   });
 
   var html = '<div class="calendar-wrap">';
@@ -17677,19 +17849,16 @@ function renderCalendar(todos) {
   html += '</div>';
   html += '</div>';
   html += '<div class="calendar-grid">';
-  // Haftalık başlıklar
   weekdayNames.forEach(function(w) { html += '<div class="calendar-weekday">' + w + '</div>'; });
 
-  // Önceki ayın son günleri (dolgu)
   for (var i = firstWeekday - 1; i >= 0; i--) {
     var dn = daysInPrevMonth - i;
     html += '<div class="calendar-day other-month"><div class="calendar-day-num">' + dn + '</div></div>';
   }
 
-  // Bu ayın günleri
   for (var d = 1; d <= daysInMonth; d++) {
     var dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
-    var dayTodos = todosByDate[dateStr] || [];
+    var dayEvents = eventsByDate[dateStr] || [];
     var dowIndex = (new Date(year, month, d).getDay() + 6) % 7;
     var isWeekend = dowIndex === 5 || dowIndex === 6;
     var cls = 'calendar-day';
@@ -17698,16 +17867,16 @@ function renderCalendar(todos) {
     html += '<div class="' + cls + '" onclick="openTodoModal({dueDate:\'' + dateStr + '\'})">';
     html += '<div class="calendar-day-num">' + d + '</div>';
     html += '<div class="calendar-day-events">';
-    dayTodos.slice(0, 3).forEach(function(t) {
-      var evCls = 'calendar-event priority-' + (t.priority || 'medium') + (t.status === 'completed' ? ' completed' : '');
-      html += '<div class="' + evCls + '" onclick="event.stopPropagation();openTodoEditModal(\'' + esc(t._id) + '\')" title="' + esc(t.title) + '">' + esc(t.title) + '</div>';
+    dayEvents.slice(0, 4).forEach(function(e) {
+      html += '<div class="calendar-event" style="background:' + e.bg + ';color:' + e.color + ';border-left:2px solid ' + e.color + '" onclick="event.stopPropagation();' + e.onClick + '" title="' + esc(e.title) + '">' +
+        '<span style="font-size:.7em">' + e.icon + '</span> ' + esc(e.title) +
+      '</div>';
     });
-    if (dayTodos.length > 3) html += '<div class="calendar-more">+' + (dayTodos.length - 3) + ' daha</div>';
+    if (dayEvents.length > 4) html += '<div class="calendar-more">+' + (dayEvents.length - 4) + ' daha</div>';
     html += '</div>';
     html += '</div>';
   }
 
-  // Sonraki ayın ilk günleri (dolgu) — 6 haftayı tamamla
   var totalCells = firstWeekday + daysInMonth;
   var remaining = (7 - (totalCells % 7)) % 7;
   for (var n = 1; n <= remaining; n++) {
