@@ -3711,7 +3711,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         <button class="ana-tab active" data-tab="hesap" onclick="showSettingsTab('hesap',this)">👤 Hesap</button>
         <button class="ana-tab" data-tab="gorunum" onclick="showSettingsTab('gorunum',this)">🎨 Görünüm</button>
         <button class="ana-tab" data-tab="site" onclick="showSettingsTab('site',this)">⚙️ Site Yönetimi</button>
-        <button class="ana-tab" data-tab="gelismis" onclick="showSettingsTab('gelismis',this)">🤖 Gelişmiş</button>
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
@@ -4184,7 +4183,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
 
           <!-- AI Chatbot Ayarları (admin-only) -->
-          <div class="panel-card" data-admin-only data-settings-tab="gelismis" style="margin-bottom:20px">
+          <div class="panel-card" data-admin-only data-settings-tab="site" style="margin-bottom:20px">
             <div class="panel-card-head"><h3>🤖 AI Chatbot</h3></div>
             <div style="padding:20px">
               <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
@@ -4198,7 +4197,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
 
           <!-- AI İçerik Durumu (admin-only) -->
-          <div class="panel-card" data-admin-only data-settings-tab="gelismis" style="margin-bottom:20px">
+          <div class="panel-card" data-admin-only data-settings-tab="site" style="margin-bottom:20px">
             <div class="panel-card-head"><h3>📄 AI İçerik Dosyası</h3></div>
             <div style="padding:20px">
               <div style="display:flex;flex-direction:column;gap:12px">
@@ -11450,7 +11449,9 @@ function showSettingsTab(tab, btn) {
 function restoreSettingsTab() {
   var saved;
   try { saved = localStorage.getItem('settings_active_tab'); } catch(e) {}
-  var valid = ['hesap', 'gorunum', 'site', 'gelismis'];
+  // Eski 'gelismis' tabi 'site'ye birlestirildi
+  if (saved === 'gelismis') saved = 'site';
+  var valid = ['hesap', 'gorunum', 'site'];
   var tab = (saved && valid.indexOf(saved) > -1) ? saved : 'hesap';
   showSettingsTab(tab);
 }
