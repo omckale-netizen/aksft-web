@@ -3941,18 +3941,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             <div class="panel-card-head"><h3>⚙️ Site Yönetimi</h3></div>
             <div style="padding:20px">
 
-              <!-- Cache Purge -->
-              <div style="padding:14px;background:rgba(0,0,0,.02);border-radius:10px;margin-bottom:14px">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-                  <div>
-                    <div style="font-size:.88rem;font-weight:700;color:var(--navy)">🧹 Cache Purge</div>
-                    <div style="font-size:.7rem;color:var(--text-muted)">Cloudflare edge cache'ini temizler — deploy sonrası kullan</div>
-                  </div>
-                  <button class="btn btn-sm btn-primary" onclick="purgeCache()" id="cache-purge-btn" style="flex-shrink:0">🧹 Purge</button>
-                </div>
-                <div id="cache-purge-status" style="font-size:.72rem;color:var(--text-muted);min-height:16px"></div>
-              </div>
-
               <!-- Bakim Modu -->
               <div style="padding:14px;background:rgba(0,0,0,.02);border-radius:10px">
                 <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px">
@@ -6782,39 +6770,6 @@ async function stopPresence() {
 function syncPresenceToggle() {
   var cb = document.getElementById('presence-toggle');
   if (cb) cb.checked = isPresenceEnabled();
-}
-
-// ═══ Cache Purge (Cloudflare) ═══
-async function purgeCache() {
-  var btn = document.getElementById('cache-purge-btn');
-  var st = document.getElementById('cache-purge-status');
-  if (!btn || !st) return;
-  if (!confirm('Cloudflare edge cache tamamen temizlensin mi? (Tüm kullanıcılar ilk yüklemede biraz yavaş olabilir)')) return;
-  btn.disabled = true;
-  btn.textContent = '⏳ Temizleniyor...';
-  st.textContent = '';
-  try {
-    var token = await firebase.auth().currentUser.getIdToken();
-    var resp = await fetch('/api/purge-cache', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: '{}'
-    });
-    var data = await resp.json();
-    if (!resp.ok || !data.ok) throw new Error(data.error || 'Bilinmeyen hata');
-    st.innerHTML = '✓ Cache temizlendi (' + new Date().toLocaleTimeString('tr-TR') + ')';
-    st.style.color = 'var(--green)';
-    showToast('✓ Cloudflare cache temizlendi', 'success');
-    if (typeof addBackupLog === 'function') addBackupLog('🧹', 'Cloudflare cache temizlendi');
-  } catch(err) {
-    st.textContent = '❌ ' + err.message;
-    st.style.color = 'var(--red)';
-    showToast('Purge hatasi: ' + err.message, 'error');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '🧹 Purge';
-    setTimeout(function() { st.textContent = ''; st.style.color = ''; }, 8000);
-  }
 }
 
 // ═══ Bakim Modu ═══
