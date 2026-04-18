@@ -4369,7 +4369,7 @@ function renderVillagePage(villageId) {
     var vLabel = vType2 === 'belde' ? 'Beldesi' : (vType2 === 'mahalle' ? 'Mahallesi' : 'Köyü');
     bodyHtml += '<div style="margin-bottom:40px;">';
     bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">📹 ' + v.title + ' Hakkında Videolar</h2>';
-    bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;">';
+    bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;">';
     v.instagramReels.forEach(function(reel, idx) {
       var reelKey = 'reel-' + v.id + '-' + idx;
       var sc = reel.shortcode || (reel.url.match(/\/(p|reel|reels)\/([A-Za-z0-9_-]+)/) || [])[2] || '';
