@@ -4375,7 +4375,11 @@ function renderVillagePage(villageId) {
       var sc = reel.shortcode || (reel.url.match(/\/(p|reel|reels)\/([A-Za-z0-9_-]+)/) || [])[2] || '';
       var embedUrl = sc ? 'https://www.instagram.com/p/' + sc + '/embed' : '';
       var titleRaw = cleanIgTitle(reel.title || '');
-      var caption = titleRaw.length > 160 ? titleRaw.substring(0, 160) + '…' : titleRaw;
+      var caption = titleRaw;
+      if (titleRaw.length > 160) {
+        var sentEnd = titleRaw.substring(0, 240).search(/[.!?…](\s|$)/);
+        caption = (sentEnd >= 40 ? titleRaw.substring(0, sentEnd + 1) : titleRaw.substring(0, 160) + '…');
+      }
       var thumb = reel.thumbnailUrl ? escAttr(reel.thumbnailUrl) : '';
       var videoUrl = reel.videoUrl ? escAttr(reel.videoUrl) : '';
       var playSrc = videoUrl || embedUrl;
