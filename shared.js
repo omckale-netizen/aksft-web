@@ -198,12 +198,20 @@ window.akBuildReelsHtml = function(reels, opts) {
   function _cleanIgTitle(s) {
     if (!s) return '';
     var str = _decodeEntities(s);
-    // "X likes, Y comments – user, Date:" prefix (og:description'dan kalma)
-    var metaPrefix = str.match(/^\s*[\d,.]+\s*likes?(?:,\s*[\d,.]+\s*comments?)?[\s\S]*?\d{4}\s*:\s*/i);
-    if (metaPrefix) str = str.substring(metaPrefix[0].length);
-    var m = str.match(/Instagram\s*:\s*["'\u201C\u201D\u2018\u2019]?\s*(.+?)\s*["'\u201C\u201D\u2018\u2019]?\s*$/);
-    if (m && m[1]) str = m[1];
-    return str.replace(/^["'\u201C\u201D\u2018\u2019\s]+|["'\u201C\u201D\u2018\u2019\s]+$/g, '');
+    // Strip prefix'leri kararli hale gelene kadar dongude uygula (nested case'ler)
+    for (var i = 0; i < 3; i++) {
+      var before = str;
+      // "X likes, Y comments – user, Date:" (og:description metadata)
+      var metaPrefix = str.match(/^\s*[\d,.]+\s*likes?(?:,\s*[\d,.]+\s*comments?)?[\s\S]*?\d{4}\s*:\s*/i);
+      if (metaPrefix) str = str.substring(metaPrefix[0].length);
+      // "username | bio, Instagram:" prefix — Instagram: sonrasini al
+      var m = str.match(/Instagram\s*:\s*["'\u201C\u201D\u2018\u2019]?\s*(.+?)\s*["'\u201C\u201D\u2018\u2019]?\s*$/s);
+      if (m && m[1]) str = m[1];
+      // Bas/son tirnak + whitespace
+      str = str.replace(/^["'\u201C\u201D\u2018\u2019\s]+|["'\u201C\u201D\u2018\u2019\s]+$/g, '');
+      if (str === before) break;
+    }
+    return str;
   }
 
   var _settings = (window.DATA && window.DATA.siteSettings) || {};
