@@ -127,6 +127,46 @@ export async function onRequest(context) {
     // Cookie var — devam et
   }
 
+  // ═══ Bakim Modu Kontrolu ═══
+  // Admin path'leri + API + static asset'ler dahil DEGIL (admin erisimi korunur)
+  const skipMaintenance = path.startsWith('/admin') ||
+    path.startsWith('/api/') ||
+    path.startsWith('/yandex_') ||
+    path === '/robots.txt' ||
+    path === '/sitemap.xml' ||
+    /\.(js|css|png|jpg|jpeg|webp|svg|ico|woff2?|ttf|map|txt|xml|json)$/i.test(path);
+  if (!skipMaintenance && env.CHAT_KV) {
+    try {
+      const mRaw = await env.CHAT_KV.get('site:maintenance');
+      if (mRaw) {
+        const m = JSON.parse(mRaw);
+        if (m && m.enabled) {
+          const msg = (m.message || 'Site kısa süre içinde hizmete dönecek.').replace(/[<>"']/g, '');
+          const html = `<!DOCTYPE html>
+<html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Bakım • Assos'u Keşfet</title>
+<style>*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#0D1829 0%,#1A2744 50%,#0F1E35 100%);color:#F5EDE0;padding:40px 24px;text-align:center}
+.card{max-width:520px}.icon{font-size:4rem;margin-bottom:20px}.title{font-family:'Plus Jakarta Sans',sans-serif;font-size:2rem;font-weight:800;margin-bottom:14px;color:#fff}
+.desc{font-size:1.02rem;line-height:1.65;color:rgba(245,237,224,.75);margin-bottom:28px}.sub{font-size:.82rem;color:rgba(245,237,224,.4)}
+.dot{display:inline-block;width:8px;height:8px;background:#D4935A;border-radius:50%;animation:pulse 1.8s infinite;margin-right:8px;vertical-align:middle}
+@keyframes pulse{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}</style></head>
+<body><div class="card"><div class="icon">🛠</div><h1 class="title">Kısa Bir Ara</h1>
+<p class="desc">${msg}</p><p class="sub"><span class="dot"></span>Lütfen birkaç dakika içinde tekrar deneyin. Anlayışınız için teşekkürler.</p></div></body></html>`;
+          return new Response(html, {
+            status: 503,
+            headers: {
+              'Content-Type': 'text/html; charset=UTF-8',
+              'Retry-After': '600',
+              'Cache-Control': 'no-store',
+              'X-Robots-Tag': 'noindex, nofollow'
+            }
+          });
+        }
+      }
+    } catch(e) { /* KV okunmazsa normal devam et */ }
+  }
+
   // Dinamik Sitemap
   if (path === '/sitemap.xml') {
     try {

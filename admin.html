@@ -3936,6 +3936,46 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         <!-- SAĞ KOLON -->
         <div style="display:flex;flex-direction:column;gap:20px">
 
+          <!-- Site Yönetim Araçları (admin-only) -->
+          <div class="panel-card" data-admin-only>
+            <div class="panel-card-head"><h3>⚙️ Site Yönetimi</h3></div>
+            <div style="padding:20px">
+
+              <!-- Cache Purge -->
+              <div style="padding:14px;background:rgba(0,0,0,.02);border-radius:10px;margin-bottom:14px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                  <div>
+                    <div style="font-size:.88rem;font-weight:700;color:var(--navy)">🧹 Cache Purge</div>
+                    <div style="font-size:.7rem;color:var(--text-muted)">Cloudflare edge cache'ini temizler — deploy sonrası kullan</div>
+                  </div>
+                  <button class="btn btn-sm btn-primary" onclick="purgeCache()" id="cache-purge-btn" style="flex-shrink:0">🧹 Purge</button>
+                </div>
+                <div id="cache-purge-status" style="font-size:.72rem;color:var(--text-muted);min-height:16px"></div>
+              </div>
+
+              <!-- Bakim Modu -->
+              <div style="padding:14px;background:rgba(0,0,0,.02);border-radius:10px">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px">
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:.88rem;font-weight:700;color:var(--navy)">🚧 Bakım Modu</div>
+                    <div style="font-size:.7rem;color:var(--text-muted)">Tüm ziyaretçiler "Bakımda" sayfasına yönlendirilir — admin paneli erişilebilir kalır</div>
+                  </div>
+                  <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;flex-shrink:0">
+                    <input type="checkbox" id="maintenance-toggle" onchange="toggleMaintenance(this.checked)" style="opacity:0;width:0;height:0">
+                    <span id="maintenance-slider" style="position:absolute;inset:0;background:#ccc;transition:.3s;border-radius:24px">
+                      <span style="position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;transition:.3s;border-radius:50%"></span>
+                    </span>
+                  </label>
+                </div>
+                <div style="margin-bottom:8px">
+                  <input type="text" id="maintenance-message" maxlength="300" placeholder="Bakım mesajı (opsiyonel, ör: 'Sistem güncelleniyor, 15 dk içinde döneceğiz')" style="width:100%;padding:8px 12px;border:1.5px solid rgba(0,0,0,.1);border-radius:8px;font-size:.78rem;font-family:inherit">
+                </div>
+                <div id="maintenance-status" style="font-size:.72rem;color:var(--text-muted);min-height:16px"></div>
+              </div>
+
+            </div>
+          </div>
+
           <!-- Şifre Değiştir -->
           <div class="panel-card">
             <div class="panel-card-head"><h3>🔒 Şifre Değiştir</h3></div>
@@ -6742,6 +6782,100 @@ async function stopPresence() {
 function syncPresenceToggle() {
   var cb = document.getElementById('presence-toggle');
   if (cb) cb.checked = isPresenceEnabled();
+}
+
+// ═══ Cache Purge (Cloudflare) ═══
+async function purgeCache() {
+  var btn = document.getElementById('cache-purge-btn');
+  var st = document.getElementById('cache-purge-status');
+  if (!btn || !st) return;
+  if (!confirm('Cloudflare edge cache tamamen temizlensin mi? (Tüm kullanıcılar ilk yüklemede biraz yavaş olabilir)')) return;
+  btn.disabled = true;
+  btn.textContent = '⏳ Temizleniyor...';
+  st.textContent = '';
+  try {
+    var token = await firebase.auth().currentUser.getIdToken();
+    var resp = await fetch('/api/purge-cache', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: '{}'
+    });
+    var data = await resp.json();
+    if (!resp.ok || !data.ok) throw new Error(data.error || 'Bilinmeyen hata');
+    st.innerHTML = '✓ Cache temizlendi (' + new Date().toLocaleTimeString('tr-TR') + ')';
+    st.style.color = 'var(--green)';
+    showToast('✓ Cloudflare cache temizlendi', 'success');
+    if (typeof addBackupLog === 'function') addBackupLog('🧹', 'Cloudflare cache temizlendi');
+  } catch(err) {
+    st.textContent = '❌ ' + err.message;
+    st.style.color = 'var(--red)';
+    showToast('Purge hatasi: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🧹 Purge';
+    setTimeout(function() { st.textContent = ''; st.style.color = ''; }, 8000);
+  }
+}
+
+// ═══ Bakim Modu ═══
+async function loadMaintenanceState() {
+  var tog = document.getElementById('maintenance-toggle');
+  var msg = document.getElementById('maintenance-message');
+  var slider = document.getElementById('maintenance-slider');
+  if (!tog) return;
+  try {
+    var resp = await fetch('/api/maintenance');
+    var data = await resp.json();
+    tog.checked = !!data.enabled;
+    if (data.message && msg) msg.value = data.message;
+    updateMaintenanceSlider(tog.checked);
+  } catch(e) { /* sessiz */ }
+}
+
+function updateMaintenanceSlider(enabled) {
+  var slider = document.getElementById('maintenance-slider');
+  if (!slider) return;
+  slider.style.background = enabled ? '#E53E3E' : '#ccc';
+  var knob = slider.querySelector('span');
+  if (knob) knob.style.transform = enabled ? 'translateX(20px)' : 'translateX(0)';
+}
+
+async function toggleMaintenance(enable) {
+  var st = document.getElementById('maintenance-status');
+  var msgEl = document.getElementById('maintenance-message');
+  var tog = document.getElementById('maintenance-toggle');
+  if (!st) return;
+
+  if (enable) {
+    if (!confirm('Bakim modu ACILIYOR. Tum ziyaretciler bakim sayfasina yonlendirilecek. Admin paneli erisilebilir kalir. Devam edilsin mi?')) {
+      tog.checked = false;
+      return;
+    }
+  }
+
+  updateMaintenanceSlider(enable);
+  st.style.color = 'var(--text-muted)';
+  st.textContent = '⏳ Güncelleniyor...';
+  try {
+    var token = await firebase.auth().currentUser.getIdToken();
+    var resp = await fetch('/api/maintenance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ enable: enable, message: (msgEl && msgEl.value || '').trim() })
+    });
+    var data = await resp.json();
+    if (!resp.ok || !data.ok) throw new Error(data.error || 'Hata');
+    st.textContent = enable ? '✓ Bakım modu AKTIF — site ziyaretçilere kapalı' : '✓ Bakım modu KAPATILDI — site normal hizmetde';
+    st.style.color = enable ? '#E53E3E' : 'var(--green)';
+    showToast(enable ? '🚧 Bakım modu aktif' : '✓ Bakım modu kapandı', 'success');
+    if (typeof addBackupLog === 'function') addBackupLog('🚧', enable ? 'Bakim modu ACILDI' : 'Bakim modu KAPATILDI');
+  } catch(err) {
+    tog.checked = !enable;
+    updateMaintenanceSlider(!enable);
+    st.textContent = '❌ ' + err.message;
+    st.style.color = 'var(--red)';
+    showToast('Hata: ' + err.message, 'error');
+  }
 }
 
 // Ayarlar'daki toggle — açık/kapalı
@@ -10768,7 +10902,7 @@ showPage = function(page) {
   _origShowPage(page);
   if (page === 'gallery' && galItems.length === 0) galLoadItems();
   if (page === 'categories') { renderCatList(); renderPlaceCatList(); }
-  if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); loadHeroHistory(); loadOgHistory(); updatePasswordDate(); loadLoginHistory(); syncPresenceToggle(); }
+  if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); loadHeroHistory(); loadOgHistory(); updatePasswordDate(); loadLoginHistory(); syncPresenceToggle(); loadMaintenanceState(); }
   if (page === 'minitools') { restoreMtTab(); if (window.lucide && lucide.createIcons) try { lucide.createIcons(); } catch(e) {} }
   if (page === 'security') runSecurityCheck();
   if (page === 'export') { loadBackupList(); updateAutoBackupUI(); }
