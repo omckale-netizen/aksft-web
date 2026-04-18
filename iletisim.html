@@ -594,9 +594,27 @@ async function submitContact(e) {
       });
     }
     const db = await waitForFirebase();
+
+    // ONCE server-side rate limit kontrolu (/api/notify icinde IP-based RL var).
+    // Sadece bunu gecen mesajlar Firestore'a yazilir — localStorage RL bypass edilse
+    // bile server rate limit etkin kalir.
+    const notifyRes = await fetch('/api/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'message',
+        data: { name: msg.name, email: msg.email, phone: msg.phone, subject: msg.subject, message: msg.message, _hp: msg._hp }
+      })
+    });
+    if (notifyRes.status === 429) {
+      var rlErr = await notifyRes.json().catch(function(){ return {}; });
+      status.innerHTML = '<span style="color:#E53E3E;font-weight:600">' + (rlErr.error || 'Çok hızlı mesaj gönderiyorsunuz. Lütfen biraz bekleyin.') + '</span>';
+      btn.disabled = false;
+      btn.innerHTML = '<span>Mesaj Gönder</span><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+      return;
+    }
+
     await db.collection('messages').add(msg);
-    // Telegram bildirim
-    fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'message',data:{name:msg.name,email:msg.email,phone:msg.phone,subject:msg.subject,message:msg.message}})}).catch(()=>{});
     status.innerHTML = '';
     document.getElementById('contact-form').reset();
     openSuccessModal();

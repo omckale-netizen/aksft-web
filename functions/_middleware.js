@@ -84,7 +84,9 @@ export async function onRequest(context) {
   const adminPaths = ['/admin', '/admin.html', '/admin-login', '/admin-login.html'];
   if (adminPaths.includes(path)) {
     const GATE_KEY = (env.ADMIN_GATE_KEY || '').trim();
-    if (!GATE_KEY) return next(); // env yoksa gate devre disi
+    // Fail-secure: env yoksa admin paneli kilitle (404'e yonlendir).
+    // Misconfiguration durumunda admin URL'sinin disclosure edilmesini onler.
+    if (!GATE_KEY) return Response.redirect(url.origin + '/404.html', 302);
 
     const gateParam = url.searchParams.get('gate');
     const cookies = request.headers.get('cookie') || '';

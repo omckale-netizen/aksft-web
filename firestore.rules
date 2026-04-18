@@ -84,10 +84,27 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // Iletisim mesajlari: herkes yazabilir; editor okur ve update edebilir (label vb.)
+    // Iletisim mesajlari: herkes yazabilir (validation'lı); editor okur/update eder
     // messages sayfa yetkisi şart — sadece yetkili editor mesajları okuyabilir
     match /messages/{docId} {
-      allow create: if true;
+      // Yazma: data shape + boyut validasyonu + honeypot bos olmalı.
+      // Spam/oversized payload'ları reddeder. IP rate limit /api/notify'dadır.
+      allow create: if
+        request.resource.data.name is string
+        && request.resource.data.name.size() >= 2
+        && request.resource.data.name.size() <= 100
+        && request.resource.data.email is string
+        && request.resource.data.email.size() >= 5
+        && request.resource.data.email.size() <= 150
+        && request.resource.data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
+        && request.resource.data.message is string
+        && request.resource.data.message.size() >= 5
+        && request.resource.data.message.size() <= 2000
+        && request.resource.data.subject is string
+        && request.resource.data.subject.size() <= 100
+        && (!('_hp' in request.resource.data) || request.resource.data._hp == '')
+        && request.resource.data.read == false
+        && request.resource.data.consentGiven == true;
       allow read, update: if hasPage('messages');
       allow delete: if isAdmin();
     }
