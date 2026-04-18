@@ -3116,8 +3116,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       <!-- View Switcher -->
       <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap">
         <div class="todo-view-switcher">
-          <button class="todo-view-btn active" data-view="list" onclick="setTodoView('list',this)">☰ Liste</button>
-          <button class="todo-view-btn" data-view="kanban" onclick="setTodoView('kanban',this)">▥ Kanban</button>
+          <button class="todo-view-btn" data-view="list" onclick="setTodoView('list',this)">☰ Liste</button>
+          <button class="todo-view-btn active" data-view="kanban" onclick="setTodoView('kanban',this)">▥ Kanban</button>
           <button class="todo-view-btn" data-view="calendar" onclick="setTodoView('calendar',this)">📅 Takvim</button>
         </div>
       </div>
@@ -3152,8 +3152,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         </select>
       </div>
 
-      <div id="todos-list"></div>
-      <div id="todos-kanban" style="display:none"></div>
+      <div id="todos-list" style="display:none"></div>
+      <div id="todos-kanban"></div>
       <div id="todos-calendar" style="display:none"></div>
     </div>
 
@@ -7815,7 +7815,7 @@ function showPage(page) {
   if (page === 'dashboard') { renderDashboard(); updatePasswordDate(); }
   if (page === 'venues') renderVenueTable();
   if (page === 'routes') renderRoutesTable();
-  if (page === 'villages') { switchVillageTab(currentVPTab); }
+  if (page === 'villages') { switchVillageTab(currentVPTab, window._initFromHash === true); }
   if (page === 'export') renderExport();
   if (page === 'socialgen') sgUpdateList();
   if (page === 'analytics') renderAnalytics();
@@ -8546,11 +8546,18 @@ function initApp() {
   loadCategories();
   const validPages = ['dashboard','venues','categories','bot','placebot','routes','villages','export','settings','security','analytics','messages','pending','gallery','activity','blog','todos','users','chat','imgcompress','socialgen','fileconvert','minitools'];
   if (hashPage && validPages.includes(hashPage)) {
-    // Alt-sekme (villages/places vb.) varsa ilgili state'i once set et
-    if (hashPage === 'villages' && (hashSub === 'places' || hashSub === 'villages')) {
-      currentVPTab = hashSub;
+    // Alt-sekme ve filtre (villages/{places|koy|belde|mahalle}) restore
+    if (hashPage === 'villages') {
+      if (hashSub === 'places') {
+        currentVPTab = 'places';
+      } else if (['koy', 'belde', 'mahalle'].includes(hashSub)) {
+        currentVPTab = 'villages';
+        vpTypeFilter = hashSub;
+      }
     }
+    window._initFromHash = true; // switchVillageTab vpTypeFilter'i koruyor bu flag ile
     showPage(hashPage);
+    window._initFromHash = false;
   } else {
     renderDashboard();
   }
@@ -12918,24 +12925,36 @@ function filterVPType(btn, type) {
   vpTypeFilter = type;
   document.querySelectorAll('#vp-type-filters .tab').forEach(function(b) { b.classList.remove('active'); });
   btn.classList.add('active');
+  // Hash'e filtreyi yaz — F5'te ayni filtrede kalsin
+  try {
+    var newHash = (type === 'all') ? '#villages' : '#villages/' + type;
+    history.replaceState(null, '', newHash);
+  } catch(e) {}
   renderVPTable();
 }
 
-function switchVillageTab(tab) {
+function switchVillageTab(tab, preserveFilter) {
   currentVPTab = tab;
-  vpTypeFilter = 'all';
+  // preserveFilter=true ise init sirasinda vpTypeFilter korunur (hash'ten set edildi)
+  if (!preserveFilter) vpTypeFilter = 'all';
   document.querySelectorAll('#page-villages .tab').forEach(t => t.classList.remove('active'));
   document.querySelector(`#page-villages .tab[onclick*="${tab}"]`).classList.add('active');
   const isPlaces = tab === 'places';
   document.getElementById('vp-th-cat').style.display = isPlaces ? '' : 'none';
   document.getElementById('vp-type-filters').style.display = isPlaces ? 'none' : 'flex';
   document.querySelectorAll('#vp-type-filters .tab').forEach(function(b) { b.classList.remove('active'); });
-  document.querySelector('#vp-type-filters .tab').classList.add('active');
+  // Aktif filtre butonunu isaretle
+  var activeFilterBtn = document.querySelector('#vp-type-filters .tab[onclick*="\'' + vpTypeFilter + '\'"]');
+  if (activeFilterBtn) activeFilterBtn.classList.add('active');
+  else document.querySelector('#vp-type-filters .tab').classList.add('active'); // fallback: all
   document.getElementById('vp-add-btn').textContent = isPlaces ? '+ Yeni Yer Ekle' : '+ Yeni Yerleşim Ekle';
   // Hash'e alt-sekmeyi yaz — F5'te ayni sekmede kalsin
-  // Default tab 'villages' icin sadece #villages, places icin #villages/places
+  // villages+all -> #villages, places -> #villages/places, villages+filter -> #villages/{filter}
   try {
-    var newHash = tab === 'places' ? '#villages/places' : '#villages';
+    var newHash;
+    if (tab === 'places') newHash = '#villages/places';
+    else if (vpTypeFilter && vpTypeFilter !== 'all') newHash = '#villages/' + vpTypeFilter;
+    else newHash = '#villages';
     history.replaceState(null, '', newHash);
   } catch(e) {}
   renderVPTable();
@@ -16034,7 +16053,7 @@ function renderDashboardTodoWidget() {
 }
 
 // View state
-var _todoView = 'list'; // list | kanban | calendar
+var _todoView = 'kanban'; // list | kanban | calendar — default Kanban
 var _calendarMonth = new Date(); // Takvim için mevcut ay
 
 function setTodoView(view, btn) {
