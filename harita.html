@@ -222,6 +222,18 @@ function renderMarkers() {
     markers.push({marker,item});
   });
   document.getElementById('map-stats').innerHTML = '<strong>'+filtered.length+'</strong> <span>konum</span>';
+  // Mobilde ilk yuklemede tum pinler gorunsun — fitBounds ile otomatik zoom
+  if (!window._mapInitialFit && filtered.length > 1) {
+    window._mapInitialFit = true;
+    try {
+      var bounds = L.latLngBounds(filtered.map(function(i) { return [i.lat, i.lng]; }));
+      var isMobile = window.innerWidth <= 768;
+      map.fitBounds(bounds, {
+        padding: isMobile ? [40, 40] : [60, 60],
+        maxZoom: isMobile ? 11 : 13
+      });
+    } catch(e) {}
+  }
 }
 
 function filterMap(type) {
