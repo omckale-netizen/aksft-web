@@ -289,142 +289,88 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     .btn-terra:hover{background:var(--terra-light);transform:translateY(-2px);box-shadow:0 10px 28px rgba(196,82,26,.28);}
     .btn-terra:active{transform:translateY(0);}
 
-    /* ════ SHINY CTA — Assos'u Planla butonu için (conic rotating border + dots + shimmer + breathe) ════ */
-    @property --gradient-angle {syntax: "<angle>";initial-value: 0deg;inherits: false;}
-    @property --gradient-angle-offset {syntax: "<angle>";initial-value: 0deg;inherits: false;}
-    @property --gradient-percent {syntax: "<percentage>";initial-value: 5%;inherits: false;}
-    @property --gradient-shine {syntax: "<color>";initial-value: white;inherits: false;}
+    /* ════ SUBTLE BORDER CTA — Assos'u Planla (navy bg + beyaz border + amber dot + shine + ripple) ════ */
     .btn-shiny{
-      --shiny-bg: #C4521A;
-      --shiny-bg-subtle: #A3431A;
-      --shiny-fg: #ffffff;
-      --shiny-highlight: #FFD4A8;
-      --shiny-highlight-subtle: #E8A07A;
-      --shiny-anim: gradient-angle linear infinite;
-      --shiny-duration: 3s;
-      --shiny-shadow-size: 2px;
-      --shiny-trans: 800ms cubic-bezier(0.25, 1, 0.5, 1);
-      isolation: isolate;
-      position: relative;
-      overflow: hidden;
-      cursor: pointer;
-      outline-offset: 4px;
-      padding: 8px 18px;
-      font-family: inherit;
-      font-size: .82rem;
-      font-weight: 700;
-      line-height: 1.2;
-      letter-spacing: .01em;
-      border: 1px solid transparent;
-      border-radius: 360px;
-      color: var(--shiny-fg);
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background:
-        linear-gradient(var(--shiny-bg), var(--shiny-bg)) padding-box,
-        conic-gradient(
-          from calc(var(--gradient-angle) - var(--gradient-angle-offset)),
-          transparent,
-          var(--shiny-highlight) var(--gradient-percent),
-          var(--gradient-shine) calc(var(--gradient-percent) * 2),
-          var(--shiny-highlight) calc(var(--gradient-percent) * 3),
-          transparent calc(var(--gradient-percent) * 4)
-        ) border-box;
-      box-shadow: inset 0 0 0 1px var(--shiny-bg-subtle), 0 2px 8px rgba(196,82,26,.15);
-      transition: var(--shiny-trans);
-      transition-property: --gradient-angle-offset, --gradient-percent, --gradient-shine, box-shadow, transform;
+      position:relative;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:7px 18px;
+      background:rgba(26,39,68,.85);
+      border:1.5px solid rgba(255,255,255,.65);
+      border-radius:999px;
+      color:#fff;
+      font-family:inherit;
+      font-size:.78rem;
+      font-weight:500;
+      letter-spacing:.01em;
+      text-decoration:none;
+      overflow:hidden;
+      backdrop-filter:blur(8px);
+      -webkit-backdrop-filter:blur(8px);
+      transition:border-color .5s ease-out,transform .5s ease-out,box-shadow .5s ease-out,background .5s ease-out;
+      cursor:pointer;
     }
-    .btn-shiny::before,
-    .btn-shiny::after,
-    .btn-shiny > span::before{
-      content: "";
-      pointer-events: none;
-      position: absolute;
-      inset-inline-start: 50%;
-      inset-block-start: 50%;
-      translate: -50% -50%;
-      z-index: -1;
-    }
-    .btn-shiny:active{translate: 0 1px;}
-    /* Dots pattern */
+    /* Shine sweep */
     .btn-shiny::before{
-      --size: calc(100% - var(--shiny-shadow-size) * 3);
-      --position: 2px;
-      --space: calc(var(--position) * 2);
-      width: var(--size);
-      height: var(--size);
-      background: radial-gradient(
-        circle at var(--position) var(--position),
-        #fff calc(var(--position) / 4),
-        transparent 0
-      ) padding-box;
-      background-size: var(--space) var(--space);
-      background-repeat: space;
-      -webkit-mask-image: conic-gradient(
-        from calc(var(--gradient-angle) + 45deg),
-        #000,
-        transparent 10% 90%,
-        #000
-      );
-      mask-image: conic-gradient(
-        from calc(var(--gradient-angle) + 45deg),
-        #000,
-        transparent 10% 90%,
-        #000
-      );
-      border-radius: inherit;
-      opacity: .4;
-      z-index: -1;
+      content:'';position:absolute;inset:0;
+      background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.12) 50%,transparent 100%);
+      transform:translateX(-100%);
+      transition:transform .7s cubic-bezier(.16,1,.3,1);
+      pointer-events:none;z-index:1;
     }
-    /* Inner shimmer */
+    .btn-shiny:hover::before{transform:translateX(100%);}
+    /* Amber glow overlay */
     .btn-shiny::after{
-      width: 100%;
-      aspect-ratio: 1;
-      background: linear-gradient(-50deg, transparent, var(--shiny-highlight), transparent);
-      -webkit-mask-image: radial-gradient(circle at bottom, transparent 40%, #000);
-      mask-image: radial-gradient(circle at bottom, transparent 40%, #000);
-      opacity: .55;
+      content:'';position:absolute;inset:0;border-radius:inherit;
+      background:radial-gradient(ellipse at center,rgba(251,191,36,.18) 0%,transparent 65%);
+      opacity:0;transition:opacity .5s;pointer-events:none;z-index:0;
     }
-    .btn-shiny > span{z-index: 1;position: relative;}
-    .btn-shiny > span::before{
-      --size: calc(100% + 1rem);
-      width: var(--size);
-      height: var(--size);
-      box-shadow: inset 0 -1ex 2rem 4px var(--shiny-highlight);
-      opacity: 0;
-      transition: opacity var(--shiny-trans);
-      animation: calc(var(--shiny-duration) * 1.5) shinyBreathe linear infinite;
+    .btn-shiny:hover::after{opacity:1;}
+    /* Hover state */
+    .btn-shiny:hover{
+      border-color:#fff;
+      background:rgba(26,39,68,.95);
+      transform:scale(1.04);
+      box-shadow:0 10px 24px rgba(255,255,255,.12),0 0 18px rgba(251,191,36,.15);
     }
-    /* Rotating animations */
-    .btn-shiny,
-    .btn-shiny::before,
-    .btn-shiny::after{
-      animation: var(--shiny-anim) var(--shiny-duration),
-                 var(--shiny-anim) calc(var(--shiny-duration) / 0.4) reverse paused;
-      animation-composition: add;
+    .btn-shiny:active{transform:scale(.96);}
+    /* Text */
+    .btn-shiny > span.bs-text{position:relative;z-index:2;transition:color .3s;}
+    .btn-shiny:hover > span.bs-text{color:#FFFBEB;}
+    /* Dot */
+    .btn-shiny > span.bs-dot{
+      position:relative;z-index:2;
+      width:10px;height:10px;
+      background:#FCD34D;
+      border-radius:50%;
+      transition:all .5s ease-out;
+      box-shadow:0 0 0 0 rgba(251,191,36,0);
     }
-    .btn-shiny:hover,
-    .btn-shiny:focus-visible{
-      --gradient-percent: 20%;
-      --gradient-angle-offset: 95deg;
-      --gradient-shine: var(--shiny-highlight-subtle);
+    .btn-shiny:hover > span.bs-dot{
+      background:#FBBF24;
+      box-shadow:0 0 10px rgba(251,191,36,.6),0 0 18px rgba(251,191,36,.3);
+      transform:scale(1.15);
     }
-    .btn-shiny:hover,
-    .btn-shiny:focus-visible,
-    .btn-shiny:hover::before,
-    .btn-shiny:focus-visible::before,
-    .btn-shiny:hover::after,
-    .btn-shiny:focus-visible::after{animation-play-state: running;}
-    .btn-shiny:hover > span::before,
-    .btn-shiny:focus-visible > span::before{opacity: 1;}
-    @keyframes gradient-angle{to{--gradient-angle: 360deg;}}
-    @keyframes shimmer{to{rotate: 360deg;}}
-    @keyframes shinyBreathe{from,to{scale: 1;}50%{scale: 1.2;}}
-    /* Mobil küçültme */
+    .btn-shiny:active > span.bs-dot{transform:scale(.85);}
+    /* Ripple — dot içinde sürekli atar hover'da */
+    .btn-shiny > span.bs-dot::before{
+      content:'';position:absolute;inset:0;border-radius:50%;
+      background:#FCD34D;opacity:0;
+      animation:bsRipple 2s cubic-bezier(0,0,.2,1) infinite;
+      animation-play-state:paused;
+    }
+    .btn-shiny:hover > span.bs-dot::before{animation-play-state:running;}
+    @keyframes bsRipple{0%{transform:scale(1);opacity:.7;}70%,100%{transform:scale(2.3);opacity:0;}}
+    /* Hero mode (şeffaf nav üstünde) — border tamamen beyaz, daha görünür */
+    #main-nav.hero-mode .btn-shiny{background:rgba(13,24,41,.5);border-color:rgba(255,255,255,.85);}
+    /* Solid nav (scroll) — daha az blur, border soft */
+    #main-nav.scrolled .btn-shiny,#main-nav.solid .btn-shiny{border-color:rgba(255,255,255,.75);}
+    /* Mobil */
     @media(max-width:760px){
-      .btn-shiny{padding:6px 14px;font-size:.72rem;}
+      .btn-shiny{padding:6px 13px;font-size:.7rem;gap:8px;}
+      .btn-shiny > span.bs-dot{width:8px;height:8px;}
     }
     .nav-hamburger{display:none;background:rgba(245,237,224,.1);border:1.5px solid rgba(245,237,224,.2);border-radius:9px;padding:8px 13px;color:var(--cream);font-size:1rem;cursor:pointer;transition:background .2s;flex-shrink:0;}
     #main-nav.solid .nav-hamburger,.nav-hamburger.dark{background:rgba(26,39,68,.05);border-color:rgba(26,39,68,.1);color:var(--navy);}
@@ -702,7 +648,7 @@ function renderNav(opts = {}) {
             <span class="nav-save-icon">♡</span>
             <span id="nav-save-count" class="nav-save-count" style="display:none;">0</span>
           </button>
-          <a href="${basePath}planla.html" class="btn-shiny"><span>Assos'u Planla</span></a>
+          <a href="${basePath}planla.html" class="btn-shiny" aria-label="Assos'u Planla"><span class="bs-text">Assos'u Planla</span><span class="bs-dot"></span></a>
           <button class="nav-hamburger${heroMode ? '' : ' dark'}" id="open-menu-btn" aria-label="Menü">☰</button>
         </div>
       </div>
