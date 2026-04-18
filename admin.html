@@ -3704,7 +3704,15 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
     <div class="admin-page" id="page-settings">
       <h2>Ayarlar</h2>
-      <p class="page-sub">Profil, şifre ve hesap ayarları.</p>
+      <p class="page-sub">Profil, görünüm, site yönetimi ve gelişmiş seçenekler.</p>
+
+      <!-- Tab nav -->
+      <div class="ana-tabs" style="margin-bottom:24px">
+        <button class="ana-tab active" data-tab="hesap" onclick="showSettingsTab('hesap',this)">👤 Hesap</button>
+        <button class="ana-tab" data-tab="gorunum" onclick="showSettingsTab('gorunum',this)">🎨 Görünüm</button>
+        <button class="ana-tab" data-tab="site" onclick="showSettingsTab('site',this)">⚙️ Site Yönetimi</button>
+        <button class="ana-tab" data-tab="gelismis" onclick="showSettingsTab('gelismis',this)">🤖 Gelişmiş</button>
+      </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
 
@@ -3712,7 +3720,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         <div style="display:flex;flex-direction:column;gap:20px">
 
           <!-- Profil -->
-          <div class="panel-card">
+          <div class="panel-card" data-settings-tab="hesap">
             <div class="panel-card-head"><h3>👤 Profil</h3></div>
             <div style="padding:20px">
               <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
@@ -3750,7 +3758,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
 
           <!-- Logo + Favicon yan yana (admin-only) -->
-          <div data-admin-only style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div data-admin-only data-settings-tab="gorunum" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
             <div class="panel-card">
               <div class="panel-card-head"><h3>🖼 Logo</h3></div>
               <div style="padding:16px">
@@ -3781,7 +3789,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
 
           <!-- Instagram Profil Resmi — reel kartlarinda kullanilir -->
-          <div class="panel-card" data-admin-only>
+          <div class="panel-card" data-admin-only data-settings-tab="gorunum">
             <div class="panel-card-head"><h3>📸 Instagram Profil Resmi</h3></div>
             <div style="padding:20px">
               <div id="ig-avatar-preview" style="margin-bottom:14px;display:flex;justify-content:center;padding:20px;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;">
@@ -3813,7 +3821,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
 
           <!-- Schema Logo (SEO / AI) — tam boyut PNG, transparent -->
-          <div class="panel-card" data-admin-only>
+          <div class="panel-card" data-admin-only data-settings-tab="gorunum">
             <div class="panel-card-head"><h3>🔍 SEO / AI Logo (Organization Schema)</h3></div>
             <div style="padding:20px">
               <div id="schema-logo-preview" style="margin-bottom:14px;text-align:center;padding:20px;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;min-height:140px;display:flex;align-items:center;justify-content:center">
@@ -3841,7 +3849,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
 
           <!-- OG Image (admin-only) -->
-          <div class="panel-card" data-admin-only>
+          <div class="panel-card" data-admin-only data-settings-tab="gorunum">
             <div class="panel-card-head"><h3>🌐 Sosyal Medya Görseli (OG Image)</h3></div>
             <div style="padding:20px">
               <div id="og-preview" style="margin-bottom:14px;border-radius:10px;overflow:hidden;background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.08)">
@@ -3876,7 +3884,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
 
           <!-- Anasayfa Hero Görseli (admin-only) -->
-          <div class="panel-card" data-admin-only>
+          <div class="panel-card" data-admin-only data-settings-tab="gorunum">
             <div class="panel-card-head"><h3>🏞 Anasayfa Hero Görseli</h3></div>
             <div style="padding:20px">
               <div id="hero-img-preview" style="margin-bottom:10px;border-radius:10px;overflow:hidden;background:linear-gradient(160deg,#0D1829,#1A2744);aspect-ratio:21/9;position:relative">
@@ -3917,7 +3925,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
 
           <!-- SEO Paneller & Araçlar -->
-          <div class="panel-card" data-admin-only>
+          <div class="panel-card" data-admin-only data-settings-tab="site">
             <div class="panel-card-head"><h3>🔍 SEO Arama Motoru Panelleri</h3></div>
             <div style="padding:20px">
               <div style="font-size:.72rem;color:var(--text-light);margin-bottom:14px;line-height:1.5">
@@ -3986,7 +3994,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         <div style="display:flex;flex-direction:column;gap:20px">
 
           <!-- Site Yönetim Araçları (admin-only) -->
-          <div class="panel-card" data-admin-only>
+          <div class="panel-card" data-admin-only data-settings-tab="site">
             <div class="panel-card-head"><h3>⚙️ Site Yönetimi</h3></div>
             <div style="padding:20px">
 
@@ -4014,7 +4022,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
 
           <!-- Duyuru Paneli (admin-only) -->
-          <div class="panel-card" data-admin-only>
+          <div class="panel-card" data-admin-only data-settings-tab="site">
             <div class="panel-card-head"><h3>📢 Yönetim Duyurusu</h3></div>
             <div style="padding:20px">
               <div style="font-size:.72rem;color:var(--text-light);margin-bottom:14px;line-height:1.5">
@@ -4048,7 +4056,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
 
           <!-- Tema (admin-only) -->
-          <div class="panel-card" data-admin-only>
+          <div class="panel-card" data-admin-only data-settings-tab="gorunum">
             <div class="panel-card-head"><h3>🎨 Tema</h3></div>
             <div style="padding:20px">
               <div style="font-size:.72rem;color:var(--text-light);margin-bottom:14px;line-height:1.5">
@@ -4098,7 +4106,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
 
           <!-- Şifre Değiştir -->
-          <div class="panel-card">
+          <div class="panel-card" data-settings-tab="hesap">
             <div class="panel-card-head"><h3>🔒 Şifre Değiştir</h3></div>
             <div style="padding:20px">
               <div id="pw-last-change" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(0,0,0,.02);border-radius:8px;margin-bottom:16px;">
@@ -4125,7 +4133,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
 
           <!-- Hesap Bilgileri -->
-          <div class="panel-card">
+          <div class="panel-card" data-settings-tab="hesap">
             <div class="panel-card-head"><h3>📊 Hesap Bilgileri</h3></div>
             <div style="padding:20px">
               <div style="display:flex;flex-direction:column;gap:12px">
@@ -4150,7 +4158,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
 
           <!-- Aktif Oturumlar -->
-          <div class="panel-card">
+          <div class="panel-card" data-settings-tab="hesap">
             <div class="panel-card-head" style="justify-content:space-between">
               <h3>🔒 Aktif Oturumlarım</h3>
               <button class="btn btn-sm btn-secondary" onclick="renderUserSessions()" style="font-size:.68rem;padding:4px 10px">Yenile</button>
@@ -4164,7 +4172,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
 
           <!-- Son Giriş Geçmişi -->
-          <div class="panel-card">
+          <div class="panel-card" data-settings-tab="hesap">
             <div class="panel-card-head" style="justify-content:space-between">
               <h3>🕐 Son Giriş Geçmişi</h3>
               <button class="btn btn-sm btn-secondary" onclick="loadLoginHistory()" style="font-size:.68rem;padding:4px 10px">Yenile</button>
@@ -4176,7 +4184,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
 
           <!-- AI Chatbot Ayarları (admin-only) -->
-          <div class="panel-card" data-admin-only style="margin-bottom:20px">
+          <div class="panel-card" data-admin-only data-settings-tab="gelismis" style="margin-bottom:20px">
             <div class="panel-card-head"><h3>🤖 AI Chatbot</h3></div>
             <div style="padding:20px">
               <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
@@ -4190,7 +4198,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
 
           <!-- AI İçerik Durumu (admin-only) -->
-          <div class="panel-card" data-admin-only style="margin-bottom:20px">
+          <div class="panel-card" data-admin-only data-settings-tab="gelismis" style="margin-bottom:20px">
             <div class="panel-card-head"><h3>📄 AI İçerik Dosyası</h3></div>
             <div style="padding:20px">
               <div style="display:flex;flex-direction:column;gap:12px">
@@ -11380,7 +11388,7 @@ showPage = function(page) {
   _origShowPage(page);
   if (page === 'gallery' && galItems.length === 0) galLoadItems();
   if (page === 'categories') { renderCatList(); renderPlaceCatList(); }
-  if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); loadHeroHistory(); loadOgHistory(); updatePasswordDate(); loadLoginHistory(); syncPresenceToggle(); loadMaintenanceState(); loadAnnouncement(); loadTheme(); renderUserSessions(); }
+  if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); loadHeroHistory(); loadOgHistory(); updatePasswordDate(); loadLoginHistory(); syncPresenceToggle(); loadMaintenanceState(); loadAnnouncement(); loadTheme(); renderUserSessions(); restoreSettingsTab(); }
   if (page === 'minitools') { restoreMtTab(); if (window.lucide && lucide.createIcons) try { lucide.createIcons(); } catch(e) {} }
   if (page === 'security') runSecurityCheck();
   if (page === 'export') { loadBackupList(); updateAutoBackupUI(); }
@@ -11422,6 +11430,29 @@ function restoreAnaTab() {
   var valid = ['ozet', 'trafik', 'donusum', 'icerik', 'davranis'];
   var tab = (saved && valid.indexOf(saved) > -1) ? saved : 'ozet';
   showAnaTab(tab);
+}
+
+// Settings sayfasi tab yonetimi
+function showSettingsTab(tab, btn) {
+  document.querySelectorAll('#page-settings .ana-tab').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) {
+    btn.classList.add('active');
+  } else {
+    var targetBtn = document.querySelector('#page-settings .ana-tab[data-tab="' + tab + '"]');
+    if (targetBtn) targetBtn.classList.add('active');
+  }
+  document.querySelectorAll('#page-settings [data-settings-tab]').forEach(function(el) {
+    el.style.display = el.getAttribute('data-settings-tab') === tab ? '' : 'none';
+  });
+  try { localStorage.setItem('settings_active_tab', tab); } catch(e) {}
+}
+
+function restoreSettingsTab() {
+  var saved;
+  try { saved = localStorage.getItem('settings_active_tab'); } catch(e) {}
+  var valid = ['hesap', 'gorunum', 'site', 'gelismis'];
+  var tab = (saved && valid.indexOf(saved) > -1) ? saved : 'hesap';
+  showSettingsTab(tab);
 }
 
 // Mekan performansinda bir satira tiklayinca: Donusum tabina gec, venue filter'i ayarla, scroll et
