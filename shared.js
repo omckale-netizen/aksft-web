@@ -4380,6 +4380,7 @@ function renderVillagePage(villageId) {
         var sentEnd = titleRaw.substring(0, 240).search(/[.!?…](\s|$)/);
         caption = (sentEnd >= 40 ? titleRaw.substring(0, sentEnd + 1) : titleRaw.substring(0, 160) + '…');
       }
+      if (caption && !/[.!?…]$/.test(caption)) caption += '…';
       var thumb = reel.thumbnailUrl ? escAttr(reel.thumbnailUrl) : '';
       var videoUrl = reel.videoUrl ? escAttr(reel.videoUrl) : '';
       var playSrc = videoUrl || embedUrl;
@@ -4392,7 +4393,7 @@ function renderVillagePage(villageId) {
       // Avatar (gradient ring — Instagram story halkası)
       bodyHtml += '<div style="width:38px;height:38px;border-radius:50%;padding:2px;background:linear-gradient(45deg,#F09433 0%,#E6683C 25%,#DC2743 50%,#CC2366 75%,#BC1888 100%);flex-shrink:0;">';
       bodyHtml += '<div style="width:100%;height:100%;border-radius:50%;background:#fff;padding:2px;">';
-      bodyHtml += '<img src="' + escAttr(avatarUrl) + '" alt="assosukesfet" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">';
+      bodyHtml += '<img src="' + escAttr(avatarUrl) + '" alt="assosukesfet" loading="lazy" onload="this.style.opacity=1" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;opacity:0;transition:opacity .35s ease;">';
       bodyHtml += '</div></div>';
       // Username + blue tick + location
       bodyHtml += '<div style="flex:1;min-width:0;">';
