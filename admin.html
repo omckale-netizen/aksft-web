@@ -13187,9 +13187,21 @@ function renderReelsList(key) {
       + thumb
       + '<div style="flex:1;min-width:0"><div style="font-size:.8rem;font-weight:600;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escHtml(r.title || '(başlıksız)') + '</div>'
       + '<div style="font-size:.68rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escHtml(r.url) + '</div></div>'
+      + '<button type="button" class="btn btn-secondary btn-sm" onclick="editReelTitle(' + i + ',\'' + key + '\')" style="flex-shrink:0" title="Başlığı düzenle">✏</button>'
       + '<button type="button" class="btn btn-danger btn-sm" onclick="removeReel(' + i + ',\'' + key + '\')" style="flex-shrink:0">Sil</button>'
       + '</div>';
   }).join('');
+}
+
+function editReelTitle(idx, key) {
+  key = key || 'vp';
+  var reel = _reelsState[key][idx];
+  if (!reel) return;
+  var current = reel.title || '';
+  var next = prompt('Reel başlığı (caption):', current);
+  if (next === null) return;
+  _reelsState[key][idx].title = next.trim();
+  renderReelsList(key);
 }
 
 async function addReel(key) {
