@@ -19079,9 +19079,20 @@ async function generateReport(type) {
   frameDoc.write(html);
   frameDoc.close();
 
-  // PDF Yazdır butonu
+  // PDF Yazdır butonu — Chrome iframe'te dosya adini parent title'dan cekiyor,
+  // bu yuzden yazdirma anina kadar gecici olarak parent title'i raporun adiyla degistiriyoruz.
   document.getElementById('report-print-btn').onclick = function() {
-    frame.contentWindow.print();
+    var _origParentTitle = document.title;
+    document.title = _reportTitle;
+    // Iframe title'i da garanti olsun
+    try { frame.contentWindow.document.title = _reportTitle; } catch(e) {}
+    setTimeout(function() {
+      frame.contentWindow.focus();
+      frame.contentWindow.print();
+      // Print diyalogu kapanmadan once title restore edilirse dosya adi degisebilir,
+      // bu yuzden 2sn sonra restore (kullanici ya indirmis ya iptal etmis olur)
+      setTimeout(function() { document.title = _origParentTitle; }, 2000);
+    }, 50);
     showToast('PDF kaydetme penceresi açıldı.', 'success');
   };
 
