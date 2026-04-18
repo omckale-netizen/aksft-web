@@ -18933,7 +18933,24 @@ async function generateReport(type) {
     '.no-print{margin-bottom:20px}' +
     '@media print{body{padding:20px}.no-print{display:none !important}@page{margin:15mm}}';
 
-  var html = '<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><title>Assos\'u Keşfet — İşletme Raporu</title><style>' + css + '</style></head><body>';
+  // Dinamik baslik + dosya adi — mekan adi + tarih
+  var _today = new Date();
+  var _dateISO = _today.toISOString().split('T')[0]; // 2026-04-18
+  var _singleVenue = type === 'single' ? draftData.venues.find(function(x){ return x.id === selectedVenue; }) : null;
+  var _reportTitle;
+  if (type === 'single' && _singleVenue) {
+    _reportTitle = (_singleVenue.title || 'Mekan') + ' — Rapor · ' + reportDate;
+  } else {
+    _reportTitle = 'Tüm Mekanlar Raporu · ' + reportDate;
+  }
+  // Turkce slugify (tr karakterleri, boslugu tire)
+  function _slugify(s) {
+    var trMap = {'ı':'i','İ':'i','ğ':'g','Ğ':'g','ü':'u','Ü':'u','ş':'s','Ş':'s','ö':'o','Ö':'o','ç':'c','Ç':'c'};
+    return String(s || '').replace(/[ıİğĞüÜşŞöÖçÇ]/g, function(c){return trMap[c];})
+      .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 50);
+  }
+
+  var html = '<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><title>' + _reportTitle + '</title><style>' + css + '</style></head><body>';
 
   if (type === 'single') {
     // TEK MEKAN RAPORU
@@ -19029,7 +19046,9 @@ async function generateReport(type) {
   html += '<div class="footer">Bu rapor Assos\'u Keşfet yönetim paneli tarafından otomatik oluşturulmuştur.<br>assosukesfet.com · ' + reportDate + '</div>';
   html += '</body></html>';
 
-  var fileName = (type === 'single' ? 'mekan-raporu' : 'tum-mekanlar-raporu') + '-' + new Date().toISOString().split('T')[0];
+  var fileName = (type === 'single' && _singleVenue)
+    ? (_slugify(_singleVenue.title) + '-rapor-' + _dateISO)
+    : ('tum-mekanlar-raporu-' + _dateISO);
 
   // Rapor önizleme modalı göster
   var overlay = document.getElementById('report-overlay');
