@@ -2055,6 +2055,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                 <input type="file" id="vpf-reel-thumb-input" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="addReelManual(this.files[0],'vp')">
               </div>
               <div id="vpf-reels-list" style="display:flex;flex-direction:column;gap:6px"></div>
+              <div style="display:flex;justify-content:flex-end;margin-top:6px">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="refreshReels('vp')" style="font-size:.7rem">🔄 Tüm Caption'ları Yenile</button>
+              </div>
               <div id="vpf-reel-status" style="font-size:.72rem;color:var(--text-muted);margin-top:6px"></div>
             </div>
             <div class="form-group">
@@ -4141,6 +4144,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             <input type="file" id="vnf-reel-thumb-input" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="addReelManual(this.files[0],'vn')">
           </div>
           <div id="vnf-reels-list" style="display:flex;flex-direction:column;gap:6px"></div>
+          <div style="display:flex;justify-content:flex-end;margin-top:6px">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="refreshReels('vn')" style="font-size:.7rem">🔄 Tüm Caption'ları Yenile</button>
+          </div>
           <div id="vnf-reel-status" style="font-size:.72rem;color:var(--text-muted);margin-top:6px"></div>
         </div>
 
@@ -13291,6 +13297,57 @@ function removeReel(idx, key) {
   key = key || 'vp';
   _reelsState[key].splice(idx, 1);
   renderReelsList(key);
+}
+
+// Mevcut reel'lerin title/thumbnail/video alanlarini yeniden cek — caption duzelme icin
+async function refreshReels(key) {
+  key = key || 'vp';
+  var arr = _reelsState[key] || [];
+  var statusEl = document.getElementById(key + 'f-reel-status');
+  if (!arr.length) { statusEl.textContent = 'Yenilenecek reel yok.'; statusEl.style.color = 'var(--text-muted)'; return; }
+  if (!confirm(arr.length + ' reel yeniden cekilecek. Devam edilsin mi?')) return;
+
+  var ok = 0, fail = 0;
+  try {
+    var token = await firebase.auth().currentUser.getIdToken();
+    for (var i = 0; i < arr.length; i++) {
+      var reel = arr[i];
+      if (!reel.url) { fail++; continue; }
+      statusEl.textContent = '🔄 ' + (i + 1) + '/' + arr.length + ' yenileniyor...';
+      statusEl.style.color = 'var(--text-muted)';
+      try {
+        var resp = await fetch('/api/ig-thumbnail', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ url: reel.url })
+        });
+        var data = await resp.json();
+        if (resp.ok && data.thumbnailUrl) {
+          // Manuel yazilmis title'i ezmeyelim; sadece IG'den cekilenleri guncelle
+          // Kisa/"Instagram Reel" gibi placeholder ise degistir, yeterince uzunsa koru
+          var looksPlaceholder = !reel.title || reel.title === 'Instagram Reel' || reel.title.length < 80;
+          if (looksPlaceholder && data.title) reel.title = data.title;
+          reel.thumbnailUrl = data.thumbnailUrl;
+          if (data.videoUrl) reel.videoUrl = data.videoUrl;
+          if (data.shortcode) reel.shortcode = data.shortcode;
+          ok++;
+        } else {
+          fail++;
+        }
+      } catch(err) {
+        console.error('Reel yenileme hatasi:', reel.url, err);
+        fail++;
+      }
+    }
+    renderReelsList(key);
+    statusEl.textContent = '✓ ' + ok + ' reel yenilendi' + (fail ? ' (' + fail + ' basarisiz)' : '') + ' — Kaydet\'e basmayi unutmayin';
+    statusEl.style.color = fail ? '#D97706' : 'var(--green)';
+    setTimeout(function() { statusEl.textContent = ''; }, 8000);
+  } catch(err) {
+    console.error('refreshReels global hata:', err);
+    statusEl.textContent = '❌ Hata: ' + (err.message || 'bilinmeyen');
+    statusEl.style.color = '#E53E3E';
+  }
 }
 
 function openVPModal(id) {

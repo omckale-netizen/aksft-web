@@ -216,9 +216,17 @@ window.akBuildReelsHtml = function(reels, opts) {
     var embedUrl = sc ? 'https://www.instagram.com/p/' + sc + '/embed' : '';
     var titleRaw = _cleanIgTitle(reel.title || '');
     var caption = titleRaw;
-    if (titleRaw.length > 160) {
-      var sentEnd = titleRaw.substring(0, 240).search(/[.!?…](\s|$)/);
-      caption = (sentEnd >= 40 ? titleRaw.substring(0, sentEnd + 1) : titleRaw.substring(0, 160) + '…');
+    if (titleRaw) {
+      // Ilk 2 cumleyi al (backend zaten boyle kaydediyor, emniyet icin burada da)
+      var _sregex = /[.!?…]+(\s|$)/g;
+      var _scount = 0, _slast = 0, _m;
+      while ((_m = _sregex.exec(titleRaw)) !== null) {
+        _slast = _m.index + _m[0].length;
+        _scount++;
+        if (_scount >= 2) break;
+      }
+      if (_scount > 0) caption = titleRaw.substring(0, _slast).trim();
+      if (caption.length > 400) caption = caption.substring(0, 300).trim() + '…';
     }
     if (caption && !/[.!?…]$/.test(caption)) caption += '…';
     var thumb = reel.thumbnailUrl ? _escAttr(reel.thumbnailUrl) : '';

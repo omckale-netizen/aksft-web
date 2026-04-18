@@ -72,7 +72,58 @@ export async function onRequestPost(context) {
     if (igPrefixMatch && igPrefixMatch[1]) title = igPrefixMatch[1];
     title = title.replace(/^["'\u201C\u201D\u2018\u2019\s]+|["'\u201C\u201D\u2018\u2019\s]+$/g, '');
 
-    // 3b) Video URL'ini cekmeyi dene — cok katmanli fallback
+    // 3a) Embed/captioned HTML — hem video URL'i hem tam caption icin kaynak
+    let embedHtml = '';
+    try {
+      const embedResp = await fetch('https://www.instagram.com/' + match[1] + '/' + shortcode + '/embed/captioned/', {
+        headers: IG_HEADERS
+      });
+      if (embedResp.ok) embedHtml = await embedResp.text();
+    } catch(e) { /* embed fallback hatali, sorun degil */ }
+
+    // 3b) Tam caption'i embed HTML'den cek — multi-strategy
+    // og:title ~80 karakter kesiyor; embed og:description + JSON full caption'i icerir
+    let fullCaption = '';
+    if (embedHtml) {
+      // Strateji 1: og:description meta — genellikle tam caption
+      const embOgDesc = embedHtml.match(/<meta\s+property=["']og:description["']\s+content=["']([^"']+)["']/i);
+      if (embOgDesc) fullCaption = decodeHtmlEntities(embOgDesc[1]);
+      // Strateji 2: edge_media_to_caption JSON
+      if (!fullCaption) {
+        const edgeCap = embedHtml.match(/"edge_media_to_caption"\s*:\s*\{\s*"edges"\s*:\s*\[\s*\{\s*"node"\s*:\s*\{\s*"text"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+        if (edgeCap) fullCaption = unescapeJsonString(edgeCap[1]);
+      }
+      // Strateji 3: caption.text JSON
+      if (!fullCaption) {
+        const capText = embedHtml.match(/"caption"\s*:\s*\{\s*"text"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+        if (capText) fullCaption = unescapeJsonString(capText[1]);
+      }
+      // Strateji 4: <div class="Caption">...<p><span>CAPTION</span></p></div>
+      if (!fullCaption) {
+        const capDiv = embedHtml.match(/<div[^>]*class=["'][^"']*Caption[^"']*["'][^>]*>([\s\S]*?)<\/div>\s*<\/div>/i);
+        if (capDiv) {
+          // Kullanici adi <a> linkini cikar, sonra kalan metni al
+          let inner = capDiv[1].replace(/<a[^>]*class=["'][^"']*CaptionUsername[^"']*["'][^>]*>[\s\S]*?<\/a>/gi, '');
+          inner = inner.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+          if (inner) fullCaption = decodeHtmlEntities(inner);
+        }
+      }
+    }
+
+    // og:title prefix temizle (full caption da bazen ayni prefix icerir)
+    if (fullCaption) {
+      const m = fullCaption.match(/Instagram\s*:\s*["'\u201C\u201D\u2018\u2019]?\s*(.+?)\s*["'\u201C\u201D\u2018\u2019]?\s*$/s);
+      if (m && m[1]) fullCaption = m[1];
+      fullCaption = fullCaption.replace(/^["'\u201C\u201D\u2018\u2019\s]+|["'\u201C\u201D\u2018\u2019\s]+$/g, '');
+    }
+
+    // Tam caption og:title'dan uzunsa onu kullan (og:title ~80 karakterde kesiyor)
+    if (fullCaption && fullCaption.length > title.length) {
+      // Ilk 2 cumle veya 400 karakter (hangisi daha kisa ise)
+      title = extractFirstNSentences(fullCaption, 2, 400);
+    }
+
+    // 3c) Video URL'ini cekmeyi dene — cok katmanli fallback
     let videoOriginalUrl = '';
     // Strateji 1: og:video / og:video:secure_url meta tag
     const videoMatch = html.match(/<meta\s+property=["']og:video:secure_url["']\s+content=["']([^"']+)["']/i)
@@ -86,32 +137,23 @@ export async function onRequestPost(context) {
         || html.match(/"video_versions"\s*:\s*\[\s*\{[^}]*"url"\s*:\s*"([^"]+)"/i)
         || html.match(/"playable_url"\s*:\s*"([^"]+)"/i);
       if (jsonVideoMatch) {
-        // JSON escape'leri decode et (\u0026 -> &, \/ -> /)
         videoOriginalUrl = jsonVideoMatch[1]
           .replace(/\\u0026/g, '&')
           .replace(/\\\//g, '/')
           .replace(/\\"/g, '"');
       }
     }
-    // Strateji 3: Embed sayfasindan dene (daha az koruma)
-    if (!videoOriginalUrl) {
-      try {
-        const embedResp = await fetch('https://www.instagram.com/' + match[1] + '/' + shortcode + '/embed/captioned/', {
-          headers: IG_HEADERS
-        });
-        if (embedResp.ok) {
-          const embedHtml = await embedResp.text();
-          const embedVideo = embedHtml.match(/"video_url"\s*:\s*"([^"]+)"/i)
-            || embedHtml.match(/<video[^>]+src=["']([^"']+)["']/i)
-            || embedHtml.match(/"contentUrl"\s*:\s*"([^"]+\.mp4[^"]*)"/i);
-          if (embedVideo) {
-            videoOriginalUrl = embedVideo[1]
-              .replace(/\\u0026/g, '&')
-              .replace(/\\\//g, '/')
-              .replace(/\\"/g, '"');
-          }
-        }
-      } catch(e) { /* embed fallback hatali, sorun degil */ }
+    // Strateji 3: Embed HTML'den (yukarida zaten fetch ettik)
+    if (!videoOriginalUrl && embedHtml) {
+      const embedVideo = embedHtml.match(/"video_url"\s*:\s*"([^"]+)"/i)
+        || embedHtml.match(/<video[^>]+src=["']([^"']+)["']/i)
+        || embedHtml.match(/"contentUrl"\s*:\s*"([^"]+\.mp4[^"]*)"/i);
+      if (embedVideo) {
+        videoOriginalUrl = embedVideo[1]
+          .replace(/\\u0026/g, '&')
+          .replace(/\\\//g, '/')
+          .replace(/\\"/g, '"');
+      }
     }
 
     // 4) Gorseli indir
@@ -288,6 +330,38 @@ function json(body, status, cors) {
     status,
     headers: { ...cors, 'Content-Type': 'application/json' },
   });
+}
+
+// JSON string escape'lerini decode et (\n, \", \u0026, \/ vb.)
+function unescapeJsonString(s) {
+  if (!s) return '';
+  return s
+    .replace(/\\u([0-9a-fA-F]{4})/g, function(_, hex) { return String.fromCharCode(parseInt(hex, 16)); })
+    .replace(/\\n/g, '\n')
+    .replace(/\\r/g, '')
+    .replace(/\\t/g, ' ')
+    .replace(/\\"/g, '"')
+    .replace(/\\\//g, '/')
+    .replace(/\\\\/g, '\\');
+}
+
+// Bir metinden ilk N cumleyi cikar. maxChars ile toplam uzunluk sinirini koru.
+function extractFirstNSentences(text, n, maxChars) {
+  if (!text) return '';
+  const clean = text.replace(/\s+/g, ' ').trim();
+  // . ! ? veya … sonrasi bosluk/son — cumle sinirlari
+  const regex = /[.!?…]+(\s|$)/g;
+  let count = 0;
+  let lastEnd = 0;
+  let match;
+  while ((match = regex.exec(clean)) !== null) {
+    lastEnd = match.index + match[0].length;
+    count++;
+    if (count >= n) break;
+  }
+  let result = count > 0 ? clean.substring(0, lastEnd).trim() : clean;
+  if (maxChars && result.length > maxChars) result = result.substring(0, maxChars).trim() + '…';
+  return result;
 }
 
 // HTML entity decode — &#x2019; -> ’ , &amp; -> & , &#39; -> ' vb.
