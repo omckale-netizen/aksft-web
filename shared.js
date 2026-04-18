@@ -3447,6 +3447,17 @@ function renderVenuePage(venueId) {
           '</div>';
         })()}
 
+        <!-- Instagram Reels -->
+        ${(Array.isArray(v.instagramReels) && v.instagramReels.length > 0) ? (
+          '<div class="vp-section fade-up">' +
+          window.akBuildReelsHtml(v.instagramReels, {
+            idPrefix: 'reel-' + v.id + '-',
+            sectionTitle: '📹 ' + v.title + ' Hakkında Videolar',
+            locationText: v.title
+          }) +
+          '</div>'
+        ) : ''}
+
         <!-- Komşu Mekanlar (aynı konum) -->
         ${(() => {
           const neighbors = (DATA.venues || []).filter(x => x.id !== v.id && x.location && v.location && x.location.toLowerCase() === v.location.toLowerCase()).slice(0, 4);
@@ -3513,17 +3524,6 @@ function renderVenuePage(venueId) {
               </a>`).join('')}
           </div>
         </div>` : ''}
-
-        <!-- Instagram Reels -->
-        ${(Array.isArray(v.instagramReels) && v.instagramReels.length > 0) ? (
-          '<div class="vp-section fade-up">' +
-          window.akBuildReelsHtml(v.instagramReels, {
-            idPrefix: 'reel-' + v.id + '-',
-            sectionTitle: '📹 ' + v.title + ' Hakkında Videolar',
-            locationText: v.title
-          }) +
-          '</div>'
-        ) : ''}
 
         <!-- Visit note -->
         <div class="vp-section fade-up">
