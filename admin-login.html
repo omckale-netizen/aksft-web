@@ -454,6 +454,9 @@ async function signInWithGoogle() {
 
   try {
     btn.disabled = true;
+    // Flag — onAuthStateChanged'in Firebase auth basarili olur olmaz admin.html'e
+    // redirect etmesini engelle. Yetki check'i burada tamamlansin.
+    window._googleSignInInProgress = true;
     const provider = new firebase.auth.GoogleAuthProvider();
     // Her zaman hesap seçim ekranini goster (başka hesapla gecme kolay)
     provider.setCustomParameters({ prompt: 'select_account' });
@@ -487,12 +490,14 @@ async function signInWithGoogle() {
 
     if (!hasAccess) {
       await fbAuth.signOut();
-      errEl.textContent = 'Bu Google hesabı yönetim paneline yetkili değil.';
+      window._googleSignInInProgress = false;
+      errEl.textContent = '⚠️ Bu Google hesabı yönetim paneline yetkili değil. Lütfen yetkili bir hesapla giriş yapın.';
       btn.disabled = false;
       return;
     }
 
     clearLoginAttempts();
+    window._googleSignInInProgress = false;
     errEl.style.color = '#86EFAC';
     errEl.textContent = '✓ Giriş başarılı! Yönlendiriliyorsunuz...';
     localStorage.setItem('lastActivity', Date.now().toString());
@@ -521,6 +526,7 @@ async function signInWithGoogle() {
     window.location.href = 'admin.html';
   } catch (err) {
     btn.disabled = false;
+    window._googleSignInInProgress = false;
     if (err.code === 'auth/cancelled-popup-request') {
       errEl.textContent = ''; // Zaten baska popup acik, sessiz gec
       return;
@@ -651,10 +657,11 @@ async function checkAuth() {
 }
 
 // Zaten giriş yapmışsa direkt admin'e yönlendir
+// Ama Google sign-in akisi sirasinda calisma — yetki check'i tamamlansin
 fbAuth.onAuthStateChanged((user) => {
-  if (user) {
+  if (user && !window._googleSignInInProgress) {
     window.location.href = 'admin.html';
-  } else {
+  } else if (!user) {
     document.getElementById('loading').classList.add('hidden');
     document.getElementById('login-box').classList.remove('hidden');
   }
