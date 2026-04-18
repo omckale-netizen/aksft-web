@@ -2386,6 +2386,24 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             </div>
           </div>
 
+          <!-- Analytics Temizligi -->
+          <div class="backup-card" style="border-color:rgba(212,147,90,.3);margin-bottom:20px">
+            <div class="backup-card-head" style="background:rgba(212,147,90,.05)">
+              <h4 style="color:#B85A1A">📊 Test Analytics Temizliği</h4>
+            </div>
+            <div class="backup-card-body">
+              <p style="margin-bottom:12px">Yayın öncesi test verilerini siler — belirtilen tarih <strong>dahil</strong> öncesine ait tüm <code>analytics_events</code> kayıtları silinir. Ayrıca <code>analytics</code> toplam sayaçları sıfırlanır.</p>
+              <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+                <label style="font-size:.8rem;font-weight:600">Kesim Tarihi (dahil):</label>
+                <input type="date" id="ana-cleanup-date" value="2026-04-17" style="padding:6px 10px;border:1.5px solid rgba(0,0,0,.1);border-radius:8px;font-size:.82rem">
+                <button class="btn btn-secondary" onclick="anaCleanupPreview()" style="font-size:.78rem">🔍 Önizle (Kaç kayıt silinecek?)</button>
+              </div>
+              <div id="ana-cleanup-preview" style="font-size:.78rem;color:var(--text-muted);margin-bottom:12px;min-height:20px"></div>
+              <button class="btn btn-danger" onclick="anaCleanupExecute()" style="font-size:.8rem" id="ana-cleanup-btn" disabled>🗑 Sil ve Sıfırla</button>
+              <div id="ana-cleanup-status" style="font-size:.78rem;margin-top:10px"></div>
+            </div>
+          </div>
+
           <!-- Danger Zone -->
           <div class="backup-card" style="border-color:rgba(229,62,62,.2)">
             <div class="backup-card-head" style="background:rgba(229,62,62,.03)">
@@ -14450,6 +14468,90 @@ function confirmReset() {
       showToast('Tum degisiklikler sifirlandi.', 'success');
     }
   );
+}
+
+// Analytics test verisi temizligi — kesim tarihi (dahil) oncesini siler
+var _anaCleanupReady = false;
+async function anaCleanupPreview() {
+  var dateInp = document.getElementById('ana-cleanup-date');
+  var prevEl = document.getElementById('ana-cleanup-preview');
+  var btnEl = document.getElementById('ana-cleanup-btn');
+  var statusEl = document.getElementById('ana-cleanup-status');
+  statusEl.textContent = '';
+  if (!dateInp.value) { prevEl.textContent = '❌ Tarih secin.'; prevEl.style.color = 'var(--red)'; return; }
+
+  var cutoff = dateInp.value; // YYYY-MM-DD
+  prevEl.textContent = '🔍 Sayım yapılıyor...';
+  prevEl.style.color = 'var(--text-muted)';
+  try {
+    // date <= cutoff kayitlari (analytics_events.date alanı YYYY-MM-DD)
+    var snap = await db.collection('analytics_events').where('date', '<=', cutoff).get();
+    var count = snap.size;
+    if (count === 0) {
+      prevEl.innerHTML = '✓ <strong>' + cutoff + '</strong> tarihine kadar silinecek kayıt yok.';
+      prevEl.style.color = 'var(--green)';
+      btnEl.disabled = true;
+      _anaCleanupReady = false;
+      return;
+    }
+    prevEl.innerHTML = '📋 <strong>' + count + '</strong> event silinecek (<strong>' + cutoff + '</strong> ve öncesi) + analytics toplam sayaçları sıfırlanacak. İşlem geri alınamaz.';
+    prevEl.style.color = '#B85A1A';
+    btnEl.disabled = false;
+    _anaCleanupReady = true;
+  } catch(err) {
+    console.error('Preview hatasi:', err);
+    prevEl.textContent = '❌ Hata: ' + err.message;
+    prevEl.style.color = 'var(--red)';
+    btnEl.disabled = true;
+    _anaCleanupReady = false;
+  }
+}
+
+async function anaCleanupExecute() {
+  if (!_anaCleanupReady) { showToast('Önce "Önizle" butonuna basın', 'info'); return; }
+  var dateInp = document.getElementById('ana-cleanup-date');
+  var statusEl = document.getElementById('ana-cleanup-status');
+  var btnEl = document.getElementById('ana-cleanup-btn');
+  var cutoff = dateInp.value;
+  // Ekstra onay
+  var confirmText = prompt('Bu işlem geri alınamaz. Onaylamak için "SIL" yazın:');
+  if (!confirmText || confirmText.trim().toUpperCase() !== 'SIL') {
+    statusEl.textContent = 'İptal edildi.';
+    statusEl.style.color = 'var(--text-muted)';
+    return;
+  }
+  btnEl.disabled = true;
+  statusEl.style.color = 'var(--text-muted)';
+  statusEl.textContent = '⏳ Siliniyor...';
+  try {
+    // 1) analytics_events: batch delete (Firestore 500/batch limit)
+    var totalDeleted = 0;
+    while (true) {
+      var snap = await db.collection('analytics_events').where('date', '<=', cutoff).limit(400).get();
+      if (snap.empty) break;
+      var batch = db.batch();
+      snap.docs.forEach(function(d) { batch.delete(d.ref); });
+      await batch.commit();
+      totalDeleted += snap.size;
+      statusEl.textContent = '⏳ ' + totalDeleted + ' event silindi, devam ediyor...';
+    }
+    // 2) analytics (totals) collection'ini sifirla
+    var totalsSnap = await db.collection('analytics').get();
+    if (!totalsSnap.empty) {
+      var tbatch = db.batch();
+      totalsSnap.docs.forEach(function(d) { tbatch.delete(d.ref); });
+      await tbatch.commit();
+    }
+    statusEl.innerHTML = '✓ <strong>' + totalDeleted + '</strong> event silindi. analytics toplam sayaçları sıfırlandı. Sayfayı yenileyin.';
+    statusEl.style.color = 'var(--green)';
+    _anaCleanupReady = false;
+    addBackupLog && addBackupLog('🗑', totalDeleted + ' test event silindi (' + cutoff + ' ve öncesi)');
+  } catch(err) {
+    console.error('Cleanup hatasi:', err);
+    statusEl.textContent = '❌ Hata: ' + err.message;
+    statusEl.style.color = 'var(--red)';
+    btnEl.disabled = false;
+  }
 }
 
 /* ══════════════════════════════════════════════════
