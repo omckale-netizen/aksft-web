@@ -19,12 +19,21 @@ export function vanityRedirect(context, utm) {
     : (p) => { try { p.catch(() => {}); } catch(e) {} };
 
   const url = new URL(request.url);
+  // Query param override — kampanya-spesifik linkler icin (?m=dm&c=osmanbey&ct=qr)
+  // Source genelde sabit (endpoint'in kendisi), ama m/c/ct istege bagli override
+  const q = url.searchParams;
+  const mediumOverride = (q.get('m') || '').trim().slice(0, 60);
+  const campaignOverride = (q.get('c') || '').trim().slice(0, 100);
+  const contentOverride = (q.get('ct') || '').trim().slice(0, 100);
+
   const params = new URLSearchParams({
     utm_source: utm.source,
-    utm_medium: utm.medium
+    utm_medium: mediumOverride || utm.medium
   });
-  if (utm.campaign) params.set('utm_campaign', utm.campaign);
-  if (utm.content) params.set('utm_content', utm.content);
+  const finalCampaign = campaignOverride || utm.campaign;
+  const finalContent = contentOverride || utm.content;
+  if (finalCampaign) params.set('utm_campaign', finalCampaign);
+  if (finalContent) params.set('utm_content', finalContent);
   const target = url.origin + '/?' + params.toString();
 
   // Tıklama sayacı — Firestore'a "vanity_click" eventi (dropout ölçümü için)
@@ -37,15 +46,15 @@ export function vanityRedirect(context, utm) {
       fields: {
         type: { stringValue: 'vanity_click' },
         source: { stringValue: String(utm.source).slice(0, 60) },
-        medium: { stringValue: String(utm.medium || 'bio').slice(0, 60) },
+        medium: { stringValue: String(mediumOverride || utm.medium || 'bio').slice(0, 60) },
         path: { stringValue: String(url.pathname).slice(0, 200) },
         timestamp: { stringValue: now.toISOString() },
         date: { stringValue: now.toISOString().split('T')[0] },
         hour: { integerValue: String(now.getHours()) }
       }
     };
-    if (utm.campaign) clickEvent.fields.campaign = { stringValue: String(utm.campaign).slice(0, 100) };
-    if (utm.content) clickEvent.fields.content = { stringValue: String(utm.content).slice(0, 100) };
+    if (finalCampaign) clickEvent.fields.campaign = { stringValue: String(finalCampaign).slice(0, 100) };
+    if (finalContent) clickEvent.fields.content = { stringValue: String(finalContent).slice(0, 100) };
     if (ua) clickEvent.fields.userAgent = { stringValue: ua.slice(0, 300) };
     if (ref) clickEvent.fields.referrer = { stringValue: ref.slice(0, 200) };
     if (cf.country) clickEvent.fields.country = { stringValue: String(cf.country).slice(0, 10) };
