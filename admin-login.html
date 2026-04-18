@@ -487,7 +487,9 @@ async function handleGoogleSignInResult(user) {
   let hasAccess = false;
   try {
     const superAdmins = ['info@onyedimedya.com', 'onyedimedya@gmail.com'];
+    console.log('[AUTH] handleGoogleSignInResult email:', user.email, 'checking superAdmin list:', superAdmins);
     if (user.email && superAdmins.includes(user.email.toLowerCase())) {
+      console.log('[AUTH] Matched super admin, hasAccess=true');
       hasAccess = true;
     } else {
       const db = firebase.firestore ? firebase.firestore() : null;
@@ -643,7 +645,9 @@ async function checkAuth() {
   let handledRedirect = false;
   try {
     const result = await fbAuth.getRedirectResult();
+    console.log('[AUTH] getRedirectResult:', result);
     if (result && result.user) {
+      console.log('[AUTH] Redirect user email:', result.user.email);
       handledRedirect = true;
       try { sessionStorage.removeItem('googleSignInPending'); } catch(e) {}
       await handleGoogleSignInResult(result.user);
