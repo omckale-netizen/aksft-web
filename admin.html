@@ -5117,7 +5117,14 @@ async function uploadImageToServer(blob, path) {
   try {
     showToast('Gorsel yukleniyor...', 'success');
     const ref = fbStorage.ref(path);
-    await ref.put(blob);
+    // Path uzantisindan contentType belirle (Firebase serve ederken dogru header gonderir)
+    var ct = (blob && blob.type) || '';
+    if (!ct) {
+      if (/\.webp$/i.test(path)) ct = 'image/webp';
+      else if (/\.png$/i.test(path)) ct = 'image/png';
+      else ct = 'image/jpeg';
+    }
+    await ref.put(blob, { contentType: ct });
     const url = await ref.getDownloadURL();
     showToast('Gorsel yuklendi.', 'success');
     return url;
