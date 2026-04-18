@@ -521,18 +521,31 @@ async function signInWithGoogle() {
     window.location.href = 'admin.html';
   } catch (err) {
     btn.disabled = false;
-    if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
-      errEl.textContent = ''; // Kullanici iptal etti, hata gosterme
+    if (err.code === 'auth/cancelled-popup-request') {
+      errEl.textContent = ''; // Zaten baska popup acik, sessiz gec
+      return;
+    }
+    if (err.code === 'auth/popup-closed-by-user') {
+      errEl.textContent = 'Popup kapatıldı. Tekrar deneyin — üçüncü taraf çerezler engelliyse Chrome\'da deneyin.';
       return;
     }
     if (err.code === 'auth/popup-blocked') {
-      errEl.textContent = 'Popup engellendi. Tarayicinizdan popuplara izin verin.';
+      errEl.textContent = 'Popup engellendi. Tarayıcı ayarlarından popup\'a izin verin.';
       return;
     }
     if (err.code === 'auth/account-exists-with-different-credential') {
-      errEl.textContent = 'Bu e-posta zaten farklı yöntemle kayıtlı. Önce o yöntemle giriş yapın.';
+      errEl.textContent = 'Bu e-posta farklı bir yöntemle kayıtlı. Önce o yöntemle giriş yapın.';
       return;
     }
+    if (err.code === 'auth/unauthorized-domain') {
+      errEl.textContent = 'Bu domain OAuth için yetkili değil. Firebase Console → Authentication → Settings → Authorized domains kontrol edin.';
+      return;
+    }
+    if (err.code === 'auth/network-request-failed') {
+      errEl.textContent = 'Ağ hatası. İnternet bağlantınızı kontrol edip tekrar deneyin.';
+      return;
+    }
+    console.error('Google sign-in error:', err);
     errEl.textContent = 'Google giriş hatası: ' + (err.message || err.code || 'bilinmeyen');
   }
 }
