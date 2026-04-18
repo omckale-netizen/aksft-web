@@ -5552,16 +5552,38 @@ function renderTsTimeseries(dateSourceCounts) {
 // ═══ MİNİ ARAÇLAR ═══
 function showMtTab(tab, btn) {
   document.querySelectorAll('#page-minitools .mt-tab').forEach(function(b) { b.classList.remove('active'); });
-  if (btn) btn.classList.add('active');
+  if (btn) {
+    btn.classList.add('active');
+  } else {
+    // btn verilmemis — tab key'ine gore butonu bul
+    var targetBtn = document.querySelector('#page-minitools .mt-tab[onclick*="showMtTab(\'' + tab + '\'"]');
+    if (targetBtn) targetBtn.classList.add('active');
+  }
   document.querySelectorAll('#page-minitools .mt-pane').forEach(function(p) {
     p.style.display = (p.getAttribute('data-pane') === tab) ? '' : 'none';
   });
+  // Aktif tab'i localStorage'a kaydet (F5 sonrasi ayni tab'a donus icin)
+  try { localStorage.setItem('mt_active_tab', tab); } catch(e) {}
   // İlk açılışlarda init
   if (tab === 'emoji' && !window._emojiInitialized) { mtEmojiRender(); window._emojiInitialized = true; }
   if (tab === 'color' && !window._colorInitialized) { mtColorUpdate(); window._colorInitialized = true; }
   if (tab === 'utm' && !window._utmInitialized) { mtUtmUpdate(); window._utmInitialized = true; }
   // Lucide ikonları yeni render olanlar için etkinleştir
   if (window.lucide && typeof lucide.createIcons === 'function') try { lucide.createIcons(); } catch(e) {}
+}
+
+// Mini Araclar sayfasi acilinca son aktif tab'i geri yukle
+function restoreMtTab() {
+  var saved;
+  try { saved = localStorage.getItem('mt_active_tab'); } catch(e) {}
+  if (!saved) return;
+  // Gecerli tab'larla sinirla
+  var valid = ['maps', 'emoji', 'color', 'utm'];
+  if (valid.indexOf(saved) === -1) return;
+  // Eger zaten aktifse tekrar calistirma
+  var activeBtn = document.querySelector('#page-minitools .mt-tab.active');
+  if (activeBtn && activeBtn.getAttribute('onclick') && activeBtn.getAttribute('onclick').indexOf("'" + saved + "'") > -1) return;
+  showMtTab(saved);
 }
 
 // --- UTM LİNK ÜRETİCİ ---
@@ -10634,7 +10656,7 @@ showPage = function(page) {
   if (page === 'gallery' && galItems.length === 0) galLoadItems();
   if (page === 'categories') { renderCatList(); renderPlaceCatList(); }
   if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); loadHeroHistory(); loadOgHistory(); updatePasswordDate(); loadLoginHistory(); syncPresenceToggle(); }
-  if (page === 'minitools') { if (window.lucide && lucide.createIcons) try { lucide.createIcons(); } catch(e) {} }
+  if (page === 'minitools') { restoreMtTab(); if (window.lucide && lucide.createIcons) try { lucide.createIcons(); } catch(e) {} }
   if (page === 'security') runSecurityCheck();
   if (page === 'export') { loadBackupList(); updateAutoBackupUI(); }
 };
