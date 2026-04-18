@@ -4408,7 +4408,10 @@ function renderVillagePage(villageId) {
 
       // ═══ MEDIA — video/thumbnail 4:5 ═══
       bodyHtml += '<div style="position:relative;aspect-ratio:4/5;background:#000;overflow:hidden;">';
-      bodyHtml += '<div class="ak-reel-cover" style="position:absolute;inset:0;background:#1A2744 center/cover ' + (thumb ? 'url(\'' + thumb + '\')' : '') + ';cursor:pointer;" onclick="akPlayReel(\'' + reelKey + '\', \'' + escAttr(playSrc) + '\', \'' + playType + '\')">';
+      bodyHtml += '<div class="ak-reel-cover" style="position:absolute;inset:0;background:#1A2744;cursor:pointer;" onclick="akPlayReel(\'' + reelKey + '\', \'' + escAttr(playSrc) + '\', \'' + playType + '\')">';
+      if (thumb) {
+        bodyHtml += '<img src="' + thumb + '" alt="" loading="lazy" decoding="async" onload="this.style.opacity=1" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .35s ease;">';
+      }
       bodyHtml += '<div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 0%,transparent 70%,rgba(0,0,0,.2) 100%);"></div>';
       bodyHtml += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">';
       bodyHtml += '<div style="width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(0,0,0,.35);transition:transform .2s;" onmouseover="this.style.transform=\'scale(1.08)\'" onmouseout="this.style.transform=\'\'">';
