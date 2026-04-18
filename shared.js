@@ -6,13 +6,26 @@
 /* ═══════════════════════════════════════════
    3rd-PARTY ANALYTICS LAZY LOADER
    Facebook Pixel + Clarity + GA4 ertelenerek yüklenir.
-   FCP/TBT iyileştirmesi: İlk kullanıcı etkileşiminde veya 3s idle sonra yüklenir.
+   - LCP (2.7s) bitsin diye timeout 5s
+   - Ilk kullanici etkilesiminden once 1s grace period (LCP'yi bozmasin)
+   - Arka planda (hidden tab) acilan sayfalarda hic yuklenmez
 ═══════════════════════════════════════════ */
 (function(){
   if (window._analyticsLoaded) return;
   var loaded = false;
+  var interactionAllowed = false;
   function loadAnalytics() {
     if (loaded) return;
+    // Sayfa arka planda ise analytics yukleme (kullanici goremedi zaten)
+    if (document.visibilityState === 'hidden') {
+      document.addEventListener('visibilitychange', function onVis() {
+        if (document.visibilityState === 'visible') {
+          document.removeEventListener('visibilitychange', onVis);
+          loadAnalytics();
+        }
+      });
+      return;
+    }
     loaded = true;
     window._analyticsLoaded = true;
     try {
@@ -36,13 +49,18 @@
       document.head.appendChild(gs);
     } catch(e) {}
   }
-  // Kullanıcı etkileşiminde hemen yükle
+  // Kullanici etkilesimi — 1s grace period sonra dinle (LCP'yi bozmasin)
+  setTimeout(function() { interactionAllowed = true; }, 1000);
   var events = ['mousemove','touchstart','scroll','keydown','click'];
-  function onInteract(){ events.forEach(function(e){ window.removeEventListener(e, onInteract); }); loadAnalytics(); }
-  events.forEach(function(e){ window.addEventListener(e, onInteract, { passive: true, once: true }); });
-  // Fallback: 3 saniye sonra idle'da yükle
-  if (window.requestIdleCallback) requestIdleCallback(loadAnalytics, { timeout: 3000 });
-  else setTimeout(loadAnalytics, 3000);
+  function onInteract(){
+    if (!interactionAllowed) return;
+    events.forEach(function(e){ window.removeEventListener(e, onInteract); });
+    loadAnalytics();
+  }
+  events.forEach(function(e){ window.addEventListener(e, onInteract, { passive: true }); });
+  // Fallback: 5s sonra idle'da yukle (LCP 2.7s + tampon)
+  if (window.requestIdleCallback) requestIdleCallback(loadAnalytics, { timeout: 5000 });
+  else setTimeout(loadAnalytics, 5000);
 })();
 
 // Türkçe bulunma eki (-da/-de/-ta/-te) — son ünlüye göre
