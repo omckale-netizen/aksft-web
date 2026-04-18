@@ -19220,12 +19220,18 @@ async function _wmMigrateOne(target) {
     return { skipped: true };
   }
 
-  // 3. Storage path turet (eski path uzantisini .webp yap)
+  // 3. Storage path turet — collision olmasin diye dosya adina _webp suffix ekle
+  // Ornegin '.../sunaba/4.jpg' -> '.../sunaba/4_webp.webp'
+  // Boylece mevcut '.webp' dosyalarla cakisma olmaz.
   var origPath = _wmExtractStoragePath(target.url);
   if (!origPath) throw new Error('Storage path çözülemedi');
-  var newPath = origPath.replace(/\.[^.\/]+$/, '') + '.webp';
+  var lastSlash = origPath.lastIndexOf('/');
+  var dir = lastSlash >= 0 ? origPath.substring(0, lastSlash + 1) : '';
+  var filename = lastSlash >= 0 ? origPath.substring(lastSlash + 1) : origPath;
+  var baseName = filename.replace(/\.[^.]+$/, '');
+  var newPath = dir + baseName + '_webp.webp';
 
-  // Eger yeni path eski path ile ayni ise (zaten .webp), atla
+  // Eger yeni path eski path ile ayni ise (zaten _webp.webp), atla
   if (newPath === origPath) {
     return { skipped: true };
   }
