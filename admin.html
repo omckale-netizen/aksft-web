@@ -1043,6 +1043,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .ana-tab{padding:12px 18px;background:transparent;border:none;color:var(--text-light);font-family:inherit;font-size:.85rem;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:color .2s ease,border-color .2s ease;position:relative}
 .ana-tab:hover{color:var(--navy)}
 .ana-tab.active{color:var(--terra);border-bottom-color:var(--terra)}
+.act-date-btn.active{background:var(--terra);color:#fff;border-color:var(--terra)}
 .ana-insight{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:rgba(196,82,26,.04);border-left:3px solid var(--terra);border-radius:0 8px 8px 0;margin-bottom:8px;font-size:.82rem;line-height:1.45}
 .ana-insight-icon{font-size:1rem;flex-shrink:0;margin-top:-2px}
 .ana-insight-text strong{color:var(--navy);font-weight:700}
@@ -3355,9 +3356,24 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
     <div class="admin-page" id="page-activity">
       <h2>Değişiklik Geçmişi</h2>
       <p class="page-sub">Tüm işlemler, değişiklikler ve kim ne zaman ne yaptı.</p>
+
+      <!-- Tarih aralığı preset butonları -->
+      <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+        <span style="font-size:.72rem;font-weight:700;color:var(--text-muted);margin-right:4px">TARİH:</span>
+        <button class="btn btn-sm btn-secondary act-date-btn active" data-range="all" onclick="setActivityRange('all',this)">Tümü</button>
+        <button class="btn btn-sm btn-secondary act-date-btn" data-range="today" onclick="setActivityRange('today',this)">Bugün</button>
+        <button class="btn btn-sm btn-secondary act-date-btn" data-range="7" onclick="setActivityRange('7',this)">Son 7 Gün</button>
+        <button class="btn btn-sm btn-secondary act-date-btn" data-range="30" onclick="setActivityRange('30',this)">Son 30 Gün</button>
+        <span style="font-size:.68rem;color:var(--text-muted);margin-left:6px">veya:</span>
+        <input type="date" id="activity-date-from" onchange="setActivityRange('custom')" style="padding:6px 10px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.76rem;background:var(--input-bg);color:var(--text)">
+        <span style="font-size:.72rem;color:var(--text-muted)">—</span>
+        <input type="date" id="activity-date-to" onchange="setActivityRange('custom')" style="padding:6px 10px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.76rem;background:var(--input-bg);color:var(--text)">
+      </div>
+
+      <!-- Tip + Kullanıcı + Arama -->
       <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
         <select id="activity-filter" onchange="renderActivityLog()" class="admin-filter-select" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:var(--input-bg);color:var(--text);cursor:pointer">
-          <option value="all">Tüm İşlemler</option>
+          <option value="all">Tüm İşlem Tipleri</option>
           <option value="mekan">🏪 Mekan</option>
           <option value="yer">📍 Yer</option>
           <option value="koy">🏘 Köy</option>
@@ -3367,11 +3383,18 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <option value="sifre">🔐 Güvenlik</option>
           <option value="sil">🗑 Silmeler</option>
         </select>
-        <input type="text" id="activity-search" placeholder="Mekan adı ile ara..." oninput="renderActivityLog()" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;background:var(--input-bg);color:var(--text);flex:1;min-width:160px">
-        <span id="activity-count" style="font-size:.75rem;color:var(--text-muted)"></span>
+        <select id="activity-user-filter" onchange="renderActivityLog()" class="admin-filter-select" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:var(--input-bg);color:var(--text);cursor:pointer;min-width:160px">
+          <option value="all">👥 Tüm Kullanıcılar</option>
+        </select>
+        <input type="text" id="activity-search" placeholder="🔍 Ara (mekan, kullanıcı, detay)..." oninput="renderActivityLog()" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;background:var(--input-bg);color:var(--text);flex:1;min-width:180px">
+        <button class="btn btn-sm btn-secondary" onclick="clearActivityFilters()" title="Tüm filtreleri temizle" style="padding:8px 14px">↻ Temizle</button>
+        <button class="btn btn-sm btn-secondary" onclick="anaExportCSV('activity-table','degisiklik-gecmisi')" title="CSV olarak indir">⬇ CSV</button>
+        <span id="activity-count" style="font-size:.75rem;color:var(--text-muted);margin-left:auto"></span>
       </div>
       <div class="panel-card">
         <div id="activity-list" style="max-height:70vh;overflow-y:auto"></div>
+        <!-- CSV export için gizli tablo — renderActivityLog doldurur -->
+        <table id="activity-table" style="display:none"><thead><tr><th>Tarih</th><th>Saat</th><th>Kullanıcı</th><th>İşlem</th><th>Hedef</th><th>Detay</th></tr></thead><tbody></tbody></table>
       </div>
     </div>
 
@@ -17421,6 +17444,51 @@ function addTodoForMessage(msgId) {
   });
 }
 
+// Aktif tarih araligi — preset veya custom
+var _activityDateRange = 'all';
+function setActivityRange(range, btn) {
+  _activityDateRange = range;
+  document.querySelectorAll('.act-date-btn').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  else {
+    // custom — preset butonlarindan secimi kaldir
+    var presetBtn = document.querySelector('.act-date-btn[data-range="' + range + '"]');
+    if (presetBtn) presetBtn.classList.add('active');
+  }
+  renderActivityLog();
+}
+
+function clearActivityFilters() {
+  document.getElementById('activity-filter').value = 'all';
+  document.getElementById('activity-user-filter').value = 'all';
+  document.getElementById('activity-search').value = '';
+  document.getElementById('activity-date-from').value = '';
+  document.getElementById('activity-date-to').value = '';
+  document.querySelectorAll('.act-date-btn').forEach(function(b) { b.classList.remove('active'); });
+  var allBtn = document.querySelector('.act-date-btn[data-range="all"]');
+  if (allBtn) allBtn.classList.add('active');
+  _activityDateRange = 'all';
+  renderActivityLog();
+}
+
+function _getActivityDateCutoff() {
+  var from = document.getElementById('activity-date-from')?.value;
+  var to = document.getElementById('activity-date-to')?.value;
+  if (_activityDateRange === 'all') return { from: null, to: null };
+  if (_activityDateRange === 'custom' && (from || to)) return { from: from || null, to: to || null };
+  var now = new Date();
+  if (_activityDateRange === 'today') {
+    var today = now.toISOString().split('T')[0];
+    return { from: today, to: today };
+  }
+  if (_activityDateRange === '7' || _activityDateRange === '30') {
+    var days = parseInt(_activityDateRange);
+    var fromD = new Date(); fromD.setDate(now.getDate() - days);
+    return { from: fromD.toISOString().split('T')[0], to: null };
+  }
+  return { from: null, to: null };
+}
+
 async function renderActivityLog() {
   const list = document.getElementById('activity-list');
   if (!list) return;
@@ -17428,7 +17496,9 @@ async function renderActivityLog() {
 
   try {
     const filter = document.getElementById('activity-filter')?.value || 'all';
+    const userFilter = document.getElementById('activity-user-filter')?.value || 'all';
     const search = (document.getElementById('activity-search')?.value || '').toLowerCase().trim();
+    const range = _getActivityDateCutoff();
     // Firestore rules: admin tümünü, editor/viewer sadece kendi aksiyonlarını okuyabilir.
     // Non-admin'de where + orderBy composite index gerektireceği için orderBy'ı çıkarıp
     // client-side sıralıyoruz.
@@ -17447,17 +17517,60 @@ async function renderActivityLog() {
       logs = logs.slice(0, 200);
     }
 
+    // Kullanici dropdown'ini populate et (sadece admin goruyor tumunu)
+    var userSelect = document.getElementById('activity-user-filter');
+    if (userSelect && isCurrentAdmin()) {
+      var currentUserFilter = userSelect.value;
+      var uniqueUsers = [...new Set(logs.map(function(l) { return l.user; }).filter(Boolean))].sort();
+      userSelect.innerHTML = '<option value="all">👥 Tüm Kullanıcılar</option>' +
+        uniqueUsers.map(function(u) { return '<option value="' + escAttr(u) + '">' + escHtml(u) + '</option>'; }).join('');
+      if (uniqueUsers.indexOf(currentUserFilter) > -1) userSelect.value = currentUserFilter;
+    }
+
     if (filter === 'sil') {
       logs = logs.filter(l => l.action && l.action.includes('sil'));
     } else if (filter !== 'all') {
       logs = logs.filter(l => l.action && l.action.startsWith(filter));
     }
 
+    // Kullanici filtresi
+    if (userFilter && userFilter !== 'all') {
+      logs = logs.filter(l => l.user === userFilter);
+    }
+
+    // Tarih araligi filtresi
+    if (range.from || range.to) {
+      logs = logs.filter(function(l) {
+        var d = (l.timestamp || '').split('T')[0];
+        if (!d) return false;
+        if (range.from && d < range.from) return false;
+        if (range.to && d > range.to) return false;
+        return true;
+      });
+    }
+
     if (search) {
-      logs = logs.filter(l => (l.details || '').toLowerCase().includes(search) || (l.target || '').toLowerCase().includes(search));
+      logs = logs.filter(l =>
+        (l.details || '').toLowerCase().includes(search) ||
+        (l.target || '').toLowerCase().includes(search) ||
+        (l.user || '').toLowerCase().includes(search) ||
+        (l.action || '').toLowerCase().includes(search)
+      );
     }
 
     document.getElementById('activity-count').textContent = logs.length + ' kayıt';
+
+    // CSV export icin gizli tabloyu doldur
+    var csvTable = document.querySelector('#activity-table tbody');
+    if (csvTable) {
+      csvTable.innerHTML = logs.map(function(l) {
+        var ts = l.timestamp ? new Date(l.timestamp) : null;
+        var date = ts ? ts.toLocaleDateString('tr-TR') : '';
+        var time = ts ? ts.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : '';
+        var cfg = ACTIVITY_LABELS[l.action] || { label: l.action };
+        return '<tr><td>' + date + '</td><td>' + time + '</td><td>' + escHtml(l.user || '') + '</td><td>' + escHtml(cfg.label) + '</td><td>' + escHtml(l.target || '') + '</td><td>' + escHtml(l.details || '') + '</td></tr>';
+      }).join('');
+    }
 
     if (logs.length === 0) {
       list.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted)">Sonuç bulunamadı.</div>';
