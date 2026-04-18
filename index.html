@@ -899,10 +899,14 @@ function pageInit() {
       return h;
     }
     function dailySorted(arr) {
-      const featured = arr.filter(v => v.featured);
-      const rest = arr.filter(v => !v.featured);
+      // Oncelik: featured (manuel) veya premium aktif -> ust tier
+      const isPriority = v => v.featured || (typeof isPremiumActive === 'function' && isPremiumActive(v));
+      const priority = arr.filter(isPriority);
+      const rest = arr.filter(v => !isPriority(v));
+      // Iki grup da gunluk seed ile shuffle — ayni tier icinde esit sans
+      const shuffledPriority = [...priority].sort((a, b) => seededHash(a.id) - seededHash(b.id));
       const shuffled = [...rest].sort((a, b) => seededHash(a.id) - seededHash(b.id));
-      return [...featured, ...shuffled];
+      return [...shuffledPriority, ...shuffled];
     }
 
     /* 1. Yeme-İçme (kafe, restoran, kahvalti, beach, iskele) */
