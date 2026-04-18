@@ -518,7 +518,6 @@ document.addEventListener('dataReady', _fetchSiteLogo);
       .mm-link .mm-label{font-size:1.35rem;}
       .nav-right{gap:6px;}
       .nav-right .btn-terra{padding:6px 10px;font-size:.68rem;}
-      .nav-save-btn{padding:6px 8px;}
       .nav-divider{display:none;}
     }
     @media(max-width:640px){
@@ -662,29 +661,32 @@ function renderNav(opts = {}) {
     const s = document.createElement('style');
     s.id = 'save-drawer-styles';
     s.textContent = `
-      /* Nav save button */
+      /* Nav save button — hamburger ile aynı dil (38x38 kare ikon butonu) */
       .nav-save-btn {
-        position:relative; display:flex; align-items:center; gap:5px;
-        padding:7px 12px; border-radius:999px; border:1.5px solid rgba(26,39,68,.12);
+        position:relative; display:flex; align-items:center; justify-content:center;
+        width:38px; height:38px; padding:0;
+        border-radius:9px; border:1.5px solid rgba(26,39,68,.12);
         background:transparent; cursor:pointer; transition:all .2s;
-        font-family:inherit;
+        font-family:inherit; flex-shrink:0;
       }
       .nav-save-btn:hover { background:rgba(196,82,26,.06); border-color:rgba(196,82,26,.3); }
       .nav-save-btn.has-saves { border-color:rgba(196,82,26,.35); }
       #main-nav.hero-mode .nav-save-btn { border-color:rgba(255,255,255,.25); }
       #main-nav.hero-mode .nav-save-btn:hover { background:rgba(255,255,255,.1); }
       #main-nav.hero-mode .nav-save-icon { color:rgba(255,255,255,.85); }
-      #main-nav.hero-mode .nav-save-count { background:rgba(255,255,255,.9); color:#C4521A; }
-      .nav-save-icon { font-size:.95rem; color:#4A5568; transition:color .2s; }
+      #main-nav.hero-mode .nav-save-count { background:rgba(255,255,255,.92); color:#C4521A; }
+      .nav-save-icon { font-size:1rem; color:#4A5568; transition:color .2s; line-height:1; }
       .nav-save-btn.has-saves .nav-save-icon { color:#C4521A; }
       .nav-save-count {
-        position:absolute; top:-6px; right:-6px;
-        min-width:18px; height:18px; border-radius:999px;
+        position:absolute; top:-5px; right:-5px;
+        min-width:16px; height:16px; border-radius:999px;
         background:#C4521A; color:#fff;
-        font-size:.62rem; font-weight:700; padding:0 5px;
+        font-size:.58rem; font-weight:700; padding:0 4px;
         display:flex; align-items:center; justify-content:center;
+        border:1.5px solid var(--cream,#FAF7F2);
         animation:savePop .3s cubic-bezier(.34,1.56,.64,1);
       }
+      #main-nav.hero-mode .nav-save-count { border-color:transparent; }
       @keyframes savePop { from{transform:scale(0);} to{transform:scale(1);} }
 
       /* Overlay */
