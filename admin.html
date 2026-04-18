@@ -8323,6 +8323,8 @@ async function loadCurrentUserRole(firebaseUser) {
       }
     } catch(e) {}
     attachCurrentUserListener(firebaseUser.uid);
+    // Aktif oturum kaydi olustur + heartbeat baslat (super admin icin de)
+    try { createUserSession(baseUser); } catch(e) { console.warn('Session create:', e); }
     return window._currentUser;
   }
   // Diğer kullanıcılar için users koleksiyonundan rol oku
