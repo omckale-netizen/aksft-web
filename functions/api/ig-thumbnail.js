@@ -63,6 +63,11 @@ export async function onRequestPost(context) {
     const titleMatch = html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i);
     const title = titleMatch ? decodeHtmlEntities(titleMatch[1]) : '';
 
+    // 3b) Video URL'ini cekmeyi dene (og:video veya og:video:secure_url)
+    const videoMatch = html.match(/<meta\s+property=["']og:video:secure_url["']\s+content=["']([^"']+)["']/i)
+      || html.match(/<meta\s+property=["']og:video["']\s+content=["']([^"']+)["']/i);
+    const videoOriginalUrl = videoMatch ? videoMatch[1].replace(/&amp;/g, '&') : '';
+
     // 4) Gorseli indir
     const imgResp = await fetch(thumbnailUrl, {
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; AssosuKesfet/1.0)' }
@@ -137,7 +142,82 @@ export async function onRequestPost(context) {
     const cachedUrl = 'https://firebasestorage.googleapis.com/v0/b/' + BUCKET
       + '/o/' + encodeURIComponent(storagePath) + '?alt=media&token=' + downloadToken;
 
-    return json({ ok: true, shortcode, title, thumbnailUrl: cachedUrl, cached: true }, 200, corsHeaders);
+    // 7) Video varsa indir ve cache'le (native player icin)
+    let videoUrl = '';
+    let videoWarning = '';
+    if (videoOriginalUrl) {
+      try {
+        const vidResp = await fetch(videoOriginalUrl, {
+          headers: { 'User-Agent': 'Mozilla/5.0 (compatible; AssosuKesfet/1.0)' }
+        });
+        if (!vidResp.ok) {
+          videoWarning = 'Video indirilemedi (IG CDN ' + vidResp.status + ')';
+        } else {
+          const vidBytes = await vidResp.arrayBuffer();
+          // Video boyut limiti — CF Worker bellek kontrolu (50MB max)
+          if (vidBytes.byteLength > 50 * 1024 * 1024) {
+            videoWarning = 'Video cok buyuk (50MB+), cache atlandi';
+          } else {
+            const vidContentType = vidResp.headers.get('Content-Type') || 'video/mp4';
+            const vidExt = vidContentType.includes('quicktime') ? 'mov' : 'mp4';
+            const vidStoragePath = 'reels/videos/' + shortcode + '.' + vidExt;
+            const vidDownloadToken = crypto.randomUUID();
+            const vidBoundary = '----AssosuKesfetVideoBoundary' + Date.now();
+            const vidMetadata = {
+              name: vidStoragePath,
+              contentType: vidContentType,
+              metadata: { firebaseStorageDownloadTokens: vidDownloadToken }
+            };
+            const vidMetadataPart = encoder.encode(
+              '--' + vidBoundary + '\r\n' +
+              'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+              JSON.stringify(vidMetadata) + '\r\n' +
+              '--' + vidBoundary + '\r\n' +
+              'Content-Type: ' + vidContentType + '\r\n\r\n'
+            );
+            const vidClosingPart = encoder.encode('\r\n--' + vidBoundary + '--\r\n');
+            const vidBodyParts = new Uint8Array(vidMetadataPart.length + vidBytes.byteLength + vidClosingPart.length);
+            vidBodyParts.set(vidMetadataPart, 0);
+            vidBodyParts.set(new Uint8Array(vidBytes), vidMetadataPart.length);
+            vidBodyParts.set(vidClosingPart, vidMetadataPart.length + vidBytes.byteLength);
+
+            const vidUploadUrl = 'https://storage.googleapis.com/upload/storage/v1/b/' + BUCKET
+              + '/o?uploadType=multipart';
+            const vidUploadResp = await fetch(vidUploadUrl, {
+              method: 'POST',
+              headers: {
+                'Authorization': 'Bearer ' + accessToken,
+                'Content-Type': 'multipart/related; boundary=' + vidBoundary,
+              },
+              body: vidBodyParts,
+            });
+            if (vidUploadResp.ok) {
+              videoUrl = 'https://firebasestorage.googleapis.com/v0/b/' + BUCKET
+                + '/o/' + encodeURIComponent(vidStoragePath) + '?alt=media&token=' + vidDownloadToken;
+            } else {
+              const vidErrText = await vidUploadResp.text();
+              console.error('[ig-thumbnail] video upload failed:', vidUploadResp.status, vidErrText);
+              videoWarning = 'Video cache basarisiz (HTTP ' + vidUploadResp.status + ')';
+            }
+          }
+        }
+      } catch (vidErr) {
+        console.error('[ig-thumbnail] video fetch/cache error:', vidErr);
+        videoWarning = 'Video fetch hatasi: ' + (vidErr.message || 'bilinmeyen');
+      }
+    } else {
+      videoWarning = 'Video URL bulunamadi (reel olmayabilir veya IG login wall)';
+    }
+
+    return json({
+      ok: true,
+      shortcode,
+      title,
+      thumbnailUrl: cachedUrl,
+      videoUrl: videoUrl,
+      cached: true,
+      videoWarning: videoWarning || undefined
+    }, 200, corsHeaders);
   } catch (err) {
     console.error('[ig-thumbnail] error:', err);
     return json({ error: 'Thumbnail cekme hatasi: ' + (err.message || 'bilinmeyen') }, 500, corsHeaders);

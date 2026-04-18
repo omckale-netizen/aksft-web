@@ -103,17 +103,28 @@ function isPremiumActive(v) {
   return true;
 }
 
-// Instagram Reel player — kartin icine iframe embed injecte eder, IG'a gitmez
-window.akPlayReel = function(cardId, embedUrl) {
+// Reel player — native video varsa tek tikla oynar, yoksa IG embed iframe
+// type: 'video' = native HTML5 video, 'embed' = IG iframe fallback
+window.akPlayReel = function(cardId, srcUrl, type) {
   var card = document.getElementById(cardId);
-  if (!card || !embedUrl) return;
+  if (!card || !srcUrl) return;
   var cover = card.querySelector('.ak-reel-cover');
   var player = card.querySelector('.ak-reel-player');
   var igOpen = card.querySelector('.ak-reel-igopen');
   if (!cover || !player) return;
-  // Iframe'i bir kere yukle
-  if (!player.querySelector('iframe')) {
-    player.innerHTML = '<iframe src="' + embedUrl + '" style="width:100%;height:100%;border:0;" allow="autoplay; encrypted-media" allowfullscreen loading="lazy"></iframe>';
+  // Player bir kere yukle
+  if (!player.hasChildNodes()) {
+    if (type === 'video') {
+      // Native HTML5 video — tek tikla oynar, chrome yok
+      player.innerHTML = '<video src="' + srcUrl + '" style="width:100%;height:100%;object-fit:cover;background:#000;" autoplay controls playsinline></video>';
+    } else {
+      // IG embed fallback
+      player.innerHTML = '<iframe src="' + srcUrl + '" style="width:100%;height:100%;border:0;" allow="autoplay; encrypted-media" allowfullscreen loading="lazy"></iframe>';
+    }
+  } else {
+    // Zaten yuklu — sadece video ise play et
+    var v = player.querySelector('video');
+    if (v) { try { v.play(); } catch(e) {} }
   }
   cover.style.display = 'none';
   player.style.display = '';
@@ -4274,9 +4285,12 @@ function renderVillagePage(villageId) {
       var titleRaw = decodeEntities(reel.title || 'Instagram Reel');
       var title = titleRaw.substring(0, 70) + (titleRaw.length > 70 ? '…' : '');
       var thumb = reel.thumbnailUrl ? escAttr(reel.thumbnailUrl) : '';
+      var videoUrl = reel.videoUrl ? escAttr(reel.videoUrl) : '';
+      var playSrc = videoUrl || embedUrl; // video varsa native, yoksa embed
+      var playType = videoUrl ? 'video' : 'embed';
       bodyHtml += '<div class="ak-reel-card" id="' + reelKey + '" style="background:#000;border-radius:18px;overflow:hidden;position:relative;aspect-ratio:4/5;max-width:420px;margin:0 auto;width:100%;">';
       // Thumbnail + Play butonu (default state)
-      bodyHtml += '<div class="ak-reel-cover" style="position:absolute;inset:0;background:#1A2744 center/cover ' + (thumb ? 'url(\'' + thumb + '\')' : '') + ';cursor:pointer;" onclick="akPlayReel(\'' + reelKey + '\', \'' + escAttr(embedUrl) + '\')">';
+      bodyHtml += '<div class="ak-reel-cover" style="position:absolute;inset:0;background:#1A2744 center/cover ' + (thumb ? 'url(\'' + thumb + '\')' : '') + ';cursor:pointer;" onclick="akPlayReel(\'' + reelKey + '\', \'' + escAttr(playSrc) + '\', \'' + playType + '\')">';
       bodyHtml += '<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.75) 0%,rgba(0,0,0,.15) 55%,rgba(0,0,0,.35) 100%);"></div>';
       // Play buton — ortada
       bodyHtml += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">';
@@ -4287,7 +4301,7 @@ function renderVillagePage(villageId) {
       bodyHtml += '<div style="position:absolute;bottom:0;left:0;right:0;padding:12px 14px;color:#fff;">';
       bodyHtml += '<div style="font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:4px;display:inline-flex;align-items:center;gap:4px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>Instagram</div>';
       bodyHtml += '<div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-size:.85rem;font-weight:700;line-height:1.3;">' + escHtml(title) + '</div>';
-      bodyHtml += '<button type="button" class="ak-reel-watch" style="margin-top:8px;padding:6px 14px;border-radius:999px;background:#fff;color:#1A2744;border:none;font-family:inherit;font-size:.72rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;" onclick="event.stopPropagation();akPlayReel(\'' + reelKey + '\', \'' + escAttr(embedUrl) + '\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>İzle</button>';
+      bodyHtml += '<button type="button" class="ak-reel-watch" style="margin-top:8px;padding:6px 14px;border-radius:999px;background:#fff;color:#1A2744;border:none;font-family:inherit;font-size:.72rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;" onclick="event.stopPropagation();akPlayReel(\'' + reelKey + '\', \'' + escAttr(playSrc) + '\', \'' + playType + '\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>İzle</button>';
       bodyHtml += '</div>';
       bodyHtml += '</div>'; // cover
       // Iframe placeholder + IG link (oynatildiginda gosterilir)

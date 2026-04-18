@@ -13081,13 +13081,18 @@ async function addReel() {
       url: url,
       shortcode: data.shortcode || '',
       title: title || (data.title ? data.title.substring(0, 80) : ''),
-      thumbnailUrl: data.thumbnailUrl
+      thumbnailUrl: data.thumbnailUrl,
+      videoUrl: data.videoUrl || ''
     });
     urlInp.value = '';
     titleInp.value = '';
     renderReelsList();
     if (data.cached) {
-      statusEl.textContent = '✓ Eklendi (Firebase cache — kalıcı)';
+      if (data.videoUrl) {
+        statusEl.textContent = '✓ Eklendi (thumbnail + video cache — tek tıkla oynar)';
+      } else {
+        statusEl.textContent = '✓ Eklendi (thumbnail cache) — video alınamadı, IG embed kullanılacak' + (data.videoWarning ? ' [' + data.videoWarning + ']' : '');
+      }
       statusEl.style.color = 'var(--green)';
     } else {
       statusEl.textContent = '⚠️ Eklendi ama IG CDN URL (~30 günde expire olabilir)';
