@@ -242,6 +242,30 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     .nav-logo:hover img{opacity:.8;}
     #main-nav.hero-mode .nav-logo img{filter:none;}
     .nav-links{display:flex;align-items:center;gap:4px;}
+    /* Keşfet dropdown */
+    .nav-dropdown-wrap{position:relative;}
+    .nav-dropdown-toggle{display:inline-flex;align-items:center;gap:4px;border:none;background:transparent;font-family:inherit;cursor:pointer;}
+    .nav-dd-chev{transition:transform .2s;opacity:.6;}
+    .nav-dropdown-wrap:hover .nav-dd-chev,
+    .nav-dropdown-wrap[aria-expanded="true"] .nav-dd-chev{transform:rotate(180deg);opacity:1;}
+    .nav-dropdown-menu{position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%) translateY(-6px);min-width:200px;background:#fff;border:1px solid rgba(26,39,68,.08);border-radius:14px;box-shadow:0 12px 32px rgba(26,39,68,.1);padding:6px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:150;}
+    .nav-dropdown-wrap:hover .nav-dropdown-menu,
+    .nav-dropdown-wrap:focus-within .nav-dropdown-menu{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;}
+    .nav-dropdown-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-size:.82rem;font-weight:600;color:var(--navy);text-decoration:none;transition:background .15s,color .15s;}
+    .nav-dropdown-item:hover{background:rgba(196,82,26,.06);color:var(--terra);}
+    .nav-dropdown-item.active{background:rgba(196,82,26,.1);color:var(--terra);}
+    .nav-dd-icon{font-size:1rem;}
+    /* Hero mode (şeffaf nav) */
+    #main-nav.hero-mode .nav-dropdown-menu{background:rgba(13,24,41,.95);border-color:rgba(245,237,224,.1);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);}
+    #main-nav.hero-mode .nav-dropdown-item{color:var(--cream);}
+    #main-nav.hero-mode .nav-dropdown-item:hover{background:rgba(245,237,224,.08);color:#fff;}
+    #main-nav.hero-mode .nav-dropdown-item.active{background:rgba(196,82,26,.2);color:#fff;}
+    /* Mobile menu — dropdown'ı inline sub grubu olarak göster */
+    .mm-group{display:flex;flex-direction:column;gap:6px;margin:4px 0;}
+    .mm-group-title{opacity:.85;}
+    .mm-subs{display:flex;flex-direction:column;gap:2px;padding-left:42px;margin-top:2px;}
+    .mm-sub{padding:10px 12px;border-radius:10px;font-size:.88rem;font-weight:500;color:rgba(245,237,224,.65);text-decoration:none;transition:color .15s,background .15s;display:inline-block;}
+    .mm-sub:hover,.mm-sub.active{color:var(--terra-light);background:rgba(196,82,26,.08);}
     .nav-link{color:var(--navy);font-size:.76rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;text-decoration:none;padding:7px 12px;border-radius:10px;transition:color .2s,background .2s,opacity .2s;opacity:.55;}
     .nav-link:hover{opacity:1;color:var(--terra);background:rgba(196,82,26,.06);}
     .nav-link.active{opacity:1;color:var(--terra);}
@@ -430,14 +454,19 @@ function renderNav(opts = {}) {
   const { heroMode = false, basePath = '' } = opts;
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
+  // Nav yapısı: Keşfet dropdown ile sade
+  const kesfetChildren = [
+    { href: 'rotalar.html',  label: 'Rotalar',  icon: '🗺' },
+    { href: 'yerler.html',   label: 'Yerler',   icon: '📍' },
+    { href: 'mekanlar.html', label: 'Mekanlar', icon: '☕' },
+    { href: 'koyler.html',   label: 'Köyler',   icon: '🏘' },
+  ];
   const links = [
     { href: 'index.html',    label: 'Ana Sayfa' },
-    { href: 'rotalar.html',  label: 'Rotalar' },
-    { href: 'yerler.html',   label: 'Yerler' },
-    { href: 'mekanlar.html', label: 'Mekanlar' },
-    { href: 'koyler.html',   label: 'Köyler' },
+    { href: 'kesfet',        label: 'Keşfet', dropdown: kesfetChildren },
     { href: 'harita.html',   label: 'Harita' },
     { href: 'rehber.html',   label: 'Rehber' },
+    { href: 'blog.html',     label: 'Blog' },
   ];
 
   const fullPath = window.location.pathname;
@@ -446,9 +475,17 @@ function renderNav(opts = {}) {
     const hrefName = href.replace('.html', '');
     if (hrefName === pageName) return true;
     if ((pageName === '' || pageName === '/') && hrefName === 'index') return true;
-    // Alt sayfa eşleştirme
+    // Keşfet dropdown — alt sayfalardan herhangi birindeyse aktif
+    if (hrefName === 'kesfet') {
+      var kesfetPages = ['rotalar','yerler','mekanlar','koyler','rota-detay','yer-detay','mekan-detay','koy-detay'];
+      if (kesfetPages.indexOf(pageName) > -1) return true;
+      if (fullPath.includes('/rotalar') || fullPath.includes('/yerler') || fullPath.includes('/mekanlar') || fullPath.includes('/koyler')) return true;
+    }
+    // Alt sayfa eşleştirme (dropdown içindekiler de)
     if (hrefName === 'mekanlar' && (pageName === 'mekan-detay' || fullPath.includes('/mekanlar'))) return true;
     if (hrefName === 'rotalar' && (pageName === 'rota-detay' || pageName === 'rota' || fullPath.includes('/rotalar'))) return true;
+    if (hrefName === 'yerler' && (pageName === 'yer-detay' || fullPath.includes('/yerler'))) return true;
+    if (hrefName === 'koyler' && (pageName === 'koy-detay' || fullPath.includes('/koyler'))) return true;
     return false;
   };
 
@@ -459,11 +496,26 @@ function renderNav(opts = {}) {
         <button id="close-menu-btn" aria-label="Kapat">✕</button>
       </div>
       <div class="mm-links">
-        ${links.map((l, i) => `
-          <a href="${basePath}${l.href}" class="mm-link${isActive(l.href) ? ' active' : ''}">
-            <span class="mm-num">0${i+1}</span>
-            <span class="mm-label">${l.label}</span>
-          </a>`).join('')}
+        ${links.map((l, i) => {
+          if (l.dropdown) {
+            // Mobile: parent başlık (tıklanamaz) + alt maddeler inline
+            return `
+              <div class="mm-group${isActive(l.href) ? ' active' : ''}">
+                <span class="mm-link mm-group-title">
+                  <span class="mm-num">0${i+1}</span>
+                  <span class="mm-label">${l.label}</span>
+                </span>
+                <div class="mm-subs">
+                  ${l.dropdown.map(s => `<a href="${basePath}${s.href}" class="mm-sub${isActive(s.href) ? ' active' : ''}">${s.icon} ${s.label}</a>`).join('')}
+                </div>
+              </div>`;
+          }
+          return `
+            <a href="${basePath}${l.href}" class="mm-link${isActive(l.href) ? ' active' : ''}">
+              <span class="mm-num">0${i+1}</span>
+              <span class="mm-label">${l.label}</span>
+            </a>`;
+        }).join('')}
       </div>
       <div class="mm-footer">
         <span></span>
@@ -476,7 +528,21 @@ function renderNav(opts = {}) {
           <img ${SITE_LOGO ? 'class="site-logo-img" src="' + SITE_LOGO + '" onload="var s=this;setTimeout(function(){s.classList.add(\'logo-loaded\')},50)"' : 'class="site-logo-img"'} data-logo="1" alt="Assos'u Keşfet" width="120" height="40" loading="eager" decoding="async">
         </a>
         <div class="nav-links">
-          ${links.map(l => `<a href="${basePath}${l.href}" class="nav-link${isActive(l.href) ? ' active' : ''}">${l.label}</a>`).join('')}
+          ${links.map(l => {
+            if (l.dropdown) {
+              return `
+                <div class="nav-dropdown-wrap">
+                  <button class="nav-link nav-dropdown-toggle${isActive(l.href) ? ' active' : ''}" type="button" aria-haspopup="true" aria-expanded="false">
+                    ${l.label}
+                    <svg class="nav-dd-chev" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
+                  <div class="nav-dropdown-menu" role="menu">
+                    ${l.dropdown.map(s => `<a href="${basePath}${s.href}" class="nav-dropdown-item${isActive(s.href) ? ' active' : ''}" role="menuitem"><span class="nav-dd-icon">${s.icon}</span>${s.label}</a>`).join('')}
+                  </div>
+                </div>`;
+            }
+            return `<a href="${basePath}${l.href}" class="nav-link${isActive(l.href) ? ' active' : ''}">${l.label}</a>`;
+          }).join('')}
         </div>
         <div class="nav-right">
           <div class="nav-divider"></div>
