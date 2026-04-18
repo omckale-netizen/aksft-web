@@ -446,6 +446,8 @@ async function forgotPassword() {
   }
 }
 
+// Google sign-in: REDIRECT flow (popup yerine — cerez/tarayici kisitlamalarini atlar)
+// Sayfa Google'a yonlendirilir, onay sonrasi geri doner; sonuc getRedirectResult() ile alinir.
 async function signInWithGoogle() {
   const errEl = document.getElementById('auth-err');
   const btn = document.getElementById('google-btn');
@@ -454,97 +456,17 @@ async function signInWithGoogle() {
 
   try {
     btn.disabled = true;
-    // Flag — onAuthStateChanged'in Firebase auth basarili olur olmaz admin.html'e
-    // redirect etmesini engelle. Yetki check'i burada tamamlansin.
-    window._googleSignInInProgress = true;
+    // Redirect akisi oldugunu isaretle — geri dondugunde yetki check calissin
+    try { sessionStorage.setItem('googleSignInPending', '1'); } catch(e) {}
     const provider = new firebase.auth.GoogleAuthProvider();
-    // Her zaman hesap seçim ekranini goster (başka hesapla gecme kolay)
     provider.setCustomParameters({ prompt: 'select_account' });
-
-    const result = await fbAuth.signInWithPopup(provider);
-    const user = result.user;
-
-    // Yetki kontrolu: super admin (email hardcode) veya Firestore users/{uid} dokumanli admin/editor
-    // users dokumani yoksa bu hesap yetkili değil, cikis yap.
-    let hasAccess = false;
-    try {
-      const superAdmins = ['info@onyedimedya.com', 'onyedimedya@gmail.com'];
-      if (user.email && superAdmins.includes(user.email.toLowerCase())) {
-        hasAccess = true; // super admin
-      } else {
-        const db = firebase.firestore ? firebase.firestore() : null;
-        if (db) {
-          const snap = await db.collection('users').doc(user.uid).get();
-          if (snap.exists) {
-            const d = snap.data();
-            if (d && d.active === true && ['admin','editor','viewer'].includes(d.role)) {
-              hasAccess = true;
-            }
-          }
-        } else {
-          // Firestore SDK yuklu degilse gec — admin.html kendi kontrolunu yapar
-          hasAccess = true;
-        }
-      }
-    } catch(e) { hasAccess = true; /* ağ hatası — admin.html yönlendirir */ }
-
-    if (!hasAccess) {
-      await fbAuth.signOut();
-      window._googleSignInInProgress = false;
-      errEl.textContent = '⚠️ Bu Google hesabı yönetim paneline yetkili değil. Lütfen yetkili bir hesapla giriş yapın.';
-      btn.disabled = false;
-      return;
-    }
-
-    clearLoginAttempts();
-    window._googleSignInInProgress = false;
-    errEl.style.color = '#86EFAC';
-    errEl.textContent = '✓ Giriş başarılı! Yönlendiriliyorsunuz...';
-    localStorage.setItem('lastActivity', Date.now().toString());
-
-    // Son login kaydi
-    try {
-      var loginInfo = { email: user.email || '', timestamp: new Date().toISOString(), success: true, method: 'google' };
-      try { var ipR2 = await fetch('https://api.ipify.org?format=json'); var ipJ2 = await ipR2.json(); loginInfo.ip = ipJ2.ip || ''; } catch(e) {}
-      loginInfo.device = getDeviceInfo().platform;
-      localStorage.setItem('assos_last_login', JSON.stringify(loginInfo));
-    } catch(e) {}
-
-    // Telegram bildirim (email/password ile ayni pattern)
-    try {
-      var device = getDeviceInfo().platform;
-      var ip = '';
-      try { var ipR = await fetch('https://api.ipify.org?format=json'); var ipJ = await ipR.json(); ip = ipJ.ip || ''; } catch(e) {}
-      var body = JSON.stringify({ type:'login', data:{ date:new Date().toLocaleString('tr-TR'), email:(user.email||''), device:device + ' (Google)', ip:ip } });
-      if (navigator.sendBeacon) {
-        navigator.sendBeacon('/api/notify', new Blob([body], {type:'application/json'}));
-      } else {
-        fetch('/api/notify', { method:'POST', headers:{'Content-Type':'application/json'}, body:body }).catch(()=>{});
-      }
-    } catch(e) {}
-
-    window.location.href = 'admin.html';
+    await fbAuth.signInWithRedirect(provider);
+    // Bu noktadan sonra sayfa Google'a gider — kod calismaz
   } catch (err) {
     btn.disabled = false;
-    window._googleSignInInProgress = false;
-    if (err.code === 'auth/cancelled-popup-request') {
-      errEl.textContent = ''; // Zaten baska popup acik, sessiz gec
-      return;
-    }
-    if (err.code === 'auth/popup-closed-by-user') {
-      errEl.textContent = 'Popup kapatıldı. Tekrar deneyin — üçüncü taraf çerezler engelliyse Chrome\'da deneyin.';
-      return;
-    }
-    if (err.code === 'auth/popup-blocked') {
-      errEl.textContent = 'Popup engellendi. Tarayıcı ayarlarından popup\'a izin verin.';
-      return;
-    }
-    if (err.code === 'auth/account-exists-with-different-credential') {
-      errEl.textContent = 'Bu e-posta farklı bir yöntemle kayıtlı. Önce o yöntemle giriş yapın.';
-      return;
-    }
+    try { sessionStorage.removeItem('googleSignInPending'); } catch(e) {}
     if (err.code === 'auth/unauthorized-domain') {
-      errEl.textContent = 'Bu domain OAuth için yetkili değil. Firebase Console → Authentication → Settings → Authorized domains kontrol edin.';
+      errEl.textContent = 'Bu domain OAuth için yetkili değil (Firebase Console → Authorized domains).';
       return;
     }
     if (err.code === 'auth/network-request-failed') {
@@ -554,6 +476,66 @@ async function signInWithGoogle() {
     console.error('Google sign-in error:', err);
     errEl.textContent = 'Google giriş hatası: ' + (err.message || err.code || 'bilinmeyen');
   }
+}
+
+// Redirect'ten donen user icin yetki check + Telegram notify + admin.html'e yonlendirme
+async function handleGoogleSignInResult(user) {
+  const errEl = document.getElementById('auth-err');
+  if (!user) return;
+
+  // Yetki kontrolu: super admin email veya Firestore users/{uid}
+  let hasAccess = false;
+  try {
+    const superAdmins = ['info@onyedimedya.com', 'onyedimedya@gmail.com'];
+    if (user.email && superAdmins.includes(user.email.toLowerCase())) {
+      hasAccess = true;
+    } else {
+      const db = firebase.firestore ? firebase.firestore() : null;
+      if (db) {
+        const snap = await db.collection('users').doc(user.uid).get();
+        if (snap.exists) {
+          const d = snap.data();
+          if (d && d.active === true && ['admin','editor','viewer'].includes(d.role)) hasAccess = true;
+        }
+      } else {
+        hasAccess = true; // SDK yok — admin.html kendi check'ini yapsin
+      }
+    }
+  } catch(e) { hasAccess = true; }
+
+  if (!hasAccess) {
+    await fbAuth.signOut();
+    if (errEl) {
+      errEl.style.color = '#F87171';
+      errEl.textContent = '⚠️ Bu Google hesabı yönetim paneline yetkili değil.';
+    }
+    // Login kartini goster
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('login-box').classList.remove('hidden');
+    return;
+  }
+
+  clearLoginAttempts();
+  if (errEl) { errEl.style.color = '#86EFAC'; errEl.textContent = '✓ Giriş başarılı! Yönlendiriliyorsunuz...'; }
+  localStorage.setItem('lastActivity', Date.now().toString());
+
+  try {
+    var loginInfo = { email: user.email || '', timestamp: new Date().toISOString(), success: true, method: 'google' };
+    try { var ipR2 = await fetch('https://api.ipify.org?format=json'); var ipJ2 = await ipR2.json(); loginInfo.ip = ipJ2.ip || ''; } catch(e) {}
+    loginInfo.device = getDeviceInfo().platform;
+    localStorage.setItem('assos_last_login', JSON.stringify(loginInfo));
+  } catch(e) {}
+
+  try {
+    var device = getDeviceInfo().platform;
+    var ip = '';
+    try { var ipR = await fetch('https://api.ipify.org?format=json'); var ipJ = await ipR.json(); ip = ipJ.ip || ''; } catch(e) {}
+    var body = JSON.stringify({ type:'login', data:{ date:new Date().toLocaleString('tr-TR'), email:(user.email||''), device:device + ' (Google)', ip:ip } });
+    if (navigator.sendBeacon) navigator.sendBeacon('/api/notify', new Blob([body], {type:'application/json'}));
+    else fetch('/api/notify', { method:'POST', headers:{'Content-Type':'application/json'}, body:body }).catch(()=>{});
+  } catch(e) {}
+
+  window.location.href = 'admin.html';
 }
 
 async function checkAuth() {
@@ -656,16 +638,46 @@ async function checkAuth() {
   }
 }
 
-// Zaten giriş yapmışsa direkt admin'e yönlendir
-// Ama Google sign-in akisi sirasinda calisma — yetki check'i tamamlansin
-fbAuth.onAuthStateChanged((user) => {
-  if (user && !window._googleSignInInProgress) {
-    window.location.href = 'admin.html';
-  } else if (!user) {
+// Init — once redirect sonucunu kontrol et, sonra normal auth state'e gec
+(async function initAuthFlow() {
+  let handledRedirect = false;
+  try {
+    const result = await fbAuth.getRedirectResult();
+    if (result && result.user) {
+      handledRedirect = true;
+      try { sessionStorage.removeItem('googleSignInPending'); } catch(e) {}
+      await handleGoogleSignInResult(result.user);
+      return; // handleGoogleSignInResult ya admin'e yonlendirir ya da login kartini gosterir
+    }
+  } catch (err) {
+    try { sessionStorage.removeItem('googleSignInPending'); } catch(e) {}
+    console.error('Redirect result error:', err);
+    const errEl = document.getElementById('auth-err');
+    if (errEl) {
+      errEl.style.color = '#F87171';
+      if (err.code === 'auth/account-exists-with-different-credential') {
+        errEl.textContent = 'Bu e-posta farklı bir yöntemle kayıtlı. Önce o yöntemle giriş yapın.';
+      } else if (err.code === 'auth/unauthorized-domain') {
+        errEl.textContent = 'Bu domain OAuth için yetkili değil.';
+      } else {
+        errEl.textContent = 'Google giriş hatası: ' + (err.message || err.code || 'bilinmeyen');
+      }
+    }
     document.getElementById('loading').classList.add('hidden');
     document.getElementById('login-box').classList.remove('hidden');
+    return;
   }
-});
+
+  // Normal akis — zaten giris yapmis mi, yoksa login kartini goster
+  fbAuth.onAuthStateChanged((user) => {
+    if (user) {
+      window.location.href = 'admin.html';
+    } else {
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('login-box').classList.remove('hidden');
+    }
+  });
+})();
 </script>
 </body>
 </html>
