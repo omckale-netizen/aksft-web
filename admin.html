@@ -1045,14 +1045,28 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .ana-tab.active{color:var(--terra);border-bottom-color:var(--terra)}
 .act-date-btn.active{background:var(--terra);color:#fff;border-color:var(--terra)}
 
-/* Ayarlar sayfasi tab filtresi + responsive grid */
+/* Ayarlar sayfasi tab filtresi + masonry layout */
 #page-settings [data-settings-tab]{display:none}
 #page-settings[data-settings-active="hesap"] [data-settings-tab="hesap"]{display:block}
 #page-settings[data-settings-active="gorunum"] [data-settings-tab="gorunum"]{display:block}
 #page-settings[data-settings-active="site"] [data-settings-tab="site"]{display:block}
-/* SOL/SAG kolon wrapperlari layout'tan cikar — cardlar ana grid'e direct eriser */
-#page-settings > div[style*="grid-template-columns: 1fr 1fr"]{grid-template-columns:repeat(auto-fit,minmax(400px,1fr)) !important}
+/* Masonry-style CSS columns — cardlar yatay/dikey boslugu doldurur */
+#page-settings > div[style*="grid-template-columns: 1fr 1fr"]{
+  display:block !important;
+  column-count:2;
+  column-gap:20px;
+}
 #page-settings > div[style*="grid-template-columns: 1fr 1fr"] > div[style*="flex-direction:column"]{display:contents !important}
+#page-settings .panel-card,
+#page-settings > div[style*="grid-template-columns: 1fr 1fr"] > div[data-settings-tab]{
+  break-inside:avoid;
+  -webkit-column-break-inside:avoid;
+  page-break-inside:avoid;
+  margin-bottom:20px;
+}
+@media(max-width:960px){
+  #page-settings > div[style*="grid-template-columns: 1fr 1fr"]{column-count:1}
+}
 .ana-insight{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:rgba(196,82,26,.04);border-left:3px solid var(--terra);border-radius:0 8px 8px 0;margin-bottom:8px;font-size:.82rem;line-height:1.45}
 .ana-insight-icon{font-size:1rem;flex-shrink:0;margin-top:-2px}
 .ana-insight-text strong{color:var(--navy);font-weight:700}
