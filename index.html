@@ -654,6 +654,10 @@ function pageInit() {
     else document.addEventListener('dataReady', loadWeather);
 
     function fetchWeather(lat, lon, cityLabel) {
+    var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon +
+      '&current=temperature_2m,weather_code' +
+      '&daily=temperature_2m_max,temperature_2m_min,weather_code' +
+      '&timezone=Europe%2FIstanbul&forecast_days=3';
     var wmo = {0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌧',63:'🌧',65:'🌧',71:'🌨',73:'🌨',75:'❄️',80:'🌦',81:'🌧',82:'⛈',95:'⛈',96:'⛈',99:'⛈'};
     var labels = {0:'Açık',1:'Az bulutlu',2:'Parçalı',3:'Bulutlu',45:'Sisli',48:'Sisli',51:'Hafif yağmur',53:'Yağmurlu',55:'Yoğun yağmur',61:'Yağmurlu',63:'Yağmurlu',65:'Şiddetli',71:'Kar',80:'Sağanak',81:'Sağanak',95:'Fırtına'};
     var gunler = ['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];
