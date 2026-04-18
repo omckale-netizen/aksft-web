@@ -56,6 +56,8 @@
     .ara-group-label{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin:24px 0 12px;display:flex;align-items:center;gap:10px;}
     .ara-group-label::after{content:'';flex:1;height:1px;background:rgba(26,39,68,.08);}
     .ara-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+    .ara-loadmore{background:#fff;border:1.5px solid rgba(26,39,68,.12);color:var(--navy);font-family:inherit;font-size:.82rem;font-weight:600;padding:11px 24px;border-radius:12px;cursor:pointer;transition:all .2s;}
+    .ara-loadmore:hover{border-color:var(--terra);color:var(--terra);transform:translateY(-2px);box-shadow:0 6px 16px rgba(196,82,26,.12);}
     .ara-card{display:block;background:#fff;border-radius:16px;overflow:hidden;border:1px solid rgba(26,39,68,.06);text-decoration:none;color:inherit;transition:transform .25s cubic-bezier(.16,1,.3,1),box-shadow .25s;cursor:pointer;}
     .ara-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(26,39,68,.1);}
     .ara-card-img{position:relative;aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;overflow:hidden;}
@@ -139,7 +141,7 @@
   <div id="footer-placeholder"></div>
 
   <script src="firebase-loader.js?v=6"></script>
-  <script src="shared.min.js?v=282"></script>
+  <script src="shared.min.js?v=283"></script>
   <script>
     function pageInit() {
       renderNav({ heroMode: false });
@@ -190,6 +192,8 @@
     }
 
     var _activeFilter = 'all';
+    var _pageSize = 24; // Her grupta ilk N sonuç gösterilir; "Daha fazla" ile batch eklenir
+    var _shownCount = {}; // { venue: 24, place: 24, ... }
 
     function runSearch(q) {
       if (!q || q.length < 2) return;
@@ -223,11 +227,11 @@
           var statusInfo = null;
           try {
             if (v.category === 'konaklama') statusInfo = null;
-            else if (v.seasonal && typeof isVenueOpen === 'function' && isVenueOpen(v) === false) statusInfo = { label: 'Sezon dışı', color: '#63B3ED', bg: 'rgba(49,130,206,.15)' };
+            else if (v.seasonal && typeof isVenueOpen === 'function' && isVenueOpen(v) === false) statusInfo = { label: 'Sezon dışı', color: '#fff', bg: 'rgba(29,78,216,.92)' };
             else if (typeof isVenueOpen === 'function') {
               var openNow = isVenueOpen(v);
-              if (openNow === true) statusInfo = { label: 'Açık', color: '#4ADE80', bg: 'rgba(34,197,94,.2)' };
-              else if (openNow === false) statusInfo = { label: 'Kapalı', color: '#F87171', bg: 'rgba(239,68,68,.18)' };
+              if (openNow === true) statusInfo = { label: 'Açık', color: '#fff', bg: 'rgba(22,163,74,.92)' };
+              else if (openNow === false) statusInfo = { label: 'Kapalı', color: '#fff', bg: 'rgba(185,28,28,.92)' };
             }
           } catch(e) {}
           out.push({ type: 'venue', id: v.id, title: v.title, sub: v.location || v.shortDesc || '', emoji: v.emoji || '📍', image: (v.images && v.images[0]) || '', badge: 'Mekan', cat: cat, status: statusInfo });
@@ -280,6 +284,13 @@
 
     function setFilter(f) {
       _activeFilter = f;
+      _shownCount = {}; // Filtre değişince sayacı sıfırla
+      var q = document.getElementById('ara-input').value.trim();
+      runSearch(q);
+    }
+
+    function loadMore(type) {
+      _shownCount[type] = (_shownCount[type] || _pageSize) + _pageSize;
       var q = document.getElementById('ara-input').value.trim();
       runSearch(q);
     }
@@ -297,9 +308,11 @@
       var html = '';
       grouped.order.forEach(function(t) {
         if (_activeFilter !== 'all' && _activeFilter !== t) return;
-        var items = grouped.groups[t];
-        if (items.length === 0) return;
-        if (_activeFilter === 'all') html += '<div class="ara-group-label">' + labels[t] + ' · ' + items.length + '</div>';
+        var allItems = grouped.groups[t];
+        if (allItems.length === 0) return;
+        var shown = _shownCount[t] || _pageSize;
+        var items = allItems.slice(0, shown);
+        if (_activeFilter === 'all') html += '<div class="ara-group-label">' + labels[t] + ' · ' + allItems.length + '</div>';
         html += '<div class="ara-grid">';
         items.forEach(function(it) {
           var tc = typeColors[t];
@@ -326,6 +339,13 @@
           '</a>';
         });
         html += '</div>';
+        // "Daha fazla" butonu — bu grupta henüz gösterilmeyen kart varsa
+        if (items.length < allItems.length) {
+          var remaining = allItems.length - items.length;
+          html += '<div style="text-align:center;margin:18px 0 24px"><button class="ara-loadmore" onclick="loadMore(\'' + t + '\')">' +
+            'Daha Fazla Göster <span style="opacity:.7">(' + remaining + ')</span>' +
+          '</button></div>';
+        }
       });
       wrap.innerHTML = html;
       // Cache'ten anında gelen görseller için fallback — onload tetiklenmeyebilir

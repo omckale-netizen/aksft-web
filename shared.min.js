@@ -2612,7 +2612,7 @@ function renderVenuePage(venueId) {
       .vp-lb-counter{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.5);font-size:.78rem;font-weight:600;}
 
       /* ── Sticky Action Bar ── */
-      .vp-sticky{position:fixed;bottom:-80px;left:0;right:0;z-index:100;transition:bottom .4s cubic-bezier(.16,1,.3,1);}
+      .vp-sticky{position:fixed;bottom:-80px;left:0;right:0;z-index:100;transition:bottom .4s cubic-bezier(.16,1,.3,1);padding-bottom:env(safe-area-inset-bottom);}
       .vp-sticky.show{bottom:0;}
       .vp-sticky-glass{margin:0 12px 12px;padding:12px 16px;background:rgba(13,24,41,.55);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-radius:16px;border:1px solid rgba(245,237,224,.12);box-shadow:0 8px 32px rgba(0,0,0,.2);}
       .vp-sticky-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;}
@@ -3144,7 +3144,9 @@ function renderVenuePage(venueId) {
   window.vpOpenLightbox = function(idx) {
     lbIdx = idx;
     const lb = document.getElementById('vp-lightbox');
-    document.getElementById('vp-lb-img').src = lbImgs[lbIdx];
+    const lbImg = document.getElementById('vp-lb-img');
+    lbImg.src = lbImgs[lbIdx];
+    lbImg.alt = (v.title || 'Mekan') + ' — fotoğraf ' + (lbIdx + 1);
     document.getElementById('vp-lb-counter').textContent = (lbIdx + 1) + ' / ' + lbImgs.length;
     lb.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -3155,7 +3157,9 @@ function renderVenuePage(venueId) {
   };
   window.vpLbNav = function(dir) {
     lbIdx = (lbIdx + dir + lbImgs.length) % lbImgs.length;
-    document.getElementById('vp-lb-img').src = lbImgs[lbIdx];
+    const lbImg = document.getElementById('vp-lb-img');
+    lbImg.src = lbImgs[lbIdx];
+    lbImg.alt = (v.title || 'Mekan') + ' — fotoğraf ' + (lbIdx + 1);
     document.getElementById('vp-lb-counter').textContent = (lbIdx + 1) + ' / ' + lbImgs.length;
   };
   // Galeri görsellerine tıklama
