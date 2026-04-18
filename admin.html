@@ -1178,8 +1178,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
   </div>
   <div class="notif-dd-tabs">
     <button class="notif-dd-tab active" onclick="filterNotifs('all',this)">Tümü</button>
-    <button class="notif-dd-tab" onclick="filterNotifs('message',this)">Mesajlar</button>
-    <button class="notif-dd-tab" onclick="filterNotifs('todo',this)">Görevler</button>
+    <button class="notif-dd-tab" onclick="filterNotifs('message',this)">Mesaj</button>
+    <button class="notif-dd-tab" onclick="filterNotifs('todo',this)">Görev</button>
+    <button class="notif-dd-tab" onclick="filterNotifs('pending',this)">Onay</button>
+    <button class="notif-dd-tab" onclick="filterNotifs('premium',this)">Premium</button>
   </div>
   <div id="notif-list" style="max-height:400px;overflow-y:auto"></div>
 </div>
@@ -15132,7 +15134,50 @@ async function renderNotifications() {
       });
     }
 
-    // 4. Okunmuş/temizlenmiş olanları listeden çıkar (görünmesinler)
+    // 3. Onay bekleyen mekanlar (pending_venues — status 'pending' veya 'updated')
+    if (canAccessPage('pending')) {
+      try {
+        var pendSnap = await db.collection('pending_venues')
+          .where('status', 'in', ['pending', 'updated'])
+          .orderBy('submittedAt', 'desc')
+          .limit(20).get();
+        pendSnap.docs.forEach(function(d) {
+          var p = d.data();
+          var isUpdate = p.status === 'updated';
+          allNotifs.push({
+            id: 'pending_' + d.id, type: 'pending', read: false,
+            icon: isUpdate ? '✏️' : '🏪', iconBg: 'rgba(196,82,26,.1)',
+            title: isUpdate ? 'Güncellenmiş mekan: ' + (p.title || '') : 'Onay bekleyen yeni mekan: ' + (p.title || ''),
+            desc: (p.ownerName ? p.ownerName + ' — ' : '') + (p.category || 'kategori yok') + (p.location ? ' · ' + p.location : ''),
+            time: p.submittedAt || '',
+            action: function() { showPage('pending'); }
+          });
+        });
+      } catch(e) { console.warn('Pending notif:', e); }
+    }
+
+    // 4. Premium bitiyor (7 gun kala uyari)
+    if (canAccessPage && canAccessPage('venues') && Array.isArray(draftData.venues)) {
+      var today = new Date().toISOString().split('T')[0];
+      var in7days = new Date(); in7days.setDate(in7days.getDate() + 7);
+      var in7str = in7days.toISOString().split('T')[0];
+      draftData.venues.forEach(function(v) {
+        if (!v.premium || !v.premiumEnd) return;
+        if (v.premiumEnd < today) return; // zaten bitmiş
+        if (v.premiumEnd > in7str) return; // 7 günden daha uzak
+        var daysLeft = Math.ceil((new Date(v.premiumEnd) - new Date()) / 86400000);
+        allNotifs.push({
+          id: 'premium_' + v.id + '_' + v.premiumEnd, type: 'premium', read: false,
+          icon: '⚠️', iconBg: 'rgba(217,119,6,.12)',
+          title: '"' + (v.title || v.id) + '" premium süresi bitiyor',
+          desc: daysLeft <= 0 ? 'Bugün bitiyor — mekan sahibine bildirim gönderin' : daysLeft + ' gün kaldı · ' + v.premiumEnd + ' tarihinde sona erecek',
+          time: new Date().toISOString(),
+          action: function() { editVenue(v.id); }
+        });
+      });
+    }
+
+    // 5. Okunmuş/temizlenmiş olanları listeden çıkar (görünmesinler)
     const readNotifs = JSON.parse(localStorage.getItem('readNotifs') || '[]');
     const readSet = new Set(readNotifs);
     allNotifs = allNotifs.filter(n => !readSet.has(n.id));
