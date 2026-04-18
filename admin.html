@@ -7744,7 +7744,19 @@ function showPage(page) {
   if (page === 'blog') renderBlogTable();
   if (page === 'todos') { startTodosListener(); renderTodos(); }
   if (page === 'users') { startUsersListener(); renderUsers(); }
-  if (page === 'chat') { startChatListener(); }
+  if (page === 'chat') {
+    // Optimistic: kullanıcı sohbet sayfasına girdi, badge'i hemen gizle
+    // (server roundtrip'i beklemeden — markChatAsRead arka planda çalışır)
+    var _cb = document.getElementById('chat-badge');
+    if (_cb) { _cb.style.display = 'none'; _cb.innerHTML = ''; }
+    var _cn = document.querySelector('.admin-nav-item[data-page="chat"]');
+    if (_cn) _cn.classList.remove('has-unread');
+    var _cl = document.querySelector('.chat-nav-label');
+    if (_cl) _cl.textContent = 'Ekip Sohbeti';
+    startChatListener();
+    // Listener'ın markChatAsRead çağrısı kısa gecikebilir, biraz bekle sonra tekrar sıfırla
+    setTimeout(function() { try { markChatAsRead(); } catch(e) {} }, 200);
+  }
 }
 
 /* ══════════════════════════════════════════════════
