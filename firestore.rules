@@ -159,6 +159,21 @@ service cloud.firestore {
       allow read, delete: if isAdmin();
     }
 
+    // Spam log: honeypot/rate-limit yakalanan iletisim form gonderileri
+    // Server (notify.js) REST API ile yazar, admin panelden okur/siler
+    match /spam_log/{docId} {
+      allow create: if
+        request.resource.data.keys().hasOnly(['ip','email','name','subject','message','reason','userAgent','timestamp','date'])
+        && (!('ip' in request.resource.data) || (request.resource.data.ip is string && request.resource.data.ip.size() < 50))
+        && (!('email' in request.resource.data) || (request.resource.data.email is string && request.resource.data.email.size() < 100))
+        && (!('name' in request.resource.data) || (request.resource.data.name is string && request.resource.data.name.size() < 80))
+        && (!('subject' in request.resource.data) || (request.resource.data.subject is string && request.resource.data.subject.size() < 120))
+        && (!('message' in request.resource.data) || (request.resource.data.message is string && request.resource.data.message.size() < 500))
+        && (!('reason' in request.resource.data) || (request.resource.data.reason is string && request.resource.data.reason.size() < 50))
+        && (!('userAgent' in request.resource.data) || (request.resource.data.userAgent is string && request.resource.data.userAgent.size() < 300));
+      allow read, delete: if isAdmin();
+    }
+
     // Favoriler: herkes okuyabilir (kod ile paylasim), yazma validasyonlu
     match /favorites/{docId} {
       allow read: if true;

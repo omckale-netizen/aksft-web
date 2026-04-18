@@ -2819,6 +2819,30 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
         </div>
       </div>
+
+      <!-- Spam Log Bolumu -->
+      <div class="panel-card" style="margin-top:24px">
+        <div class="panel-card-head" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <div>
+            <h3>🚫 Spam Yakalamaları</h3>
+            <span style="font-size:.68rem;color:var(--text-muted)">Honeypot + rate-limit ile bloklanmış form gönderileri</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span id="spam-count" style="font-size:.72rem;color:var(--text-muted)"></span>
+            <button class="btn btn-sm btn-secondary" onclick="renderSpamLog()" title="Yenile">🔄</button>
+            <button class="btn btn-sm btn-secondary" onclick="anaExportCSV('spam-table','spam-log')" title="CSV indir">⬇ CSV</button>
+            <button class="btn btn-sm btn-danger" onclick="clearAllSpam()" title="Tüm spam kayıtlarını sil">🗑 Tümünü Sil</button>
+          </div>
+        </div>
+        <div style="padding:14px 0">
+          <table class="panel-table" id="spam-table" style="width:100%">
+            <thead>
+              <tr><th style="width:130px">Tarih</th><th style="width:120px">IP</th><th>Gönderen</th><th>Konu / Mesaj</th><th style="width:90px">Neden</th><th style="width:60px"></th></tr>
+            </thead>
+            <tbody id="spam-tbody"><tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">Yükleniyor...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- ══════ PENDING VENUES ══════ -->
@@ -8448,7 +8472,7 @@ function showPage(page) {
   if (page === 'export') renderExport();
   if (page === 'socialgen') sgUpdateList();
   if (page === 'analytics') { renderAnalytics(); restoreAnaTab(); }
-  if (page === 'messages') renderMessages();
+  if (page === 'messages') { renderMessages(); renderSpamLog(); }
   if (page === 'pending') renderPendingVenues();
   if (page === 'activity') renderActivityLog();
   if (page === 'blog') renderBlogTable();
@@ -9813,6 +9837,74 @@ async function permanentDeletePendingVenue(id) {
     renderPendingVenues();
     showToast('Talep kalıcı olarak silindi.', 'success');
   } catch(err) { showToast('Hata: ' + err.message, 'error'); }
+}
+
+// Spam log — honeypot/rate-limit ile yakalanan gonderiler
+async function renderSpamLog() {
+  var tbody = document.getElementById('spam-tbody');
+  var count = document.getElementById('spam-count');
+  if (!tbody) return;
+  try {
+    var snap = await db.collection('spam_log').orderBy('timestamp', 'desc').limit(200).get();
+    var items = snap.docs.map(function(d) { return { _id: d.id, ...d.data() }; });
+    if (count) count.textContent = items.length + ' kayıt';
+    if (items.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:30px">✓ Henüz spam yakalanmadı</td></tr>';
+      return;
+    }
+    var reasonLabels = {
+      honeypot:        { label: '🍯 Honeypot', color: '#C53030', bg: 'rgba(229,62,62,.08)' },
+      rate_limit_min:  { label: '⏱ Dk limit', color: '#D97706', bg: 'rgba(217,119,6,.08)' },
+      rate_limit_day:  { label: '📅 Gün limit', color: '#D97706', bg: 'rgba(217,119,6,.08)' }
+    };
+    tbody.innerHTML = items.map(function(s) {
+      var ts = s.timestamp ? new Date(s.timestamp) : null;
+      var dateStr = ts ? ts.toLocaleString('tr-TR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+      var r = reasonLabels[s.reason] || { label: s.reason || '?', color: '#718096', bg: 'rgba(0,0,0,.05)' };
+      var sender = escHtml((s.name || 'Anonim') + (s.email ? ' <' + s.email + '>' : ''));
+      var content = escHtml((s.subject ? s.subject + ': ' : '') + (s.message || '').substring(0, 120));
+      if ((s.message || '').length > 120) content += '…';
+      return '<tr style="border-bottom:1px solid rgba(0,0,0,.04)">' +
+        '<td style="padding:10px 14px;font-size:.72rem;color:var(--text-muted)">' + dateStr + '</td>' +
+        '<td style="padding:10px 14px;font-size:.72rem;font-family:monospace;color:var(--text-muted)">' + escHtml(s.ip || '-') + '</td>' +
+        '<td style="padding:10px 14px;font-size:.78rem;color:var(--navy)">' + sender + '</td>' +
+        '<td style="padding:10px 14px;font-size:.78rem;color:var(--text-mid)">' + content + '</td>' +
+        '<td style="padding:10px 14px"><span style="display:inline-block;padding:3px 8px;border-radius:6px;background:' + r.bg + ';color:' + r.color + ';font-size:.65rem;font-weight:700;white-space:nowrap">' + r.label + '</span></td>' +
+        '<td style="padding:10px 14px;text-align:right"><button class="btn btn-sm btn-danger" style="padding:3px 8px;font-size:.65rem" onclick="deleteSpamEntry(\'' + s._id + '\')" title="Sil">🗑</button></td>' +
+      '</tr>';
+    }).join('');
+  } catch(err) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--red);padding:30px">Yüklenemedi: ' + err.message + '</td></tr>';
+  }
+}
+
+async function deleteSpamEntry(id) {
+  if (!confirm('Bu spam kaydı silinsin mi?')) return;
+  try {
+    await db.collection('spam_log').doc(id).delete();
+    renderSpamLog();
+    showToast('✓ Silindi', 'success');
+  } catch(err) { showToast('Hata: ' + err.message, 'error'); }
+}
+
+async function clearAllSpam() {
+  if (!confirm('Tüm spam log kayıtları silinsin mi? Geri alınamaz.')) return;
+  try {
+    var tbody = document.getElementById('spam-tbody');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px">⏳ Siliniyor...</td></tr>';
+    var total = 0;
+    while (true) {
+      var snap = await db.collection('spam_log').limit(400).get();
+      if (snap.empty) break;
+      var batch = db.batch();
+      snap.docs.forEach(function(d) { batch.delete(d.ref); });
+      await batch.commit();
+      total += snap.size;
+    }
+    renderSpamLog();
+    showToast('✓ ' + total + ' spam kaydı silindi', 'success');
+    if (typeof addBackupLog === 'function') addBackupLog('🗑', total + ' spam kaydi silindi');
+  } catch(err) { showToast('Hata: ' + err.message, 'error'); renderSpamLog(); }
 }
 
 async function renderMessages() {

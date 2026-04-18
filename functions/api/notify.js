@@ -34,7 +34,10 @@ export async function onRequestPost(context) {
 
   // Honeypot kontrolü — bot tuzağı (iletişim formu)
   if (type === 'message' && data._hp) {
-    // Honeypot alanı doldurulmuş — bot
+    // Bot — spam log'a yaz, normal kullanici bunu bilmez
+    const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+    const ua = request.headers.get('user-agent') || '';
+    logSpam(data, ip, ua, 'honeypot', context);
     return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   }
 
@@ -47,6 +50,7 @@ export async function onRequestPost(context) {
         var minKey = 'contact_min_' + ip + '_' + Math.floor(Date.now() / 60000);
         var minCount = parseInt(await env.CHAT_KV.get(minKey) || '0');
         if (minCount >= 2) {
+          logSpam(data, ip, request.headers.get('user-agent') || '', 'rate_limit_min', context);
           return new Response(JSON.stringify({ error: 'Çok hızlı mesaj gönderiyorsunuz. Lütfen biraz bekleyin.' }), { status: 429, headers: { 'Content-Type': 'application/json' } });
         }
         await env.CHAT_KV.put(minKey, String(minCount + 1), { expirationTtl: 60 });
@@ -56,6 +60,7 @@ export async function onRequestPost(context) {
         var dayKey = 'contact_day_' + ip + '_' + today;
         var dayCount = parseInt(await env.CHAT_KV.get(dayKey) || '0');
         if (dayCount >= 5) {
+          logSpam(data, ip, request.headers.get('user-agent') || '', 'rate_limit_day', context);
           return new Response(JSON.stringify({ error: 'Günlük mesaj limitinize ulaştınız. Yarın tekrar deneyebilirsiniz.' }), { status: 429, headers: { 'Content-Type': 'application/json' } });
         }
         await env.CHAT_KV.put(dayKey, String(dayCount + 1), { expirationTtl: 86400 });
@@ -416,4 +421,34 @@ export async function onRequestPost(context) {
   } catch (err) {
     return new Response(JSON.stringify({ error: 'Send failed' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
+}
+
+// Spam log'a yaz (honeypot / rate-limit yakalamalari)
+// Firestore REST API — admin panel 'Messages > Spam' sekmesinde goruntulenir
+function logSpam(data, ip, ua, reason, context) {
+  try {
+    const waitUntil = (context && typeof context.waitUntil === 'function')
+      ? (p) => context.waitUntil(p)
+      : (p) => { try { p.catch(() => {}); } catch(e) {} };
+    const now = new Date();
+    const body = {
+      fields: {
+        ip: { stringValue: String(ip || '').slice(0, 50) },
+        email: { stringValue: String(data.email || '').slice(0, 100) },
+        name: { stringValue: String(data.name || '').slice(0, 80) },
+        subject: { stringValue: String(data.subject || '').slice(0, 120) },
+        message: { stringValue: String(data.message || '').slice(0, 500) },
+        reason: { stringValue: String(reason || 'unknown').slice(0, 50) },
+        userAgent: { stringValue: String(ua || '').slice(0, 200) },
+        timestamp: { stringValue: now.toISOString() },
+        date: { stringValue: now.toISOString().split('T')[0] }
+      }
+    };
+    const url = 'https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents/spam_log';
+    waitUntil(fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    }).catch(() => {}));
+  } catch(e) { /* sessiz */ }
 }
