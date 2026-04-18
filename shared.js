@@ -182,7 +182,7 @@ window.akBuildReelsHtml = function(reels, opts) {
   if (!Array.isArray(reels) || !reels.length) return '';
   opts = opts || {};
   var idPrefix = opts.idPrefix || 'reel-';
-  var sectionTitle = opts.sectionTitle || '📹 Hakkında Videolar';
+  var sectionTitle = opts.sectionTitle || '🎬 Hakkında Videolar';
   var locationText = opts.locationText || '';
 
   function _escHtml(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
@@ -3452,7 +3452,7 @@ function renderVenuePage(venueId) {
           '<div class="vp-section fade-up">' +
           window.akBuildReelsHtml(v.instagramReels, {
             idPrefix: 'reel-' + v.id + '-',
-            sectionTitle: '📹 ' + v.title + ' Hakkında Videolar',
+            sectionTitle: '🎬 ' + v.title + ' Hakkında Videolar',
             locationText: v.title
           }) +
           '</div>'
@@ -4461,7 +4461,7 @@ function renderVillagePage(villageId) {
     var vLabel = vType2 === 'belde' ? 'Beldesi' : (vType2 === 'mahalle' ? 'Mahallesi' : 'Köyü');
     bodyHtml += window.akBuildReelsHtml(v.instagramReels, {
       idPrefix: 'reel-' + v.id + '-',
-      sectionTitle: '📹 ' + v.title + ' Hakkında Videolar',
+      sectionTitle: '🎬 ' + v.title + ' Hakkında Videolar',
       locationText: v.title + ' ' + vLabel
     });
   }
@@ -4998,7 +4998,7 @@ function renderPlacePage(placeId) {
   if (Array.isArray(p.instagramReels) && p.instagramReels.length > 0) {
     bodyHtml += window.akBuildReelsHtml(p.instagramReels, {
       idPrefix: 'reel-' + p.id + '-',
-      sectionTitle: '📹 ' + p.title + ' Hakkında Videolar',
+      sectionTitle: '🎬 ' + p.title + ' Hakkında Videolar',
       locationText: p.title
     });
   }
