@@ -32,7 +32,7 @@
 <div id="vp-body"></div>
 <div id="footer-placeholder"></div>
 <script src="../firebase-loader.js?v=6"></script>
-<script src="../shared.min.js?v=328"></script>
+<script src="../shared.min.js?v=329"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false, basePath: '../' });
@@ -92,7 +92,7 @@ function pageInit() {
           </div>
         </div>
         <div style="position:absolute;bottom:24px;text-align:center;color:rgba(113,128,150,.5);font-size:.75rem;">
-          © 2026 Assos'u Keşfet
+          © ${new Date().getFullYear()} Assos'u Keşfet
         </div>
       </div>`;
     return;

@@ -2554,7 +2554,7 @@ function notFoundHTML(label, icon, backUrl, backLabel) {
         </div>
       </div>
       <div style="position:absolute;bottom:24px;text-align:center;color:rgba(113,128,150,.5);font-size:.75rem;">
-        © 2026 Assos'u Keşfet
+        © ${new Date().getFullYear()} Assos'u Keşfet
       </div>
     </div>`;
 }
