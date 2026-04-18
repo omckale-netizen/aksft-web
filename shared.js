@@ -176,6 +176,107 @@ window.akReelRestoreState = function() {
   });
 };
 
+// Reel kartlarini HTML string olarak build et — venue/place/village detay sayfalari icin ortak
+// opts: { idPrefix, sectionTitle, locationText }
+window.akBuildReelsHtml = function(reels, opts) {
+  if (!Array.isArray(reels) || !reels.length) return '';
+  opts = opts || {};
+  var idPrefix = opts.idPrefix || 'reel-';
+  var sectionTitle = opts.sectionTitle || '📹 Hakkında Videolar';
+  var locationText = opts.locationText || '';
+
+  function _escHtml(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+  function _escAttr(s) { return _escHtml(s); }
+  function _decodeEntities(s) {
+    if (!s) return '';
+    return String(s)
+      .replace(/&#x([0-9a-fA-F]+);/g, function(_, hex) { return String.fromCodePoint(parseInt(hex, 16)); })
+      .replace(/&#(\d+);/g, function(_, dec) { return String.fromCodePoint(parseInt(dec, 10)); })
+      .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&nbsp;/g, ' ');
+  }
+  function _cleanIgTitle(s) {
+    if (!s) return '';
+    var str = _decodeEntities(s);
+    var m = str.match(/Instagram\s*:\s*["'\u201C\u201D\u2018\u2019]?\s*(.+?)\s*["'\u201C\u201D\u2018\u2019]?\s*$/);
+    if (m && m[1]) str = m[1];
+    return str.replace(/^["'\u201C\u201D\u2018\u2019\s]+|["'\u201C\u201D\u2018\u2019\s]+$/g, '');
+  }
+
+  var _settings = (window.DATA && window.DATA.siteSettings) || {};
+  var avatarUrl = _settings.igAvatarUrl || _settings.schemaLogoUrl || '/icon-512.png';
+
+  var html = '<div style="margin-bottom:40px;">';
+  html += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">' + _escHtml(sectionTitle) + '</h2>';
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;">';
+
+  reels.forEach(function(reel, idx) {
+    var reelKey = idPrefix + idx;
+    var sc = reel.shortcode || (reel.url && reel.url.match ? (reel.url.match(/\/(p|reel|reels)\/([A-Za-z0-9_-]+)/) || [])[2] || '' : '');
+    var embedUrl = sc ? 'https://www.instagram.com/p/' + sc + '/embed' : '';
+    var titleRaw = _cleanIgTitle(reel.title || '');
+    var caption = titleRaw;
+    if (titleRaw.length > 160) {
+      var sentEnd = titleRaw.substring(0, 240).search(/[.!?…](\s|$)/);
+      caption = (sentEnd >= 40 ? titleRaw.substring(0, sentEnd + 1) : titleRaw.substring(0, 160) + '…');
+    }
+    if (caption && !/[.!?…]$/.test(caption)) caption += '…';
+    var thumb = reel.thumbnailUrl ? _escAttr(reel.thumbnailUrl) : '';
+    var videoUrl = reel.videoUrl ? _escAttr(reel.videoUrl) : '';
+    var playSrc = videoUrl || embedUrl;
+    var playType = videoUrl ? 'video' : 'embed';
+
+    html += '<div class="ak-reel-card" id="' + reelKey + '" oncontextmenu="return false" style="background:#fff;border:1px solid rgba(26,39,68,.08);border-radius:14px;overflow:hidden;max-width:460px;margin:0 auto;width:100%;box-shadow:0 2px 12px rgba(26,39,68,.06);-webkit-user-select:none;user-select:none;">';
+    // Header
+    html += '<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;">';
+    html += '<div style="width:38px;height:38px;border-radius:50%;padding:2px;background:linear-gradient(45deg,#F09433 0%,#E6683C 25%,#DC2743 50%,#CC2366 75%,#BC1888 100%);flex-shrink:0;">';
+    html += '<div style="width:100%;height:100%;border-radius:50%;background:#fff;padding:2px;">';
+    html += '<img src="' + _escAttr(avatarUrl) + '" alt="assosukesfet" loading="lazy" onload="this.style.opacity=1" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;opacity:0;transition:opacity .35s ease;">';
+    html += '</div></div>';
+    html += '<div style="flex:1;min-width:0;">';
+    html += '<div style="display:flex;align-items:center;gap:4px;"><span style="font-weight:700;font-size:.84rem;color:#262626;">assosukesfet</span>';
+    html += '<svg width="14" height="14" viewBox="0 0 24 24" style="flex-shrink:0;"><path fill="#0095F6" d="M12 2L14.5 4.5L18 4L18.5 7.5L22 9L20.5 12L22 15L18.5 16.5L18 20L14.5 19.5L12 22L9.5 19.5L6 20L5.5 16.5L2 15L3.5 12L2 9L5.5 7.5L6 4L9.5 4.5L12 2Z"/><path fill="#fff" d="M10.5 14.5L7.5 11.5L9 10L10.5 11.5L14.5 7.5L16 9L10.5 14.5Z"/></svg>';
+    html += '</div>';
+    if (locationText) html += '<div style="font-size:.72rem;color:#262626;margin-top:1px;">📍 ' + _escHtml(locationText) + '</div>';
+    html += '</div>';
+    html += '<div style="color:#262626;font-size:1rem;letter-spacing:1px;flex-shrink:0;padding:0 4px;">⋯</div>';
+    html += '</div>';
+    // Media
+    html += '<div style="position:relative;aspect-ratio:4/5;background:#000;overflow:hidden;">';
+    html += '<div class="ak-reel-cover" style="position:absolute;inset:0;background:#1A2744;cursor:pointer;" onclick="akPlayReel(\'' + reelKey + '\', \'' + _escAttr(playSrc) + '\', \'' + playType + '\')">';
+    if (thumb) html += '<img src="' + thumb + '" alt="" loading="lazy" decoding="async" onload="this.style.opacity=1" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .35s ease;">';
+    html += '<div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 0%,transparent 70%,rgba(0,0,0,.2) 100%);"></div>';
+    html += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">';
+    html += '<div style="width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(0,0,0,.35);transition:transform .2s;" onmouseover="this.style.transform=\'scale(1.08)\'" onmouseout="this.style.transform=\'\'">';
+    html += '<svg width="28" height="28" viewBox="0 0 24 24" fill="#262626" style="margin-left:3px"><path d="M8 5v14l11-7z"/></svg>';
+    html += '</div></div>';
+    html += '</div>';
+    html += '<div class="ak-reel-player" style="position:absolute;inset:0;display:none;"></div>';
+    html += '</div>';
+    // Action bar
+    html += '<div style="display:flex;align-items:center;padding:10px 14px 6px;gap:14px;">';
+    html += '<button type="button" onclick="akReelLike(this,\'' + reelKey + '\')" aria-label="Beğen" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;color:#262626;" class="ak-reel-like-btn"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ak-reel-heart"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>';
+    html += '<span aria-hidden="true" style="color:#262626;display:flex;align-items:center;opacity:.85;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>';
+    html += '<span aria-hidden="true" style="color:#262626;display:flex;align-items:center;opacity:.85;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span>';
+    html += '<div style="flex:1;"></div>';
+    html += '<button type="button" onclick="akReelBookmark(this,\'' + reelKey + '\')" aria-label="Kaydet" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;color:#262626;" class="ak-reel-save-btn"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ak-reel-bookmark"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>';
+    html += '</div>';
+    // Caption
+    if (caption) {
+      html += '<div style="padding:6px 14px 4px;font-size:.82rem;color:#262626;line-height:1.4;">';
+      html += '<span style="font-weight:700;">assosukesfet</span> ' + _escHtml(caption);
+      html += '</div>';
+    }
+    // IG CTA
+    html += '<a href="' + _escAttr(reel.url) + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;padding:10px 14px 14px;font-size:.76rem;font-weight:600;color:#00376B;text-decoration:none;">';
+    html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>Instagram\'da Görüntüle';
+    html += '</a>';
+    html += '</div>';
+  });
+  html += '</div></div>';
+  return html;
+};
+
 // Reel player — native video varsa tek tikla oynar, yoksa IG embed iframe
 // type: 'video' = native HTML5 video, 'embed' = IG iframe fallback
 window.akPlayReel = function(cardId, srcUrl, type) {
@@ -3346,6 +3447,17 @@ function renderVenuePage(venueId) {
           '</div>';
         })()}
 
+        <!-- Instagram Reels -->
+        ${(Array.isArray(v.instagramReels) && v.instagramReels.length > 0) ? (
+          '<div class="vp-section fade-up">' +
+          window.akBuildReelsHtml(v.instagramReels, {
+            idPrefix: 'reel-' + v.id + '-',
+            sectionTitle: '📹 ' + v.title + ' Hakkında Videolar',
+            locationText: v.title
+          }) +
+          '</div>'
+        ) : ''}
+
         <!-- Komşu Mekanlar (aynı konum) -->
         ${(() => {
           const neighbors = (DATA.venues || []).filter(x => x.id !== v.id && x.location && v.location && x.location.toLowerCase() === v.location.toLowerCase()).slice(0, 4);
@@ -3454,6 +3566,9 @@ function renderVenuePage(venueId) {
     </div>
 
   `;
+
+  // Reel like/bookmark state restore
+  try { if (window.akReelRestoreState) akReelRestoreState(); } catch(e) {}
 
   /* ── Global event handlers ── */
   /* ── Lightbox ── */
@@ -4340,116 +4455,15 @@ function renderVillagePage(villageId) {
     bodyHtml += '</div></div>';
   }
 
-  // Instagram Reels — Instagram gonderi tarzi post karti (header + media + action bar + caption)
+  // Instagram Reels — Instagram gonderi tarzi post karti (ortak helper)
   if (Array.isArray(v.instagramReels) && v.instagramReels.length > 0) {
-    var decodeEntities = function(s) {
-      if (!s) return '';
-      return String(s)
-        .replace(/&#x([0-9a-fA-F]+);/g, function(_, hex) { return String.fromCodePoint(parseInt(hex, 16)); })
-        .replace(/&#(\d+);/g, function(_, dec) { return String.fromCodePoint(parseInt(dec, 10)); })
-        .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&nbsp;/g, ' ');
-    };
-    // Instagram og:title kaliplari: "username | bio, Instagram: '<caption>'" -> sadece caption
-    var cleanIgTitle = function(s) {
-      if (!s) return '';
-      var str = decodeEntities(s);
-      // "Instagram:" sonrasini al (varsa)
-      var m = str.match(/Instagram\s*:\s*["'\u201C\u201D\u2018\u2019]?\s*(.+?)\s*["'\u201C\u201D\u2018\u2019]?\s*$/);
-      if (m && m[1]) str = m[1];
-      // Bas/son tirnak/slash temizlik
-      str = str.replace(/^["'\u201C\u201D\u2018\u2019\s]+|["'\u201C\u201D\u2018\u2019\s]+$/g, '');
-      return str;
-    };
-    // Avatar URL — IG avatar > schema logo > icon-512 fallback hiyerarsisi
-    var _settings = (window.DATA && window.DATA.siteSettings) || {};
-    var avatarUrl = _settings.igAvatarUrl || _settings.schemaLogoUrl || '/icon-512.png';
-    // Koy tipi (koy/belde/mahalle) suffix
     var vType2 = v.type || 'koy';
     var vLabel = vType2 === 'belde' ? 'Beldesi' : (vType2 === 'mahalle' ? 'Mahallesi' : 'Köyü');
-    bodyHtml += '<div style="margin-bottom:40px;">';
-    bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">📹 ' + v.title + ' Hakkında Videolar</h2>';
-    bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;">';
-    v.instagramReels.forEach(function(reel, idx) {
-      var reelKey = 'reel-' + v.id + '-' + idx;
-      var sc = reel.shortcode || (reel.url.match(/\/(p|reel|reels)\/([A-Za-z0-9_-]+)/) || [])[2] || '';
-      var embedUrl = sc ? 'https://www.instagram.com/p/' + sc + '/embed' : '';
-      var titleRaw = cleanIgTitle(reel.title || '');
-      var caption = titleRaw;
-      if (titleRaw.length > 160) {
-        var sentEnd = titleRaw.substring(0, 240).search(/[.!?…](\s|$)/);
-        caption = (sentEnd >= 40 ? titleRaw.substring(0, sentEnd + 1) : titleRaw.substring(0, 160) + '…');
-      }
-      if (caption && !/[.!?…]$/.test(caption)) caption += '…';
-      var thumb = reel.thumbnailUrl ? escAttr(reel.thumbnailUrl) : '';
-      var videoUrl = reel.videoUrl ? escAttr(reel.videoUrl) : '';
-      var playSrc = videoUrl || embedUrl;
-      var playType = videoUrl ? 'video' : 'embed';
-
-      bodyHtml += '<div class="ak-reel-card" id="' + reelKey + '" oncontextmenu="return false" style="background:#fff;border:1px solid rgba(26,39,68,.08);border-radius:14px;overflow:hidden;max-width:460px;margin:0 auto;width:100%;box-shadow:0 2px 12px rgba(26,39,68,.06);-webkit-user-select:none;user-select:none;">';
-
-      // ═══ HEADER — Instagram post basligi ═══
-      bodyHtml += '<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;">';
-      // Avatar (gradient ring — Instagram story halkası)
-      bodyHtml += '<div style="width:38px;height:38px;border-radius:50%;padding:2px;background:linear-gradient(45deg,#F09433 0%,#E6683C 25%,#DC2743 50%,#CC2366 75%,#BC1888 100%);flex-shrink:0;">';
-      bodyHtml += '<div style="width:100%;height:100%;border-radius:50%;background:#fff;padding:2px;">';
-      bodyHtml += '<img src="' + escAttr(avatarUrl) + '" alt="assosukesfet" loading="lazy" onload="this.style.opacity=1" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;opacity:0;transition:opacity .35s ease;">';
-      bodyHtml += '</div></div>';
-      // Username + blue tick + location
-      bodyHtml += '<div style="flex:1;min-width:0;">';
-      bodyHtml += '<div style="display:flex;align-items:center;gap:4px;"><span style="font-weight:700;font-size:.84rem;color:#262626;">assosukesfet</span>';
-      bodyHtml += '<svg width="14" height="14" viewBox="0 0 24 24" style="flex-shrink:0;"><path fill="#0095F6" d="M12 2L14.5 4.5L18 4L18.5 7.5L22 9L20.5 12L22 15L18.5 16.5L18 20L14.5 19.5L12 22L9.5 19.5L6 20L5.5 16.5L2 15L3.5 12L2 9L5.5 7.5L6 4L9.5 4.5L12 2Z"/><path fill="#fff" d="M10.5 14.5L7.5 11.5L9 10L10.5 11.5L14.5 7.5L16 9L10.5 14.5Z"/></svg>';
-      bodyHtml += '</div>';
-      bodyHtml += '<div style="font-size:.72rem;color:#262626;margin-top:1px;">📍 ' + escHtml(v.title) + ' ' + vLabel + '</div>';
-      bodyHtml += '</div>';
-      // 3-dot menu (sadece dekoratif)
-      bodyHtml += '<div style="color:#262626;font-size:1rem;letter-spacing:1px;flex-shrink:0;padding:0 4px;">⋯</div>';
-      bodyHtml += '</div>';
-
-      // ═══ MEDIA — video/thumbnail 4:5 ═══
-      bodyHtml += '<div style="position:relative;aspect-ratio:4/5;background:#000;overflow:hidden;">';
-      bodyHtml += '<div class="ak-reel-cover" style="position:absolute;inset:0;background:#1A2744;cursor:pointer;" onclick="akPlayReel(\'' + reelKey + '\', \'' + escAttr(playSrc) + '\', \'' + playType + '\')">';
-      if (thumb) {
-        bodyHtml += '<img src="' + thumb + '" alt="" loading="lazy" decoding="async" onload="this.style.opacity=1" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .35s ease;">';
-      }
-      bodyHtml += '<div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 0%,transparent 70%,rgba(0,0,0,.2) 100%);"></div>';
-      bodyHtml += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">';
-      bodyHtml += '<div style="width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(0,0,0,.35);transition:transform .2s;" onmouseover="this.style.transform=\'scale(1.08)\'" onmouseout="this.style.transform=\'\'">';
-      bodyHtml += '<svg width="28" height="28" viewBox="0 0 24 24" fill="#262626" style="margin-left:3px"><path d="M8 5v14l11-7z"/></svg>';
-      bodyHtml += '</div></div>';
-      bodyHtml += '</div>'; // cover
-      bodyHtml += '<div class="ak-reel-player" style="position:absolute;inset:0;display:none;"></div>';
-      bodyHtml += '</div>'; // media container
-
-      // ═══ ACTION BAR — heart ve bookmark tiklanabilir (fill toggle), yorum/gonder dekoratif ═══
-      bodyHtml += '<div style="display:flex;align-items:center;padding:10px 14px 6px;gap:14px;">';
-      // Heart — tiklanabilir (icli dolu toggle)
-      bodyHtml += '<button type="button" onclick="akReelLike(this,\'' + reelKey + '\')" aria-label="Beğen" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;color:#262626;" class="ak-reel-like-btn"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ak-reel-heart"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>';
-      // Comment — dekoratif, aria-hidden
-      bodyHtml += '<span aria-hidden="true" style="color:#262626;display:flex;align-items:center;opacity:.85;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>';
-      // Share — dekoratif
-      bodyHtml += '<span aria-hidden="true" style="color:#262626;display:flex;align-items:center;opacity:.85;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span>';
-      // Spacer
-      bodyHtml += '<div style="flex:1;"></div>';
-      // Save/bookmark — tiklanabilir (icli dolu toggle)
-      bodyHtml += '<button type="button" onclick="akReelBookmark(this,\'' + reelKey + '\')" aria-label="Kaydet" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;color:#262626;" class="ak-reel-save-btn"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ak-reel-bookmark"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>';
-      bodyHtml += '</div>';
-
-      // Caption — "assosukesfet" + titleRaw
-      if (caption) {
-        bodyHtml += '<div style="padding:6px 14px 4px;font-size:.82rem;color:#262626;line-height:1.4;">';
-        bodyHtml += '<span style="font-weight:700;">assosukesfet</span> ' + escHtml(caption);
-        bodyHtml += '</div>';
-      }
-
-      // IG'da Aç CTA
-      bodyHtml += '<a href="' + escAttr(reel.url) + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;padding:10px 14px 14px;font-size:.76rem;font-weight:600;color:#00376B;text-decoration:none;">';
-      bodyHtml += '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>Instagram\'da Görüntüle';
-      bodyHtml += '</a>';
-
-      bodyHtml += '</div>'; // card
+    bodyHtml += window.akBuildReelsHtml(v.instagramReels, {
+      idPrefix: 'reel-' + v.id + '-',
+      sectionTitle: '📹 ' + v.title + ' Hakkında Videolar',
+      locationText: v.title + ' ' + vLabel
     });
-    bodyHtml += '</div></div>';
   }
 
   // Diğer mahalleler (mahalle detayındaysa)
@@ -4980,8 +4994,20 @@ function renderPlacePage(placeId) {
     }
   }
 
+  // Instagram Reels
+  if (Array.isArray(p.instagramReels) && p.instagramReels.length > 0) {
+    bodyHtml += window.akBuildReelsHtml(p.instagramReels, {
+      idPrefix: 'reel-' + p.id + '-',
+      sectionTitle: '📹 ' + p.title + ' Hakkında Videolar',
+      locationText: p.title
+    });
+  }
+
   bodyHtml += '</div>';
   document.getElementById('place-body').innerHTML = bodyHtml;
+
+  // Reel like/bookmark state restore
+  try { if (window.akReelRestoreState) akReelRestoreState(); } catch(e) {}
 
   // Favori
   var plIsSaved = window.isPlaceSaved && isPlaceSaved(p.id);

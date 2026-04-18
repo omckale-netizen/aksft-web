@@ -2041,21 +2041,21 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                   <span>Yerler sayfasında da göster</span>
                 </label>
               </div>
-              <!-- Instagram Reels — thumbnail otomatik cekilir (Firebase Storage cache) -->
-              <div class="form-group">
-                <label>📹 Instagram Reels <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(Köy hakkında videolar)</span></label>
-                <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">
-                  <input type="text" id="vpf-reel-url" placeholder="https://www.instagram.com/reel/XXXXX/" style="flex:1;min-width:200px">
-                  <input type="text" id="vpf-reel-title" placeholder="Video başlığı" style="flex:1;min-width:150px">
-                </div>
-                <div style="display:flex;gap:6px;margin-bottom:8px">
-                  <button type="button" class="btn btn-primary btn-sm" onclick="addReel()" style="flex:1">⚡ Otomatik Ekle (Thumbnail'i çek)</button>
-                  <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('vpf-reel-thumb-input').click()" style="flex:1">📷 Manuel Thumbnail ile Ekle</button>
-                  <input type="file" id="vpf-reel-thumb-input" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="addReelManual(this.files[0])">
-                </div>
-                <div id="vpf-reels-list" style="display:flex;flex-direction:column;gap:6px"></div>
-                <div id="vpf-reel-status" style="font-size:.72rem;color:var(--text-muted);margin-top:6px"></div>
+            </div>
+            <!-- Instagram Reels — thumbnail otomatik cekilir (Firebase Storage cache). Koy + Yer icin ortak. -->
+            <div class="form-group">
+              <label>📹 Instagram Reels <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(Bu yer/yerleşim hakkında videolar)</span></label>
+              <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">
+                <input type="text" id="vpf-reel-url" placeholder="https://www.instagram.com/reel/XXXXX/" style="flex:1;min-width:200px">
+                <input type="text" id="vpf-reel-title" placeholder="Video başlığı" style="flex:1;min-width:150px">
               </div>
+              <div style="display:flex;gap:6px;margin-bottom:8px">
+                <button type="button" class="btn btn-primary btn-sm" onclick="addReel('vp')" style="flex:1">⚡ Otomatik Ekle (Thumbnail'i çek)</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('vpf-reel-thumb-input').click()" style="flex:1">📷 Manuel Thumbnail ile Ekle</button>
+                <input type="file" id="vpf-reel-thumb-input" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="addReelManual(this.files[0],'vp')">
+              </div>
+              <div id="vpf-reels-list" style="display:flex;flex-direction:column;gap:6px"></div>
+              <div id="vpf-reel-status" style="font-size:.72rem;color:var(--text-muted);margin-top:6px"></div>
             </div>
             <div class="form-group">
               <label>Kısa Açıklama</label>
@@ -4125,6 +4125,23 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <select id="f-placeId">
             <option value="">Yok</option>
           </select>
+        </div>
+
+        <!-- ═══ Instagram Reels ═══ -->
+        <div style="font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--terra);margin:20px 0 12px;padding-top:16px;border-top:1px solid rgba(0,0,0,.06)">Instagram Reels</div>
+        <div class="form-group">
+          <label>📹 Hakkında Videolar <span style="font-weight:400;color:var(--text-muted);font-size:.72rem">(Bu mekana ait Instagram reel/post)</span></label>
+          <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">
+            <input type="text" id="vnf-reel-url" placeholder="https://www.instagram.com/reel/XXXXX/" style="flex:1;min-width:200px">
+            <input type="text" id="vnf-reel-title" placeholder="Video başlığı" style="flex:1;min-width:150px">
+          </div>
+          <div style="display:flex;gap:6px;margin-bottom:8px">
+            <button type="button" class="btn btn-primary btn-sm" onclick="addReel('vn')" style="flex:1">⚡ Otomatik Ekle (Thumbnail'i çek)</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('vnf-reel-thumb-input').click()" style="flex:1">📷 Manuel Thumbnail ile Ekle</button>
+            <input type="file" id="vnf-reel-thumb-input" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="addReelManual(this.files[0],'vn')">
+          </div>
+          <div id="vnf-reels-list" style="display:flex;flex-direction:column;gap:6px"></div>
+          <div id="vnf-reel-status" style="font-size:.72rem;color:var(--text-muted);margin-top:6px"></div>
         </div>
 
         <!-- ═══ Durum & Özellikler ═══ -->
@@ -12258,6 +12275,8 @@ function openVenueModal(id) {
   pendingImages = [];
   const form = document.getElementById('venue-form');
   form.reset();
+  _reelsState.vn = [];
+  renderReelsList('vn');
   populateLocationDropdown();
 
   // "Görev Ekle" butonu sadece mevcut mekan düzenlerken görünsün
@@ -12323,6 +12342,9 @@ function openVenueModal(id) {
     if (!v.dayHours && v.weeklyHours) {
       renderWhGrid(null);
     }
+    // Instagram Reels — mevcut listeyi yukle
+    _reelsState.vn = Array.isArray(v.instagramReels) ? v.instagramReels.slice() : [];
+    renderReelsList('vn');
   } else {
     document.getElementById('modal-title').textContent = 'Yeni Mekan Ekle';
     document.getElementById('f-id').value = '';
@@ -12743,7 +12765,8 @@ async function saveVenue(e) {
     lng: parseFloat(document.getElementById('f-lng').value) || null,
     seasonal: document.getElementById('f-seasonal').checked,
     seasonStart: document.getElementById('f-seasonal').checked ? document.getElementById('f-season-start').value : null,
-    seasonEnd: document.getElementById('f-seasonal').checked ? document.getElementById('f-season-end').value : null
+    seasonEnd: document.getElementById('f-seasonal').checked ? document.getElementById('f-season-end').value : null,
+    instagramReels: Array.isArray(_reelsState.vn) ? _reelsState.vn : []
   };
 
   // Generate keywords from title + tags
@@ -13137,27 +13160,37 @@ function autoVPId() {
 }
 
 // Instagram Reels state (modal instance'ina bagli)
-var _vpReels = [];
+// Reel state — vp (koy/yer formu), vn (mekan formu)
+var _reelsState = { vp: [], vn: [] };
+// Geri uyumluluk icin _vpReels'i state.vp'ye baglanti tut
+Object.defineProperty(window, '_vpReels', {
+  get: function() { return _reelsState.vp; },
+  set: function(v) { _reelsState.vp = v; },
+  configurable: true
+});
 
-function renderReelsList() {
-  var el = document.getElementById('vpf-reels-list');
+function renderReelsList(key) {
+  key = key || 'vp';
+  var arr = _reelsState[key] || [];
+  var el = document.getElementById(key + 'f-reels-list');
   if (!el) return;
-  if (!_vpReels.length) { el.innerHTML = '<div style="font-size:.72rem;color:var(--text-muted);padding:8px 0">Henüz reel eklenmedi.</div>'; return; }
-  el.innerHTML = _vpReels.map(function(r, i) {
+  if (!arr.length) { el.innerHTML = '<div style="font-size:.72rem;color:var(--text-muted);padding:8px 0">Henüz reel eklenmedi.</div>'; return; }
+  el.innerHTML = arr.map(function(r, i) {
     var thumb = r.thumbnailUrl ? '<img src="' + escAttr(r.thumbnailUrl) + '" style="width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0">' : '<div style="width:48px;height:48px;border-radius:8px;background:rgba(0,0,0,.06);display:flex;align-items:center;justify-content:center;flex-shrink:0">📹</div>';
     return '<div style="display:flex;align-items:center;gap:10px;padding:8px;background:rgba(0,0,0,.03);border-radius:8px">'
       + thumb
       + '<div style="flex:1;min-width:0"><div style="font-size:.8rem;font-weight:600;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escHtml(r.title || '(başlıksız)') + '</div>'
       + '<div style="font-size:.68rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escHtml(r.url) + '</div></div>'
-      + '<button type="button" class="btn btn-danger btn-sm" onclick="removeReel(' + i + ')" style="flex-shrink:0">Sil</button>'
+      + '<button type="button" class="btn btn-danger btn-sm" onclick="removeReel(' + i + ',\'' + key + '\')" style="flex-shrink:0">Sil</button>'
       + '</div>';
   }).join('');
 }
 
-async function addReel() {
-  var urlInp = document.getElementById('vpf-reel-url');
-  var titleInp = document.getElementById('vpf-reel-title');
-  var statusEl = document.getElementById('vpf-reel-status');
+async function addReel(key) {
+  key = key || 'vp';
+  var urlInp = document.getElementById(key + 'f-reel-url');
+  var titleInp = document.getElementById(key + 'f-reel-title');
+  var statusEl = document.getElementById(key + 'f-reel-status');
   var url = (urlInp.value || '').trim();
   var title = (titleInp.value || '').trim();
   if (!url) { statusEl.textContent = 'Instagram URL girin.'; statusEl.style.color = '#E53E3E'; return; }
@@ -13174,7 +13207,7 @@ async function addReel() {
     });
     var data = await resp.json();
     if (!resp.ok || !data.thumbnailUrl) throw new Error(data.error || 'Thumbnail alınamadı');
-    _vpReels.push({
+    _reelsState[key].push({
       url: url,
       shortcode: data.shortcode || '',
       title: title || (data.title ? data.title.substring(0, 80) : ''),
@@ -13183,7 +13216,7 @@ async function addReel() {
     });
     urlInp.value = '';
     titleInp.value = '';
-    renderReelsList();
+    renderReelsList(key);
     if (data.cached) {
       if (data.videoUrl) {
         statusEl.textContent = '✓ Eklendi (thumbnail + video cache — tek tıkla oynar)';
@@ -13194,7 +13227,6 @@ async function addReel() {
     } else {
       statusEl.textContent = '⚠️ Eklendi ama IG CDN URL (~30 günde expire olabilir)';
       statusEl.style.color = '#D97706';
-      // Firebase upload hata detayini konsola + toast'a yaz — debug icin
       if (data.uploadError) {
         console.error('[ig-thumbnail] Firebase Storage upload error:', data.uploadError);
         showToast('Firebase upload hatasi: ' + String(data.uploadError).substring(0, 150), 'error');
@@ -13209,12 +13241,13 @@ async function addReel() {
 }
 
 // Manuel thumbnail ile reel ekle — Instagram Cloudflare'i bloklarsa fallback
-async function addReelManual(file) {
+async function addReelManual(file, key) {
   if (!file) return;
-  var urlInp = document.getElementById('vpf-reel-url');
-  var titleInp = document.getElementById('vpf-reel-title');
-  var statusEl = document.getElementById('vpf-reel-status');
-  var fileInp = document.getElementById('vpf-reel-thumb-input');
+  key = key || 'vp';
+  var urlInp = document.getElementById(key + 'f-reel-url');
+  var titleInp = document.getElementById(key + 'f-reel-title');
+  var statusEl = document.getElementById(key + 'f-reel-status');
+  var fileInp = document.getElementById(key + 'f-reel-thumb-input');
 
   var url = (urlInp.value || '').trim();
   var title = (titleInp.value || '').trim();
@@ -13233,7 +13266,7 @@ async function addReelManual(file) {
     var ext = (file.type.includes('png') ? 'png' : (file.type.includes('webp') ? 'webp' : 'jpg'));
     var path = 'reels/' + shortcode + '.' + ext;
     var thumbUrl = await uploadImageToServer(file, path);
-    _vpReels.push({
+    _reelsState[key].push({
       url: url,
       shortcode: shortcode,
       title: title || 'Instagram Reel',
@@ -13242,7 +13275,7 @@ async function addReelManual(file) {
     urlInp.value = '';
     titleInp.value = '';
     fileInp.value = '';
-    renderReelsList();
+    renderReelsList(key);
     statusEl.textContent = '✓ Manuel eklendi';
     statusEl.style.color = 'var(--green)';
     setTimeout(function() { statusEl.textContent = ''; }, 2500);
@@ -13254,9 +13287,10 @@ async function addReelManual(file) {
   }
 }
 
-function removeReel(idx) {
-  _vpReels.splice(idx, 1);
-  renderReelsList();
+function removeReel(idx, key) {
+  key = key || 'vp';
+  _reelsState[key].splice(idx, 1);
+  renderReelsList(key);
 }
 
 function openVPModal(id) {
@@ -13264,8 +13298,8 @@ function openVPModal(id) {
   const isPlaces = currentVPTab === 'places';
   const form = document.getElementById('vp-form');
   form.reset();
-  _vpReels = [];
-  renderReelsList();
+  _reelsState.vp = [];
+  renderReelsList('vp');
   document.getElementById('vpf-desc-editor').innerHTML = '';
   window._vpRteSourceMode = false;
   document.getElementById('vpf-desc-editor').style.display = 'block';
@@ -13375,10 +13409,10 @@ function openVPModal(id) {
       onVillageTypeChange();
       document.getElementById('vpf-highlights').value = (item.highlights || []).join(', ');
       document.getElementById('vpf-showInPlaces').checked = !!item.showInPlaces;
-      // Instagram Reels — mevcut listeyi yukle
-      _vpReels = Array.isArray(item.instagramReels) ? item.instagramReels.slice() : [];
-      renderReelsList();
     }
+    // Instagram Reels — koy + yer icin ortak
+    _reelsState.vp = Array.isArray(item.instagramReels) ? item.instagramReels.slice() : [];
+    renderReelsList('vp');
     // Fotoğraf preview
     vpShowImgPreview(item.image || '');
   } else {
@@ -13532,11 +13566,12 @@ async function saveVP(e) {
       parent: document.getElementById('vpf-village-type').value === 'mahalle' ? (document.getElementById('vpf-parent').value || 'ayvacik') : '',
       highlights: highlightsStr ? highlightsStr.split(',').map(h => h.trim()).filter(Boolean) : [],
       showInPlaces: document.getElementById('vpf-showInPlaces').checked,
-      instagramReels: Array.isArray(_vpReels) ? _vpReels : [],
     };
     if (!editingVPId) { villagePatch.image = ''; }
     Object.assign(item, villagePatch);
   }
+  // Instagram Reels — koy + yer ortak
+  item.instagramReels = Array.isArray(_reelsState.vp) ? _reelsState.vp : [];
 
   // Fotoğraf yükleme/silme
   if (vpPendingImg === 'REMOVE') {
