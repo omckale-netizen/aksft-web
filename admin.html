@@ -5640,18 +5640,40 @@ function mtUtmCopy() {
 function mtUtmShort() {
   var source = mtUtmGetSource();
   var medium = document.getElementById('mt-utm-medium').value;
+  var campaign = (document.getElementById('mt-utm-campaign').value || '').trim().replace(/\s+/g, '-').toLowerCase();
+  var content = (document.getElementById('mt-utm-content').value || '').trim().replace(/\s+/g, '-').toLowerCase();
   var shortEl = document.getElementById('mt-utm-short');
   var urlEl = document.getElementById('mt-utm-short-url');
   if (!shortEl || !urlEl) return;
 
+  // Once tam eslesen path'i bul (medium->path). Yoksa bio'ya dus.
   var short = null;
-  if (VANITY_LINKS[source]) short = VANITY_LINKS[source][medium] || VANITY_LINKS[source].bio || null;
+  var defaultMedium = null;
+  if (VANITY_LINKS[source]) {
+    if (VANITY_LINKS[source][medium]) {
+      short = VANITY_LINKS[source][medium];
+      defaultMedium = medium; // Path zaten bu medium icin — override gerekmez
+    } else if (VANITY_LINKS[source].bio) {
+      short = VANITY_LINKS[source].bio;
+      defaultMedium = 'bio'; // /wa, /ig vb. default bio
+    }
+  }
   if (!short) {
     shortEl.style.display = 'none';
     showToast('Bu kaynak/ortam için vanity link tanımlı değil. Hedef URL doğrudan kullanılabilir.', 'info');
     return;
   }
-  urlEl.textContent = 'https://assosukesfet.com' + short;
+
+  // Query param ekle — sadece default'tan farkliysa veya kampanya/icerik varsa
+  var qParams = [];
+  if (medium && medium !== defaultMedium) qParams.push('m=' + encodeURIComponent(medium));
+  if (campaign) qParams.push('c=' + encodeURIComponent(campaign));
+  if (content) qParams.push('ct=' + encodeURIComponent(content));
+
+  var finalUrl = 'https://assosukesfet.com' + short;
+  if (qParams.length) finalUrl += '?' + qParams.join('&');
+
+  urlEl.textContent = finalUrl;
   shortEl.style.display = '';
 }
 
