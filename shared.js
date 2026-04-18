@@ -220,9 +220,13 @@ window.akBuildReelsHtml = function(reels, opts) {
     var titleRaw = _cleanIgTitle(reel.title || '');
     var caption = titleRaw;
     if (titleRaw) {
-      // Ilk 2 cumleyi al — tek bosluga normalize et (newline'lari da)
-      var _normalized = titleRaw.replace(/\s+/g, ' ').trim();
-      var _sregex = /[.!?…]+(\s|$)/g;
+      // IG og:description bazen whitespace sıkıştırır: "biri.Adını" gibi → terminator+harf arasına boşluk koy
+      var _normalized = titleRaw
+        .replace(/([.!?…]+)([A-ZÇŞĞÜÖİ])/g, '$1 $2')
+        .replace(/\s+/g, ' ')
+        .trim();
+      // Ilk 2 cumle — terminator + (boşluk veya son)
+      var _sregex = /[.!?…]+(?=\s|$)/g;
       var _scount = 0, _slast = 0, _m;
       while ((_m = _sregex.exec(_normalized)) !== null) {
         _slast = _m.index + _m[0].length;

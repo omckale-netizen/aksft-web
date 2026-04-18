@@ -368,10 +368,14 @@ function unescapeJsonString(s) {
 }
 
 // Bir metinden ilk N cumleyi cikar ve sonuna '…' ekle (son noktanin yerine).
+// IG og:description'daki "biri.Adını" gibi bosluksuz birlesmeleri de ayirir.
 function extractFirstNSentences(text, n, maxChars) {
   if (!text) return '';
-  const clean = text.replace(/\s+/g, ' ').trim();
-  const regex = /[.!?…]+(\s|$)/g;
+  const clean = text
+    .replace(/([.!?…]+)([A-ZÇŞĞÜÖİ])/g, '$1 $2')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const regex = /[.!?…]+(?=\s|$)/g;
   let count = 0;
   let lastEnd = 0;
   let match;
@@ -382,7 +386,6 @@ function extractFirstNSentences(text, n, maxChars) {
   }
   let result = count > 0 ? clean.substring(0, lastEnd).trim() : clean;
   if (maxChars && result.length > maxChars) result = result.substring(0, maxChars).trim();
-  // Son noktalama isaretini '…' ile degistir (. ! ? -> …). Zaten … ise aynen kalsin.
   result = result.replace(/[.!?]+$/, '').replace(/…+$/, '') + '…';
   return result;
 }
