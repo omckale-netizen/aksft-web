@@ -8,7 +8,10 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=2">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" onload="this.rel='stylesheet'">
+  <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" onload="this.rel='stylesheet'" fetchpriority="high">
   <title>Assos Blog — Gezi Rehberi, Mekan Önerileri ve Rota İpuçları | Assos'u Keşfet</title>
   <meta name="description" content="Assos gezi rehberleri, en iyi kahvaltı mekanları, gün batımı noktaları, koy ve plaj önerileri, köy rotaları ve yerel lezzetler. Assos'u keşfetmek için bilmeniz gereken her şey.">
   <meta name="keywords" content="Assos blog, Assos gezi, Assos rehber, Assos kahvaltı, Assos koylar, Assos köyler, Behramkale, Kadırga, Adatepe, Babakale">
@@ -198,7 +201,7 @@ if (new URLSearchParams(window.location.search).get('yazi')) {
 <div id="footer-placeholder"></div>
 
 <script src="firebase-loader.js?v=6"></script>
-<script src="shared.min.js?v=332"></script>
+<script src="shared.min.js?v=333"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });

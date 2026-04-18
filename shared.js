@@ -1423,7 +1423,7 @@ function renderNav(opts = {}) {
             const header = '<div style="display:flex;align-items:center;gap:7px;padding:8px 2px 6px;"><span style="font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:' + m.catC + ';">' + m.catL + '</span><span style="font-size:.55rem;font-weight:700;padding:1px 6px;border-radius:999px;background:' + m.catBg + ';color:' + m.catC + ';">' + items.length + '</span></div>';
             const cards = items.map(v => {
               const hasPhoto = v.images && v.images.length > 0;
-              const imgContent = hasPhoto ? '<img src="' + v.images[0] + '" onload="this.classList.add(\'sd-loaded\')">' : v.emoji;
+              const imgContent = hasPhoto ? '<img src="' + v.images[0] + '" loading="lazy" decoding="async" onload="this.classList.add(\'sd-loaded\')">' : v.emoji;
               var premTag = isPremiumActive(v) ? '<span style="font-size:.48rem;font-weight:800;letter-spacing:.06em;margin-left:5px;padding:2px 7px;border-radius:4px;background:linear-gradient(135deg,#C9963A,#E8C46A);color:#5C3D0E;vertical-align:middle;text-transform:uppercase;">Premium</span>' : '';
               var premBorder = isPremiumActive(v) ? 'border:1.5px solid rgba(212,147,90,.25);' : '';
               return '<a class="sd-venue" href="' + getMekanPath(v.id) + '" style="' + premBorder + '"><div class="sd-venue-img" style="background:' + m.g + ';">' + imgContent + '</div><div class="sd-venue-info"><div class="sd-venue-name">' + v.title + premTag + '</div><div class="sd-venue-loc">📍 ' + v.location + '</div></div><button class="sd-venue-remove" onclick="removeSave(\'' + escAttr(v.id) + '\',event)" aria-label="Kaldır">✕</button></a>';
@@ -1440,7 +1440,7 @@ function renderNav(opts = {}) {
       html += '<div style="display:flex;align-items:center;gap:7px;padding:16px 2px 8px;"><span style="font-size:.7rem;font-weight:800;color:var(--navy);">📍 Yerler</span><span style="font-size:.6rem;font-weight:700;padding:1px 7px;border-radius:999px;background:rgba(26,39,68,.08);color:var(--navy);">' + onlyPlaces.length + '</span><div style="flex:1;height:1px;background:rgba(26,39,68,.08);"></div></div>';
       html += onlyPlaces.map(p => {
         const hasPhoto = p.image && p.image.length > 0;
-        const imgContent = hasPhoto ? '<img src="' + p.image + '" onload="this.classList.add(\'sd-loaded\')">' : p.emoji;
+        const imgContent = hasPhoto ? '<img src="' + p.image + '" loading="lazy" decoding="async" onload="this.classList.add(\'sd-loaded\')">' : p.emoji;
         return '<a class="sd-venue" href="' + getYerPath(p.id) + '"><div class="sd-venue-img" style="background:linear-gradient(135deg,#2A3F6A,#1A2744);">' + imgContent + '</div><div class="sd-venue-info"><div class="sd-venue-name">' + p.title + '</div><div class="sd-venue-loc">📍 ' + (p.location || '') + '</div></div><button class="sd-venue-remove" onclick="removePlaceSave(\'' + escAttr(p.id) + '\',event)" aria-label="Kaldır">✕</button></a>';
       }).join('');
     }
@@ -1451,7 +1451,7 @@ function renderNav(opts = {}) {
       html += '<div style="display:flex;align-items:center;gap:7px;padding:16px 2px 8px;"><span style="font-size:.7rem;font-weight:800;color:var(--navy);">🏘 Köyler</span><span style="font-size:.6rem;font-weight:700;padding:1px 7px;border-radius:999px;background:rgba(90,122,86,.1);color:#5A7A56;">' + onlyVillages.length + '</span><div style="flex:1;height:1px;background:rgba(26,39,68,.08);"></div></div>';
       html += onlyVillages.map(p => {
         const hasPhoto = p.image && p.image.length > 0;
-        const imgContent = hasPhoto ? '<img src="' + p.image + '" onload="this.classList.add(\'sd-loaded\')">' : p.emoji;
+        const imgContent = hasPhoto ? '<img src="' + p.image + '" loading="lazy" decoding="async" onload="this.classList.add(\'sd-loaded\')">' : p.emoji;
         return '<a class="sd-venue" href="' + getKoyPath(p.id) + '"><div class="sd-venue-img" style="background:linear-gradient(135deg,#1A2744,#243255);">' + imgContent + '</div><div class="sd-venue-info"><div class="sd-venue-name">' + p.title + '</div><div class="sd-venue-loc">📍 Ayvacık, Çanakkale</div></div><button class="sd-venue-remove" onclick="removePlaceSave(\'' + escAttr(p.id) + '\',event)" aria-label="Kaldır">✕</button></a>';
       }).join('');
     }
@@ -3211,7 +3211,7 @@ function renderVenuePage(venueId) {
   document.getElementById('vp-hero').innerHTML = `
     <div class="vp-hero">
       <div class="vp-hero-bg" style="background:${G};"></div>
-      ${v.images && v.images.length > 0 ? '<img src="' + v.images[0] + '" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0;transition:opacity .7s ease;" onload="this.style.opacity=\'0.25\'">' : ''}
+      ${v.images && v.images.length > 0 ? '<img src="' + v.images[0] + '" alt="" fetchpriority="high" decoding="async" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0;transition:opacity .7s ease;" onload="this.style.opacity=\'0.25\'">' : ''}
       <div class="vp-topo"></div>
       <div class="vp-vignette"></div>
       <div class="vp-text-overlay"></div>
