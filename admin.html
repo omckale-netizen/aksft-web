@@ -4143,6 +4143,50 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             </div>
           </div>
 
+          <!-- Hero Metni + Hava Durumu (admin-only) -->
+          <div class="panel-card" data-admin-only data-settings-tab="gorunum">
+            <div class="panel-card-head"><h3>🎯 Hero Ayarları</h3></div>
+            <div style="padding:20px">
+              <div style="font-size:.72rem;color:var(--text-light);margin-bottom:14px;line-height:1.5">
+                Anasayfadaki hero bölümünün metni ve hava durumu widget'ı ayarları.
+              </div>
+
+              <div class="form-group" style="margin-bottom:14px">
+                <label style="font-size:.78rem">✦ Badge Metni</label>
+                <input type="text" id="hero-badge-input" maxlength="100" placeholder="ASSOS'TA SANA EŞLİK EDEN YOL ARKADAŞI" style="width:100%;padding:8px 12px;border:1.5px solid rgba(0,0,0,.1);border-radius:8px;font-size:.82rem;font-family:inherit">
+                <div style="font-size:.62rem;color:var(--text-muted);margin-top:3px">Büyük harfle yazıp kısa tutun. Hero'da ✦ sonrası görünür.</div>
+              </div>
+
+              <div style="padding-top:14px;border-top:1px dashed rgba(0,0,0,.08)">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px">
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:.82rem;font-weight:700;color:var(--navy)">🌤 Hava Durumu Widget</div>
+                    <div style="font-size:.68rem;color:var(--text-muted)">Hero üstünde 3 günlük tahmin gösterir</div>
+                  </div>
+                  <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;flex-shrink:0">
+                    <input type="checkbox" id="hero-weather-toggle" style="opacity:0;width:0;height:0">
+                    <span id="hero-weather-slider" style="position:absolute;inset:0;background:#ccc;transition:.3s;border-radius:24px">
+                      <span style="position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;transition:.3s;border-radius:50%"></span>
+                    </span>
+                  </label>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+                  <div class="form-group" style="margin:0">
+                    <label style="font-size:.68rem">Konum Adı</label>
+                    <input type="text" id="hero-weather-label" maxlength="30" placeholder="Assos" style="width:100%;padding:7px 10px;border:1.5px solid rgba(0,0,0,.1);border-radius:7px;font-size:.76rem;font-family:inherit">
+                  </div>
+                  <div class="form-group" style="margin:0">
+                    <label style="font-size:.68rem">Koordinat (Lat, Lon)</label>
+                    <input type="text" id="hero-weather-coords" placeholder="39.4887, 26.3393" style="width:100%;padding:7px 10px;border:1.5px solid rgba(0,0,0,.1);border-radius:7px;font-size:.76rem;font-family:monospace">
+                  </div>
+                </div>
+              </div>
+
+              <button class="btn btn-primary btn-sm" onclick="saveHeroSettings()" style="width:100%;margin-top:10px">💾 Kaydet</button>
+              <div id="hero-settings-status" style="font-size:.72rem;color:var(--text-muted);margin-top:8px;min-height:16px"></div>
+            </div>
+          </div>
+
           <!-- Tema (admin-only) -->
           <div class="panel-card" data-admin-only data-settings-tab="gorunum">
             <div class="panel-card-head"><h3>🎨 Tema</h3></div>
@@ -7339,6 +7383,82 @@ async function resetTheme() {
   if (!confirm('Varsayılan terra rengine dönülsün mü?')) return;
   applyThemePreset('default');
   await saveTheme();
+}
+
+// ═══ Hero Ayarları (badge + hava durumu) ═══
+async function loadHeroSettings() {
+  try {
+    var doc = await db.collection('settings').doc('site').get();
+    if (!doc.exists) return;
+    var d = doc.data() || {};
+    var badge = document.getElementById('hero-badge-input');
+    var toggle = document.getElementById('hero-weather-toggle');
+    var slider = document.getElementById('hero-weather-slider');
+    var label = document.getElementById('hero-weather-label');
+    var coords = document.getElementById('hero-weather-coords');
+    if (badge) badge.value = d.heroBadgeText || '';
+    var weatherEnabled = d.weatherEnabled !== false; // default true
+    if (toggle) toggle.checked = weatherEnabled;
+    if (slider) {
+      slider.style.background = weatherEnabled ? 'var(--terra)' : '#ccc';
+      var knob = slider.querySelector('span');
+      if (knob) knob.style.transform = weatherEnabled ? 'translateX(20px)' : 'translateX(0)';
+    }
+    if (label) label.value = d.weatherLabel || '';
+    if (coords) {
+      var lat = (typeof d.weatherLat === 'number') ? d.weatherLat : '';
+      var lon = (typeof d.weatherLon === 'number') ? d.weatherLon : '';
+      coords.value = (lat && lon) ? (lat + ', ' + lon) : '';
+    }
+    // Toggle change listener — sadece slider guncellemek icin (save butonu ile kaydediliyor)
+    if (toggle && !toggle._hasListener) {
+      toggle._hasListener = true;
+      toggle.addEventListener('change', function() {
+        var on = toggle.checked;
+        slider.style.background = on ? 'var(--terra)' : '#ccc';
+        var knob = slider.querySelector('span');
+        if (knob) knob.style.transform = on ? 'translateX(20px)' : 'translateX(0)';
+      });
+    }
+  } catch(e) { console.warn('loadHeroSettings:', e); }
+}
+
+async function saveHeroSettings() {
+  var st = document.getElementById('hero-settings-status');
+  var badge = document.getElementById('hero-badge-input');
+  var toggle = document.getElementById('hero-weather-toggle');
+  var label = document.getElementById('hero-weather-label');
+  var coords = document.getElementById('hero-weather-coords');
+  st.textContent = '⏳ Kaydediliyor...'; st.style.color = 'var(--text-muted)';
+  try {
+    var patch = {
+      heroBadgeText: (badge.value || '').trim().slice(0, 100),
+      weatherEnabled: !!toggle.checked,
+      weatherLabel: (label.value || '').trim().slice(0, 30) || 'Assos'
+    };
+    // Coords parse
+    var cv = (coords.value || '').trim();
+    if (cv) {
+      var parts = cv.split(',').map(function(s){ return parseFloat(s.trim()); });
+      if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+        patch.weatherLat = parts[0];
+        patch.weatherLon = parts[1];
+      } else {
+        st.textContent = '❌ Koordinat formatı hatalı. Örn: 39.4887, 26.3393';
+        st.style.color = 'var(--red)';
+        return;
+      }
+    }
+    await db.collection('settings').doc('site').set(patch, { merge: true });
+    st.textContent = '✓ Hero ayarları kaydedildi';
+    st.style.color = 'var(--green)';
+    showToast('✓ Hero ayarları güncellendi', 'success');
+    if (typeof addBackupLog === 'function') addBackupLog('🎯', 'Hero ayarlari guncellendi');
+  } catch(err) {
+    st.textContent = '❌ ' + err.message;
+    st.style.color = 'var(--red)';
+  }
+  setTimeout(function() { st.textContent = ''; st.style.color = ''; }, 6000);
 }
 
 // ═══ Bakim Modu ═══
@@ -11554,7 +11674,7 @@ showPage = function(page) {
   _origShowPage(page);
   if (page === 'gallery' && galItems.length === 0) galLoadItems();
   if (page === 'categories') { renderCatList(); renderPlaceCatList(); }
-  if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); loadHeroHistory(); loadOgHistory(); updatePasswordDate(); loadLoginHistory(); syncPresenceToggle(); syncSessionTimeoutSelect(); loadMaintenanceState(); loadAnnouncement(); loadTheme(); renderUserSessions(); restoreSettingsTab(); }
+  if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); loadHeroHistory(); loadOgHistory(); updatePasswordDate(); loadLoginHistory(); syncPresenceToggle(); syncSessionTimeoutSelect(); loadMaintenanceState(); loadAnnouncement(); loadTheme(); loadHeroSettings(); renderUserSessions(); restoreSettingsTab(); }
   if (page === 'minitools') { restoreMtTab(); if (window.lucide && lucide.createIcons) try { lucide.createIcons(); } catch(e) {} }
   if (page === 'security') runSecurityCheck();
   if (page === 'export') { loadBackupList(); updateAutoBackupUI(); }

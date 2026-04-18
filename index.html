@@ -145,7 +145,7 @@
         <!-- Badge -->
         <div class="hero-badge">
           <span class="hero-badge-dot">✦</span>
-          <span>ASSOS'TA SANA EŞLİK EDEN YOL ARKADAŞI</span>
+          <span id="hero-badge-text">ASSOS'TA SANA EŞLİK EDEN YOL ARKADAŞI</span>
         </div>
 
         <!-- Headline -->
@@ -627,18 +627,36 @@ function pageInit() {
       }).join('');
   })();
 
+  /* ── Hero Badge Metni (siteSettings'den ozel metin) ── */
+  document.addEventListener('dataReady', function() {
+    var s = (window.DATA && window.DATA.siteSettings) || {};
+    if (s.heroBadgeText) {
+      var bt = document.getElementById('hero-badge-text');
+      if (bt) bt.textContent = s.heroBadgeText;
+    }
+  });
+
   /* ── Hava Durumu — 3 günlük tahmin (Open-Meteo API) ── */
   (function() {
     const el = document.getElementById('hero-weather');
     if (!el) return;
-    const lat = 39.4887, lon = 26.3393;
-    const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon +
-      '&current=temperature_2m,weather_code' +
-      '&daily=temperature_2m_max,temperature_2m_min,weather_code' +
-      '&timezone=Europe%2FIstanbul&forecast_days=3';
-    const wmo = {0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌧',63:'🌧',65:'🌧',71:'🌨',73:'🌨',75:'❄️',80:'🌦',81:'🌧',82:'⛈',95:'⛈',96:'⛈',99:'⛈'};
-    const labels = {0:'Açık',1:'Az bulutlu',2:'Parçalı',3:'Bulutlu',45:'Sisli',48:'Sisli',51:'Hafif yağmur',53:'Yağmurlu',55:'Yoğun yağmur',61:'Yağmurlu',63:'Yağmurlu',65:'Şiddetli',71:'Kar',80:'Sağanak',81:'Sağanak',95:'Fırtına'};
-    const gunler = ['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];
+    // siteSettings'den konum ve toggle oku (dataReady bekler)
+    function loadWeather() {
+      var s = (window.DATA && window.DATA.siteSettings) || {};
+      if (s.weatherEnabled === false) { el.style.display = 'none'; return; }
+      var lat = (typeof s.weatherLat === 'number') ? s.weatherLat : 39.4887;
+      var lon = (typeof s.weatherLon === 'number') ? s.weatherLon : 26.3393;
+      var label = s.weatherLabel || 'Assos';
+      fetchWeather(lat, lon, label);
+    }
+    // dataReady firmiş mi? firmişse hemen yükle, yoksa bekle
+    if (window.DATA && window.DATA.siteSettings) loadWeather();
+    else document.addEventListener('dataReady', loadWeather);
+
+    function fetchWeather(lat, lon, cityLabel) {
+    var wmo = {0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌧',63:'🌧',65:'🌧',71:'🌨',73:'🌨',75:'❄️',80:'🌦',81:'🌧',82:'⛈',95:'⛈',96:'⛈',99:'⛈'};
+    var labels = {0:'Açık',1:'Az bulutlu',2:'Parçalı',3:'Bulutlu',45:'Sisli',48:'Sisli',51:'Hafif yağmur',53:'Yağmurlu',55:'Yoğun yağmur',61:'Yağmurlu',63:'Yağmurlu',65:'Şiddetli',71:'Kar',80:'Sağanak',81:'Sağanak',95:'Fırtına'};
+    var gunler = ['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];
 
     fetch(url).then(r => r.json()).then(data => {
       if (!data.current || !data.daily) return;
@@ -661,7 +679,7 @@ function pageInit() {
       });
 
       el.innerHTML =
-        '<span style="font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(245,237,224,.25);padding:0 10px 0 6px;white-space:nowrap;">Assos</span>' +
+        '<span style="font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(245,237,224,.25);padding:0 10px 0 6px;white-space:nowrap;">' + cityLabel + '</span>' +
         '<div class="hw-day hw-today">' +
           '<span class="hw-icon">' + todayEmoji + '</span>' +
           '<span class="hw-temp">' + todayTemp + '°C</span>' +
@@ -677,6 +695,7 @@ function pageInit() {
         ).join('');
       el.style.opacity = '1';
     }).catch(() => { el.style.opacity = '1'; });
+    } // end fetchWeather
   })();
 
   function heroSearchSubmit() {
