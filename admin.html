@@ -1045,11 +1045,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .ana-tab.active{color:var(--terra);border-bottom-color:var(--terra)}
 .act-date-btn.active{background:var(--terra);color:#fff;border-color:var(--terra)}
 
-/* Ayarlar sayfasi tab filtresi + masonry layout */
-#page-settings [data-settings-tab]{display:none}
-#page-settings[data-settings-active="hesap"] [data-settings-tab="hesap"]{display:block}
-#page-settings[data-settings-active="gorunum"] [data-settings-tab="gorunum"]{display:block}
-#page-settings[data-settings-active="site"] [data-settings-tab="site"]{display:block}
+/* Ayarlar sayfasi tab filtresi + masonry layout — !important inline style override */
+#page-settings [data-settings-tab]{display:none !important}
+#page-settings[data-settings-active="hesap"] [data-settings-tab="hesap"]{display:block !important}
+#page-settings[data-settings-active="gorunum"] [data-settings-tab="gorunum"]{display:block !important}
+#page-settings[data-settings-active="site"] [data-settings-tab="site"]{display:block !important}
+/* Logo+Favicon wrapper inline display:grid — gorunum tab'da grid goster */
+#page-settings[data-settings-active="gorunum"] [data-settings-tab="gorunum"][style*="grid-template-columns"]{display:grid !important}
 /* Masonry-style CSS columns — cardlar yatay/dikey boslugu doldurur */
 #page-settings .settings-grid{
   display:block !important;
@@ -3998,30 +4000,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                 </a>
               </div>
 
-              <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(0,0,0,.06)">
-                <div style="font-size:.72rem;font-weight:700;color:var(--navy);margin-bottom:10px">📊 Analytics & Heatmap</div>
-                <div style="display:flex;flex-direction:column;gap:8px">
-                  <a href="https://analytics.google.com" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(0,0,0,.02);border-radius:8px;text-decoration:none;color:inherit;font-size:.78rem">
-                    <span style="font-size:.95rem">📈</span>
-                    <span style="flex:1;color:var(--navy);font-weight:600">Google Analytics 4</span>
-                    <span style="color:var(--text-muted);font-size:.65rem">G-7XN86NYD1S</span>
-                    <span style="color:var(--text-muted)">↗</span>
-                  </a>
-                  <a href="https://clarity.microsoft.com/projects/view/w8k2ttk14q" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(0,0,0,.02);border-radius:8px;text-decoration:none;color:inherit;font-size:.78rem">
-                    <span style="font-size:.95rem">🔥</span>
-                    <span style="flex:1;color:var(--navy);font-weight:600">Microsoft Clarity</span>
-                    <span style="color:var(--text-muted);font-size:.65rem">Heatmap · session recording</span>
-                    <span style="color:var(--text-muted)">↗</span>
-                  </a>
-                  <a href="https://console.firebase.google.com/project/assosu-kesfet/overview" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(0,0,0,.02);border-radius:8px;text-decoration:none;color:inherit;font-size:.78rem">
-                    <span style="font-size:.95rem">🔥</span>
-                    <span style="flex:1;color:var(--navy);font-weight:600">Firebase Console</span>
-                    <span style="color:var(--text-muted);font-size:.65rem">Firestore · Auth · Storage</span>
-                    <span style="color:var(--text-muted)">↗</span>
-                  </a>
-                </div>
-              </div>
-
               <div style="margin-top:16px;padding:10px 12px;background:rgba(90,122,86,.05);border:1px solid rgba(90,122,86,.15);border-radius:8px;font-size:.7rem;color:var(--text-light);line-height:1.5">
                 💡 <strong>IndexNow otomatik aktif.</strong> Yeni mekan/rota eklendiğinde Bing ve Yandex anında bilgilendirilir — manuel sitemap submit gerekmez.
               </div>
@@ -4259,7 +4237,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           </div>
 
           <!-- API & Servisler (admin-only) -->
-          <div class="panel-card" data-admin-only>
+          <div class="panel-card" data-admin-only data-settings-tab="site">
             <div class="panel-card-head"><h3>🔗 API & Servisler</h3></div>
             <div style="padding:20px">
               <div style="display:flex;flex-direction:column;gap:10px">
@@ -4269,16 +4247,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                     <div>
                       <div style="font-size:.82rem;font-weight:700;color:var(--navy);">Claude API Dashboard</div>
                       <div style="font-size:.65rem;color:var(--text-muted);">Kullanım, limit ve fatura takibi</div>
-                    </div>
-                  </div>
-                  <span style="font-size:.75rem;color:var(--terra);">↗</span>
-                </a>
-                <a href="https://claude.ai/new" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(0,0,0,.02);border-radius:10px;text-decoration:none;transition:background .15s;" onmouseover="this.style.background='rgba(0,0,0,.05)'" onmouseout="this.style.background='rgba(0,0,0,.02)'">
-                  <div style="display:flex;align-items:center;gap:10px;">
-                    <span style="font-size:1.1rem;">💬</span>
-                    <div>
-                      <div style="font-size:.82rem;font-weight:700;color:var(--navy);">Claude AI Chat</div>
-                      <div style="font-size:.65rem;color:var(--text-muted);">Claude ile doğrudan sohbet</div>
                     </div>
                   </div>
                   <span style="font-size:.75rem;color:var(--terra);">↗</span>
@@ -4293,12 +4261,32 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                   </div>
                   <span style="font-size:.75rem;color:var(--terra);">↗</span>
                 </a>
-                <a href="https://console.firebase.google.com" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(0,0,0,.02);border-radius:10px;text-decoration:none;transition:background .15s;" onmouseover="this.style.background='rgba(0,0,0,.05)'" onmouseout="this.style.background='rgba(0,0,0,.02)'">
+                <a href="https://console.firebase.google.com/project/assosu-kesfet/overview" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(0,0,0,.02);border-radius:10px;text-decoration:none;transition:background .15s;" onmouseover="this.style.background='rgba(0,0,0,.05)'" onmouseout="this.style.background='rgba(0,0,0,.02)'">
                   <div style="display:flex;align-items:center;gap:10px;">
                     <span style="font-size:1.1rem;">🔥</span>
                     <div>
                       <div style="font-size:.82rem;font-weight:700;color:var(--navy);">Firebase Console</div>
-                      <div style="font-size:.65rem;color:var(--text-muted);">Veritabanı, storage, auth yönetimi</div>
+                      <div style="font-size:.65rem;color:var(--text-muted);">Firestore · Auth · Storage yönetimi</div>
+                    </div>
+                  </div>
+                  <span style="font-size:.75rem;color:var(--terra);">↗</span>
+                </a>
+                <a href="https://analytics.google.com" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(0,0,0,.02);border-radius:10px;text-decoration:none;transition:background .15s;" onmouseover="this.style.background='rgba(0,0,0,.05)'" onmouseout="this.style.background='rgba(0,0,0,.02)'">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="font-size:1.1rem;">📈</span>
+                    <div>
+                      <div style="font-size:.82rem;font-weight:700;color:var(--navy);">Google Analytics 4</div>
+                      <div style="font-size:.65rem;color:var(--text-muted);">Trafik analitiği (G-7XN86NYD1S)</div>
+                    </div>
+                  </div>
+                  <span style="font-size:.75rem;color:var(--terra);">↗</span>
+                </a>
+                <a href="https://clarity.microsoft.com/projects/view/w8k2ttk14q" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(0,0,0,.02);border-radius:10px;text-decoration:none;transition:background .15s;" onmouseover="this.style.background='rgba(0,0,0,.05)'" onmouseout="this.style.background='rgba(0,0,0,.02)'">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="font-size:1.1rem;">🔥</span>
+                    <div>
+                      <div style="font-size:.82rem;font-weight:700;color:var(--navy);">Microsoft Clarity</div>
+                      <div style="font-size:.65rem;color:var(--text-muted);">Heatmap · session recording</div>
                     </div>
                   </div>
                   <span style="font-size:.75rem;color:var(--terra);">↗</span>
@@ -4313,22 +4301,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                   </div>
                   <span style="font-size:.75rem;color:var(--terra);">↗</span>
                 </a>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tehlikeli Alan -->
-          <div class="panel-card" style="border:1px solid rgba(229,62,62,.15)">
-            <div class="panel-card-head" style="border-bottom-color:rgba(229,62,62,.1)"><h3 style="color:var(--red)">⚠️ Tehlikeli Alan</h3></div>
-            <div style="padding:20px;display:flex;flex-direction:column;gap:12px">
-              <div>
-                <div style="font-size:.78rem;color:var(--text-light);line-height:1.6;margin-bottom:10px">Oturumu sonlandırır ve giriş sayfasına yönlendirir.</div>
-                <button class="btn" style="width:100%;background:var(--red-bg);color:var(--red);border:1px solid rgba(229,62,62,.2)" onclick="if(confirm('Oturumu kapatmak istediğinize emin misiniz?'))logout()">Oturumu Kapat</button>
-              </div>
-              <div style="padding-top:12px;border-top:1px dashed rgba(229,62,62,.2)">
-                <div style="font-size:.78rem;color:var(--text-light);line-height:1.6;margin-bottom:10px">Tüm cihazlarda (başka tarayıcı, telefon, eski oturumlar) açık olan tüm oturumlarınızı kapatır. Şüpheli erişimde kullanın.</div>
-                <button class="btn" style="width:100%;background:rgba(221,107,32,.08);color:#C05621;border:1px solid rgba(221,107,32,.25)" onclick="logoutAllDevices()">🚪 Tüm Cihazlardan Çıkış Yap</button>
-                <div id="logout-all-status" style="font-size:.68rem;color:var(--text-muted);margin-top:6px;text-align:center"></div>
               </div>
             </div>
           </div>
