@@ -173,7 +173,9 @@ function pageInit() {
 }
 
 function initMapOnly() {
-  map = L.map('map', { center:[39.52,26.32], zoom:12, zoomControl:false, attributionControl:false });
+  // Ilk zoom: mobilde daha genis (veri yuklenene kadar fitBounds ile hedefe yakin dursun)
+  var initZoom = window.innerWidth <= 768 ? 10 : 12;
+  map = L.map('map', { center:[39.50,26.20], zoom:initZoom, zoomControl:false, attributionControl:false });
   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(map);
   L.control.zoom({position:'bottomleft'}).addTo(map);
   L.control.attribution({position:'bottomleft',prefix:false}).addAttribution('&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>').addTo(map);
@@ -222,15 +224,16 @@ function renderMarkers() {
     markers.push({marker,item});
   });
   document.getElementById('map-stats').innerHTML = '<strong>'+filtered.length+'</strong> <span>konum</span>';
-  // Mobilde ilk yuklemede tum pinler gorunsun — fitBounds ile otomatik zoom
+  // Ilk yuklemede tum pinler gorunsun — fitBounds animasyonsuz (F5'te zoom degisimi gorulmesin)
   if (!window._mapInitialFit && filtered.length > 1) {
     window._mapInitialFit = true;
     try {
       var bounds = L.latLngBounds(filtered.map(function(i) { return [i.lat, i.lng]; }));
       var isMobile = window.innerWidth <= 768;
       map.fitBounds(bounds, {
-        padding: isMobile ? [40, 40] : [60, 60],
-        maxZoom: isMobile ? 11 : 13
+        padding: isMobile ? [30, 30] : [60, 60],
+        maxZoom: isMobile ? 12 : 13,
+        animate: false
       });
     } catch(e) {}
   }
