@@ -85,37 +85,57 @@ export async function onRequestPost(context) {
     };
     const accessToken = await getAccessToken(sa);
 
-    // 6) Firebase Storage'a yukle — reels/{shortcode}.{ext}
+    // 6) GCS JSON API ile multipart upload — Firebase Storage download token'i ile
+    // (Firebase Storage REST endpoint'i 403 donerse GCS direkt calisir — Storage Admin yetkisi var)
     const storagePath = 'reels/' + shortcode + '.' + ext;
-    const uploadUrl = 'https://firebasestorage.googleapis.com/v0/b/' + BUCKET
-      + '/o?uploadType=media&name=' + encodeURIComponent(storagePath);
+    const downloadToken = crypto.randomUUID();
+    const boundary = '----AssosuKesfetBoundary' + Date.now();
+    const metadata = {
+      name: storagePath,
+      contentType: contentType,
+      metadata: { firebaseStorageDownloadTokens: downloadToken }
+    };
+    const encoder = new TextEncoder();
+    const metadataPart = encoder.encode(
+      '--' + boundary + '\r\n' +
+      'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+      JSON.stringify(metadata) + '\r\n' +
+      '--' + boundary + '\r\n' +
+      'Content-Type: ' + contentType + '\r\n\r\n'
+    );
+    const closingPart = encoder.encode('\r\n--' + boundary + '--\r\n');
+    // Multipart body'yi birlestir
+    const bodyParts = new Uint8Array(metadataPart.length + imgBytes.byteLength + closingPart.length);
+    bodyParts.set(metadataPart, 0);
+    bodyParts.set(new Uint8Array(imgBytes), metadataPart.length);
+    bodyParts.set(closingPart, metadataPart.length + imgBytes.byteLength);
+
+    const uploadUrl = 'https://storage.googleapis.com/upload/storage/v1/b/' + BUCKET
+      + '/o?uploadType=multipart';
     const uploadResp = await fetch(uploadUrl, {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer ' + accessToken,
-        'Content-Type': contentType,
+        'Content-Type': 'multipart/related; boundary=' + boundary,
       },
-      body: imgBytes,
+      body: bodyParts,
     });
     if (!uploadResp.ok) {
       const errText = await uploadResp.text();
-      console.error('[ig-thumbnail] storage upload failed:', uploadResp.status, errText);
-      // Upload hata olursa IG CDN URL'ini fallback kullan (CSP'de izinli).
-      // Dikkat: IG CDN URL'leri ~30 gunde expire olur, manuel upload daha kalici.
+      console.error('[ig-thumbnail] GCS upload failed:', uploadResp.status, errText);
       return json({
         ok: true,
         shortcode,
         title,
         thumbnailUrl,
         cached: false,
-        warning: 'Firebase cache basarisiz (HTTP ' + uploadResp.status + ') — IG CDN URL kullaniliyor (~30 gun sonra expire olabilir, manuel upload onerilir).',
+        warning: 'Firebase cache basarisiz (HTTP ' + uploadResp.status + ') — IG CDN URL fallback (~30 gun expire).',
         uploadError: errText.substring(0, 200)
       }, 200, corsHeaders);
     }
-    const uploadData = await uploadResp.json();
-    const token = uploadData.downloadTokens;
+    // Firebase Storage download URL (our download token)
     const cachedUrl = 'https://firebasestorage.googleapis.com/v0/b/' + BUCKET
-      + '/o/' + encodeURIComponent(storagePath) + '?alt=media&token=' + token;
+      + '/o/' + encodeURIComponent(storagePath) + '?alt=media&token=' + downloadToken;
 
     return json({ ok: true, shortcode, title, thumbnailUrl: cachedUrl, cached: true }, 200, corsHeaders);
   } catch (err) {
