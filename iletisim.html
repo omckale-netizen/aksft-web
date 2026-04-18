@@ -31,6 +31,26 @@
 </head>
 <body>
 
+<!-- Başarı Modal'ı -->
+<div id="ct-success-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:9999;align-items:center;justify-content:center;padding:24px;animation:ctFadeIn .25s ease;">
+  <div style="background:#fff;border-radius:20px;padding:40px 32px;max-width:420px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:ctPopIn .3s cubic-bezier(.34,1.56,.64,1);">
+    <div style="width:80px;height:80px;margin:0 auto 18px;border-radius:50%;background:linear-gradient(135deg,#D4F5E3,#A8E6C0);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(56,161,105,.25);">
+      <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#38A169" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.4rem;font-weight:800;color:#1A2744;margin:0 0 10px;letter-spacing:-.02em;">Mesajınız İletildi! 🎉</h3>
+    <p style="font-size:.92rem;color:#4A5870;line-height:1.65;margin:0 0 28px;">Talebinizi aldık. Ekibimiz en kısa sürede size <strong style="color:#1A2744">e-posta</strong> ile dönüş yapacaktır.</p>
+    <div style="display:flex;gap:10px;flex-direction:column">
+      <button type="button" onclick="closeSuccessModal()" style="background:linear-gradient(135deg,#C4521A,#A3431A);color:#fff;border:none;border-radius:12px;padding:14px 24px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;transition:transform .15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">Harika, kapat</button>
+      <a href="index.html" style="color:#718096;text-decoration:none;font-size:.82rem;padding:8px;font-weight:600;">Ana Sayfaya Dön</a>
+    </div>
+  </div>
+</div>
+<style>
+  @keyframes ctFadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes ctPopIn{from{opacity:0;transform:scale(.85) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+  #ct-success-modal.show{display:flex !important}
+</style>
+
 <div id="nav-placeholder"></div>
 
 <!-- Hero -->
@@ -375,7 +395,7 @@
 <div id="footer-placeholder"></div>
 
 <script src="firebase-loader.js?v=6"></script>
-<script src="shared.min.js?v=281"></script>
+<script src="shared.min.js?v=282"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
@@ -506,8 +526,8 @@ async function submitContact(e) {
   var hpField = document.getElementById('ct-website');
   if (hpField && hpField.value) {
     // Bot — sessizce başarılı göster ama gönderme
-    status.innerHTML = '<span style="color:#38A169">✓ Mesajınız başarıyla gönderildi!</span>';
     document.getElementById('contact-form').reset();
+    openSuccessModal();
     return;
   }
 
@@ -577,18 +597,38 @@ async function submitContact(e) {
     await db.collection('messages').add(msg);
     // Telegram bildirim
     fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'message',data:{name:msg.name,email:msg.email,phone:msg.phone,subject:msg.subject,message:msg.message}})}).catch(()=>{});
-    status.innerHTML = '<span style="color:#38A169">✓ Mesajınız başarıyla gönderildi! En kısa sürede dönüş yapacağız.</span>';
-    status.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    status.innerHTML = '';
     document.getElementById('contact-form').reset();
-    // 8 saniye sonra başarı mesajını temizle
-    setTimeout(function() { if (status.innerHTML.indexOf('başarıyla') > -1) status.innerHTML = ''; }, 8000);
+    openSuccessModal();
   } catch(err) {
-    status.innerHTML = '<span style="color:#E53E3E">Gönderme hatası. Lütfen tekrar deneyin.</span>';
-    setTimeout(function() { if (status.innerHTML.indexOf('hatası') > -1) status.innerHTML = ''; }, 8000);
+    status.innerHTML = '<span style="color:#E53E3E;font-weight:600">⚠️ Gönderme hatası. Lütfen tekrar deneyin veya doğrudan info@assosukesfet.com adresine yazın.</span>';
+    status.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(function() { if (status.innerHTML.indexOf('hatası') > -1) status.innerHTML = ''; }, 10000);
   }
   btn.disabled = false;
   btn.innerHTML = '<span>Mesaj Gönder</span><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
 }
+
+function openSuccessModal() {
+  var m = document.getElementById('ct-success-modal');
+  if (!m) return;
+  m.classList.add('show');
+  document.body.style.overflow = 'hidden';
+  // ESC ile kapat
+  document.addEventListener('keydown', _ctModalEsc);
+  // Arka plan tıklaması ile kapat
+  m.addEventListener('click', _ctModalBgClick);
+}
+function closeSuccessModal() {
+  var m = document.getElementById('ct-success-modal');
+  if (!m) return;
+  m.classList.remove('show');
+  document.body.style.overflow = '';
+  document.removeEventListener('keydown', _ctModalEsc);
+  m.removeEventListener('click', _ctModalBgClick);
+}
+function _ctModalEsc(e) { if (e.key === 'Escape') closeSuccessModal(); }
+function _ctModalBgClick(e) { if (e.target.id === 'ct-success-modal') closeSuccessModal(); }
 </script>
 
 

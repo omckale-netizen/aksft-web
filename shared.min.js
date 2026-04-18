@@ -189,6 +189,35 @@ document.addEventListener('dataReady', _fetchSiteLogo);
         font-size: max(16px, 1em) !important;
       }
     }
+
+    /* Touch tap target 44px — WCAG 2.5.5 / Apple HIG / Material Design standardı
+       Sadece touch cihazlarda (hover yok + parmakla dokunulan), desktop hover stili değişmez. */
+    @media (hover: none) and (pointer: coarse) {
+      .mk-cat, .mk-status-btn, .ara-filter, .hp-filter-pill, .filter-btn,
+      .yl-cat-btn, .kv-filter, .rt-filter,
+      button.btn, a.btn, .btn-sm, .btn-primary, .btn-secondary {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      /* Küçük save/favori butonlarının tıklama alanı */
+      .mk-fc-save, .mk-vc-save, .place-save-btn, .save-icon-btn {
+        min-width: 40px;
+        min-height: 40px;
+      }
+    }
+
+    /* Global form focus ring — WCAG 2.1 Level AA klavye navigasyon için görsel feedback */
+    input:focus-visible, textarea:focus-visible, select:focus-visible {
+      outline: 2px solid var(--terra, #C4521A) !important;
+      outline-offset: 2px;
+    }
+    /* Mouse kullanan kullanıcıları rahatsız etmesin — :focus-visible sadece klavye navigasyonunda
+       görünür (modern tarayıcı davranışı). Eski Safari için fallback aşağıda. */
+    input:focus:not(:focus-visible), textarea:focus:not(:focus-visible), select:focus:not(:focus-visible) {
+      outline: none;
+    }
     :root {
       --navy:#1A2744;--navy-deep:#0D1829;--navy-mid:#243255;
       --cream:#F5EDE0;--cream-light:#FAF7F2;--cream-mid:#EDE3D4;
@@ -1167,17 +1196,32 @@ function renderNav(opts = {}) {
     }, { passive: true });
   }
 
-  // Mobile menu
+  // Mobile menu — iOS Safari uyumlu scroll lock
+  // iOS'ta 'overflow:hidden' tek başına yetmiyor; position:fixed + top korunan scrollY şart
   const menu = document.getElementById('mobile-menu');
+  let _menuScrollY = 0;
   function openMenu() {
     menu?.classList.add('open');
     menu?.setAttribute('aria-hidden', 'false');
+    _menuScrollY = window.scrollY || window.pageYOffset || 0;
+    document.body.style.position = 'fixed';
+    document.body.style.top = '-' + _menuScrollY + 'px';
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
     document.body.style.overflow = 'hidden';
   }
   function closeMenuFn() {
     menu?.classList.remove('open');
     menu?.setAttribute('aria-hidden', 'true');
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
     document.body.style.overflow = '';
+    // Scroll pozisyonunu geri yükle (iOS'ta position:fixed'den çıkınca 0'a atar)
+    window.scrollTo(0, _menuScrollY);
   }
   document.getElementById('open-menu-btn')?.addEventListener('click', openMenu);
   document.getElementById('close-menu-btn')?.addEventListener('click', closeMenuFn);
