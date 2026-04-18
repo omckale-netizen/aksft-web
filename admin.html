@@ -3814,6 +3814,24 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                   </div>
                 </label>
               </div>
+
+              <!-- Oturum Süresi -->
+              <div style="margin-top:16px;padding-top:14px;border-top:1px dashed rgba(0,0,0,.08)">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:.82rem;font-weight:600;color:var(--navy)">🔐 Oturum Süresi</div>
+                    <div style="font-size:.68rem;color:var(--text-muted);line-height:1.4">Hareketsiz kaldıktan sonra otomatik çıkış. Ortak bilgisayarda kısa tut.</div>
+                  </div>
+                  <select id="session-timeout-select" onchange="setSessionTimeoutPreset(this.value)" style="padding:6px 10px;border:1.5px solid rgba(0,0,0,.1);border-radius:8px;font-size:.76rem;font-family:inherit;background:var(--input-bg,#fff);color:var(--text);cursor:pointer;flex-shrink:0">
+                    <option value="900000">15 dakika</option>
+                    <option value="1800000">30 dakika</option>
+                    <option value="3600000">1 saat</option>
+                    <option value="14400000" selected>4 saat</option>
+                    <option value="28800000">8 saat</option>
+                    <option value="86400000">1 gün</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -5070,7 +5088,14 @@ async function uploadImageToServer(blob, path) {
 ══════════════════════════════════════════════════ */
 const LOGIN_MAX_ATTEMPTS = 5;
 const LOGIN_LOCKOUT_MS = 5 * 60 * 1000; // 5 dakika
-const SESSION_TIMEOUT_MS = 4 * 60 * 60 * 1000; // 4 saat
+// Oturum süresi — kullanici tercihine gore localStorage'dan okunur (default 4 saat)
+function getSessionTimeoutMs() {
+  try {
+    var v = parseInt(localStorage.getItem('session_timeout_ms') || '0');
+    if (v > 0) return v;
+  } catch(e) {}
+  return 4 * 60 * 60 * 1000; // default 4 saat
+}
 let sessionTimer = null;
 
 function getLoginAttempts() {
@@ -5098,12 +5123,11 @@ function clearLoginAttempts() {
 
 function startSessionTimer() {
   clearTimeout(sessionTimer);
-  // Son aktivite zamanini kaydet
   localStorage.setItem('lastActivity', Date.now().toString());
   sessionTimer = setTimeout(() => {
     showToast('Oturum suresi doldu. Tekrar giris yapin.', 'error');
     setTimeout(() => logout(), 1500);
-  }, SESSION_TIMEOUT_MS);
+  }, getSessionTimeoutMs());
 }
 
 function resetSessionTimer() {
@@ -5112,7 +5136,7 @@ function resetSessionTimer() {
   sessionTimer = setTimeout(() => {
     showToast('Oturum suresi doldu. Tekrar giris yapin.', 'error');
     setTimeout(() => logout(), 1500);
-  }, SESSION_TIMEOUT_MS);
+  }, getSessionTimeoutMs());
 }
 
 // Kullanici aktif oldugunda zamanlayiciyi sifirla
@@ -7156,6 +7180,28 @@ function syncPresenceToggle() {
   if (cb) cb.checked = isPresenceEnabled();
 }
 
+// Oturum süresi tercihi — kullanici secimi localStorage'a kaydedilir + timer yeniden baslar
+function syncSessionTimeoutSelect() {
+  var sel = document.getElementById('session-timeout-select');
+  if (!sel) return;
+  var current = getSessionTimeoutMs();
+  // Dropdown'daki en yakin degeri sec
+  var presets = [900000, 1800000, 3600000, 14400000, 28800000, 86400000];
+  if (presets.indexOf(current) > -1) sel.value = String(current);
+  else sel.value = '14400000'; // default 4 saat
+}
+
+function setSessionTimeoutPreset(ms) {
+  var parsed = parseInt(ms);
+  if (!parsed || parsed < 60000) return;
+  try { localStorage.setItem('session_timeout_ms', String(parsed)); } catch(e) {}
+  // Timer'i yeni sure ile yeniden baslat
+  if (fbAuth.currentUser) resetSessionTimer();
+  var labels = { 900000:'15 dakika', 1800000:'30 dakika', 3600000:'1 saat', 14400000:'4 saat', 28800000:'8 saat', 86400000:'1 gün' };
+  showToast('✓ Oturum süresi: ' + (labels[parsed] || (Math.round(parsed/60000) + ' dk')), 'success');
+  if (typeof addBackupLog === 'function') addBackupLog('🔐', 'Oturum suresi degistirildi: ' + (labels[parsed] || ''));
+}
+
 // ═══ Duyuru Paneli ═══
 async function loadAnnouncement() {
   try {
@@ -8696,7 +8742,7 @@ fbAuth.onAuthStateChanged(async (user) => {
   if (user) {
     // Oturum suresi kontrolu
     const lastActivity = parseInt(localStorage.getItem('lastActivity') || '0');
-    if (lastActivity > 0 && (Date.now() - lastActivity) > SESSION_TIMEOUT_MS) {
+    if (lastActivity > 0 && (Date.now() - lastActivity) > getSessionTimeoutMs()) {
       // Oturum suresi dolmus — login sayfasina yonlendir
       localStorage.removeItem('lastActivity');
       fbAuth.signOut();
@@ -11504,7 +11550,7 @@ showPage = function(page) {
   _origShowPage(page);
   if (page === 'gallery' && galItems.length === 0) galLoadItems();
   if (page === 'categories') { renderCatList(); renderPlaceCatList(); }
-  if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); loadHeroHistory(); loadOgHistory(); updatePasswordDate(); loadLoginHistory(); syncPresenceToggle(); loadMaintenanceState(); loadAnnouncement(); loadTheme(); renderUserSessions(); restoreSettingsTab(); }
+  if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); loadHeroHistory(); loadOgHistory(); updatePasswordDate(); loadLoginHistory(); syncPresenceToggle(); syncSessionTimeoutSelect(); loadMaintenanceState(); loadAnnouncement(); loadTheme(); renderUserSessions(); restoreSettingsTab(); }
   if (page === 'minitools') { restoreMtTab(); if (window.lucide && lucide.createIcons) try { lucide.createIcons(); } catch(e) {} }
   if (page === 'security') runSecurityCheck();
   if (page === 'export') { loadBackupList(); updateAutoBackupUI(); }
