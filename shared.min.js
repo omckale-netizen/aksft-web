@@ -289,7 +289,7 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     .btn-terra:hover{background:var(--terra-light);transform:translateY(-2px);box-shadow:0 10px 28px rgba(196,82,26,.28);}
     .btn-terra:active{transform:translateY(0);}
 
-    /* ════ SUBTLE BORDER CTA — Assos'u Planla (navy bg + beyaz border + amber dot + shine + ripple) ════ */
+    /* ════ SHINY CTA — Assos'u Planla (terra gradient + beyaz dot + shimmer sweep + ripple) ════ */
     .btn-shiny{
       position:relative;
       display:inline-flex;
@@ -297,80 +297,79 @@ document.addEventListener('dataReady', _fetchSiteLogo);
       justify-content:center;
       gap:10px;
       padding:7px 18px;
-      background:rgba(26,39,68,.85);
-      border:1.5px solid rgba(255,255,255,.65);
+      background:linear-gradient(135deg,#C4521A 0%,#A3431A 100%);
+      border:1.5px solid rgba(255,255,255,.55);
       border-radius:999px;
       color:#fff;
       font-family:inherit;
       font-size:.78rem;
-      font-weight:500;
+      font-weight:600;
       letter-spacing:.01em;
       text-decoration:none;
       overflow:hidden;
-      backdrop-filter:blur(8px);
-      -webkit-backdrop-filter:blur(8px);
-      transition:border-color .5s ease-out,transform .5s ease-out,box-shadow .5s ease-out,background .5s ease-out;
+      isolation:isolate;
+      box-shadow:0 2px 8px rgba(196,82,26,.25);
+      transition:border-color .4s ease-out,transform .4s ease-out,box-shadow .4s ease-out,background .4s ease-out;
       cursor:pointer;
     }
-    /* Shine sweep */
+    /* Shimmer sweep — Apple/Stripe tarzı eğik parıltı, hover'da soldan sağa geçer */
     .btn-shiny::before{
-      content:'';position:absolute;inset:0;
-      background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.12) 50%,transparent 100%);
-      transform:translateX(-100%);
-      transition:transform .7s cubic-bezier(.16,1,.3,1);
+      content:'';position:absolute;top:0;left:-120%;
+      width:65%;height:100%;
+      background:linear-gradient(110deg,transparent 0%,rgba(255,255,255,.38) 50%,transparent 100%);
+      transform:skewX(-18deg);
+      transition:left .75s cubic-bezier(.16,1,.3,1);
       pointer-events:none;z-index:1;
     }
-    .btn-shiny:hover::before{transform:translateX(100%);}
-    /* Amber glow overlay */
+    .btn-shiny:hover::before{left:120%;}
+    /* Sıcak glow overlay (turuncu arkada) */
     .btn-shiny::after{
       content:'';position:absolute;inset:0;border-radius:inherit;
-      background:radial-gradient(ellipse at center,rgba(251,191,36,.18) 0%,transparent 65%);
-      opacity:0;transition:opacity .5s;pointer-events:none;z-index:0;
+      background:radial-gradient(ellipse at center,rgba(255,212,168,.25) 0%,transparent 70%);
+      opacity:0;transition:opacity .45s;pointer-events:none;z-index:0;
     }
     .btn-shiny:hover::after{opacity:1;}
     /* Hover state */
     .btn-shiny:hover{
-      border-color:#fff;
-      background:rgba(26,39,68,.95);
+      border-color:rgba(255,255,255,.9);
+      background:linear-gradient(135deg,#D96B2E 0%,#C4521A 100%);
       transform:scale(1.04);
-      box-shadow:0 10px 24px rgba(255,255,255,.12),0 0 18px rgba(251,191,36,.15);
+      box-shadow:0 10px 24px rgba(196,82,26,.4),0 0 20px rgba(255,212,168,.2);
     }
     .btn-shiny:active{transform:scale(.96);}
     /* Text */
-    .btn-shiny > span.bs-text{position:relative;z-index:2;transition:color .3s;}
-    .btn-shiny:hover > span.bs-text{color:#FFFBEB;}
-    /* Dot */
+    .btn-shiny > span.bs-text{position:relative;z-index:2;transition:text-shadow .3s;}
+    .btn-shiny:hover > span.bs-text{text-shadow:0 0 10px rgba(255,255,255,.3);}
+    /* Dot — beyaz nokta */
     .btn-shiny > span.bs-dot{
       position:relative;z-index:2;
-      width:10px;height:10px;
-      background:#FCD34D;
+      width:9px;height:9px;
+      background:#fff;
       border-radius:50%;
-      transition:all .5s ease-out;
-      box-shadow:0 0 0 0 rgba(251,191,36,0);
+      transition:all .4s ease-out;
+      box-shadow:0 0 0 0 rgba(255,255,255,0);
     }
     .btn-shiny:hover > span.bs-dot{
-      background:#FBBF24;
-      box-shadow:0 0 10px rgba(251,191,36,.6),0 0 18px rgba(251,191,36,.3);
-      transform:scale(1.15);
+      background:#fff;
+      box-shadow:0 0 10px rgba(255,255,255,.8),0 0 18px rgba(255,255,255,.4);
+      transform:scale(1.2);
     }
     .btn-shiny:active > span.bs-dot{transform:scale(.85);}
     /* Ripple — dot içinde sürekli atar hover'da */
     .btn-shiny > span.bs-dot::before{
       content:'';position:absolute;inset:0;border-radius:50%;
-      background:#FCD34D;opacity:0;
+      background:#fff;opacity:0;
       animation:bsRipple 2s cubic-bezier(0,0,.2,1) infinite;
       animation-play-state:paused;
     }
     .btn-shiny:hover > span.bs-dot::before{animation-play-state:running;}
-    @keyframes bsRipple{0%{transform:scale(1);opacity:.7;}70%,100%{transform:scale(2.3);opacity:0;}}
-    /* Hero mode (şeffaf nav üstünde) — border tamamen beyaz, daha görünür */
-    #main-nav.hero-mode .btn-shiny{background:rgba(13,24,41,.5);border-color:rgba(255,255,255,.85);}
-    /* Solid nav (scroll) — daha az blur, border soft */
-    #main-nav.scrolled .btn-shiny,#main-nav.solid .btn-shiny{border-color:rgba(255,255,255,.75);}
+    @keyframes bsRipple{0%{transform:scale(1);opacity:.75;}70%,100%{transform:scale(2.5);opacity:0;}}
+    /* Hero mode — biraz daha belirgin */
+    #main-nav.hero-mode .btn-shiny{border-color:rgba(255,255,255,.7);}
     /* Mobil */
     @media(max-width:760px){
       .btn-shiny{padding:6px 13px;font-size:.7rem;gap:8px;}
-      .btn-shiny > span.bs-dot{width:8px;height:8px;}
+      .btn-shiny > span.bs-dot{width:7px;height:7px;}
     }
     .nav-hamburger{display:none;background:rgba(245,237,224,.1);border:1.5px solid rgba(245,237,224,.2);border-radius:9px;padding:8px 13px;color:var(--cream);font-size:1rem;cursor:pointer;transition:background .2s;flex-shrink:0;}
     #main-nav.solid .nav-hamburger,.nav-hamburger.dark{background:rgba(26,39,68,.05);border-color:rgba(26,39,68,.1);color:var(--navy);}
