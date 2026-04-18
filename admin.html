@@ -8418,7 +8418,7 @@ function showPage(page) {
     document.body.classList.remove('sidebar-open');
   }
   // Refresh page data
-  if (page === 'dashboard') { renderDashboard(); updatePasswordDate(); }
+  if (page === 'dashboard') { renderDashboard(); updatePasswordDate(); if (!window._notifPrefetched) { window._notifPrefetched = true; setTimeout(function() { try { renderNotifications(); } catch(e) {} }, 1500); } }
   if (page === 'venues') renderVenueTable();
   if (page === 'routes') renderRoutesTable();
   if (page === 'villages') { switchVillageTab(currentVPTab, window._initFromHash === true); }
@@ -15094,7 +15094,12 @@ let notifFilter = 'all';
 async function renderNotifications() {
   const list = document.getElementById('notif-list');
   if (!list) return;
-  list.innerHTML = skeletonRows(4);
+  // Cache varsa hemen goster, arka planda yenile — iskelet flash'ini onle
+  if (Array.isArray(allNotifs) && allNotifs.length > 0) {
+    renderNotifList();
+  } else {
+    list.innerHTML = skeletonRows(3);
+  }
 
   try {
     allNotifs = [];
