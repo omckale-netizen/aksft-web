@@ -168,6 +168,9 @@ body{
       <p class="auth-sub">Yönetim paneline giriş yapın</p>
     </div>
 
+    <!-- Admin Duyurusu (varsa Firestore'dan yüklenir) -->
+    <div id="admin-announcement" style="display:none;margin-bottom:18px;padding:12px 14px;border-radius:10px;font-size:.82rem;line-height:1.5"></div>
+
     <form class="auth-form" onsubmit="event.preventDefault();checkAuth()">
       <!-- E-posta -->
       <div class="field">
@@ -324,6 +327,31 @@ try {
 } catch(e) { console.warn('App Check activation failed:', e); }
 
 const fbAuth = firebase.auth();
+const fbDb = firebase.firestore();
+
+// Admin duyurusu yükle (varsa)
+(async function loadAdminAnnouncement() {
+  try {
+    const doc = await fbDb.collection('settings').doc('announcement').get();
+    if (!doc.exists) return;
+    const d = doc.data() || {};
+    if (!d.active || !d.text) return;
+    const el = document.getElementById('admin-announcement');
+    if (!el) return;
+    const colors = {
+      info:    { bg:'rgba(26,107,138,.12)',  border:'rgba(26,107,138,.3)',  text:'#1A6B8A', icon:'💡' },
+      success: { bg:'rgba(72,187,120,.12)',  border:'rgba(72,187,120,.3)',  text:'#2F855A', icon:'✓' },
+      warning: { bg:'rgba(237,137,54,.12)',  border:'rgba(237,137,54,.3)',  text:'#C05621', icon:'⚠️' },
+      urgent:  { bg:'rgba(229,62,62,.12)',   border:'rgba(229,62,62,.3)',   text:'#C53030', icon:'🚨' }
+    };
+    const c = colors[d.type] || colors.info;
+    el.style.background = c.bg;
+    el.style.border = '1px solid ' + c.border;
+    el.style.color = c.text;
+    el.innerHTML = '<div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:1rem;line-height:1.2">' + c.icon + '</span><div style="flex:1"><div style="font-weight:700;font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;opacity:.8">Admin Duyurusu</div><div>' + String(d.text).replace(/[<>]/g,'') + '</div></div></div>';
+    el.style.display = 'block';
+  } catch(e) { /* sessiz */ }
+})();
 
 // Brute force koruma
 const LOGIN_MAX_ATTEMPTS = 5;

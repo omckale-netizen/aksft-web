@@ -390,8 +390,10 @@ if (SITE_LOGO) {
 function _fetchSiteLogo() {
   if (typeof firebase === 'undefined' || !firebase.firestore) return;
   firebase.firestore().collection('settings').doc('site').get().then(function(doc) {
-    if (doc.exists && doc.data().logoUrl) {
-      var url = doc.data().logoUrl;
+    if (!doc.exists) return;
+    var d = doc.data() || {};
+    if (d.logoUrl) {
+      var url = d.logoUrl;
       if (url !== SITE_LOGO) {
         SITE_LOGO = url;
         localStorage.setItem('site_logo_url', url);
@@ -402,8 +404,31 @@ function _fetchSiteLogo() {
         if (img.complete && img.naturalWidth > 0) img.classList.add('logo-loaded');
       });
     }
+    // Tema vurgu rengi (admin panelden degistirilebilir)
+    if (d.themeAccent && /^#[0-9a-fA-F]{6}$/.test(d.themeAccent)) {
+      localStorage.setItem('site_theme_accent', d.themeAccent);
+      _applyThemeAccent(d.themeAccent);
+    }
   }).catch(function() {});
 }
+function _applyThemeAccent(hex) {
+  if (!hex) return;
+  document.documentElement.style.setProperty('--terra', hex);
+  // --terra-light: hex'i biraz daha acik yap
+  try {
+    var r = parseInt(hex.slice(1,3), 16), g = parseInt(hex.slice(3,5), 16), b = parseInt(hex.slice(5,7), 16);
+    var lr = Math.min(255, Math.round(r + (255 - r) * 0.1));
+    var lg = Math.min(255, Math.round(g + (255 - g) * 0.1));
+    var lb = Math.min(255, Math.round(b + (255 - b) * 0.1));
+    var lighter = '#' + [lr,lg,lb].map(function(v){ return v.toString(16).padStart(2,'0'); }).join('');
+    document.documentElement.style.setProperty('--terra-light', lighter);
+  } catch(e) {}
+}
+// Tema cache'den anında uygula (flash of unstyled content engelle)
+try {
+  var _cachedTheme = localStorage.getItem('site_theme_accent');
+  if (_cachedTheme) _applyThemeAccent(_cachedTheme);
+} catch(e) {}
 document.addEventListener('dataReady', _fetchSiteLogo);
 
 /* ── Inject shared CSS ── */
