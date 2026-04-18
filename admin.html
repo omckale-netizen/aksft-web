@@ -1051,21 +1051,21 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 #page-settings[data-settings-active="gorunum"] [data-settings-tab="gorunum"]{display:block}
 #page-settings[data-settings-active="site"] [data-settings-tab="site"]{display:block}
 /* Masonry-style CSS columns — cardlar yatay/dikey boslugu doldurur */
-#page-settings > div[style*="grid-template-columns: 1fr 1fr"]{
+#page-settings .settings-grid{
   display:block !important;
   column-count:2;
   column-gap:20px;
 }
-#page-settings > div[style*="grid-template-columns: 1fr 1fr"] > div[style*="flex-direction:column"]{display:contents !important}
-#page-settings .panel-card,
-#page-settings > div[style*="grid-template-columns: 1fr 1fr"] > div[data-settings-tab]{
+#page-settings .settings-grid > div[style*="flex-direction:column"]{display:contents !important}
+#page-settings .settings-grid .panel-card,
+#page-settings .settings-grid > div[data-settings-tab]{
   break-inside:avoid;
   -webkit-column-break-inside:avoid;
   page-break-inside:avoid;
   margin-bottom:20px;
 }
-@media(max-width:960px){
-  #page-settings > div[style*="grid-template-columns: 1fr 1fr"]{column-count:1}
+@media(max-width:900px){
+  #page-settings .settings-grid{column-count:1}
 }
 .ana-insight{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:rgba(196,82,26,.04);border-left:3px solid var(--terra);border-radius:0 8px 8px 0;margin-bottom:8px;font-size:.82rem;line-height:1.45}
 .ana-insight-icon{font-size:1rem;flex-shrink:0;margin-top:-2px}
@@ -3754,7 +3754,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         <button class="ana-tab" data-tab="site" onclick="showSettingsTab('site',this)">⚙️ Site Yönetimi</button>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
+      <div class="settings-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
 
         <!-- SOL KOLON -->
         <div style="display:flex;flex-direction:column;gap:20px">
