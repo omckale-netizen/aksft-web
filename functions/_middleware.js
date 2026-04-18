@@ -99,7 +99,7 @@ export async function onRequest(context) {
         status: 302,
         headers: {
           'Location': cleanUrl,
-          'Set-Cookie': `admin_gate=${GATE_KEY}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=2592000`,
+          'Set-Cookie': `admin_gate=${GATE_KEY}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=2592000`,
         }
       });
     }
