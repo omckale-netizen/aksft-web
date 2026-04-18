@@ -7376,7 +7376,9 @@ async function removeHeroImage() {
 // ═══════════════════════════════════════════
 // KULLANICI ROL SİSTEMİ (Multi-admin / Editor / Viewer)
 // ═══════════════════════════════════════════
-const SUPER_ADMIN_EMAIL = 'info@onyedimedya.com';
+const SUPER_ADMIN_EMAILS = ['info@onyedimedya.com', 'onyedimedya@gmail.com'];
+const SUPER_ADMIN_EMAIL = SUPER_ADMIN_EMAILS[0]; // Geriye uyumluluk (tekil referans yerlerinde)
+function isSuperAdminEmail(email) { return !!(email && SUPER_ADMIN_EMAILS.includes(String(email).toLowerCase())); }
 window._currentUser = null; // { uid, email, name, role, active }
 
 async function loadCurrentUserRole(firebaseUser) {
@@ -7393,7 +7395,7 @@ async function loadCurrentUserRole(firebaseUser) {
     photoURL: null
   };
   // Super admin email — her zaman tam yetki (kurtarma)
-  if (firebaseUser.email === SUPER_ADMIN_EMAIL) {
+  if (isSuperAdminEmail(firebaseUser.email)) {
     baseUser.role = 'admin';
     window._currentUser = baseUser;
     // Users koleksiyonunda yoksa otomatik ekle
@@ -7467,7 +7469,7 @@ async function cleanupExpiredTempAccess(uid, data) {
     }).map(function(kv) { return kv[0]; });
     if (expiredPages.length === 0) return;
     // Bu admin ise kendi doc'unu temizleyebilir
-    var isSuper = data.email === 'info@onyedimedya.com';
+    var isSuper = isSuperAdminEmail(data.email);
     var currentRole = data.role;
     if (currentRole !== 'admin' && !isSuper) return; // sadece admin cleanup yapar
     var newPages = (data.allowedPages || []).filter(function(p) { return expiredPages.indexOf(p) === -1; });
@@ -7502,7 +7504,7 @@ function attachCurrentUserListener(uid) {
     _currentUserUnsub = db.collection('users').doc(uid).onSnapshot(function(snap) {
       if (!snap.exists) return;
       var data = snap.data();
-      var isSuper = window._currentUser && window._currentUser.email === SUPER_ADMIN_EMAIL;
+      var isSuper = window._currentUser && isSuperAdminEmail(window._currentUser.email);
       // Pasif edildiyse → çıkış
       if (data.active === false && !isSuper) {
         showToast('Hesabınız pasif edildi. Çıkış yapılıyor...', 'error');
@@ -14400,7 +14402,7 @@ function renderUsers() {
     var roleBadge = { admin: '👑 Admin', editor: '✏️ Editor', viewer: '👁 Viewer' }[u.role] || u.role;
     var isActive = u.active !== false;
     var isSelf = window._currentUser && u.uid === window._currentUser.uid;
-    var isSuper = u.email === SUPER_ADMIN_EMAIL;
+    var isSuper = isSuperAdminEmail(u.email);
     var lastLogin = u.lastLogin ? new Date(u.lastLogin).toLocaleDateString('tr-TR', {day:'numeric',month:'short',year:'numeric'}) : '—';
     // Yetki özeti (sadece editor/viewer için)
     var permsInfo = '';

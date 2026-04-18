@@ -5,7 +5,8 @@ service cloud.firestore {
     // Yardimci: Rol tabanli yetki kontrolu
     // Super admin — email bazli, her zaman tam yetki (kurtarma)
     function isSuperAdmin() {
-      return request.auth != null && request.auth.token.email == 'info@onyedimedya.com';
+      return request.auth != null
+        && request.auth.token.email in ['info@onyedimedya.com', 'onyedimedya@gmail.com'];
     }
     // Kullanici rolunu users koleksiyonundan oku
     function getUserRole() {

@@ -465,7 +465,8 @@ async function signInWithGoogle() {
     // users dokumani yoksa bu hesap yetkili değil, cikis yap.
     let hasAccess = false;
     try {
-      if (user.email && user.email.toLowerCase() === 'info@onyedimedya.com') {
+      const superAdmins = ['info@onyedimedya.com', 'onyedimedya@gmail.com'];
+      if (user.email && superAdmins.includes(user.email.toLowerCase())) {
         hasAccess = true; // super admin
       } else {
         const db = firebase.firestore ? firebase.firestore() : null;
