@@ -8182,6 +8182,17 @@ function updateChatBadge() {
     if (navItem) navItem.classList.remove('has-unread');
     return;
   }
+  // Sohbet sayfası açık ise badge'i hiç gösterme — kullanıcı zaten mesajları görüyor
+  // (markChatAsRead server roundtrip'i sırasında flash olmasını engeller)
+  var chatPageActive = document.getElementById('page-chat') &&
+                       document.getElementById('page-chat').classList.contains('active');
+  if (chatPageActive) {
+    badge.style.display = 'none';
+    badge.innerHTML = '';
+    if (label) label.textContent = 'Ekip Sohbeti';
+    if (navItem) navItem.classList.remove('has-unread');
+    return;
+  }
   var lastRead = _chatLastReadAt && _chatLastReadAt.toDate ? _chatLastReadAt.toDate().getTime() : 0;
   var unread = _chatAllMessages.filter(function(m) {
     if (m.authorUid === u.uid) return false;
