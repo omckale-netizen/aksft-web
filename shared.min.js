@@ -475,6 +475,7 @@ function renderNav(opts = {}) {
     { href: 'harita.html',   label: 'Harita' },
     { href: 'rehber.html',   label: 'Rehber' },
     { href: 'blog.html',     label: 'Blog' },
+    { href: 'iletisim.html', label: 'İletişim' },
   ];
 
   const fullPath = window.location.pathname;
