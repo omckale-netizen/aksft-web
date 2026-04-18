@@ -455,20 +455,36 @@ async function signInWithGoogle() {
   errEl.textContent = '';
 
   try {
-    console.log('[AUTH] signInWithGoogle START — fbAuth:', !!fbAuth, 'GoogleAuthProvider:', !!firebase.auth.GoogleAuthProvider);
+    console.log('[AUTH] signInWithGoogle START (POPUP mode)');
     btn.disabled = true;
-    // Redirect akisi oldugunu isaretle — geri dondugunde yetki check calissin
-    try { sessionStorage.setItem('googleSignInPending', '1'); } catch(e) {}
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
-    console.log('[AUTH] Calling signInWithRedirect...');
-    await fbAuth.signInWithRedirect(provider);
-    console.log('[AUTH] After signInWithRedirect — sayfa degismeliydi!');
-    // Bu noktadan sonra sayfa Google'a gider — kod calismaz
+    console.log('[AUTH] Opening popup...');
+    const result = await fbAuth.signInWithPopup(provider);
+    console.log('[AUTH] Popup result:', result);
+    if (result && result.user) {
+      console.log('[AUTH] Popup user email:', result.user.email);
+      await handleGoogleSignInResult(result.user);
+    } else {
+      errEl.textContent = 'Popup sonucu alınamadı. Lütfen tekrar deneyin.';
+      btn.disabled = false;
+    }
+    return;
   } catch (err) {
-    console.error('[AUTH] signInWithRedirect THREW:', err);
+    console.error('[AUTH] signInWithPopup THREW:', err);
     btn.disabled = false;
-    try { sessionStorage.removeItem('googleSignInPending'); } catch(e) {}
+    if (err.code === 'auth/popup-closed-by-user') {
+      errEl.textContent = 'Popup kapatıldı. Tekrar deneyin.';
+      return;
+    }
+    if (err.code === 'auth/cancelled-popup-request') {
+      errEl.textContent = '';
+      return;
+    }
+    if (err.code === 'auth/popup-blocked') {
+      errEl.textContent = 'Popup engellendi. Tarayıcıdan popup izni verin.';
+      return;
+    }
     if (err.code === 'auth/unauthorized-domain') {
       errEl.textContent = 'Bu domain OAuth için yetkili değil (Firebase Console → Authorized domains).';
       return;
@@ -477,7 +493,6 @@ async function signInWithGoogle() {
       errEl.textContent = 'Ağ hatası. İnternet bağlantınızı kontrol edip tekrar deneyin.';
       return;
     }
-    console.error('Google sign-in error:', err);
     errEl.textContent = 'Google giriş hatası: ' + (err.message || err.code || 'bilinmeyen');
   }
 }
