@@ -288,6 +288,144 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     .btn-terra:hover::before{left:120%;}
     .btn-terra:hover{background:var(--terra-light);transform:translateY(-2px);box-shadow:0 10px 28px rgba(196,82,26,.28);}
     .btn-terra:active{transform:translateY(0);}
+
+    /* ════ SHINY CTA — Assos'u Planla butonu için (conic rotating border + dots + shimmer + breathe) ════ */
+    @property --gradient-angle {syntax: "<angle>";initial-value: 0deg;inherits: false;}
+    @property --gradient-angle-offset {syntax: "<angle>";initial-value: 0deg;inherits: false;}
+    @property --gradient-percent {syntax: "<percentage>";initial-value: 5%;inherits: false;}
+    @property --gradient-shine {syntax: "<color>";initial-value: white;inherits: false;}
+    .btn-shiny{
+      --shiny-bg: #C4521A;
+      --shiny-bg-subtle: #A3431A;
+      --shiny-fg: #ffffff;
+      --shiny-highlight: #FFD4A8;
+      --shiny-highlight-subtle: #E8A07A;
+      --shiny-anim: gradient-angle linear infinite;
+      --shiny-duration: 3s;
+      --shiny-shadow-size: 2px;
+      --shiny-trans: 800ms cubic-bezier(0.25, 1, 0.5, 1);
+      isolation: isolate;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      outline-offset: 4px;
+      padding: 8px 18px;
+      font-family: inherit;
+      font-size: .82rem;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: .01em;
+      border: 1px solid transparent;
+      border-radius: 360px;
+      color: var(--shiny-fg);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background:
+        linear-gradient(var(--shiny-bg), var(--shiny-bg)) padding-box,
+        conic-gradient(
+          from calc(var(--gradient-angle) - var(--gradient-angle-offset)),
+          transparent,
+          var(--shiny-highlight) var(--gradient-percent),
+          var(--gradient-shine) calc(var(--gradient-percent) * 2),
+          var(--shiny-highlight) calc(var(--gradient-percent) * 3),
+          transparent calc(var(--gradient-percent) * 4)
+        ) border-box;
+      box-shadow: inset 0 0 0 1px var(--shiny-bg-subtle), 0 2px 8px rgba(196,82,26,.15);
+      transition: var(--shiny-trans);
+      transition-property: --gradient-angle-offset, --gradient-percent, --gradient-shine, box-shadow, transform;
+    }
+    .btn-shiny::before,
+    .btn-shiny::after,
+    .btn-shiny > span::before{
+      content: "";
+      pointer-events: none;
+      position: absolute;
+      inset-inline-start: 50%;
+      inset-block-start: 50%;
+      translate: -50% -50%;
+      z-index: -1;
+    }
+    .btn-shiny:active{translate: 0 1px;}
+    /* Dots pattern */
+    .btn-shiny::before{
+      --size: calc(100% - var(--shiny-shadow-size) * 3);
+      --position: 2px;
+      --space: calc(var(--position) * 2);
+      width: var(--size);
+      height: var(--size);
+      background: radial-gradient(
+        circle at var(--position) var(--position),
+        #fff calc(var(--position) / 4),
+        transparent 0
+      ) padding-box;
+      background-size: var(--space) var(--space);
+      background-repeat: space;
+      -webkit-mask-image: conic-gradient(
+        from calc(var(--gradient-angle) + 45deg),
+        #000,
+        transparent 10% 90%,
+        #000
+      );
+      mask-image: conic-gradient(
+        from calc(var(--gradient-angle) + 45deg),
+        #000,
+        transparent 10% 90%,
+        #000
+      );
+      border-radius: inherit;
+      opacity: .4;
+      z-index: -1;
+    }
+    /* Inner shimmer */
+    .btn-shiny::after{
+      width: 100%;
+      aspect-ratio: 1;
+      background: linear-gradient(-50deg, transparent, var(--shiny-highlight), transparent);
+      -webkit-mask-image: radial-gradient(circle at bottom, transparent 40%, #000);
+      mask-image: radial-gradient(circle at bottom, transparent 40%, #000);
+      opacity: .55;
+    }
+    .btn-shiny > span{z-index: 1;position: relative;}
+    .btn-shiny > span::before{
+      --size: calc(100% + 1rem);
+      width: var(--size);
+      height: var(--size);
+      box-shadow: inset 0 -1ex 2rem 4px var(--shiny-highlight);
+      opacity: 0;
+      transition: opacity var(--shiny-trans);
+      animation: calc(var(--shiny-duration) * 1.5) shinyBreathe linear infinite;
+    }
+    /* Rotating animations */
+    .btn-shiny,
+    .btn-shiny::before,
+    .btn-shiny::after{
+      animation: var(--shiny-anim) var(--shiny-duration),
+                 var(--shiny-anim) calc(var(--shiny-duration) / 0.4) reverse paused;
+      animation-composition: add;
+    }
+    .btn-shiny:hover,
+    .btn-shiny:focus-visible{
+      --gradient-percent: 20%;
+      --gradient-angle-offset: 95deg;
+      --gradient-shine: var(--shiny-highlight-subtle);
+    }
+    .btn-shiny:hover,
+    .btn-shiny:focus-visible,
+    .btn-shiny:hover::before,
+    .btn-shiny:focus-visible::before,
+    .btn-shiny:hover::after,
+    .btn-shiny:focus-visible::after{animation-play-state: running;}
+    .btn-shiny:hover > span::before,
+    .btn-shiny:focus-visible > span::before{opacity: 1;}
+    @keyframes gradient-angle{to{--gradient-angle: 360deg;}}
+    @keyframes shimmer{to{rotate: 360deg;}}
+    @keyframes shinyBreathe{from,to{scale: 1;}50%{scale: 1.2;}}
+    /* Mobil küçültme */
+    @media(max-width:760px){
+      .btn-shiny{padding:6px 14px;font-size:.72rem;}
+    }
     .nav-hamburger{display:none;background:rgba(245,237,224,.1);border:1.5px solid rgba(245,237,224,.2);border-radius:9px;padding:8px 13px;color:var(--cream);font-size:1rem;cursor:pointer;transition:background .2s;flex-shrink:0;}
     #main-nav.solid .nav-hamburger,.nav-hamburger.dark{background:rgba(26,39,68,.05);border-color:rgba(26,39,68,.1);color:var(--navy);}
     .nav-hamburger:hover{background:rgba(245,237,224,.18);}
@@ -564,7 +702,7 @@ function renderNav(opts = {}) {
             <span class="nav-save-icon">♡</span>
             <span id="nav-save-count" class="nav-save-count" style="display:none;">0</span>
           </button>
-          <a href="${basePath}planla.html" class="btn-terra" style="padding:7px 16px;font-size:.76rem;">Assos'u Planla</a>
+          <a href="${basePath}planla.html" class="btn-shiny"><span>Assos'u Planla</span></a>
           <button class="nav-hamburger${heroMode ? '' : ' dark'}" id="open-menu-btn" aria-label="Menü">☰</button>
         </div>
       </div>
