@@ -270,6 +270,25 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // Kullanıcı oturumları (multi-device session tracking):
+    // - Kullanıcı kendi oturumlarını okur/yazar/siler
+    // - Admin herkesin oturumlarını okuyabilir (audit/monitoring)
+    // - Silme: sahip + admin (başka device'tan uzaktan logout)
+    match /user_sessions/{sid} {
+      allow read: if request.auth != null && (
+        resource.data.uid == request.auth.uid || isAdmin()
+      );
+      allow create: if request.auth != null
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['uid','email','sessionId','device','browser','os','userAgent','loginAt','lastActivity','isCurrent']);
+      allow update: if request.auth != null
+        && resource.data.uid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastActivity','isCurrent']);
+      allow delete: if request.auth != null && (
+        resource.data.uid == request.auth.uid || isAdmin()
+      );
+    }
+
     // Kullanıcı presence (online durumu):
     // - Herkes (authenticated) tüm presence'ları okuyabilir (sidebar'da yeşil nokta için)
     // - Sadece kendi dokümanını yazabilir

@@ -4149,6 +4149,20 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             </div>
           </div>
 
+          <!-- Aktif Oturumlar -->
+          <div class="panel-card">
+            <div class="panel-card-head" style="justify-content:space-between">
+              <h3>🔒 Aktif Oturumlarım</h3>
+              <button class="btn btn-sm btn-secondary" onclick="renderUserSessions()" style="font-size:.68rem;padding:4px 10px">Yenile</button>
+            </div>
+            <div style="padding:16px 20px">
+              <div style="font-size:.7rem;color:var(--text-light);margin-bottom:12px;line-height:1.5">
+                Hesabınıza giriş yapmış cihazlar. Kaybolmuş/ortak bir cihazdan çıkmadıysanız oradaki oturumu kapatabilirsiniz.
+              </div>
+              <div id="user-sessions-list"></div>
+            </div>
+          </div>
+
           <!-- Son Giriş Geçmişi -->
           <div class="panel-card">
             <div class="panel-card-head" style="justify-content:space-between">
@@ -6785,6 +6799,171 @@ function showHelpModal(title, bodyHtml) {
   ov.style.display = 'flex';
 }
 
+// ═══ OTURUM YÖNETİMİ (Multi-device session tracking) ═══
+var _sessionHeartbeat = null;
+var _sessionListener = null;
+
+function _parseUA(ua) {
+  ua = ua || '';
+  var device = 'Bilinmeyen';
+  var browser = 'Tarayıcı';
+  var os = 'İşletim Sistemi';
+  // Device
+  if (/iPhone/i.test(ua)) device = '📱 iPhone';
+  else if (/iPad/i.test(ua)) device = '📱 iPad';
+  else if (/Android/i.test(ua)) device = /Mobile/i.test(ua) ? '📱 Android' : '📱 Android Tablet';
+  else if (/Macintosh|Mac OS/i.test(ua)) device = '💻 Mac';
+  else if (/Windows/i.test(ua)) device = '💻 Windows';
+  else if (/Linux/i.test(ua)) device = '💻 Linux';
+  // Browser
+  if (/Edg/.test(ua)) browser = 'Edge';
+  else if (/OPR|Opera/.test(ua)) browser = 'Opera';
+  else if (/Chrome/.test(ua) && !/Edg|OPR/.test(ua)) browser = 'Chrome';
+  else if (/Safari/.test(ua) && !/Chrome/.test(ua)) browser = 'Safari';
+  else if (/Firefox/.test(ua)) browser = 'Firefox';
+  // OS
+  if (/iPhone OS|iPad OS|iOS/i.test(ua)) os = 'iOS';
+  else if (/Mac OS X/i.test(ua)) os = 'macOS';
+  else if (/Windows NT 10/i.test(ua)) os = 'Windows 10/11';
+  else if (/Windows NT/i.test(ua)) os = 'Windows';
+  else if (/Android/i.test(ua)) os = 'Android';
+  else if (/Linux/i.test(ua)) os = 'Linux';
+  return { device: device, browser: browser, os: os };
+}
+
+async function createUserSession(user) {
+  if (!user || !user.uid) return;
+  try {
+    var sid = localStorage.getItem('admin_session_id');
+    if (!sid) {
+      sid = 'sess_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem('admin_session_id', sid);
+    }
+    var uaInfo = _parseUA(navigator.userAgent);
+    var now = new Date().toISOString();
+    await db.collection('user_sessions').doc(sid).set({
+      uid: user.uid,
+      email: user.email || '',
+      sessionId: sid,
+      device: uaInfo.device,
+      browser: uaInfo.browser,
+      os: uaInfo.os,
+      userAgent: (navigator.userAgent || '').slice(0, 300),
+      loginAt: now,
+      lastActivity: now,
+      isCurrent: true
+    });
+    // Heartbeat baslat (her 3 dakikada lastActivity guncelle)
+    if (_sessionHeartbeat) clearInterval(_sessionHeartbeat);
+    _sessionHeartbeat = setInterval(async function() {
+      try {
+        await db.collection('user_sessions').doc(sid).update({ lastActivity: new Date().toISOString() });
+      } catch(e) {
+        // Session doc silinmis — baska cihazdan revoke edildi
+        if (e.code === 'not-found' || (e.message && /No document to update/i.test(e.message))) {
+          clearInterval(_sessionHeartbeat);
+          _sessionHeartbeat = null;
+          showToast('🔒 Oturumunuz başka bir cihazdan sonlandırıldı. Çıkış yapılıyor...', 'error');
+          setTimeout(async function() {
+            try { await fbAuth.signOut(); } catch(e) {}
+            localStorage.removeItem('admin_session_id');
+            window.location.replace('admin-login.html');
+          }, 2000);
+        }
+      }
+    }, 3 * 60 * 1000); // 3 dakika
+    // Realtime listener — session doc silinince anında logout
+    if (_sessionListener) _sessionListener();
+    _sessionListener = db.collection('user_sessions').doc(sid).onSnapshot(function(doc) {
+      if (!doc.exists) {
+        if (_sessionHeartbeat) { clearInterval(_sessionHeartbeat); _sessionHeartbeat = null; }
+        if (_sessionListener) { _sessionListener(); _sessionListener = null; }
+        showToast('🔒 Oturumunuz sonlandırıldı. Çıkış yapılıyor...', 'error');
+        setTimeout(async function() {
+          try { await fbAuth.signOut(); } catch(e) {}
+          localStorage.removeItem('admin_session_id');
+          window.location.replace('admin-login.html');
+        }, 1500);
+      }
+    }, function(err) { console.warn('Session listener:', err); });
+  } catch(e) { console.warn('createUserSession:', e); }
+}
+
+async function renderUserSessions() {
+  var listEl = document.getElementById('user-sessions-list');
+  if (!listEl) return;
+  listEl.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:.78rem">Yükleniyor...</div>';
+  try {
+    var uid = window._currentUser && window._currentUser.uid;
+    if (!uid) { listEl.innerHTML = ''; return; }
+    var snap = await db.collection('user_sessions').where('uid', '==', uid).get();
+    var currentSid = localStorage.getItem('admin_session_id');
+    var sessions = snap.docs.map(function(d) { return { _id: d.id, ...d.data() }; })
+      .sort(function(a, b) { return (b.lastActivity || '').localeCompare(a.lastActivity || ''); });
+    // Stale sessions (>30 dk heartbeat yok) temizle
+    var now = Date.now();
+    var STALE = 30 * 60 * 1000;
+    sessions = sessions.filter(function(s) {
+      var last = s.lastActivity ? new Date(s.lastActivity).getTime() : 0;
+      if (now - last > STALE) {
+        // Background delete (non-blocking)
+        db.collection('user_sessions').doc(s._id).delete().catch(function() {});
+        return false;
+      }
+      return true;
+    });
+    if (!sessions.length) {
+      listEl.innerHTML = '<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:.78rem">Aktif oturum yok.</div>';
+      return;
+    }
+    listEl.innerHTML = sessions.map(function(s) {
+      var isCurrent = s.sessionId === currentSid;
+      var lastAgo = '';
+      try {
+        var diff = Math.floor((now - new Date(s.lastActivity).getTime()) / 1000);
+        if (diff < 60) lastAgo = 'Az önce';
+        else if (diff < 3600) lastAgo = Math.floor(diff / 60) + ' dk önce';
+        else if (diff < 86400) lastAgo = Math.floor(diff / 3600) + ' saat önce';
+        else lastAgo = Math.floor(diff / 86400) + ' gün önce';
+      } catch(e) {}
+      var loginStr = s.loginAt ? new Date(s.loginAt).toLocaleString('tr-TR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+      return '<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid ' + (isCurrent ? 'rgba(56,161,105,.3)' : 'rgba(0,0,0,.06)') + ';border-radius:10px;margin-bottom:8px;background:' + (isCurrent ? 'rgba(56,161,105,.04)' : 'var(--card-bg)') + '">' +
+        '<div style="font-size:1.2rem;flex-shrink:0">' + (s.device || '💻').split(' ')[0] + '</div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:.82rem;font-weight:700;color:var(--navy)">' + escHtml((s.device || 'Bilinmeyen').replace(/^[📱💻]\s/, '')) + ' · ' + escHtml(s.browser || '') + (isCurrent ? ' <span style="display:inline-block;padding:1px 7px;border-radius:4px;background:var(--green);color:#fff;font-size:.55rem;margin-left:4px;font-weight:800;vertical-align:1px">BU CİHAZ</span>' : '') + '</div>' +
+          '<div style="font-size:.68rem;color:var(--text-muted);margin-top:2px">' + escHtml(s.os || '') + ' · Son aktivite: ' + lastAgo + (loginStr ? ' · Giriş: ' + loginStr : '') + '</div>' +
+        '</div>' +
+        (isCurrent ? '' : '<button class="btn btn-sm btn-danger" style="padding:4px 10px;font-size:.7rem" onclick="revokeSession(\'' + s._id + '\')">🚪 Bu cihazdan çık</button>') +
+      '</div>';
+    }).join('');
+  } catch(err) {
+    listEl.innerHTML = '<div style="padding:12px;color:var(--red);font-size:.72rem">Yüklenemedi: ' + escHtml(err.message) + '</div>';
+  }
+}
+
+async function revokeSession(sid) {
+  if (!confirm('Bu cihazın oturumu kapatılsın mı? Cihaz otomatik çıkış yapacaktır.')) return;
+  try {
+    await db.collection('user_sessions').doc(sid).delete();
+    showToast('✓ Oturum sonlandırıldı', 'success');
+    renderUserSessions();
+    if (typeof addBackupLog === 'function') addBackupLog('🔒', 'Uzak oturum sonlandirildi: ' + sid.slice(0, 20));
+  } catch(e) {
+    showToast('❌ ' + e.message, 'error');
+  }
+}
+
+// Sekme kapandiginda kendi session'unu temizle (non-blocking, best effort)
+window.addEventListener('beforeunload', function() {
+  try {
+    var sid = localStorage.getItem('admin_session_id');
+    if (sid && db) {
+      // sendBeacon ile best-effort delete (bazi tarayicilar bunu desteklemez; db ile de denemis oluyoruz)
+      db.collection('user_sessions').doc(sid).delete().catch(function() {});
+    }
+  } catch(e) {}
+});
+
 // ═══ FORCE LOGOUT (Tüm cihazlardan çıkış) ═══
 async function logoutAllDevices() {
   if (!confirm('Tüm cihazlarda açık oturumlarınız kapatılacak. Devam etmek istiyor musunuz?')) return;
@@ -8177,6 +8356,8 @@ async function loadCurrentUserRole(firebaseUser) {
     // Son giriş güncelle
     try { db.collection('users').doc(firebaseUser.uid).update({ lastLogin: new Date().toISOString() }); } catch(e) {}
     attachCurrentUserListener(firebaseUser.uid);
+    // Aktif oturum kaydi olustur + heartbeat baslat
+    try { createUserSession(baseUser); } catch(e) { console.warn('Session create:', e); }
     return window._currentUser;
   } catch(e) {
     console.error('User role fetch error:', e);
@@ -11197,7 +11378,7 @@ showPage = function(page) {
   _origShowPage(page);
   if (page === 'gallery' && galItems.length === 0) galLoadItems();
   if (page === 'categories') { renderCatList(); renderPlaceCatList(); }
-  if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); loadHeroHistory(); loadOgHistory(); updatePasswordDate(); loadLoginHistory(); syncPresenceToggle(); loadMaintenanceState(); loadAnnouncement(); loadTheme(); }
+  if (page === 'settings') { loadLogoPreview(); updateLlmsSettingsInfo(); loadHeroHistory(); loadOgHistory(); updatePasswordDate(); loadLoginHistory(); syncPresenceToggle(); loadMaintenanceState(); loadAnnouncement(); loadTheme(); renderUserSessions(); }
   if (page === 'minitools') { restoreMtTab(); if (window.lucide && lucide.createIcons) try { lucide.createIcons(); } catch(e) {} }
   if (page === 'security') runSecurityCheck();
   if (page === 'export') { loadBackupList(); updateAutoBackupUI(); }
