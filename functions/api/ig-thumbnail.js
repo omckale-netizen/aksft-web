@@ -59,9 +59,9 @@ export async function onRequestPost(context) {
     }
     const thumbnailUrl = ogMatch[1].replace(/&amp;/g, '&');
 
-    // 3) Title cekmeyi dene (og:title)
+    // 3) Title cekmeyi dene (og:title) — HTML entity'leri decode et
     const titleMatch = html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i);
-    const title = titleMatch ? titleMatch[1].replace(/&amp;/g, '&').replace(/&quot;/g, '"') : '';
+    const title = titleMatch ? decodeHtmlEntities(titleMatch[1]) : '';
 
     // 4) Gorseli indir
     const imgResp = await fetch(thumbnailUrl, {
@@ -142,6 +142,20 @@ function json(body, status, cors) {
     status,
     headers: { ...cors, 'Content-Type': 'application/json' },
   });
+}
+
+// HTML entity decode — &#x2019; -> ’ , &amp; -> & , &#39; -> ' vb.
+function decodeHtmlEntities(s) {
+  if (!s) return '';
+  return s
+    .replace(/&#x([0-9a-fA-F]+);/g, function(_, hex) { return String.fromCodePoint(parseInt(hex, 16)); })
+    .replace(/&#(\d+);/g, function(_, dec) { return String.fromCodePoint(parseInt(dec, 10)); })
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&nbsp;/g, ' ');
 }
 
 // Service Account JWT -> Google OAuth access token (Firebase Storage write scope)
