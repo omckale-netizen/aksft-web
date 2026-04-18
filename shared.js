@@ -103,6 +103,95 @@ function isPremiumActive(v) {
   return true;
 }
 
+// Reel beğeni (client-side) — localStorage'da tutulur, kalp animasyonu
+window.akReelLike = function(btn, reelKey) {
+  try {
+    var key = 'reel_like_' + reelKey;
+    var liked = localStorage.getItem(key) === '1';
+    var heart = btn.querySelector('.ak-reel-heart');
+    var card = document.getElementById(reelKey);
+    var likesEl = card && card.querySelector('.ak-reel-likes');
+    if (!liked) {
+      localStorage.setItem(key, '1');
+      if (heart) { heart.setAttribute('fill', '#ED4956'); heart.setAttribute('stroke', '#ED4956'); }
+      btn.style.color = '#ED4956';
+      if (likesEl) {
+        var base = parseInt(likesEl.getAttribute('data-base')) || 0;
+        likesEl.textContent = (base + 1) + ' beğeni';
+      }
+      // Kalp atma animasyonu
+      btn.animate([{ transform:'scale(1)' }, { transform:'scale(1.3)' }, { transform:'scale(1)' }], { duration:300 });
+    } else {
+      localStorage.removeItem(key);
+      if (heart) { heart.setAttribute('fill', 'none'); heart.setAttribute('stroke', 'currentColor'); }
+      btn.style.color = '#262626';
+      if (likesEl) {
+        var base2 = parseInt(likesEl.getAttribute('data-base')) || 0;
+        likesEl.textContent = base2 + ' beğeni';
+      }
+    }
+  } catch(e) {}
+};
+
+// Reel paylaş — native share API + fallback clipboard
+window.akReelShare = function(url, title) {
+  try {
+    if (navigator.share) {
+      navigator.share({ title: (title || 'Assos') + ' — Assos\'u Keşfet', url: url }).catch(function(){});
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(function() {
+        if (typeof showToast === 'function') showToast('Link kopyalandı', 'success');
+        else alert('Link kopyalandı: ' + url);
+      });
+    } else {
+      window.open(url, '_blank');
+    }
+  } catch(e) { window.open(url, '_blank'); }
+};
+
+// Reel kaydetme — localStorage "bookmark" toggle
+window.akReelBookmark = function(btn, reelKey) {
+  try {
+    var key = 'reel_bookmark_' + reelKey;
+    var saved = localStorage.getItem(key) === '1';
+    var icon = btn.querySelector('.ak-reel-bookmark');
+    if (!saved) {
+      localStorage.setItem(key, '1');
+      if (icon) icon.setAttribute('fill', '#262626');
+    } else {
+      localStorage.removeItem(key);
+      if (icon) icon.setAttribute('fill', 'none');
+    }
+    btn.animate([{ transform:'scale(1)' }, { transform:'scale(1.2)' }, { transform:'scale(1)' }], { duration:250 });
+  } catch(e) {}
+};
+
+// Reel state restore — sayfa yuklenince like/bookmark durumlari
+window.akReelRestoreState = function() {
+  document.querySelectorAll('[id^="reel-"]').forEach(function(card) {
+    try {
+      var key = card.id;
+      // Like
+      if (localStorage.getItem('reel_like_' + key) === '1') {
+        var likeBtn = card.querySelector('.ak-reel-like-btn');
+        var heart = card.querySelector('.ak-reel-heart');
+        var likesEl = card.querySelector('.ak-reel-likes');
+        if (likeBtn) likeBtn.style.color = '#ED4956';
+        if (heart) { heart.setAttribute('fill', '#ED4956'); heart.setAttribute('stroke', '#ED4956'); }
+        if (likesEl) {
+          var base = parseInt(likesEl.getAttribute('data-base')) || 0;
+          likesEl.textContent = (base + 1) + ' beğeni';
+        }
+      }
+      // Bookmark
+      if (localStorage.getItem('reel_bookmark_' + key) === '1') {
+        var bm = card.querySelector('.ak-reel-bookmark');
+        if (bm) bm.setAttribute('fill', '#262626');
+      }
+    } catch(e) {}
+  });
+};
+
 // Reel player — native video varsa tek tikla oynar, yoksa IG embed iframe
 // type: 'video' = native HTML5 video, 'embed' = IG iframe fallback
 window.akPlayReel = function(cardId, srcUrl, type) {
@@ -4264,7 +4353,7 @@ function renderVillagePage(villageId) {
     bodyHtml += '</div></div>';
   }
 
-  // Instagram Reels — koy hakkinda videolar (yakindaki koylerden sonra)
+  // Instagram Reels — Instagram gonderi tarzi post karti (header + media + action bar + caption)
   if (Array.isArray(v.instagramReels) && v.instagramReels.length > 0) {
     var decodeEntities = function(s) {
       if (!s) return '';
@@ -4274,40 +4363,90 @@ function renderVillagePage(villageId) {
         .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
         .replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&nbsp;/g, ' ');
     };
+    // Avatar URL — site settings'ten schema logo (ya da fallback icon-512)
+    var avatarUrl = (window.DATA && window.DATA.siteSettings && window.DATA.siteSettings.schemaLogoUrl) || '/icon-512.png';
+    // Koy tipi (koy/belde/mahalle) suffix
+    var vType2 = v.type || 'koy';
+    var vLabel = vType2 === 'belde' ? 'Beldesi' : (vType2 === 'mahalle' ? 'Mahallesi' : 'Köyü');
     bodyHtml += '<div style="margin-bottom:40px;">';
     bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">📹 ' + v.title + ' Hakkında Videolar</h2>';
-    bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;">';
+    bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;">';
     v.instagramReels.forEach(function(reel, idx) {
       var reelKey = 'reel-' + v.id + '-' + idx;
       var sc = reel.shortcode || (reel.url.match(/\/(p|reel|reels)\/([A-Za-z0-9_-]+)/) || [])[2] || '';
       var embedUrl = sc ? 'https://www.instagram.com/p/' + sc + '/embed' : '';
-      // Entity decode (eski kayitlardaki &#x2019; vb. icin)
-      var titleRaw = decodeEntities(reel.title || 'Instagram Reel');
-      var title = titleRaw.substring(0, 70) + (titleRaw.length > 70 ? '…' : '');
+      var titleRaw = decodeEntities(reel.title || '');
+      var caption = titleRaw.length > 120 ? titleRaw.substring(0, 120) + '…' : titleRaw;
       var thumb = reel.thumbnailUrl ? escAttr(reel.thumbnailUrl) : '';
       var videoUrl = reel.videoUrl ? escAttr(reel.videoUrl) : '';
-      var playSrc = videoUrl || embedUrl; // video varsa native, yoksa embed
+      var playSrc = videoUrl || embedUrl;
       var playType = videoUrl ? 'video' : 'embed';
-      bodyHtml += '<div class="ak-reel-card" id="' + reelKey + '" style="background:#000;border-radius:18px;overflow:hidden;position:relative;aspect-ratio:4/5;max-width:420px;margin:0 auto;width:100%;">';
-      // Thumbnail + Play butonu (default state)
-      bodyHtml += '<div class="ak-reel-cover" style="position:absolute;inset:0;background:#1A2744 center/cover ' + (thumb ? 'url(\'' + thumb + '\')' : '') + ';cursor:pointer;" onclick="akPlayReel(\'' + reelKey + '\', \'' + escAttr(playSrc) + '\', \'' + playType + '\')">';
-      bodyHtml += '<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.75) 0%,rgba(0,0,0,.15) 55%,rgba(0,0,0,.35) 100%);"></div>';
-      // Play buton — ortada
-      bodyHtml += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">';
-      bodyHtml += '<div style="width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.95);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(0,0,0,.4);transition:transform .2s;" onmouseover="this.style.transform=\'scale(1.08)\'" onmouseout="this.style.transform=\'\'">';
-      bodyHtml += '<svg width="26" height="26" viewBox="0 0 24 24" fill="#C4521A" style="margin-left:3px"><path d="M8 5v14l11-7z"/></svg>';
+
+      bodyHtml += '<div class="ak-reel-card" id="' + reelKey + '" style="background:#fff;border:1px solid rgba(26,39,68,.08);border-radius:14px;overflow:hidden;max-width:460px;margin:0 auto;width:100%;box-shadow:0 2px 12px rgba(26,39,68,.06);">';
+
+      // ═══ HEADER — Instagram post basligi ═══
+      bodyHtml += '<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;">';
+      // Avatar (gradient ring — Instagram story halkası)
+      bodyHtml += '<div style="width:38px;height:38px;border-radius:50%;padding:2px;background:linear-gradient(45deg,#F09433 0%,#E6683C 25%,#DC2743 50%,#CC2366 75%,#BC1888 100%);flex-shrink:0;">';
+      bodyHtml += '<div style="width:100%;height:100%;border-radius:50%;background:#fff;padding:2px;">';
+      bodyHtml += '<img src="' + escAttr(avatarUrl) + '" alt="assosukesfet" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">';
       bodyHtml += '</div></div>';
-      // Baslik alt
-      bodyHtml += '<div style="position:absolute;bottom:0;left:0;right:0;padding:12px 14px;color:#fff;">';
-      bodyHtml += '<div style="font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:4px;display:inline-flex;align-items:center;gap:4px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>Instagram</div>';
-      bodyHtml += '<div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-size:.85rem;font-weight:700;line-height:1.3;">' + escHtml(title) + '</div>';
-      bodyHtml += '<button type="button" class="ak-reel-watch" style="margin-top:8px;padding:6px 14px;border-radius:999px;background:#fff;color:#1A2744;border:none;font-family:inherit;font-size:.72rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;" onclick="event.stopPropagation();akPlayReel(\'' + reelKey + '\', \'' + escAttr(playSrc) + '\', \'' + playType + '\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>İzle</button>';
+      // Username + blue tick + location
+      bodyHtml += '<div style="flex:1;min-width:0;">';
+      bodyHtml += '<div style="display:flex;align-items:center;gap:4px;"><span style="font-weight:700;font-size:.84rem;color:#262626;">assosukesfet</span>';
+      bodyHtml += '<svg width="14" height="14" viewBox="0 0 24 24" style="flex-shrink:0;"><path fill="#0095F6" d="M12 2L14.5 4.5L18 4L18.5 7.5L22 9L20.5 12L22 15L18.5 16.5L18 20L14.5 19.5L12 22L9.5 19.5L6 20L5.5 16.5L2 15L3.5 12L2 9L5.5 7.5L6 4L9.5 4.5L12 2Z"/><path fill="#fff" d="M10.5 14.5L7.5 11.5L9 10L10.5 11.5L14.5 7.5L16 9L10.5 14.5Z"/></svg>';
       bodyHtml += '</div>';
+      bodyHtml += '<div style="font-size:.72rem;color:#262626;margin-top:1px;">📍 ' + escHtml(v.title) + ' ' + vLabel + '</div>';
+      bodyHtml += '</div>';
+      // 3-dot menu (sadece dekoratif)
+      bodyHtml += '<div style="color:#262626;font-size:1rem;letter-spacing:1px;flex-shrink:0;padding:0 4px;">⋯</div>';
+      bodyHtml += '</div>';
+
+      // ═══ MEDIA — video/thumbnail 4:5 ═══
+      bodyHtml += '<div style="position:relative;aspect-ratio:4/5;background:#000;overflow:hidden;">';
+      bodyHtml += '<div class="ak-reel-cover" style="position:absolute;inset:0;background:#1A2744 center/cover ' + (thumb ? 'url(\'' + thumb + '\')' : '') + ';cursor:pointer;" onclick="akPlayReel(\'' + reelKey + '\', \'' + escAttr(playSrc) + '\', \'' + playType + '\')">';
+      bodyHtml += '<div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 0%,transparent 70%,rgba(0,0,0,.2) 100%);"></div>';
+      bodyHtml += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">';
+      bodyHtml += '<div style="width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(0,0,0,.35);transition:transform .2s;" onmouseover="this.style.transform=\'scale(1.08)\'" onmouseout="this.style.transform=\'\'">';
+      bodyHtml += '<svg width="28" height="28" viewBox="0 0 24 24" fill="#262626" style="margin-left:3px"><path d="M8 5v14l11-7z"/></svg>';
+      bodyHtml += '</div></div>';
       bodyHtml += '</div>'; // cover
-      // Iframe placeholder + IG link (oynatildiginda gosterilir)
       bodyHtml += '<div class="ak-reel-player" style="position:absolute;inset:0;display:none;"></div>';
-      bodyHtml += '<div class="ak-reel-igopen" style="display:none;position:absolute;bottom:8px;right:8px;z-index:2;"><a href="' + escAttr(reel.url) + '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);color:#fff;font-size:.68rem;font-weight:600;text-decoration:none;">📱 Instagram\'da Aç</a></div>';
+      bodyHtml += '</div>'; // media container
+
+      // ═══ ACTION BAR — heart, comment, share, save ═══
+      bodyHtml += '<div style="display:flex;align-items:center;padding:10px 14px 4px;gap:14px;">';
+      // Heart (client-side toggle)
+      bodyHtml += '<button type="button" onclick="akReelLike(this,\'' + reelKey + '\')" aria-label="Beğen" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;color:#262626;" class="ak-reel-like-btn"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ak-reel-heart"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>';
+      // Comment (IG'a yonlendir)
+      bodyHtml += '<a href="' + escAttr(reel.url) + '" target="_blank" rel="noopener" aria-label="Yorum" style="color:#262626;display:flex;align-items:center;text-decoration:none;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></a>';
+      // Share (native share or copy)
+      bodyHtml += '<button type="button" onclick="akReelShare(\'' + escAttr(reel.url) + '\',\'' + escAttr(titleRaw.replace(/[\\\"]/g, "")) + '\')" aria-label="Paylaş" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;color:#262626;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>';
+      // Spacer
+      bodyHtml += '<div style="flex:1;"></div>';
+      // Save/bookmark (decorative)
+      bodyHtml += '<button type="button" onclick="akReelBookmark(this,\'' + reelKey + '\')" aria-label="Kaydet" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;color:#262626;" class="ak-reel-save-btn"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ak-reel-bookmark"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>';
       bodyHtml += '</div>';
+
+      // Likes count (initial dummy count — her reel ic random seed ile stabil)
+      var seedLikes = 0;
+      for (var ci = 0; ci < reelKey.length; ci++) seedLikes += reelKey.charCodeAt(ci);
+      var likesCount = 42 + (seedLikes % 238); // 42-280 arası
+      bodyHtml += '<div class="ak-reel-likes" data-base="' + likesCount + '" style="padding:0 14px;font-size:.8rem;font-weight:700;color:#262626;">' + likesCount + ' beğeni</div>';
+
+      // Caption — "assosukesfet" + titleRaw
+      if (caption) {
+        bodyHtml += '<div style="padding:6px 14px 4px;font-size:.82rem;color:#262626;line-height:1.4;">';
+        bodyHtml += '<span style="font-weight:700;">assosukesfet</span> ' + escHtml(caption);
+        bodyHtml += '</div>';
+      }
+
+      // IG'da Aç CTA
+      bodyHtml += '<a href="' + escAttr(reel.url) + '" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;padding:10px 14px 14px;font-size:.76rem;font-weight:600;color:#00376B;text-decoration:none;">';
+      bodyHtml += '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>Instagram\'da Görüntüle';
+      bodyHtml += '</a>';
+
+      bodyHtml += '</div>'; // card
     });
     bodyHtml += '</div></div>';
   }
@@ -4336,6 +4475,9 @@ function renderVillagePage(villageId) {
   bodyHtml += '</div>'; // container
 
   document.getElementById('village-body').innerHTML = bodyHtml;
+
+  // Reel like/bookmark state restore (varsa)
+  try { if (window.akReelRestoreState) akReelRestoreState(); } catch(e) {}
 
   // FAQ Schema (SEO — sayfada görsel yok, sadece head'e eklenir)
   var faqItems = [];
