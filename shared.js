@@ -260,23 +260,16 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     #main-nav.hero-mode .nav-dropdown-item{color:var(--cream);}
     #main-nav.hero-mode .nav-dropdown-item:hover{background:rgba(245,237,224,.08);color:#fff;}
     #main-nav.hero-mode .nav-dropdown-item.active{background:rgba(196,82,26,.2);color:#fff;}
-    /* Mobile menu — Keşfet collapsible dropdown */
+    /* Mobile menu — Keşfet dropdown her zaman açık (static) */
     .mm-group{display:flex;flex-direction:column;margin:4px 0;}
-    .mm-group-toggle{width:100%;display:flex;align-items:center;gap:14px;background:none;border:none;color:inherit;font-family:inherit;cursor:pointer;text-align:left;padding:12px 0;}
-    .mm-group-toggle .mm-label{flex:1;}
-    .mm-chev{opacity:.5;transition:transform .25s cubic-bezier(.16,1,.3,1),opacity .2s;flex-shrink:0;}
-    .mm-group.expanded .mm-chev{transform:rotate(180deg);opacity:.9;}
-    .mm-group.active .mm-chev{color:var(--terra-light);opacity:.9;}
-    .mm-subs{display:grid;grid-template-rows:0fr;overflow:hidden;transition:grid-template-rows .3s cubic-bezier(.16,1,.3,1);}
-    .mm-group.expanded .mm-subs{grid-template-rows:1fr;}
-    .mm-subs > *{min-height:0;}
+    .mm-group-title{padding:12px 0;display:flex;align-items:center;gap:14px;}
+    .mm-subs{overflow:hidden;}
     .mm-subs-inner{display:flex;flex-direction:column;gap:4px;padding:4px 0 12px 28px;margin-left:14px;border-left:1.5px solid rgba(245,237,224,.08);}
-    .mm-sub{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;font-size:.92rem;font-weight:500;color:rgba(245,237,224,.7);text-decoration:none;transition:all .2s;}
+    .mm-sub{position:relative;display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;font-size:.92rem;font-weight:500;color:rgba(245,237,224,.7);text-decoration:none;transition:all .2s;}
     .mm-sub-icon{font-size:1.1rem;width:24px;text-align:center;flex-shrink:0;}
     .mm-sub:hover{color:#fff;background:rgba(245,237,224,.06);transform:translateX(2px);}
     .mm-sub.active{color:var(--terra-light);background:rgba(196,82,26,.1);font-weight:600;}
     .mm-sub.active::before{content:'';position:absolute;left:-14px;top:50%;width:2px;height:20px;background:var(--terra);border-radius:2px;transform:translateY(-50%);}
-    .mm-sub{position:relative;}
     .nav-link{color:var(--navy);font-size:.76rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;text-decoration:none;padding:7px 12px;border-radius:10px;transition:color .2s,background .2s,opacity .2s;opacity:.55;}
     .nav-link:hover{opacity:1;color:var(--terra);background:rgba(196,82,26,.06);}
     .nav-link.active{opacity:1;color:var(--terra);}
@@ -509,15 +502,14 @@ function renderNav(opts = {}) {
       <div class="mm-links">
         ${links.map((l, i) => {
           if (l.dropdown) {
-            // Mobile: collapsible parent — tıklayınca alt menü açılır
+            // Mobile: her zaman açık, static başlık + alt menü görünür
             var groupActive = isActive(l.href);
             return `
-              <div class="mm-group${groupActive ? ' active' : ''}${groupActive ? ' expanded' : ''}">
-                <button type="button" class="mm-link mm-group-toggle" onclick="this.parentElement.classList.toggle('expanded')" aria-expanded="${groupActive ? 'true' : 'false'}">
+              <div class="mm-group expanded${groupActive ? ' active' : ''}">
+                <div class="mm-link mm-group-title">
                   <span class="mm-num">0${i+1}</span>
                   <span class="mm-label">${l.label}</span>
-                  <svg class="mm-chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-                </button>
+                </div>
                 <div class="mm-subs">
                   <div class="mm-subs-inner">
                     ${l.dropdown.map(s => `<a href="${basePath}${s.href}" class="mm-sub${isActive(s.href) ? ' active' : ''}"><span class="mm-sub-icon">${s.icon}</span><span>${s.label}</span></a>`).join('')}
