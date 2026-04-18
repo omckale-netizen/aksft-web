@@ -64,9 +64,13 @@ export async function onRequestPost(context) {
     }
     const thumbnailUrl = ogMatch[1].replace(/&amp;/g, '&');
 
-    // 3) Title cekmeyi dene (og:title) — HTML entity'leri decode et
+    // 3) Title cekmeyi dene (og:title) — HTML entity'leri decode et + Instagram prefix temizle
     const titleMatch = html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i);
-    const title = titleMatch ? decodeHtmlEntities(titleMatch[1]) : '';
+    let title = titleMatch ? decodeHtmlEntities(titleMatch[1]) : '';
+    // IG formati: "username | bio, Instagram: '<caption>'" -> sadece caption
+    const igPrefixMatch = title.match(/Instagram\s*:\s*["'\u201C\u201D\u2018\u2019]?\s*(.+?)\s*["'\u201C\u201D\u2018\u2019]?\s*$/);
+    if (igPrefixMatch && igPrefixMatch[1]) title = igPrefixMatch[1];
+    title = title.replace(/^["'\u201C\u201D\u2018\u2019\s]+|["'\u201C\u201D\u2018\u2019\s]+$/g, '');
 
     // 3b) Video URL'ini cekmeyi dene — cok katmanli fallback
     let videoOriginalUrl = '';

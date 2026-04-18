@@ -103,32 +103,21 @@ function isPremiumActive(v) {
   return true;
 }
 
-// Reel beğeni (client-side) — localStorage'da tutulur, kalp animasyonu
+// Reel beğeni (client-side) — kalp dolu/bos toggle + kisa animasyon
 window.akReelLike = function(btn, reelKey) {
   try {
     var key = 'reel_like_' + reelKey;
     var liked = localStorage.getItem(key) === '1';
     var heart = btn.querySelector('.ak-reel-heart');
-    var card = document.getElementById(reelKey);
-    var likesEl = card && card.querySelector('.ak-reel-likes');
     if (!liked) {
       localStorage.setItem(key, '1');
       if (heart) { heart.setAttribute('fill', '#ED4956'); heart.setAttribute('stroke', '#ED4956'); }
       btn.style.color = '#ED4956';
-      if (likesEl) {
-        var base = parseInt(likesEl.getAttribute('data-base')) || 0;
-        likesEl.textContent = (base + 1) + ' beğeni';
-      }
-      // Kalp atma animasyonu
       btn.animate([{ transform:'scale(1)' }, { transform:'scale(1.3)' }, { transform:'scale(1)' }], { duration:300 });
     } else {
       localStorage.removeItem(key);
       if (heart) { heart.setAttribute('fill', 'none'); heart.setAttribute('stroke', 'currentColor'); }
       btn.style.color = '#262626';
-      if (likesEl) {
-        var base2 = parseInt(likesEl.getAttribute('data-base')) || 0;
-        likesEl.textContent = base2 + ' beğeni';
-      }
     }
   } catch(e) {}
 };
@@ -175,13 +164,8 @@ window.akReelRestoreState = function() {
       if (localStorage.getItem('reel_like_' + key) === '1') {
         var likeBtn = card.querySelector('.ak-reel-like-btn');
         var heart = card.querySelector('.ak-reel-heart');
-        var likesEl = card.querySelector('.ak-reel-likes');
         if (likeBtn) likeBtn.style.color = '#ED4956';
         if (heart) { heart.setAttribute('fill', '#ED4956'); heart.setAttribute('stroke', '#ED4956'); }
-        if (likesEl) {
-          var base = parseInt(likesEl.getAttribute('data-base')) || 0;
-          likesEl.textContent = (base + 1) + ' beğeni';
-        }
       }
       // Bookmark
       if (localStorage.getItem('reel_bookmark_' + key) === '1') {
@@ -4363,6 +4347,17 @@ function renderVillagePage(villageId) {
         .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
         .replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&nbsp;/g, ' ');
     };
+    // Instagram og:title kaliplari: "username | bio, Instagram: '<caption>'" -> sadece caption
+    var cleanIgTitle = function(s) {
+      if (!s) return '';
+      var str = decodeEntities(s);
+      // "Instagram:" sonrasini al (varsa)
+      var m = str.match(/Instagram\s*:\s*["'\u201C\u201D\u2018\u2019]?\s*(.+?)\s*["'\u201C\u201D\u2018\u2019]?\s*$/);
+      if (m && m[1]) str = m[1];
+      // Bas/son tirnak/slash temizlik
+      str = str.replace(/^["'\u201C\u201D\u2018\u2019\s]+|["'\u201C\u201D\u2018\u2019\s]+$/g, '');
+      return str;
+    };
     // Avatar URL — IG avatar > schema logo > icon-512 fallback hiyerarsisi
     var _settings = (window.DATA && window.DATA.siteSettings) || {};
     var avatarUrl = _settings.igAvatarUrl || _settings.schemaLogoUrl || '/icon-512.png';
@@ -4376,8 +4371,8 @@ function renderVillagePage(villageId) {
       var reelKey = 'reel-' + v.id + '-' + idx;
       var sc = reel.shortcode || (reel.url.match(/\/(p|reel|reels)\/([A-Za-z0-9_-]+)/) || [])[2] || '';
       var embedUrl = sc ? 'https://www.instagram.com/p/' + sc + '/embed' : '';
-      var titleRaw = decodeEntities(reel.title || '');
-      var caption = titleRaw.length > 120 ? titleRaw.substring(0, 120) + '…' : titleRaw;
+      var titleRaw = cleanIgTitle(reel.title || '');
+      var caption = titleRaw.length > 160 ? titleRaw.substring(0, 160) + '…' : titleRaw;
       var thumb = reel.thumbnailUrl ? escAttr(reel.thumbnailUrl) : '';
       var videoUrl = reel.videoUrl ? escAttr(reel.videoUrl) : '';
       var playSrc = videoUrl || embedUrl;
@@ -4415,25 +4410,19 @@ function renderVillagePage(villageId) {
       bodyHtml += '<div class="ak-reel-player" style="position:absolute;inset:0;display:none;"></div>';
       bodyHtml += '</div>'; // media container
 
-      // ═══ ACTION BAR — heart, comment, share, save ═══
-      bodyHtml += '<div style="display:flex;align-items:center;padding:10px 14px 4px;gap:14px;">';
-      // Heart (client-side toggle)
+      // ═══ ACTION BAR — heart ve bookmark tiklanabilir (fill toggle), yorum/gonder dekoratif ═══
+      bodyHtml += '<div style="display:flex;align-items:center;padding:10px 14px 6px;gap:14px;">';
+      // Heart — tiklanabilir (icli dolu toggle)
       bodyHtml += '<button type="button" onclick="akReelLike(this,\'' + reelKey + '\')" aria-label="Beğen" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;color:#262626;" class="ak-reel-like-btn"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ak-reel-heart"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>';
-      // Comment (IG'a yonlendir)
-      bodyHtml += '<a href="' + escAttr(reel.url) + '" target="_blank" rel="noopener" aria-label="Yorum" style="color:#262626;display:flex;align-items:center;text-decoration:none;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></a>';
-      // Share (native share or copy)
-      bodyHtml += '<button type="button" onclick="akReelShare(\'' + escAttr(reel.url) + '\',\'' + escAttr(titleRaw.replace(/[\\\"]/g, "")) + '\')" aria-label="Paylaş" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;color:#262626;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>';
+      // Comment — dekoratif, aria-hidden
+      bodyHtml += '<span aria-hidden="true" style="color:#262626;display:flex;align-items:center;opacity:.85;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>';
+      // Share — dekoratif
+      bodyHtml += '<span aria-hidden="true" style="color:#262626;display:flex;align-items:center;opacity:.85;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span>';
       // Spacer
       bodyHtml += '<div style="flex:1;"></div>';
-      // Save/bookmark (decorative)
+      // Save/bookmark — tiklanabilir (icli dolu toggle)
       bodyHtml += '<button type="button" onclick="akReelBookmark(this,\'' + reelKey + '\')" aria-label="Kaydet" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;color:#262626;" class="ak-reel-save-btn"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ak-reel-bookmark"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>';
       bodyHtml += '</div>';
-
-      // Likes count (initial dummy count — her reel ic random seed ile stabil)
-      var seedLikes = 0;
-      for (var ci = 0; ci < reelKey.length; ci++) seedLikes += reelKey.charCodeAt(ci);
-      var likesCount = 42 + (seedLikes % 238); // 42-280 arası
-      bodyHtml += '<div class="ak-reel-likes" data-base="' + likesCount + '" style="padding:0 14px;font-size:.8rem;font-weight:700;color:#262626;">' + likesCount + ' beğeni</div>';
 
       // Caption — "assosukesfet" + titleRaw
       if (caption) {
