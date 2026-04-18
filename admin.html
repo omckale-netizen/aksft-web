@@ -3679,6 +3679,38 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
             </div>
           </div>
 
+          <!-- Instagram Profil Resmi — reel kartlarinda kullanilir -->
+          <div class="panel-card" data-admin-only>
+            <div class="panel-card-head"><h3>📸 Instagram Profil Resmi</h3></div>
+            <div style="padding:20px">
+              <div id="ig-avatar-preview" style="margin-bottom:14px;display:flex;justify-content:center;padding:20px;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;">
+                <div style="width:96px;height:96px;border-radius:50%;padding:3px;background:linear-gradient(45deg,#F09433 0%,#E6683C 25%,#DC2743 50%,#CC2366 75%,#BC1888 100%);">
+                  <div style="width:100%;height:100%;border-radius:50%;background:#fff;padding:2px;">
+                    <img id="ig-avatar-preview-img" src="" alt="IG Avatar" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:none;">
+                    <div id="ig-avatar-preview-empty" style="width:100%;height:100%;border-radius:50%;background:rgba(0,0,0,.04);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:1.2rem;">📷</div>
+                  </div>
+                </div>
+              </div>
+              <div style="background:rgba(196,82,26,.05);border:1px solid rgba(196,82,26,.12);border-radius:8px;padding:10px 12px;margin-bottom:14px">
+                <div style="font-size:.72rem;color:var(--text-light);line-height:1.5">
+                  <strong>Kare format</strong> (örn. 320×320 px) · JPG/PNG<br>
+                  Köy detay sayfasındaki Instagram reel kartlarının header'ında avatar olarak görünür. Kendi Instagram profil fotoğrafını yükle.
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <button class="btn btn-primary btn-sm" onclick="document.getElementById('ig-avatar-file-input').click()">📸 Avatar Yükle</button>
+                <span id="ig-avatar-upload-status" style="font-size:.72rem;color:var(--text-muted)"></span>
+              </div>
+              <input type="file" id="ig-avatar-file-input" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="uploadIgAvatar(this.files[0])">
+              <div id="ig-avatar-url-box" style="display:none;margin-top:12px">
+                <div style="display:flex;gap:6px">
+                  <input type="text" id="ig-avatar-url-display" readonly style="flex:1;padding:6px 10px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.68rem;background:rgba(0,0,0,.02);color:var(--text)">
+                  <button class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText(document.getElementById('ig-avatar-url-display').value);showToast('Kopyalandı','success')">Kopyala</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Schema Logo (SEO / AI) — tam boyut PNG, transparent -->
           <div class="panel-card" data-admin-only>
             <div class="panel-card-head"><h3>🔍 SEO / AI Logo (Organization Schema)</h3></div>
@@ -7053,6 +7085,70 @@ function showSchemaLogoPreview(url) {
   }
 }
 
+// ═══ Instagram Profil Resmi (Reel avatar) ═══
+async function uploadIgAvatar(file) {
+  if (!file) return;
+  if (file.size > 1 * 1024 * 1024) {
+    showToast('Dosya maks 1MB olmalı (kare küçük boyut yeterli).', 'error');
+    return;
+  }
+  const statusEl = document.getElementById('ig-avatar-upload-status');
+  statusEl.textContent = 'Optimize ediliyor...';
+  try {
+    // Kareye kırp ve 320px'e küçült + WebP
+    const optimizedBlob = await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = function() {
+        const size = Math.min(img.width, img.height);
+        const sx = (img.width - size) / 2;
+        const sy = (img.height - size) / 2;
+        const target = 320;
+        const canvas = document.createElement('canvas');
+        canvas.width = target; canvas.height = target;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, sx, sy, size, size, 0, 0, target, target);
+        canvas.toBlob(resolve, 'image/webp', 0.9);
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+    statusEl.textContent = 'Yükleniyor...';
+    const ref = firebase.storage().ref('site/ig-avatar.webp');
+    await ref.put(optimizedBlob, { contentType: 'image/webp' });
+    const url = await ref.getDownloadURL();
+    await db.collection('settings').doc('site').set({
+      igAvatarUrl: url,
+      igAvatarUpdatedAt: new Date().toISOString()
+    }, { merge: true });
+    statusEl.textContent = 'Yüklendi!';
+    showIgAvatarPreview(url);
+    showToast('Instagram avatarı güncellendi. Köy sayfalarındaki reel kartlarına yansır.', 'success');
+  } catch(err) {
+    console.error('IG avatar upload error:', err);
+    statusEl.textContent = 'Hata!';
+    showToast('Yüklenemedi: ' + err.message, 'error');
+  }
+}
+
+function showIgAvatarPreview(url) {
+  const img = document.getElementById('ig-avatar-preview-img');
+  const empty = document.getElementById('ig-avatar-preview-empty');
+  const urlBox = document.getElementById('ig-avatar-url-box');
+  const urlInput = document.getElementById('ig-avatar-url-display');
+  if (!img) return;
+  if (url) {
+    img.src = url;
+    img.style.display = '';
+    empty.style.display = 'none';
+    urlBox.style.display = '';
+    urlInput.value = url;
+  } else {
+    img.style.display = 'none';
+    empty.style.display = '';
+    urlBox.style.display = 'none';
+  }
+}
+
 // updateAdminName'in debounce timer'ı — her tuş vuruşunda Firestore yazmamak için
 var _nameUpdateTimer = null;
 function updateAdminName(val) {
@@ -7161,6 +7257,7 @@ async function loadLogoPreview() {
     if (doc.exists) {
       if (doc.data().logoUrl) showLogoPreview(doc.data().logoUrl);
       if (doc.data().schemaLogoUrl) showSchemaLogoPreview(doc.data().schemaLogoUrl);
+      if (doc.data().igAvatarUrl) showIgAvatarPreview(doc.data().igAvatarUrl);
       if (doc.data().ogImageUrl) showOgPreview(doc.data().ogImageUrl);
       if (doc.data().heroImageUrl) showHeroPreview(doc.data().heroImageUrl, doc.data().heroImagePosY);
       if (doc.data().aiDailyLimit) { var aiInp = document.getElementById('ai-limit-input'); if (aiInp) aiInp.value = doc.data().aiDailyLimit; }

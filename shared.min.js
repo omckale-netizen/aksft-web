@@ -4363,8 +4363,9 @@ function renderVillagePage(villageId) {
         .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
         .replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&nbsp;/g, ' ');
     };
-    // Avatar URL — site settings'ten schema logo (ya da fallback icon-512)
-    var avatarUrl = (window.DATA && window.DATA.siteSettings && window.DATA.siteSettings.schemaLogoUrl) || '/icon-512.png';
+    // Avatar URL — IG avatar > schema logo > icon-512 fallback hiyerarsisi
+    var _settings = (window.DATA && window.DATA.siteSettings) || {};
+    var avatarUrl = _settings.igAvatarUrl || _settings.schemaLogoUrl || '/icon-512.png';
     // Koy tipi (koy/belde/mahalle) suffix
     var vType2 = v.type || 'koy';
     var vLabel = vType2 === 'belde' ? 'Beldesi' : (vType2 === 'mahalle' ? 'Mahallesi' : 'Köyü');
