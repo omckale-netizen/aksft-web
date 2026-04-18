@@ -4890,7 +4890,7 @@ function renderPlacePage(placeId) {
     <button class="ai-chat-fab" id="ai-chat-fab" onclick="aiChatToggle()" aria-label="Assos Asistan">🧭</button>
     <div class="ai-chat-panel" id="ai-chat-panel">
       <div class="ai-chat-head">
-        <div class="ai-chat-avatar">🧭</div>
+        <div class="ai-chat-avatar">🏛</div>
         <div class="ai-chat-head-info">
           <div class="ai-chat-title"><span>Assos'u Keşfet Asistan</span><span class="ai-chat-badge">AI</span></div>
           <div class="ai-chat-sub">Yapay zeka destekli kişisel seyahat rehberiniz</div>
