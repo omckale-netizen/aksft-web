@@ -635,6 +635,12 @@ function renderNav(opts = {}) {
       .sd-empty-text { font-size:.86rem; color:#718096; margin-bottom:16px; line-height:1.6; }
       .sd-empty-link { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border-radius:999px; background:#1A2744; color:#fff; font-size:.78rem; font-weight:600; text-decoration:none; transition:background .2s; }
       .sd-empty-link:hover { background:#2A3A5A; }
+      .sd-empty-actions{display:flex;flex-direction:column;gap:10px;width:100%;max-width:280px;margin:4px auto 0;}
+      .sd-empty-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:13px 20px;border-radius:14px;font-size:.88rem;font-weight:700;text-decoration:none;transition:transform .15s,box-shadow .2s,opacity .2s;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+      .sd-empty-btn:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.1);}
+      .sd-empty-btn-venue{background:linear-gradient(135deg,#C4521A,#A3431A);color:#fff;}
+      .sd-empty-btn-place{background:linear-gradient(135deg,#1A6B8A,#155876);color:#fff;}
+      .sd-empty-emoji{font-size:1.05rem;}
       .sd-venue {
         display:flex; align-items:center; gap:12px;
         padding:12px; border-radius:16px;
@@ -957,7 +963,16 @@ function renderNav(opts = {}) {
         <div class="sd-empty">
           <div class="sd-empty-icon">♡</div>
           <p class="sd-empty-text">Henüz kaydettiğin mekan veya yer yok.<br>Beğendiğin yerleri ♡ ile işaretle.</p>
-          <a class="sd-empty-link" href="${getMekanListPath()}">Mekanları Keşfet →</a>
+          <div class="sd-empty-actions">
+            <a class="sd-empty-btn sd-empty-btn-venue" href="${getBasePath()}mekanlar.html">
+              <span class="sd-empty-emoji">☕</span>
+              <span>Mekanları Keşfet</span>
+            </a>
+            <a class="sd-empty-btn sd-empty-btn-place" href="${getBasePath()}yerler.html">
+              <span class="sd-empty-emoji">📍</span>
+              <span>Gezilecek Yerler</span>
+            </a>
+          </div>
         </div>`;
       return;
     }
