@@ -4081,7 +4081,8 @@ function renderVillagePage(villageId) {
     villageVenues.forEach(function(venue) {
       var vci = getVenueCatInfo(venue.category);
       var cs = { bg: vci.color + '14', color: vci.color, label: vci.label, emoji: vci.emoji };
-      var isOpen = typeof isVenueOpen === 'function' ? isVenueOpen(venue) : null;
+      // Konaklama: acik/kapali badge gosterme (7/24 kabul edilir)
+      var isOpen = (venue.category === 'konaklama') ? null : (typeof isVenueOpen === 'function' ? isVenueOpen(venue) : null);
       var statusDot = '', statusText = '';
       if (isOpen === true) { statusDot = '#22C55E'; statusText = 'Açık'; }
       else if (isOpen === false) { statusDot = '#EF4444'; statusText = 'Kapalı'; }
