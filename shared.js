@@ -409,6 +409,27 @@ function _fetchSiteLogo() {
       localStorage.setItem('site_theme_accent', d.themeAccent);
       _applyThemeAccent(d.themeAccent);
     }
+    // AI daily limit cache (ilk sayfa yuklenmesinde 25/25 flash'ini onler)
+    if (d.aiDailyLimit && d.aiDailyLimit > 0) {
+      try { localStorage.setItem('ai_daily_limit', String(d.aiDailyLimit)); } catch(e) {}
+      // Eger AI chat UI zaten render edilmisse display'i guncelle
+      try {
+        var el = document.getElementById('ai-chat-limit');
+        if (el && el.textContent) {
+          var newLimit = d.aiDailyLimit;
+          // State'i yeni limit'e gore yeniden hesapla
+          var stateRaw = localStorage.getItem('assos_ai_chat');
+          if (stateRaw) {
+            var st = JSON.parse(stateRaw);
+            var today = new Date().toISOString().split('T')[0];
+            if (st.date === today) {
+              var remaining = Math.max(0, newLimit - (st.count || 0));
+              el.textContent = remaining + '/' + newLimit + ' soru kaldı';
+            }
+          }
+        }
+      } catch(e) {}
+    }
   }).catch(function() {});
 }
 function _applyThemeAccent(hex) {
@@ -5224,7 +5245,16 @@ function renderPlacePage(placeId) {
 
   // Hazır soru tıklama
   // State
-  function getAiDailyLimit() { return (window.DATA && window.DATA.siteSettings && window.DATA.siteSettings.aiDailyLimit) || 25; }
+  function getAiDailyLimit() {
+    var fromData = window.DATA && window.DATA.siteSettings && window.DATA.siteSettings.aiDailyLimit;
+    if (fromData) return fromData;
+    // localStorage cache (Firestore yuklenmeden onceki ilk render icin)
+    try {
+      var cached = parseInt(localStorage.getItem('ai_daily_limit') || '0');
+      if (cached > 0) return cached;
+    } catch(e) {}
+    return 15;
+  }
   var AI_STORAGE_KEY = 'assos_ai_chat';
   var AI_HISTORY_KEY = 'assos_ai_history';
 
