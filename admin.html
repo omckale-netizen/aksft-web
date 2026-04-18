@@ -13090,8 +13090,13 @@ async function addReel() {
       statusEl.textContent = '✓ Eklendi (Firebase cache — kalıcı)';
       statusEl.style.color = 'var(--green)';
     } else {
-      statusEl.textContent = '⚠️ Eklendi ama IG CDN URL (~30 günde expire olabilir, manuel thumbnail önerilir)';
+      statusEl.textContent = '⚠️ Eklendi ama IG CDN URL (~30 günde expire olabilir)';
       statusEl.style.color = '#D97706';
+      // Firebase upload hata detayini konsola + toast'a yaz — debug icin
+      if (data.uploadError) {
+        console.error('[ig-thumbnail] Firebase Storage upload error:', data.uploadError);
+        showToast('Firebase upload hatasi: ' + String(data.uploadError).substring(0, 150), 'error');
+      }
     }
     setTimeout(function() { statusEl.textContent = ''; }, 5000);
   } catch(err) {
