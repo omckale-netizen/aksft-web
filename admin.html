@@ -2565,8 +2565,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
                 <button class="btn btn-sm btn-secondary" onclick="mtUtmTest()"><i data-lucide="external-link" style="width:13px;height:13px"></i> Test Et</button>
               </div>
               <div id="mt-utm-short" style="display:none;margin-top:10px;padding:10px;background:rgba(56,161,105,.06);border:1px solid rgba(56,161,105,.2);border-radius:8px">
-                <div style="font-size:.68rem;font-weight:700;color:var(--green);text-transform:uppercase;margin-bottom:4px">🔗 Vanity Kısa Link</div>
-                <div id="mt-utm-short-url" style="font-family:'SF Mono',Consolas,monospace;font-size:.85rem;font-weight:700;color:var(--green)"></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px">
+                  <div style="font-size:.68rem;font-weight:700;color:var(--green);text-transform:uppercase">🔗 Vanity Kısa Link</div>
+                  <button class="btn btn-sm btn-primary" onclick="mtUtmShortCopy()" style="padding:4px 10px;font-size:.68rem"><i data-lucide="copy" style="width:11px;height:11px"></i> Kopyala</button>
+                </div>
+                <div id="mt-utm-short-url" onclick="mtUtmShortCopy()" title="Tıkla kopyala" style="font-family:'SF Mono',Consolas,monospace;font-size:.85rem;font-weight:700;color:var(--green);cursor:pointer;word-break:break-all"></div>
                 <div style="font-size:.68rem;color:var(--text-muted);margin-top:4px">Bu link tıklandığında otomatik UTM'li URL'e yönlendirilir. Bio'da çok daha temiz görünür.</div>
               </div>
               <div id="mt-utm-qr" style="display:none;margin-top:12px;text-align:center;padding:14px;background:#fff;border-radius:8px;border:1px solid rgba(0,0,0,.05)"></div>
@@ -5550,8 +5553,21 @@ function mtUtmShort() {
     showToast('Bu kaynak/ortam için vanity link tanımlı değil. Hedef URL doğrudan kullanılabilir.', 'info');
     return;
   }
-  urlEl.textContent = 'assosukesfet.com' + short;
+  urlEl.textContent = 'https://assosukesfet.com' + short;
   shortEl.style.display = '';
+}
+
+// Short URL'e tıklayınca panoya kopyala (UX iyileştirme)
+function mtUtmShortCopy() {
+  var urlEl = document.getElementById('mt-utm-short-url');
+  if (!urlEl) return;
+  var txt = urlEl.textContent.trim();
+  if (!txt) return;
+  navigator.clipboard.writeText(txt).then(function() {
+    showToast('✓ Kısa link panoya kopyalandı: ' + txt, 'success');
+  }).catch(function() {
+    showToast('Kopyalanamadı — lütfen manuel seçin', 'error');
+  });
 }
 
 function mtUtmQr() {
