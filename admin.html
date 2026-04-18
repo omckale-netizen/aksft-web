@@ -8495,6 +8495,8 @@ async function loadCurrentUserRole(firebaseUser) {
     attachCurrentUserListener(firebaseUser.uid);
     // Aktif oturum kaydi olustur + heartbeat baslat (super admin icin de)
     try { createUserSession(baseUser); } catch(e) { console.warn('Session create:', e); }
+    // Admin/staff trafigi istatistige sayilmasin — otomatik flag (super admin)
+    try { localStorage.setItem('analytics_excluded', '1'); } catch(e) {}
     return window._currentUser;
   }
   // Diğer kullanıcılar için users koleksiyonundan rol oku
@@ -8530,6 +8532,8 @@ async function loadCurrentUserRole(firebaseUser) {
     attachCurrentUserListener(firebaseUser.uid);
     // Aktif oturum kaydi olustur + heartbeat baslat
     try { createUserSession(baseUser); } catch(e) { console.warn('Session create:', e); }
+    // Admin/staff trafigi istatistige sayilmasin — otomatik flag
+    try { localStorage.setItem('analytics_excluded', '1'); } catch(e) {}
     return window._currentUser;
   } catch(e) {
     console.error('User role fetch error:', e);

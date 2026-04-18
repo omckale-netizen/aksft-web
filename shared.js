@@ -4097,6 +4097,10 @@ function renderVenuePage(venueId) {
 
     // Log event with timestamp + weather + traffic source (non-blocking)
     function logEvent(type, target, action) {
+      // Admin/staff kullanici kontrolu — kendi trafigi analytics'e yazilmasin
+      try {
+        if (localStorage.getItem('analytics_excluded') === '1') return;
+      } catch(e) {}
       const run = function() {
         const now = new Date();
         const ev = {
@@ -4143,9 +4147,15 @@ function renderVenuePage(venueId) {
       else setTimeout(run, 100);
     }
 
+    // Admin/staff trafigi istatistige sayilmasin — localStorage flag
+    function _analyticsExcluded() {
+      try { return localStorage.getItem('analytics_excluded') === '1'; } catch(e) { return false; }
+    }
+
     // Track page view (counter + event log, non-blocking)
     window.trackPageView = function(pageId) {
       if (!pageId) return;
+      if (_analyticsExcluded()) return;
       const run = function() {
         adb.collection('analytics').doc(pageId).set({
           views: firebase.firestore.FieldValue.increment(1),
@@ -4161,6 +4171,7 @@ function renderVenuePage(venueId) {
     // Track action (counter + event log)
     window.trackAction = function(venueId, action) {
       if (!venueId || !action) return;
+      if (_analyticsExcluded()) return;
       const docRef = adb.collection('analytics').doc('venue_' + venueId);
       const field = action + '_count';
       const update = { [field]: firebase.firestore.FieldValue.increment(1) };
