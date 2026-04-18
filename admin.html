@@ -10894,6 +10894,12 @@ async function renderAnalytics() {
     }
     const eventsSnap = await eventsQuery.limit(5000).get();
     const events = eventsSnap.docs.map(d => d.data());
+    // Period label'a event sayisi ekle — user gorsel dogrulama icin
+    var _plLabel = document.getElementById('analytics-period-label');
+    if (_plLabel) {
+      var _periodTxt = analyticsPeriod === 0 ? 'Tüm zamanlar' : 'Son ' + analyticsPeriod + ' gün';
+      _plLabel.textContent = _periodTxt + ' · ' + events.length + ' event';
+    }
 
     // Günlük sayılar (grafik için)
     const dailyCounts = {};
