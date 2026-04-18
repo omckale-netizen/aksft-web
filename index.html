@@ -520,6 +520,21 @@ function pageInit() {
     type();
   })();
 
+  // Hero image'i viewport height'a sabitle (iOS URL bar resize parallax'ini engeller)
+  (function() {
+    var heroImg = document.getElementById('hero-bg-img');
+    var heroSec = document.getElementById('hero');
+    if (!heroImg || !heroSec) return;
+    function lockHeroSize() {
+      var h = window.innerHeight;
+      heroImg.style.height = h + 'px';
+      heroSec.style.minHeight = h + 'px';
+    }
+    lockHeroSize();
+    // Sadece orientation degisiminde yeniden hesapla (scroll'da re-run ETME)
+    window.addEventListener('orientationchange', function() { setTimeout(lockHeroSize, 100); });
+  })();
+
   // Hero arka plan görselini Firebase'den çek
   (function() {
     var heroImg = document.getElementById('hero-bg-img');
