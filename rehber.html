@@ -1169,7 +1169,9 @@
 .timeline-wrap{position:relative;margin-top:36px}
 .timeline-track{display:flex;align-items:flex-start;gap:0;padding:0 8px 40px;overflow-x:auto;scrollbar-width:none;position:relative}
 .timeline-track::-webkit-scrollbar{display:none}
-.timeline-track::before{content:'';position:absolute;top:54px;left:calc(6.25% + 20px);right:calc(6.25% + 20px);height:2px;background:linear-gradient(90deg,rgba(26,39,68,.1) 0%,rgba(26,39,68,.25) 50%,rgba(26,39,68,.1) 100%);z-index:0}
+/* Her node kendi sag tarafina ince bir cizgi cizer — scroll'da da tam kapsayan connector */
+.timeline-node::after{content:'';position:absolute;top:54px;left:50%;width:100%;height:2px;background:rgba(26,39,68,.18);z-index:0;transition:background .3s}
+.timeline-node:last-child::after{display:none}
 .timeline-node{flex:1 0 12.5%;min-width:110px;background:none;border:none;cursor:pointer;padding:8px 4px;display:flex;flex-direction:column;align-items:center;font-family:inherit;position:relative;z-index:1;transition:transform .3s cubic-bezier(.16,1,.3,1);color:inherit}
 .timeline-node:hover{transform:translateY(-3px)}
 .tl-emoji{font-size:1.5rem;line-height:1;margin-bottom:16px;opacity:.5;transition:all .35s cubic-bezier(.16,1,.3,1);filter:saturate(.6)}
@@ -1200,7 +1202,6 @@
 @media(max-width:760px){
   .timeline-track{padding:0 16px 32px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
   .timeline-node{flex:0 0 110px;scroll-snap-align:center}
-  .timeline-track::before{left:70px;right:70px;top:54px}
   .timeline-panel{padding:24px 22px 28px}
   .tl-panel-title{font-size:1.25rem}
   .tl-panel-text{font-size:.86rem}
@@ -1350,27 +1351,34 @@ document.addEventListener('dataReady', pageInit);
     } catch(e) {}
   }
 
-  // Click handlers
+  // Click + klavye ok handlers — her butona direkt bagla (bubble sorunu onlenir)
   for (var i = 0; i < nodes.length; i++) {
     (function(idx) {
       nodes[idx].addEventListener('click', function() { setActive(idx); });
+      nodes[idx].addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          var next = idx + 1;
+          if (next >= nodes.length) next = 0; // wrap around
+          setActive(next);
+          nodes[next].focus();
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          var prev = idx - 1;
+          if (prev < 0) prev = nodes.length - 1; // wrap around
+          setActive(prev);
+          nodes[prev].focus();
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          setActive(0);
+          nodes[0].focus();
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          setActive(nodes.length - 1);
+          nodes[nodes.length - 1].focus();
+        }
+      });
     })(i);
-  }
-
-  // Klavye ok tusu navigasyon
-  var track = document.querySelector('.timeline-track');
-  if (track) {
-    track.addEventListener('keydown', function(e) {
-      if (e.key === 'ArrowRight' && current < nodes.length - 1) {
-        e.preventDefault();
-        setActive(current + 1);
-        nodes[current].focus();
-      } else if (e.key === 'ArrowLeft' && current > 0) {
-        e.preventDefault();
-        setActive(current - 1);
-        nodes[current].focus();
-      }
-    });
   }
 })();
 </script>
