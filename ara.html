@@ -153,7 +153,16 @@
       var q = getParam('q') || '';
       document.getElementById('ara-input').value = q;
       updateClearBtn();
-      if (q) runSearch(q);
+      if (q) {
+        // Ayni sorgu icin kaydedilmis filtreyi geri yukle (mekanlar/yerler/...)
+        try {
+          var saved = JSON.parse(sessionStorage.getItem(ARA_FILTER_KEY) || 'null');
+          if (saved && saved.q === q && ['all','venue','place','village','route'].indexOf(saved.filter) > -1) {
+            _activeFilter = saved.filter;
+          }
+        } catch(e) {}
+        runSearch(q);
+      }
       else {
         document.getElementById('ara-popular').style.display = 'block';
       }
@@ -186,6 +195,10 @@
         inp.focus();
         return;
       }
+      // Yeni sorgu -> filtre sifirlanir (kaydedilmis filtre sadece ayni q icin gecerli)
+      _activeFilter = 'all';
+      _shownCount = {};
+      try { sessionStorage.removeItem(ARA_FILTER_KEY); } catch(e) {}
       var newUrl = '/ara.html?q=' + encodeURIComponent(q);
       if (location.pathname.replace(/\/$/, '').endsWith('/ara.html') || location.pathname.endsWith('/ara')) {
         history.replaceState(null, '', newUrl);
@@ -217,6 +230,7 @@
     var _activeFilter = 'all';
     var _pageSize = 24; // Her grupta ilk N sonuç gösterilir; "Daha fazla" ile batch eklenir
     var _shownCount = {}; // { venue: 24, place: 24, ... }
+    var ARA_FILTER_KEY = 'ara_filter_state';
 
     function runSearch(q) {
       if (!q) return;
@@ -310,6 +324,7 @@
       _activeFilter = f;
       _shownCount = {}; // Filtre değişince sayacı sıfırla
       var q = document.getElementById('ara-input').value.trim();
+      try { sessionStorage.setItem(ARA_FILTER_KEY, JSON.stringify({ q: q, filter: f })); } catch(e) {}
       runSearch(q);
     }
 
