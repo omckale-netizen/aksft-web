@@ -480,6 +480,25 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .export-info .change-count{font-size:1.6rem;font-weight:800;color:var(--terra);margin-right:6px}
 .export-btns{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
 
+/* ── HERO BASLIK ── */
+.dash-hero{position:relative;background:linear-gradient(135deg,#1A2744 0%,#2A3A5A 55%,#C4521A 125%);color:#F5EDE0;border-radius:16px;padding:26px 28px 22px;margin-bottom:20px;overflow:hidden;box-shadow:0 6px 24px rgba(26,39,68,.12)}
+.dash-hero::before{content:'';position:absolute;width:220px;height:220px;border-radius:50%;background:rgba(212,147,90,.18);filter:blur(60px);top:-80px;right:-60px;pointer-events:none}
+.dash-hero::after{content:'';position:absolute;width:150px;height:150px;border-radius:50%;background:rgba(26,107,138,.2);filter:blur(50px);bottom:-50px;left:20%;pointer-events:none}
+.dash-hero-inner{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px}
+.dash-hero-left{flex:1;min-width:260px}
+.dash-hero-greet{font-size:.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(245,237,224,.6);margin-bottom:6px}
+.dash-hero-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin-bottom:10px;line-height:1.15}
+.dash-hero-title em{font-style:italic;font-family:'Lora',serif;font-weight:500;color:#E8C46A}
+.dash-hero-summary{font-size:.82rem;color:rgba(245,237,224,.78);line-height:1.5;max-width:520px}
+.dash-hero-summary strong{color:#F5EDE0;font-weight:700}
+.dash-hero-summary .hero-chip{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:3px 10px;margin:0 4px;font-size:.72rem;font-weight:600;cursor:pointer;transition:background .15s;backdrop-filter:blur(4px)}
+.dash-hero-summary .hero-chip:hover{background:rgba(255,255,255,.16)}
+.dash-hero-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;text-align:right;flex-shrink:0}
+.dash-hero-clock{font-family:'Plus Jakarta Sans',sans-serif;font-size:2rem;font-weight:800;letter-spacing:-.02em;color:#F5EDE0;line-height:1;font-variant-numeric:tabular-nums}
+.dash-hero-date{font-size:.75rem;color:rgba(245,237,224,.6);font-weight:500}
+.dash-hero-weather{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:4px 11px;font-size:.72rem;font-weight:600;margin-top:6px;backdrop-filter:blur(4px)}
+@media(max-width:640px){.dash-hero{padding:20px 18px 16px}.dash-hero-title{font-size:1.2rem}.dash-hero-clock{font-size:1.5rem}.dash-hero-right{align-items:flex-start;text-align:left}}
+
 /* ── AKILLI BILDIRIM KARTLARI ── */
 .alert-card{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:12px;margin-bottom:8px;cursor:pointer;transition:all .15s;border:1px solid transparent;background:var(--card-bg)}
 .alert-card:hover{transform:translateX(2px);box-shadow:0 4px 12px rgba(0,0,0,.05)}
@@ -1412,6 +1431,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
     <!-- ══════ DASHBOARD ══════ -->
     <div class="admin-page active" id="page-dashboard">
+      <!-- ═══ HERO: Tebrik + Ozet + Saat ═══ -->
+      <div id="dash-hero" class="dash-hero" data-admin-only></div>
+
       <!-- ═══ CANLI PULSE (live metrics) ═══ -->
       <div id="dash-pulse" data-admin-only style="margin-bottom:16px;display:none"></div>
 
@@ -12676,6 +12698,75 @@ function getTRDate() {
   return new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Istanbul' }));
 }
 
+// Hero header — tebrik + gunun ozeti + saat + hava (varsa)
+function renderDashHero() {
+  var el = document.getElementById('dash-hero');
+  if (!el) return;
+  try {
+    var userName = (window._currentUser && window._currentUser.name) || '';
+    var firstName = (userName || '').split(/\s+/)[0] || '';
+    var hour = getTRDate().getHours();
+    var greet = hour >= 6 && hour < 12 ? 'Günaydın' : hour >= 12 && hour < 18 ? 'İyi günler' : hour >= 18 ? 'İyi akşamlar' : 'İyi geceler';
+    var emoji = hour >= 6 && hour < 12 ? '☀️' : hour >= 12 && hour < 18 ? '🌤' : hour >= 18 && hour < 22 ? '🌅' : '🌙';
+
+    // Ozet hesapla
+    var v = (typeof draftData !== 'undefined' && draftData.venues) || [];
+    var published = v.filter(function(x) { return typeof getVenueStatusKey === 'function' && getVenueStatusKey(x) === 'published'; }).length;
+    var draft = v.filter(function(x) { return typeof getVenueStatusKey === 'function' && getVenueStatusKey(x) === 'draft'; }).length;
+    var pending = 0;
+    if (Array.isArray(window._allPendingVenues)) {
+      pending = window._allPendingVenues.filter(function(p) { return p && (!p.status || p.status === 'pending' || p.status === 'updated' || p.status === 'revision'); }).length;
+    }
+    var unread = 0;
+    if (typeof allMessages !== 'undefined' && Array.isArray(allMessages)) {
+      unread = allMessages.filter(function(m) { return m && !m.read && !m.trashed; }).length;
+    }
+
+    // Dinamik summary
+    var summaryParts = [];
+    if (pending > 0) summaryParts.push('<span class="hero-chip" onclick="showPage(\'pending\')">📋 ' + pending + ' talep</span>');
+    if (unread > 0) summaryParts.push('<span class="hero-chip" onclick="showPage(\'messages\')">✉️ ' + unread + ' mesaj</span>');
+    if (draft > 0) summaryParts.push('<span class="hero-chip" onclick="showPage(\'venues\')">📝 ' + draft + ' taslak</span>');
+
+    var summary = '';
+    if (summaryParts.length > 0) {
+      summary = 'Dikkat gereken: ' + summaryParts.join('');
+    } else {
+      summary = '<strong>' + published + '</strong> yayında mekan · Her sey yolunda bugün.';
+    }
+
+    // Saat
+    var now = getTRDate();
+    var h = now.getHours().toString().padStart(2, '0');
+    var m = now.getMinutes().toString().padStart(2, '0');
+    var dateStr = now.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' });
+
+    el.innerHTML =
+      '<div class="dash-hero-inner">' +
+        '<div class="dash-hero-left">' +
+          '<div class="dash-hero-greet">' + emoji + ' ' + greet + (firstName ? ', ' + firstName : '') + '</div>' +
+          '<div class="dash-hero-title">Bugün Assos\'<em>u</em> kesfedelim</div>' +
+          '<div class="dash-hero-summary">' + summary + '</div>' +
+        '</div>' +
+        '<div class="dash-hero-right">' +
+          '<div class="dash-hero-clock" id="dash-hero-clock">' + h + ':' + m + '</div>' +
+          '<div class="dash-hero-date">' + dateStr + '</div>' +
+        '</div>' +
+      '</div>';
+  } catch(e) { el.style.display = 'none'; }
+}
+
+// Sadece saat/dakika tazele (her 10sn'de)
+function tickDashHeroClock() {
+  var clockEl = document.getElementById('dash-hero-clock');
+  if (!clockEl) return;
+  var now = getTRDate();
+  var h = now.getHours().toString().padStart(2, '0');
+  var m = now.getMinutes().toString().padStart(2, '0');
+  clockEl.textContent = h + ':' + m;
+}
+setInterval(tickDashHeroClock, 30000);
+
 // Canli pulse strip — online users, unread messages, pending requests, delta
 function renderDashPulse() {
   var el = document.getElementById('dash-pulse');
@@ -12811,6 +12902,8 @@ function renderDashboard() {
 
   // Editor/viewer görünümü (admin ise gizli kalır)
   try { renderEditorDashboard(); } catch(e) {}
+  // Hero header (tebrik + ozet + saat)
+  try { renderDashHero(); } catch(e) {}
   // Canli pulse strip (online, unread, pending)
   try { renderDashPulse(); } catch(e) {}
   // Admin için 'Detaylı İstatistikler' açık/kapalı tercihini uygula
