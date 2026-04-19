@@ -2,9 +2,13 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
-    // Yardimci: Admin mi kontrol et
+    // Yardimci: Admin mi kontrol et (super admin e-posta listesi)
+    // Firestore ve _verify.js ile tutarli olmasi icin her iki super admin de dahil
     function isAdmin() {
-      return request.auth != null && request.auth.token.email == 'info@onyedimedya.com';
+      return request.auth != null && (
+        request.auth.token.email == 'info@onyedimedya.com' ||
+        request.auth.token.email == 'onyedimedya@gmail.com'
+      );
     }
 
     // Mekan gorselleri: herkes gorebilir, sadece admin yukleyebilir
@@ -53,6 +57,17 @@ service firebase.storage {
         && request.auth.uid == uid
         && request.resource.size < 1 * 1024 * 1024       // Maks 1MB
         && request.resource.contentType.matches('image/.*');
+    }
+
+    // Mekan basvuru gorselleri (anonim upload — mekan-ekle.html formu)
+    // Path: pending/{timestamp}_{n}.jpg
+    // Anonim kullanicilar yazabilir ama: sadece gorsel, maks 5MB, admin silebilir
+    // Abuse riski: Firestore'da pending_venues/{refNo} kaydi + IP rate limit (/api/notify)
+    match /pending/{fileName} {
+      allow read: if true; // admin panel onizleme icin
+      allow write: if request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if isAdmin();
     }
 
     // Diger tum dosyalar: engelle
