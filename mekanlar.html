@@ -369,11 +369,19 @@ function pageInit() {
 
     /* Init counter after render */
     setTimeout(() => applyFeaturedPos(featured.length), 0);
-    window.addEventListener('resize', () => {
-      fcIndex = 0;
-      applyFeaturedPos(featured.length);
-    }, { passive: true });
   }
+
+  /* Resize listener — bir kez bag, debounce'lu */
+  let _fcResizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(_fcResizeTimer);
+    _fcResizeTimer = setTimeout(() => {
+      const track = document.getElementById('mk-ftrack');
+      if (!track) return;
+      fcIndex = 0;
+      applyFeaturedPos(track.children.length);
+    }, 120);
+  }, { passive: true });
 
   /* ══════════════════════════════════════════
      RENDER: CURATED
