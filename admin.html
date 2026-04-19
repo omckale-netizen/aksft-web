@@ -7285,6 +7285,11 @@ async function startPresence() {
     _allPresence = {};
     snap.docs.forEach(function(d) { _allPresence[d.id] = d.data(); });
     renderSidebarOnline();
+    // Users sayfasi aktifse "Su an aktif" rozetlerini guncelle
+    var usersPage = document.getElementById('page-users');
+    if (usersPage && usersPage.classList.contains('active') && typeof renderUsers === 'function') {
+      try { renderUsers(); } catch(e) {}
+    }
   }, function(err) { console.warn('Presence listener:', err); });
 }
 
@@ -16419,7 +16424,26 @@ function renderUsers() {
     var isActive = u.active !== false;
     var isSelf = window._currentUser && u.uid === window._currentUser.uid;
     var isSuper = isSuperAdminEmail(u.email);
-    var lastLogin = u.lastLogin ? new Date(u.lastLogin).toLocaleDateString('tr-TR', {day:'numeric',month:'short',year:'numeric'}) : '—';
+    var isOnline = typeof isUserOnline === 'function' && isUserOnline(u.uid);
+    var lastLoginLabel;
+    if (isOnline) {
+      lastLoginLabel = '<span style="color:#16A34A;font-weight:600;">🟢 Şu an aktif</span>';
+    } else if (u.lastLogin) {
+      var _d = new Date(u.lastLogin);
+      var _diff = Date.now() - _d.getTime();
+      var _min = Math.floor(_diff / 60000);
+      var _hr  = Math.floor(_diff / 3600000);
+      var _day = Math.floor(_diff / 86400000);
+      var _txt;
+      if (_min < 1) _txt = 'Az önce';
+      else if (_min < 60) _txt = _min + ' dk önce';
+      else if (_hr  < 24) _txt = _hr + ' saat önce';
+      else if (_day < 7)  _txt = _day + ' gün önce';
+      else _txt = _d.toLocaleDateString('tr-TR', {day:'numeric',month:'short',year:'numeric'});
+      lastLoginLabel = '📅 Son giriş: ' + _txt;
+    } else {
+      lastLoginLabel = '📅 Son giriş: —';
+    }
     // Yetki özeti (sadece editor/viewer için)
     var permsInfo = '';
     if (u.role !== 'admin' && !isSuper) {
@@ -16444,7 +16468,7 @@ function renderUsers() {
         '</div>' +
         '<div class="user-email">' + esc(u.email || '') + '</div>' +
         '<div class="user-meta">' +
-          '<span>📅 Son giriş: ' + lastLogin + '</span>' +
+          '<span>' + lastLoginLabel + '</span>' +
           permsInfo +
           (u.notes ? '<span>📝 ' + esc(u.notes) + '</span>' : '') +
         '</div>' +
