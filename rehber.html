@@ -232,36 +232,41 @@
       </div>
       <h1 class="rh-hero-h1">Assos Gezi<br><em>Rehberi</em></h1>
       <div class="rh-hero-divider"></div>
-      <p class="rh-hero-sub">Nasıl gidilir, nerede kalınır, ne yenir, hangi mevsim gidilmeli — bilmen gereken her şey tek sayfada.</p>
+      <p class="rh-hero-sub">Nasıl gidilir, hangi mevsim ideal, hangi hikâyelere tanık olursunuz — <strong>5 bin yıllık Assos</strong> için bilmen gereken her şey tek sayfada.</p>
       <div class="rh-hero-cats">
-        <span class="rh-hero-chip">🚗 Ulaşım</span>
-        <span class="rh-hero-chip">🗓 Mevsimler</span>
-        <span class="rh-hero-chip">🍽 Yeme-İçme</span>
-        <span class="rh-hero-chip">🏡 Konaklama</span>
-        <span class="rh-hero-chip">🌊 Koylar & Köyler</span>
+        <a href="#ulasim" class="rh-hero-chip">🚗 Ulaşım</a>
+        <a href="#mevsim" class="rh-hero-chip">🌿 Mevsim</a>
+        <a href="#hikayeler" class="rh-hero-chip">📖 Hikâyeler</a>
+        <a href="#tarih" class="rh-hero-chip">⏳ 5 Bin Yıllık Tarih</a>
+        <a href="#sss" class="rh-hero-chip">❓ Sıkça Sorulanlar</a>
       </div>
     </div>
     <div class="rh-hero-card">
       <div class="rh-hstat">
-        <div class="rh-hstat-num">13</div>
-        <div class="rh-hstat-label">Şehir Güzergahı</div>
+        <div class="rh-hstat-num" data-count="8">8</div>
+        <div class="rh-hstat-label">Tarihsel Dönem</div>
       </div>
       <div class="rh-hstat-sep"></div>
       <div class="rh-hstat">
-        <div class="rh-hstat-num">14</div>
-        <div class="rh-hstat-label">Sık Sorulan Soru</div>
+        <div class="rh-hstat-num" data-count="3">3</div>
+        <div class="rh-hstat-label">İlginç Hikâye</div>
       </div>
       <div class="rh-hstat-sep"></div>
       <div class="rh-hstat">
-        <div class="rh-hstat-num">4</div>
+        <div class="rh-hstat-num" data-count="4">4</div>
         <div class="rh-hstat-label">Mevsim Rehberi</div>
+      </div>
+      <div class="rh-hstat-sep"></div>
+      <div class="rh-hstat">
+        <div class="rh-hstat-num" data-count="8">8</div>
+        <div class="rh-hstat-label">Sık Soru</div>
       </div>
     </div>
   </div>
 </div>
 
 <!-- ULAŞIM -->
-<section class="ulasim-sec">
+<section class="ulasim-sec" id="ulasim">
   <div class="ulasim-deco-circle ulasim-deco-1"></div>
   <div class="ulasim-deco-circle ulasim-deco-2"></div>
   <div class="ulasim-inner">
@@ -475,7 +480,7 @@
 </section>
 
 <!-- SEASONS -->
-<section class="rh-section rh-section-light">
+<section class="rh-section rh-section-light" id="mevsim">
   <div class="rh-container-wide">
     <div class="fade-up rh-sec-header">
       <div class="rh-sec-label-row">
@@ -578,7 +583,7 @@
 </section>
 
 <!-- ═══ HİKAYELER — Assos'un ilginç detayları (teaser) ═══ -->
-<section class="rh-section">
+<section class="rh-section" id="hikayeler">
   <div class="rh-container">
 
     <div class="fade-up rh-sec-header">
@@ -623,7 +628,7 @@
 </section>
 
 <!-- ═══ TIMELINE — Assos tarihi interaktif cizelge (tam akış) ═══ -->
-<section class="rh-section rh-section-mid">
+<section class="rh-section rh-section-mid" id="tarih">
   <div class="rh-container">
 
     <div class="fade-up rh-sec-header">
@@ -708,7 +713,7 @@
 </section>
 
 <!-- FAQ -->
-<section class="rh-section rh-section-mid rh-faq-sec">
+<section class="rh-section rh-section-mid rh-faq-sec" id="sss">
   <div class="rh-faq-deco"></div>
 
   <div class="rh-container">
@@ -999,7 +1004,12 @@
 .rh-hero-divider{width:52px;height:2px;background:linear-gradient(90deg,#C4521A,transparent);margin-bottom:16px;transform-origin:left;animation:rhLineGrow .9s .3s cubic-bezier(.16,1,.3,1) both}
 .rh-hero-sub{font-size:.95rem;color:rgba(245,237,224,.6);line-height:1.75;max-width:440px;animation:rhFadeUp .8s .22s both}
 .rh-hero-cats{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px;animation:rhFadeUp .8s .45s both}
-.rh-hero-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:6px 14px;font-size:.72rem;font-weight:600;color:rgba(245,237,224,.55);backdrop-filter:blur(8px)}
+.rh-hero-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:7px 15px;font-size:.74rem;font-weight:600;color:rgba(245,237,224,.65);backdrop-filter:blur(8px);text-decoration:none;cursor:pointer;transition:all .25s cubic-bezier(.16,1,.3,1)}
+.rh-hero-chip:hover{background:rgba(196,82,26,.25);border-color:rgba(196,82,26,.45);color:#fff;transform:translateY(-2px);box-shadow:0 6px 18px rgba(196,82,26,.25)}
+.rh-hero-chip:active{transform:translateY(0)}
+/* Smooth scroll + header ofseti (nav yuksekligi icin) */
+html{scroll-behavior:smooth}
+#ulasim,#mevsim,#hikayeler,#tarih,#sss{scroll-margin-top:80px}
 .rh-hero-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px 32px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);display:flex;flex-direction:column;gap:20px;min-width:180px;animation:rhFadeUp .8s .35s both}
 .rh-hstat{text-align:center}
 .rh-hstat-num{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.9rem;color:#F5EDE0;letter-spacing:-.03em;line-height:1;margin-bottom:4px}
@@ -1231,7 +1241,11 @@
 }
 @media(max-width:700px){
   .rh-hero-inner{grid-template-columns:1fr;padding:100px 0 60px}
-  .rh-hero-card{flex-direction:row;flex-wrap:wrap;justify-content:center;min-width:unset}
+  .rh-hero-card{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:14px 22px;min-width:unset}
+  .rh-hstat-sep{display:none}
+  .rh-hstat{flex:0 0 calc(50% - 11px);min-width:120px}
+  .rh-hstat-num{font-size:1.6rem}
+  .rh-hero-chip{font-size:.7rem;padding:6px 12px}
 }
 @media(max-width:520px){.season-card-grid{grid-template-columns:repeat(2,1fr) !important;gap:10px !important}}
 @media(max-width:760px){.rehber-tips{grid-template-columns:1fr}.guide-answer-inner{padding-left:24px}.rh-seo-cols{columns:1}}
