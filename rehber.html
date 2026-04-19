@@ -577,6 +577,91 @@
   </div>
 </section>
 
+<!-- ═══ TIMELINE — Assos tarihi interaktif cizelge ═══ -->
+<section class="rh-section rh-section-mid">
+  <div class="rh-container">
+
+    <div class="fade-up rh-sec-header">
+      <div class="rh-sec-label-row">
+        <div class="rh-sec-line rh-sec-line-l"></div>
+        <p class="rh-sec-label">Zaman Çizelgesi</p>
+        <div class="rh-sec-line rh-sec-line-r"></div>
+      </div>
+      <h2 class="rh-sec-title">5 bin yıllık yolculuk</h2>
+      <p class="rh-sec-desc">Tunç Çağı'ndan modern turizme — Assos'un 8 dönemde tarihsel serüvenini keşfedin.</p>
+    </div>
+
+    <div class="timeline-wrap fade-up" style="--era-color:#B08763">
+
+      <!-- Yatay timeline nav (8 nokta) -->
+      <div class="timeline-track" role="tablist" aria-label="Assos tarihi dönemleri">
+        <button type="button" class="timeline-node active" data-idx="0" style="--era-color:#B08763" role="tab" aria-selected="true">
+          <span class="tl-emoji">🏺</span>
+          <span class="tl-dot"></span>
+          <span class="tl-year">MÖ 3000</span>
+          <span class="tl-name">Tunç Çağı</span>
+        </button>
+        <button type="button" class="timeline-node" data-idx="1" style="--era-color:#1A6B8A" role="tab" aria-selected="false">
+          <span class="tl-emoji">⛵</span>
+          <span class="tl-dot"></span>
+          <span class="tl-year">MÖ 7. yy</span>
+          <span class="tl-name">Aiolis</span>
+        </button>
+        <button type="button" class="timeline-node" data-idx="2" style="--era-color:#D4935A" role="tab" aria-selected="false">
+          <span class="tl-emoji">💰</span>
+          <span class="tl-dot"></span>
+          <span class="tl-year">MÖ 560</span>
+          <span class="tl-name">Lidya & Pers</span>
+        </button>
+        <button type="button" class="timeline-node" data-idx="3" style="--era-color:#8A6E3F" role="tab" aria-selected="false">
+          <span class="tl-emoji">📜</span>
+          <span class="tl-dot"></span>
+          <span class="tl-year">MÖ 347</span>
+          <span class="tl-name">Aristoteles</span>
+        </button>
+        <button type="button" class="timeline-node" data-idx="4" style="--era-color:#C4521A" role="tab" aria-selected="false">
+          <span class="tl-emoji">🎭</span>
+          <span class="tl-dot"></span>
+          <span class="tl-year">MÖ 4. yy</span>
+          <span class="tl-name">Hellenistik</span>
+        </button>
+        <button type="button" class="timeline-node" data-idx="5" style="--era-color:#1A2744" role="tab" aria-selected="false">
+          <span class="tl-emoji">🦅</span>
+          <span class="tl-dot"></span>
+          <span class="tl-year">MÖ 1. yy</span>
+          <span class="tl-name">Roma</span>
+        </button>
+        <button type="button" class="timeline-node" data-idx="6" style="--era-color:#C9963A" role="tab" aria-selected="false">
+          <span class="tl-emoji">⛪</span>
+          <span class="tl-dot"></span>
+          <span class="tl-year">MS 4. yy</span>
+          <span class="tl-name">Bizans</span>
+        </button>
+        <button type="button" class="timeline-node" data-idx="7" style="--era-color:#5A7A56" role="tab" aria-selected="false">
+          <span class="tl-emoji">🕌</span>
+          <span class="tl-dot"></span>
+          <span class="tl-year">14. yy →</span>
+          <span class="tl-name">Osmanlı & Bugün</span>
+        </button>
+      </div>
+
+      <!-- Detay paneli -->
+      <div class="timeline-panel" id="timeline-panel" role="tabpanel" aria-live="polite">
+        <div class="tl-panel-head">
+          <span class="tl-panel-num" id="tl-panel-num">Dönem 01</span>
+          <span class="tl-panel-years" id="tl-panel-years">MÖ 3000 – 1200</span>
+        </div>
+        <h3 class="tl-panel-title" id="tl-panel-title">Tunç Çağı</h3>
+        <p class="tl-panel-text" id="tl-panel-text">Assos'un ilk yerleşim izleri MÖ 3000'e uzanır. Arkeolojik kazılarda bulunan Tunç Çağı seramikleri ve yerleşim kalıntıları, Assos tepesinin bu erken dönemde dahi stratejik bir iskan noktası olduğunu gösterir. Bu çağ, kentin binlerce yıllık kesintisiz yerleşim geleneğinin başlangıç noktasıdır.</p>
+      </div>
+
+      <div class="timeline-hint">← Noktalara tıklayın veya klavye oklarıyla gezinin →</div>
+
+    </div>
+
+  </div>
+</section>
+
 <!-- ═══ HİKAYELER — Assos'un ilginç detayları ═══ -->
 <section class="rh-section">
   <div class="rh-container">
@@ -1080,6 +1165,49 @@
 .rh-seo-cols{columns:2;column-gap:32px;font-size:.84rem;color:var(--text-mid);line-height:1.9}
 .rh-seo-cols p{margin-bottom:14px}
 
+/* ═══ Timeline — Assos Tarih Cizelgesi (yatay interaktif) ═══ */
+.timeline-wrap{position:relative;margin-top:36px}
+.timeline-track{display:flex;align-items:flex-start;gap:0;padding:0 8px 40px;overflow-x:auto;scrollbar-width:none;position:relative}
+.timeline-track::-webkit-scrollbar{display:none}
+.timeline-track::before{content:'';position:absolute;top:54px;left:calc(6.25% + 20px);right:calc(6.25% + 20px);height:2px;background:linear-gradient(90deg,rgba(26,39,68,.1) 0%,rgba(26,39,68,.25) 50%,rgba(26,39,68,.1) 100%);z-index:0}
+.timeline-node{flex:1 0 12.5%;min-width:110px;background:none;border:none;cursor:pointer;padding:8px 4px;display:flex;flex-direction:column;align-items:center;font-family:inherit;position:relative;z-index:1;transition:transform .3s cubic-bezier(.16,1,.3,1);color:inherit}
+.timeline-node:hover{transform:translateY(-3px)}
+.tl-emoji{font-size:1.5rem;line-height:1;margin-bottom:16px;opacity:.5;transition:all .35s cubic-bezier(.16,1,.3,1);filter:saturate(.6)}
+.tl-dot{width:12px;height:12px;border-radius:50%;background:#fff;border:2.5px solid rgba(26,39,68,.25);transition:all .4s cubic-bezier(.16,1,.3,1);box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:14px}
+.tl-year{font-size:.68rem;font-weight:700;color:var(--text-mid);letter-spacing:.05em;text-align:center;transition:color .3s;margin-bottom:4px}
+.tl-name{font-size:.66rem;font-weight:600;color:var(--text-muted);text-align:center;line-height:1.3;transition:color .3s}
+.timeline-node.active .tl-emoji{opacity:1;transform:scale(1.15);filter:saturate(1)}
+.timeline-node.active .tl-dot{background:var(--era-color);border-color:var(--era-color);width:18px;height:18px;box-shadow:0 0 0 6px color-mix(in srgb, var(--era-color) 15%, transparent),0 3px 10px color-mix(in srgb, var(--era-color) 35%, transparent)}
+.timeline-node.active .tl-year{color:var(--era-color)}
+.timeline-node.active .tl-name{color:var(--navy);font-weight:700}
+.timeline-node:focus-visible{outline:2px solid var(--era-color,var(--terra));outline-offset:6px;border-radius:6px}
+
+/* Timeline panel */
+.timeline-panel{background:#fff;border-radius:20px;padding:32px 36px 36px;box-shadow:0 6px 32px rgba(26,39,68,.08);border:1px solid rgba(26,39,68,.05);border-left:4px solid var(--era-color,#C4521A);transition:border-color .4s cubic-bezier(.16,1,.3,1);min-height:240px;position:relative;overflow:hidden}
+.timeline-panel::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb, var(--era-color,#C4521A) 10%, transparent) 0%,transparent 70%);pointer-events:none;transition:background .4s}
+.tl-panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:16px;flex-wrap:wrap}
+.tl-panel-num{font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--era-color,var(--terra));transition:color .35s}
+.tl-panel-years{font-family:'Lora',serif;font-style:italic;font-size:.88rem;color:var(--text-muted);letter-spacing:.02em}
+.tl-panel-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.55rem;color:var(--navy);margin:0 0 16px;letter-spacing:-.02em;line-height:1.2}
+.tl-panel-text{font-size:.92rem;line-height:1.8;color:var(--text-mid);margin:0;max-width:780px;position:relative;z-index:1}
+.tl-panel-title.tl-fade,.tl-panel-text.tl-fade,.tl-panel-head.tl-fade{opacity:0;transform:translateY(10px)}
+.tl-panel-title,.tl-panel-text,.tl-panel-head{transition:opacity .3s cubic-bezier(.16,1,.3,1),transform .3s cubic-bezier(.16,1,.3,1)}
+
+/* Timeline hint (ilk kullanici) */
+.timeline-hint{text-align:center;font-size:.72rem;color:var(--text-muted);margin-top:14px;opacity:.7;font-style:italic}
+
+/* Mobile */
+@media(max-width:760px){
+  .timeline-track{padding:0 16px 32px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+  .timeline-node{flex:0 0 110px;scroll-snap-align:center}
+  .timeline-track::before{left:70px;right:70px;top:54px}
+  .timeline-panel{padding:24px 22px 28px}
+  .tl-panel-title{font-size:1.25rem}
+  .tl-panel-text{font-size:.86rem}
+  .tl-panel-head{margin-bottom:10px}
+  .tl-panel-years{font-size:.8rem}
+}
+
 /* ═══ Hikayeler (stories) ═══ */
 .story-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:36px}
 .story-card{background:#fff;border-radius:20px;padding:32px 26px 28px;box-shadow:0 2px 14px rgba(26,39,68,.06);border:1px solid rgba(26,39,68,.05);transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s;position:relative;overflow:hidden}
@@ -1139,7 +1267,113 @@ function pageInit() {
 document.addEventListener('dataReady', pageInit);
 </script>
 
+<!-- Timeline interactivite -->
+<script>
+(function() {
+  var eras = [
+    { num: '01', years: 'MÖ 3000 – 1200', name: 'Tunç Çağı', color: '#B08763',
+      text: 'Assos\'un ilk yerleşim izleri MÖ 3000\'e uzanır. Arkeolojik kazılarda bulunan Tunç Çağı seramikleri ve yerleşim kalıntıları, Assos tepesinin bu erken dönemde dahi stratejik bir iskan noktası olduğunu gösterir. Bu çağ, kentin binlerce yıllık kesintisiz yerleşim geleneğinin başlangıç noktasıdır.' },
+    { num: '02', years: 'MÖ 7. yüzyıl', name: 'Aiolis Göçü', color: '#1A6B8A',
+      text: 'MÖ 7. yüzyılda Midilli (Lesbos) adasından gelen Aiolisli göçmenler, Assos\'u şehir devleti (polis) kimliğine kavuşturdu. Homeros\'un İlyada destanında bahsedilen, denizcilik ve korsanlıkta uzmanlaşmış Lelegler de bu dönemde bölgede yaşamıştı. Yerleşimin kentsel planlaması ve sur sisteminin temelleri bu çağda atıldı.' },
+    { num: '03', years: 'MÖ 560 – 334', name: 'Lidya & Pers Hakimiyeti', color: '#D4935A',
+      text: 'MÖ 560 civarında Lidya Kralı Kroisos\'un hakimiyetine giren Assos, Atarneus ve Pergamon arasındaki maden gelirleriyle ekonomik bir güç haline geldi. MÖ 548\'de Lidya\'nın Persler tarafından yıkılmasıyla bölge Pers hakimiyetine girdi ve Büyük İskender\'in Anadolu seferine kadar Hellespontos Phrygia Satraplığı\'na bağlı kaldı.' },
+    { num: '04', years: 'MÖ 347 – 344', name: 'Aristoteles Dönemi', color: '#8A6E3F',
+      text: 'Platon\'un ölümünden sonra Aristoteles, dostu ve siyasi danışmanı Hermias\'ın davetiyle Assos\'a geldi. Üç yıl boyunca burada felsefe okulu kurdu, deniz biyolojisi gözlemleri yaptı ve Historia Animalium eserinin temellerini attı. Hermias\'ın yeğeni Pythias ile evlenerek kente akrabalık bağıyla da bağlandı.' },
+    { num: '05', years: 'MÖ 4. – 1. yüzyıl', name: 'Hellenistik Dönem', color: '#C4521A',
+      text: 'Büyük İskender sonrası Hellenistik çağda Assos\'un büyük kamu yapıları inşa edildi. Yaklaşık 5.000 kişilik antik tiyatro, agora çevresindeki stoalar, gymnasium ve bouleuterion (meclis binası) bu dönemin ürünleridir. Kent, Pergamon Krallığı\'nın etkisinde kültürel ve mimari zirvesini yaşadı.' },
+    { num: '06', years: 'MÖ 1. – MS 4. yüzyıl', name: 'Roma Dönemi', color: '#1A2744',
+      text: 'Roma hakimiyeti altında Assos\'un nekropolü büyük ölçüde genişledi. "Et yiyen" andezit lahitler — bugün kullandığımız "sarcophagus" kelimesinin kökeni — bu dönemde Suriye, Lübnan, Mısır ve Roma\'ya kadar ihraç edildi. Kent, Troas bölgesinin önemli ticaret ve üretim merkezlerinden biri oldu.' },
+    { num: '07', years: 'MS 4. – 14. yüzyıl', name: 'Bizans Dönemi', color: '#C9963A',
+      text: 'Hristiyanlığın yayılmasıyla Assos bir piskoposluk merkezi haline geldi. Kentin surları güçlendirildi, Cornelius Kilisesi gibi dini yapılar inşa edildi. Bu dönem boyunca Assos, Bizans İmparatorluğu\'nun Ege kıyısındaki önemli stratejik noktalarından biri olarak varlığını sürdürdü.' },
+    { num: '08', years: '14. yüzyıl – Günümüz', name: 'Osmanlı ve Modern Dönem', color: '#5A7A56',
+      text: '14. yüzyılda Osmanlı hakimiyetine giren bölgede, Sultan I. Murad (Hüdavendigar) tarafından akropolün zirvesinde cami yaptırıldı. Antik kentin kuzey yamacına kurulan Behramkale köyü, bugünkü yerleşim dokusunun temelini oluşturdu. 2000\'li yıllardan itibaren UNESCO Dünya Mirası Geçici Listesi, felsefe toplantıları ve modern turizmle Assos yeniden uluslararası ilgiyi topladı.' }
+  ];
 
+  var nodes = document.querySelectorAll('.timeline-node');
+  var panel = document.getElementById('timeline-panel');
+  var panelNum = document.getElementById('tl-panel-num');
+  var panelYears = document.getElementById('tl-panel-years');
+  var panelTitle = document.getElementById('tl-panel-title');
+  var panelText = document.getElementById('tl-panel-text');
+  var wrap = document.querySelector('.timeline-wrap');
+  var current = 0;
+
+  function setActive(idx) {
+    if (idx < 0 || idx >= eras.length || !eras[idx]) return;
+    var era = eras[idx];
+    current = idx;
+
+    // Node state
+    for (var i = 0; i < nodes.length; i++) {
+      if (i === idx) {
+        nodes[i].classList.add('active');
+        nodes[i].setAttribute('aria-selected', 'true');
+      } else {
+        nodes[i].classList.remove('active');
+        nodes[i].setAttribute('aria-selected', 'false');
+      }
+    }
+
+    // Fade out
+    panelNum.classList.add('tl-fade');
+    panelYears.classList.add('tl-fade');
+    panelTitle.classList.add('tl-fade');
+    panelText.classList.add('tl-fade');
+
+    setTimeout(function() {
+      panelNum.textContent = 'Dönem ' + era.num;
+      panelYears.textContent = era.years;
+      panelTitle.textContent = era.name;
+      panelText.textContent = era.text;
+      // Era color
+      panel.style.setProperty('--era-color', era.color);
+      if (wrap) wrap.style.setProperty('--era-color', era.color);
+      panel.style.borderLeftColor = era.color;
+      // Panel head element has fade too
+      var headEl = panel.querySelector('.tl-panel-head');
+      if (headEl) headEl.classList.add('tl-fade');
+
+      // Fade in
+      setTimeout(function() {
+        panelNum.classList.remove('tl-fade');
+        panelYears.classList.remove('tl-fade');
+        panelTitle.classList.remove('tl-fade');
+        panelText.classList.remove('tl-fade');
+      }, 30);
+    }, 180);
+
+    // Mobilde aktif node'u ortaya kaydir
+    try {
+      if (window.matchMedia('(max-width:760px)').matches && nodes[idx].scrollIntoView) {
+        nodes[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    } catch(e) {}
+  }
+
+  // Click handlers
+  for (var i = 0; i < nodes.length; i++) {
+    (function(idx) {
+      nodes[idx].addEventListener('click', function() { setActive(idx); });
+    })(i);
+  }
+
+  // Klavye ok tusu navigasyon
+  var track = document.querySelector('.timeline-track');
+  if (track) {
+    track.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowRight' && current < nodes.length - 1) {
+        e.preventDefault();
+        setActive(current + 1);
+        nodes[current].focus();
+      } else if (e.key === 'ArrowLeft' && current > 0) {
+        e.preventDefault();
+        setActive(current - 1);
+        nodes[current].focus();
+      }
+    });
+  }
+})();
+</script>
 
 </body>
 </html>
