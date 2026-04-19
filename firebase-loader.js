@@ -52,15 +52,31 @@
     }
   }, 4000);
 
-  // LocalStorage cache — aninda yukleme
+  // LocalStorage cache — aninda yukleme (TTL'li)
+  // Cache 24 saatten eski ise kullanma (admin degisiklikleri yansimaya baslar)
   var DATA_CACHE_KEY = 'assos_data_cache';
+  var CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 saat
   var cached = null;
-  try { cached = JSON.parse(localStorage.getItem(DATA_CACHE_KEY)); } catch(e) {}
+  try {
+    var raw = JSON.parse(localStorage.getItem(DATA_CACHE_KEY));
+    // Eski format (saf veri) veya yeni format ({data, savedAt})
+    if (raw && raw.data && raw.savedAt) {
+      var age = Date.now() - raw.savedAt;
+      if (age < CACHE_TTL_MS) cached = raw.data;
+      else try { localStorage.removeItem(DATA_CACHE_KEY); } catch(e) {}
+    } else if (raw && raw.venues) {
+      // Backward compat: eski format - hemen kullan ama yeni formata migrate edilecek
+      cached = raw;
+    }
+  } catch(e) {}
   if (cached && cached.venues && cached.venues.length > 0 && cached.placeCategories && cached.venueCategories) {
     window.DATA = cached;
     hideLoader();
-    document.dispatchEvent(new Event('dataReady'));
+    // dataReady ilk seferinde (cache veya Firebase'den birisi) tek kez dispatch olur.
+    // Cache kullanildiysa, Firebase sonrasi 'dataRefresh' ayri event ile bilgi verilir.
+    document.dispatchEvent(new CustomEvent('dataReady', { detail: { source: 'cache' } }));
     window._cacheUsed = true;
+    window._dataReadyFired = true;
   }
 
   function fallback() {
@@ -70,7 +86,11 @@
       if (!window.DATA.placeCategories) window.DATA.placeCategories = [];
       if (!window.DATA.venueCategories) window.DATA.venueCategories = [];
       window._firebaseReady = false;
-      if (!window._cacheUsed) { hideLoader(); document.dispatchEvent(new Event('dataReady')); }
+      if (!window._dataReadyFired) {
+        hideLoader();
+        document.dispatchEvent(new CustomEvent('dataReady', { detail: { source: 'fallback' } }));
+        window._dataReadyFired = true;
+      }
     } else {
       // data.js henüz yüklenmemişse dinamik yükle
       var ds = document.createElement('script');
@@ -80,7 +100,11 @@
         if (window.DATA) {
           if (!window.DATA.placeCategories) window.DATA.placeCategories = [];
           if (!window.DATA.venueCategories) window.DATA.venueCategories = [];
-          hideLoader(); document.dispatchEvent(new Event('dataReady'));
+          hideLoader();
+          if (!window._dataReadyFired) {
+            document.dispatchEvent(new CustomEvent('dataReady', { detail: { source: 'fallback' } }));
+            window._dataReadyFired = true;
+          }
         }
       };
       document.head.appendChild(ds);
@@ -164,16 +188,24 @@
         window.DATA = { routes: routes, places: places, venues: venues, villages: villages, placeCategories: placeCats, venueCategories: venueCats, siteSettings: siteSettings };
         window._firebaseReady = true;
 
-        // Cache guncelle
-        try { localStorage.setItem(DATA_CACHE_KEY, JSON.stringify(window.DATA)); } catch(e) {}
-
+        // Cache guncelle — yeni format: {data, savedAt}
+        try {
+          localStorage.setItem(DATA_CACHE_KEY, JSON.stringify({
+            data: window.DATA,
+            savedAt: Date.now()
+          }));
+        } catch(e) {}
 
         hideLoader();
-        if (window._cacheUsed) {
-          // Cache'den yuklendi, Firebase'den guncelle
-          document.dispatchEvent(new Event('dataReady'));
+        if (window._dataReadyFired) {
+          // Cache'den ilk render edildi, simdi Firebase'den guncel veri geldi.
+          // 'dataReady' tekrar dispatch ETME (pageInit 2x calismasin + listener sizintisi).
+          // Bunun yerine ayri 'dataRefresh' event'i — isteyen sayfa dinler.
+          document.dispatchEvent(new CustomEvent('dataRefresh', { detail: { source: 'firebase' } }));
         } else {
-          document.dispatchEvent(new Event('dataReady'));
+          // Cache yoktu, Firebase ilk kez geldi
+          document.dispatchEvent(new CustomEvent('dataReady', { detail: { source: 'firebase' } }));
+          window._dataReadyFired = true;
         }
       });
     } catch(err) {
