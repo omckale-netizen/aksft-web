@@ -96,7 +96,8 @@
     <div id="routes-grid" class="card-grid"></div>
     <div id="no-routes" style="display:none;text-align:center;padding:60px 0;">
       <div style="font-size:2rem;margin-bottom:12px;">🗺</div>
-      <p style="color:rgba(245,237,224,.4);font-size:.9rem;">Bu filtrede rota bulunamadı.</p>
+      <p style="color:rgba(245,237,224,.4);font-size:.9rem;margin-bottom:10px;">Bu filtrede rota bulunamadı.</p>
+      <button onclick="filterRoutes(null,'all')" style="font-size:.78rem;font-weight:700;color:#D4935A;background:none;border:none;cursor:pointer;font-family:inherit;">Filtreyi temizle</button>
     </div>
   </div>
 </section>
@@ -244,6 +245,10 @@ function pageInit() {
     try { sessionStorage.setItem(RT_FILTER_KEY, cat); } catch(e) {}
     document.querySelectorAll('[onclick^="filterRoutes"]').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');
+    else {
+      var matchBtn = document.querySelector('[onclick^="filterRoutes(this,\'' + cat + '\')"]');
+      if (matchBtn) matchBtn.classList.add('active');
+    }
     renderGrid();
   }
 

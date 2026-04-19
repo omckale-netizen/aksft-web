@@ -141,7 +141,11 @@
     </div>
 
     <div id="grid-all" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;"></div>
-    <div id="no-village" style="display:none;text-align:center;padding:40px 0;color:var(--text-soft);font-size:.9rem;">Sonuç bulunamadı.</div>
+    <div id="no-village" style="display:none;text-align:center;padding:48px 0;">
+      <div style="font-size:2rem;margin-bottom:12px;">🔍</div>
+      <p style="color:var(--text-soft);font-size:.88rem;margin-bottom:10px;">Bu aramayla eşleşen köy bulunamadı.</p>
+      <button onclick="var i=document.getElementById('village-search');i.value='';filterAllVillages('');i.focus();" style="font-size:.78rem;font-weight:700;color:#C4521A;background:none;border:none;cursor:pointer;font-family:inherit;">Aramayı temizle</button>
+    </div>
   </div>
 </section>
 
