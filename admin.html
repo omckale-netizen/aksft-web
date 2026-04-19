@@ -9747,6 +9747,8 @@ function initApp() {
   setupBackupDragDrop();
   populateLocationDropdown();
   try { initNotifBadge(); } catch(e) {}
+  // Bildirim listener'lari — yeni talep/mesaj geldikce zil anlik guncellenir
+  try { startNotifListeners(); } catch(e) {}
   // Todo listener'ı başlat — her sayfada badge ve dashboard widget güncellensin
   try { startTodosListener(); } catch(e) {}
   // Sohbet listener'ı arka planda başlat — kullanıcı sohbet sayfasında değilken de unread badge güncellensin
@@ -15782,14 +15784,17 @@ function copyQRLink() {
 let allNotifs = [];
 let notifFilter = 'all';
 
-async function renderNotifications() {
+async function renderNotifications(opts) {
+  opts = opts || {};
+  var silent = opts.silent === true; // true ise sadece allNotifs + badge guncelle, dropdown DOM'a dokunma
   const list = document.getElementById('notif-list');
-  if (!list) return;
-  // Cache varsa hemen goster, arka planda yenile — iskelet flash'ini onle
-  if (Array.isArray(allNotifs) && allNotifs.length > 0) {
-    renderNotifList();
-  } else {
-    list.innerHTML = skeletonRows(3);
+  if (!silent && list) {
+    // Cache varsa hemen goster, arka planda yenile — iskelet flash'ini onle
+    if (Array.isArray(allNotifs) && allNotifs.length > 0) {
+      renderNotifList();
+    } else {
+      list.innerHTML = skeletonRows(3);
+    }
   }
 
   try {
@@ -15831,12 +15836,13 @@ async function renderNotifications() {
     }
 
     // 3. Onay bekleyen mekanlar (pending_venues — status 'pending' veya 'updated')
+    // NOT: orderBy kullanilmiyor cunku bazi eski kayitlarda submittedAt olmayabilir
+    // (orderBy eksik field'li dokumanlari filtreliyor). Client-side sirala.
     if (canAccessPage('pending')) {
       try {
         var pendSnap = await db.collection('pending_venues')
           .where('status', 'in', ['pending', 'updated'])
-          .orderBy('submittedAt', 'desc')
-          .limit(20).get();
+          .limit(50).get();
         pendSnap.docs.forEach(function(d) {
           var p = d.data();
           var isUpdate = p.status === 'updated';
@@ -15845,11 +15851,30 @@ async function renderNotifications() {
             icon: isUpdate ? '✏️' : '🏪', iconBg: 'rgba(196,82,26,.1)',
             title: isUpdate ? 'Güncellenmiş mekan: ' + (p.title || '') : 'Onay bekleyen yeni mekan: ' + (p.title || ''),
             desc: (p.ownerName ? p.ownerName + ' — ' : '') + (p.category || 'kategori yok') + (p.location ? ' · ' + p.location : ''),
-            time: p.submittedAt || '',
+            time: p.submittedAt || p.updatedAt || new Date().toISOString(),
             action: function() { showPage('pending'); }
           });
         });
-      } catch(e) { console.warn('Pending notif:', e); }
+      } catch(e) { console.warn('Pending venues notif:', e); }
+
+      // Onay bekleyen yerler/koyler (pending_places)
+      try {
+        var pplSnap = await db.collection('pending_places')
+          .where('status', 'in', ['pending', 'updated'])
+          .limit(50).get();
+        pplSnap.docs.forEach(function(d) {
+          var p = d.data();
+          var isUpdate = p.status === 'updated';
+          allNotifs.push({
+            id: 'pplace_' + d.id, type: 'pending', read: false,
+            icon: isUpdate ? '✏️' : '📍', iconBg: 'rgba(26,107,138,.1)',
+            title: isUpdate ? 'Güncellenmiş yer: ' + (p.title || '') : 'Onay bekleyen yeni yer: ' + (p.title || ''),
+            desc: (p.ownerName ? p.ownerName + ' — ' : '') + (p.type || 'yer') + (p.location ? ' · ' + p.location : ''),
+            time: p.submittedAt || p.updatedAt || new Date().toISOString(),
+            action: function() { showPage('pending'); }
+          });
+        });
+      } catch(e) { console.warn('Pending places notif:', e); }
     }
 
     // 4. Premium bitiyor (7 gun kala uyari)
@@ -15883,10 +15908,11 @@ async function renderNotifications() {
 
     // Badge guncelle
     updateNotifBadge();
-    renderNotifList();
+    if (!silent) renderNotifList();
 
   } catch(err) {
-    list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--red)">Yüklenemedi: ' + err.message + '</div>';
+    if (!silent && list) list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--red)">Yüklenemedi: ' + err.message + '</div>';
+    else console.warn('renderNotifications error:', err);
   }
 }
 
@@ -16001,13 +16027,13 @@ async function clearAllNotifs() {
         msgSnap.docs.forEach(function(d) { readSet.add(d.id); });
       } catch(e) {}
     }
-    // Bekleyen talepler (erişim varsa)
+    // Bekleyen talepler (erişim varsa) — renderNotifications ile ayni prefix
     if (typeof canAccessPage !== 'function' || canAccessPage('pending')) {
       try {
         var botSnap = await db.collection('pending_venues').get();
-        botSnap.docs.forEach(function(d) { readSet.add('bot_' + d.id); });
+        botSnap.docs.forEach(function(d) { readSet.add('pending_' + d.id); });
         var plSnap = await db.collection('pending_places').get();
-        plSnap.docs.forEach(function(d) { readSet.add('pbot_' + d.id); });
+        plSnap.docs.forEach(function(d) { readSet.add('pplace_' + d.id); });
       } catch(e) {}
     }
     // Atanmış aktif görevler
@@ -18448,44 +18474,40 @@ async function renderActivityLog() {
   }
 }
 
-// Sayfa yuklendiginde badge guncelle
+// Sayfa yuklendiginde badge guncelle — renderNotifications ile TEK KAYNAK kullanir
+// Boylece badge sayisi dropdown icerigi ile birebir ayni olur.
 async function initNotifBadge() {
   try {
-    const readNotifs = JSON.parse(localStorage.getItem('readNotifs') || '[]');
-    let unread = 0;
+    await renderNotifications({ silent: true });
+  } catch(e) { console.warn('initNotifBadge:', e); }
+}
 
-    // Mesajlar — sadece erişim yetkisi varsa say
-    if (typeof canAccessPage !== 'function' || canAccessPage('messages')) {
-      try {
-        const msgSnap = await db.collection('messages').where('read', '==', false).get();
-        msgSnap.docs.forEach(d => { if (!readNotifs.includes(d.id)) unread++; });
-      } catch(e) {}
-    }
-    // Bekleyen talepler — admin/editor
-    if (typeof canAccessPage !== 'function' || canAccessPage('pending')) {
-      try {
-        const [botSnap, plSnap] = await Promise.all([
-          db.collection('pending_venues').get(),
-          db.collection('pending_places').get()
-        ]);
-        botSnap.docs.forEach(d => { if (!readNotifs.includes('bot_' + d.id)) unread++; });
-        plSnap.docs.forEach(d => { if (!readNotifs.includes('pbot_' + d.id)) unread++; });
-      } catch(e) {}
-    }
-    // Atanmış görevler — kullanıcının kendi görevleri
-    var myUid = window._currentUser && window._currentUser.uid;
-    if (myUid && Array.isArray(_allTodos)) {
-      _allTodos.forEach(function(t) {
-        if (t.assignedTo !== myUid) return;
-        if (t.status === 'completed') return;
-        if (readNotifs.includes('todo_' + t._id)) return;
-        unread++;
-      });
-    }
+// Bildirim realtime listener — yeni talep/mesaj geldikce zil anlik guncellenir
+var _notifListeners = [];
+function startNotifListeners() {
+  // Onceki listener'lari temizle
+  _notifListeners.forEach(function(unsub) { try { unsub(); } catch(e) {} });
+  _notifListeners = [];
 
-    const badge = document.getElementById('notif-badge');
-    if (badge) { badge.textContent = unread; badge.style.display = unread > 0 ? '' : 'none'; }
-  } catch(e) {}
+  // Pending venues
+  if (canAccessPage('pending')) {
+    try {
+      var u1 = db.collection('pending_venues').where('status', 'in', ['pending', 'updated'])
+        .onSnapshot(function() { initNotifBadge(); }, function(e) { console.warn('pending_venues listener:', e); });
+      _notifListeners.push(u1);
+      var u2 = db.collection('pending_places').where('status', 'in', ['pending', 'updated'])
+        .onSnapshot(function() { initNotifBadge(); }, function(e) { console.warn('pending_places listener:', e); });
+      _notifListeners.push(u2);
+    } catch(e) { console.warn('Pending listener:', e); }
+  }
+  // Mesajlar (okunmamis)
+  if (canAccessPage('messages')) {
+    try {
+      var u3 = db.collection('messages').where('read', '==', false)
+        .onSnapshot(function() { initNotifBadge(); }, function(e) { console.warn('messages listener:', e); });
+      _notifListeners.push(u3);
+    } catch(e) { console.warn('Messages listener:', e); }
+  }
 }
 
 /* ══════════════════════════════════════════════════
