@@ -1229,14 +1229,29 @@ function renderNav(opts = {}) {
   window.resyncFavButtons = function() {
     try {
       var savedVenues = new Set(JSON.parse(localStorage.getItem(SD_KEY) || '[]'));
+      // Index.html ve detail sayfalari: .venue-save-btn
       document.querySelectorAll('.venue-save-btn[data-id]').forEach(function(btn) {
         var id = btn.getAttribute('data-id');
         var isSaved = savedVenues.has(id);
         btn.classList.toggle('saved', isSaved);
-        // Butonun icerigi farkli olabilir (♡♥ metin veya emoji). Sadece
-        // metin node'u ise guncelle, icinde SVG varsa dokunma.
         if (btn.children.length === 0) btn.textContent = isSaved ? '♥' : '♡';
       });
+      // mekanlar.html farkli class kullaniyor: .save-btn (ayni localStorage)
+      // Bazi save-btn'lerin icinde .act-icon/.act-label alt elemanlari var
+      document.querySelectorAll('.save-btn[data-id]').forEach(function(btn) {
+        var id = btn.getAttribute('data-id');
+        var isSaved = savedVenues.has(id);
+        btn.classList.toggle('saved', isSaved);
+        var icon = btn.querySelector('.act-icon');
+        var label = btn.querySelector('.act-label');
+        if (icon && label) {
+          icon.textContent = isSaved ? '♥' : '♡';
+          label.textContent = isSaved ? 'Kaydedildi' : 'Kaydet';
+        } else if (btn.children.length === 0) {
+          btn.textContent = isSaved ? '♥' : '♡';
+        }
+      });
+      // Yerler ve koyler: .place-save-btn
       var savedPlaces = new Set(JSON.parse(localStorage.getItem(SD_PLACE_KEY) || '[]'));
       document.querySelectorAll('.place-save-btn[data-id]').forEach(function(btn) {
         var id = btn.getAttribute('data-id');
