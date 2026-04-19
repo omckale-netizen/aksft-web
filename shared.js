@@ -1301,7 +1301,51 @@ function renderNav(opts = {}) {
     }
   });
 
+  // Focus trap yardimci — klavye kullanicilari icin accessibility
+  // Tab tuşu modal/drawer icinde kalır, arka plana kaçmaz
+  window._createFocusTrap = window._createFocusTrap || function(container) {
+    var sel = 'a[href],button:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])';
+    var trigger = null;
+    function getFocusables() {
+      return Array.from(container.querySelectorAll(sel)).filter(function(el) {
+        return el.offsetParent !== null && !el.hasAttribute('hidden');
+      });
+    }
+    function onKey(e) {
+      if (e.key !== 'Tab') return;
+      var items = getFocusables();
+      if (items.length === 0) return;
+      var first = items[0];
+      var last = items[items.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first || !container.contains(document.activeElement)) {
+          e.preventDefault(); last.focus();
+        }
+      } else {
+        if (document.activeElement === last || !container.contains(document.activeElement)) {
+          e.preventDefault(); first.focus();
+        }
+      }
+    }
+    return {
+      enable: function(triggerEl) {
+        trigger = triggerEl || document.activeElement;
+        container.addEventListener('keydown', onKey);
+        setTimeout(function() {
+          var items = getFocusables();
+          if (items.length) items[0].focus();
+        }, 50);
+      },
+      disable: function() {
+        container.removeEventListener('keydown', onKey);
+        if (trigger && trigger.focus) { try { trigger.focus(); } catch(e) {} }
+        trigger = null;
+      }
+    };
+  };
+
   var _sdJustOpened = false;
+  var _sdTrap = null;
   window.openSaveDrawer = function () {
     try { renderSaveDrawer(); } catch(e) { console.error('Favori render hatası:', e); }
     _sdJustOpened = true;
@@ -1310,6 +1354,11 @@ function renderNav(opts = {}) {
     if (drawer) drawer.classList.add('open');
     if (overlay) overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
+    // Focus trap
+    if (drawer) {
+      if (!_sdTrap) _sdTrap = window._createFocusTrap(drawer);
+      _sdTrap.enable();
+    }
     setTimeout(function() { _sdJustOpened = false; }, 400);
   };
   // Overlay click — kapatma (açılış anını atla)
@@ -1329,6 +1378,7 @@ function renderNav(opts = {}) {
     if (drawer) drawer.classList.remove('open');
     if (overlay) overlay.classList.remove('open');
     document.body.style.overflow = '';
+    if (_sdTrap) _sdTrap.disable();
   };
 
   window.removeSave = function (id, e) {
@@ -1769,6 +1819,7 @@ function renderNav(opts = {}) {
   // iOS'ta 'overflow:hidden' tek başına yetmiyor; position:fixed + top korunan scrollY şart
   const menu = document.getElementById('mobile-menu');
   let _menuScrollY = 0;
+  let _menuTrap = null;
   function openMenu() {
     menu?.classList.add('open');
     menu?.setAttribute('aria-hidden', 'false');
@@ -1779,6 +1830,11 @@ function renderNav(opts = {}) {
     document.body.style.right = '0';
     document.body.style.width = '100%';
     document.body.style.overflow = 'hidden';
+    // Focus trap — Tab klavye arka plana kacmasin
+    if (menu && window._createFocusTrap) {
+      if (!_menuTrap) _menuTrap = window._createFocusTrap(menu);
+      _menuTrap.enable();
+    }
   }
   function closeMenuFn() {
     menu?.classList.remove('open');
@@ -1791,6 +1847,7 @@ function renderNav(opts = {}) {
     document.body.style.overflow = '';
     // Scroll pozisyonunu geri yükle (iOS'ta position:fixed'den çıkınca 0'a atar)
     window.scrollTo(0, _menuScrollY);
+    if (_menuTrap) _menuTrap.disable();
   }
   document.getElementById('open-menu-btn')?.addEventListener('click', openMenu);
   document.getElementById('close-menu-btn')?.addEventListener('click', closeMenuFn);
