@@ -480,6 +480,33 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .export-info .change-count{font-size:1.6rem;font-weight:800;color:var(--terra);margin-right:6px}
 .export-btns{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
 
+/* ── AKILLI BILDIRIM KARTLARI ── */
+.alert-card{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:12px;margin-bottom:8px;cursor:pointer;transition:all .15s;border:1px solid transparent;background:var(--card-bg)}
+.alert-card:hover{transform:translateX(2px);box-shadow:0 4px 12px rgba(0,0,0,.05)}
+.alert-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;font-weight:700}
+.alert-body{flex:1;min-width:0}
+.alert-title{font-size:.86rem;font-weight:700;color:var(--navy);margin-bottom:2px;line-height:1.3}
+.alert-desc{font-size:.72rem;color:var(--text-light);line-height:1.4}
+.alert-action{background:transparent;border:1px solid currentColor;border-radius:8px;padding:5px 10px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;flex-shrink:0;white-space:nowrap}
+.alert-action:hover{background:currentColor;color:#fff !important}
+.alert-error{background:rgba(229,62,62,.04);border-color:rgba(229,62,62,.2)}
+.alert-error .alert-icon{background:rgba(229,62,62,.12);color:#E53E3E}
+.alert-error .alert-action{color:#E53E3E}
+.alert-warn{background:rgba(214,158,46,.05);border-color:rgba(214,158,46,.2)}
+.alert-warn .alert-icon{background:rgba(214,158,46,.14);color:#D69E2E}
+.alert-warn .alert-action{color:#D69E2E}
+.alert-info{background:rgba(66,153,225,.04);border-color:rgba(66,153,225,.18)}
+.alert-info .alert-icon{background:rgba(66,153,225,.12);color:#4299E1}
+.alert-info .alert-action{color:#4299E1}
+.alert-ok{background:rgba(22,163,74,.05);border-color:rgba(22,163,74,.2);cursor:default}
+.alert-ok:hover{transform:none}
+.alert-ok .alert-icon{background:rgba(22,163,74,.12);color:var(--green);font-size:1.2rem}
+[data-theme="dark"] .alert-error{background:rgba(229,62,62,.08)}
+[data-theme="dark"] .alert-warn{background:rgba(214,158,46,.1)}
+[data-theme="dark"] .alert-info{background:rgba(66,153,225,.08)}
+[data-theme="dark"] .alert-ok{background:rgba(22,163,74,.1)}
+@media(max-width:640px){.alert-desc{display:none}.alert-card{padding:10px 12px;gap:10px}.alert-icon{width:32px;height:32px;font-size:1rem}.alert-title{font-size:.78rem}}
+
 /* ── CANLI PULSE (live metrics strip) ── */
 .pulse-strip{display:flex;align-items:center;gap:18px;padding:10px 16px;background:linear-gradient(90deg,rgba(22,163,74,.06),rgba(196,82,26,.04));border:1px solid rgba(22,163,74,.14);border-radius:10px;flex-wrap:wrap;font-size:.78rem;font-weight:600;color:var(--text)}
 .pulse-item{display:inline-flex;align-items:center;gap:6px}
@@ -12907,15 +12934,37 @@ function renderDashboard() {
   })();
 
 
-  // Bildirimler (alerts)
+  // Bildirimler (alerts) — oncelik: error > warn > info
+  // severity: 'error' (kirmizi), 'warn' (turuncu), 'info' (mavi)
   const alerts = [];
-  if (noImgCount > 0) alerts.push({ icon:'📷', text:noImgCount + ' yayındaki mekanın görseli eksik', action:'venues', color:'#D4935A' });
-  if (draft > 0) alerts.push({ icon:'📝', text:draft + ' mekan taslak durumda — yayınlamayı unutma', action:'venues', color:'#975A16' });
-  if (trashed > 0) alerts.push({ icon:'🗑', text:trashed + ' mekan çöp kutusunda', action:'venues', color:'#718096' });
+  // Kritik (error)
+  if (noImgCount > 0) alerts.push({ severity:'error', icon:'📷', title:noImgCount + ' mekan görselsiz', desc:'Yayında olup görseli olmayan mekanlar SEO ve UX acisindan kritik.', action:'venues', actionLabel:'Görsel Ekle', filter:'noimg' });
   var noPhoneCount = v.filter(x => getVenueStatusKey(x) === 'published' && (!x.phones || x.phones.length === 0) && !x.phone).length;
-  if (noPhoneCount > 0) alerts.push({ icon:'📞', text:noPhoneCount + ' mekanın telefon numarası yok', action:'venues', color:'#C53030' });
+  if (noPhoneCount > 0) alerts.push({ severity:'error', icon:'📞', title:noPhoneCount + ' mekan telefonsuz', desc:'Iletisim bilgisi olmayan yayindaki mekanlar.', action:'venues', actionLabel:'Düzelt' });
+
+  // Uyari (warn)
+  if (draft > 0) alerts.push({ severity:'warn', icon:'📝', title:draft + ' mekan taslak', desc:'Yayinlanmayi bekleyen mekanlar var.', action:'venues', actionLabel:'Incele' });
+  // Premium suresi dolan/dolmasina yakin
+  var premExpiring = v.filter(function(x) {
+    if (!x.premium || !x.premiumEnd) return false;
+    var daysLeft = Math.floor((new Date(x.premiumEnd).getTime() - Date.now()) / 86400000);
+    return daysLeft >= 0 && daysLeft <= 7;
+  }).length;
+  if (premExpiring > 0) alerts.push({ severity:'warn', icon:'⏰', title:premExpiring + ' premium suresi bu hafta doluyor', desc:'Yenileme icin sahipleriyle iletisime gecin.', action:'venues', actionLabel:'Listele', filter:'premium' });
+  // Eski okunmamis mesajlar
+  if (typeof allMessages !== 'undefined' && Array.isArray(allMessages)) {
+    var staleMsg = allMessages.filter(function(m) {
+      if (!m || m.read || m.trashed || !m.timestamp) return false;
+      var t = m.timestamp && m.timestamp.toDate ? m.timestamp.toDate().getTime() : new Date(m.timestamp).getTime();
+      return (Date.now() - t) > 86400000; // 24+ saat
+    }).length;
+    if (staleMsg > 0) alerts.push({ severity:'warn', icon:'💬', title:staleMsg + ' mesaj 24+ saattir okunmadi', desc:'Cevaplanmayi bekleyen iletişim mesajlari.', action:'messages', actionLabel:'Okundu' });
+  }
+
+  // Info
+  if (trashed > 0) alerts.push({ severity:'info', icon:'🗑', title:trashed + ' mekan cop kutusunda', desc:'Geri yuklenebilir veya kalici silinir.', action:'venues', actionLabel:'Yonet' });
   var noOwnerEmail = v.filter(x => getVenueStatusKey(x) === 'published' && !x.ownerEmail).length;
-  if (noOwnerEmail > 0 && noOwnerEmail < v.length) alerts.push({ icon:'✉️', text:noOwnerEmail + ' mekanın sahip e-postası eksik', action:'venues', color:'#6B46C1' });
+  if (noOwnerEmail > 0 && noOwnerEmail < v.length) alerts.push({ severity:'info', icon:'✉️', title:noOwnerEmail + ' mekanda sahip e-postasi yok', desc:'Iletisim icin gerekli.', action:'venues', actionLabel:'Tamamla' });
 
   // Bekleyen mekan talepleri
   (async function(){
@@ -12923,7 +12972,7 @@ function renderDashboard() {
       var pendSnap = await db.collection('pending_venues').get();
       var pendItems = pendSnap.docs.map(function(d){ return d.data(); });
       var pendingCount = pendItems.filter(function(i){ return i.status === 'pending' || i.status === 'updated'; }).length;
-      if (pendingCount > 0) alerts.push({ icon:'📋', text:pendingCount + ' mekan talebi bekliyor — inceleyin', action:'pending', color:'#C4521A' });
+      if (pendingCount > 0) alerts.push({ severity:'warn', icon:'📋', title:pendingCount + ' mekan talebi bekliyor', desc:'Yeni basvurulari veya duzenlemeleri inceleyin.', action:'pending', actionLabel:'Incele' });
       // Badge güncelle
       var badge = document.getElementById('pending-badge');
       if (badge) { badge.textContent = pendingCount; badge.style.display = pendingCount > 0 ? '' : 'none'; }
@@ -12935,23 +12984,36 @@ function renderDashboard() {
   function renderDashAlerts() {
     var alertEl = document.getElementById('dash-alerts');
     if (!alertEl) return;
-    alertEl.innerHTML = alerts.map(a =>
-      '<div onclick="showPage(\'' + a.action + '\')" style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(212,147,90,.06);border:1px solid rgba(212,147,90,.12);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background=\'rgba(212,147,90,.1)\'" onmouseout="this.style.background=\'rgba(212,147,90,.06)\'">' +
-        '<span style="font-size:1rem">' + a.icon + '</span>' +
-        '<span style="font-size:.82rem;color:' + a.color + ';font-weight:600">' + a.text + '</span>' +
-        '<span style="margin-left:auto;font-size:.7rem;color:var(--text-muted)">→</span>' +
-      '</div>').join('');
+    // Severity siralama
+    var order = { error: 0, warn: 1, info: 2 };
+    alerts.sort(function(a, b) { return (order[a.severity]||3) - (order[b.severity]||3); });
+
+    if (alerts.length === 0) {
+      alertEl.innerHTML = '<div class="alert-card alert-ok">' +
+        '<div class="alert-icon" style="background:rgba(22,163,74,.12);color:var(--green)">✓</div>' +
+        '<div class="alert-body"><div class="alert-title">Her sey yolunda</div><div class="alert-desc">Su an aktif bir uyari yok. Tum yayindaki mekanlar saglikli.</div></div>' +
+      '</div>';
+      return;
+    }
+
+    alertEl.innerHTML = alerts.map(function(a) {
+      var sevClass = 'alert-' + a.severity;
+      var actionClick = a.filter
+        ? 'goToVenuesFilter(\'' + a.filter + '\')'
+        : 'showPage(\'' + a.action + '\')';
+      return '<div class="alert-card ' + sevClass + '" onclick="' + actionClick + '">' +
+        '<div class="alert-icon">' + a.icon + '</div>' +
+        '<div class="alert-body">' +
+          '<div class="alert-title">' + a.title + '</div>' +
+          '<div class="alert-desc">' + (a.desc || '') + '</div>' +
+        '</div>' +
+        '<button class="alert-action" onclick="event.stopPropagation();' + actionClick + '">' + (a.actionLabel || 'Ac') + ' →</button>' +
+      '</div>';
+    }).join('');
   }
 
-  const alertEl = document.getElementById('dash-alerts');
-  if (alertEl) {
-    alertEl.innerHTML = alerts.map(a =>
-      '<div onclick="showPage(\'' + a.action + '\')" style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(212,147,90,.06);border:1px solid rgba(212,147,90,.12);border-radius:10px;margin-bottom:8px;cursor:pointer;transition:background .15s;" onmouseover="this.style.background=\'rgba(212,147,90,.1)\'" onmouseout="this.style.background=\'rgba(212,147,90,.06)\'">' +
-        '<span style="font-size:1rem">' + a.icon + '</span>' +
-        '<span style="font-size:.82rem;color:' + a.color + ';font-weight:600">' + a.text + '</span>' +
-        '<span style="margin-left:auto;font-size:.7rem;color:var(--text-muted)">→</span>' +
-      '</div>').join('');
-  }
+  // Ilk render (pending_venues fetch sonra tekrar render eder)
+  renderDashAlerts();
 
   // ── Güvenlik Özeti ──
   (function() {
