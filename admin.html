@@ -5032,13 +5032,17 @@ async function loadDataFromFirestore() {
       db.collection('venues').get(),
       db.collection('places').get(),
       db.collection('villages').get(),
-      db.collection('routes').get()
+      db.collection('routes').get(),
+      db.collection('blog_posts').orderBy('createdAt', 'desc').limit(100).get()
     ]);
     draftData.venues = results[0].status === 'fulfilled' ? results[0].value.docs.map(d => ({ id: d.id, ...d.data() })) : [];
     draftData.places = results[1].status === 'fulfilled' ? results[1].value.docs.map(d => ({ id: d.id, ...d.data() })) : [];
     draftData.villages = results[2].status === 'fulfilled' ? results[2].value.docs.map(d => ({ id: d.id, ...d.data() })) : [];
     draftData.routes = results[3].status === 'fulfilled' ? results[3].value.docs.map(d => ({ id: d.id, ...d.data() })) : [];
-    ORIGINAL_DATA = JSON.parse(JSON.stringify(draftData));
+    if (results[4].status === 'fulfilled') {
+      window.blogPosts = results[4].value.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+    ORIGINAL_DATA = JSON.parse(JSON.stringify({ venues: draftData.venues, places: draftData.places, villages: draftData.villages, routes: draftData.routes }));
     var failed = results.filter(r => r.status === 'rejected');
     if (failed.length > 0) console.warn('Bazı koleksiyonlar yüklenemedi:', failed.length);
   } catch(err) {
@@ -5048,6 +5052,36 @@ async function loadDataFromFirestore() {
     if (!draftData.villages) draftData.villages = [];
     if (!draftData.routes) draftData.routes = [];
   }
+}
+
+// Dashboard icin arka planda veri tazele — her genel bakis acilista cagrilir.
+// Kullaniciya bloklamadan (awaits yok), tamamlandiginda yeniden render eder.
+var _dashRefreshing = false;
+var _dashRefreshLast = 0;
+function refreshDashboardData() {
+  if (_dashRefreshing) return;
+  // 10 saniyeden yakinsa skip (spam onleme)
+  if (Date.now() - _dashRefreshLast < 10000) return;
+  _dashRefreshing = true;
+  _dashRefreshLast = Date.now();
+  Promise.allSettled([
+    db.collection('venues').get(),
+    db.collection('places').get(),
+    db.collection('villages').get(),
+    db.collection('routes').get(),
+    db.collection('blog_posts').orderBy('createdAt', 'desc').limit(100).get()
+  ]).then(function(results) {
+    if (results[0].status === 'fulfilled') draftData.venues = results[0].value.docs.map(function(d) { return { id: d.id, ...d.data() }; });
+    if (results[1].status === 'fulfilled') draftData.places = results[1].value.docs.map(function(d) { return { id: d.id, ...d.data() }; });
+    if (results[2].status === 'fulfilled') draftData.villages = results[2].value.docs.map(function(d) { return { id: d.id, ...d.data() }; });
+    if (results[3].status === 'fulfilled') draftData.routes = results[3].value.docs.map(function(d) { return { id: d.id, ...d.data() }; });
+    if (results[4].status === 'fulfilled') window.blogPosts = results[4].value.docs.map(function(d) { return { id: d.id, ...d.data() }; });
+    // Eger dashboard hala acik ise yeniden render
+    var page = document.getElementById('page-dashboard');
+    if (page && page.classList.contains('active')) {
+      try { renderDashboard(); } catch(e) {}
+    }
+  }).catch(function() {}).finally(function() { _dashRefreshing = false; });
 }
 
 /* ── Firestore save/delete helpers ── */
@@ -9039,7 +9073,7 @@ function showPage(page) {
     document.body.classList.remove('sidebar-open');
   }
   // Refresh page data
-  if (page === 'dashboard') { renderDashboard(); updatePasswordDate(); if (!window._notifPrefetched) { window._notifPrefetched = true; setTimeout(function() { try { renderNotifications(); } catch(e) {} }, 1500); } }
+  if (page === 'dashboard') { renderDashboard(); refreshDashboardData(); updatePasswordDate(); if (!window._notifPrefetched) { window._notifPrefetched = true; setTimeout(function() { try { renderNotifications(); } catch(e) {} }, 1500); } }
   if (page === 'venues') renderVenueTable();
   if (page === 'routes') renderRoutesTable();
   if (page === 'villages') { switchVillageTab(currentVPTab, window._initFromHash === true); }
