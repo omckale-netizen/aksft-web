@@ -435,14 +435,11 @@ async function forgotPassword() {
       errEl.textContent = data.error || 'Çok fazla istek. Lütfen 5 dakika sonra tekrar deneyin.';
       return;
     }
-    if (resp.status === 404 || data.registered === false) {
-      errEl.style.color = '#F87171';
-      errEl.textContent = '❌ ' + (data.error || 'Bu e-posta adresiyle kayıtlı bir hesap bulunamadı.');
-      return;
-    }
     if (!resp.ok) throw new Error(data.error || 'Hata');
+    // Guvenlik: user enumeration onlemek icin, email kayitli olmasa bile
+    // ayni basari mesaji dondurulur. Gercekten kayitliysa mail gider.
     errEl.style.color = '#86EFAC';
-    errEl.textContent = '✓ Şifre sıfırlama linki gönderildi. E-postanızı kontrol edin.';
+    errEl.textContent = '✓ Eğer bu e-posta adresi sistemde kayıtlıysa, şifre sıfırlama linki gönderildi. E-postanızı kontrol edin.';
   } catch(err) {
     errEl.style.color = '#F87171';
     errEl.textContent = 'Bir hata oluştu. Lütfen daha sonra tekrar deneyin.';

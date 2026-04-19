@@ -56,14 +56,16 @@ async function fetchFirestoreDoc(collection, docId) {
 }
 
 // Güvenlik header'larını response'a ekle
+// NOT: CSP burada TANIMLANMAZ — _headers dosyasi tek kaynak olarak kullanilir.
+// Boylece iki dosya arasinda tutarsizlik/cakisma olmaz. _headers hem static hem
+// Functions response'larinda Cloudflare Pages tarafindan uygulanir.
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'SAMEORIGIN',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=(self)',
   'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-  'X-XSS-Protection': '1; mode=block',
-  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googletagmanager.com https://connect.facebook.net https://www.clarity.ms https://cdn.jsdelivr.net https://api.anthropic.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data:; connect-src 'self' https:; frame-src 'self' https://challenges.cloudflare.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self' https:;"
+  'X-XSS-Protection': '1; mode=block'
 };
 
 function addSecurityHeaders(response) {

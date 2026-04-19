@@ -98,8 +98,10 @@ export async function onRequestPost(context) {
       const users = (lookupData && lookupData.users) || [];
       steps.push({ step: 'lookup', status: lookupResp.status, userCount: users.length });
       if (users.length === 0) {
+        // User enumeration koruma: kayitli olmayan email icin de 'ok:true' don
+        // Saldirgan hangi mailin sistemde oldugunu ogrenemesin
         if (debug) return jsonResp({ error: 'Email kayıtlı değil', steps, lookupData }, 404);
-        return jsonResp({ ok: false, registered: false, error: 'Bu e-posta adresiyle kayıtlı bir hesap bulunamadı.' }, 404);
+        return jsonResp({ ok: true, sent: 'silent' }, 200);
       }
 
       // 3) Reset link al (returnOobLink: true → Firebase mail göndermesin)
@@ -174,7 +176,8 @@ export async function onRequestPost(context) {
       const errData = await fallbackResp.json().catch(() => ({}));
       const msg = (errData.error && errData.error.message) || '';
       if (msg === 'EMAIL_NOT_FOUND') {
-        return jsonResp({ ok: false, registered: false, error: 'Bu e-posta adresiyle kayıtlı bir hesap bulunamadı.' }, 404);
+        // User enumeration koruma: kayitli olmayan email icin de 'ok:true' don
+        return jsonResp({ ok: true, sent: 'silent' }, 200);
       }
     }
     return jsonResp({ ok: true, sent: 'firebase-default', reason: 'no-service-account' }, 200);
