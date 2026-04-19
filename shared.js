@@ -1192,8 +1192,11 @@ function renderNav(opts = {}) {
       localStorage.setItem(SD_PLACE_KEY, JSON.stringify([...saved]));
       // Buton güncelle
       document.querySelectorAll('.place-save-btn[data-id="' + id + '"]').forEach(function(btn) {
-        btn.classList.toggle('saved', saved.has(id));
-        btn.textContent = saved.has(id) ? '♥' : '♡';
+        var isSaved = saved.has(id);
+        btn.classList.toggle('saved', isSaved);
+        btn.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
+        btn.setAttribute('aria-label', isSaved ? 'Kayıtlardan çıkar' : 'Kaydet');
+        btn.textContent = isSaved ? '♥' : '♡';
       });
     } catch {}
     window.updateSaveNavCount();
@@ -1217,8 +1220,11 @@ function renderNav(opts = {}) {
       if (saved.has(id)) saved.delete(id); else saved.add(id);
       localStorage.setItem(SD_KEY, JSON.stringify([...saved]));
       document.querySelectorAll('.venue-save-btn[data-id="' + id + '"]').forEach(function(btn) {
-        btn.classList.toggle('saved', saved.has(id));
-        btn.textContent = saved.has(id) ? '♥' : '♡';
+        var isSaved = saved.has(id);
+        btn.classList.toggle('saved', isSaved);
+        btn.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
+        btn.setAttribute('aria-label', isSaved ? 'Kayıtlardan çıkar' : 'Kaydet');
+        btn.textContent = isSaved ? '♥' : '♡';
       });
     } catch {}
     window.updateSaveNavCount();
@@ -1237,6 +1243,8 @@ function renderNav(opts = {}) {
         var id = btn.getAttribute('data-id');
         var isSaved = savedVenues.has(id);
         btn.classList.toggle('saved', isSaved);
+        btn.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
+        btn.setAttribute('aria-label', isSaved ? 'Kayıtlardan çıkar' : 'Kaydet');
         if (btn.children.length === 0) btn.textContent = isSaved ? '♥' : '♡';
       });
       // mekanlar.html farkli class kullaniyor: .save-btn (ayni localStorage)
@@ -1245,6 +1253,8 @@ function renderNav(opts = {}) {
         var id = btn.getAttribute('data-id');
         var isSaved = savedVenues.has(id);
         btn.classList.toggle('saved', isSaved);
+        btn.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
+        btn.setAttribute('aria-label', isSaved ? 'Kayıtlardan çıkar' : 'Kaydet');
         var icon = btn.querySelector('.act-icon');
         var label = btn.querySelector('.act-label');
         if (icon && label) {
@@ -1260,6 +1270,8 @@ function renderNav(opts = {}) {
         var id = btn.getAttribute('data-id');
         var isSaved = savedPlaces.has(id);
         btn.classList.toggle('saved', isSaved);
+        btn.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
+        btn.setAttribute('aria-label', isSaved ? 'Kayıtlardan çıkar' : 'Kaydet');
         if (btn.children.length === 0) btn.textContent = isSaved ? '♥' : '♡';
       });
       if (window.updateSaveNavCount) window.updateSaveNavCount();
@@ -1393,6 +1405,8 @@ function renderNav(opts = {}) {
     /* Also update any save-btn on the current page */
     document.querySelectorAll(`.save-btn[data-id="${id}"]`).forEach(btn => {
       btn.classList.remove('saved');
+      btn.setAttribute('aria-pressed', 'false');
+      btn.setAttribute('aria-label', 'Kaydet');
       const icon = btn.querySelector('.act-icon, #vp-save-icon');
       const label = btn.querySelector('.act-label, #vp-save-label');
       if (icon)  icon.textContent  = '♡';
@@ -1425,6 +1439,8 @@ function renderNav(opts = {}) {
     window.updateSaveNavCount();
     document.querySelectorAll('.save-btn, .place-save-btn, .venue-save-btn').forEach(btn => {
       btn.classList.remove('saved');
+      btn.setAttribute('aria-pressed', 'false');
+      btn.setAttribute('aria-label', 'Kaydet');
       if (btn.classList.contains('place-save-btn') || btn.classList.contains('venue-save-btn')) { btn.textContent = '♡'; return; }
       const icon = btn.querySelector('.act-icon, #vp-save-icon');
       const label = btn.querySelector('.act-label, #vp-save-label');
@@ -1453,6 +1469,8 @@ function renderNav(opts = {}) {
     window.updateSaveNavCount();
     document.querySelectorAll('.place-save-btn[data-id="' + id + '"]').forEach(function(btn) {
       btn.classList.remove('saved');
+      btn.setAttribute('aria-pressed', 'false');
+      btn.setAttribute('aria-label', 'Kaydet');
       btn.textContent = '♡';
     });
     if (window.syncFavToFirebase) setTimeout(window.syncFavToFirebase, 300);
@@ -3374,7 +3392,7 @@ function renderVenuePage(venueId) {
       <div class="vp-hero-top">
         <a href="${base}mekanlar.html" class="vp-back-btn">← Mekanlar</a>
         <div class="vp-hero-acts">
-          <button id="vp-save-btn" class="vp-act-btn${isSaved?' saved':''}" onclick="vpToggleSave()">
+          <button id="vp-save-btn" class="vp-act-btn${isSaved?' saved':''}" aria-label="${isSaved?'Kayıtlardan çıkar':'Kaydet'}" aria-pressed="${isSaved?'true':'false'}" onclick="vpToggleSave()">
             <span id="vp-save-icon">${isSaved?'♥':'♡'}</span>
             <span id="vp-save-label">${isSaved?'Kaydedildi':'Kaydet'}</span>
           </button>
@@ -3863,6 +3881,8 @@ function renderVenuePage(venueId) {
       document.getElementById('vp-save-icon').textContent  = isSavedNow ? '♥' : '♡';
       document.getElementById('vp-save-label').textContent = isSavedNow ? 'Kaydedildi' : 'Kaydet';
       btn.classList.toggle('saved', isSavedNow);
+      btn.setAttribute('aria-pressed', isSavedNow ? 'true' : 'false');
+      btn.setAttribute('aria-label', isSavedNow ? 'Kayıtlardan çıkar' : 'Kaydet');
     }
     if (window.updateSaveNavCount) window.updateSaveNavCount();
     if (window.syncFavToFirebase) window.syncFavToFirebase();
@@ -4413,7 +4433,7 @@ function renderVillagePage(villageId) {
   heroHtml += '<div class="vp-hero-top">';
   heroHtml += '<a href="../koyler.html" class="vp-back-btn">← Köyler</a>';
   heroHtml += '<div class="vp-hero-acts">';
-  heroHtml += '<button id="vg-save-btn" class="vp-act-btn" onclick="vgToggleSave()"><span id="vg-save-icon">♡</span> <span id="vg-save-label">Kaydet</span></button>';
+  heroHtml += '<button id="vg-save-btn" class="vp-act-btn" aria-label="Kaydet" aria-pressed="false" onclick="vgToggleSave()"><span id="vg-save-icon">♡</span> <span id="vg-save-label">Kaydet</span></button>';
   heroHtml += '<div class="vp-share-wrap" id="vg-share-wrap"><button class="vp-share-btn" onclick="vgToggleShare()">↑ Paylaş</button><div class="vp-share-dd" id="vg-share-dd"></div></div>';
   heroHtml += '</div>';
   heroHtml += '</div>';
@@ -4818,7 +4838,13 @@ function renderVillagePage(villageId) {
   var vgIsSaved = window.isPlaceSaved && isPlaceSaved(v.id);
   if (vgIsSaved) {
     var sb = document.getElementById('vg-save-btn');
-    if (sb) { sb.classList.add('saved'); document.getElementById('vg-save-icon').textContent = '♥'; document.getElementById('vg-save-label').textContent = 'Kaydedildi'; }
+    if (sb) {
+      sb.classList.add('saved');
+      sb.setAttribute('aria-pressed', 'true');
+      sb.setAttribute('aria-label', 'Kayıtlardan çıkar');
+      document.getElementById('vg-save-icon').textContent = '♥';
+      document.getElementById('vg-save-label').textContent = 'Kaydedildi';
+    }
   }
   window.vgToggleSave = function() {
     if (window.togglePlaceSave) togglePlaceSave(v.id);
@@ -4826,6 +4852,8 @@ function renderVillagePage(villageId) {
     var sb = document.getElementById('vg-save-btn');
     if (sb) {
       sb.classList.toggle('saved', now);
+      sb.setAttribute('aria-pressed', now ? 'true' : 'false');
+      sb.setAttribute('aria-label', now ? 'Kayıtlardan çıkar' : 'Kaydet');
       document.getElementById('vg-save-icon').textContent = now ? '♥' : '♡';
       document.getElementById('vg-save-label').textContent = now ? 'Kaydedildi' : 'Kaydet';
     }
@@ -4899,7 +4927,7 @@ function renderPlacePage(placeId) {
   heroHtml += '<div class="vp-hero-top">';
   heroHtml += '<a href="../yerler.html" class="vp-back-btn">← Gezilecek Yerler</a>';
   heroHtml += '<div class="vp-hero-acts">';
-  heroHtml += '<button id="pl-save-btn" class="vp-act-btn" onclick="plToggleSave()"><span id="pl-save-icon">♡</span> <span id="pl-save-label">Kaydet</span></button>';
+  heroHtml += '<button id="pl-save-btn" class="vp-act-btn" aria-label="Kaydet" aria-pressed="false" onclick="plToggleSave()"><span id="pl-save-icon">♡</span> <span id="pl-save-label">Kaydet</span></button>';
   heroHtml += '<div class="vp-share-wrap" id="pl-share-wrap"><button class="vp-share-btn" onclick="plToggleShare()">↑ Paylaş</button><div class="vp-share-dd" id="pl-share-dd"></div></div>';
   heroHtml += '</div></div>';
 
@@ -5249,7 +5277,13 @@ function renderPlacePage(placeId) {
   var plIsSaved = window.isPlaceSaved && isPlaceSaved(p.id);
   if (plIsSaved) {
     var sb = document.getElementById('pl-save-btn');
-    if (sb) { sb.classList.add('saved'); document.getElementById('pl-save-icon').textContent = '♥'; document.getElementById('pl-save-label').textContent = 'Kaydedildi'; }
+    if (sb) {
+      sb.classList.add('saved');
+      sb.setAttribute('aria-pressed', 'true');
+      sb.setAttribute('aria-label', 'Kayıtlardan çıkar');
+      document.getElementById('pl-save-icon').textContent = '♥';
+      document.getElementById('pl-save-label').textContent = 'Kaydedildi';
+    }
   }
   window.plToggleSave = function() {
     if (window.togglePlaceSave) togglePlaceSave(p.id);
@@ -5257,6 +5291,8 @@ function renderPlacePage(placeId) {
     var sb = document.getElementById('pl-save-btn');
     if (sb) {
       sb.classList.toggle('saved', now);
+      sb.setAttribute('aria-pressed', now ? 'true' : 'false');
+      sb.setAttribute('aria-label', now ? 'Kayıtlardan çıkar' : 'Kaydet');
       document.getElementById('pl-save-icon').textContent = now ? '♥' : '♡';
       document.getElementById('pl-save-label').textContent = now ? 'Kaydedildi' : 'Kaydet';
     }

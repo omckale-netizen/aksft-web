@@ -138,7 +138,7 @@
 <div id="footer-placeholder"></div>
 
 <script src="firebase-loader.js?v=6"></script>
-<script src="shared.min.js?v=340"></script>
+<script src="shared.min.js?v=341"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
@@ -265,6 +265,8 @@ function pageInit() {
     document.querySelectorAll(`.save-btn[data-id="${id}"]`).forEach(btn => {
       const isSaved = saved.has(id);
       btn.classList.toggle('saved', isSaved);
+      btn.setAttribute('aria-pressed', isSaved ? 'true' : 'false');
+      btn.setAttribute('aria-label', isSaved ? 'Kayıtlardan çıkar' : 'Kaydet');
       const label = btn.querySelector('.act-label');
       if (label) {
         btn.querySelector('.act-icon').textContent = isSaved ? '♥' : '♡';
@@ -347,7 +349,7 @@ function pageInit() {
         <div class="mk-fc" onclick="window.location.href='mekanlar/mekan-detay.html?id=${v.id}'" style="${isPremiumActive(v)?'border:2px solid rgba(212,147,90,.3);box-shadow:0 4px 24px rgba(212,147,90,.12);':''}">
           <div class="mk-fc-img" style="background:${v.gradient};">
             ${isPremiumActive(v) ? '<span style="font-size:.56rem;font-weight:800;letter-spacing:.06em;padding:3px 9px;border-radius:4px;background:linear-gradient(135deg,#C9963A,#E8C46A);color:#5C3D0E;text-transform:uppercase;position:absolute;top:11px;left:11px;z-index:2;">Premium</span>' : '<span class="mk-fc-badge' + (status.isOpen === true ? ' mk-fc-badge-open' : status.isOpen === false ? ' mk-fc-badge-closed' : '') + '">' + (status.isOpen === true ? 'Açık' : status.isOpen === false ? 'Kapalı' : 'Önerilen') + '</span>'}
-            <button class="mk-fc-save save-btn${saved.has(v.id)?' saved':''}" data-id="${v.id}" onclick="toggleSave('${v.id}',event)">
+            <button class="mk-fc-save save-btn${saved.has(v.id)?' saved':''}" data-id="${v.id}" aria-label="${saved.has(v.id)?'Kayıtlardan çıkar':'Kaydet'}" aria-pressed="${saved.has(v.id)?'true':'false'}" onclick="toggleSave('${v.id}',event)">
               ${saved.has(v.id)?'♥':'♡'}
             </button>
             ${(v.images && v.images.length > 0) ? '<img class="mk-vc-photo" src="' + v.images[0] + '" alt="' + v.title + ' — ' + (v.tagText || 'Assos Mekan') + (v.location ? ', ' + v.location : '') + ' | Assos Mekanları" loading="lazy" onload="this.classList.add(\'loaded\');this.closest(\'.mk-vc-img\').classList.remove(\'has-img\')">' : '<span class="mk-fc-emoji">' + v.emoji + '</span>'}
@@ -458,7 +460,7 @@ function pageInit() {
               ${v.featured && !isPremiumActive(v) ? '<span class="mk-vc-featured">⭐ Öne Çıkan</span>' : ''}
               ${status.badge}
             </div>
-            <button class="mk-vc-save save-btn${saved.has(v.id)?' saved':''}" data-id="${v.id}" onclick="toggleSave('${v.id}',event)">
+            <button class="mk-vc-save save-btn${saved.has(v.id)?' saved':''}" data-id="${v.id}" aria-label="${saved.has(v.id)?'Kayıtlardan çıkar':'Kaydet'}" aria-pressed="${saved.has(v.id)?'true':'false'}" onclick="toggleSave('${v.id}',event)">
               ${saved.has(v.id)?'♥':'♡'}
             </button>
           </div>
