@@ -225,14 +225,23 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
 /* ── STATS CARDS ── */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:32px}
-.stat-card{background:var(--card-bg);border-radius:var(--radius-md);padding:22px 20px;box-shadow:var(--shadow-xs);border:1px solid var(--card-border);transition:all var(--transition);position:relative}
-.stat-card[onclick]:hover{box-shadow:var(--shadow);border-color:rgba(196,82,26,.2);transform:translateY(-1px)}
-.stat-card[onclick]:hover::after{content:'→';position:absolute;top:12px;right:14px;color:var(--terra);font-weight:700;font-size:.9rem;opacity:0;transition:opacity var(--transition)}
-.stat-card[onclick]:hover::after{opacity:.8}
-.stat-card .stat-label{font-size:.78rem;color:var(--text-light);font-weight:500;margin-bottom:6px;text-transform:uppercase;letter-spacing:.3px}
-.stat-card .stat-val{font-size:1.8rem;font-weight:800;color:var(--navy)}
+.stat-card{background:var(--card-bg);border-radius:var(--radius-md);padding:18px 20px 20px;box-shadow:var(--shadow-xs);border:1px solid var(--card-border);transition:all var(--transition);position:relative;overflow:hidden}
+.stat-card[onclick]{cursor:pointer}
+.stat-card[onclick]:hover{box-shadow:0 8px 20px rgba(26,39,68,.1);border-color:rgba(196,82,26,.22);transform:translateY(-2px)}
+.stat-card[onclick]::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--terra),#D4935A);opacity:0;transition:opacity var(--transition)}
+.stat-card[onclick]:hover::before{opacity:1}
+.stat-card[onclick]:hover::after{content:'→';position:absolute;top:14px;right:16px;color:var(--terra);font-weight:700;font-size:1rem;opacity:.8;transition:all var(--transition);animation:statArrowIn .25s ease-out}
+@keyframes statArrowIn{from{transform:translateX(-4px);opacity:0}to{transform:translateX(0);opacity:.8}}
+.stat-card .stat-label{display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--text-light);font-weight:600;margin-bottom:10px;letter-spacing:.02em}
+.stat-card .stat-val{font-size:2rem;font-weight:800;color:var(--navy);line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.stat-card .stat-sub{font-size:.65rem;color:var(--text-muted);margin-top:6px;font-weight:500}
+.stat-card .stat-trend{display:inline-flex;align-items:center;gap:3px;font-size:.62rem;font-weight:700;padding:2px 6px;border-radius:999px;margin-top:8px}
+.stat-card .stat-trend.up{background:rgba(22,163,74,.12);color:var(--green)}
+.stat-card .stat-trend.down{background:rgba(229,62,62,.1);color:#E53E3E}
+.stat-card .stat-trend.flat{background:rgba(113,128,150,.1);color:var(--text-muted)}
 .stat-card.terra .stat-val{color:var(--terra)}
 .stat-card.green .stat-val{color:var(--green)}
+[data-theme="dark"] .stat-card[onclick]:hover{box-shadow:0 8px 20px rgba(0,0,0,.3)}
 
 /* ── NOTIF BELL ── */
 .notif-bell{display:none}
@@ -12934,15 +12943,56 @@ function renderDashboard() {
   v.forEach(x => { if (getVenueStatus(x) === true) openCount++; });
   var blogCount = (typeof blogPosts !== 'undefined' ? blogPosts.length : 0);
 
+  // Blog delta — son 7 gunde eklenen yazi sayisi
+  var weekAgo = Date.now() - 7 * 86400000;
+  var blogWeekDelta = 0;
+  if (typeof blogPosts !== 'undefined' && Array.isArray(blogPosts)) {
+    blogWeekDelta = blogPosts.filter(function(bp) {
+      if (!bp || !bp.createdAt) return false;
+      return new Date(bp.createdAt).getTime() >= weekAgo;
+    }).length;
+  }
+  var openPct = published > 0 ? Math.round(openCount / published * 100) : 0;
+
+  function mkStat(opts) {
+    var cls = 'stat-card' + (opts.color ? ' ' + opts.color : '');
+    var click = opts.onclick ? ' onclick="' + opts.onclick + '"' : '';
+    var html = '<div class="' + cls + '"' + click + '>';
+    html += '<div class="stat-label">' + opts.label + '</div>';
+    html += '<div class="stat-val"' + (opts.valStyle ? ' style="' + opts.valStyle + '"' : '') + '>' + opts.value;
+    if (opts.valSub) html += '<span style="font-size:.62rem;color:var(--text-muted);font-weight:500;margin-left:3px">' + opts.valSub + '</span>';
+    html += '</div>';
+    if (opts.sub) html += '<div class="stat-sub">' + opts.sub + '</div>';
+    if (opts.trend) {
+      var tClass = opts.trend.dir || 'flat';
+      var tIcon = tClass === 'up' ? '↑' : tClass === 'down' ? '↓' : '·';
+      html += '<div class="stat-trend ' + tClass + '">' + tIcon + ' ' + opts.trend.text + '</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
   document.getElementById('stats-grid').innerHTML =
-    '<div class="stat-card" onclick="showPage(\'venues\')" style="cursor:pointer"><div class="stat-label">🏪 Mekanlar</div><div class="stat-val">' + published + '<span style="font-size:.6rem;color:var(--text-muted);font-weight:400">/' + v.length + '</span></div><div style="font-size:.6rem;color:var(--text-muted);margin-top:2px">' + published + ' yayında' + (draft ? ', ' + draft + ' taslak' : '') + '</div></div>' +
-    '<div class="stat-card" onclick="goToPlaces()" style="cursor:pointer"><div class="stat-label">🏛 Yerler</div><div class="stat-val">' + p.length + '</div></div>' +
-    '<div class="stat-card" onclick="goToVillages()" style="cursor:pointer"><div class="stat-label">🏘 Köyler</div><div class="stat-val">' + vi.length + '</div></div>' +
-    '<div class="stat-card" onclick="showPage(\'routes\')" style="cursor:pointer"><div class="stat-label">🗺 Rotalar</div><div class="stat-val">' + r.length + '</div></div>' +
-    '<div class="stat-card" onclick="showPage(\'blog\')" style="cursor:pointer"><div class="stat-label">✍️ Blog</div><div class="stat-val">' + blogCount + '</div></div>' +
-    '<div class="stat-card green" onclick="showPage(\'analytics\')" style="cursor:pointer"><div class="stat-label">Şu An Açık</div><div class="stat-val">' + openCount + '<span style="font-size:.6rem;color:var(--text-muted);font-weight:400">/' + published + '</span></div></div>' +
-    (premiumCount > 0 ? '<div class="stat-card" onclick="goToVenuesFilter(\'premium\')" style="cursor:pointer"><div class="stat-label">👑 Premium</div><div class="stat-val" style="color:#D4935A">' + premiumCount + '</div></div>' : '') +
-    '<div class="stat-card terra" onclick="goToVenuesFilter(\'featured\')" style="cursor:pointer"><div class="stat-label">⭐ Öne Çıkan</div><div class="stat-val">' + featured + '</div></div>';
+    mkStat({ label:'🏪 Mekanlar', value:published, valSub:'/' + v.length, sub:published + ' yayında' + (draft ? ', ' + draft + ' taslak' : ''), onclick:'showPage(\'venues\')' }) +
+    mkStat({ label:'🏛 Yerler', value:p.length, onclick:'goToPlaces()' }) +
+    mkStat({ label:'🏘 Köyler', value:vi.length, onclick:'goToVillages()' }) +
+    mkStat({ label:'🗺 Rotalar', value:r.length, onclick:'showPage(\'routes\')' }) +
+    mkStat({
+      label:'✍️ Blog',
+      value:blogCount,
+      onclick:'showPage(\'blog\')',
+      trend: blogWeekDelta > 0 ? { dir:'up', text:'+' + blogWeekDelta + ' bu hafta' } : null
+    }) +
+    mkStat({
+      label:'Su An Acik',
+      value:openCount,
+      valSub:'/' + published,
+      color:'green',
+      onclick:'showPage(\'analytics\')',
+      sub: published > 0 ? '%' + openPct + ' aktif' : null
+    }) +
+    (premiumCount > 0 ? mkStat({ label:'👑 Premium', value:premiumCount, valStyle:'color:#D4935A', onclick:'goToVenuesFilter(\'premium\')' }) : '') +
+    mkStat({ label:'⭐ Öne Çıkan', value:featured, color:'terra', onclick:'goToVenuesFilter(\'featured\')' });
 
 
   /* Kategori dağılımı — her satır tıklanınca o kategoriyle filtrelenmiş venues sayfasına */
