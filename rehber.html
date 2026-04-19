@@ -1177,7 +1177,7 @@ html{scroll-behavior:smooth}
 
 /* ═══ Timeline — Assos Tarih Cizelgesi (yatay interaktif) ═══ */
 .timeline-wrap{position:relative;margin-top:36px}
-.timeline-track{display:flex;align-items:flex-start;gap:0;padding:0 8px 40px;overflow-x:auto;scrollbar-width:none;position:relative}
+.timeline-track{display:flex;align-items:flex-start;gap:0;padding:14px 8px 40px;overflow-x:auto;overflow-y:visible;scrollbar-width:none;position:relative}
 .timeline-track::-webkit-scrollbar{display:none}
 /* Her node kendi sag tarafina ince bir cizgi cizer — scroll'da da tam kapsayan connector */
 .timeline-node::after{content:'';position:absolute;top:54px;left:50%;width:100%;height:2px;background:rgba(26,39,68,.18);z-index:0;transition:background .3s}
@@ -1192,7 +1192,7 @@ html{scroll-behavior:smooth}
 .timeline-node.active .tl-dot{background:var(--era-color);border-color:var(--era-color);width:18px;height:18px;box-shadow:0 0 0 6px color-mix(in srgb, var(--era-color) 15%, transparent),0 3px 10px color-mix(in srgb, var(--era-color) 35%, transparent)}
 .timeline-node.active .tl-year{color:var(--era-color)}
 .timeline-node.active .tl-name{color:var(--navy);font-weight:700}
-.timeline-node:focus-visible{outline:2px solid var(--era-color,var(--terra));outline-offset:6px;border-radius:6px}
+.timeline-node:focus-visible{outline:2px solid var(--era-color,var(--terra));outline-offset:2px;border-radius:8px}
 
 /* Timeline panel */
 .timeline-panel{background:#fff;border-radius:20px;padding:32px 36px 36px;box-shadow:0 6px 32px rgba(26,39,68,.08);border:1px solid rgba(26,39,68,.05);border-left:4px solid var(--era-color,#C4521A);transition:border-color .4s cubic-bezier(.16,1,.3,1);min-height:240px;position:relative;overflow:hidden}
