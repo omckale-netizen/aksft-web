@@ -168,6 +168,10 @@
             </label>
             <div id="ct-consent-msg" class="ct-consent-warn" style="display:none;">Devam etmek için Gizlilik Politikası ve Kullanım Koşulları'nı kabul etmeniz gerekmektedir.</div>
           </div>
+          <!-- Cloudflare Turnstile — spam koruması (görünmez) -->
+          <div style="margin:14px 0;display:flex;justify-content:center;">
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAC_fn7XC86__ahbz" data-theme="light" data-size="flexible"></div>
+          </div>
           <button type="submit" id="ct-submit" class="ct-btn">
             <span>Mesaj Gönder</span>
             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -399,6 +403,7 @@
 
 <script src="firebase-loader.js?v=6"></script>
 <script src="shared.min.js?v=334"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
@@ -534,6 +539,14 @@ async function submitContact(e) {
     return;
   }
 
+  // Cloudflare Turnstile token kontrolü (bot koruma)
+  var turnstileResp = (typeof turnstile !== 'undefined' && window.turnstile) ?
+    turnstile.getResponse() : '';
+  if (!turnstileResp) {
+    status.innerHTML = '<span style="color:#E53E3E">Doğrulama tamamlanamadı. Sayfayı yenileyip tekrar deneyin.</span>';
+    return;
+  }
+
   // Rate limiting — dakikada max 2 mesaj
   var rlKey = 'rl_contact';
   var rlData = JSON.parse(localStorage.getItem(rlKey) || '{"count":0,"time":0}');
@@ -606,6 +619,7 @@ async function submitContact(e) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         type: 'message',
+        turnstileToken: turnstileResp,
         data: { name: msg.name, email: msg.email, phone: msg.phone, subject: msg.subject, message: msg.message, _hp: msg._hp }
       })
     });

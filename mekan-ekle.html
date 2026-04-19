@@ -269,6 +269,10 @@ a{color:var(--terra);text-decoration:none}
           <input type="checkbox" id="consent">
           <label for="consent">Mekanıma ait bilgilerin (mekan adı, adres, telefon, görseller, çalışma saatleri) assosukesfet.com platformunda yayınlanmasını kabul ediyorum. Yüklediğim görsellerin telif hakkının bana ait olduğunu veya kullanım iznimin bulunduğunu ve platformda kullanılmasına izin verdiğimi beyan ederim. Verdiğim bilgilerin doğru ve güncel olduğunu kabul ediyorum. Kişisel verilerimin (ad, e-posta, telefon) yalnızca iletişim amacıyla kullanılacağını ve üçüncü taraflarla paylaşılmayacağını, dilediğim zaman info@assosukesfet.com adresine yazarak verilerimin silinmesini talep edebileceğimi biliyorum. <a href="/gizlilik.html" target="_blank">Gizlilik Politikası</a> ve <a href="/kullanim-kosullari.html" target="_blank">Kullanım Koşullarını</a> okudum ve kabul ediyorum.</label>
         </div>
+        <!-- Cloudflare Turnstile — spam koruması (görünmez) -->
+        <div style="margin-top:14px;display:flex;justify-content:center;">
+          <div class="cf-turnstile" data-sitekey="0x4AAAAAAC_fn7XC86__ahbz" data-theme="light" data-size="flexible"></div>
+        </div>
       </div>
     </div>
 
@@ -299,6 +303,7 @@ a{color:var(--terra);text-decoration:none}
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js" crossorigin="anonymous" integrity="sha384-4DnN3LMk363cZnO0ZZ+46dvN6+1On5ODUbq/68J4ZeSDAghncVXodw2jecSmTyAe"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js" crossorigin="anonymous" integrity="sha384-OWv+RYFfLxKnRm2S6RYMcxn1Un3vxC0dbSWy7XC9DKsJGGHMWBCbDV27k62l/2XK"></script>
 <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-storage-compat.js" crossorigin="anonymous" integrity="sha384-5RO7AQJ51T1u3BV84KGn4xVulsFE2gbaUebkDJe5jPVSm0+NN34/wzUp/vZugodK"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>
 firebase.initializeApp({apiKey:"AIzaSyCXqgczplchzjClAZt-Wl2eqgqmUMhLVJs",authDomain:"assosu-kesfet.firebaseapp.com",projectId:"assosu-kesfet",storageBucket:"assosu-kesfet.firebasestorage.app",messagingSenderId:"225032191860",appId:"1:225032191860:web:61ac6ba36764b530be3621"});
 var db=firebase.firestore();
@@ -619,6 +624,9 @@ function renderSummary(){
 async function submit(){
   if(document.getElementById('hp').value){document.getElementById('success').style.display='';document.getElementById('btns').style.display='none';document.querySelectorAll('.me-step').forEach(function(el){el.style.display='none';});return;}
   if(!document.getElementById('consent').checked){toast('KVKK onayı zorunlu','red');return;}
+  // Cloudflare Turnstile token kontrolu
+  var turnstileResp=(typeof turnstile!=='undefined'&&window.turnstile)?turnstile.getResponse():'';
+  if(!turnstileResp){toast('Doğrulama bekleniyor, sayfayı yenileyin','red');return;}
   var rlKey='me_sub_'+new Date().toISOString().split('T')[0];var rlC=parseInt(localStorage.getItem(rlKey)||'0');
   if(rlC>=3){toast('Günlük başvuru limitine ulaştınız','red');return;}
   var btn=document.getElementById('submitBtn');btn.disabled=true;btn.textContent='Gönderiliyor...';
@@ -637,14 +645,14 @@ async function submit(){
       data.refNo=editRefNo;
       await db.collection('pending_venues').doc(editDocId).update(data);
       // Düzenleme bildirimi — mail göndermeden sadece Telegram
-      try{fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'venue_update',data:{name:data.ownerName,email:data.ownerEmail,phone:data.ownerPhone,venueTitle:data.title,category:CAT_LABELS[data.category]||data.category,location:data.location,refNo:editRefNo}})});}catch(e){}
+      try{fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'venue_update',turnstileToken:turnstileResp,data:{name:data.ownerName,email:data.ownerEmail,phone:data.ownerPhone,venueTitle:data.title,category:CAT_LABELS[data.category]||data.category,location:data.location,refNo:editRefNo}})});}catch(e){}
     }else{
       data.submittedAt=new Date().toISOString();
       data.status='pending';
       data.refNo='A-'+Date.now().toString(36).toUpperCase().slice(-6);
       await db.collection('pending_venues').add(data);
       // Yeni başvuru bildirimi
-      try{fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'venue_request',data:{name:data.ownerName,email:data.ownerEmail,phone:data.ownerPhone,venueTitle:data.title,category:CAT_LABELS[data.category]||data.category,location:data.location,refNo:data.refNo}})});}catch(e){}
+      try{fetch('/api/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'venue_request',turnstileToken:turnstileResp,data:{name:data.ownerName,email:data.ownerEmail,phone:data.ownerPhone,venueTitle:data.title,category:CAT_LABELS[data.category]||data.category,location:data.location,refNo:data.refNo}})});}catch(e){}
     }
     localStorage.setItem(rlKey,String(rlC+1));
     // Farklı success mesajları

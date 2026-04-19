@@ -6,6 +6,33 @@ async function sha256(text) {
   return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+// Cloudflare Turnstile token dogrulama
+// Docs: https://developers.cloudflare.com/turnstile/get-started/server-side-validation/
+async function verifyTurnstile(token, env, ip) {
+  if (!token || typeof token !== 'string') return { valid: false, error: 'missing_token' };
+  const secret = env.TURNSTILE_SECRET_KEY;
+  if (!secret) {
+    // Secret tanimli degilse — deploy hatasi, fail-open yerine reddet
+    console.warn('[turnstile] TURNSTILE_SECRET_KEY env var eksik');
+    return { valid: false, error: 'server_config' };
+  }
+  try {
+    const formData = new FormData();
+    formData.append('secret', secret);
+    formData.append('response', token);
+    if (ip) formData.append('remoteip', ip);
+    const resp = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      body: formData,
+    });
+    const result = await resp.json();
+    return { valid: !!result.success, error: result.success ? null : (result['error-codes'] || []).join(',') };
+  } catch (e) {
+    console.error('[turnstile] verify hatasi:', e);
+    return { valid: false, error: 'verify_exception' };
+  }
+}
+
 export async function onRequestPost(context) {
   const request = context.request;
   const env = context.env || {};
@@ -27,9 +54,23 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
   }
 
-  const { type, data } = body || {};
+  const { type, data, turnstileToken } = body || {};
   if (!type || !data) {
     return new Response(JSON.stringify({ error: 'Missing type or data' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+  }
+
+  // Turnstile dogrulama — public formlar icin zorunlu (message, venue_request, venue_update)
+  // Admin tarafindan tetiklenen bildirimler (ornegin backup) turnstileToken gondermez
+  const publicTypes = ['message', 'venue_request', 'venue_update'];
+  if (publicTypes.includes(type)) {
+    const clientIp = request.headers.get('CF-Connecting-IP') || '';
+    const tsResult = await verifyTurnstile(turnstileToken, env, clientIp);
+    if (!tsResult.valid) {
+      return new Response(JSON.stringify({ error: 'Doğrulama başarısız. Sayfayı yenileyip tekrar deneyin.' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
   }
 
   // Honeypot kontrolü — bot tuzağı (iletişim formu)
