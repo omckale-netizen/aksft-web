@@ -498,8 +498,10 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .dash-hero-inner{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px}
 .dash-hero-left{flex:1;min-width:260px}
 .dash-hero-greet{font-size:.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(245,237,224,.6);margin-bottom:6px}
-.dash-hero-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin-bottom:10px;line-height:1.15}
+.dash-hero-title{font-family:'Lora',serif;font-size:1.35rem;font-weight:500;font-style:italic;letter-spacing:-.005em;margin-bottom:10px;line-height:1.25;color:#F5EDE0}
 .dash-hero-title em{font-style:italic;font-family:'Lora',serif;font-weight:500;color:#E8C46A}
+.dash-hero-quote-mark{font-family:'Lora',serif;font-size:1.6em;font-weight:700;color:#E8C46A;opacity:.7;line-height:0;vertical-align:-.2em;margin-right:2px}
+.dash-hero-quote-mark.right{margin-right:0;margin-left:2px}
 .dash-hero-summary{font-size:.82rem;color:rgba(245,237,224,.78);line-height:1.5;max-width:520px}
 .dash-hero-summary strong{color:#F5EDE0;font-weight:700}
 .dash-hero-summary .hero-chip{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:3px 10px;margin:0 4px;font-size:.72rem;font-weight:600;cursor:pointer;transition:background .15s;backdrop-filter:blur(4px)}
@@ -12747,6 +12749,51 @@ function dailyCountsByDate(items, dateField, days) {
   return buckets;
 }
 
+// Gunun motivasyonu — tarihe gore deterministik rotasyon
+var DASH_QUOTES = [
+  'Kucuk adimlar buyuk hikayeler yazar.',
+  'Her gun yeni bir baslangic.',
+  'Detaylar farki yaratir.',
+  'Mukemmel degil, ilerici ol.',
+  'Bugun dunkune gore bir adim onde ol.',
+  'Sabir, Assos\'un taslarini yonttu.',
+  'Yavas yavas, ama durmadan.',
+  'Calismanin tadi surprizindedir.',
+  'Her tas yerine oturur.',
+  'Iyi is, sessiz gururdur.',
+  'Bir nefes al, sonra devam.',
+  'Zamani yonetemezsen hayat seni yonetir.',
+  'Icindeki kivilcimi unutma.',
+  'Sen yapmasan kim yapacak?',
+  'Kaliteyi sec, hiz kendi gelir.',
+  'Buyuk isler kucuk niyetlerle baslar.',
+  'En iyi rota, henuz cizilmemis olandir.',
+  'Isikla yaz, golgeyle yumusat.',
+  'Assos\'un ruzgari, taze fikirler getirir.',
+  'Bugun bir sey ogren, bir sey degistir.',
+  'Zeytin agaci gibi kokles.',
+  'Hikayeleri gorseller anlatir.',
+  'Acik kapilar, guzel insanlar getirir.',
+  'En degerli sey zamanindir.',
+  'Uret, paylas, gulumse.',
+  'Akdeniz\'in sabri senin de olsun.',
+  'Hedef degil, yon onemli.',
+  'Yol kendini gostermeden adim at.',
+  'Bir kasif gibi bak, bir ustabasi gibi calis.',
+  'Her gun Assos\'a yeni bir renk kat.',
+  'Basitlik, dikkatli dusunmenin sonucudur.',
+  'Ilk cumleyi yaz, gerisi gelir.',
+  'Bugun tamamlanan kucuk is, yarinin buyuk farki.',
+  'Bir fincan kahve, bir yeni fikir.',
+  'Iyi is, zamani duydurmaz.'
+];
+function getDailyQuote() {
+  // Gunun indeksi: YYYY-MM-DD -> deterministik hash
+  var d = getTRDate();
+  var seed = d.getFullYear() * 400 + (d.getMonth() + 1) * 31 + d.getDate();
+  return DASH_QUOTES[seed % DASH_QUOTES.length];
+}
+
 // Hero header — tebrik + gunun ozeti + saat + hava (varsa)
 function renderDashHero() {
   var el = document.getElementById('dash-hero');
@@ -12794,7 +12841,7 @@ function renderDashHero() {
       '<div class="dash-hero-inner">' +
         '<div class="dash-hero-left">' +
           '<div class="dash-hero-greet">' + emoji + ' ' + greet + (firstName ? ', ' + firstName : '') + '</div>' +
-          '<div class="dash-hero-title">Bugün Assos\'<em>u</em> kesfedelim</div>' +
+          '<div class="dash-hero-title"><span class="dash-hero-quote-mark">“</span>' + getDailyQuote() + '<span class="dash-hero-quote-mark right">”</span></div>' +
           '<div class="dash-hero-summary">' + summary + '</div>' +
         '</div>' +
         '<div class="dash-hero-right">' +
