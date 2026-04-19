@@ -419,6 +419,23 @@ async function loadSinglePost(slug) {
       document.head.appendChild(articleScript);
     } catch(e) { console.warn('Article schema injection failed:', e); }
 
+    // Canonical URL — blog detay sayfasi icin kritik SEO fix
+    // Onceden butun yazilar ayni canonical'e (https://assosukesfet.com/blog) isaret
+    // ediyordu -> Google duplicate content sayip yazilari index etmiyordu.
+    // Simdi her yazi kendi canonical URL'sine sahip.
+    var canonicalEl = document.querySelector('link[rel="canonical"]');
+    if (!canonicalEl) {
+      canonicalEl = document.createElement('link');
+      canonicalEl.rel = 'canonical';
+      document.head.appendChild(canonicalEl);
+    }
+    canonicalEl.href = url;
+
+    // SEO title + description
+    document.title = shareTitle;
+    var descMeta = document.querySelector('meta[name="description"]');
+    if (descMeta) descMeta.content = (p.excerpt || p.title || '').substring(0, 160);
+
     // OG meta tag'larını yazıya özel güncelle
     var ogTitle = document.querySelector('meta[property="og:title"]');
     var ogDesc = document.querySelector('meta[property="og:description"]');

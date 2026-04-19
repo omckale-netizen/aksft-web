@@ -1,10 +1,17 @@
 // Cloudflare Pages Middleware
-// Sosyal medya botlari icin mekan/rota detay sayfalarinda dinamik OG taglari
+// Sosyal medya botlari + arama motoru botlari icin mekan/rota detay sayfalarinda
+// server-side rendered HTML (OG tag + schema + canonical + icerik) servisi.
+// Googlebot JS render edebilir ama 2 pass gerekir (yavas indexleme); bu yontem
+// direkt indexlenir -> detay sayfalari Google'da daha hizli ve tam icerikle cikar.
 
 const BOT_USER_AGENTS = [
+  // Sosyal medya paylaşım bot'ları (OG tag okur)
   'facebookexternalhit', 'Facebot', 'Twitterbot', 'LinkedInBot',
   'WhatsApp', 'TelegramBot', 'Slackbot', 'Discord', 'Pinterest',
-  'Embedly', 'Iframely', 'vkShare'
+  'Embedly', 'Iframely', 'vkShare',
+  // Arama motoru bot'lari (SEO icin — detay sayfalari indexlenebilsin)
+  'Googlebot', 'Bingbot', 'YandexBot', 'Yandex', 'DuckDuckBot',
+  'Baiduspider', 'Applebot', 'Slurp' // Slurp = Yahoo
 ];
 
 const DEFAULT_OG_IMAGE = 'https://firebasestorage.googleapis.com/v0/b/assosu-kesfet.firebasestorage.app/o/site%2Fog-image.jpg?alt=media&token=70d62a44-9142-43d8-aee4-de790f5c7dcd';
@@ -22,13 +29,18 @@ function escHtml(str) {
     .replace(/>/g, '&gt;');
 }
 
-function buildOgHtml({ title, description, url, image }) {
+function buildOgHtml({ title, description, url, image, h1, bodyExtra }) {
+  // h1 varsa onu kullan, yoksa title'dan üret (Google "...-Assos'u Keşfet" kuyruğu istemiyor H1'de)
+  const heading = h1 || String(title).split(' — ')[0].split(' | ')[0];
+  const extra = bodyExtra || '';
   return `<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escHtml(title)}</title>
   <meta name="description" content="${escHtml(description)}">
+  <link rel="canonical" href="${escHtml(url)}">
   <meta property="og:title" content="${escHtml(title)}">
   <meta property="og:description" content="${escHtml(description)}">
   <meta property="og:type" content="website">
@@ -43,7 +55,15 @@ function buildOgHtml({ title, description, url, image }) {
   <meta name="twitter:description" content="${escHtml(description)}">
   <meta name="twitter:image" content="${image}">
 </head>
-<body><p>${escHtml(title)}</p></body>
+<body>
+  <header><a href="https://assosukesfet.com/">Assos'u Keşfet</a></header>
+  <main>
+    <h1>${escHtml(heading)}</h1>
+    <p>${escHtml(description)}</p>
+    ${extra}
+    <p><a href="${escHtml(url)}">${escHtml(url)}</a></p>
+  </main>
+</body>
 </html>`;
 }
 
