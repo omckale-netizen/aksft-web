@@ -429,7 +429,7 @@
 <div id="footer-placeholder"></div>
 
 <script src="firebase-loader.js?v=6"></script>
-<script src="shared.min.js?v=334"></script>
+<script src="shared.min.js?v=335"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: true });
@@ -737,7 +737,7 @@ function pageInit() {
       const cat = getHomeCatInfo(catKey);
       const bg = p.bgGradient || 'linear-gradient(135deg,' + cat.bg[0] + ',' + cat.bg[1] + ')';
       const imgHtml = p.image
-        ? '<img src="' + p.image + '" alt="' + p.title + '" loading="lazy" onload="this.classList.add(\'loaded\')" style="object-position:center ' + (p.imagePos != null ? p.imagePos : 50) + '%">'
+        ? '<img src="' + p.image + '" alt="' + p.title + (p._isVillage ? ' Köyü' : ' — ' + (cat.label || 'Gezilecek Yer')) + ' | Assos Ayvacık" loading="lazy" onload="this.classList.add(\'loaded\')" style="object-position:center ' + (p.imagePos != null ? p.imagePos : 50) + '%">'
         : '<span class="hp-place-emoji">' + p.emoji + '</span>';
       var placeHref = p._isVillage ? 'koyler/koy-detay.html?id=' + p.id : 'yerler/yer-detay.html?id=' + p.id;
       return '<a class="hp-place-card fade-up" href="' + placeHref + '" data-cat="' + catKey + '" style="animation-delay:' + (i * 0.05) + 's;">' +
@@ -890,7 +890,7 @@ function pageInit() {
       const featBadge = v.featured ? '<span style="position:absolute;top:8px;left:8px;z-index:2;font-size:.52rem;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:999px;background:rgba(212,147,90,.22);color:#D4935A;border:1px solid rgba(212,147,90,.35);backdrop-filter:blur(6px);display:inline-flex;align-items:center;gap:3px;">⭐ Öne Çıkan</span>' : '';
       return '<a class="hp-vc" href="mekanlar/mekan-detay.html?id=' + v.id + '">' +
         '<div class="hp-vc-img' + (hasImg ? ' has-photo' : '') + '" style="background:' + g + ';">' +
-          (hasImg ? '<img src="' + v.images[0] + '" alt="' + v.title + '" loading="lazy" width="350" height="350" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s ease;" onload="this.style.opacity=1;this.parentElement.style.animation=\'none\'">' : '<span style="font-size:2rem;line-height:1;">' + v.emoji + '</span>') +
+          (hasImg ? '<img src="' + v.images[0] + '" alt="' + v.title + ' — ' + (v.tagText || 'Assos Mekan') + (v.location ? ', ' + v.location : '') + ' | Assos' + '" loading="lazy" width="350" height="350" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s ease;" onload="this.style.opacity=1;this.parentElement.style.animation=\'none\'">' : '<span style="font-size:2rem;line-height:1;">' + v.emoji + '</span>') +
           featBadge +
           '<button class="venue-save-btn' + (window.isVenueSaved && isVenueSaved(v.id) ? ' saved' : '') + '" data-id="' + v.id + '" onclick="event.preventDefault();event.stopPropagation();toggleVenueSave(\'' + v.id + '\')" style="position:absolute;top:8px;right:8px;z-index:2;width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);color:#fff;font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;">' + (window.isVenueSaved && isVenueSaved(v.id) ? '♥' : '♡') + '</button>' +
         '</div>' +
@@ -1021,7 +1021,7 @@ async function loadHomeBlog() {
     grid.innerHTML = picked.map(function(r) {
       var doc = r.doc;
       var p = doc.data();
-      var imgHtml = p.image ? '<img src="' + p.image + '" alt="' + (p.title||'') + '" loading="lazy" onload="var el=this;setTimeout(function(){el.classList.add(\'loaded\')},50)">' : '<div class="hp-blog-emoji">' + (p.emoji||'📝') + '</div>';
+      var imgHtml = p.image ? '<img src="' + p.image + '" alt="' + (p.title||'') + ' — Assos Gezi Rehberi Blog" loading="lazy" onload="var el=this;setTimeout(function(){el.classList.add(\'loaded\')},50)">' : '<div class="hp-blog-emoji">' + (p.emoji||'📝') + '</div>';
       return '<a href="blog?yazi=' + doc.id + '" class="hp-blog-card">' +
         '<div class="hp-blog-img">' + imgHtml + '</div>' +
         '<div class="hp-blog-body">' +

@@ -138,7 +138,7 @@
 <div id="footer-placeholder"></div>
 
 <script src="firebase-loader.js?v=6"></script>
-<script src="shared.min.js?v=334"></script>
+<script src="shared.min.js?v=335"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
@@ -350,7 +350,7 @@ function pageInit() {
             <button class="mk-fc-save save-btn${saved.has(v.id)?' saved':''}" data-id="${v.id}" onclick="toggleSave('${v.id}',event)">
               ${saved.has(v.id)?'♥':'♡'}
             </button>
-            ${(v.images && v.images.length > 0) ? '<img class="mk-vc-photo" src="' + v.images[0] + '" alt="' + v.title + '" loading="lazy" onload="this.classList.add(\'loaded\');this.closest(\'.mk-vc-img\').classList.remove(\'has-img\')">' : '<span class="mk-fc-emoji">' + v.emoji + '</span>'}
+            ${(v.images && v.images.length > 0) ? '<img class="mk-vc-photo" src="' + v.images[0] + '" alt="' + v.title + ' — ' + (v.tagText || 'Assos Mekan') + (v.location ? ', ' + v.location : '') + ' | Assos Mekanları" loading="lazy" onload="this.classList.add(\'loaded\');this.closest(\'.mk-vc-img\').classList.remove(\'has-img\')">' : '<span class="mk-fc-emoji">' + v.emoji + '</span>'}
           </div>
           <div class="mk-fc-body">
             <span class="mk-fc-cat" style="background:${cs.bg};color:${cs.color};">${cs.label}</span>
@@ -452,7 +452,7 @@ function pageInit() {
       return `
         <div class="mk-vc fade-up" data-delay="${i * 0.05}" onclick="window.location.href='mekanlar/mekan-detay.html?id=${v.id}'" style="${isPremiumActive(v)?'border:2px solid rgba(212,147,90,.3);box-shadow:0 4px 20px rgba(212,147,90,.1);':''}">
           <div class="mk-vc-img${(v.images && v.images.length > 0) ? ' has-img' : ''}" style="background:${v.gradient};">
-            ${(v.images && v.images.length > 0) ? '<img class="mk-vc-photo" src="' + v.images[0] + '" alt="' + v.title + '" loading="lazy" onload="this.classList.add(\'loaded\');this.closest(\'.mk-vc-img\').classList.remove(\'has-img\')">' : '<span class="mk-vc-emoji">' + v.emoji + '</span>'}
+            ${(v.images && v.images.length > 0) ? '<img class="mk-vc-photo" src="' + v.images[0] + '" alt="' + v.title + ' — ' + (v.tagText || 'Assos Mekan') + (v.location ? ', ' + v.location : '') + ' | Assos Mekanları" loading="lazy" onload="this.classList.add(\'loaded\');this.closest(\'.mk-vc-img\').classList.remove(\'has-img\')">' : '<span class="mk-vc-emoji">' + v.emoji + '</span>'}
             <div class="mk-vc-badges">
               ${isPremiumActive(v) ? '<span style="font-size:.56rem;font-weight:800;letter-spacing:.06em;padding:3px 9px;border-radius:4px;background:linear-gradient(135deg,#C9963A,#E8C46A);color:#5C3D0E;text-transform:uppercase;">Premium</span>' : ''}
               ${v.featured && !isPremiumActive(v) ? '<span class="mk-vc-featured">⭐ Öne Çıkan</span>' : ''}

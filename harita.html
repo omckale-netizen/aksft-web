@@ -151,7 +151,7 @@
 <div id="footer-placeholder"></div>
 
 <script src="firebase-loader.js?v=6"></script>
-<script src="shared.min.js?v=334"></script>
+<script src="shared.min.js?v=335"></script>
 <script>
 const FALLBACK_COORDS = {
   'athena-tapinagi':[39.4907,26.3380],'assos-antik-liman':[39.4862,26.3365],
@@ -372,8 +372,8 @@ function openPanel(item) {
   document.getElementById('popup-btns').innerHTML =
     '<a class="mp-btn mp-btn-primary" href="'+item.link+'">'+detailLabel+'</a>' +
     '<div class="popup-btn-row">' +
-      '<a class="mp-btn mp-btn-nav" href="'+gUrl+'" target="_blank" rel="noopener">📍 Google Maps</a>' +
-      '<a class="mp-btn mp-btn-nav" href="'+aUrl+'" target="_blank" rel="noopener">🗺 Apple Maps</a>' +
+      '<a class="mp-btn mp-btn-nav" href="'+gUrl+'" target="_blank" rel="noopener noreferrer">📍 Google Maps</a>' +
+      '<a class="mp-btn mp-btn-nav" href="'+aUrl+'" target="_blank" rel="noopener noreferrer">🗺 Apple Maps</a>' +
     '</div>';
 
   overlay.classList.add('open');

@@ -1913,8 +1913,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
         <h2 style="margin:0;">Yerleşimler & Yerler</h2>
         <div style="display:flex;gap:6px;">
-          <a href="https://assosukesfet.com/koyler" target="_blank" class="btn btn-secondary btn-sm" style="font-size:.7rem;">🏘 Köyler Sayfası ↗</a>
-          <a href="https://assosukesfet.com/yerler" target="_blank" class="btn btn-secondary btn-sm" style="font-size:.7rem;">📍 Yerler Sayfası ↗</a>
+          <a href="https://assosukesfet.com/koyler" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="font-size:.7rem;">🏘 Köyler Sayfası ↗</a>
+          <a href="https://assosukesfet.com/yerler" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="font-size:.7rem;">📍 Yerler Sayfası ↗</a>
         </div>
       </div>
       <p class="page-sub">Yerleşimleri ve gezilecek yerleri yönetin.</p>
@@ -13193,7 +13193,7 @@ function renderVenueTable(resetPage) {
           <button title="Geri Al" onclick="restoreVenue('${v.id}')"><i data-lucide="rotate-ccw"></i></button>
           <button class="danger" title="Kalıcı Sil" onclick="permanentDeleteVenue('${v.id}')"><i data-lucide="x"></i></button>
           ` : `
-          <a href="https://assosukesfet.com/mekanlar/mekan-detay?id=${v.id}" target="_blank" title="Sayfayı Görüntüle"><i data-lucide="external-link"></i></a>
+          <a href="https://assosukesfet.com/mekanlar/mekan-detay?id=${v.id}" target="_blank" rel="noopener" title="Sayfayı Görüntüle"><i data-lucide="external-link"></i></a>
           <button title="Düzenle" onclick="openVenueModal('${v.id}')"><i data-lucide="pencil"></i></button>
           ${v.ownerEmail ? '<button title="Sahibine mail gönder: ' + esc(v.ownerEmail) + '" onclick="sendWelcomeMailToVenue(\'' + v.id + '\')"><i data-lucide="mail"></i></button>' : ''}
           <button class="danger" title="Çöp Kutusuna Taşı" onclick="confirmDeleteVenue('${v.id}')"><i data-lucide="trash-2"></i></button>
@@ -14213,7 +14213,7 @@ function renderRoutesTable() {
         <td>${r.zorluk || '-'}</td>
         <td>${r.durak || (r.stops||[]).length}</td>
         <td>
-          <a class="btn-icon" href="rotalar/rota-detay.html?id=${r.id}" target="_blank" title="Rotayi Gor" style="text-decoration:none">&#128065;</a>
+          <a class="btn-icon" href="rotalar/rota-detay.html?id=${r.id}" target="_blank" rel="noopener" title="Rotayi Gor" style="text-decoration:none">&#128065;</a>
           <button class="btn-icon" title="Düzenle" onclick="openRouteModal('${r.id}')" style="margin-left:4px">&#9998;</button>
           <button class="btn-icon" title="Sil" onclick="confirmDeleteRoute('${r.id}')" style="margin-left:4px;color:var(--red)">&#128465;</button>
         </td>
@@ -14442,7 +14442,7 @@ function renderVPTable() {
         '<td style="' + (isPlaces ? '' : 'display:none') + '"><span class="badge badge-cat">' + (x.category || '-') + '</span></td>' +
         '<td>' + (x.image ? '<span class="badge badge-open" style="font-size:.65rem">Var</span>' : '<span class="badge" style="color:var(--text-muted);font-size:.65rem">Yok</span>') + '</td>' +
         '<td>' +
-          '<a href="https://assosukesfet.com/' + (isPlaces ? 'yerler/yer-detay?id=' : 'koyler/koy-detay?id=') + x.id + '" target="_blank" class="btn-icon" title="Sayfayı Görüntüle" style="text-decoration:none;color:var(--terra)">↗</a>' +
+          '<a href="https://assosukesfet.com/' + (isPlaces ? 'yerler/yer-detay?id=' : 'koyler/koy-detay?id=') + x.id + '" target="_blank" rel="noopener" class="btn-icon" title="Sayfayı Görüntüle" style="text-decoration:none;color:var(--terra)">↗</a>' +
           '<button class="btn-icon" title="Görsel" onclick="openPlaceImgModal(\'' + x.id + '\',\'' + (isPlaces ? 'places' : 'villages') + '\')">&#128247;</button>' +
           '<button class="btn-icon" title="Düzenle" onclick="openVPModal(\'' + x.id + '\')" style="margin-left:4px">&#9998;</button>' +
           '<button class="btn-icon" title="Sil" onclick="confirmDeleteVP(\'' + x.id + '\')" style="margin-left:4px;color:var(--red)">&#128465;</button>' +
@@ -16116,7 +16116,7 @@ async function renderBlogTable() {
         '<td>' + st + '</td>' +
         '<td style="font-size:.85rem;font-weight:700;color:var(--navy)">' + views + '</td>' +
         '<td>' +
-          '<a class="btn-icon" href="blog?yazi=' + p.id + '" target="_blank" title="Görüntüle" style="text-decoration:none;margin-right:4px">👁</a>' +
+          '<a class="btn-icon" href="blog?yazi=' + p.id + '" target="_blank" rel="noopener" title="Görüntüle" style="text-decoration:none;margin-right:4px">👁</a>' +
           '<button class="btn-icon" title="Düzenle" onclick="openBlogModal(\'' + p.id + '\')" style="margin-right:4px">✏️</button>' +
           '<button class="btn-icon" title="Sil" onclick="deleteBlogPost(\'' + p.id + '\')" style="color:var(--red)">🗑</button>' +
         '</td></tr>';
@@ -20182,7 +20182,7 @@ async function loadBackupList() {
           '<div style="font-size:.82rem;font-weight:600;color:var(--navy)">' + (b.target || 'Yedek') + '</div>' +
           '<div style="font-size:.72rem;color:var(--text-muted)">' + date + ' · ' + sizeKB + ' · ' + typeLabel + '</div>' +
         '</div>' +
-        (b.backupUrl ? '<a href="' + b.backupUrl + '" target="_blank" class="btn btn-sm btn-secondary" style="flex-shrink:0;font-size:.7rem">⬇ İndir</a>' : '') +
+        (b.backupUrl ? '<a href="' + b.backupUrl + '" target="_blank" rel="noopener" class="btn btn-sm btn-secondary" style="flex-shrink:0;font-size:.7rem">⬇ İndir</a>' : '') +
       '</div>';
     }).join('');
   } catch(err) {
