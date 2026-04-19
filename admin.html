@@ -8695,11 +8695,16 @@ async function loadCurrentUserRole(firebaseUser) {
       if (!snap.exists) {
         await db.collection('users').doc(firebaseUser.uid).set({
           email: firebaseUser.email, name: baseUser.name, role: 'admin', active: true,
-          createdAt: new Date().toISOString(), createdBy: 'system'
+          createdAt: new Date().toISOString(), createdBy: 'system',
+          lastLogin: new Date().toISOString()
         });
       } else {
         var data = snap.data();
         baseUser.name = data.name || baseUser.name;
+        // Super admin icin de lastLogin guncelle
+        db.collection('users').doc(firebaseUser.uid)
+          .update({ lastLogin: new Date().toISOString() })
+          .catch(function(err) { console.warn('lastLogin update failed (super):', err && err.code, err && err.message); });
       }
     } catch(e) {}
     attachCurrentUserListener(firebaseUser.uid);
