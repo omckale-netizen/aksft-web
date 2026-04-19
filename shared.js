@@ -1222,6 +1222,47 @@ function renderNav(opts = {}) {
     if (window.syncFavToFirebase) window.syncFavToFirebase();
   };
 
+  // Tum favori butonlarini localStorage ile senkronlastir
+  // Detay sayfasinda favoriye eklenen bir kart, back navigation ile donuldukten
+  // sonra DOM'da eski state'i gosteriyordu (bfcache). Bu fonksiyon tum
+  // .venue-save-btn ve .place-save-btn dugmelerini localStorage'a gore yeniler.
+  window.resyncFavButtons = function() {
+    try {
+      var savedVenues = new Set(JSON.parse(localStorage.getItem(SD_KEY) || '[]'));
+      document.querySelectorAll('.venue-save-btn[data-id]').forEach(function(btn) {
+        var id = btn.getAttribute('data-id');
+        var isSaved = savedVenues.has(id);
+        btn.classList.toggle('saved', isSaved);
+        // Butonun icerigi farkli olabilir (♡♥ metin veya emoji). Sadece
+        // metin node'u ise guncelle, icinde SVG varsa dokunma.
+        if (btn.children.length === 0) btn.textContent = isSaved ? '♥' : '♡';
+      });
+      var savedPlaces = new Set(JSON.parse(localStorage.getItem(SD_PLACE_KEY) || '[]'));
+      document.querySelectorAll('.place-save-btn[data-id]').forEach(function(btn) {
+        var id = btn.getAttribute('data-id');
+        var isSaved = savedPlaces.has(id);
+        btn.classList.toggle('saved', isSaved);
+        if (btn.children.length === 0) btn.textContent = isSaved ? '♥' : '♡';
+      });
+      if (window.updateSaveNavCount) window.updateSaveNavCount();
+    } catch(e) {}
+  };
+
+  // Back navigation (bfcache) ile sayfaya donus - favori butonlarini senkronla
+  window.addEventListener('pageshow', function(e) {
+    // e.persisted = true ise bfcache'ten yuklendi - JS yeniden calismiyor
+    // e.persisted = false ise normal yeniden yukleme - zaten guncel render
+    if (e.persisted) {
+      window.resyncFavButtons();
+    }
+  });
+  // Tab gorunur hale gelince de senkronla (diger sekmeden gelindi ise)
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') {
+      window.resyncFavButtons();
+    }
+  });
+
   var _sdJustOpened = false;
   window.openSaveDrawer = function () {
     try { renderSaveDrawer(); } catch(e) { console.error('Favori render hatası:', e); }
