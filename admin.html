@@ -7061,18 +7061,27 @@ async function createUserSession(user) {
     }
     var uaInfo = _parseUA(navigator.userAgent);
     var now = new Date().toISOString();
-    await db.collection('user_sessions').doc(sid).set({
-      uid: user.uid,
-      email: user.email || '',
-      sessionId: sid,
-      device: uaInfo.device,
-      browser: uaInfo.browser,
-      os: uaInfo.os,
-      userAgent: (navigator.userAgent || '').slice(0, 300),
-      loginAt: now,
-      lastActivity: now,
-      isCurrent: true
-    });
+    var docRef = db.collection('user_sessions').doc(sid);
+    // Firestore rules 'update' izni yalnizca lastActivity + isCurrent degisimine
+    // izin verir. F5'te tum alanlarla set() -> rule reject. Bu yuzden:
+    // Doc varsa sadece heartbeat alanlarini update; yoksa tam create.
+    var existing = await docRef.get();
+    if (existing.exists) {
+      await docRef.update({ lastActivity: now, isCurrent: true });
+    } else {
+      await docRef.set({
+        uid: user.uid,
+        email: user.email || '',
+        sessionId: sid,
+        device: uaInfo.device,
+        browser: uaInfo.browser,
+        os: uaInfo.os,
+        userAgent: (navigator.userAgent || '').slice(0, 300),
+        loginAt: now,
+        lastActivity: now,
+        isCurrent: true
+      });
+    }
     // Heartbeat baslat (her 3 dakikada lastActivity guncelle)
     if (_sessionHeartbeat) clearInterval(_sessionHeartbeat);
     _sessionHeartbeat = setInterval(async function() {
