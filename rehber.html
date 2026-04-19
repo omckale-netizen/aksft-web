@@ -577,6 +577,51 @@
   </div>
 </section>
 
+<!-- ═══ HİKAYELER — Assos'un ilginç detayları ═══ -->
+<section class="rh-section">
+  <div class="rh-container">
+
+    <div class="fade-up rh-sec-header">
+      <div class="rh-sec-label-row">
+        <div class="rh-sec-line rh-sec-line-l"></div>
+        <p class="rh-sec-label">Hikâyeler</p>
+        <div class="rh-sec-line rh-sec-line-r"></div>
+      </div>
+      <h2 class="rh-sec-title">Her taşın bir hikâyesi var</h2>
+      <p class="rh-sec-desc">Turistlerin çoğunun bilmediği, Assos'un ilginç detayları — antik dönemden Osmanlı'ya uzanan hikâyeler.</p>
+    </div>
+
+    <div class="story-grid">
+
+      <!-- Hikaye 1: Sarcophagus -->
+      <article class="story-card fade-up">
+        <span class="story-emoji">🪦</span>
+        <span class="story-tag">Antik Dönem</span>
+        <h3 class="story-title">"Sarcophagus" kelimesi Assos'tan gelir</h3>
+        <p class="story-text">Antik dönemde Assos andezit taşı "et yiyen taş" olarak bilinirdi. İçine konulan cesedi dişler hariç 40 günde çürütürdü. Yunanca <em>sarx</em> (et) ve <em>phagein</em> (yemek) birleşiminden doğan "sarcophagus" (lahit) terimi, kökenini bizzat Assos'un bu taşından alır. Assos lahitleri Suriye, Lübnan, Mısır ve Roma'ya kadar ihraç edilen küresel bir ürün haline geldi.</p>
+      </article>
+
+      <!-- Hikaye 2: Aristoteles -->
+      <article class="story-card fade-up">
+        <span class="story-emoji">📜</span>
+        <span class="story-tag">MÖ 347</span>
+        <h3 class="story-title">Aristoteles neden Assos'a geldi?</h3>
+        <p class="story-text">Platon'un ölümünden sonra Aristoteles, dostu ve siyasi danışmanı Hermias'ın davetiyle Assos'a geldi. Üç yıl boyunca burada bir felsefe okulu kurdu, deniz biyolojisi üzerine gözlemler yaptı ve "Historia Animalium" eserinin temellerini attı. Hermias'ın yeğeni Pythias ile evlenerek kente akrabalık bağıyla da bağlandı.</p>
+      </article>
+
+      <!-- Hikaye 3: Babakale -->
+      <article class="story-card fade-up">
+        <span class="story-emoji">🏰</span>
+        <span class="story-tag">1723</span>
+        <h3 class="story-title">Osmanlı'nın yaptırdığı son kale</h3>
+        <p class="story-text">Babakale Kalesi, 1723'te Sultan III. Ahmet tarafından Ege korsanlarına karşı inşa ettirildi. Osmanlı İmparatorluğu'nun yaptırdığı en son kaledir. Kaleyi ziyaret edenlere "Asya kıtasının en batı ucuna ulaştıklarını" belgeleyen sembolik bir sertifika verilir.</p>
+      </article>
+
+    </div>
+
+  </div>
+</section>
+
 <!-- FAQ -->
 <section class="rh-section rh-section-mid rh-faq-sec">
   <div class="rh-faq-deco"></div>
@@ -1018,8 +1063,18 @@
 .rh-seo-cols{columns:2;column-gap:32px;font-size:.84rem;color:var(--text-mid);line-height:1.9}
 .rh-seo-cols p{margin-bottom:14px}
 
+/* ═══ Hikayeler (stories) ═══ */
+.story-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:36px}
+.story-card{background:#fff;border-radius:20px;padding:32px 26px 28px;box-shadow:0 2px 14px rgba(26,39,68,.06);border:1px solid rgba(26,39,68,.05);transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s;position:relative;overflow:hidden}
+.story-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--terra),var(--terra-light))}
+.story-card:hover{transform:translateY(-5px);box-shadow:0 16px 44px rgba(26,39,68,.1)}
+.story-emoji{font-size:2rem;line-height:1;margin-bottom:16px;display:block}
+.story-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.05rem;color:var(--navy);margin-bottom:12px;line-height:1.35;letter-spacing:-.01em}
+.story-text{font-size:.85rem;color:var(--text-mid);line-height:1.75;margin-bottom:0}
+.story-tag{display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--terra);background:rgba(196,82,26,.08);padding:4px 10px;border-radius:6px;margin-bottom:14px}
+
 /* ═══ Responsive ═══ */
-@media(max-width:860px){.season-card-grid{grid-template-columns:repeat(2,1fr) !important}}
+@media(max-width:860px){.season-card-grid{grid-template-columns:repeat(2,1fr) !important}.story-grid{grid-template-columns:1fr;gap:14px}}
 @media(max-width:768px){
   .ulasim-grid{grid-template-columns:1fr !important}
   .ulasim-tips{grid-template-columns:1fr !important}
