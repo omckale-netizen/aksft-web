@@ -241,6 +241,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .stat-card .stat-trend.flat{background:rgba(113,128,150,.1);color:var(--text-muted)}
 .stat-card.terra .stat-val{color:var(--terra)}
 .stat-card.green .stat-val{color:var(--green)}
+.stat-breakdown{display:inline-flex;gap:6px;margin-top:2px;flex-wrap:wrap}
+.stat-bd-item{display:inline-flex;align-items:center;gap:3px;font-size:.68rem;font-weight:700;color:var(--text);background:rgba(26,39,68,.05);border-radius:6px;padding:2px 7px;line-height:1.3}
+[data-theme="dark"] .stat-bd-item{background:rgba(255,255,255,.06)}
 .stat-card .spark{position:absolute;bottom:8px;right:10px;opacity:.55;pointer-events:none;transition:opacity var(--transition)}
 .stat-card[onclick]:hover .spark{opacity:.9}
 [data-theme="dark"] .stat-card[onclick]:hover{box-shadow:0 8px 20px rgba(0,0,0,.3)}
@@ -5100,6 +5103,9 @@ const fbStorage = firebase.storage();
 
 let draftData = { venues: [], places: [], villages: [], routes: [] };
 let ORIGINAL_DATA = { venues: [], places: [], villages: [], routes: [] };
+// Blog: burada deklare edilir (yukarida) — boylece loadDataFromFirestore
+// ve renderDashboard ayni lexical variable'a erisiyor. Eski yer line ~16612'dan alindi.
+let blogPosts = [];
 
 // Load data from Firestore
 async function loadDataFromFirestore() {
@@ -5116,7 +5122,7 @@ async function loadDataFromFirestore() {
     draftData.villages = results[2].status === 'fulfilled' ? results[2].value.docs.map(d => ({ id: d.id, ...d.data() })) : [];
     draftData.routes = results[3].status === 'fulfilled' ? results[3].value.docs.map(d => ({ id: d.id, ...d.data() })) : [];
     if (results[4].status === 'fulfilled') {
-      window.blogPosts = results[4].value.docs.map(d => ({ id: d.id, ...d.data() }));
+      blogPosts = results[4].value.docs.map(d => ({ id: d.id, ...d.data() }));
     }
     ORIGINAL_DATA = JSON.parse(JSON.stringify({ venues: draftData.venues, places: draftData.places, villages: draftData.villages, routes: draftData.routes }));
     var failed = results.filter(r => r.status === 'rejected');
@@ -5151,7 +5157,7 @@ function refreshDashboardData() {
     if (results[1].status === 'fulfilled') draftData.places = results[1].value.docs.map(function(d) { return { id: d.id, ...d.data() }; });
     if (results[2].status === 'fulfilled') draftData.villages = results[2].value.docs.map(function(d) { return { id: d.id, ...d.data() }; });
     if (results[3].status === 'fulfilled') draftData.routes = results[3].value.docs.map(function(d) { return { id: d.id, ...d.data() }; });
-    if (results[4].status === 'fulfilled') window.blogPosts = results[4].value.docs.map(function(d) { return { id: d.id, ...d.data() }; });
+    if (results[4].status === 'fulfilled') blogPosts = results[4].value.docs.map(function(d) { return { id: d.id, ...d.data() }; });
     // Eger dashboard hala acik ise yeniden render
     var page = document.getElementById('page-dashboard');
     if (page && page.classList.contains('active')) {
@@ -13134,7 +13140,22 @@ function renderDashboard() {
   document.getElementById('stats-grid').innerHTML =
     mkStat({ label:'🏪 Mekanlar', value:published, valSub:'/' + v.length, sub:published + ' yayında' + (draft ? ', ' + draft + ' taslak' : ''), onclick:'showPage(\'venues\')' }) +
     mkStat({ label:'🏛 Yerler', value:p.length, onclick:'goToPlaces()' }) +
-    mkStat({ label:'🏘 Köyler', value:vi.length, onclick:'goToVillages()' }) +
+    (function() {
+      var koy = vi.filter(function(x){ return (x.type || 'koy') === 'koy'; }).length;
+      var belde = vi.filter(function(x){ return x.type === 'belde'; }).length;
+      var mahalle = vi.filter(function(x){ return x.type === 'mahalle'; }).length;
+      var breakdown = '<div class="stat-breakdown">' +
+        '<span class="stat-bd-item" title="Köy">🏘 ' + koy + '</span>' +
+        (belde > 0 ? '<span class="stat-bd-item" title="Belde">🏛 ' + belde + '</span>' : '') +
+        (mahalle > 0 ? '<span class="stat-bd-item" title="Mahalle">📍 ' + mahalle + '</span>' : '') +
+      '</div>';
+      return mkStat({
+        label:'🏘 Yerleşim',
+        value: vi.length,
+        sub: breakdown,
+        onclick:'goToVillages()'
+      });
+    })() +
     mkStat({ label:'🗺 Rotalar', value:r.length, onclick:'showPage(\'routes\')' }) +
     mkStat({
       label:'✍️ Blog',
@@ -16609,7 +16630,8 @@ function updateNotifBadge() {
 /* ══════════════════════════════════════════════════
    BLOG YONETIMI
 ══════════════════════════════════════════════════ */
-let blogPosts = [];
+// blogPosts yukarida (draftData yaninda) deklare edildi — burada yeniden
+// deklarasyon SyntaxError verir. editingBlogId lokal kalir.
 let editingBlogId = null;
 
 async function renderBlogTable() {
@@ -18495,7 +18517,7 @@ async function preloadCalendarSources() {
     // Blog — blogPosts global
     if (typeof blogPosts === 'undefined' || !Array.isArray(blogPosts) || blogPosts.length === 0) {
       db.collection('blog_posts').orderBy('createdAt','desc').limit(100).get().then(function(snap) {
-        window.blogPosts = snap.docs.map(function(d) { return { id: d.id, ...d.data() }; });
+        blogPosts = snap.docs.map(function(d) { return { id: d.id, ...d.data() }; });
       }).catch(function() {});
     }
     // Messages — allMessages global (for message toggle)
