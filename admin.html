@@ -8737,8 +8737,10 @@ async function loadCurrentUserRole(firebaseUser) {
     window._currentUser = baseUser;
     // Geçici erişim süresi dolmuşsa temizle (asenkron, UI'ı bloklamaz)
     cleanupExpiredTempAccess(firebaseUser.uid, data).catch(function() {});
-    // Son giriş güncelle
-    try { db.collection('users').doc(firebaseUser.uid).update({ lastLogin: new Date().toISOString() }); } catch(e) {}
+    // Son giriş güncelle — promise reject'leri de yakala (rule hatasi icin gorunur log)
+    db.collection('users').doc(firebaseUser.uid)
+      .update({ lastLogin: new Date().toISOString() })
+      .catch(function(err) { console.warn('lastLogin update failed:', err && err.code, err && err.message); });
     attachCurrentUserListener(firebaseUser.uid);
     // Aktif oturum kaydi olustur + heartbeat baslat
     try { createUserSession(baseUser); } catch(e) { console.warn('Session create:', e); }
