@@ -177,8 +177,15 @@
     }
 
     function araSubmit() {
-      var q = document.getElementById('ara-input').value.trim();
-      if (!q) { document.getElementById('ara-input').focus(); return; }
+      var inp = document.getElementById('ara-input');
+      var q = inp.value.trim();
+      if (!q) { inp.focus(); return; }
+      if (q.length < 2) {
+        // Kullaniciyi sessizce reddetme — bilgilendir
+        showAraHint('En az 2 karakter yazın');
+        inp.focus();
+        return;
+      }
       var newUrl = '/ara.html?q=' + encodeURIComponent(q);
       if (location.pathname.replace(/\/$/, '').endsWith('/ara.html') || location.pathname.endsWith('/ara')) {
         history.replaceState(null, '', newUrl);
@@ -186,6 +193,19 @@
       } else {
         location.href = newUrl;
       }
+    }
+
+    // Ara ipucu mesaji (input altinda kirmizi flash)
+    function showAraHint(msg) {
+      var sub = document.getElementById('ara-sub');
+      if (!sub) return;
+      var prev = sub.innerHTML;
+      sub.innerHTML = '<span style="color:#F87171">⚠ ' + msg + '</span>';
+      clearTimeout(window._araHintTimer);
+      window._araHintTimer = setTimeout(function() {
+        // Sadece mesaj hala goruluyor ise geri getir
+        if (sub.innerHTML.indexOf('⚠') > -1) sub.innerHTML = prev;
+      }, 2500);
     }
 
     function araQuick(term) {
@@ -199,7 +219,8 @@
     var _shownCount = {}; // { venue: 24, place: 24, ... }
 
     function runSearch(q) {
-      if (!q || q.length < 2) return;
+      if (!q) return;
+      if (q.length < 2) { showAraHint('Arama için en az 2 karakter gerekli'); return; }
       document.title = '"' + q + '" için arama — Assos\'u Keşfet';
       document.getElementById('ara-title').innerHTML = '"<em>' + escAttr(q) + '</em>"';
       document.getElementById('ara-popular').style.display = 'none';
