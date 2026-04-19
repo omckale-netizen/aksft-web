@@ -1286,16 +1286,21 @@ function renderNav(opts = {}) {
     var img = e.target;
     if (!img || img.tagName !== 'IMG') return;
     if (img.dataset && img.dataset.fallback === 'true') return; // sonsuz loop onle
-    if (!img.src) return; // bos src - ignore
+    // img.src resolved URL doner — bos attribute'ta bile document URL verir.
+    // Gercek attribute'u oku — bos ise (ornek: lightbox'un initial placeholder img'i)
+    // error dinleyicisini atla.
+    var srcAttr = img.getAttribute('src');
+    if (!srcAttr) return;
+    // Bilinen parent container yoksa hiç dokunma — aksi halde lightbox gibi
+    // ozel durumlardaki img'leri yanlislikla gizleyebiliyorduk.
+    var parent = img.closest('.mk-vc-img,.mk-fc-img,.place-img-box,.hp-vc-img,.hp-place-img,.ara-card-img,.vp-gimg,.bp-img-wrap,.blog-card-img,.sd-venue-img,.blog-skel-img');
+    if (!parent) return;
     try { img.dataset.fallback = 'true'; } catch(err) {}
     img.style.display = 'none';
-    var parent = img.closest('.mk-vc-img,.mk-fc-img,.place-img-box,.hp-vc-img,.hp-place-img,.ara-card-img,.vp-gimg,.bp-img-wrap,.blog-card-img,.sd-venue-img,.blog-skel-img');
-    if (parent) {
-      parent.classList.remove('has-img','has-photo','is-loaded');
-      parent.classList.add('img-error');
-      var emoji = parent.querySelector('[class*="-emoji"]');
-      if (emoji) { emoji.style.display = ''; emoji.style.opacity = '1'; }
-    }
+    parent.classList.remove('has-img','has-photo','is-loaded');
+    parent.classList.add('img-error');
+    var emoji = parent.querySelector('[class*="-emoji"]');
+    if (emoji) { emoji.style.display = ''; emoji.style.opacity = '1'; }
   }, true);
 
   // Back navigation (bfcache) ile sayfaya donus - favori butonlarini senkronla
@@ -3821,6 +3826,9 @@ function renderVenuePage(venueId) {
     lbIdx = idx;
     const lb = document.getElementById('vp-lightbox');
     const lbImg = document.getElementById('vp-lb-img');
+    // Global error handler eskiden bos src'li lightbox img'i gizliyordu — resetle
+    lbImg.style.display = '';
+    if (lbImg.dataset) delete lbImg.dataset.fallback;
     lbImg.src = lbImgs[lbIdx];
     lbImg.alt = (v.title || 'Mekan') + ' — fotoğraf ' + (lbIdx + 1);
     document.getElementById('vp-lb-counter').textContent = (lbIdx + 1) + ' / ' + lbImgs.length;
