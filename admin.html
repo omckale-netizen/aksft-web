@@ -241,6 +241,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .stat-card .stat-trend.flat{background:rgba(113,128,150,.1);color:var(--text-muted)}
 .stat-card.terra .stat-val{color:var(--terra)}
 .stat-card.green .stat-val{color:var(--green)}
+.stat-card .spark{position:absolute;bottom:8px;right:10px;opacity:.55;pointer-events:none;transition:opacity var(--transition)}
+.stat-card[onclick]:hover .spark{opacity:.9}
 [data-theme="dark"] .stat-card[onclick]:hover{box-shadow:0 8px 20px rgba(0,0,0,.3)}
 
 /* ── NOTIF BELL ── */
@@ -561,7 +563,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 .dash-cat-name{flex:1;font-size:.84rem;font-weight:600;color:var(--text)}
 .dash-cat-bar{flex:2;height:6px;border-radius:3px;background:rgba(0,0,0,.04);overflow:hidden}
 .dash-cat-fill{height:100%;border-radius:3px;transition:width .5s}
-.dash-cat-count{font-size:.78rem;font-weight:700;color:var(--text-light);min-width:20px;text-align:right}
+.dash-cat-count{font-size:.78rem;font-weight:700;color:var(--text-light);min-width:48px;text-align:right;display:inline-flex;align-items:baseline;justify-content:flex-end;gap:2px}
 .recent-item{display:flex;align-items:center;gap:14px;padding:13px 20px;border-bottom:1px solid rgba(0,0,0,.03)}
 .recent-item:last-child{border-bottom:none}
 .recent-emoji{font-size:1.4rem;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:var(--cream);border-radius:var(--radius-sm);flex-shrink:0}
@@ -12707,6 +12709,44 @@ function getTRDate() {
   return new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Istanbul' }));
 }
 
+// Sparkline — kucuk SVG grafik. data: number[], color: string
+function sparklineSVG(data, color, width, height) {
+  if (!Array.isArray(data) || data.length === 0) return '';
+  width = width || 60;
+  height = height || 18;
+  var max = Math.max.apply(null, data), min = Math.min.apply(null, data);
+  var range = max - min || 1;
+  var step = data.length > 1 ? width / (data.length - 1) : 0;
+  var points = data.map(function(v, i) {
+    var x = (i * step).toFixed(1);
+    var y = (height - ((v - min) / range) * height).toFixed(1);
+    return x + ',' + y;
+  }).join(' ');
+  // Fill area (bottom)
+  var areaPoints = '0,' + height + ' ' + points + ' ' + width + ',' + height;
+  return '<svg class="spark" width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + ' ' + height + '" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+    '<polygon points="' + areaPoints + '" fill="' + color + '" fill-opacity=".15"/>' +
+    '<polyline points="' + points + '" fill="none" stroke="' + color + '" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>' +
+  '</svg>';
+}
+
+// Son N gundeki gunluk sayim — createdAt gore gruplama
+function dailyCountsByDate(items, dateField, days) {
+  days = days || 7;
+  var buckets = new Array(days).fill(0);
+  var now = new Date(); now.setHours(0,0,0,0);
+  var startMs = now.getTime() - (days - 1) * 86400000;
+  items.forEach(function(it) {
+    var raw = it && it[dateField];
+    if (!raw) return;
+    var t = raw && raw.toDate ? raw.toDate().getTime() : new Date(raw).getTime();
+    if (isNaN(t) || t < startMs) return;
+    var dayIdx = Math.floor((t - startMs) / 86400000);
+    if (dayIdx >= 0 && dayIdx < days) buckets[dayIdx]++;
+  });
+  return buckets;
+}
+
 // Hero header — tebrik + gunun ozeti + saat + hava (varsa)
 function renderDashHero() {
   var el = document.getElementById('dash-hero');
@@ -12943,15 +12983,11 @@ function renderDashboard() {
   v.forEach(x => { if (getVenueStatus(x) === true) openCount++; });
   var blogCount = (typeof blogPosts !== 'undefined' ? blogPosts.length : 0);
 
-  // Blog delta — son 7 gunde eklenen yazi sayisi
-  var weekAgo = Date.now() - 7 * 86400000;
-  var blogWeekDelta = 0;
-  if (typeof blogPosts !== 'undefined' && Array.isArray(blogPosts)) {
-    blogWeekDelta = blogPosts.filter(function(bp) {
-      if (!bp || !bp.createdAt) return false;
-      return new Date(bp.createdAt).getTime() >= weekAgo;
-    }).length;
-  }
+  // Blog delta — son 7 gunde eklenen yazi sayisi + sparkline
+  var blogArr = (typeof blogPosts !== 'undefined' && Array.isArray(blogPosts)) ? blogPosts : [];
+  var blogDaily = dailyCountsByDate(blogArr, 'createdAt', 7);
+  var blogWeekDelta = blogDaily.reduce(function(s, n) { return s + n; }, 0);
+  var blogSpark = blogWeekDelta > 0 ? sparklineSVG(blogDaily, '#8B5CF6') : '';
   var openPct = published > 0 ? Math.round(openCount / published * 100) : 0;
 
   function mkStat(opts) {
@@ -12968,6 +13004,7 @@ function renderDashboard() {
       var tIcon = tClass === 'up' ? '↑' : tClass === 'down' ? '↓' : '·';
       html += '<div class="stat-trend ' + tClass + '">' + tIcon + ' ' + opts.trend.text + '</div>';
     }
+    if (opts.spark) html += opts.spark;
     html += '</div>';
     return html;
   }
@@ -12981,7 +13018,8 @@ function renderDashboard() {
       label:'✍️ Blog',
       value:blogCount,
       onclick:'showPage(\'blog\')',
-      trend: blogWeekDelta > 0 ? { dir:'up', text:'+' + blogWeekDelta + ' bu hafta' } : null
+      trend: blogWeekDelta > 0 ? { dir:'up', text:'+' + blogWeekDelta + ' bu hafta' } : null,
+      spark: blogSpark
     }) +
     mkStat({
       label:'Su An Acik',
@@ -12999,16 +13037,18 @@ function renderDashboard() {
   const catCounts = {};
   v.forEach(x => { catCounts[x.category] = (catCounts[x.category] || 0) + 1; });
   const maxCat = Math.max(...Object.values(catCounts), 1);
+  const totalCatVenues = v.length || 1;
   const catEl = document.getElementById('dash-categories');
   if (catEl) {
     catEl.innerHTML = Object.keys(catLabels).map(cat => {
       const count = catCounts[cat] || 0;
       const pct = Math.round(count / maxCat * 100);
-      return '<div class="dash-cat-row" style="cursor:pointer" onclick="goToVenuesCategory(\'' + cat + '\')" title="' + esc(catLabels[cat]||cat) + ' mekanlarını göster">' +
+      const share = Math.round(count / totalCatVenues * 100);
+      return '<div class="dash-cat-row" style="cursor:pointer" onclick="goToVenuesCategory(\'' + cat + '\')" title="' + esc(catLabels[cat]||cat) + ' mekanlari (%' + share + ' toplam)">' +
         '<span class="dash-cat-emoji">' + (catEmojis[cat]||'') + '</span>' +
         '<span class="dash-cat-name">' + (catLabels[cat]||cat) + '</span>' +
         '<div class="dash-cat-bar"><div class="dash-cat-fill" style="width:' + pct + '%;background:' + (catColors[cat]||'#718096') + '"></div></div>' +
-        '<span class="dash-cat-count">' + count + '</span>' +
+        '<span class="dash-cat-count">' + count + '<span style="font-size:.58rem;color:var(--text-muted);font-weight:500;margin-left:4px">%' + share + '</span></span>' +
       '</div>';
     }).join('');
   }
