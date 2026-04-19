@@ -12751,41 +12751,41 @@ function dailyCountsByDate(items, dateField, days) {
 
 // Gunun motivasyonu — tarihe gore deterministik rotasyon
 var DASH_QUOTES = [
-  'Kucuk adimlar buyuk hikayeler yazar.',
-  'Her gun yeni bir baslangic.',
-  'Detaylar farki yaratir.',
-  'Mukemmel degil, ilerici ol.',
-  'Bugun dunkune gore bir adim onde ol.',
-  'Sabir, Assos\'un taslarini yonttu.',
-  'Yavas yavas, ama durmadan.',
-  'Calismanin tadi surprizindedir.',
-  'Her tas yerine oturur.',
-  'Iyi is, sessiz gururdur.',
+  'Küçük adımlar büyük hikâyeler yazar.',
+  'Her gün yeni bir başlangıç.',
+  'Detaylar farkı yaratır.',
+  'Mükemmel değil, ilerici ol.',
+  'Bugün dünküne göre bir adım önde ol.',
+  'Sabır, Assos\'un taşlarını yonttu.',
+  'Yavaş yavaş, ama durmadan.',
+  'Çalışmanın tadı sürprizindedir.',
+  'Her taş yerine oturur.',
+  'İyi iş, sessiz gururdur.',
   'Bir nefes al, sonra devam.',
-  'Zamani yonetemezsen hayat seni yonetir.',
-  'Icindeki kivilcimi unutma.',
+  'Zamanı yönetemezsen hayat seni yönetir.',
+  'İçindeki kıvılcımı unutma.',
   'Sen yapmasan kim yapacak?',
-  'Kaliteyi sec, hiz kendi gelir.',
-  'Buyuk isler kucuk niyetlerle baslar.',
-  'En iyi rota, henuz cizilmemis olandir.',
-  'Isikla yaz, golgeyle yumusat.',
-  'Assos\'un ruzgari, taze fikirler getirir.',
-  'Bugun bir sey ogren, bir sey degistir.',
-  'Zeytin agaci gibi kokles.',
-  'Hikayeleri gorseller anlatir.',
-  'Acik kapilar, guzel insanlar getirir.',
-  'En degerli sey zamanindir.',
-  'Uret, paylas, gulumse.',
-  'Akdeniz\'in sabri senin de olsun.',
-  'Hedef degil, yon onemli.',
-  'Yol kendini gostermeden adim at.',
-  'Bir kasif gibi bak, bir ustabasi gibi calis.',
-  'Her gun Assos\'a yeni bir renk kat.',
-  'Basitlik, dikkatli dusunmenin sonucudur.',
-  'Ilk cumleyi yaz, gerisi gelir.',
-  'Bugun tamamlanan kucuk is, yarinin buyuk farki.',
+  'Kaliteyi seç, hız kendi gelir.',
+  'Büyük işler küçük niyetlerle başlar.',
+  'En iyi rota, henüz çizilmemiş olandır.',
+  'Işıkla yaz, gölgeyle yumuşat.',
+  'Assos\'un rüzgârı, taze fikirler getirir.',
+  'Bugün bir şey öğren, bir şey değiştir.',
+  'Zeytin ağacı gibi kökleş.',
+  'Hikâyeleri görseller anlatır.',
+  'Açık kapılar, güzel insanlar getirir.',
+  'En değerli şey zamanındır.',
+  'Üret, paylaş, gülümse.',
+  'Akdeniz\'in sabrı senin de olsun.',
+  'Hedef değil, yön önemli.',
+  'Yol kendini göstermeden adım at.',
+  'Bir kâşif gibi bak, bir ustabaşı gibi çalış.',
+  'Her gün Assos\'a yeni bir renk kat.',
+  'Basitlik, dikkatli düşünmenin sonucudur.',
+  'İlk cümleyi yaz, gerisi gelir.',
+  'Bugün tamamlanan küçük iş, yarının büyük farkı.',
   'Bir fincan kahve, bir yeni fikir.',
-  'Iyi is, zamani duydurmaz.'
+  'İyi iş, zamanı duyurmaz.'
 ];
 function getDailyQuote() {
   // Gunun indeksi: YYYY-MM-DD -> deterministik hash
@@ -12828,7 +12828,7 @@ function renderDashHero() {
     if (summaryParts.length > 0) {
       summary = 'Dikkat gereken: ' + summaryParts.join('');
     } else {
-      summary = '<strong>' + published + '</strong> yayında mekan · Her sey yolunda bugün.';
+      summary = '<strong>' + published + '</strong> yayında mekan · Her şey yolunda bugün.';
     }
 
     // Saat
@@ -12901,29 +12901,29 @@ function renderDashPulse() {
 
     var parts = [];
     // Online
-    parts.push('<span class="pulse-item" title="Su an panelde aktif kullanici sayisi">' +
+    parts.push('<span class="pulse-item" title="Şu an panelde aktif kullanıcı sayısı">' +
       '<span class="pulse-dot"></span>' +
       '<span class="pulse-num">' + online + '</span> aktif' +
       '</span>');
     // Unread messages
     if (unread > 0) {
       parts.push('<span class="pulse-sep"></span>');
-      parts.push('<a class="pulse-item pulse-link" onclick="showPage(\'messages\')" title="Okunmamis mesajlari goster">' +
-        '✉️ <span class="pulse-badge">' + unread + '</span> okunmamis' +
+      parts.push('<a class="pulse-item pulse-link" onclick="showPage(\'messages\')" title="Okunmamış mesajları göster">' +
+        '✉️ <span class="pulse-badge">' + unread + '</span> okunmamış' +
         '</a>');
     }
     // Pending
     if (pending > 0) {
       parts.push('<span class="pulse-sep"></span>');
-      parts.push('<a class="pulse-item pulse-link" onclick="showPage(\'pending\')" title="Bekleyen mekan/yer taleplerini goster">' +
+      parts.push('<a class="pulse-item pulse-link" onclick="showPage(\'pending\')" title="Bekleyen mekan/yer taleplerini göster">' +
         '📋 <span class="pulse-badge">' + pending + '</span> talep' +
         '</a>');
     }
     // Today's additions
     if (blogToday > 0) {
       parts.push('<span class="pulse-sep"></span>');
-      parts.push('<span class="pulse-item" title="Bugun yayina alinan yazilar">' +
-        '⚡ Bugun: <span style="color:var(--terra);font-weight:800">+' + blogToday + ' yazi</span>' +
+      parts.push('<span class="pulse-item" title="Bugün yayına alınan yazılar">' +
+        '⚡ Bugün: <span style="color:var(--terra);font-weight:800">+' + blogToday + ' yazı</span>' +
         '</span>');
     }
     // Sadece online varsa veya diger gorunur veriler varsa goster
@@ -13069,7 +13069,7 @@ function renderDashboard() {
       spark: blogSpark
     }) +
     mkStat({
-      label:'Su An Acik',
+      label:'Şu An Açık',
       value:openCount,
       valSub:'/' + published,
       color:'green',
@@ -13091,7 +13091,7 @@ function renderDashboard() {
       const count = catCounts[cat] || 0;
       const pct = Math.round(count / maxCat * 100);
       const share = Math.round(count / totalCatVenues * 100);
-      return '<div class="dash-cat-row" style="cursor:pointer" onclick="goToVenuesCategory(\'' + cat + '\')" title="' + esc(catLabels[cat]||cat) + ' mekanlari (%' + share + ' toplam)">' +
+      return '<div class="dash-cat-row" style="cursor:pointer" onclick="goToVenuesCategory(\'' + cat + '\')" title="' + esc(catLabels[cat]||cat) + ' mekanları (%' + share + ' toplam)">' +
         '<span class="dash-cat-emoji">' + (catEmojis[cat]||'') + '</span>' +
         '<span class="dash-cat-name">' + (catLabels[cat]||cat) + '</span>' +
         '<div class="dash-cat-bar"><div class="dash-cat-fill" style="width:' + pct + '%;background:' + (catColors[cat]||'#718096') + '"></div></div>' +
@@ -13168,19 +13168,19 @@ function renderDashboard() {
   // severity: 'error' (kirmizi), 'warn' (turuncu), 'info' (mavi)
   const alerts = [];
   // Kritik (error)
-  if (noImgCount > 0) alerts.push({ severity:'error', icon:'📷', title:noImgCount + ' mekan görselsiz', desc:'Yayında olup görseli olmayan mekanlar SEO ve UX acisindan kritik.', action:'venues', actionLabel:'Görsel Ekle', filter:'noimg' });
+  if (noImgCount > 0) alerts.push({ severity:'error', icon:'📷', title:noImgCount + ' mekan görselsiz', desc:'Yayında olup görseli olmayan mekanlar SEO ve UX açısından kritik.', action:'venues', actionLabel:'Görsel Ekle', filter:'noimg' });
   var noPhoneCount = v.filter(x => getVenueStatusKey(x) === 'published' && (!x.phones || x.phones.length === 0) && !x.phone).length;
-  if (noPhoneCount > 0) alerts.push({ severity:'error', icon:'📞', title:noPhoneCount + ' mekan telefonsuz', desc:'Iletisim bilgisi olmayan yayindaki mekanlar.', action:'venues', actionLabel:'Düzelt' });
+  if (noPhoneCount > 0) alerts.push({ severity:'error', icon:'📞', title:noPhoneCount + ' mekan telefonsuz', desc:'İletişim bilgisi olmayan yayındaki mekanlar.', action:'venues', actionLabel:'Düzelt' });
 
   // Uyari (warn)
-  if (draft > 0) alerts.push({ severity:'warn', icon:'📝', title:draft + ' mekan taslak', desc:'Yayinlanmayi bekleyen mekanlar var.', action:'venues', actionLabel:'Incele' });
+  if (draft > 0) alerts.push({ severity:'warn', icon:'📝', title:draft + ' mekan taslak', desc:'Yayınlanmayı bekleyen mekanlar var.', action:'venues', actionLabel:'İncele' });
   // Premium suresi dolan/dolmasina yakin
   var premExpiring = v.filter(function(x) {
     if (!x.premium || !x.premiumEnd) return false;
     var daysLeft = Math.floor((new Date(x.premiumEnd).getTime() - Date.now()) / 86400000);
     return daysLeft >= 0 && daysLeft <= 7;
   }).length;
-  if (premExpiring > 0) alerts.push({ severity:'warn', icon:'⏰', title:premExpiring + ' premium suresi bu hafta doluyor', desc:'Yenileme icin sahipleriyle iletisime gecin.', action:'venues', actionLabel:'Listele', filter:'premium' });
+  if (premExpiring > 0) alerts.push({ severity:'warn', icon:'⏰', title:premExpiring + ' premium süresi bu hafta doluyor', desc:'Yenileme için sahipleriyle iletişime geçin.', action:'venues', actionLabel:'Listele', filter:'premium' });
   // Eski okunmamis mesajlar
   if (typeof allMessages !== 'undefined' && Array.isArray(allMessages)) {
     var staleMsg = allMessages.filter(function(m) {
@@ -13188,13 +13188,13 @@ function renderDashboard() {
       var t = m.timestamp && m.timestamp.toDate ? m.timestamp.toDate().getTime() : new Date(m.timestamp).getTime();
       return (Date.now() - t) > 86400000; // 24+ saat
     }).length;
-    if (staleMsg > 0) alerts.push({ severity:'warn', icon:'💬', title:staleMsg + ' mesaj 24+ saattir okunmadi', desc:'Cevaplanmayi bekleyen iletişim mesajlari.', action:'messages', actionLabel:'Okundu' });
+    if (staleMsg > 0) alerts.push({ severity:'warn', icon:'💬', title:staleMsg + ' mesaj 24+ saattir okunmadı', desc:'Cevaplanmayı bekleyen iletişim mesajları.', action:'messages', actionLabel:'Okundu' });
   }
 
   // Info
-  if (trashed > 0) alerts.push({ severity:'info', icon:'🗑', title:trashed + ' mekan cop kutusunda', desc:'Geri yuklenebilir veya kalici silinir.', action:'venues', actionLabel:'Yonet' });
+  if (trashed > 0) alerts.push({ severity:'info', icon:'🗑', title:trashed + ' mekan çöp kutusunda', desc:'Geri yüklenebilir veya kalıcı silinir.', action:'venues', actionLabel:'Yönet' });
   var noOwnerEmail = v.filter(x => getVenueStatusKey(x) === 'published' && !x.ownerEmail).length;
-  if (noOwnerEmail > 0 && noOwnerEmail < v.length) alerts.push({ severity:'info', icon:'✉️', title:noOwnerEmail + ' mekanda sahip e-postasi yok', desc:'Iletisim icin gerekli.', action:'venues', actionLabel:'Tamamla' });
+  if (noOwnerEmail > 0 && noOwnerEmail < v.length) alerts.push({ severity:'info', icon:'✉️', title:noOwnerEmail + ' mekanda sahip e-postası yok', desc:'İletişim için gerekli.', action:'venues', actionLabel:'Tamamla' });
 
   // Bekleyen mekan talepleri
   (async function(){
@@ -13202,7 +13202,7 @@ function renderDashboard() {
       var pendSnap = await db.collection('pending_venues').get();
       var pendItems = pendSnap.docs.map(function(d){ return d.data(); });
       var pendingCount = pendItems.filter(function(i){ return i.status === 'pending' || i.status === 'updated'; }).length;
-      if (pendingCount > 0) alerts.push({ severity:'warn', icon:'📋', title:pendingCount + ' mekan talebi bekliyor', desc:'Yeni basvurulari veya duzenlemeleri inceleyin.', action:'pending', actionLabel:'Incele' });
+      if (pendingCount > 0) alerts.push({ severity:'warn', icon:'📋', title:pendingCount + ' mekan talebi bekliyor', desc:'Yeni başvuruları veya düzenlemeleri inceleyin.', action:'pending', actionLabel:'İncele' });
       // Badge güncelle
       var badge = document.getElementById('pending-badge');
       if (badge) { badge.textContent = pendingCount; badge.style.display = pendingCount > 0 ? '' : 'none'; }
@@ -13221,7 +13221,7 @@ function renderDashboard() {
     if (alerts.length === 0) {
       alertEl.innerHTML = '<div class="alert-card alert-ok">' +
         '<div class="alert-icon" style="background:rgba(22,163,74,.12);color:var(--green)">✓</div>' +
-        '<div class="alert-body"><div class="alert-title">Her sey yolunda</div><div class="alert-desc">Su an aktif bir uyari yok. Tum yayindaki mekanlar saglikli.</div></div>' +
+        '<div class="alert-body"><div class="alert-title">Her şey yolunda</div><div class="alert-desc">Şu an aktif bir uyarı yok. Tüm yayındaki mekanlar sağlıklı.</div></div>' +
       '</div>';
       return;
     }
@@ -13237,7 +13237,7 @@ function renderDashboard() {
           '<div class="alert-title">' + a.title + '</div>' +
           '<div class="alert-desc">' + (a.desc || '') + '</div>' +
         '</div>' +
-        '<button class="alert-action" onclick="event.stopPropagation();' + actionClick + '">' + (a.actionLabel || 'Ac') + ' →</button>' +
+        '<button class="alert-action" onclick="event.stopPropagation();' + actionClick + '">' + (a.actionLabel || 'Aç') + ' →</button>' +
       '</div>';
     }).join('');
   }
