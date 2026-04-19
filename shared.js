@@ -768,6 +768,9 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     .place-card .place-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s ease;}
     .place-card .place-img img.loaded{opacity:1;}
     .place-save-btn.saved,.venue-save-btn.saved{background:rgba(196,82,26,.85) !important;color:#fff !important;}
+    /* Image error fallback — kirilan gorselde shimmer durmasin, placeholder gorunsun */
+    .img-error{animation:none !important;background:linear-gradient(135deg,#E8E0D5,#D4C8B8) !important;}
+    .img-error::before{content:'🖼';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2rem;opacity:.35;pointer-events:none;}
     .place-save-btn:hover,.venue-save-btn:hover{transform:scale(1.12);}
     .place-card .place-img .place-emoji-fallback{position:relative;z-index:1;}
     .place-card .place-cat-badge{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:999px;}
@@ -1262,6 +1265,26 @@ function renderNav(opts = {}) {
       if (window.updateSaveNavCount) window.updateSaveNavCount();
     } catch(e) {}
   };
+
+  // Global image error fallback — kirilan Storage URL'leri veya 404 gorsellerde
+  // sonsuz shimmer/bos durum olusmasin. Broken image gizlenir, parent card
+  // 'img-error' class alir ve varsa emoji fallback gosterir.
+  // Event delegation: error event bubble olmadigi icin capture phase ile dinle.
+  document.addEventListener('error', function(e) {
+    var img = e.target;
+    if (!img || img.tagName !== 'IMG') return;
+    if (img.dataset && img.dataset.fallback === 'true') return; // sonsuz loop onle
+    if (!img.src) return; // bos src - ignore
+    try { img.dataset.fallback = 'true'; } catch(err) {}
+    img.style.display = 'none';
+    var parent = img.closest('.mk-vc-img,.mk-fc-img,.place-img-box,.hp-vc-img,.hp-place-img,.ara-card-img,.vp-gimg,.bp-img-wrap,.blog-card-img,.sd-venue-img,.blog-skel-img');
+    if (parent) {
+      parent.classList.remove('has-img','has-photo','is-loaded');
+      parent.classList.add('img-error');
+      var emoji = parent.querySelector('[class*="-emoji"]');
+      if (emoji) { emoji.style.display = ''; emoji.style.opacity = '1'; }
+    }
+  }, true);
 
   // Back navigation (bfcache) ile sayfaya donus - favori butonlarini senkronla
   window.addEventListener('pageshow', function(e) {
