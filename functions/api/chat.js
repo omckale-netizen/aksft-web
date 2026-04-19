@@ -253,8 +253,109 @@ Assos (Behramkale), Çanakkale'nin Ayvacık ilçesine bağlı antik yerleşim. A
 - Ücretsiz yerleri ücretliymiş gibi gösterme.
 
 ## Ören Yeri Saatleri
-- Yaz (Nisan-Ekim): 08:30–20:00 (gişe 19:30'da kapanır).
+- Yaz (1 Mayıs - 1 Ekim): 08:30–20:00 (gişe 19:30'da kapanır).
 - Kış (Kasım-Mart): 08:30–17:30 (gişe 17:00'da kapanır).
+
+# TARİHSEL & KÜLTÜREL ARKA PLAN
+
+Bu bölüm Assos'un tarih ve kültürel mirası için SABİT bilgidir. Kullanıcı ilgili soru sorduğunda kullan; uydurma, ama bilgini göster.
+
+## Assos Tarih Çizelgesi (8 Dönem)
+1. **Tunç Çağı (MÖ 3000-1200)**: İlk yerleşim izleri, arkeolojik seramikler.
+2. **Aiolis Göçü (MÖ 7. yy)**: Midilli (Lesbos) adasından göçmenler şehir devletini kurdu. Lelegler (yerli halk) Homeros İlyada'da geçer.
+3. **Lidya & Pers (MÖ 560-334)**: Kral Kroisos, maden gelirleri, sonra Pers hakimiyeti (Hellespontos Phrygia Satraplığı).
+4. **Aristoteles Dönemi (MÖ 347-344)**: Platon'un ölümünden sonra dostu Hermias'ın davetiyle Assos'a geldi. 3 yıl felsefe okulu kurdu, Historia Animalium'un temellerini attı. Hermias'ın yeğeni Pythias ile evlendi.
+5. **Hellenistik (MÖ 4-1. yy)**: Tiyatro (~5000 kişilik), agora, gymnasium, bouleuterion inşası.
+6. **Roma (MÖ 1-MS 4. yy)**: Nekropol büyüdü; andezit lahitler ("sarcophagus") Suriye/Lübnan/Mısır/Roma'ya ihraç edildi.
+7. **Bizans (MS 4-14. yy)**: Hristiyanlık, piskoposluk, surlar güçlendirildi, Cornelius Kilisesi.
+8. **Osmanlı & Modern (14. yy-bugün)**: Sultan I. Murad (Hüdavendigar) cami, Behramkale köyü. 2000'den itibaren UNESCO Geçici Listesi, felsefe toplantıları.
+
+## İlginç Hikayeler
+
+- **"Sarcophagus" kelimesi Assos'tan gelir**: Yunanca "sarx" (et) + "phagein" (yemek). Assos andezit taşı "et yiyen taş" olarak bilinirdi — cesedi dişler hariç 40 günde çürütürdü. Şap (alüminyum sülfat) ve gözenekli taş etkisi. Lahitler Suriye, Lübnan, Mısır, Roma'ya ihraç ediliyordu.
+- **Aristoteles neden Assos'a geldi**: Platon'un ölümü sonrası MÖ 347'de Hermias'ın daveti. Üç yılda felsefe okulu kurdu, deniz biyolojisi gözlemleri yaptı, Historia Animalium'un temellerini attı.
+- **Osmanlı'nın yaptırdığı son kale**: Babakale Kalesi 1723, Sultan III. Ahmet, Ege korsanlarına karşı. Osmanlı İmparatorluğu'nun yaptırdığı en son kaledir. Asya kıtasının en batı ucu (Baba Burnu / Lekton) — ziyaretçilere sembolik sertifika verilir.
+
+## Önemli Yer Tarihsel Detayları
+
+### Athena Tapınağı (Behramkale akropolü)
+- MÖ 530 yapımı. **Anadolu'daki tek Dor düzenindeki tapınak**.
+- 6×13 sütun dizisi, toplam 34 sütun (~6m yükseklik).
+- Volkanik andezit taşı — işlenmesi zor ama depreme dayanıklı.
+- Herakles friz parçaları **Paris Louvre, Boston Güzel Sanatlar, İstanbul Arkeoloji Müzeleri**nde.
+- İlk kazılar 1881-1883, Amerikan Arkeoloji Enstitüsü.
+- Yaz 08:30-20:00, müzekart geçerli.
+
+### Assos Nekropolü
+- "Sarcophagus" kelimesinin kökeni.
+- Andezit lahitler "Asya Taşı" olarak bilinirdi.
+- Mezar tipleri: Lahit (aristokrat, mitolojik kabartmalı), Basit Mezar, Anıt Mezar, Arkaik Cadde.
+- Batı kapısı önünde, akropole yakın.
+
+### Zeus Altarı (Adatepe girişi)
+- Homeros **İlyada destanında** Zeus'un Truva Savaşı'nı izlediği yer.
+- Kayaya oyulmuş antik sarnıç.
+- Edremit Körfezi panorama + Midilli silüeti.
+- Gün batımı için **efsanevi nokta**.
+- Ücretsiz, Adatepe'den kısa yürüyüş.
+
+### Hüdavendigar Camii (Behramkale akropolü)
+- 14. yy, **Sultan I. Murad (Hüdavendigar)** yapımı.
+- Tek kubbeli, kare planlı — erken Osmanlı mimarisinin yalın örneği.
+- Giriş kapısı **Bizans Cornelius Kilisesi'nden devşirilmiş**.
+- Kapı üzerinde **Kral Skamandros yazıtları** (haç işaretlerinin kanatları kırık).
+- İç mekanda **kadırga (gemi) resimleri**.
+
+### Babakale Kalesi (Baba Burnu)
+- 1723, Sultan III. Ahmet. **Osmanlı'nın yaptırdığı son kale**.
+- Ege korsanlarına karşı inşa edildi.
+- **Asya kıtasının en batı ucu** — sembolik sertifika verilir (köy kahvehanesinden).
+- Geleneksel **el yapımı boynuz saplı bıçaklarla** ünlü.
+- Assos'tan ~20 km.
+
+### Apollon Smintheion (Gülpınar)
+- MÖ 2. yy Hellenistik Apollon tapınağı.
+- "Smintheios" = **fare tanrısı** — tarım zararlılarından koruyan.
+- Homeros **İlyada'sında** geçer (Khryses rahibi, Troia savaşı öncesi).
+- İonik düzen + altar + geç antik hamamlar.
+- Orijinal **3 metrelik Apollon heykeli** vardı.
+- Assos'tan ~25 km, müzekart geçerli.
+
+### Adatepe Zeytinyağı Müzesi
+- **2001 açılışı — Türkiye'nin ilk zeytinyağı müzesi**.
+- Restore edilmiş tarihi sabunhane binası.
+- Geleneksel zeytin aletleri, taş değirmenler, presler, sabun üretim süreci.
+- **Giriş ücretsiz**. Küçükkuyu girişinde.
+
+### Mıhlı Şelalesi (Kazdağları eteği)
+- Küçükkuyu bölgesinde, İda Dağı (Kazdağları) Milli Park eteği.
+- Zeytinlikler arasında, serinleme noktası.
+- İlkbahar-yaz başı debi en yüksek.
+- Homeros mitolojik İda Dağı rotasında (Zeus Altarı ile birlikte).
+- Assos'tan ~35 km.
+
+### Antik Liman
+- Antik dönem **andezit + tahıl ticaretinin** ana çıkış limanı.
+- Suriye, Lübnan, Mısır, Roma'ya sarcophagus ihracı.
+- Bugün restore palamar depoları → **butik oteller + balık lokantaları**.
+- **2021 heyelan tehlikesi** → Kaya Islahı Projesi başlatıldı; 2022 Çanakkale İdare Mahkemesi **yürütmeyi durdurma** kararı verdi. Bugün liman büyük ölçüde faal.
+- Taşlık zemin, iskelelerden denize iniş — **deniz ayakkabısı önerilir**.
+
+### Plaj / Koy Teknik Detayları
+- **Kadırga**: Mavi Bayraklı, çakıl+kum, hızla derinleşir. 2 km. Otel + kamp + restoran.
+- **Yeşil Liman**: Tamamen bakir, **tesis yok**, taşlık. 4 km. Yiyecek/su yanında götür.
+- **Sokakağzı**: Geniş kumluk, sığ dalgasız — **aile dostu**. Deniz ayakkabısı gerektirmez. 15 km.
+- **Akliman**: Kum plaj, sığ, sessiz. 30+ km.
+- **Sivrice**: Taşlık, Midilli manzaralı, sakin. 10 km batı. Pansiyonlar + salaş balıkçılar.
+- **Küçükkuyu Sahili**: Edremit Körfezi Mavi Bayraklı, aile dostu, palmiye ağaçlı sahil yürüyüşü, balık lokantaları. 25 km.
+
+## "Assos'ta Felsefe" Modern Etkinliği
+2000 yılından itibaren Prof. Dr. Örsan K. Öymen öncülüğünde **Felsefe Sanat Bilim Derneği** tarafından düzenlenen toplantılar. Aristoteles'in antik felsefe okulu geleneğini modern çağda sürdürür. Yıllık organize edilir; güncel tarih için /iletisim veya /blog sayfasına yönlendir.
+
+## Modern Bilgiler
+- UNESCO **Dünya Mirası Geçici Listesi**'nde.
+- 1989'dan beri Adatepe sit alanı.
+- Behramkale sit alanı (yeni bina yasak, restoran sadece).
 
 # ULAŞIM
 
