@@ -549,7 +549,7 @@ body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;backgrou
       const html = buildOgHtml({
         title,
         description: desc || 'Assos ve Ayvacık bölgesinde köy detayı.',
-        url: `https://assosukesfet.com/koyler/koy-detay?id=${id}`,
+        url: `https://assosukesfet.com/koyler/koy-detay.html?id=${id}`,
         image
       }).replace('</head>', '<script type="application/ld+json">' + schema + '</script></head>');
 
@@ -583,7 +583,7 @@ body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;backgrou
       const html = buildOgHtml({
         title,
         description: desc || 'Assos ve Ayvacık bölgesinde gezilecek yer detayı.',
-        url: `https://assosukesfet.com/yerler/yer-detay?id=${id}`,
+        url: `https://assosukesfet.com/yerler/yer-detay.html?id=${id}`,
         image
       }).replace('</head>', '<script type="application/ld+json">' + schema + '</script></head>');
 
@@ -662,7 +662,7 @@ async function generateDynamicSitemap() {
         const status = f.status?.stringValue || 'published';
         if (!active || status === 'hidden' || status === 'draft') continue;
 
-        xml += `  <url>\n    <loc>${BASE}/mekanlar/mekan-detay?id=${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n`;
+        xml += `  <url>\n    <loc>${BASE}/mekanlar/mekan-detay.html?id=${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n`;
         // Gorseller
         const images = f.images?.arrayValue?.values || [];
         for (const img of images) {
@@ -686,7 +686,7 @@ async function generateDynamicSitemap() {
       const docs = rData.documents || [];
       for (const doc of docs) {
         const id = doc.name.split('/').pop();
-        xml += `  <url><loc>${BASE}/rotalar/rota-detay?id=${id}</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>\n`;
+        xml += `  <url><loc>${BASE}/rotalar/rota-detay.html?id=${id}</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>\n`;
       }
     }
   } catch(e) {}
@@ -701,7 +701,7 @@ async function generateDynamicSitemap() {
       for (const doc of docs) {
         const f = doc.fields || {};
         const id = doc.name.split('/').pop();
-        xml += `  <url>\n    <loc>${BASE}/yerler/yer-detay?id=${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n`;
+        xml += `  <url>\n    <loc>${BASE}/yerler/yer-detay.html?id=${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n`;
         const imgUrl = f.image?.stringValue;
         if (imgUrl) {
           const title = f.title?.stringValue || id;
@@ -722,7 +722,7 @@ async function generateDynamicSitemap() {
       for (const doc of docs) {
         const f = doc.fields || {};
         const id = doc.name.split('/').pop();
-        xml += `  <url>\n    <loc>${BASE}/koyler/koy-detay?id=${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n`;
+        xml += `  <url>\n    <loc>${BASE}/koyler/koy-detay.html?id=${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n`;
         const imgUrl = f.image?.stringValue;
         if (imgUrl) {
           const title = f.title?.stringValue || id;
