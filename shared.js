@@ -751,7 +751,10 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     .section-rule{width:40px;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--terra),var(--amber));}
 
     /* CARDS */
-    .route-card{background:var(--navy);border:1px solid rgba(245,237,224,.07);border-radius:20px;overflow:hidden;cursor:pointer;transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s cubic-bezier(.16,1,.3,1);text-decoration:none;display:block;}
+    .route-card{background:var(--navy);border:1px solid rgba(245,237,224,.07);border-radius:20px;overflow:hidden;cursor:pointer;transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s cubic-bezier(.16,1,.3,1);text-decoration:none;display:flex;flex-direction:column;}
+    /* Kart icindeki icerik alani esnek — buton satiri her kartta ayni hizada */
+    .route-card > div:nth-child(2){flex:1;display:flex;flex-direction:column;}
+    .route-card > div:nth-child(2) > div:last-child{margin-top:auto;}
     .route-card:hover{transform:translateY(-8px);box-shadow:0 32px 64px rgba(13,24,41,.4),0 8px 16px rgba(196,82,26,.12);}
     .route-card .route-number{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:.68rem;letter-spacing:.12em;color:rgba(245,237,224,.3);}
     .route-card .route-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.2rem;line-height:1.2;letter-spacing:-.02em;color:var(--cream);margin-bottom:8px;}
