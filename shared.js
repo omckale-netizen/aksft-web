@@ -761,8 +761,10 @@ document.addEventListener('dataReady', _fetchSiteLogo);
     .route-card .route-desc{font-family:'Lora',serif;font-size:.82rem;color:rgba(245,237,224,.5);line-height:1.65;font-style:italic;margin-bottom:18px;}
     .route-card .route-meta{font-size:.74rem;font-weight:500;color:rgba(245,237,224,.4);}
     .route-card .route-meta span{color:rgba(245,237,224,.7);}
-    .route-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:10px;background:rgba(245,237,224,.08);border:1.5px solid rgba(245,237,224,.14);color:var(--cream);font-size:.78rem;font-weight:600;cursor:pointer;text-decoration:none;transition:background .22s,transform .22s;}
+    .route-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:10px;background:rgba(245,237,224,.08);border:1.5px solid rgba(245,237,224,.14);color:var(--cream);font-size:.78rem;font-weight:600;cursor:pointer;text-decoration:none;transition:background .22s,transform .22s;white-space:nowrap;flex-shrink:0;}
     .route-btn:hover{background:rgba(245,237,224,.14);transform:translateX(3px);}
+    /* Kart footer: hedef kitle metni sinirli, buton sabit boyutlu */
+    .route-card > div:nth-child(2) > div:last-child > span:first-child{flex:1;min-width:0;padding-right:12px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.35;}
 
     .place-card{background:#fff;border-radius:18px;overflow:hidden;border:1px solid rgba(26,39,68,.06);cursor:pointer;transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s cubic-bezier(.16,1,.3,1);text-decoration:none;display:block;}
     .place-card:hover{transform:translateY(-5px);box-shadow:0 20px 50px rgba(26,39,68,.1);}
