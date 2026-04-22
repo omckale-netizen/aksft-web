@@ -507,72 +507,9 @@ body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;backgrou
   // Bot SSR + 301 redirect mantigi functions/rotalar/rota-detay.js ve
   // functions/rotalar/[slug].js'te (next() specific function'a birakir)
 
-  // Koy detay sayfasi
-  if (path.includes('/koyler/koy-detay')) {
-    const id = url.searchParams.get('id');
-    if (!id) return next();
-
-    try {
-      const fields = await fetchFirestoreDoc('villages', id);
-      if (!fields) return next();
-
-      const villageName = fields.title?.stringValue || 'Köy';
-      const title = villageName + ' Köyü \u2014 Assos Köyleri | Assos\'u Keşfet';
-      const shortDesc = (fields.shortDesc?.stringValue || fields.description?.stringValue || '').replace(/<[^>]*>/g, '').substring(0, 160);
-      const desc = villageName + ', Ayvacık bölgesinde. ' + shortDesc;
-      const image = fields.image?.stringValue || DEFAULT_OG_IMAGE;
-
-      const schema = JSON.stringify({
-        '@context':'https://schema.org','@type':'Place',
-        'name':villageName,'description':shortDesc,
-        'address':{'@type':'PostalAddress','addressLocality':villageName,'addressRegion':'Ayvacık, Çanakkale','addressCountry':'TR'},
-        'image':image
-      });
-
-      const html = buildOgHtml({
-        title,
-        description: desc || 'Assos ve Ayvacık bölgesinde köy detayı.',
-        url: `https://assosukesfet.com/koyler/koy-detay.html?id=${id}`,
-        image
-      }).replace('</head>', '<script type="application/ld+json">' + schema + '</script></head>');
-
-      return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
-    } catch (e) { return next(); }
-  }
-
-  // Yer detay sayfasi
-  if (path.includes('/yerler/yer-detay')) {
-    const id = url.searchParams.get('id');
-    if (!id) return next();
-
-    try {
-      const fields = await fetchFirestoreDoc('places', id);
-      if (!fields) return next();
-
-      const placeName = fields.title?.stringValue || 'Gezilecek Yer';
-      const title = placeName + ' \u2014 Assos Bölgesi | Assos\'u Keşfet';
-      const shortDesc = (fields.shortDesc?.stringValue || fields.description?.stringValue || '').replace(/<[^>]*>/g, '').substring(0, 160);
-      const location = fields.location?.stringValue || 'Ayvacık';
-      const desc = placeName + ', ' + location + '. ' + shortDesc;
-      const image = fields.image?.stringValue || DEFAULT_OG_IMAGE;
-
-      const schema = JSON.stringify({
-        '@context':'https://schema.org','@type':'Place',
-        'name':placeName,'description':shortDesc,
-        'address':{'@type':'PostalAddress','addressLocality':location,'addressRegion':'Ayvacık, Çanakkale','addressCountry':'TR'},
-        'image':image
-      });
-
-      const html = buildOgHtml({
-        title,
-        description: desc || 'Assos ve Ayvacık bölgesinde gezilecek yer detayı.',
-        url: `https://assosukesfet.com/yerler/yer-detay.html?id=${id}`,
-        image
-      }).replace('</head>', '<script type="application/ld+json">' + schema + '</script></head>');
-
-      return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
-    } catch (e) { return next(); }
-  }
+  // Koy + Yer detay sayfalari: eski /koyler/koy-detay?id=X ve yeni /koyler/slug
+  // Bot SSR + 301 redirect mantigi functions/koyler/[slug].js + yerler/[slug].js + eski handler'larda
+  // (next() specific function'a birakir)
 
   // Blog detay sayfalari: /blog?yazi=slug ve /blog/slug
   // Bot SSR + 301 redirect mantigi functions/blog.js ve functions/blog/[slug].js'te
@@ -666,7 +603,7 @@ async function generateDynamicSitemap() {
       for (const doc of docs) {
         const f = doc.fields || {};
         const id = doc.name.split('/').pop();
-        xml += `  <url>\n    <loc>${BASE}/yerler/yer-detay.html?id=${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n`;
+        xml += `  <url>\n    <loc>${BASE}/yerler/${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n`;
         const imgUrl = f.image?.stringValue;
         if (imgUrl) {
           const title = f.title?.stringValue || id;
@@ -687,7 +624,7 @@ async function generateDynamicSitemap() {
       for (const doc of docs) {
         const f = doc.fields || {};
         const id = doc.name.split('/').pop();
-        xml += `  <url>\n    <loc>${BASE}/koyler/koy-detay.html?id=${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n`;
+        xml += `  <url>\n    <loc>${BASE}/koyler/${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n`;
         const imgUrl = f.image?.stringValue;
         if (imgUrl) {
           const title = f.title?.stringValue || id;

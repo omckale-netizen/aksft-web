@@ -80,7 +80,7 @@ export async function onRequest(context) {
     // Yerler
     for (const p of places) {
       dynamicPages.push({
-        loc: `/yerler/yer-detay.html?id=${p.id}`,
+        loc: `/yerler/${p.id}`,
         changefreq: 'monthly',
         priority: '0.7',
       });
@@ -89,7 +89,7 @@ export async function onRequest(context) {
     // Köyler
     for (const k of villages) {
       dynamicPages.push({
-        loc: `/koyler/koy-detay.html?id=${k.id}`,
+        loc: `/koyler/${k.id}`,
         changefreq: 'monthly',
         priority: '0.6',
       });

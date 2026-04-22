@@ -15003,7 +15003,7 @@ function renderVPTable() {
         '<td style="' + (isPlaces ? '' : 'display:none') + '"><span class="badge badge-cat">' + (x.category || '-') + '</span></td>' +
         '<td>' + (x.image ? '<span class="badge badge-open" style="font-size:.65rem">Var</span>' : '<span class="badge" style="color:var(--text-muted);font-size:.65rem">Yok</span>') + '</td>' +
         '<td>' +
-          '<a href="https://assosukesfet.com/' + (isPlaces ? 'yerler/yer-detay?id=' : 'koyler/koy-detay?id=') + x.id + '" target="_blank" rel="noopener" class="btn-icon" title="Sayfayı Görüntüle" style="text-decoration:none;color:var(--terra)">↗</a>' +
+          '<a href="https://assosukesfet.com/' + (isPlaces ? 'yerler/' : 'koyler/') + x.id + '" target="_blank" rel="noopener" class="btn-icon" title="Sayfayı Görüntüle" style="text-decoration:none;color:var(--terra)">↗</a>' +
           '<button class="btn-icon" title="Görsel" onclick="openPlaceImgModal(\'' + x.id + '\',\'' + (isPlaces ? 'places' : 'villages') + '\')">&#128247;</button>' +
           '<button class="btn-icon" title="Düzenle" onclick="openVPModal(\'' + x.id + '\')" style="margin-left:4px">&#9998;</button>' +
           '<button class="btn-icon" title="Sil" onclick="confirmDeleteVP(\'' + x.id + '\')" style="margin-left:4px;color:var(--red)">&#128465;</button>' +
@@ -19923,10 +19923,10 @@ function sgGenerate() {
     if (item) { url = 'https://assosukesfet.com/mekanlar/mekan-detay?id=' + id; location = item.location || ''; tags = item.keywords || []; desc = item.shortDesc || ''; category = item.category || ''; longDesc = item.description || ''; }
   } else if (type === 'place') {
     item = (draftData.places || []).find(function(p){ return p.id === id; });
-    if (item) { url = 'https://assosukesfet.com/yerler/yer-detay?id=' + id; location = item.location || ''; tags = item.keywords || []; desc = item.shortDesc || ''; longDesc = item.description || ''; }
+    if (item) { url = 'https://assosukesfet.com/yerler/' + id; location = item.location || ''; tags = item.keywords || []; desc = item.shortDesc || ''; longDesc = item.description || ''; }
   } else if (type === 'village') {
     item = (draftData.villages || []).find(function(v){ return v.id === id; });
-    if (item) { url = 'https://assosukesfet.com/koyler/koy-detay?id=' + id; location = 'Ayvacık, Çanakkale'; tags = item.tags || []; desc = item.shortDesc || ''; longDesc = item.description || ''; }
+    if (item) { url = 'https://assosukesfet.com/koyler/' + id; location = 'Ayvacık, Çanakkale'; tags = item.tags || []; desc = item.shortDesc || ''; longDesc = item.description || ''; }
   } else if (type === 'route') {
     item = (draftData.routes || []).find(function(r){ return r.id === id; });
     if (item) { url = 'https://assosukesfet.com/rotalar/' + id; tags = item.keywords || []; desc = item.shortDesc || ''; longDesc = item.description || ''; }

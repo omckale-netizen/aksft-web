@@ -429,7 +429,7 @@
 <div id="footer-placeholder"></div>
 
 <script src="firebase-loader.js?v=6"></script>
-<script src="shared.min.js?v=347"></script>
+<script src="shared.min.js?v=348"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: true });
@@ -752,7 +752,7 @@ function pageInit() {
       const imgHtml = p.image
         ? '<img src="' + p.image + '" alt="' + p.title + (p._isVillage ? ' Köyü' : ' — ' + (cat.label || 'Gezilecek Yer')) + ' | Assos Ayvacık" loading="lazy" onload="this.classList.add(\'loaded\')" style="object-position:center ' + (p.imagePos != null ? p.imagePos : 50) + '%">'
         : '<span class="hp-place-emoji">' + p.emoji + '</span>';
-      var placeHref = p._isVillage ? 'koyler/koy-detay.html?id=' + p.id : 'yerler/yer-detay.html?id=' + p.id;
+      var placeHref = p._isVillage ? '/koyler/' + p.id : '/yerler/' + p.id;
       return '<a class="hp-place-card fade-up" href="' + placeHref + '" data-cat="' + catKey + '" style="animation-delay:' + (i * 0.05) + 's;">' +
         '<div class="hp-place-img" style="background:' + bg + ';">' + imgHtml +
           '<span class="hp-place-badge" style="background:' + cat.color + 'b3;color:#fff;">' + cat.label + '</span>' +
@@ -856,7 +856,7 @@ function pageInit() {
       const tags = (v.tags || []).slice(0, 2).map(t =>
         `<span style="font-size:.62rem;padding:2px 8px;border-radius:999px;background:rgba(245,237,224,0.08);color:rgba(245,237,224,0.5);">${t}</span>`
       ).join('');
-      return `<a class="village-card fade-up" href="koyler/koy-detay.html?id=${v.id}" tabindex="0" role="article"
+      return `<a class="village-card fade-up" href="/koyler/${v.id}" tabindex="0" role="article"
         style="animation-delay:${idx * 0.06}s;background:${bg};border:1px solid rgba(245,237,224,0.07);padding:28px 24px;cursor:pointer;text-decoration:none;display:block;">
         <div style="font-size:2rem;margin-bottom:16px;">${v.emoji}</div>
         <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:1rem;color:var(--cream);margin-bottom:8px;">${v.title}</h3>

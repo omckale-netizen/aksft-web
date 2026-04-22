@@ -1464,10 +1464,10 @@ function renderNav(opts = {}) {
   };
 
   function getYerPath(id) {
-    return getBasePath() + 'yerler/yer-detay.html?id=' + id;
+    return getBasePath() + 'yerler/' + id;
   }
   function getKoyPath(id) {
-    return getBasePath() + 'koyler/koy-detay.html?id=' + id;
+    return getBasePath() + 'koyler/' + id;
   }
 
   window.removePlaceSave = function (id, e) {
@@ -2028,9 +2028,9 @@ function initSearch(inputId, opts = {}) {
     const _p = window.location.pathname;
     const base = _p.includes('/mekanlar/') || _p.includes('/rotalar/') || _p.includes('/yerler/') || _p.includes('/koyler/') || /^\/blog\/[^\/]+\/?$/.test(_p) ? '../' : '';
     if (type === 'route')   return `${base}rotalar/${id}`;
-    if (type === 'place')   return `${base}yerler/yer-detay.html?id=${id}`;
+    if (type === 'place')   return `${base}yerler/${id}`;
     if (type === 'venue')   return `${base}mekanlar/mekan-detay.html?id=${id}`;
-    if (type === 'village') return `${base}koyler/koy-detay.html?id=${id}`;
+    if (type === 'village') return `${base}koyler/${id}`;
     return '#';
   }
 
@@ -2339,7 +2339,7 @@ function placeCardHTML(p, delay = 0) {
   var catInfo = getPlaceCatInfo(p.category);
   const [c1, c2] = catInfo.bg;
   return `
-    <a class="place-card fade-up" href="yerler/yer-detay.html?id=${p.id}" data-delay="${delay}" aria-label="${p.title}">
+    <a class="place-card fade-up" href="yerler/${p.id}" data-delay="${delay}" aria-label="${p.title}">
       <div class="place-img" style="background:linear-gradient(135deg,${c1},${c2});">
         ${p.image ? '<img src="' + p.image + '" alt="' + p.title + ' — ' + (catInfo.label || 'Gezilecek Yer') + ' | Assos Ayvacık" loading="lazy" onload="this.classList.add(\'loaded\')" style="object-position:center ' + (p.imagePos != null ? p.imagePos : 50) + '%">' : '<span class="place-emoji-fallback">' + p.emoji + '</span>'}
       </div>
@@ -4626,7 +4626,7 @@ function renderVillagePage(villageId) {
     bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">🏛 ' + v.title + '\u2019' + ekPlaceSuffix + ' Gezilecek Yerler</h2>';
     bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">';
     villagePlaces.forEach(function(place) {
-      bodyHtml += '<a href="../yerler/yer-detay.html?id=' + place.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+      bodyHtml += '<a href="/yerler/' + place.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
       if (place.image) {
         bodyHtml += '<div style="height:120px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + place.image + '" alt="' + (place.title || '') + ' Assos" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1"></div>';
       } else {
@@ -4672,7 +4672,7 @@ function renderVillagePage(villageId) {
     bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">📍 Bağlı Mahalleler</h2>';
     bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;">';
     bagliMahalleler.forEach(function(vl) {
-      bodyHtml += '<a href="koy-detay.html?id=' + vl.id + '" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 6px 20px rgba(26,39,68,.07)\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+      bodyHtml += '<a href="/koyler/' + vl.id + '" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 6px 20px rgba(26,39,68,.07)\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
       bodyHtml += '<span style="font-size:1.4rem;">' + (vl.emoji || '📍') + '</span>';
       bodyHtml += '<div style="flex:1;min-width:0;"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.82rem;color:var(--navy);">' + vl.title + '</div>';
       if (vl.shortDesc) bodyHtml += '<div style="font-size:.68rem;color:var(--text-mid);margin-top:2px;">' + vl.shortDesc.substring(0, 50) + '</div>';
@@ -4716,7 +4716,7 @@ function renderVillagePage(villageId) {
         if (distM < 200) distM = 200;
         distText = vl._dist < 1 ? distM + ' m' : vl._dist.toFixed(1) + ' km';
       }
-      bodyHtml += '<a href="koy-detay.html?id=' + vl.id + '" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 6px 20px rgba(26,39,68,.07)\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+      bodyHtml += '<a href="/koyler/' + vl.id + '" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 6px 20px rgba(26,39,68,.07)\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
       bodyHtml += '<span style="font-size:1.4rem;">' + (vl.emoji || '📍') + '</span>';
       bodyHtml += '<div style="flex:1;min-width:0;"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.82rem;color:var(--navy);">' + vl.title + '</div>';
       if (vl.shortDesc) bodyHtml += '<div style="font-size:.68rem;color:var(--text-mid);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + vl.shortDesc.substring(0, 50) + '</div>';
@@ -4751,7 +4751,7 @@ function renderVillagePage(villageId) {
       bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">📍 ' + parentName + '\'ın Diğer Mahalleleri</h2>';
       bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;">';
       digerMahalleler.forEach(function(vl) {
-        bodyHtml += '<a href="koy-detay.html?id=' + vl.id + '" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 6px 20px rgba(26,39,68,.07)\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+        bodyHtml += '<a href="/koyler/' + vl.id + '" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 6px 20px rgba(26,39,68,.07)\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
         bodyHtml += '<span style="font-size:1.4rem;">' + (vl.emoji || '📍') + '</span>';
         bodyHtml += '<div><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.82rem;color:var(--navy);">' + vl.title + '</div></div></a>';
       });
@@ -4876,7 +4876,7 @@ function renderVillagePage(villageId) {
   };
 
   // Paylaş — mekan detaydaki ile aynı class yapısı (vp-share-opt)
-  var vgUrl = window.location.origin + '/koyler/koy-detay.html?id=' + v.id;
+  var vgUrl = window.location.origin + '/koyler/' + v.id;
   var vgText = heroTitle + ' - Assos\'u Keşfet';
   var vgWaText = heroTitle + '\nAyvacık, Çanakkale\n\n' + vgUrl;
   var dd = document.getElementById('vg-share-dd');
@@ -5101,7 +5101,7 @@ function renderPlacePage(placeId) {
     if (village) {
       bodyHtml += '<div style="margin-bottom:40px;">';
       bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:14px;">📍 Bağlı Olduğu Yerleşim</h2>';
-      bodyHtml += '<a href="../koyler/koy-detay.html?id=' + village.id + '" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 6px 20px rgba(26,39,68,.07)\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+      bodyHtml += '<a href="/koyler/' + village.id + '" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 6px 20px rgba(26,39,68,.07)\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
       bodyHtml += '<span style="font-size:1.4rem;">' + (village.emoji || '🏘') + '</span>';
       bodyHtml += '<div><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.85rem;color:var(--navy);">' + village.title + '</div>';
       if (village.shortDesc) bodyHtml += '<div style="font-size:.68rem;color:var(--text-mid);margin-top:2px;">' + village.shortDesc + '</div>';
@@ -5200,7 +5200,7 @@ function renderPlacePage(placeId) {
     bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">🏛 Yakındaki Diğer Yerler</h2>';
     bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">';
     otherPlaces.forEach(function(op) {
-      bodyHtml += '<a href="yer-detay.html?id=' + op.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+      bodyHtml += '<a href="/yerler/' + op.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
       if (op.image) {
         bodyHtml += '<div style="height:120px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + op.image + '" alt="' + (op.title || '') + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1"></div>';
       } else {
@@ -5260,7 +5260,7 @@ function renderPlacePage(placeId) {
       bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">';
       otherOrenYeri.forEach(function(op) {
         var distBadge = op._roadKm ? '<span style="position:absolute;bottom:10px;right:10px;font-size:.62rem;font-weight:700;padding:3px 10px;border-radius:999px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);color:#fff;z-index:1;">~' + op._roadKm + ' km</span>' : '';
-        bodyHtml += '<a href="yer-detay.html?id=' + op.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+        bodyHtml += '<a href="/yerler/' + op.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
         if (op.image) {
           bodyHtml += '<div style="position:relative;height:120px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + op.image + '" alt="' + (op.title || '') + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1">' + distBadge + '</div>';
         } else {
@@ -5315,7 +5315,7 @@ function renderPlacePage(placeId) {
   };
 
   // Paylaş
-  var plUrl = window.location.origin + '/yerler/yer-detay.html?id=' + p.id;
+  var plUrl = window.location.origin + '/yerler/' + p.id;
   var plText = p.title + ' - Assos\'u Keşfet';
   var plWaText = p.title + '\n' + (p.location || 'Assos Bölgesi') + '\n\n' + plUrl;
   var dd = document.getElementById('pl-share-dd');
