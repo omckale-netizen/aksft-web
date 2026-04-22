@@ -364,6 +364,7 @@ async function loadSinglePost(slug) {
     if (!doc.exists) {
       heroContent.innerHTML = '<a href="/blog" style="font-size:.72rem;color:rgba(245,237,224,.4);text-decoration:none;margin-bottom:20px;display:inline-block">← Blog\'a Dön</a><h1 class="bh-h1">Yazı Bulunamadı</h1>';
       document.getElementById('bp-content').innerHTML = '<div style="text-align:center;padding:40px;color:#718096"><a href="/blog" style="color:#C4521A;font-weight:700">← Blog\'a Dön</a></div>';
+      document.body.style.opacity = '1';
       return;
     }
     var p = doc.data();
