@@ -138,7 +138,7 @@
 <div id="footer-placeholder"></div>
 
 <script src="firebase-loader.js?v=6"></script>
-<script src="shared.min.js?v=353"></script>
+<script src="shared.min.js?v=354"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
@@ -253,23 +253,28 @@ function pageInit() {
     window._isHub = true;
     window._hubCat = catId;
 
-    // Meta tags
-    var seoTitle = 'Assos ' + c.plural + ' — ' + (c.heroSub || '') + ' | Assos\'u Keşfet';
-    document.title = 'Assos ' + c.plural + ' | Assos\'u Keşfet';
-    var descMeta = document.querySelector('meta[name="description"]');
-    if (descMeta) descMeta.content = (c.intro || '').substring(0, 160);
-    var canonicalEl = document.querySelector('link[rel="canonical"]');
-    if (canonicalEl) canonicalEl.href = hubUrl;
-    var ogUrl = document.querySelector('meta[property="og:url"]');
-    if (ogUrl) ogUrl.content = hubUrl;
-    var ogTitle = document.querySelector('meta[property="og:title"]');
-    if (ogTitle) ogTitle.content = 'Assos ' + c.plural + ' | Assos\'u Keşfet';
-    var ogDesc = document.querySelector('meta[property="og:description"]');
-    if (ogDesc) ogDesc.content = (c.heroSub || '');
-    var twTitle = document.querySelector('meta[name="twitter:title"]');
-    if (twTitle) twTitle.content = 'Assos ' + c.plural + ' | Assos\'u Keşfet';
-    var twDesc = document.querySelector('meta[name="twitter:description"]');
-    if (twDesc) twDesc.content = (c.heroSub || '');
+    // Meta tags: SSR (Cloudflare Function HTMLRewriter) zaten title + meta tag'leri
+    // dogru SEO degerleriyle ayarladi — client OVERWRITE ETMEMELI. Overwrite title
+    // flicker'a sebep oluyordu: "Assos Kafeleri — Deniz Manzarasi..." (SSR) once
+    // gorunup sonra "Assos Kafeler | ..." (client kisa versiyon) oluyordu.
+    // SSR skip olursa (ornek: local dev, asset fetch fail) fallback:
+    if (document.title === 'Assos Mekanları — Kafeler, Restoranlar, Oteller ve Kahvaltı | Assos\'u Keşfet') {
+      document.title = 'Assos ' + c.plural + ' | Assos\'u Keşfet';
+      var descMeta = document.querySelector('meta[name="description"]');
+      if (descMeta) descMeta.content = (c.intro || '').substring(0, 160);
+      var canonicalEl = document.querySelector('link[rel="canonical"]');
+      if (canonicalEl) canonicalEl.href = hubUrl;
+      var ogTitle = document.querySelector('meta[property="og:title"]');
+      if (ogTitle) ogTitle.content = 'Assos ' + c.plural + ' | Assos\'u Keşfet';
+      var ogDesc = document.querySelector('meta[property="og:description"]');
+      if (ogDesc) ogDesc.content = (c.heroSub || '');
+      var ogUrl = document.querySelector('meta[property="og:url"]');
+      if (ogUrl) ogUrl.content = hubUrl;
+      var twTitle = document.querySelector('meta[name="twitter:title"]');
+      if (twTitle) twTitle.content = 'Assos ' + c.plural + ' | Assos\'u Keşfet';
+      var twDesc = document.querySelector('meta[name="twitter:description"]');
+      if (twDesc) twDesc.content = (c.heroSub || '');
+    }
 
     // Hero dinamik
     var eyebrowEl = document.querySelector('.mk-hero-eyebrow span:not(.mk-hero-eyebrow-dot)');
