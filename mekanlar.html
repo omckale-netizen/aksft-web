@@ -138,7 +138,7 @@
 <div id="footer-placeholder"></div>
 
 <script src="firebase-loader.js?v=6"></script>
-<script src="shared.min.js?v=356"></script>
+<script src="shared.min.js?v=357"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
@@ -296,30 +296,39 @@ function pageInit() {
       }).join('');
     }
 
-    // Regions section (SSR zaten insert ediyor; client fallback sadece SSR atlandiysa)
-    if (c.regions && c.regions.length && !document.querySelector('.mk-hub-regions')) {
+    // Experiences section (SSR zaten insert ediyor; client fallback sadece SSR atlandiysa)
+    if (c.experiences && c.experiences.length && !document.querySelector('.mk-hub-experiences')) {
       var heroEl = document.querySelector('.mk-hero');
       if (heroEl) {
-        var regSec = document.createElement('section');
-        regSec.className = 'mk-hub-regions';
-        regSec.style.cssText = 'background:linear-gradient(180deg,#FAF7F2 0%,#F5EDE0 100%);padding:72px 24px;position:relative;overflow:hidden';
-        var cardsHtml = c.regions.map(function(r) {
-          return '<div style="background:#fff;border:1px solid rgba(26,39,68,.06);border-radius:18px;padding:22px 20px;transition:transform .25s cubic-bezier(.16,1,.3,1),box-shadow .25s" onmouseover="this.style.transform=\'translateY(-4px)\';this.style.boxShadow=\'0 16px 40px rgba(26,39,68,.08)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'"><div style="font-size:2rem;margin-bottom:12px;line-height:1" role="img" aria-label="' + r.title + '">' + r.emoji + '</div><h3 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;font-size:1rem;color:#1A2744;margin:0 0 6px;letter-spacing:-.015em">' + r.title + '</h3><p style="font-family:\'Plus Jakarta Sans\',sans-serif;font-size:.82rem;color:#4A5568;line-height:1.6;margin:0">' + r.desc + '</p></div>';
+        var expSec = document.createElement('section');
+        expSec.className = 'mk-hub-experiences';
+        expSec.style.cssText = 'background:linear-gradient(180deg,#FAF7F2 0%,#F5EDE0 100%);padding:88px 24px 80px;position:relative;overflow:hidden';
+        var cardsHtml = c.experiences.map(function(e, i) {
+          var num = String(i + 1).padStart(2, '0');
+          return '<article class="mk-exp-card" style="background:#fff;border:1px solid rgba(26,39,68,.06);border-radius:22px;padding:32px 28px;position:relative;overflow:hidden;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s,border-color .3s;cursor:default" onmouseover="this.style.transform=\'translateY(-6px)\';this.style.boxShadow=\'0 24px 60px rgba(26,39,68,.1)\';this.style.borderColor=\'' + c.color + '33\';this.querySelector(\'.mk-exp-num\').style.color=\'' + c.color + '\';this.querySelector(\'.mk-exp-line\').style.width=\'48px\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\';this.style.borderColor=\'rgba(26,39,68,.06)\';this.querySelector(\'.mk-exp-num\').style.color=\'rgba(26,39,68,.08)\';this.querySelector(\'.mk-exp-line\').style.width=\'24px\'">' +
+            '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px">' +
+              '<div style="font-size:3rem;line-height:1;filter:drop-shadow(0 3px 8px ' + c.color + '22)" role="img" aria-label="' + e.title + '">' + e.emoji + '</div>' +
+              '<span class="mk-exp-num" style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;font-size:2.4rem;color:rgba(26,39,68,.08);line-height:1;letter-spacing:-.04em;transition:color .3s">' + num + '</span>' +
+            '</div>' +
+            '<div class="mk-exp-line" style="width:24px;height:2px;background:' + c.color + ';margin-bottom:14px;transition:width .3s"></div>' +
+            '<h3 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;font-size:1.15rem;color:#1A2744;margin:0 0 8px;letter-spacing:-.015em">' + e.title + '</h3>' +
+            '<p style="font-family:\'Plus Jakarta Sans\',sans-serif;font-size:.88rem;color:#4A5568;line-height:1.7;margin:0">' + e.desc + '</p>' +
+          '</article>';
         }).join('');
-        regSec.innerHTML =
-          '<div style="max-width:1080px;margin:0 auto;position:relative;z-index:1">' +
-            '<div style="text-align:center;margin-bottom:44px;max-width:680px;margin-left:auto;margin-right:auto">' +
-              '<div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:14px">' +
-                '<span style="width:22px;height:1.5px;background:' + c.color + '"></span>' +
-                '<span style="font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:' + c.color + '">Bölgeler</span>' +
-                '<span style="width:22px;height:1.5px;background:' + c.color + '"></span>' +
+        expSec.innerHTML =
+          '<div style="max-width:1100px;margin:0 auto;position:relative;z-index:1">' +
+            '<div style="text-align:center;margin-bottom:52px;max-width:640px;margin-left:auto;margin-right:auto">' +
+              '<div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:16px">' +
+                '<span style="width:28px;height:1.5px;background:' + c.color + '"></span>' +
+                '<span style="font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:' + c.color + '">Stil Keşfi</span>' +
+                '<span style="width:28px;height:1.5px;background:' + c.color + '"></span>' +
               '</div>' +
-              '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;font-size:clamp(1.5rem,3.5vw,2rem);color:#1A2744;margin:0 0 12px;letter-spacing:-.02em;line-height:1.15">Assos ' + c.plural + ' <span style="font-family:\'Lora\',serif;font-style:italic;font-weight:500;color:' + c.color + '">nereden seçilir?</span></h2>' +
+              '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;font-size:clamp(1.7rem,4vw,2.4rem);color:#1A2744;margin:0 0 14px;letter-spacing:-.025em;line-height:1.12">Sana hangi <span style="font-family:\'Lora\',serif;font-style:italic;font-weight:500;color:' + c.color + '">' + c.plural.toLowerCase() + '</span> uygun?</h2>' +
               '<p style="font-family:\'Plus Jakarta Sans\',sans-serif;font-size:.94rem;color:#4A5568;line-height:1.75;margin:0">' + (c.shortIntro || '') + '</p>' +
             '</div>' +
-            '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">' + cardsHtml + '</div>' +
+            '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px">' + cardsHtml + '</div>' +
           '</div>';
-        heroEl.parentNode.insertBefore(regSec, heroEl.nextSibling);
+        heroEl.parentNode.insertBefore(expSec, heroEl.nextSibling);
       }
     }
 

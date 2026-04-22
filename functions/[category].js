@@ -12,12 +12,11 @@ const CATEGORIES = {
     heroChips: ['Butik Otel', 'Taş Ev Pansiyon', 'Deniz Manzaralı', 'Behramkale', 'Kadırga Koyu', 'Ekonomik'],
     title: "Assos Otelleri — Konaklama & Pansiyon Rehberi | Assos'u Keşfet",
     desc: "Assos otelleri ve pansiyonları: Behramkale taş evleri, Kadırga butik oteller, Babakale deniz manzaralı konaklama. Fiyat, konum ve iletişim bilgisiyle rehber.",
-    shortIntro: "Assos'ta konaklama 4 farklı bölgeye yayılmıştır. Her biri kendine özgü atmosfer sunar; tarihi taş ev pansiyonlardan butik otellere, her bütçeye uygun adresleri bir arada bulabilirsiniz.",
-    regions: [
-      { emoji: '🏛', title: 'Behramkale', desc: 'Antik surlar arasındaki taş ev pansiyonlar ve köy otelleri.' },
-      { emoji: '🌊', title: 'Kadırga Koyu', desc: 'Deniz kenarında sahil otelleri ve butik pansiyonlar.' },
-      { emoji: '⚓', title: 'Babakale', desc: "Türkiye'nin en batısında deniz manzaralı oteller." },
-      { emoji: '🫒', title: 'Adatepe', desc: 'Zeytinlikler arasında yayla evleri ve köy pansiyonları.' }
+    shortIntro: "Assos'ta konaklama seçimi sadece yer değil, atmosfer seçimi. Tarihi doku, deniz kenarı ya da doğa içinde — hangi tarzda bir tatil istediğinize göre konaklama stilinizi seçin.",
+    experiences: [
+      { emoji: '🏛', title: 'Tarihi Doku', desc: '200-300 yıllık taş ev pansiyonlarda antik köy atmosferi. Dar sokaklar, avlulu odalar, Ege mimarisi.' },
+      { emoji: '🌊', title: 'Denize Sıfır', desc: 'Sahil koylarında butik oteller ve pansiyonlar. Oda kapısından plaja, berrak sularda güne başlayın.' },
+      { emoji: '🫒', title: 'Doğa İçinde', desc: 'Zeytinlikler ve yayla evleri arasında sakinlik. Doğayla iç içe, organik sofralar ve kuş sesleri.' }
     ],
     intro: "Assos'ta konaklama arıyorsanız, Behramkale'nin antik surları arasındaki tarihi taş otellerden Kadırga Koyu'na bakan butik pansiyonlara uzanan geniş bir yelpazeye sahipsiniz. Adatepe'nin zeytinlikleri arasındaki yayla evlerinden Babakale'nin deniz manzaralı otellerine, her bütçeye uygun pansiyon, villa ve otel seçenekleri — fiyat, konum, manzara ve misafir yorumlarıyla karşılaştırabileceğiniz Assos otel rehberi. İletişim bilgileri, çalışma saatleri ve yol tarifiyle birlikte Assos konaklama rezervasyonunuzu tek sayfadan planlayın.",
     faqs: [
@@ -35,12 +34,11 @@ const CATEGORIES = {
     heroChips: ['Deniz Manzarası', 'Asma Altı', 'Gün Batımı', 'Ev Yapımı Tatlı', 'Behramkale', 'Köy Kahvesi'],
     title: "Assos Kafeleri — Deniz Manzarası & Kahve Molası Rehberi | Assos'u Keşfet",
     desc: "Assos kafeleri: Behramkale asma altı kahveci, Kadırga deniz manzaralı cafe, Adatepe köy kafeleri. Çalışma saatleri, konum ve menüyle Assos kafe rehberi.",
-    shortIntro: "Assos'un kafeleri her köşede farklı bir ruh hali sunar. Taş sokaklardan deniz kenarına, zeytinlikten gün batımı terasına — kahve molanız için en özel adresleri bölgelere göre keşfedin.",
-    regions: [
-      { emoji: '🏛', title: 'Behramkale', desc: 'Taş sokaklarda asma altı avlu kafeleri ve köy kahvecisi.' },
-      { emoji: '🌊', title: 'Kadırga Koyu', desc: 'Deniz kenarında manzaralı sahil kafeleri.' },
-      { emoji: '🫒', title: 'Adatepe', desc: 'Zeytinlikler arasında köy kafeleri ve kahvaltı mekanları.' },
-      { emoji: '🌅', title: 'Tepe Kafeleri', desc: 'Antik tapınak yakınında panoramik gün batımı manzarası.' }
+    shortIntro: "Assos'ta kahve molası her ruh haline göre şekil alır. Denize karşı, antik sokaklarda ya da gün batımında — hangi atmosferde mola vermek istediğinize göre kahve deneyiminizi seçin.",
+    experiences: [
+      { emoji: '🌊', title: 'Deniz Manzaralı', desc: 'Sahil koylarında ve teraslarda mavi sulara bakarak kahve. Rüzgarın tuzlu tadı, gün boyu martı sesleri.' },
+      { emoji: '☕', title: 'Asma Altı', desc: 'Taş sokaklarda avlulu, geleneksel köy kahvecisi havası. Yöresel ikramlar ve samimi sohbetler.' },
+      { emoji: '🌅', title: 'Gün Batımı', desc: 'Panoramik tepe teraslarında altın saatin keyfi. Ege\'nin rengini izleyerek özel molalar.' }
     ],
     intro: "Assos'un en iyi kafeleri, Behramkale'nin taş döşeli sokaklarından Kadırga Koyu'nun deniz kenarına uzanan benzersiz bir coğrafyaya yayılmış. Asma altı avluları, gün batımı teraslı butik kafeleri, Ege kahvesi ve ev yapımı tatlılar sunan köy işletmeleri — her ruh haline uygun bir Assos kafe adresi burada. Çalışma saatleri, konumları ve menü detaylarıyla Behramkale, Adatepe ve çevre köylerdeki kafeleri keşfedin; kahve molanızı Assos'un tarihi dokusuyla birleştirin.",
     faqs: [
@@ -58,12 +56,11 @@ const CATEGORIES = {
     heroChips: ['Balık Restoranı', 'Ege Mutfağı', 'Mezeli Akşam', 'Deniz Kenarı', 'Antik Liman', 'Köy Lokantası'],
     title: "Assos Restoranları — Balık & Ege Mutfağı Rehberi | Assos'u Keşfet",
     desc: "Assos restoranları: antik liman balık lokantaları, Behramkale mezeli akşam yemeği, Kadırga deniz manzaralı restoranlar. Menü ve iletişimle restoran rehberi.",
-    shortIntro: "Assos restoranları 4 ayrı bölgede farklı tatlar sunar — antik liman'ın balıkçıları, Behramkale'nin köy lokantaları, Kadırga'nın deniz manzaralı mekanları ve Adatepe'nin zeytinyağlı yemekleri.",
-    regions: [
-      { emoji: '⚓', title: 'Antik Liman', desc: 'Tarihi taş rıhtımda balık lokantaları ve deniz ürünleri.' },
-      { emoji: '🌊', title: 'Kadırga Koyu', desc: 'Deniz manzaralı restoranlar ve meze bahçeleri.' },
-      { emoji: '🏛', title: 'Behramkale', desc: 'Köy evlerinin avlusunda mezeli akşam yemeği.' },
-      { emoji: '🫒', title: 'Adatepe', desc: 'Yöresel Ege mutfağı ve zeytinyağlı köy lokantaları.' }
+    shortIntro: "Assos restoranları yemek tarzına göre farklı deneyimler sunar. Taze balıktan ev yemeklerine, mezeden zeytinyağlılara — hangi akşamı istediğinize göre sofranızı seçin.",
+    experiences: [
+      { emoji: '🐟', title: 'Balık Keyfi', desc: 'Günlük tutulmuş Ege balıklarıyla deniz manzaralı sofralar. Taze mezeler, yerel şarap, rıhtımda uzun akşamlar.' },
+      { emoji: '🫒', title: 'Ege Mutfağı', desc: 'Zeytinyağlı ot yemekleri, yöresel mezeler ve geleneksel Ege tatları. Sağlıklı ve yerel üretim.' },
+      { emoji: '🏡', title: 'Köy Lokantası', desc: 'Avluya kurulmuş sofralarda ev yemekleri. Keşkek, kuzu tandır, ev baklavası — otantik köy ruhu.' }
     ],
     intro: "Assos restoranları, antik liman'ın taş rıhtımındaki balık lokantalarından Behramkale köy evlerinin avlusunda servis edilen mezeli akşam yemeklerine kadar geniş bir Ege mutfağı deneyimi sunuyor. Kadırga Koyu'nun deniz manzaralı restoranları, geleneksel Assos zeytinyağı ile hazırlanan ot yemekleri, taze tutulmuş balık çeşitleri ve yerel üretim şarabı — akşam yemeği planınızı konum, menü ve fiyat bilgileriyle birlikte yapın. Assos'ta en iyi restoranlar, çalışma saatleri ve iletişim bilgileriyle tek sayfada.",
     faqs: [
@@ -81,12 +78,11 @@ const CATEGORIES = {
     heroChips: ['Serpme Kahvaltı', 'Köy Kahvaltısı', 'Ev Yapımı Reçel', 'Zeytin & Peynir', 'Manzaralı', 'Ayvacık'],
     title: "Assos Kahvaltı Mekanları — Serpme Köy Kahvaltısı Rehberi | Assos'u Keşfet",
     desc: "Assos kahvaltı: Behramkale, Ahmetçe, Adatepe serpme köy kahvaltısı. Ev yapımı reçel, Ayvacık peyniri, taze fırın ekmeği. En iyi kahvaltı mekanları tek sayfada.",
-    shortIntro: "Assos'ta kahvaltı deneyimi bölgeye göre değişir. Ahmetçe'nin kadın kooperatifinden Behramkale'nin taş ev sofralarına — 15-25 çeşit serpme kahvaltıyı bölge bölge keşfedin.",
-    regions: [
-      { emoji: '👩‍🌾', title: 'Ahmetçe', desc: 'Kadın Kooperatifi köy kahvaltısı ve el emeği reçeller.' },
-      { emoji: '🏛', title: 'Behramkale', desc: 'Taş ev kafelerinde serpme köy kahvaltısı.' },
-      { emoji: '🫒', title: 'Adatepe', desc: 'Zeytin müzesi yakını kahvaltı evleri ve yöresel peynir.' },
-      { emoji: '⚓', title: 'Babakale', desc: 'Sahil kenarında günaydın menüsü ve deniz manzarası.' }
+    shortIntro: "Assos'ta kahvaltı sadece yemek değil, bir ritüel. 15-25 çeşit serpme menü, ev yapımı ürünler ve bölgenin özgün lezzetleri — hangi sabahı istediğinize göre sofranızı seçin.",
+    experiences: [
+      { emoji: '🌾', title: 'Serpme Köy Kahvaltısı', desc: '15-25 çeşit ev yapımı menü. El emeği reçeller, köy peyniri, taze fırın ekmeği ve organik ürünler.' },
+      { emoji: '👩‍🌾', title: 'Kadın Kooperatifi', desc: 'Yerel kadınların hazırladığı sosyal dayanışma sofrası. Organik, el emeği, hikayesi olan sofralar.' },
+      { emoji: '🌅', title: 'Manzaralı Başlangıç', desc: 'Denize veya zeytinliklere bakarak güne başlayın. Ege\'nin ışığında sakin ve uzun kahvaltılar.' }
     ],
     intro: "Assos'ta kahvaltı deneyimi, kadın kooperatiflerinin el emeği reçellerinden Ayvacık köylerinin taze peynirlerine kadar Ege'nin gerçek tatlarını sofranıza taşıyor. Behramkale, Ahmetçe ve Adatepe'nin serpme köy kahvaltısı sunan mekanları; taze fırın ekmeği, yöresel zeytin, ev yapımı tereyağı ve 15-20 çeşit sunumla güne başlamanın en doğru yolu. Assos kahvaltı mekanları, çalışma saatleri ve menü detaylarıyla birlikte — sabah kahvaltı planınızı buradan yapın.",
     faqs: [
@@ -104,12 +100,11 @@ const CATEGORIES = {
     heroChips: ['Berrak Koy', 'Çakıl Plaj', 'Beach Club', 'Gizli Koy', 'Kadırga', 'Sivrice'],
     title: "Assos Plajları — Kadırga, Sivrice & Beach Club Rehberi | Assos'u Keşfet",
     desc: "Assos plajları: Kadırga Koyu berrak sular, Sivrice çakıl plaj, gizli koylar ve beach club'lar. Şemsiye, yeme-içme ve ulaşım bilgileriyle plaj rehberi.",
-    shortIntro: "Assos sahilleri her zevke uygun koy ve plaj sunar. Berrak sulu ünlü Kadırga'dan aileye uygun Sivrice kumsalına, gizli koylardan konforlu beach club'lara — her tatilde bir Assos manzarası.",
-    regions: [
-      { emoji: '🌊', title: 'Kadırga Koyu', desc: 'Berrak sular, ince çakıl, mavi bayrak — en popüler plaj.' },
-      { emoji: '👨‍👩‍👧', title: 'Sivrice', desc: 'Geniş kumsal, sığ su, çocuklu ailelere uygun.' },
-      { emoji: '🏝', title: 'Sokakağzı', desc: 'Gizli koy, sakinlik ve doğal güzellik arayanlara.' },
-      { emoji: '🛋', title: 'Beach Club', desc: 'Konforlu şezlong, bar, restoran — gün boyu servis.' }
+    shortIntro: "Assos'un denizle buluşmasının birden fazla yolu var. Ünlü koylar, gizli sahiller, beach club'lar — plaj tarzınıza göre Ege'nin en berrak sularını deneyimleyin.",
+    experiences: [
+      { emoji: '🌊', title: 'Ünlü Koylar', desc: 'Berrak sular, ince çakıl, mavi bayrak. Fotoğraflık ikonik plajlar; kalabalık ama kaliteli.' },
+      { emoji: '🏝', title: 'Gizli Sahiller', desc: 'Doğal ve bakir koylar. Sessizlik, yalnız olmanın keyfi, kendi cennetinizi bulma şansı.' },
+      { emoji: '🛋', title: 'Beach Club', desc: 'Konforlu şezlong, bar servisi, yemek ve müzik. Gün boyu tatil rahatlığı arayanlara.' }
     ],
     intro: "Assos plajları, Kadırga Koyu'nun ünlü berrak sularından Sivrice Plajı'nın ince çakıllarına, Türkiye'nin en temiz Ege sahillerini barındırıyor. Sokakağzı Koyu'nun sakinliğinden Kaleiçi Beach Club'ın konforuna, gizli koylardan çocuklu aileye uygun sığ plajlara — her tatil zevkine uygun Assos koyu ve plajı. Plaj girişleri, şemsiye-şezlong fiyatları, yeme-içme olanakları ve ulaşım bilgileriyle tatilinizi buradan planlayın. Assos'ta denize girilecek en iyi yerler tek listede.",
     faqs: [
@@ -127,12 +122,11 @@ const CATEGORIES = {
     heroChips: ['Balıkçı Limanı', 'Tekne Turu', 'Gün Batımı', 'Antik Liman', 'Babakale', 'Ahmetçe'],
     title: "Assos İskeleleri — Antik Liman & Balıkçı Limanı Rehberi | Assos'u Keşfet",
     desc: "Assos iskeleleri: antik liman, Babakale balıkçı iskelesi, Ahmetçe sakin koy. Tekne turu, balık mekanları ve tarihi rıhtım ulaşımıyla iskele rehberi.",
-    shortIntro: "Assos'un denize açılan kapıları her biri bir hikaye anlatır. Antik liman'ın 2500 yıllık taş rıhtımından Babakale'nin Osmanlı kalesine — 4 iskele, 4 farklı Ege deneyimi.",
-    regions: [
-      { emoji: '🏛', title: 'Antik Liman', desc: '2500 yıllık taş rıhtım, balık lokantaları ve tarih.' },
-      { emoji: '🏰', title: 'Babakale', desc: 'Osmanlı Kalesi yakını sakin iskele ve taze balık.' },
-      { emoji: '🎣', title: 'Ahmetçe', desc: 'Küçük balıkçı köyü — otantik ve sakinlik için ideal.' },
-      { emoji: '⛵', title: 'Tekne Turları', desc: 'Gün batımı turları, koy turu ve balık tutma aktiviteleri.' }
+    shortIntro: "Assos'un iskeleleri sadece denize açılan kapı değil, deneyim kapısı. Tarihle, balıkla ya da tekneyle — hangi hikayede yer almak istediğinize göre limanınızı seçin.",
+    experiences: [
+      { emoji: '🏛', title: 'Tarihi Limanlar', desc: '2500 yıllık taş rıhtımda yürüyüş. Antik çağdan Osmanlı\'ya Ege ticaretinin izleri ve etkileyici fotoğraf anları.' },
+      { emoji: '🎣', title: 'Balıkçı Limanı', desc: 'Sabah erken taze balık tezgahları, köy halkıyla sohbet, basit ama gerçek Ege sofraları.' },
+      { emoji: '⛵', title: 'Tekne & Gün Batımı', desc: 'Koy turları, günbatımı tekneleri, balık tutma aktiviteleri. Denizi yaşamak için en özel yol.' }
     ],
     intro: "Assos iskeleleri, antik çağdan bu yana Ege'nin ticaret ve balıkçılık merkezi olan bu bölgenin denizle olan köklü bağını yaşıyor. Antik liman'ın tarihi taş rıhtımından Babakale balıkçı iskelesine, Ahmetçe'nin sakin limanından gün batımı teknelerine kadar — her iskele Assos'un farklı bir hikayesini anlatıyor. Tekne turları, taze balık mekanları, manzara noktaları ve iskele kafeleri; konum ve ulaşım bilgileriyle birlikte Assos'un deniz kapılarını keşfedin.",
     faqs: [
@@ -177,29 +171,36 @@ export async function onRequest(context) {
     `<span class="mk-hero-chip">${escapeHtml(ch)}</span>`
   ).join('');
 
-  // Regions section HTML — hero'dan sonra, bolge bazli gorsel grid (cok metin yerine karta parcalanmis)
-  const regionsHtml = `
-<section class="mk-hub-regions" style="background:linear-gradient(180deg,#FAF7F2 0%,#F5EDE0 100%);padding:72px 24px;position:relative;overflow:hidden">
-  <div style="position:absolute;top:-60px;right:-40px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,${c.color}14 0%,transparent 70%);pointer-events:none"></div>
-  <div style="position:absolute;bottom:-40px;left:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,${c.color}0c 0%,transparent 70%);pointer-events:none"></div>
-  <div style="max-width:1080px;margin:0 auto;position:relative;z-index:1">
-    <div style="text-align:center;margin-bottom:44px;max-width:680px;margin-left:auto;margin-right:auto">
-      <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:14px">
-        <span style="width:22px;height:1.5px;background:${c.color}"></span>
-        <span style="font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:${c.color}">Bölgeler</span>
-        <span style="width:22px;height:1.5px;background:${c.color}"></span>
+  // Experiences section — deneyim/stil odakli 3 kart. Lokasyon bagimsiz, yaratici
+  // Tasarim: sol-buyuk numara + emoji + baslik + desc, hover'da kategori rengi accent
+  const experiencesHtml = `
+<section class="mk-hub-experiences" style="background:linear-gradient(180deg,#FAF7F2 0%,#F5EDE0 100%);padding:88px 24px 80px;position:relative;overflow:hidden">
+  <div style="position:absolute;top:-80px;right:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,${c.color}1a 0%,transparent 70%);pointer-events:none"></div>
+  <div style="position:absolute;bottom:-50px;left:-50px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,${c.color}14 0%,transparent 70%);pointer-events:none"></div>
+  <div style="max-width:1100px;margin:0 auto;position:relative;z-index:1">
+    <div style="text-align:center;margin-bottom:52px;max-width:640px;margin-left:auto;margin-right:auto">
+      <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:16px">
+        <span style="width:28px;height:1.5px;background:${c.color}"></span>
+        <span style="font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:${c.color}">Stil Keşfi</span>
+        <span style="width:28px;height:1.5px;background:${c.color}"></span>
       </div>
-      <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.5rem,3.5vw,2rem);color:#1A2744;margin:0 0 12px;letter-spacing:-.02em;line-height:1.15">Assos ${escapeHtml(c.plural)} <span style="font-family:'Lora',serif;font-style:italic;font-weight:500;color:${c.color}">nereden seçilir?</span></h2>
+      <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.7rem,4vw,2.4rem);color:#1A2744;margin:0 0 14px;letter-spacing:-.025em;line-height:1.12">Sana hangi <span style="font-family:'Lora',serif;font-style:italic;font-weight:500;color:${c.color}">${escapeHtml(c.plural.toLowerCase())}</span> uygun?</h2>
       <p style="font-family:'Plus Jakarta Sans',sans-serif;font-size:.94rem;color:#4A5568;line-height:1.75;margin:0">${escapeHtml(c.shortIntro)}</p>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
-      ${c.regions.map(r => `
-        <div style="background:#fff;border:1px solid rgba(26,39,68,.06);border-radius:18px;padding:22px 20px;transition:transform .25s cubic-bezier(.16,1,.3,1),box-shadow .25s;position:relative;overflow:hidden" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 16px 40px rgba(26,39,68,.08)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
-          <div style="font-size:2rem;margin-bottom:12px;line-height:1" role="img" aria-label="${escapeHtml(r.title)}">${r.emoji}</div>
-          <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1rem;color:#1A2744;margin:0 0 6px;letter-spacing:-.015em">${escapeHtml(r.title)}</h3>
-          <p style="font-family:'Plus Jakarta Sans',sans-serif;font-size:.82rem;color:#4A5568;line-height:1.6;margin:0">${escapeHtml(r.desc)}</p>
-        </div>
-      `).join('')}
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px">
+      ${c.experiences.map((e, i) => {
+        const num = String(i + 1).padStart(2, '0');
+        return `
+        <article class="mk-exp-card" style="background:#fff;border:1px solid rgba(26,39,68,.06);border-radius:22px;padding:32px 28px;position:relative;overflow:hidden;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s,border-color .3s;cursor:default" onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 24px 60px rgba(26,39,68,.1)';this.style.borderColor='${c.color}33';this.querySelector('.mk-exp-num').style.color='${c.color}';this.querySelector('.mk-exp-line').style.width='48px'" onmouseout="this.style.transform='';this.style.boxShadow='';this.style.borderColor='rgba(26,39,68,.06)';this.querySelector('.mk-exp-num').style.color='rgba(26,39,68,.08)';this.querySelector('.mk-exp-line').style.width='24px'">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px">
+            <div style="font-size:3rem;line-height:1;filter:drop-shadow(0 3px 8px ${c.color}22)" role="img" aria-label="${escapeHtml(e.title)}">${e.emoji}</div>
+            <span class="mk-exp-num" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:2.4rem;color:rgba(26,39,68,.08);line-height:1;letter-spacing:-.04em;transition:color .3s">${num}</span>
+          </div>
+          <div class="mk-exp-line" style="width:24px;height:2px;background:${c.color};margin-bottom:14px;transition:width .3s"></div>
+          <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.15rem;color:#1A2744;margin:0 0 8px;letter-spacing:-.015em">${escapeHtml(e.title)}</h3>
+          <p style="font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;color:#4A5568;line-height:1.7;margin:0">${escapeHtml(e.desc)}</p>
+        </article>`;
+      }).join('')}
     </div>
   </div>
 </section>`;
@@ -316,8 +317,8 @@ export async function onRequest(context) {
     .on('#mk-hero-cats', { element(el) { el.setInnerContent(chipsHtml, { html: true }); } })
     // Istatistik karti gizle (sadece /mekanlar'da gorunsun)
     .on('.mk-hero-card', { element(el) { el.setAttribute('style', 'display:none'); } })
-    // Hero'dan sonra bolge kartlari grid (metin parcalari halinde, gorsel zenginlik)
-    .on('.mk-hero', { element(el) { el.after(regionsHtml, { html: true }); } })
+    // Hero'dan sonra deneyim/stil kartlari (3 kart, lokasyon bagimsiz)
+    .on('.mk-hero', { element(el) { el.after(experiencesHtml, { html: true }); } })
     // FAQ section'u footer'dan hemen once (tum mekanlar listesinden sonra)
     .on('#footer-placeholder', { element(el) { el.before(faqHtml, { html: true }); } })
     // Body'e hub flag
