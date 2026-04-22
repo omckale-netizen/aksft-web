@@ -420,7 +420,19 @@ async function loadSinglePost(slug) {
       /(href\s*=\s*["'])(?:https?:\/\/(?:www\.)?assosukesfet\.com)?\/?blog\?yazi=([a-zA-Z0-9_-]+)/gi,
       '$1/blog/$2'
     );
-    document.getElementById('bp-content').innerHTML = contentHtml;
+    var bpEl = document.getElementById('bp-content');
+    bpEl.innerHTML = contentHtml;
+
+    // /blog/slug URL'indeyken 'harita.html', 'mekanlar.html' gibi relative
+    // linkler /blog/harita.html seklinde yanlis resolve oluyor. Blog
+    // icerigindeki tum relative href'leri site koku bazli absolute yap.
+    bpEl.querySelectorAll('a[href]').forEach(function(a) {
+      var h = a.getAttribute('href');
+      if (!h) return;
+      // Absolute, anchor, mailto, tel, javascript, protocol-relative -> dokunma
+      if (/^(https?:|mailto:|tel:|#|\/|\/\/|javascript:)/i.test(h)) return;
+      a.setAttribute('href', '/' + h);
+    });
 
     if (p.tags && p.tags.length) {
       var tagsEl = document.getElementById('bp-tags');
