@@ -12,6 +12,13 @@ const CATEGORIES = {
     heroChips: ['Butik Otel', 'Taş Ev Pansiyon', 'Deniz Manzaralı', 'Behramkale', 'Kadırga Koyu', 'Ekonomik'],
     title: "Assos Otelleri — Konaklama & Pansiyon Rehberi | Assos'u Keşfet",
     desc: "Assos otelleri ve pansiyonları: Behramkale taş evleri, Kadırga butik oteller, Babakale deniz manzaralı konaklama. Fiyat, konum ve iletişim bilgisiyle rehber.",
+    shortIntro: "Assos'ta konaklama 4 farklı bölgeye yayılmıştır. Her biri kendine özgü atmosfer sunar; tarihi taş ev pansiyonlardan butik otellere, her bütçeye uygun adresleri bir arada bulabilirsiniz.",
+    regions: [
+      { emoji: '🏛', title: 'Behramkale', desc: 'Antik surlar arasındaki taş ev pansiyonlar ve köy otelleri.' },
+      { emoji: '🌊', title: 'Kadırga Koyu', desc: 'Deniz kenarında sahil otelleri ve butik pansiyonlar.' },
+      { emoji: '⚓', title: 'Babakale', desc: "Türkiye'nin en batısında deniz manzaralı oteller." },
+      { emoji: '🫒', title: 'Adatepe', desc: 'Zeytinlikler arasında yayla evleri ve köy pansiyonları.' }
+    ],
     intro: "Assos'ta konaklama arıyorsanız, Behramkale'nin antik surları arasındaki tarihi taş otellerden Kadırga Koyu'na bakan butik pansiyonlara uzanan geniş bir yelpazeye sahipsiniz. Adatepe'nin zeytinlikleri arasındaki yayla evlerinden Babakale'nin deniz manzaralı otellerine, her bütçeye uygun pansiyon, villa ve otel seçenekleri — fiyat, konum, manzara ve misafir yorumlarıyla karşılaştırabileceğiniz Assos otel rehberi. İletişim bilgileri, çalışma saatleri ve yol tarifiyle birlikte Assos konaklama rezervasyonunuzu tek sayfadan planlayın.",
     faqs: [
       { q: "Assos'ta konaklama nasıl, nerelerde kalınır?", a: "Assos'ta konaklama bölgeye göre oldukça çeşitlidir. Behramkale köy merkezinde 200-300 yıllık taş ev pansiyonları tarihi deneyim sunar; dar sokaklar ve avlulu odalarıyla Ege mimarisini yaşarsınız. Kadırga Koyu ve Sivrice bölgesinde butik oteller ve sahil pansiyonları deniz kenarında konforlu konaklama için idealdir. Adatepe'nin zeytinlikler arasındaki yayla evleri sakin ve doğayla iç içe bir tatil deneyimi sunar. Babakale'deki deniz manzaralı pansiyonlar ise Türkiye'nin en batı ucundan Ege günbatımını izleme keyfini yaşatır. Her bütçe ve tarzda pansiyon, villa, butik otel veya lüks otel seçeneği bulunur." },
@@ -28,6 +35,13 @@ const CATEGORIES = {
     heroChips: ['Deniz Manzarası', 'Asma Altı', 'Gün Batımı', 'Ev Yapımı Tatlı', 'Behramkale', 'Köy Kahvesi'],
     title: "Assos Kafeleri — Deniz Manzarası & Kahve Molası Rehberi | Assos'u Keşfet",
     desc: "Assos kafeleri: Behramkale asma altı kahveci, Kadırga deniz manzaralı cafe, Adatepe köy kafeleri. Çalışma saatleri, konum ve menüyle Assos kafe rehberi.",
+    shortIntro: "Assos'un kafeleri her köşede farklı bir ruh hali sunar. Taş sokaklardan deniz kenarına, zeytinlikten gün batımı terasına — kahve molanız için en özel adresleri bölgelere göre keşfedin.",
+    regions: [
+      { emoji: '🏛', title: 'Behramkale', desc: 'Taş sokaklarda asma altı avlu kafeleri ve köy kahvecisi.' },
+      { emoji: '🌊', title: 'Kadırga Koyu', desc: 'Deniz kenarında manzaralı sahil kafeleri.' },
+      { emoji: '🫒', title: 'Adatepe', desc: 'Zeytinlikler arasında köy kafeleri ve kahvaltı mekanları.' },
+      { emoji: '🌅', title: 'Tepe Kafeleri', desc: 'Antik tapınak yakınında panoramik gün batımı manzarası.' }
+    ],
     intro: "Assos'un en iyi kafeleri, Behramkale'nin taş döşeli sokaklarından Kadırga Koyu'nun deniz kenarına uzanan benzersiz bir coğrafyaya yayılmış. Asma altı avluları, gün batımı teraslı butik kafeleri, Ege kahvesi ve ev yapımı tatlılar sunan köy işletmeleri — her ruh haline uygun bir Assos kafe adresi burada. Çalışma saatleri, konumları ve menü detaylarıyla Behramkale, Adatepe ve çevre köylerdeki kafeleri keşfedin; kahve molanızı Assos'un tarihi dokusuyla birleştirin.",
     faqs: [
       { q: "Assos kafeleri kaç arası açık, çalışma saatleri nedir?", a: "Assos kafelerinin çalışma saatleri mevsime ve konuma göre farklılık gösterir. Yaz sezonunda (Haziran-Eylül) genelde 08:00-24:00 arası açıktır; Behramkale köy meydanındaki kahveci ve taş ev kafeleri sabah erken saatte hizmete başlar. Kış aylarında (Kasım-Mart) çalışma saatleri 09:00-22:00 arasına çekilir, bazı manzara kafeleri Pazartesi-Salı günleri kapalı olabilir. Hafta sonları ve resmi tatil günlerinde saatler uzar; özellikle gün batımı saatinde (yaz 19:30-21:00) popüler kafeler çok yoğunlaşır. Rezervasyon almayan kafeler için erken gitmek önerilir; Adatepe ve köy kafeleri geleneksel saatleriyle (10:00-21:00) çalışır." },
@@ -44,6 +58,13 @@ const CATEGORIES = {
     heroChips: ['Balık Restoranı', 'Ege Mutfağı', 'Mezeli Akşam', 'Deniz Kenarı', 'Antik Liman', 'Köy Lokantası'],
     title: "Assos Restoranları — Balık & Ege Mutfağı Rehberi | Assos'u Keşfet",
     desc: "Assos restoranları: antik liman balık lokantaları, Behramkale mezeli akşam yemeği, Kadırga deniz manzaralı restoranlar. Menü ve iletişimle restoran rehberi.",
+    shortIntro: "Assos restoranları 4 ayrı bölgede farklı tatlar sunar — antik liman'ın balıkçıları, Behramkale'nin köy lokantaları, Kadırga'nın deniz manzaralı mekanları ve Adatepe'nin zeytinyağlı yemekleri.",
+    regions: [
+      { emoji: '⚓', title: 'Antik Liman', desc: 'Tarihi taş rıhtımda balık lokantaları ve deniz ürünleri.' },
+      { emoji: '🌊', title: 'Kadırga Koyu', desc: 'Deniz manzaralı restoranlar ve meze bahçeleri.' },
+      { emoji: '🏛', title: 'Behramkale', desc: 'Köy evlerinin avlusunda mezeli akşam yemeği.' },
+      { emoji: '🫒', title: 'Adatepe', desc: 'Yöresel Ege mutfağı ve zeytinyağlı köy lokantaları.' }
+    ],
     intro: "Assos restoranları, antik liman'ın taş rıhtımındaki balık lokantalarından Behramkale köy evlerinin avlusunda servis edilen mezeli akşam yemeklerine kadar geniş bir Ege mutfağı deneyimi sunuyor. Kadırga Koyu'nun deniz manzaralı restoranları, geleneksel Assos zeytinyağı ile hazırlanan ot yemekleri, taze tutulmuş balık çeşitleri ve yerel üretim şarabı — akşam yemeği planınızı konum, menü ve fiyat bilgileriyle birlikte yapın. Assos'ta en iyi restoranlar, çalışma saatleri ve iletişim bilgileriyle tek sayfada.",
     faqs: [
       { q: "Assos'ta hangi yemekler meşhurdur, ne yenir?", a: "Assos ve Ayvacık bölgesi Ege mutfağının en zengin merkezlerinden biridir. Taze Ege balıkları (karagöz, mezgit, sardalya, levrek, çipura) bölgenin başlıca lezzetleridir; antik liman ve Kadırga bölgesindeki restoranlarda günlük tutulmuş balık servis edilir. Zeytinyağlı ot yemekleri de bölgenin imzasıdır: kuzukulağı, şevketi bostan, deniz börülcesi, türlü ot kavurması ve enginar Assos zeytinyağıyla pişirilir. Meze çeşitleri zengindir — köpoğlu, çerkez tavuğu, sakız, barbunya ve haydari sıkça bulunur. Köy lokantalarında keşkek, kuzu tandır, etli dolma gibi ev yemekleri sunulur. Yanında yerel üretim şarap, rakı ve ayran tercih edilir. Tatlılarda sütlü tatlılar ve mevsim meyveleriyle yapılan kompostolar öne çıkar." },
@@ -60,6 +81,13 @@ const CATEGORIES = {
     heroChips: ['Serpme Kahvaltı', 'Köy Kahvaltısı', 'Ev Yapımı Reçel', 'Zeytin & Peynir', 'Manzaralı', 'Ayvacık'],
     title: "Assos Kahvaltı Mekanları — Serpme Köy Kahvaltısı Rehberi | Assos'u Keşfet",
     desc: "Assos kahvaltı: Behramkale, Ahmetçe, Adatepe serpme köy kahvaltısı. Ev yapımı reçel, Ayvacık peyniri, taze fırın ekmeği. En iyi kahvaltı mekanları tek sayfada.",
+    shortIntro: "Assos'ta kahvaltı deneyimi bölgeye göre değişir. Ahmetçe'nin kadın kooperatifinden Behramkale'nin taş ev sofralarına — 15-25 çeşit serpme kahvaltıyı bölge bölge keşfedin.",
+    regions: [
+      { emoji: '👩‍🌾', title: 'Ahmetçe', desc: 'Kadın Kooperatifi köy kahvaltısı ve el emeği reçeller.' },
+      { emoji: '🏛', title: 'Behramkale', desc: 'Taş ev kafelerinde serpme köy kahvaltısı.' },
+      { emoji: '🫒', title: 'Adatepe', desc: 'Zeytin müzesi yakını kahvaltı evleri ve yöresel peynir.' },
+      { emoji: '⚓', title: 'Babakale', desc: 'Sahil kenarında günaydın menüsü ve deniz manzarası.' }
+    ],
     intro: "Assos'ta kahvaltı deneyimi, kadın kooperatiflerinin el emeği reçellerinden Ayvacık köylerinin taze peynirlerine kadar Ege'nin gerçek tatlarını sofranıza taşıyor. Behramkale, Ahmetçe ve Adatepe'nin serpme köy kahvaltısı sunan mekanları; taze fırın ekmeği, yöresel zeytin, ev yapımı tereyağı ve 15-20 çeşit sunumla güne başlamanın en doğru yolu. Assos kahvaltı mekanları, çalışma saatleri ve menü detaylarıyla birlikte — sabah kahvaltı planınızı buradan yapın.",
     faqs: [
       { q: "Assos'ta serpme köy kahvaltısı nerede yapılır?", a: "Assos ve Ayvacık köyleri serpme köy kahvaltısının Türkiye'deki en özgün merkezlerinden biridir. Behramkale köy merkezindeki taş ev kafeleri ve aile işletmeleri; Ahmetçe köyündeki kadın kooperatifleri; Adatepe'nin zeytinlikler arasındaki avlulu mekanları ve Babakale sahilindeki köy evleri 15-25 çeşitlik serpme kahvaltı sunar. Menüde ev yapımı reçel (gül, kayısı, ceviz, taze incir), yöresel peynirler (beyaz, tulum, lor), günlük tereyağı, ekşi maya ekmeği, zeytin, sucuklu yumurta, omlet, börek, salata, bal-kaymak, mevsim meyveleri yer alır. Köy kahvaltısı kültürü Behramkale civarında özellikle gelişmiştir; yerel ürünlerle hazırlanır ve aileler tarafından servis edilir. Adatepe'de zeytinyağı müzesi yakınındaki kahvaltı mekanları da ünlüdür." },
@@ -76,6 +104,13 @@ const CATEGORIES = {
     heroChips: ['Berrak Koy', 'Çakıl Plaj', 'Beach Club', 'Gizli Koy', 'Kadırga', 'Sivrice'],
     title: "Assos Plajları — Kadırga, Sivrice & Beach Club Rehberi | Assos'u Keşfet",
     desc: "Assos plajları: Kadırga Koyu berrak sular, Sivrice çakıl plaj, gizli koylar ve beach club'lar. Şemsiye, yeme-içme ve ulaşım bilgileriyle plaj rehberi.",
+    shortIntro: "Assos sahilleri her zevke uygun koy ve plaj sunar. Berrak sulu ünlü Kadırga'dan aileye uygun Sivrice kumsalına, gizli koylardan konforlu beach club'lara — her tatilde bir Assos manzarası.",
+    regions: [
+      { emoji: '🌊', title: 'Kadırga Koyu', desc: 'Berrak sular, ince çakıl, mavi bayrak — en popüler plaj.' },
+      { emoji: '👨‍👩‍👧', title: 'Sivrice', desc: 'Geniş kumsal, sığ su, çocuklu ailelere uygun.' },
+      { emoji: '🏝', title: 'Sokakağzı', desc: 'Gizli koy, sakinlik ve doğal güzellik arayanlara.' },
+      { emoji: '🛋', title: 'Beach Club', desc: 'Konforlu şezlong, bar, restoran — gün boyu servis.' }
+    ],
     intro: "Assos plajları, Kadırga Koyu'nun ünlü berrak sularından Sivrice Plajı'nın ince çakıllarına, Türkiye'nin en temiz Ege sahillerini barındırıyor. Sokakağzı Koyu'nun sakinliğinden Kaleiçi Beach Club'ın konforuna, gizli koylardan çocuklu aileye uygun sığ plajlara — her tatil zevkine uygun Assos koyu ve plajı. Plaj girişleri, şemsiye-şezlong fiyatları, yeme-içme olanakları ve ulaşım bilgileriyle tatilinizi buradan planlayın. Assos'ta denize girilecek en iyi yerler tek listede.",
     faqs: [
       { q: "Assos'ta en iyi plaj ve koy hangisi?", a: "Assos bölgesinde her zevke uygun plaj ve koy bulunur. Kadırga Koyu berrak suları, ince çakıllı sahili ve tarihi Behramkale manzarasıyla en popüler plajdır — Temmuz-Ağustos ayları çok yoğun olur. Sivrice Plajı geniş kumsalı ve sığ suyu ile özellikle çocuklu aileler için idealdir, mavi bayraklıdır ve birkaç beach club bulunur. Sokakağzı Koyu küçük, sakin ve doğal güzelliğiyle gizli cennet arayanlar için mükemmeldir; arabayla zor ulaşım ama değer. Kaleiçi bölgesi butik beach club konsepti ile konfor isteyenlere uygun. Babakale yakınlarındaki koylar yerli ailelerin tercihi; daha sakin ve otantiktir. Yıldız Koyu ve Assos antik liman yakını plajlar ise tarih ve doğayı birleştirir. Her plajın kendine özgü karakteri vardır." },
@@ -92,6 +127,13 @@ const CATEGORIES = {
     heroChips: ['Balıkçı Limanı', 'Tekne Turu', 'Gün Batımı', 'Antik Liman', 'Babakale', 'Ahmetçe'],
     title: "Assos İskeleleri — Antik Liman & Balıkçı Limanı Rehberi | Assos'u Keşfet",
     desc: "Assos iskeleleri: antik liman, Babakale balıkçı iskelesi, Ahmetçe sakin koy. Tekne turu, balık mekanları ve tarihi rıhtım ulaşımıyla iskele rehberi.",
+    shortIntro: "Assos'un denize açılan kapıları her biri bir hikaye anlatır. Antik liman'ın 2500 yıllık taş rıhtımından Babakale'nin Osmanlı kalesine — 4 iskele, 4 farklı Ege deneyimi.",
+    regions: [
+      { emoji: '🏛', title: 'Antik Liman', desc: '2500 yıllık taş rıhtım, balık lokantaları ve tarih.' },
+      { emoji: '🏰', title: 'Babakale', desc: 'Osmanlı Kalesi yakını sakin iskele ve taze balık.' },
+      { emoji: '🎣', title: 'Ahmetçe', desc: 'Küçük balıkçı köyü — otantik ve sakinlik için ideal.' },
+      { emoji: '⛵', title: 'Tekne Turları', desc: 'Gün batımı turları, koy turu ve balık tutma aktiviteleri.' }
+    ],
     intro: "Assos iskeleleri, antik çağdan bu yana Ege'nin ticaret ve balıkçılık merkezi olan bu bölgenin denizle olan köklü bağını yaşıyor. Antik liman'ın tarihi taş rıhtımından Babakale balıkçı iskelesine, Ahmetçe'nin sakin limanından gün batımı teknelerine kadar — her iskele Assos'un farklı bir hikayesini anlatıyor. Tekne turları, taze balık mekanları, manzara noktaları ve iskele kafeleri; konum ve ulaşım bilgileriyle birlikte Assos'un deniz kapılarını keşfedin.",
     faqs: [
       { q: "Assos antik limanı nerede, nasıl ulaşılır?", a: "Assos antik limanı Behramkale köyünün hemen altında, 2500 yıllık surların dibindedir. Köyden deniz seviyesine inen taş döşeli yoldan yürüyerek 15 dakikada (zorlu, eğimli) veya araçla 10 dakikada ulaşılır. Araçla dönüşte yol oldukça dik olduğu için düşük vites önerilir; yürüyüşte rahat ayakkabı gerekir. Liman kısmında park alanı sınırlıdır, yaz aylarında (Haziran-Eylül) erken saatlerde gitmek önerilir. Antik liman hem tarihi bir mekân hem yeme-içme noktasıdır: taş rıhtımın iki yanında 10-15 balık lokantası bulunur. Lokantaların her biri kendine özgü atmosfer sunar; günbatımı saatleri en popüler dönemdir. Giriş ücretsizdir, plaj kısmı yüzmeye uygun değil ama deniz fotoğraf için mükemmeldir." },
@@ -135,7 +177,32 @@ export async function onRequest(context) {
     `<span class="mk-hero-chip">${escapeHtml(ch)}</span>`
   ).join('');
 
-  // Intro artik hero ICINDE — #mk-hero-intro element'ine dogrudan yaziliyor (HTMLRewriter ile)
+  // Regions section HTML — hero'dan sonra, bolge bazli gorsel grid (cok metin yerine karta parcalanmis)
+  const regionsHtml = `
+<section class="mk-hub-regions" style="background:linear-gradient(180deg,#FAF7F2 0%,#F5EDE0 100%);padding:72px 24px;position:relative;overflow:hidden">
+  <div style="position:absolute;top:-60px;right:-40px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,${c.color}14 0%,transparent 70%);pointer-events:none"></div>
+  <div style="position:absolute;bottom:-40px;left:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,${c.color}0c 0%,transparent 70%);pointer-events:none"></div>
+  <div style="max-width:1080px;margin:0 auto;position:relative;z-index:1">
+    <div style="text-align:center;margin-bottom:44px;max-width:680px;margin-left:auto;margin-right:auto">
+      <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:14px">
+        <span style="width:22px;height:1.5px;background:${c.color}"></span>
+        <span style="font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:${c.color}">Bölgeler</span>
+        <span style="width:22px;height:1.5px;background:${c.color}"></span>
+      </div>
+      <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.5rem,3.5vw,2rem);color:#1A2744;margin:0 0 12px;letter-spacing:-.02em;line-height:1.15">Assos ${escapeHtml(c.plural)} <span style="font-family:'Lora',serif;font-style:italic;font-weight:500;color:${c.color}">nereden seçilir?</span></h2>
+      <p style="font-family:'Plus Jakarta Sans',sans-serif;font-size:.94rem;color:#4A5568;line-height:1.75;margin:0">${escapeHtml(c.shortIntro)}</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+      ${c.regions.map(r => `
+        <div style="background:#fff;border:1px solid rgba(26,39,68,.06);border-radius:18px;padding:22px 20px;transition:transform .25s cubic-bezier(.16,1,.3,1),box-shadow .25s;position:relative;overflow:hidden" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 16px 40px rgba(26,39,68,.08)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+          <div style="font-size:2rem;margin-bottom:12px;line-height:1" role="img" aria-label="${escapeHtml(r.title)}">${r.emoji}</div>
+          <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1rem;color:#1A2744;margin:0 0 6px;letter-spacing:-.015em">${escapeHtml(r.title)}</h3>
+          <p style="font-family:'Plus Jakarta Sans',sans-serif;font-size:.82rem;color:#4A5568;line-height:1.6;margin:0">${escapeHtml(r.desc)}</p>
+        </div>
+      `).join('')}
+    </div>
+  </div>
+</section>`;
 
   // FAQ section HTML (SSS — SEO long-tail keyword'ler + rich snippet besler)
   const faqHtml = `
@@ -243,12 +310,14 @@ export async function onRequest(context) {
     .on('.mk-hero-h1', { element(el) { el.setInnerContent(`Assos<br><em>${c.heroPlural}</em>`, { html: true }); } })
     // Hero alt metin (kisa etkileyici cümle)
     .on('.mk-hero-sub', { element(el) { el.setInnerContent(c.heroSub); } })
-    // Hero intro paragraf (SEO zengin, keyword-rich, ~80-100 kelime)
-    .on('#mk-hero-intro', { element(el) { el.setInnerContent(c.intro); } })
+    // Hero-intro element'ini bos birak (artik kullanilmiyor, regions section'a tasindi)
+    .on('#mk-hero-intro', { element(el) { el.setInnerContent(''); } })
     // Hero chip'leri
     .on('#mk-hero-cats', { element(el) { el.setInnerContent(chipsHtml, { html: true }); } })
     // Istatistik karti gizle (sadece /mekanlar'da gorunsun)
     .on('.mk-hero-card', { element(el) { el.setAttribute('style', 'display:none'); } })
+    // Hero'dan sonra bolge kartlari grid (metin parcalari halinde, gorsel zenginlik)
+    .on('.mk-hero', { element(el) { el.after(regionsHtml, { html: true }); } })
     // FAQ section'u footer'dan hemen once (tum mekanlar listesinden sonra)
     .on('#footer-placeholder', { element(el) { el.before(faqHtml, { html: true }); } })
     // Body'e hub flag
