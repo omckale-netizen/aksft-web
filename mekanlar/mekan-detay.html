@@ -16,7 +16,7 @@
   <meta property="og:title" content="Mekan — Assos'u Keşfet">
   <meta property="og:description" content="Assos ve Ayvacık'ta mekan detayı.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://assosukesfet.com/mekanlar/mekan-detay.html">
+  <meta property="og:url" content="https://assosukesfet.com/mekanlar">
   <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/assosu-kesfet.firebasestorage.app/o/site%2Fog-image.jpg?alt=media&token=70d62a44-9142-43d8-aee4-de790f5c7dcd">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -43,18 +43,34 @@
 </div>
 <div id="footer-placeholder"></div>
 <script src="../firebase-loader.js?v=6"></script>
-<script src="../shared.min.js?v=348"></script>
+<script src="../shared.min.js?v=349"></script>
 <script>
+// Mekan slug'ini URL'den cikar: once path (/kategori/slug), sonra query (?id=slug), sonra hash
+// Path parsing window.CATEGORY_SLUG_TO_ID ile guvenli (shared.min.js yuklendikten sonra calisir)
+function getMekanSlugFromUrl() {
+  var m = window.location.pathname.match(/^\/([^\/\?#]+)\/([^\/\?#]+)\/?$/);
+  if (m && window.CATEGORY_SLUG_TO_ID && window.CATEGORY_SLUG_TO_ID[m[1]]) {
+    return { slug: decodeURIComponent(m[2]), category: window.CATEGORY_SLUG_TO_ID[m[1]] };
+  }
+  var params = new URLSearchParams(window.location.search);
+  var q = params.get('id');
+  if (q) return { slug: q, category: null };
+  var h = window.location.hash.replace('#', '');
+  return h ? { slug: h, category: null } : null;
+}
+
 function pageInit() {
   renderNav({ heroMode: false, basePath: '../' });
   renderFooter({ basePath: '../' });
 
-  // URL'den mekan ID'si al: ?id=behram-kafe veya #behram-kafe
-  const params = new URLSearchParams(window.location.search);
-  let venueId = params.get('id');
-  if (!venueId) venueId = window.location.hash.replace('#', '');
-  if (!venueId) {
-    var noindex = document.createElement('meta'); noindex.name = 'robots'; noindex.content = 'noindex, nofollow'; document.head.appendChild(noindex);
+  // URL'den mekan al: /oteller/sunaba-kasri veya ?id=behram-kafe veya #behram-kafe
+  var parsed = getMekanSlugFromUrl();
+  let venueId = parsed ? parsed.slug : null;
+
+  function renderMekanBulunamadi() {
+    var noindex = document.querySelector('meta[name="robots"]');
+    if (!noindex) { noindex = document.createElement('meta'); noindex.name = 'robots'; document.head.appendChild(noindex); }
+    noindex.content = 'noindex, nofollow';
     document.title = 'Mekan Bulunamadı — Assos\u2019u Keşfet';
     document.getElementById('vp-hero').innerHTML = '';
     var footer = document.getElementById('footer-placeholder'); if (footer) footer.style.display = 'none';
@@ -106,13 +122,32 @@ function pageInit() {
           © ${new Date().getFullYear()} Assos'u Keşfet
         </div>
       </div>`;
+  }
+
+  if (!venueId) {
+    renderMekanBulunamadi();
     return;
   }
 
   // Mekanı render et
-  renderVenuePage(venueId);
+  function checkAndRender() {
+    var exists = (window.DATA?.venues || []).some(function(v) { return v.id === venueId; });
+    if (exists) {
+      renderVenuePage(venueId);
+      applySeoMeta();
+    } else if (window.DATA && window.DATA.venues) {
+      // DATA yuklendi ama mekan yok
+      renderMekanBulunamadi();
+    } else {
+      // DATA henuz yok
+      renderVenuePage(venueId);
+    }
+  }
+  checkAndRender();
+  // Firebase'den guncel veri geldiginde tekrar kontrol
+  document.addEventListener('dataReady', checkAndRender);
 
-  // Sayfa başlığını güncelle
+  function applySeoMeta() {
   const venue = (window.DATA?.venues || []).find(v => v.id === venueId);
   if (venue) {
     const catLabels = {kafe:'Assos Kafeler',restoran:'Assos Restoranlar',kahvalti:'Assos Kahvaltı Mekanları',konaklama:'Assos Otelleri',beach:'Assos Beach Club',iskele:'Assos İskeleler'};
@@ -139,7 +174,7 @@ function pageInit() {
     const twImg = document.querySelector('meta[name="twitter:image"]');
     if (ogTitle) ogTitle.content = seoTitle;
     if (ogDesc) ogDesc.content = seoDesc;
-    if (ogUrl) ogUrl.content = 'https://assosukesfet.com/mekanlar/mekan-detay.html?id=' + venueId;
+    if (ogUrl) ogUrl.content = (window.getVenueUrl ? ('https://assosukesfet.com' + window.getVenueUrl(venue)) : ('https://assosukesfet.com/mekanlar/mekan-detay.html?id=' + venueId));
     if (venue.images && venue.images[0]) {
       if (ogImg) ogImg.content = venue.images[0];
       if (twImg) twImg.content = venue.images[0];
@@ -147,21 +182,28 @@ function pageInit() {
     if (twTitle) twTitle.content = seoTitle;
     if (twDesc) twDesc.content = seoDesc;
     // Canonical URL
-    var canonicalUrl = 'https://assosukesfet.com/mekanlar/mekan-detay.html?id=' + venueId;
+    var canonicalUrl = (window.getVenueUrl ? ('https://assosukesfet.com' + window.getVenueUrl(venue)) : ('https://assosukesfet.com/mekanlar/mekan-detay.html?id=' + venueId));
     var canonicalEl = document.querySelector('link[rel="canonical"]');
     if (!canonicalEl) { canonicalEl = document.createElement('link'); canonicalEl.rel = 'canonical'; document.head.appendChild(canonicalEl); }
     canonicalEl.href = canonicalUrl;
 
-    // Breadcrumb Schema
+    // Breadcrumb Schema - 4 seviye (Anasayfa > Mekanlar > Kategori > Mekan)
+    var bcItems = [
+      {'@type':'ListItem','position':1,'name':'Anasayfa','item':'https://assosukesfet.com'},
+      {'@type':'ListItem','position':2,'name':'Mekanlar','item':'https://assosukesfet.com/mekanlar'}
+    ];
+    var catInfo = window.CATEGORIES && window.CATEGORIES[venue.category];
+    if (catInfo) {
+      bcItems.push({'@type':'ListItem','position':3,'name':catInfo.plural,'item':'https://assosukesfet.com/' + catInfo.slug});
+      bcItems.push({'@type':'ListItem','position':4,'name':venue.title,'item':'https://assosukesfet.com' + window.getVenueUrl(venue)});
+    } else {
+      bcItems.push({'@type':'ListItem','position':3,'name':venue.title,'item':'https://assosukesfet.com/mekanlar/mekan-detay.html?id=' + venueId});
+    }
     var bcSchema = document.createElement('script');
     bcSchema.type = 'application/ld+json';
     bcSchema.textContent = JSON.stringify({
       '@context':'https://schema.org','@type':'BreadcrumbList',
-      'itemListElement':[
-        {'@type':'ListItem','position':1,'name':'Anasayfa','item':'https://assosukesfet.com'},
-        {'@type':'ListItem','position':2,'name':'Mekanlar','item':'https://assosukesfet.com/mekanlar'},
-        {'@type':'ListItem','position':3,'name':venue.title,'item':'https://assosukesfet.com/mekanlar/mekan-detay.html?id='+venueId}
-      ]
+      'itemListElement': bcItems
     });
     document.head.appendChild(bcSchema);
 
@@ -172,7 +214,7 @@ function pageInit() {
       '@type': schemaTypes[venue.category] || 'LocalBusiness',
       'name': venue.title,
       'description': venue.shortDesc || '',
-      'url': 'https://assosukesfet.com/mekanlar/mekan-detay.html?id=' + venueId,
+      'url': (window.getVenueUrl ? ('https://assosukesfet.com' + window.getVenueUrl(venue)) : ('https://assosukesfet.com/mekanlar/mekan-detay.html?id=' + venueId)),
       'address': {
         '@type': 'PostalAddress',
         'addressLocality': venue.location || 'Assos',
@@ -198,6 +240,7 @@ function pageInit() {
     schemaScript.textContent = JSON.stringify(schema);
     document.head.appendChild(schemaScript);
   }
+  } // applySeoMeta
 }
 document.addEventListener('dataReady', pageInit);
 // Firebase verisi geldiğinde yeniden render et (güncel görseller için)

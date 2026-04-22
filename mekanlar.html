@@ -138,7 +138,7 @@
 <div id="footer-placeholder"></div>
 
 <script src="firebase-loader.js?v=6"></script>
-<script src="shared.min.js?v=348"></script>
+<script src="shared.min.js?v=349"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
@@ -223,11 +223,39 @@ function pageInit() {
   const FILTER_KEY = 'mk_filter_state';
   let _saved = {};
   try { _saved = JSON.parse(sessionStorage.getItem(FILTER_KEY) || '{}'); } catch(e) {}
-  let activeCat    = _saved.cat || 'all';
+  // URL'den kategori al (oncelik: ?cat= query > path /oteller vs > sessionStorage > 'all')
+  let _urlCat = null;
+  try {
+    _urlCat = new URLSearchParams(location.search).get('cat');
+    if (!_urlCat) {
+      // Path bazli hub: /oteller, /kafeler, /restoranlar, /kahvalti, /plajlar, /iskeleler
+      var _pathMatch = location.pathname.match(/^\/([^\/\?#]+)\/?$/);
+      if (_pathMatch && window.CATEGORY_SLUG_TO_ID && window.CATEGORY_SLUG_TO_ID[_pathMatch[1]]) {
+        _urlCat = window.CATEGORY_SLUG_TO_ID[_pathMatch[1]];
+      }
+    }
+  } catch(e) {}
+  let activeCat    = _urlCat || _saved.cat || 'all';
   let activeStatus = _saved.status || 'all'; // 'all' | 'open' | 'closed'
   function persistFilter() {
     try { sessionStorage.setItem(FILTER_KEY, JSON.stringify({ cat: activeCat, status: activeStatus })); } catch(e) {}
   }
+  // Hub sayfasi ise (path /oteller, /kafeler vb.) SEO meta'lari guncelle
+  (function updateHubSeo() {
+    var m = location.pathname.match(/^\/([^\/\?#]+)\/?$/);
+    if (!m || !window.CATEGORIES || !window.CATEGORY_SLUG_TO_ID) return;
+    var catId = window.CATEGORY_SLUG_TO_ID[m[1]];
+    if (!catId) return;
+    var c = window.CATEGORIES[catId];
+    var hubUrl = 'https://assosukesfet.com/' + c.slug;
+    document.title = 'Assos ' + c.plural + ' — ' + c.emoji + ' | Assos\'u Keşfet';
+    var canonicalEl = document.querySelector('link[rel="canonical"]');
+    if (canonicalEl) canonicalEl.href = hubUrl;
+    var ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl) ogUrl.content = hubUrl;
+    var ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) ogTitle.content = 'Assos ' + c.plural + ' | Assos\'u Keşfet';
+  })();
   let showingSaved = false;
 
   /* ── Açık / Kapalı durumu — shared.js isVenueOpen() kullanır ── */

@@ -66,16 +66,25 @@ export async function onRequest(context) {
     // Dinamik sayfalar
     const dynamicPages = [];
 
-    // Mekanlar — sadece yayında olanlar
+    // Mekanlar — sadece yayında olanlar (yeni URL formati: /kategori/slug)
+    const CATEGORY_SLUG = { konaklama:'oteller', kafe:'kafeler', restoran:'restoranlar', kahvalti:'kahvalti', beach:'plajlar', iskele:'iskeleler' };
     for (const v of venues) {
       const status = getField(v.fields, 'status') || (getField(v.fields, 'active') === false ? 'hidden' : 'published');
       if (status !== 'published') continue;
+      const cat = getField(v.fields, 'category');
+      const catSlug = CATEGORY_SLUG[cat] || 'mekanlar';
       dynamicPages.push({
-        loc: `/mekanlar/mekan-detay.html?id=${v.id}`,
+        loc: `/${catSlug}/${v.id}`,
         changefreq: 'weekly',
         priority: '0.7',
       });
     }
+    // Kategori hub sayfalari
+    const activeCats = new Set(venues.map(v => getField(v.fields, 'category')).filter(Boolean));
+    activeCats.forEach(cat => {
+      const slug = CATEGORY_SLUG[cat];
+      if (slug) dynamicPages.push({ loc: '/' + slug, changefreq: 'weekly', priority: '0.8' });
+    });
 
     // Yerler
     for (const p of places) {

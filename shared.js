@@ -4,6 +4,49 @@
 ═══════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════
+   KATEGORILER — Single source of truth
+   Yeni kategori eklemek: buraya 1 satir ekle, deploy et. Admin dropdown
+   otomatik guncellenir, URL routing (functions/[category]/[slug].js)
+   dinamik olarak yakalar.
+═══════════════════════════════════════════ */
+window.CATEGORIES = {
+  konaklama: { slug: 'oteller',     label: 'Konaklama', emoji: '🏨', plural: 'Oteller',     color: '#5A7A56' },
+  kafe:      { slug: 'kafeler',     label: 'Kafe',      emoji: '☕', plural: 'Kafeler',     color: '#C4521A' },
+  restoran:  { slug: 'restoranlar', label: 'Restoran',  emoji: '🍽', plural: 'Restoranlar', color: '#1A6B8A' },
+  kahvalti:  { slug: 'kahvalti',    label: 'Kahvaltı',  emoji: '🌞', plural: 'Kahvaltı',    color: '#8A5520' },
+  beach:     { slug: 'plajlar',     label: 'Plaj',      emoji: '🏖', plural: 'Plajlar',     color: '#1A9A8A' },
+  iskele:    { slug: 'iskeleler',   label: 'İskele',    emoji: '⚓', plural: 'İskeleler',   color: '#3A5A8A' }
+};
+// Slug -> category id (reverse lookup icin)
+window.CATEGORY_SLUG_TO_ID = Object.keys(window.CATEGORIES).reduce(function(acc, cat) {
+  acc[window.CATEGORIES[cat].slug] = cat;
+  return acc;
+}, {});
+// Venue URL olustur: venue objesini verince /kategori-slug/venue-id donerek
+window.getVenueUrl = function(venue) {
+  if (!venue || !venue.id) return '/mekanlar';
+  var catId = venue.category;
+  var cat = window.CATEGORIES[catId];
+  if (!cat) return '/mekanlar/mekan-detay.html?id=' + venue.id; // bilinmeyen kategori: fallback
+  return '/' + cat.slug + '/' + venue.id;
+};
+// Kategori hub URL'i: '/oteller', '/kafeler' vb.
+window.getCategoryHubUrl = function(catId) {
+  var cat = window.CATEGORIES[catId];
+  if (!cat) return '/mekanlar';
+  return '/' + cat.slug;
+};
+// URL pathten venue slug cikar: /oteller/sunaba-kasri -> { cat: 'konaklama', slug: 'sunaba-kasri' }
+window.parseVenueFromPath = function(pathname) {
+  var m = (pathname || window.location.pathname).match(/^\/([^\/\?#]+)\/([^\/\?#]+)\/?$/);
+  if (!m) return null;
+  var catId = window.CATEGORY_SLUG_TO_ID[m[1]];
+  if (!catId) return null;
+  return { cat: catId, slug: decodeURIComponent(m[2]) };
+};
+
+
+/* ═══════════════════════════════════════════
    3rd-PARTY ANALYTICS LAZY LOADER
    Facebook Pixel + Clarity + GA4 ertelenerek yüklenir.
    - LCP (2.7s) bitsin diye timeout 5s
@@ -1154,6 +1197,12 @@ function renderNav(opts = {}) {
     return '';
   }
   function getMekanPath(id) {
+    // Venue DATA'da varsa kategori-slug formatinda URL don, yoksa eski format
+    // (eski format da functions/mekanlar/mekan-detay.js tarafindan 301 yeniye yonlendirilir)
+    if (window.DATA && window.DATA.venues) {
+      var v = window.DATA.venues.find(function(x) { return x.id === id; });
+      if (v && window.getVenueUrl) return window.getVenueUrl(v);
+    }
     return getBasePath() + 'mekanlar/mekan-detay.html?id=' + id;
   }
   function getMekanListPath() {
@@ -2029,7 +2078,14 @@ function initSearch(inputId, opts = {}) {
     const base = _p.includes('/mekanlar/') || _p.includes('/rotalar/') || _p.includes('/yerler/') || _p.includes('/koyler/') || /^\/blog\/[^\/]+\/?$/.test(_p) ? '../' : '';
     if (type === 'route')   return `${base}rotalar/${id}`;
     if (type === 'place')   return `${base}yerler/${id}`;
-    if (type === 'venue')   return `${base}mekanlar/mekan-detay.html?id=${id}`;
+    if (type === 'venue') {
+      // Venue DATA'da varsa kategori URL'i, yoksa eski format (server 301)
+      if (window.DATA && window.DATA.venues) {
+        var v = window.DATA.venues.find(function(x) { return x.id === id; });
+        if (v && window.getVenueUrl) return window.getVenueUrl(v);
+      }
+      return `${base}mekanlar/mekan-detay.html?id=${id}`;
+    }
     if (type === 'village') return `${base}koyler/${id}`;
     return '#';
   }
@@ -3726,7 +3782,7 @@ function renderVenuePage(venueId) {
               const sm = VMETA[s.id] || { g:'linear-gradient(160deg,#1A2744,#2A3A5A)' };
               const scs = CAT_STYLE[s.category] || { bg:'rgba(26,39,68,.08)', color:'#4A5568', label:s.category };
               const nHasImg = s.images && s.images.length > 0;
-              return '<a class="vp-sim-card" href="' + base + 'mekanlar/mekan-detay.html?id=' + s.id + '">' +
+              return '<a class="vp-sim-card" href="' + (window.getVenueUrl ? window.getVenueUrl(s) : (base + 'mekanlar/mekan-detay.html?id=' + s.id)) + '">' +
                 '<div class="vp-sim-img" style="background:' + sm.g + ';">' +
                   (nHasImg ? '<img src="' + s.images[0] + '" alt="' + s.title + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s;" onload="this.style.opacity=\'1\'">' : '<span class="vp-sim-emoji">' + s.emoji + '</span>') +
                 '</div>' +
@@ -3749,7 +3805,7 @@ function renderVenuePage(venueId) {
               const sm  = VMETA[s.id] || { g:'linear-gradient(160deg,#1A2744,#2A3A5A)' };
               const scs = CAT_STYLE[s.category] || { bg:'rgba(26,39,68,.08)', color:'#4A5568', label:s.category };
               const simHasImg = s.images && s.images.length > 0;
-              return `<a class="vp-sim-card" href="${base}mekanlar/mekan-detay.html?id=${s.id}">
+              return `<a class="vp-sim-card" href="${window.getVenueUrl ? window.getVenueUrl(s) : base + 'mekanlar/mekan-detay.html?id=' + s.id}">
                 <div class="vp-sim-img" style="background:${sm.g};">
                   ${simHasImg ? '<img src="' + s.images[0] + '" alt="' + s.title + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s;" onload="this.style.opacity=\'1\'">' : '<span class="vp-sim-emoji">' + s.emoji + '</span>'}
                 </div>
@@ -3906,7 +3962,7 @@ function renderVenuePage(venueId) {
 
   /* ── Share dropdown ── */
   (function() {
-    const url = window.location.origin + '/mekanlar/mekan-detay.html?id=' + v.id;
+    const url = window.location.origin + (window.getVenueUrl ? window.getVenueUrl(v) : ('/mekanlar/mekan-detay.html?id=' + v.id));
     const text = v.title + ' - Assos\'u Keşfet';
     const waText = v.title + ' - Assos\'u Keşfet\n' + v.location + '\n\n' + url;
     const dd = document.getElementById('vp-share-dd');
@@ -4580,7 +4636,7 @@ function renderVillagePage(villageId) {
       var shortDesc = (venue.shortDesc || '').substring(0, 70);
       if (shortDesc.length >= 70) shortDesc += '…';
 
-      bodyHtml += '<a href="../mekanlar/mekan-detay.html?id=' + venue.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+      bodyHtml += '<a href="' + (window.getVenueUrl ? window.getVenueUrl(venue) : ('/mekanlar/mekan-detay.html?id=' + venue.id)) + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
 
       // Görsel
       if (venue.images && venue.images[0]) {
@@ -5155,7 +5211,7 @@ function renderPlacePage(placeId) {
     bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">';
     placeVenues.forEach(function(venue) {
       var vci = getVenueCatInfo(venue.category); var cs = { bg: vci.color + '14', color: vci.color, label: vci.label, emoji: vci.emoji };
-      bodyHtml += '<a href="../mekanlar/mekan-detay.html?id=' + venue.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+      bodyHtml += '<a href="' + (window.getVenueUrl ? window.getVenueUrl(venue) : ('/mekanlar/mekan-detay.html?id=' + venue.id)) + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
       if (venue.images && venue.images[0]) {
         bodyHtml += '<div style="position:relative;height:140px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + venue.images[0] + '" alt="' + venue.title + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1">';
         bodyHtml += '<span style="position:absolute;top:10px;left:10px;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);font-size:.62rem;font-weight:700;color:#fff;">' + cs.emoji + ' ' + cs.label + '</span></div>';
@@ -5174,7 +5230,7 @@ function renderPlacePage(placeId) {
     bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">';
     nearbyVenues.forEach(function(venue) {
       var vci = getVenueCatInfo(venue.category); var cs = { bg: vci.color + '14', color: vci.color, label: vci.label, emoji: vci.emoji };
-      bodyHtml += '<a href="../mekanlar/mekan-detay.html?id=' + venue.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+      bodyHtml += '<a href="' + (window.getVenueUrl ? window.getVenueUrl(venue) : ('/mekanlar/mekan-detay.html?id=' + venue.id)) + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
       if (venue.images && venue.images[0]) {
         bodyHtml += '<div style="position:relative;height:140px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + venue.images[0] + '" alt="' + venue.title + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1">';
         bodyHtml += '<span style="position:absolute;top:10px;left:10px;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);font-size:.62rem;font-weight:700;color:#fff;">' + cs.emoji + ' ' + cs.label + '</span></div>';

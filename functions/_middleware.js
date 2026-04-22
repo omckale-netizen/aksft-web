@@ -441,67 +441,10 @@ body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;backgrou
   // Sadece botlar icin calis
   if (!isBot(ua)) return next();
 
-  // Mekan detay sayfasi
-  if (path.includes('/mekanlar/mekan-detay')) {
-    const id = url.searchParams.get('id');
-    if (!id) return next();
-
-    try {
-      const fields = await fetchFirestoreDoc('venues', id);
-      if (!fields) return next();
-
-      // Kategori bilgisini Firebase'den çekmeye çalış, yoksa fallback
-      let catLabel = 'Assos Mekanlar';
-      let catSing = 'mekan';
-      const cat = fields.category?.stringValue || '';
-      try {
-        const catDoc = await fetch('https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents/settings/venue_categories');
-        if (catDoc.ok) {
-          const catData = await catDoc.json();
-          const list = catData.fields?.list?.arrayValue?.values || [];
-          const found = list.find(c => c.mapValue?.fields?.id?.stringValue === cat);
-          if (found) {
-            const fLabel = found.mapValue.fields.label?.stringValue || cat;
-            catLabel = 'Assos ' + fLabel;
-            catSing = fLabel.toLowerCase();
-          }
-        }
-      } catch(e) {}
-      if (catLabel === 'Assos Mekanlar') {
-        const fallbackLabels = {kafe:'Assos Kafeler',restoran:'Assos Restoranlar',kahvalti:'Assos Kahvaltı Mekanları',konaklama:'Assos Otelleri',beach:'Assos Beach Club',iskele:'Assos İskeleler'};
-        const fallbackSing = {kafe:'kafe',restoran:'restoran',kahvalti:'kahvaltı mekanı',konaklama:'otel',beach:'beach club',iskele:'iskele'};
-        catLabel = fallbackLabels[cat] || 'Assos Mekanlar';
-        catSing = fallbackSing[cat] || 'mekan';
-      }
-      const venueName = fields.title?.stringValue || 'Mekan';
-      const loc = fields.location?.stringValue || 'Assos';
-      const title = venueName + ' \u2014 ' + catLabel + ' | Assos\'u Keşfet';
-      const shortDesc = (fields.shortDesc?.stringValue || '').replace(/<[^>]*>/g, '').substring(0, 120);
-      const desc = venueName + '. ' + loc + ' bölgesinde ' + catSing + '. ' + shortDesc;
-      let image = DEFAULT_OG_IMAGE;
-      if (fields.images?.arrayValue?.values?.length > 0) {
-        image = fields.images.arrayValue.values[0].stringValue || image;
-      }
-
-      const schemaTypes = {kafe:'CafeOrCoffeeShop',restoran:'Restaurant',kahvalti:'Restaurant',konaklama:'Hotel',beach:'BarOrPub',iskele:'FoodEstablishment'};
-      const phone = fields.phone?.stringValue || '';
-      const schema = JSON.stringify({
-        '@context':'https://schema.org','@type':schemaTypes[cat]||'LocalBusiness',
-        'name':venueName,'description':shortDesc,
-        'address':{'@type':'PostalAddress','addressLocality':loc,'addressRegion':'Canakkale','addressCountry':'TR'},
-        'telephone':phone,'image':image
-      });
-
-      const html = buildOgHtml({
-        title,
-        description: desc || 'Assos ve Ayvacık\'ta mekan detayı.',
-        url: `https://assosukesfet.com/mekanlar/mekan-detay.html?id=${id}`,
-        image
-      }).replace('</head>', '<script type="application/ld+json">' + schema + '</script></head>');
-
-      return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
-    } catch (e) { return next(); }
-  }
+  // Mekan detay sayfalari: eski /mekanlar/mekan-detay?id=X ve yeni /:kategori/slug
+  // Bot SSR + 301 redirect mantigi specific function'larda:
+  //   functions/mekanlar/mekan-detay.js (eski URL -> 301)
+  //   functions/[category]/[slug].js (yeni URL + bot SSR)
 
   // Rota detay sayfalari: /rotalar/rota-detay?id=X ve /rotalar/slug
   // Bot SSR + 301 redirect mantigi functions/rotalar/rota-detay.js ve
@@ -557,6 +500,7 @@ async function generateDynamicSitemap() {
     if (vResp.ok) {
       const vData = await vResp.json();
       const docs = vData.documents || [];
+      const CATEGORY_SLUG = {konaklama:'oteller',kafe:'kafeler',restoran:'restoranlar',kahvalti:'kahvalti',beach:'plajlar',iskele:'iskeleler'};
       for (const doc of docs) {
         const f = doc.fields || {};
         const id = doc.name.split('/').pop();
@@ -564,7 +508,9 @@ async function generateDynamicSitemap() {
         const status = f.status?.stringValue || 'published';
         if (!active || status === 'hidden' || status === 'draft') continue;
 
-        xml += `  <url>\n    <loc>${BASE}/mekanlar/mekan-detay.html?id=${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n`;
+        const cat = f.category?.stringValue;
+        const catSlug = CATEGORY_SLUG[cat] || 'mekanlar';
+        xml += `  <url>\n    <loc>${BASE}/${catSlug}/${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n`;
         // Gorseller
         const images = f.images?.arrayValue?.values || [];
         for (const img of images) {

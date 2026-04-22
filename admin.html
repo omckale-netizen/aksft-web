@@ -1591,14 +1591,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <span>&#128269;</span>
               <input type="text" id="venue-search" placeholder="Mekan ara..." oninput="renderVenueTable(true)">
             </div>
-            <select id="venue-cat-filter" onchange="renderVenueTable(true)" class="admin-filter-select" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:#fff;color:var(--text);cursor:pointer">
+            <select id="venue-cat-filter" onchange="renderVenueTable(true)" class="admin-filter-select" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:#fff;color:var(--text);cursor:pointer" data-cat-dropdown="filter">
               <option value="all">Tüm Kategoriler</option>
-              <option value="kafe">☕ Kafeler</option>
-              <option value="restoran">🍽 Restoranlar</option>
-              <option value="kahvalti">🌞 Kahvaltı</option>
-              <option value="konaklama">🏨 Konaklama</option>
-              <option value="beach">🏖 Beach</option>
-              <option value="iskele">⚓ İskeleler</option>
             </select>
             <select id="venue-loc-filter" onchange="renderVenueTable(true)" class="admin-filter-select" style="padding:8px 12px;border:1.5px solid rgba(26,39,68,.12);border-radius:var(--radius-sm);font-size:.82rem;font-family:inherit;background:#fff;color:var(--text);cursor:pointer">
               <option value="all">Tüm Konumlar</option>
@@ -1620,14 +1614,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         <!-- Toplu islem bari -->
         <div id="bulk-bar" style="display:none;padding:12px 20px;background:var(--navy);color:#fff;border-radius:var(--radius-sm);margin:0 16px 12px;display:none;align-items:center;gap:12px;flex-wrap:wrap;font-size:.82rem">
           <strong id="bulk-count">0 secili</strong>
-          <select id="bulk-cat-select" style="padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-family:inherit;font-size:.78rem">
+          <select id="bulk-cat-select" style="padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-family:inherit;font-size:.78rem" data-cat-dropdown="bulk">
             <option value="">Kategori Değiştir</option>
-            <option value="kafe">☕ Kafe</option>
-            <option value="restoran">🍽 Restoran</option>
-            <option value="kahvalti">🌞 Kahvalti</option>
-            <option value="konaklama">🏨 Konaklama</option>
-            <option value="beach">🏖 Beach</option>
-            <option value="iskele">⚓ Iskele</option>
           </select>
           <button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.2)" onclick="bulkChangeCategory()">Uygula</button>
           <button class="btn btn-sm" style="background:rgba(56,161,105,.2);color:#6feca8;border:1px solid rgba(56,161,105,.3)" onclick="bulkSetStatus('published')">🟢 Yayinla</button>
@@ -4598,14 +4586,8 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         <div class="form-row">
           <div class="form-group">
             <label>Kategori</label>
-            <select id="f-category" required onchange="autoCatEmoji();updateHoursVisibility()">
+            <select id="f-category" required onchange="autoCatEmoji();updateHoursVisibility()" data-cat-dropdown="form">
               <option value="">Seçin</option>
-              <option value="kafe">☕ Kafe</option>
-              <option value="restoran">🍽 Restoran</option>
-              <option value="kahvalti">🌞 Kahvaltı</option>
-              <option value="konaklama">🏨 Konaklama</option>
-              <option value="beach">🏖 Beach</option>
-              <option value="iskele">⚓ İskele</option>
             </select>
           </div>
           <div class="form-group">
@@ -4994,6 +4976,48 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
 
 <script>
 /* ══════════════════════════════════════════════════
+   KATEGORILER — Tek kaynak (shared.js ile senkron)
+   Yeni kategori eklemek icin burayi + shared.js'i guncelle.
+   Admin dropdown'lari asagidaki populateCategoryDropdowns() ile render olur.
+══════════════════════════════════════════════════ */
+window.CATEGORIES = {
+  konaklama: { slug: 'oteller',     label: 'Konaklama', emoji: '🏨', plural: 'Oteller',     color: '#5A7A56' },
+  kafe:      { slug: 'kafeler',     label: 'Kafe',      emoji: '☕', plural: 'Kafeler',     color: '#C4521A' },
+  restoran:  { slug: 'restoranlar', label: 'Restoran',  emoji: '🍽', plural: 'Restoranlar', color: '#1A6B8A' },
+  kahvalti:  { slug: 'kahvalti',    label: 'Kahvaltı',  emoji: '🌞', plural: 'Kahvaltı',    color: '#8A5520' },
+  beach:     { slug: 'plajlar',     label: 'Plaj',      emoji: '🏖', plural: 'Plajlar',     color: '#1A9A8A' },
+  iskele:    { slug: 'iskeleler',   label: 'İskele',    emoji: '⚓', plural: 'İskeleler',   color: '#3A5A8A' }
+};
+window.getVenueUrl = function(v) {
+  if (!v || !v.id) return '/mekanlar';
+  var c = window.CATEGORIES[v.category];
+  return c ? '/' + c.slug + '/' + v.id : '/mekanlar/mekan-detay.html?id=' + v.id;
+};
+// Kategori dropdown'larini CATEGORIES'ten render et.
+// 3 varyant: filter (Tum Kategoriler placeholder), form (Secin placeholder), bulk (Kategori Degistir placeholder)
+function populateCategoryDropdowns() {
+  document.querySelectorAll('select[data-cat-dropdown]').forEach(function(sel) {
+    var placeholder = sel.querySelector('option'); // ilk option (placeholder)
+    sel.innerHTML = '';
+    if (placeholder) sel.appendChild(placeholder);
+    Object.keys(window.CATEGORIES).forEach(function(catId) {
+      var c = window.CATEGORIES[catId];
+      var opt = document.createElement('option');
+      opt.value = catId;
+      var variant = sel.getAttribute('data-cat-dropdown');
+      // filter: "Kafeler" (plural), form/bulk: "Kafe" (label)
+      var name = (variant === 'filter') ? c.plural : c.label;
+      opt.textContent = c.emoji + ' ' + name;
+      sel.appendChild(opt);
+    });
+  });
+}
+document.addEventListener('DOMContentLoaded', populateCategoryDropdowns);
+// Erken render durumunda (DOMContentLoaded oncesi dropdown tetiklenmiş olabilir)
+if (document.readyState !== 'loading') populateCategoryDropdowns();
+</script>
+<script>
+/* ══════════════════════════════════════════════════
    XSS KORUMA — HTML escape helper
    Kullanıcıdan gelen (messages, pending_venues) verilerin innerHTML'e basılmadan önce escape edilmesi için.
 ══════════════════════════════════════════════════ */
@@ -5227,7 +5251,7 @@ async function saveVenueToFirestore(venue, beforeData) {
   await db.collection('venues').doc(venue.id).set(data);
   var ch = beforeData ? diffChanges(beforeData, venue, ['title','category','location','phone','phones','address','website','instagram','shortDesc','hours','premium','seasonal','weeklyHours','facilities']) : null;
   logActivity('mekan_guncelle', venue.id, venue.title, ch);
-  pingIndexNow('https://assosukesfet.com/mekanlar/mekan-detay?id=' + venue.id);
+  pingIndexNow('https://assosukesfet.com' + (window.getVenueUrl ? window.getVenueUrl(venue) : ('/mekanlar/mekan-detay.html?id=' + venue.id)));
 }
 
 async function deleteVenueFromFirestore(id) {
@@ -10280,7 +10304,7 @@ async function afterVenueSaveApproval(venue) {
     await db.collection('pending_venues').doc(id).update({ status: 'approved', approvedAt: new Date().toISOString() });
     // Onay maili gönder
     if (data.ownerEmail) {
-      var venueUrl = 'https://assosukesfet.com/mekanlar/mekan-detay?id=' + venue.id;
+      var venueUrl = 'https://assosukesfet.com' + (window.getVenueUrl ? window.getVenueUrl(venue) : ('/mekanlar/mekan-detay.html?id=' + venue.id));
       var catEmojis = {kafe:'☕',restoran:'🍽',kahvalti:'🌞',konaklama:'🏨',beach:'🏖',iskele:'⚓'};
       var catEmoji = catEmojis[venue.category] || '🏪';
       try {
@@ -11547,7 +11571,7 @@ async function sendComposeMail() {
 // ── Mekan Hoşgeldin Maili ──
 async function sendVenueWelcomeMail(venue) {
   var ownerName = venue.ownerName || 'Değerli İşletme Sahibi';
-  var venueUrl = 'https://assosukesfet.com/mekanlar/mekan-detay?id=' + venue.id;
+  var venueUrl = 'https://assosukesfet.com' + (window.getVenueUrl ? window.getVenueUrl(venue) : ('/mekanlar/mekan-detay.html?id=' + venue.id));
   var catLabels = {kafe:'kafe',restoran:'restoran',kahvalti:'kahvaltı mekanı',konaklama:'konaklama tesisi',beach:'beach club',iskele:'iskele'};
   var catLabel = catLabels[venue.category] || 'mekan';
 
@@ -13754,7 +13778,7 @@ function renderVenueTable(resetPage) {
           <button title="Geri Al" onclick="restoreVenue('${v.id}')"><i data-lucide="rotate-ccw"></i></button>
           <button class="danger" title="Kalıcı Sil" onclick="permanentDeleteVenue('${v.id}')"><i data-lucide="x"></i></button>
           ` : `
-          <a href="https://assosukesfet.com/mekanlar/mekan-detay?id=${v.id}" target="_blank" rel="noopener" title="Sayfayı Görüntüle"><i data-lucide="external-link"></i></a>
+          <a href="${window.getVenueUrl ? window.getVenueUrl(v) : ('/mekanlar/mekan-detay.html?id=' + v.id)}" target="_blank" rel="noopener" title="Sayfayı Görüntüle"><i data-lucide="external-link"></i></a>
           <button title="Düzenle" onclick="openVenueModal('${v.id}')"><i data-lucide="pencil"></i></button>
           ${v.ownerEmail ? '<button title="Sahibine mail gönder: ' + esc(v.ownerEmail) + '" onclick="sendWelcomeMailToVenue(\'' + v.id + '\')"><i data-lucide="mail"></i></button>' : ''}
           <button class="danger" title="Çöp Kutusuna Taşı" onclick="confirmDeleteVenue('${v.id}')"><i data-lucide="trash-2"></i></button>
@@ -16231,7 +16255,7 @@ async function openQRModal(id) {
   currentQRVenueId = id;
   const siteLogoUrl = await ensureLogoUrl();
 
-  const url = 'https://assosukesfet.com/mekanlar/mekan-detay?id=' + id;
+  const url = 'https://assosukesfet.com' + (window.getVenueUrl ? window.getVenueUrl(v) : ('/mekanlar/mekan-detay.html?id=' + id));
   document.getElementById('qr-title').textContent = v.emoji + ' ' + v.title;
   document.getElementById('qr-subtitle').textContent = 'Bu QR kodu indirip masaya, menuye veya vitrine koyabilirsiniz.';
   document.getElementById('qr-url').textContent = url;
@@ -16331,7 +16355,8 @@ function downloadQR() {
 }
 
 function copyQRLink() {
-  const url = 'https://assosukesfet.com/mekanlar/mekan-detay?id=' + currentQRVenueId;
+  var v = venues.find(function(x) { return x.id === currentQRVenueId; });
+  const url = 'https://assosukesfet.com' + (v && window.getVenueUrl ? window.getVenueUrl(v) : ('/mekanlar/mekan-detay.html?id=' + currentQRVenueId));
   navigator.clipboard.writeText(url).then(() => {
     showToast('Link kopyalandi!', 'success');
   }).catch(() => {
@@ -19920,7 +19945,7 @@ function sgGenerate() {
   var item = null, url = '', location = '', tags = [], desc = '', category = '', longDesc = '';
   if (type === 'venue') {
     item = (draftData.venues || []).find(function(v){ return v.id === id; });
-    if (item) { url = 'https://assosukesfet.com/mekanlar/mekan-detay?id=' + id; location = item.location || ''; tags = item.keywords || []; desc = item.shortDesc || ''; category = item.category || ''; longDesc = item.description || ''; }
+    if (item) { url = 'https://assosukesfet.com' + (window.getVenueUrl ? window.getVenueUrl(item) : ('/mekanlar/mekan-detay.html?id=' + id)); location = item.location || ''; tags = item.keywords || []; desc = item.shortDesc || ''; category = item.category || ''; longDesc = item.description || ''; }
   } else if (type === 'place') {
     item = (draftData.places || []).find(function(p){ return p.id === id; });
     if (item) { url = 'https://assosukesfet.com/yerler/' + id; location = item.location || ''; tags = item.keywords || []; desc = item.shortDesc || ''; longDesc = item.description || ''; }
@@ -20485,7 +20510,7 @@ function generateLlmsFullTxt() {
         if (m.hours) info.push('Saat: ' + m.hours);
         if (info.length) lines.push('- ' + info.join(' | '));
         if (m.tags && m.tags.length) lines.push('- Etiketler: ' + m.tags.join(', '));
-        lines.push('- Detay: https://assosukesfet.com/mekanlar/mekan-detay?id=' + (m.id||''));
+        lines.push('- Detay: https://assosukesfet.com' + (window.getVenueUrl ? window.getVenueUrl(m) : ('/mekanlar/mekan-detay.html?id=' + (m.id||''))));
         lines.push('');
       });
     });
@@ -20849,7 +20874,7 @@ async function autoUpdateLlmsFile(currentHash) {
           if (m.hours) info.push('Saat: ' + m.hours);
           if (info.length) lines.push('- ' + info.join(' | '));
           if (m.tags && m.tags.length) lines.push('- Etiketler: ' + m.tags.join(', '));
-          lines.push('- Detay: https://assosukesfet.com/mekanlar/mekan-detay?id=' + (m.id||''));
+          lines.push('- Detay: https://assosukesfet.com' + (window.getVenueUrl ? window.getVenueUrl(m) : ('/mekanlar/mekan-detay.html?id=' + (m.id||''))));
           lines.push('');
         });
       });
