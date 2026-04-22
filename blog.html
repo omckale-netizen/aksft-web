@@ -412,7 +412,15 @@ async function loadSinglePost(slug) {
       document.getElementById('bp-img-wrap').innerHTML = '<img src="' + p.image + '" alt="' + (p.title||'') + ' — Assos Gezi Rehberi' + (p.category ? ' · ' + p.category : '') + '" onload="var el=this;setTimeout(function(){el.classList.add(\'loaded\')},50)">';
     }
 
-    document.getElementById('bp-content').innerHTML = p.content || '';
+    // Eski blog linklerini yeni formata cevir (Firestore'da saklanmis eski
+     // ?yazi= linkleri: relative 'blog?yazi=X', absolute '/blog?yazi=X' veya
+     // tam URL https://assosukesfet.com/blog?yazi=X). Hepsini /blog/X'e cevir.
+    var contentHtml = p.content || '';
+    contentHtml = contentHtml.replace(
+      /(href\s*=\s*["'])(?:https?:\/\/(?:www\.)?assosukesfet\.com)?\/?blog\?yazi=([a-zA-Z0-9_-]+)/gi,
+      '$1/blog/$2'
+    );
+    document.getElementById('bp-content').innerHTML = contentHtml;
 
     if (p.tags && p.tags.length) {
       var tagsEl = document.getElementById('bp-tags');
