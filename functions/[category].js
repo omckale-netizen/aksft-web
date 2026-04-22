@@ -135,19 +135,7 @@ export async function onRequest(context) {
     `<span class="mk-hero-chip">${escapeHtml(ch)}</span>`
   ).join('');
 
-  // Intro section HTML (hero'dan sonra insert edilecek)
-  // Emoji aria-label ile accessibility uyumlu
-  const introHtml = `
-<section class="mk-hub-intro" style="background:linear-gradient(180deg,#FAF7F2 0%,#F5EDE0 100%);padding:56px 24px;border-bottom:1px solid rgba(26,39,68,.06)">
-  <div style="max-width:820px;margin:0 auto;text-align:center">
-    <div style="display:inline-flex;align-items:center;gap:10px;margin-bottom:20px">
-      <span style="width:32px;height:1px;background:${c.color}"></span>
-      <span style="font-size:2.2rem" role="img" aria-label="${escapeHtml(c.plural)}">${c.emoji}</span>
-      <span style="width:32px;height:1px;background:${c.color}"></span>
-    </div>
-    <p style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.02rem;line-height:1.85;color:#4A5568;margin:0;letter-spacing:-.002em">${escapeHtml(c.intro)}</p>
-  </div>
-</section>`;
+  // Intro artik hero ICINDE — #mk-hero-intro element'ine dogrudan yaziliyor (HTMLRewriter ile)
 
   // FAQ section HTML (SSS — SEO long-tail keyword'ler + rich snippet besler)
   const faqHtml = `
@@ -253,14 +241,14 @@ export async function onRequest(context) {
     .on('.mk-hero-eyebrow span:nth-of-type(2)', { element(el) { el.setInnerContent(c.eyebrow); } })
     // Hero H1
     .on('.mk-hero-h1', { element(el) { el.setInnerContent(`Assos<br><em>${c.heroPlural}</em>`, { html: true }); } })
-    // Hero alt metin
+    // Hero alt metin (kisa etkileyici cümle)
     .on('.mk-hero-sub', { element(el) { el.setInnerContent(c.heroSub); } })
+    // Hero intro paragraf (SEO zengin, keyword-rich, ~80-100 kelime)
+    .on('#mk-hero-intro', { element(el) { el.setInnerContent(c.intro); } })
     // Hero chip'leri
     .on('#mk-hero-cats', { element(el) { el.setInnerContent(chipsHtml, { html: true }); } })
     // Istatistik karti gizle (sadece /mekanlar'da gorunsun)
     .on('.mk-hero-card', { element(el) { el.setAttribute('style', 'display:none'); } })
-    // Hero'dan sonra intro section (SEO zengin tanitim metni)
-    .on('.mk-hero', { element(el) { el.after(introHtml, { html: true }); } })
     // FAQ section'u footer'dan hemen once (tum mekanlar listesinden sonra)
     .on('#footer-placeholder', { element(el) { el.before(faqHtml, { html: true }); } })
     // Body'e hub flag
