@@ -44,6 +44,12 @@ export async function onRequest(context) {
   // function'larda yakalanir (daha oncelikli). Ama emniyet icin fallback.
   if (!CATEGORIES[category]) return next();
 
+  // Trailing slash normalize: /kafeler/mucs-coffee/ -> /kafeler/mucs-coffee
+  const url = new URL(request.url);
+  if (url.pathname.endsWith('/') && url.pathname.length > 1) {
+    return Response.redirect(url.origin + url.pathname.slice(0, -1) + url.search, 301);
+  }
+
   const expectedCat = CATEGORIES[category]; // 'konaklama', 'kafe' vb.
   const ua = request.headers.get('user-agent') || '';
   const pageUrl = `https://assosukesfet.com/${category}/${slug}`;

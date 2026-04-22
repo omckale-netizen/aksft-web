@@ -20,6 +20,12 @@ export async function onRequest(context) {
   // Whitelist disindakiler: diger function'lara ve static asset'e birak
   if (!HUB_CATEGORIES[category]) return next();
 
+  // Trailing slash normalize: /kafeler/ -> /kafeler (301)
+  const url = new URL(request.url);
+  if (url.pathname.endsWith('/') && url.pathname.length > 1) {
+    return Response.redirect(url.origin + url.pathname.slice(0, -1) + url.search, 301);
+  }
+
   // Kategori hub sayfasi: mekanlar.html?cat=X content'ini serve et,
   // URL bar'da /kategori-slug kalir (SEO temiz URL)
   const catId = HUB_CATEGORIES[category];
