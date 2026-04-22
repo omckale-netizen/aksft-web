@@ -1148,7 +1148,11 @@ function renderNav(opts = {}) {
 
   function getBasePath() {
     const p = window.location.pathname;
+    // Alt dizinlerdeki sayfalar (eski yapi): ../ ile root'a cik
     if (p.includes('/mekanlar/') || p.includes('/rotalar/') || p.includes('/koyler/') || p.includes('/yerler/')) return '../';
+    // Yeni SEO URL'ler (/oteller/xxx vb.) — URL bar'da tek segment derinde
+    // goruluyor, relative path cozumu icin ../ gerekli (veya / absolute).
+    if (/^\/(oteller|kafeler|restoranlar|kahvalti|plajlar|iskeleler)\/[^/]+\/?$/.test(p)) return '../';
     return '';
   }
   function getMekanPath(id) {
@@ -2029,7 +2033,10 @@ function initSearch(inputId, opts = {}) {
   }
 
   function getUrl(type, id) {
-    const base = window.location.pathname.includes('/mekanlar/') || window.location.pathname.includes('/rotalar/') ? '../' : '';
+    const _path = window.location.pathname;
+    const _inSub = _path.includes('/mekanlar/') || _path.includes('/rotalar/');
+    const _inNew = /^\/(oteller|kafeler|restoranlar|kahvalti|plajlar|iskeleler)\/[^/]+\/?$/.test(_path);
+    const base = (_inSub || _inNew) ? '../' : '';
     if (type === 'venue') {
       var v = (window.DATA && DATA.venues || []).find(function(x){ return x.id === id; });
       if (v && typeof getVenueUrl === 'function') return getVenueUrl(v);
@@ -2974,8 +2981,12 @@ function renderVenuePage(venueId) {
   const relatedRoutes = DATA.routes.filter(r => (r.relatedVenues||[]).includes(v.id));
 
   /* ── Paths ── */
-  const inSub  = window.location.pathname.includes('/mekanlar/');
-  const base   = inSub ? '../' : '';
+  // Yeni SEO URL'lerde (/oteller/xxx) URL bar tek-segment derin gozukur.
+  // Relative link'ler URL bar'a gore cozulur -> ../ gerekli.
+  const _p = window.location.pathname;
+  const inSub  = _p.includes('/mekanlar/');
+  const inNewFormat = /^\/(oteller|kafeler|restoranlar|kahvalti|plajlar|iskeleler)\/[^/]+\/?$/.test(_p);
+  const base   = (inSub || inNewFormat) ? '../' : '';
   const mapsUrl = 'https://maps.google.com/?q=' + encodeURIComponent(v.title + ' ' + (v.address || v.location + ' Ayvacık Çanakkale'));
 
   /* ── Save helpers ── */

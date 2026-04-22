@@ -43,16 +43,25 @@
 </div>
 <div id="footer-placeholder"></div>
 <script src="../firebase-loader.js?v=6"></script>
-<script src="../shared.min.js?v=345"></script>
+<script src="../shared.min.js?v=346"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false, basePath: '../' });
   renderFooter({ basePath: '../' });
 
-  // URL'den mekan ID'si al: ?id=behram-kafe veya #behram-kafe
-  const params = new URLSearchParams(window.location.search);
-  let venueId = params.get('id');
-  if (!venueId) venueId = window.location.hash.replace('#', '');
+  // URL'den mekan ID'si al. 3 yol var:
+  // 1. Yeni SEO URL: /oteller/sunaba-kasri-otel (path'ten slug cek)
+  // 2. Eski URL: /mekanlar/mekan-detay.html?id=xxx (query param)
+  // 3. Hash URL (legacy): /mekanlar/mekan-detay.html#xxx
+  let venueId = '';
+  const path = window.location.pathname;
+  const pathMatch = path.match(/^\/(oteller|kafeler|restoranlar|kahvalti|plajlar|iskeleler)\/([a-z0-9][a-z0-9\-_]*)\/?$/i);
+  if (pathMatch) {
+    venueId = pathMatch[2];
+  } else {
+    const params = new URLSearchParams(window.location.search);
+    venueId = params.get('id') || window.location.hash.replace('#', '');
+  }
   if (!venueId) {
     var noindex = document.createElement('meta'); noindex.name = 'robots'; noindex.content = 'noindex, nofollow'; document.head.appendChild(noindex);
     document.title = 'Mekan Bulunamadı — Assos\u2019u Keşfet';
