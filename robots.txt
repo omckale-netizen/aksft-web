@@ -1,15 +1,40 @@
-# AI Chatbot Crawlers
-User-agent: GPTBot
+# ═══════════════════════════════════════════════════════
+# Assos'u Keşfet — robots.txt
+# Strateji: AI SEARCH botlarına izin (trafik) + TRAINING botlarını engelle (koruma)
+# ═══════════════════════════════════════════════════════
+
+# ─── ARAMA MOTORLARI (tam erişim) ───────────────────────
+User-agent: Googlebot
 Allow: /
 Disallow: /admin
 Disallow: /admin-login
+Disallow: /mekan-ekle.html
+
+User-agent: Bingbot
+Allow: /
+Disallow: /admin
+Disallow: /admin-login
+Disallow: /mekan-ekle.html
+
+User-agent: Yandex
+Allow: /
+Disallow: /admin
+Disallow: /admin-login
+
+User-agent: DuckDuckBot
+Allow: /
+Disallow: /admin
+Disallow: /admin-login
+
+# ─── AI SEARCH BOTLARI (kullanıcı sorunca anlık çeker, KAYNAK GÖSTERİR) ──
+# Bunlar siteye trafik getirir, adını söyler → İZİN VER
 
 User-agent: ChatGPT-User
 Allow: /
 Disallow: /admin
 Disallow: /admin-login
 
-User-agent: ClaudeBot
+User-agent: OAI-SearchBot
 Allow: /
 Disallow: /admin
 Disallow: /admin-login
@@ -19,20 +44,103 @@ Allow: /
 Disallow: /admin
 Disallow: /admin-login
 
-User-agent: Google-Extended
+User-agent: Perplexity-User
 Allow: /
 Disallow: /admin
 Disallow: /admin-login
+
+User-agent: Claude-Web
+Allow: /
+Disallow: /admin
+Disallow: /admin-login
+
+User-agent: Applebot
+Allow: /
+Disallow: /admin
+Disallow: /admin-login
+
+# ─── AI TRAINING BOTLARI (sadece model eğitimi — KAYNAK GÖSTERMEZ) ──────
+# Bunlar içeriği alır, kendi modellerine eklerler ama sana trafik getirmez
+# → ENGELLE
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
 
 User-agent: Applebot-Extended
-Allow: /
-Disallow: /admin
-Disallow: /admin-login
+Disallow: /
 
-# General
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: Meta-ExternalAgent
+Disallow: /
+
+User-agent: Meta-ExternalFetcher
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: Omgili
+Disallow: /
+
+User-agent: omgilibot
+Disallow: /
+
+# ─── SEO/SCRAPER BOTLARI (rakip analizi için içerik çeker — engel) ──────
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: Screaming Frog SEO Spider
+Disallow: /
+
+User-agent: SerpstatBot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: DataForSeoBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+# ─── GENEL KURAL (diğer tüm botlar) ──────────────────────
+
 User-agent: *
 Allow: /
-
 Disallow: /admin
 Disallow: /admin.html
 Disallow: /admin-login
