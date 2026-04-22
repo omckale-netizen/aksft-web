@@ -362,8 +362,43 @@ async function loadSinglePost(slug) {
   try {
     var doc = await firebase.firestore().collection('blog_posts').doc(slug).get();
     if (!doc.exists) {
-      heroContent.innerHTML = '<a href="/blog" style="font-size:.72rem;color:rgba(245,237,224,.4);text-decoration:none;margin-bottom:20px;display:inline-block">← Blog\'a Dön</a><h1 class="bh-h1">Yazı Bulunamadı</h1>';
-      document.getElementById('bp-content').innerHTML = '<div style="text-align:center;padding:40px;color:#718096"><a href="/blog" style="color:#C4521A;font-weight:700">← Blog\'a Dön</a></div>';
+      heroContent.innerHTML =
+        '<div style="font-size:3rem;margin-bottom:8px;opacity:.5">📭</div>' +
+        '<div class="bh-badge">Bulunamadı</div>' +
+        '<h1 class="bh-h1">Aradığın yazı <em>burada değil</em></h1>' +
+        '<p class="bh-sub">Yazı kaldırılmış, yeniden düzenleniyor ya da adresi değişmiş olabilir. Aşağıda son yazılarımıza göz atabilirsin.</p>';
+
+      var bp = document.getElementById('bp-content');
+      bp.innerHTML =
+        '<div style="text-align:center;padding:10px 0 8px">' +
+          '<a href="/blog" style="display:inline-flex;align-items:center;gap:8px;padding:14px 32px;background:#C4521A;color:#F5EDE0;border-radius:12px;text-decoration:none;font-weight:700;font-size:.88rem;transition:all .25s;box-shadow:0 6px 20px rgba(196,82,26,.25)" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 10px 28px rgba(196,82,26,.35)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 6px 20px rgba(196,82,26,.25)\'">Tüm Yazılara Göz At →</a>' +
+        '</div>';
+
+      // Onerilen yazilari cek + goster (sessizce basarisiz olursa sorun yok)
+      try {
+        var suggestions = await fetchBlogPostsFresh();
+        if (suggestions && suggestions.length > 0) {
+          var cards = suggestions.slice(0, 3).map(function(p) {
+            var imgHtml = p.image
+              ? '<img src="' + p.image + '" alt="' + (p.title||'') + '" loading="lazy" onload="var el=this;setTimeout(function(){el.classList.add(\'loaded\')},50)">'
+              : '<div class="bp-rel-emoji">' + (p.emoji||'📝') + '</div>';
+            return '<a href="/blog/' + p.id + '" class="bp-related-card">' +
+              '<div class="bp-related-img">' + imgHtml + '</div>' +
+              '<div class="bp-related-body">' +
+                '<div class="bp-related-cat">' + (p.category || 'Genel') + '</div>' +
+                '<div class="bp-related-name">' + (p.title || '') + '</div>' +
+              '</div>' +
+            '</a>';
+          }).join('');
+          var relHTML =
+            '<div class="bp-related" style="margin-top:44px;padding-top:32px;border-top:1px solid rgba(0,0,0,.06)">' +
+              '<div class="bp-related-title">Bunları okumak ister misin?</div>' +
+              '<div class="bp-related-grid">' + cards + '</div>' +
+            '</div>';
+          bp.insertAdjacentHTML('beforeend', relHTML);
+        }
+      } catch(e) {}
+
       document.body.style.opacity = '1';
       return;
     }
