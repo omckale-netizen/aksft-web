@@ -128,8 +128,14 @@
   </div>
 </section>
 <script>
+// Slug'i URL'den cikar: once path (/blog/slug), sonra query (?yazi=slug) fallback
+function getBlogSlugFromUrl() {
+  var m = window.location.pathname.match(/^\/blog\/([^\/\?#]+)\/?$/);
+  if (m && m[1]) return decodeURIComponent(m[1]);
+  return new URLSearchParams(window.location.search).get('yazi');
+}
 // Detay sayfasiysa tum sayfayi gizle, icerik hazir olunca fade-in
-if (new URLSearchParams(window.location.search).get('yazi')) {
+if (getBlogSlugFromUrl()) {
   document.body.style.opacity = '0';
   document.body.style.transition = 'opacity .4s ease';
   document.getElementById('bh-content').innerHTML = '';
@@ -200,13 +206,16 @@ if (new URLSearchParams(window.location.search).get('yazi')) {
 
 <div id="footer-placeholder"></div>
 
-<script src="firebase-loader.js?v=6"></script>
-<script src="shared.min.js?v=344"></script>
+<script src="/firebase-loader.js?v=6"></script>
+<script src="/shared.min.js?v=345"></script>
 <script>
 function pageInit() {
-  renderNav({ heroMode: false });
-  renderFooter({});
-  var slug = new URLSearchParams(window.location.search).get('yazi');
+  // /blog/slug yolundaysa nav/footer linkleri icin ../ lazim
+  var isDetailPath = /^\/blog\/[^\/]+\/?$/.test(window.location.pathname);
+  var navBase = isDetailPath ? '../' : '';
+  renderNav({ heroMode: false, basePath: navBase });
+  renderFooter({ basePath: navBase });
+  var slug = getBlogSlugFromUrl();
   if (slug) {
     loadSinglePost(slug);
   } else {
@@ -229,7 +238,7 @@ function renderBlogGrid(posts) {
     var imgHtml = p.image
       ? '<img src="' + p.image + '" alt="' + (p.title || '') + ' — Assos Gezi Rehberi Blog' + (p.category ? ' · ' + p.category : '') + '" loading="lazy" onload="var el=this;setTimeout(function(){el.classList.add(\'loaded\')},50)">'
       : '<div class="blog-emoji">' + (p.emoji || '📝') + '</div>';
-    return '<a href="blog?yazi=' + p.id + '" class="blog-card" style="animation-delay:' + (idx * 0.06) + 's">' +
+    return '<a href="/blog/' + p.id + '" class="blog-card" style="animation-delay:' + (idx * 0.06) + 's">' +
       '<div class="blog-card-img">' + imgHtml + '</div>' +
       '<div class="blog-card-body">' +
         '<div class="blog-card-cat">' + (p.category || 'Genel') + '</div>' +
@@ -353,13 +362,13 @@ async function loadSinglePost(slug) {
   try {
     var doc = await firebase.firestore().collection('blog_posts').doc(slug).get();
     if (!doc.exists) {
-      heroContent.innerHTML = '<a href="blog" style="font-size:.72rem;color:rgba(245,237,224,.4);text-decoration:none;margin-bottom:20px;display:inline-block">← Blog\'a Dön</a><h1 class="bh-h1">Yazı Bulunamadı</h1>';
-      document.getElementById('bp-content').innerHTML = '<div style="text-align:center;padding:40px;color:#718096"><a href="blog" style="color:#C4521A;font-weight:700">← Blog\'a Dön</a></div>';
+      heroContent.innerHTML = '<a href="/blog" style="font-size:.72rem;color:rgba(245,237,224,.4);text-decoration:none;margin-bottom:20px;display:inline-block">← Blog\'a Dön</a><h1 class="bh-h1">Yazı Bulunamadı</h1>';
+      document.getElementById('bp-content').innerHTML = '<div style="text-align:center;padding:40px;color:#718096"><a href="/blog" style="color:#C4521A;font-weight:700">← Blog\'a Dön</a></div>';
       return;
     }
     var p = doc.data();
     heroContent.innerHTML =
-      '<a href="blog" style="font-size:.72rem;font-weight:600;color:rgba(245,237,224,.4);text-decoration:none;margin-bottom:20px;display:inline-block">← Blog\'a Dön</a>' +
+      '<a href="/blog" style="font-size:.72rem;font-weight:600;color:rgba(245,237,224,.4);text-decoration:none;margin-bottom:20px;display:inline-block">← Blog\'a Dön</a>' +
       '<div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#D96B2E;margin-bottom:12px">' + (p.category||'Genel') + '</div>' +
       '<h1 class="bh-h1">' + (p.title||'') + '</h1>';
 
@@ -375,7 +384,7 @@ async function loadSinglePost(slug) {
       tagsEl.innerHTML = p.tags.map(function(t){return '<span class="post-tag">#'+t+'</span>';}).join('');
     }
 
-    var url = 'https://assosukesfet.com/blog?yazi=' + slug;
+    var url = 'https://assosukesfet.com/blog/' + slug;
     var shareTitle = p.title + ' — Assos\'u Keşfet';
     var shareImg = p.coverImage || p.image || '';
 
@@ -481,7 +490,7 @@ async function loadSinglePost(slug) {
           related.map(function(d) {
             var r = d.data();
             var imgHtml = r.image ? '<img src="'+r.image+'" alt="'+r.title+'" loading="lazy" onload="var el=this;setTimeout(function(){el.classList.add(\'loaded\')},50)">' : '<div class="bp-rel-emoji">'+(r.emoji||'📝')+'</div>';
-            return '<a href="blog?yazi='+d.id+'" class="bp-related-card"><div class="bp-related-img">'+imgHtml+'</div><div class="bp-related-body"><div class="bp-related-cat">'+(r.category||'')+'</div><div class="bp-related-name">'+(r.title||'')+'</div></div></a>';
+            return '<a href="/blog/'+d.id+'" class="bp-related-card"><div class="bp-related-img">'+imgHtml+'</div><div class="bp-related-body"><div class="bp-related-cat">'+(r.category||'')+'</div><div class="bp-related-name">'+(r.title||'')+'</div></div></a>';
           }).join('') + '</div></div>';
       }
     } catch(e) {}
@@ -509,7 +518,7 @@ var blogInited = false;
 // ERKEN cache render — Firebase beklemeden, hemen
 // Detay sayfası değilse cache'ten anında liste göster
 (function earlyBlogCacheRender() {
-  if (new URLSearchParams(window.location.search).get('yazi')) return; // detay sayfasıysa atla
+  if (getBlogSlugFromUrl()) return; // detay sayfasıysa atla
   try {
     var raw = localStorage.getItem('assos_blog_posts_v1');
     if (!raw) return;

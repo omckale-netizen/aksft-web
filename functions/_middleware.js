@@ -591,27 +591,9 @@ body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;backgrou
     } catch (e) { return next(); }
   }
 
-  // Blog detay sayfasi (?yazi=slug)
-  if ((path === '/blog' || path === '/blog.html') && url.searchParams.get('yazi')) {
-    const slug = url.searchParams.get('yazi');
-    if (!slug) return next();
-
-    try {
-      const fields = await fetchFirestoreDoc('blog_posts', slug);
-      if (!fields) return next();
-
-      const title = (fields.title?.stringValue || 'Blog') + ' \u2014 Assos\'u Keşfet';
-      const desc = (fields.excerpt?.stringValue || '').substring(0, 200);
-      const image = fields.coverImage?.stringValue || fields.image?.stringValue || DEFAULT_OG_IMAGE;
-
-      return new Response(buildOgHtml({
-        title,
-        description: desc || 'Assos hakkında blog yazısı.',
-        url: `https://assosukesfet.com/blog?yazi=${slug}`,
-        image
-      }), { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
-    } catch (e) { return next(); }
-  }
+  // Blog detay sayfalari: /blog?yazi=slug ve /blog/slug
+  // Bot SSR + 301 redirect mantigi functions/blog.js ve functions/blog/[slug].js'te
+  // (Burada ekstra handler yok — next() diger function'lara birakir)
 
   // Diger sayfalar — normal devam + güvenlik header'ları
   const response = await next();
@@ -746,7 +728,7 @@ async function generateDynamicSitemap() {
         const status = f.status?.stringValue;
         if (status !== 'published') continue;
 
-        xml += `  <url>\n    <loc>${BASE}/blog?yazi=${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n`;
+        xml += `  <url>\n    <loc>${BASE}/blog/${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n`;
         const imgUrl = f.image?.stringValue;
         if (imgUrl) {
           const title = f.title?.stringValue || id;

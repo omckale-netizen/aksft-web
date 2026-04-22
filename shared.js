@@ -1149,6 +1149,8 @@ function renderNav(opts = {}) {
   function getBasePath() {
     const p = window.location.pathname;
     if (p.includes('/mekanlar/') || p.includes('/rotalar/') || p.includes('/koyler/') || p.includes('/yerler/')) return '../';
+    // /blog/slug: iki seviye derin, ../ lazim
+    if (/^\/blog\/[^\/]+\/?$/.test(p)) return '../';
     return '';
   }
   function getMekanPath(id) {
@@ -2023,7 +2025,8 @@ function initSearch(inputId, opts = {}) {
   }
 
   function getUrl(type, id) {
-    const base = window.location.pathname.includes('/mekanlar/') || window.location.pathname.includes('/rotalar/') ? '../' : '';
+    const _p = window.location.pathname;
+    const base = _p.includes('/mekanlar/') || _p.includes('/rotalar/') || _p.includes('/yerler/') || _p.includes('/koyler/') || /^\/blog\/[^\/]+\/?$/.test(_p) ? '../' : '';
     if (type === 'route')   return `${base}rotalar/rota-detay.html?id=${id}`;
     if (type === 'place')   return `${base}yerler/yer-detay.html?id=${id}`;
     if (type === 'venue')   return `${base}mekanlar/mekan-detay.html?id=${id}`;
@@ -2062,7 +2065,7 @@ function initSearch(inputId, opts = {}) {
 
     if (results.length === 0) {
       var qEsc = q.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-      var araBase = window.location.pathname.includes('/mekanlar/') || window.location.pathname.includes('/rotalar/') || window.location.pathname.includes('/yerler/') || window.location.pathname.includes('/koyler/') ? '../' : '';
+      var araBase = (window.location.pathname.includes('/mekanlar/') || window.location.pathname.includes('/rotalar/') || window.location.pathname.includes('/yerler/') || window.location.pathname.includes('/koyler/') || /^\/blog\/[^\/]+\/?$/.test(window.location.pathname)) ? '../' : '';
       dropdown.innerHTML = '<div class="search-no-results">Sonuç bulunamadı: "<strong style="color:var(--cream)">' + qEsc + '</strong>"</div>' +
         '<a class="search-see-all" href="' + araBase + 'ara.html?q=' + encodeURIComponent(q) + '">Arama sayfasında dene →</a>';
     } else {
@@ -2089,7 +2092,7 @@ function initSearch(inputId, opts = {}) {
         }).join('');
       });
       // "Tüm sonuçları gör" linki — sonuçların altında
-      var araBase2 = window.location.pathname.includes('/mekanlar/') || window.location.pathname.includes('/rotalar/') || window.location.pathname.includes('/yerler/') || window.location.pathname.includes('/koyler/') ? '../' : '';
+      var araBase2 = (window.location.pathname.includes('/mekanlar/') || window.location.pathname.includes('/rotalar/') || window.location.pathname.includes('/yerler/') || window.location.pathname.includes('/koyler/') || /^\/blog\/[^\/]+\/?$/.test(window.location.pathname)) ? '../' : '';
       html += '<a class="search-see-all" href="' + araBase2 + 'ara.html?q=' + encodeURIComponent(q) + '">Tüm sonuçları gör →</a>';
       dropdown.innerHTML = html;
     }
@@ -2140,7 +2143,7 @@ function initSearch(inputId, opts = {}) {
         // Enter → tam arama sayfasına git (ilk sonuca değil; kullanıcı daha çok seçenek görsün)
         const q = input.value.trim();
         if (q) {
-          const araBase3 = window.location.pathname.includes('/mekanlar/') || window.location.pathname.includes('/rotalar/') || window.location.pathname.includes('/yerler/') || window.location.pathname.includes('/koyler/') ? '../' : '';
+          const araBase3 = (window.location.pathname.includes('/mekanlar/') || window.location.pathname.includes('/rotalar/') || window.location.pathname.includes('/yerler/') || window.location.pathname.includes('/koyler/') || /^\/blog\/[^\/]+\/?$/.test(window.location.pathname)) ? '../' : '';
           window.location.href = araBase3 + 'ara.html?q=' + encodeURIComponent(q);
         } else { dropdown.classList.remove('open'); }
       }

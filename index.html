@@ -429,7 +429,7 @@
 <div id="footer-placeholder"></div>
 
 <script src="firebase-loader.js?v=6"></script>
-<script src="shared.min.js?v=344"></script>
+<script src="shared.min.js?v=345"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: true });
@@ -1035,7 +1035,7 @@ async function loadHomeBlog() {
       var doc = r.doc;
       var p = doc.data();
       var imgHtml = p.image ? '<img src="' + p.image + '" alt="' + (p.title||'') + ' — Assos Gezi Rehberi Blog" loading="lazy" onload="var el=this;setTimeout(function(){el.classList.add(\'loaded\')},50)">' : '<div class="hp-blog-emoji">' + (p.emoji||'📝') + '</div>';
-      return '<a href="blog?yazi=' + doc.id + '" class="hp-blog-card">' +
+      return '<a href="/blog/' + doc.id + '" class="hp-blog-card">' +
         '<div class="hp-blog-img">' + imgHtml + '</div>' +
         '<div class="hp-blog-body">' +
           '<div class="hp-blog-cat">' + (p.category||'') + '</div>' +

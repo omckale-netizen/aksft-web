@@ -91,7 +91,7 @@ Assos ve çevresi hakkında detaylı gezi yazıları:
 - `/koyler` — Köyler listesi
 - `/harita` — İnteraktif harita
 - `/blog` — Blog yazıları listesi
-- `/blog?yazi={slug}` — Blog yazısı detayı
+- `/blog/{slug}` — Blog yazısı detayı
 - `/rehber` — Assos gezi rehberi (13 şehirden ulaşım güzergahları, feribot/köprü bilgileri, 4 mevsim rehberi, 14 SSS)
 - `/planla` — Gezi planlama aracı
 - `/hakkimizda` — Hakkımızda sayfası

@@ -16678,7 +16678,7 @@ async function renderBlogTable() {
         '<td>' + st + '</td>' +
         '<td style="font-size:.85rem;font-weight:700;color:var(--navy)">' + views + '</td>' +
         '<td>' +
-          '<a class="btn-icon" href="blog?yazi=' + p.id + '" target="_blank" rel="noopener" title="Görüntüle" style="text-decoration:none;margin-right:4px">👁</a>' +
+          '<a class="btn-icon" href="/blog/' + p.id + '" target="_blank" rel="noopener" title="Görüntüle" style="text-decoration:none;margin-right:4px">👁</a>' +
           '<button class="btn-icon" title="Düzenle" onclick="openBlogModal(\'' + p.id + '\')" style="margin-right:4px">✏️</button>' +
           '<button class="btn-icon" title="Sil" onclick="deleteBlogPost(\'' + p.id + '\')" style="color:var(--red)">🗑</button>' +
         '</td></tr>';
@@ -16836,7 +16836,7 @@ async function saveBlogPost(e) {
   try {
     await db.collection('blog_posts').doc(slug).set(post, { merge: true });
     logActivity('blog_' + (editingBlogId ? 'guncelle' : 'ekle'), slug, post.title);
-    if (post.status === 'published') pingIndexNow('https://assosukesfet.com/blog?yazi=' + slug);
+    if (post.status === 'published') pingIndexNow('https://assosukesfet.com/blog/' + slug);
     closeBlogModal();
     renderBlogTable();
     showToast('Yazı kaydedildi!', 'success');
