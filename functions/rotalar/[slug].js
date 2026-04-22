@@ -44,8 +44,13 @@ export async function onRequest(context) {
     const resp = await fetch(docUrl, { signal: controller.signal });
     clearTimeout(timeout);
 
-    // Firestore'da yok -> 410 Gone
-    if (resp.status === 404) return gone410();
+    // Firestore'da yok:
+    //   Bot -> 410 Gone (SEO sinyali: Google URL'i index'ten kaldirsin)
+    //   Kullanici -> rota-detay.html serve (client-side "Rota Bulunamadi" state)
+    if (resp.status === 404) {
+      if (isBot(ua)) return gone410();
+      return serveAsset(request, env);
+    }
     // Firestore hatasi -> kullanici icin asset'i serve et (client-side arayabilir)
     if (!resp.ok) return serveAsset(request, env);
 
