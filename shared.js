@@ -12,39 +12,45 @@
 window.CATEGORIES = {
   konaklama: {
     slug: 'oteller', label: 'Konaklama', emoji: '🏨', plural: 'Oteller', heroPlural: 'Otelleri', color: '#5A7A56',
-    eyebrow: "Assos'ta Konaklama",
-    heroSub: "Tarihi taş evlerden butik konsepte, her bütçeye uygun Assos konaklama rehberi.",
-    intro: "Behramkale'nin antik surları arasında kalan taş otellerden, Kadırga Koyu'nun sakinliğine açılan butik pansiyonlara — Assos'ta konaklama seçenekleri hem tarihi doku hem modern konfor sunuyor. Fiyat, konum ve manzarayla birlikte bölgenin en iyi otellerini tek sayfada karşılaştırın."
+    eyebrow: "Assos Konaklama Rehberi",
+    heroSub: "Behramkale taş evlerinden Kadırga butik otellerine — Assos'un en iyi konaklama adresleri.",
+    heroChips: ['Butik Otel', 'Taş Ev Pansiyon', 'Deniz Manzaralı', 'Behramkale', 'Kadırga Koyu', 'Ekonomik'],
+    intro: "Assos'ta konaklama arıyorsanız, Behramkale'nin antik surları arasındaki tarihi taş otellerden Kadırga Koyu'na bakan butik pansiyonlara uzanan geniş bir yelpazeye sahipsiniz. Adatepe'nin zeytinlikleri arasındaki yayla evlerinden Babakale'nin deniz manzaralı otellerine, her bütçeye uygun pansiyon, villa ve otel seçenekleri — fiyat, konum, manzara ve misafir yorumlarıyla karşılaştırabileceğiniz Assos otel rehberi. İletişim bilgileri, çalışma saatleri ve yol tarifiyle birlikte Assos konaklama rezervasyonunuzu tek sayfadan planlayın."
   },
   kafe: {
     slug: 'kafeler', label: 'Kafe', emoji: '☕', plural: 'Kafeler', heroPlural: 'Kafeleri', color: '#C4521A',
-    eyebrow: "Assos'ta Kahve Molası",
-    heroSub: "Manzaralı oturumlar, ev yapımı tatlılar ve gerçek Ege kahvesi.",
-    intro: "Behramkale'nin taş sokaklarından Kadırga Koyu'nun deniz kenarına, Assos'un kafeleri kahve molanızı unutulmaz kılan adresler. Asma altı avlular, gün batımı terası ve yerel tatlarla hazırlanan menüler — her kafede farklı bir Assos ruhu."
+    eyebrow: "Assos Kafe Rehberi",
+    heroSub: "Manzaralı oturumlar, ev yapımı tatlılar ve gerçek Ege kahvesi — Assos kafeleri tek sayfada.",
+    heroChips: ['Deniz Manzarası', 'Asma Altı', 'Gün Batımı', 'Ev Yapımı Tatlı', 'Behramkale', 'Köy Kahvesi'],
+    intro: "Assos'un en iyi kafeleri, Behramkale'nin taş döşeli sokaklarından Kadırga Koyu'nun deniz kenarına uzanan benzersiz bir coğrafyaya yayılmış. Asma altı avluları, gün batımı teraslı butik kafeleri, Ege kahvesi ve ev yapımı tatlılar sunan köy işletmeleri — her ruh haline uygun bir Assos kafe adresi burada. Çalışma saatleri, konumları ve menü detaylarıyla Behramkale, Adatepe ve çevre köylerdeki kafeleri keşfedin; kahve molanızı Assos'un tarihi dokusuyla birleştirin."
   },
   restoran: {
     slug: 'restoranlar', label: 'Restoran', emoji: '🍽', plural: 'Restoranlar', heroPlural: 'Restoranları', color: '#1A6B8A',
-    eyebrow: "Assos'ta Akşam Yemeği",
-    heroSub: "Taze balıktan yerel lezzetlere, Ege mutfağının en iyi adresleri.",
-    intro: "Antik liman'ın taş rıhtımındaki balık lokantalarından, köy evlerinin avlusunda servis edilen mezeli akşam yemeklerine — Assos restoranları geleneksel Ege mutfağını taze deniz ürünleri ve yerel üretim malzemelerle buluşturuyor. Manzara, fiyat ve menüyle birlikte seçim yapın."
+    eyebrow: "Assos Restoran Rehberi",
+    heroSub: "Taze balık, mezeli akşamlar ve Ege mutfağı — Assos'un en iyi restoranları.",
+    heroChips: ['Balık Restoranı', 'Ege Mutfağı', 'Mezeli Akşam', 'Deniz Kenarı', 'Antik Liman', 'Köy Lokantası'],
+    intro: "Assos restoranları, antik liman'ın taş rıhtımındaki balık lokantalarından Behramkale köy evlerinin avlusunda servis edilen mezeli akşam yemeklerine kadar geniş bir Ege mutfağı deneyimi sunuyor. Kadırga Koyu'nun deniz manzaralı restoranları, geleneksel Assos zeytinyağı ile hazırlanan ot yemekleri, taze tutulmuş balık çeşitleri ve yerel üretim şarabı — akşam yemeği planınızı konum, menü ve fiyat bilgileriyle birlikte yapın. Assos'ta en iyi restoranlar, çalışma saatleri ve iletişim bilgileriyle tek sayfada."
   },
   kahvalti: {
     slug: 'kahvalti', label: 'Kahvaltı', emoji: '🌞', plural: 'Kahvaltı', heroPlural: 'Kahvaltı Mekanları', color: '#8A5520',
-    eyebrow: "Assos'ta Köy Kahvaltısı",
-    heroSub: "Ev yapımı reçeller, köy peyniri, taze zeytin ve kuş sesleri.",
-    intro: "Assos'ta sabaha başlamanın en güzel yolu serpme köy kahvaltısı. Kadın kooperatiflerinin el emeği reçelleri, taze fırın ekmeği, Ayvacık köylerinden gelen zeytin ve peynirler — Ege'nin gerçek tatlarıyla güne merhaba deyin. En iyi kahvaltı mekanları çalışma saatleri ve menüleriyle burada."
+    eyebrow: "Assos Kahvaltı Rehberi",
+    heroSub: "Serpme köy kahvaltısı, ev yapımı reçel ve Ayvacık peyniri — Assos'un en iyi kahvaltı adresleri.",
+    heroChips: ['Serpme Kahvaltı', 'Köy Kahvaltısı', 'Ev Yapımı Reçel', 'Zeytin & Peynir', 'Manzaralı', 'Ayvacık'],
+    intro: "Assos'ta kahvaltı deneyimi, kadın kooperatiflerinin el emeği reçellerinden Ayvacık köylerinin taze peynirlerine kadar Ege'nin gerçek tatlarını sofranıza taşıyor. Behramkale, Ahmetçe ve Adatepe'nin serpme köy kahvaltısı sunan mekanları; taze fırın ekmeği, yöresel zeytin, ev yapımı tereyağı ve 15-20 çeşit sunumla güne başlamanın en doğru yolu. Assos kahvaltı mekanları, çalışma saatleri ve menü detaylarıyla birlikte — sabah kahvaltı planınızı buradan yapın."
   },
   beach: {
     slug: 'plajlar', label: 'Plaj', emoji: '🏖', plural: 'Plajlar', heroPlural: 'Plajları', color: '#1A9A8A',
-    eyebrow: "Assos'ta Deniz Keyfi",
-    heroSub: "Berrak koylar, taşlı sahiller ve Ege'nin en güzel mavi tonları.",
-    intro: "Kadırga Koyu'nun berrak sularından Sivrice Plajı'nın ince çakıllarına, Assos bölgesi Türkiye'nin en sakin sahillerine ev sahipliği yapıyor. Beach club'lar, gizli koylar ve aileye uygun plajlar — her yaz günü için bir Assos manzarası."
+    eyebrow: "Assos Plaj & Koy Rehberi",
+    heroSub: "Berrak koylar, ince çakıllı sahiller ve Ege'nin en güzel mavisi — Assos plajları.",
+    heroChips: ['Berrak Koy', 'Çakıl Plaj', 'Beach Club', 'Gizli Koy', 'Kadırga', 'Sivrice'],
+    intro: "Assos plajları, Kadırga Koyu'nun ünlü berrak sularından Sivrice Plajı'nın ince çakıllarına, Türkiye'nin en temiz Ege sahillerini barındırıyor. Sokakağzı Koyu'nun sakinliğinden Kaleiçi Beach Club'ın konforuna, gizli koylardan çocuklu aileye uygun sığ plajlara — her tatil zevkine uygun Assos koyu ve plajı. Plaj girişleri, şemsiye-şezlong fiyatları, yeme-içme olanakları ve ulaşım bilgileriyle tatilinizi buradan planlayın. Assos'ta denize girilecek en iyi yerler tek listede."
   },
   iskele: {
     slug: 'iskeleler', label: 'İskele', emoji: '⚓', plural: 'İskeleler', heroPlural: 'İskeleleri', color: '#3A5A8A',
-    eyebrow: "Assos'ta Tarihi Limanlar",
-    heroSub: "Balıkçı tekneleri, gün batımı ve Ege'nin rüzgârı.",
-    intro: "Antik çağdan bu yana Ege'nin ticaret merkezi olan Assos'un iskeleleri bugün hem balıkçı limanı hem buluşma noktası. Tarihi rıhtım taşlarında yürüyüş, teknelerle gün batımı turu ya da taze balık keyfi — Assos'un denizle olan bağı buralarda yaşıyor."
+    eyebrow: "Assos Tarihi İskeleler",
+    heroSub: "Balıkçı tekneleri, gün batımı turları ve Ege'nin rüzgârı — Assos iskeleleri.",
+    heroChips: ['Balıkçı Limanı', 'Tekne Turu', 'Gün Batımı', 'Antik Liman', 'Babakale', 'Ahmetçe'],
+    intro: "Assos iskeleleri, antik çağdan bu yana Ege'nin ticaret ve balıkçılık merkezi olan bu bölgenin denizle olan köklü bağını yaşıyor. Antik liman'ın tarihi taş rıhtımından Babakale balıkçı iskelesine, Ahmetçe'nin sakin limanından gün batımı teknelerine kadar — her iskele Assos'un farklı bir hikayesini anlatıyor. Tekne turları, taze balık mekanları, manzara noktaları ve iskele kafeleri; konum ve ulaşım bilgileriyle birlikte Assos'un deniz kapılarını keşfedin."
   }
 };
 // Slug -> category id (reverse lookup icin)
