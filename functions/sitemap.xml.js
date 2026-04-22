@@ -98,7 +98,7 @@ export async function onRequest(context) {
     // Rotalar
     for (const r of routes) {
       dynamicPages.push({
-        loc: `/rotalar/rota-detay.html?id=${r.id}`,
+        loc: `/rotalar/${r.id}`,
         changefreq: 'monthly',
         priority: '0.6',
       });

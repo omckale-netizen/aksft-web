@@ -14774,7 +14774,7 @@ function renderRoutesTable() {
         <td>${r.zorluk || '-'}</td>
         <td>${r.durak || (r.stops||[]).length}</td>
         <td>
-          <a class="btn-icon" href="rotalar/rota-detay.html?id=${r.id}" target="_blank" rel="noopener" title="Rotayi Gor" style="text-decoration:none">&#128065;</a>
+          <a class="btn-icon" href="/rotalar/${r.id}" target="_blank" rel="noopener" title="Rotayi Gor" style="text-decoration:none">&#128065;</a>
           <button class="btn-icon" title="Düzenle" onclick="openRouteModal('${r.id}')" style="margin-left:4px">&#9998;</button>
           <button class="btn-icon" title="Sil" onclick="confirmDeleteRoute('${r.id}')" style="margin-left:4px;color:var(--red)">&#128465;</button>
         </td>
@@ -14917,7 +14917,7 @@ async function saveRoute(e) {
   }
 
   logActivity(editingRouteId ? 'rota_guncelle' : 'rota_ekle', route.id, route.title);
-  pingIndexNow('https://assosukesfet.com/rotalar/rota-detay?id=' + route.id);
+  pingIndexNow('https://assosukesfet.com/rotalar/' + route.id);
   closeRouteModal();
   renderRoutesTable();
   showToast('"' + route.title + '" ' + (isEdit ? 'güncellendi.' : 'eklendi.'), 'success');
@@ -19929,7 +19929,7 @@ function sgGenerate() {
     if (item) { url = 'https://assosukesfet.com/koyler/koy-detay?id=' + id; location = 'Ayvacık, Çanakkale'; tags = item.tags || []; desc = item.shortDesc || ''; longDesc = item.description || ''; }
   } else if (type === 'route') {
     item = (draftData.routes || []).find(function(r){ return r.id === id; });
-    if (item) { url = 'https://assosukesfet.com/rotalar/rota-detay?id=' + id; tags = item.keywords || []; desc = item.shortDesc || ''; longDesc = item.description || ''; }
+    if (item) { url = 'https://assosukesfet.com/rotalar/' + id; tags = item.keywords || []; desc = item.shortDesc || ''; longDesc = item.description || ''; }
   }
   if (!item) return;
 
@@ -20507,7 +20507,7 @@ function generateLlmsFullTxt() {
         var stops = rt.stops.filter(function(s){return s.title;}).map(function(s){return s.title;});
         if (stops.length) lines.push('- Duraklar: ' + stops.join(', '));
       }
-      lines.push('- Detay: https://assosukesfet.com/rotalar/rota-detay?id=' + (rt.id||''));
+      lines.push('- Detay: https://assosukesfet.com/rotalar/' + (rt.id||''));
       lines.push('');
     });
   }
@@ -20868,7 +20868,7 @@ async function autoUpdateLlmsFile(currentHash) {
           var stops = rt.stops.filter(function(s){return s.title;}).map(function(s){return s.title;});
           if (stops.length) lines.push('- Duraklar: ' + stops.join(', '));
         }
-        lines.push('- Detay: https://assosukesfet.com/rotalar/rota-detay?id=' + (rt.id||''));
+        lines.push('- Detay: https://assosukesfet.com/rotalar/' + (rt.id||''));
         lines.push('');
       });
     }

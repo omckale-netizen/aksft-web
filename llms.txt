@@ -86,7 +86,7 @@ Assos ve çevresi hakkında detaylı gezi yazıları:
 - `/mekanlar` — Tüm mekanlar listesi (kategori ve durum filtresi)
 - `/mekanlar/mekan-detay?id={id}` — Mekan detay sayfası
 - `/rotalar` — Gezi rotaları listesi
-- `/rotalar/rota-detay?id={id}` — Rota detay sayfası
+- `/rotalar/{id}` — Rota detay sayfası
 - `/yerler` — Gezilecek yerler listesi
 - `/koyler` — Köyler listesi
 - `/harita` — İnteraktif harita

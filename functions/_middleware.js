@@ -503,26 +503,9 @@ body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;backgrou
     } catch (e) { return next(); }
   }
 
-  // Rota detay sayfasi
-  if (path.includes('/rotalar/rota-detay')) {
-    const id = url.searchParams.get('id');
-    if (!id) return next();
-
-    try {
-      const fields = await fetchFirestoreDoc('routes', id);
-      if (!fields) return next();
-
-      const title = (fields.title?.stringValue || 'Rota') + ' \u2014 Assos\'u Keşfet';
-      const desc = (fields.shortDesc?.stringValue || fields.description?.stringValue || '').replace(/<[^>]*>/g, '').substring(0, 200);
-
-      return new Response(buildOgHtml({
-        title,
-        description: desc || 'Assos rota detayları.',
-        url: `https://assosukesfet.com/rotalar/rota-detay.html?id=${id}`,
-        image: DEFAULT_OG_IMAGE
-      }), { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
-    } catch (e) { return next(); }
-  }
+  // Rota detay sayfalari: /rotalar/rota-detay?id=X ve /rotalar/slug
+  // Bot SSR + 301 redirect mantigi functions/rotalar/rota-detay.js ve
+  // functions/rotalar/[slug].js'te (next() specific function'a birakir)
 
   // Koy detay sayfasi
   if (path.includes('/koyler/koy-detay')) {
@@ -668,7 +651,7 @@ async function generateDynamicSitemap() {
       const docs = rData.documents || [];
       for (const doc of docs) {
         const id = doc.name.split('/').pop();
-        xml += `  <url><loc>${BASE}/rotalar/rota-detay.html?id=${id}</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>\n`;
+        xml += `  <url><loc>${BASE}/rotalar/${id}</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>\n`;
       }
     }
   } catch(e) {}

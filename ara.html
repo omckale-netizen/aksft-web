@@ -144,7 +144,7 @@
   <div id="footer-placeholder"></div>
 
   <script src="firebase-loader.js?v=6"></script>
-  <script src="shared.min.js?v=345"></script>
+  <script src="shared.min.js?v=346"></script>
   <script>
     function pageInit() {
       renderNav({ heroMode: false });
@@ -342,6 +342,7 @@
         return;
       }
       var labels = { venue: 'Mekanlar', place: 'Gezilecek Yerler', village: 'Köyler', route: 'Rotalar' };
+      // Rotalar icin yeni URL formati: /rotalar/slug (eski: /rotalar/rota-detay.html?id=slug)
       var detailPath = { venue: 'mekanlar/mekan-detay.html', place: 'yerler/yer-detay.html', village: 'koyler/koy-detay.html', route: 'rotalar/rota-detay.html' };
       var typeColors = { venue: { bg: 'rgba(212,147,90,.9)', color: '#fff' }, place: { bg: 'rgba(36,144,184,.9)', color: '#fff' }, village: { bg: 'rgba(127,184,123,.9)', color: '#fff' }, route: { bg: 'rgba(196,82,26,.9)', color: '#fff' } };
       var html = '';
@@ -365,7 +366,10 @@
           if (it.status) {
             statusHtml = '<span class="ara-card-status" style="background:' + it.status.bg + ';color:' + it.status.color + ';border:1px solid ' + it.status.color + '66"><span class="ara-status-dot" style="background:' + it.status.color + '"></span>' + escHtml(it.status.label) + '</span>';
           }
-          html += '<a class="ara-card" href="/' + detailPath[t] + '?id=' + encodeURIComponent(it.id) + '">' +
+          var _detayUrl = (t === 'route')
+            ? '/rotalar/' + encodeURIComponent(it.id)
+            : '/' + detailPath[t] + '?id=' + encodeURIComponent(it.id);
+          html += '<a class="ara-card" href="' + _detayUrl + '">' +
             '<div class="ara-card-img' + (it.image ? ' has-img' : '') + '" style="background:linear-gradient(135deg,#243255,#1A2744)">' +
               (it.image ? '<img src="' + escAttr(it.image) + '" alt="' + escAttr(it.title) + '" loading="lazy" onload="this.classList.add(\'loaded\');this.parentElement.classList.add(\'is-loaded\')">' : '<span class="ara-card-emoji">' + it.emoji + '</span>') +
               catHtml +

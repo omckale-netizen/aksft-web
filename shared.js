@@ -2027,7 +2027,7 @@ function initSearch(inputId, opts = {}) {
   function getUrl(type, id) {
     const _p = window.location.pathname;
     const base = _p.includes('/mekanlar/') || _p.includes('/rotalar/') || _p.includes('/yerler/') || _p.includes('/koyler/') || /^\/blog\/[^\/]+\/?$/.test(_p) ? '../' : '';
-    if (type === 'route')   return `${base}rotalar/rota-detay.html?id=${id}`;
+    if (type === 'route')   return `${base}rotalar/${id}`;
     if (type === 'place')   return `${base}yerler/yer-detay.html?id=${id}`;
     if (type === 'venue')   return `${base}mekanlar/mekan-detay.html?id=${id}`;
     if (type === 'village') return `${base}koyler/koy-detay.html?id=${id}`;
@@ -2183,7 +2183,7 @@ function getParam(name) {
 ═══════════════════ */
 function routeCardHTML(r, delay = 0) {
   return `
-    <a class="route-card fade-up" href="rotalar/rota-detay.html?id=${r.id}" data-delay="${delay}" aria-label="${r.title}">
+    <a class="route-card fade-up" href="rotalar/${r.id}" data-delay="${delay}" aria-label="${r.title}">
       <div style="height:130px;background:${r.headerBg};border-bottom:1px solid rgba(245,237,224,.06);position:relative;overflow:hidden;display:flex;align-items:center;padding:22px 26px;gap:14px;">
         <div style="font-size:3rem;line-height:1;flex-shrink:0;filter:drop-shadow(0 4px 10px ${r.glowColor}66);">${r.emoji}</div>
         <div>
@@ -2597,7 +2597,7 @@ function renderRoutePage(routeId) {
   const basePath = window.location.pathname.includes('/rotalar/') ? '../' : '';
 
   const othersHTML = DATA.routes.filter(x => x.id !== routeId).slice(0, 3).map(x => `
-    <a class="rp-other-link" href="${basePath}rotalar/rota-detay.html?id=${x.id}">
+    <a class="rp-other-link" href="${basePath}rotalar/${x.id}">
       <span style="font-size:1.5rem;">${x.emoji}</span>
       <div style="flex:1;min-width:0;">
         <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.85rem;color:var(--cream);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${x.title}</div>
@@ -2698,7 +2698,7 @@ function renderRoutePage(routeId) {
 
 /* ── Share helper (used by renderRoutePage) ── */
 function rpShare(id, encodedTitle, encodedDesc) {
-  const shareUrl = 'https://assosukesfet.com/rotalar/rota-detay.html?id=' + id;
+  const shareUrl = 'https://assosukesfet.com/rotalar/' + id;
   const title = decodeURIComponent(encodedTitle) + ' — Assos\'u Keşfet';
   const shareText = title + '\n' + decodeURIComponent(encodedDesc) + '\n\n' + shareUrl;
   if (navigator.share) {
@@ -3770,7 +3770,7 @@ function renderVenuePage(venueId) {
           <h2 class="vp-stitle">Bu Mekan Şu Rotalarda Yer Alıyor</h2>
           <div class="vp-route-list">
             ${relatedRoutes.map(r=>`
-              <a class="vp-route-item" href="${base}rotalar/rota-detay.html?id=${r.id}">
+              <a class="vp-route-item" href="${base}rotalar/${r.id}">
                 <div class="vp-route-badge" style="background:${r.headerBg||'rgba(26,39,68,.06)'};">${r.emoji}</div>
                 <div class="vp-route-info">
                   <div class="vp-route-name">${r.title}</div>
@@ -4653,7 +4653,7 @@ function renderVillagePage(villageId) {
     bodyHtml += '<div style="margin-bottom:40px;">';
     bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">🗺 Bu Köyden Geçen Rotalar</h2>';
     villageRoutes.forEach(function(route) {
-      bodyHtml += '<a href="../rotalar/rota-detay.html?id=' + route.id + '" style="display:flex;align-items:center;gap:14px;padding:14px 18px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;margin-bottom:10px;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 8px 28px rgba(26,39,68,.08)\'" onmouseout="this.style.boxShadow=\'none\'">';
+      bodyHtml += '<a href="../rotalar/' + route.id + '" style="display:flex;align-items:center;gap:14px;padding:14px 18px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;margin-bottom:10px;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 8px 28px rgba(26,39,68,.08)\'" onmouseout="this.style.boxShadow=\'none\'">';
       bodyHtml += '<span style="font-size:1.5rem;">' + (route.emoji || '🗺') + '</span>';
       bodyHtml += '<div><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.85rem;color:var(--navy);margin-bottom:2px;">' + route.title + '</div>';
       bodyHtml += '<span style="font-size:.7rem;color:var(--text-mid);">' + (route.sure || '') + (route.stops ? ' · ' + route.stops.length + ' durak' : '') + '</span>';
@@ -5226,7 +5226,7 @@ function renderPlacePage(placeId) {
     bodyHtml += '<div style="margin-bottom:40px;">';
     bodyHtml += '<h2 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:1.1rem;color:var(--navy);margin-bottom:18px;">🗺 Bu Yerin Dahil Olduğu Rotalar</h2>';
     placeRoutes.forEach(function(route) {
-      bodyHtml += '<a href="../rotalar/rota-detay.html?id=' + route.id + '" style="display:flex;align-items:center;gap:14px;padding:14px 18px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;margin-bottom:10px;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 8px 28px rgba(26,39,68,.08)\'" onmouseout="this.style.boxShadow=\'none\'">';
+      bodyHtml += '<a href="../rotalar/' + route.id + '" style="display:flex;align-items:center;gap:14px;padding:14px 18px;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:14px;text-decoration:none;margin-bottom:10px;transition:all .25s;" onmouseover="this.style.boxShadow=\'0 8px 28px rgba(26,39,68,.08)\'" onmouseout="this.style.boxShadow=\'none\'">';
       bodyHtml += '<span style="font-size:1.5rem;">' + (route.emoji || '🗺') + '</span>';
       bodyHtml += '<div><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.85rem;color:var(--navy);margin-bottom:2px;">' + route.title + '</div>';
       bodyHtml += '<span style="font-size:.7rem;color:var(--text-mid);">' + (route.sure || '') + (route.stops ? ' · ' + route.stops.length + ' durak' : '') + '</span>';

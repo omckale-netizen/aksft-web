@@ -16,7 +16,7 @@
   <meta property="og:title" content="Rota — Assos'u Keşfet">
   <meta property="og:description" content="Assos ve Ayvacık rota detayı.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://assosukesfet.com/rotalar/rota-detay.html">
+  <meta property="og:url" content="https://assosukesfet.com/rotalar">
   <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/assosu-kesfet.firebasestorage.app/o/site%2Fog-image.jpg?alt=media&token=70d62a44-9142-43d8-aee4-de790f5c7dcd">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -42,18 +42,27 @@
 </div>
 <div id="footer-placeholder"></div>
 <script src="../firebase-loader.js?v=6"></script>
-<script src="../shared.min.js?v=345"></script>
+<script src="../shared.min.js?v=346"></script>
 <script>
+// Rota slug'ini URL'den cikar: once path (/rotalar/slug), sonra query (?id=slug), sonra hash
+function getRotaSlugFromUrl() {
+  var m = window.location.pathname.match(/^\/rotalar\/([^\/\?#]+)\/?$/);
+  if (m && m[1] && m[1] !== 'rota-detay' && m[1] !== 'rota-detay.html') return decodeURIComponent(m[1]);
+  var params = new URLSearchParams(window.location.search);
+  var q = params.get('id');
+  if (q) return q;
+  var h = window.location.hash.replace('#', '');
+  return h || null;
+}
+
 function pageInit() {
   renderNav({ heroMode: false, basePath: '../' });
   renderFooter({ basePath: '../' });
 
-  const params = new URLSearchParams(window.location.search);
-  let routeId = params.get('id');
-  if (!routeId) routeId = window.location.hash.replace('#', '');
+  let routeId = getRotaSlugFromUrl();
   if (!routeId) {
     document.getElementById('route-hero').innerHTML = '';
-    document.getElementById('route-body').innerHTML = '<div style="padding:120px 24px;text-align:center;"><h2 style="font-family:Plus Jakarta Sans,sans-serif;color:#1A2744;margin-bottom:12px;">Rota bulunamadı</h2><p style="color:#718096;margin-bottom:24px;">Lütfen geçerli bir rota seçin.</p><a href="../rotalar.html" style="color:#C4521A;font-weight:600;">← Rotalara Dön</a></div>';
+    document.getElementById('route-body').innerHTML = '<div style="padding:120px 24px;text-align:center;"><h2 style="font-family:Plus Jakarta Sans,sans-serif;color:#1A2744;margin-bottom:12px;">Rota bulunamadı</h2><p style="color:#718096;margin-bottom:24px;">Lütfen geçerli bir rota seçin.</p><a href="/rotalar" style="color:#C4521A;font-weight:600;">← Rotalara Dön</a></div>';
     return;
   }
 
@@ -75,12 +84,12 @@ function pageInit() {
     const twDesc = document.querySelector('meta[name="twitter:description"]');
     if (ogTitle) ogTitle.content = seoTitle;
     if (ogDesc) ogDesc.content = seoDesc;
-    if (ogUrl) ogUrl.content = 'https://assosukesfet.com/rotalar/rota-detay.html?id=' + routeId;
+    if (ogUrl) ogUrl.content = 'https://assosukesfet.com/rotalar/' + routeId;
     if (twTitle) twTitle.content = seoTitle;
     if (twDesc) twDesc.content = route.shortDesc || '';
 
     // Canonical URL
-    var canonicalUrl = 'https://assosukesfet.com/rotalar/rota-detay.html?id=' + routeId;
+    var canonicalUrl = 'https://assosukesfet.com/rotalar/' + routeId;
     var canonicalEl = document.querySelector('link[rel="canonical"]');
     if (!canonicalEl) { canonicalEl = document.createElement('link'); canonicalEl.rel = 'canonical'; document.head.appendChild(canonicalEl); }
     canonicalEl.href = canonicalUrl;
@@ -93,7 +102,7 @@ function pageInit() {
       'itemListElement':[
         {'@type':'ListItem','position':1,'name':'Anasayfa','item':'https://assosukesfet.com'},
         {'@type':'ListItem','position':2,'name':'Rotalar','item':'https://assosukesfet.com/rotalar'},
-        {'@type':'ListItem','position':3,'name':route.title,'item':'https://assosukesfet.com/rotalar/rota-detay.html?id='+routeId}
+        {'@type':'ListItem','position':3,'name':route.title,'item':'https://assosukesfet.com/rotalar/'+routeId}
       ]
     });
     document.head.appendChild(bcSchema);
@@ -104,7 +113,7 @@ function pageInit() {
       '@type': 'TouristTrip',
       'name': route.title,
       'description': route.description || route.shortDesc || ('Assos bolgesi icin ' + route.title + ' rotasi'),
-      'url': 'https://assosukesfet.com/rotalar/rota-detay.html?id=' + routeId,
+      'url': 'https://assosukesfet.com/rotalar/' + routeId,
       'touristType': ['Gezgin','Aile','Cift','Solo'],
       'itinerary': {
         '@type': 'ItemList',
