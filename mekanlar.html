@@ -138,7 +138,7 @@
 <div id="footer-placeholder"></div>
 
 <script src="firebase-loader.js?v=6"></script>
-<script src="shared.min.js?v=345"></script>
+<script src="shared.min.js?v=344"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
@@ -346,7 +346,7 @@ function pageInit() {
       const cs = CAT_STYLE[v.category] || { bg:'rgba(26,39,68,.08)', color:'#4A5568', label:v.category };
       const status = getVenueStatus(v);
       return `
-        <div class="mk-fc" onclick="window.location.href='${typeof getVenueUrl === 'function' ? getVenueUrl(v) : 'mekanlar/mekan-detay.html?id=' + v.id}'" style="${isPremiumActive(v)?'border:2px solid rgba(212,147,90,.3);box-shadow:0 4px 24px rgba(212,147,90,.12);':''}">
+        <div class="mk-fc" onclick="window.location.href='mekanlar/mekan-detay.html?id=${v.id}'" style="${isPremiumActive(v)?'border:2px solid rgba(212,147,90,.3);box-shadow:0 4px 24px rgba(212,147,90,.12);':''}">
           <div class="mk-fc-img" style="background:${v.gradient};">
             ${isPremiumActive(v) ? '<span style="font-size:.56rem;font-weight:800;letter-spacing:.06em;padding:3px 9px;border-radius:4px;background:linear-gradient(135deg,#C9963A,#E8C46A);color:#5C3D0E;text-transform:uppercase;position:absolute;top:11px;left:11px;z-index:2;">Premium</span>' : '<span class="mk-fc-badge' + (status.isOpen === true ? ' mk-fc-badge-open' : status.isOpen === false ? ' mk-fc-badge-closed' : '') + '">' + (status.isOpen === true ? 'Açık' : status.isOpen === false ? 'Kapalı' : 'Önerilen') + '</span>'}
             <button class="mk-fc-save save-btn${saved.has(v.id)?' saved':''}" data-id="${v.id}" aria-label="${saved.has(v.id)?'Kayıtlardan çıkar':'Kaydet'}" aria-pressed="${saved.has(v.id)?'true':'false'}" onclick="toggleSave('${v.id}',event)">
@@ -460,7 +460,7 @@ function pageInit() {
       const cs = CAT_STYLE[v.category] || { bg:'rgba(26,39,68,.08)', color:'#4A5568', label:v.category };
       const status = getVenueStatus(v);
       return `
-        <div class="mk-vc fade-up" data-delay="${i * 0.05}" onclick="window.location.href='${typeof getVenueUrl === 'function' ? getVenueUrl(v) : 'mekanlar/mekan-detay.html?id=' + v.id}'" style="${isPremiumActive(v)?'border:2px solid rgba(212,147,90,.3);box-shadow:0 4px 20px rgba(212,147,90,.1);':''}">
+        <div class="mk-vc fade-up" data-delay="${i * 0.05}" onclick="window.location.href='mekanlar/mekan-detay.html?id=${v.id}'" style="${isPremiumActive(v)?'border:2px solid rgba(212,147,90,.3);box-shadow:0 4px 20px rgba(212,147,90,.1);':''}">
           <div class="mk-vc-img${(v.images && v.images.length > 0) ? ' has-img' : ''}" style="background:${v.gradient};">
             ${(v.images && v.images.length > 0) ? '<img class="mk-vc-photo" src="' + v.images[0] + '" alt="' + v.title + ' — ' + (v.tagText || 'Assos Mekan') + (v.location ? ', ' + v.location : '') + ' | Assos Mekanları" loading="lazy" onload="this.classList.add(\'loaded\');this.closest(\'.mk-vc-img\').classList.remove(\'has-img\')">' : '<span class="mk-vc-emoji">' + v.emoji + '</span>'}
             <div class="mk-vc-badges">
@@ -527,11 +527,7 @@ function pageInit() {
 
   /* ?id= param — navigate to detail page */
   const paramId = getParam('id');
-  if (paramId && /^[a-z0-9-]+$/.test(paramId)) {
-    var vObj = (window.DATA && DATA.venues || []).find(function(x){ return x.id === paramId; });
-    var target = (vObj && typeof getVenueUrl === 'function') ? getVenueUrl(vObj) : ('mekanlar/mekan-detay.html?id=' + paramId);
-    window.location.replace(target);
-  }
+  if (paramId && /^[a-z0-9-]+$/.test(paramId)) window.location.replace('mekanlar/mekan-detay.html?id=' + paramId);
 
   // Expose functions to global scope for onclick handlers
   window.featuredNav = featuredNav;

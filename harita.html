@@ -151,7 +151,7 @@
 <div id="footer-placeholder"></div>
 
 <script src="firebase-loader.js?v=6"></script>
-<script src="shared.min.js?v=345"></script>
+<script src="shared.min.js?v=344"></script>
 <script>
 const FALLBACK_COORDS = {
   'athena-tapinagi':[39.4907,26.3380],'assos-antik-liman':[39.4862,26.3365],
@@ -219,7 +219,7 @@ function buildItems() {
     allItems.push({ id:v.id, type:'venue', lat:c[0], lng:c[1], title:v.title, emoji:v.emoji,
       shortDesc:v.shortDesc, category:getVenueCatLabel(v.category), location:v.location,
       hours:v.hours, phone:v.phone, images:v.images, tags:v.tags,
-      link: (typeof getVenueUrl === 'function' ? getVenueUrl(v) : 'mekanlar/mekan-detay.html?id='+v.id),
+      link:'mekanlar/mekan-detay.html?id='+v.id,
       isPremium: v.premium && (!v.premiumStart || new Date().toISOString().split('T')[0] >= v.premiumStart) && (!v.premiumEnd || new Date().toISOString().split('T')[0] <= v.premiumEnd) });
   });
   (D.places||[]).forEach(p => {

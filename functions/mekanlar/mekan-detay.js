@@ -45,13 +45,7 @@ export async function onRequest(context) {
     if (f.images?.arrayValue?.values?.length > 0) {
       image = f.images.arrayValue.values[0].stringValue || image;
     }
-    // Yeni SEO-friendly URL (/oteller/xxx, /kafeler/xxx vb.)
-    const CATEGORY_URL_SLUG = {
-      kafe: 'kafeler', restoran: 'restoranlar', konaklama: 'oteller',
-      kahvalti: 'kahvalti', beach: 'plajlar', iskele: 'iskeleler'
-    };
-    const catSlug = CATEGORY_URL_SLUG[cat] || 'mekanlar';
-    const pageUrl = `https://assosukesfet.com/${catSlug}/${id}`;
+    const pageUrl = `https://assosukesfet.com/mekanlar/mekan-detay?id=${id}`;
 
     const html = `<!DOCTYPE html><html lang="tr"><head>
 <meta charset="UTF-8">
