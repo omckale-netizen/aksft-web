@@ -4980,6 +4980,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
    Yeni kategori eklemek icin burayi + shared.js'i guncelle.
    Admin dropdown'lari asagidaki populateCategoryDropdowns() ile render olur.
 ══════════════════════════════════════════════════ */
+// Admin'de sadece id, slug, label, emoji, plural kullaniliyor (dropdown + preview URL)
+// eyebrow/heroSub/intro gibi SEO metinleri sadece public hub sayfalarinda kullaniliyor,
+// burada yer kaplamamak icin kisa tutuluyor. Full versiyon: shared.js ve shared.min.js
 window.CATEGORIES = {
   konaklama: { slug: 'oteller',     label: 'Konaklama', emoji: '🏨', plural: 'Oteller',     color: '#5A7A56' },
   kafe:      { slug: 'kafeler',     label: 'Kafe',      emoji: '☕', plural: 'Kafeler',     color: '#C4521A' },

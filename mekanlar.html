@@ -138,7 +138,7 @@
 <div id="footer-placeholder"></div>
 
 <script src="firebase-loader.js?v=6"></script>
-<script src="shared.min.js?v=350"></script>
+<script src="shared.min.js?v=351"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false });
@@ -240,7 +240,9 @@ function pageInit() {
   function persistFilter() {
     try { sessionStorage.setItem(FILTER_KEY, JSON.stringify({ cat: activeCat, status: activeStatus })); } catch(e) {}
   }
-  // Hub sayfasi ise (path /oteller, /kafeler vb.) SEO meta'lari guncelle
+  // Hub sayfasi ise (path /oteller, /kafeler vb.) SEO + hero'yu kategoriye ozel guncelle
+  window._isHub = false;
+  window._hubCat = null;
   (function updateHubSeo() {
     var m = location.pathname.match(/^\/([^\/\?#]+)\/?$/);
     if (!m || !window.CATEGORIES || !window.CATEGORY_SLUG_TO_ID) return;
@@ -248,13 +250,66 @@ function pageInit() {
     if (!catId) return;
     var c = window.CATEGORIES[catId];
     var hubUrl = 'https://assosukesfet.com/' + c.slug;
-    document.title = 'Assos ' + c.plural + ' — ' + c.emoji + ' | Assos\'u Keşfet';
+    window._isHub = true;
+    window._hubCat = catId;
+
+    // Meta tags
+    var seoTitle = 'Assos ' + c.plural + ' — ' + (c.heroSub || '') + ' | Assos\'u Keşfet';
+    document.title = 'Assos ' + c.plural + ' | Assos\'u Keşfet';
+    var descMeta = document.querySelector('meta[name="description"]');
+    if (descMeta) descMeta.content = (c.intro || '').substring(0, 160);
     var canonicalEl = document.querySelector('link[rel="canonical"]');
     if (canonicalEl) canonicalEl.href = hubUrl;
     var ogUrl = document.querySelector('meta[property="og:url"]');
     if (ogUrl) ogUrl.content = hubUrl;
     var ogTitle = document.querySelector('meta[property="og:title"]');
     if (ogTitle) ogTitle.content = 'Assos ' + c.plural + ' | Assos\'u Keşfet';
+    var ogDesc = document.querySelector('meta[property="og:description"]');
+    if (ogDesc) ogDesc.content = (c.heroSub || '');
+    var twTitle = document.querySelector('meta[name="twitter:title"]');
+    if (twTitle) twTitle.content = 'Assos ' + c.plural + ' | Assos\'u Keşfet';
+    var twDesc = document.querySelector('meta[name="twitter:description"]');
+    if (twDesc) twDesc.content = (c.heroSub || '');
+
+    // Hero dinamik
+    var eyebrowEl = document.querySelector('.mk-hero-eyebrow span:not(.mk-hero-eyebrow-dot)');
+    if (eyebrowEl && c.eyebrow) eyebrowEl.textContent = c.eyebrow;
+    var h1El = document.querySelector('.mk-hero-h1');
+    if (h1El) h1El.innerHTML = 'Assos<br><em>' + (c.heroPlural || c.plural) + '</em>';
+    var subEl = document.querySelector('.mk-hero-sub');
+    if (subEl && c.heroSub) subEl.textContent = c.heroSub;
+
+    // Intro paragraf: hero altinda yeni bir section olarak ekle
+    if (c.intro) {
+      var heroEl = document.querySelector('.mk-hero');
+      if (heroEl) {
+        var introSec = document.createElement('section');
+        introSec.className = 'mk-hub-intro';
+        introSec.innerHTML =
+          '<div class="mk-container">' +
+            '<p style="max-width:720px;margin:0 auto;font-size:1rem;line-height:1.8;color:#4A5568;text-align:center;font-family:\'Plus Jakarta Sans\',sans-serif;padding:40px 24px;">' +
+              c.intro +
+            '</p>' +
+          '</div>';
+        heroEl.parentNode.insertBefore(introSec, heroEl.nextSibling);
+      }
+    }
+
+    // Breadcrumb schema 3 seviye (hub sayfasi)
+    var bcSchemas = document.querySelectorAll('script[type="application/ld+json"]');
+    bcSchemas.forEach(function(s) {
+      try {
+        var data = JSON.parse(s.textContent);
+        if (data && data['@type'] === 'BreadcrumbList') {
+          data.itemListElement = [
+            {'@type':'ListItem','position':1,'name':'Anasayfa','item':'https://assosukesfet.com'},
+            {'@type':'ListItem','position':2,'name':'Mekanlar','item':'https://assosukesfet.com/mekanlar'},
+            {'@type':'ListItem','position':3,'name':c.plural,'item':hubUrl}
+          ];
+          s.textContent = JSON.stringify(data);
+        }
+      } catch(e) {}
+    });
   })();
   let showingSaved = false;
 
@@ -365,10 +420,18 @@ function pageInit() {
      RENDER: FEATURED
   ══════════════════════════════════════════ */
   function renderFeatured() {
-    const featured = getActiveVenues().filter(v => v.featured || isPremiumActive(v)).sort((a,b) => (isPremiumActive(b)?1:0) - (isPremiumActive(a)?1:0));
+    var vs = getActiveVenues().filter(v => v.featured || isPremiumActive(v));
+    // Hub sayfasi (activeCat != 'all') -> sadece aktif kategori featured
+    if (activeCat !== 'all') vs = vs.filter(v => v.category === activeCat);
+    const featured = vs.sort((a,b) => (isPremiumActive(b)?1:0) - (isPremiumActive(a)?1:0));
     var featSection = document.querySelector('.mk-featured');
     if (featured.length === 0) { if (featSection) featSection.style.display = 'none'; return; }
     if (featSection) featSection.style.display = '';
+    // Kategori hub'inda featured basligi "Öne Çıkan {Plural}"
+    if (activeCat !== 'all' && window.CATEGORIES && window.CATEGORIES[activeCat]) {
+      var featH2 = document.querySelector('.mk-featured .mk-h2');
+      if (featH2) featH2.textContent = 'Öne Çıkan ' + window.CATEGORIES[activeCat].plural;
+    }
     const saved    = getSaved();
     document.getElementById('mk-ftrack').innerHTML = featured.map((v) => {
       const cs = CAT_STYLE[v.category] || { bg:'rgba(26,39,68,.08)', color:'#4A5568', label:v.category };

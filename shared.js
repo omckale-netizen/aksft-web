@@ -10,12 +10,42 @@
    dinamik olarak yakalar.
 ═══════════════════════════════════════════ */
 window.CATEGORIES = {
-  konaklama: { slug: 'oteller',     label: 'Konaklama', emoji: '🏨', plural: 'Oteller',     color: '#5A7A56' },
-  kafe:      { slug: 'kafeler',     label: 'Kafe',      emoji: '☕', plural: 'Kafeler',     color: '#C4521A' },
-  restoran:  { slug: 'restoranlar', label: 'Restoran',  emoji: '🍽', plural: 'Restoranlar', color: '#1A6B8A' },
-  kahvalti:  { slug: 'kahvalti',    label: 'Kahvaltı',  emoji: '🌞', plural: 'Kahvaltı',    color: '#8A5520' },
-  beach:     { slug: 'plajlar',     label: 'Plaj',      emoji: '🏖', plural: 'Plajlar',     color: '#1A9A8A' },
-  iskele:    { slug: 'iskeleler',   label: 'İskele',    emoji: '⚓', plural: 'İskeleler',   color: '#3A5A8A' }
+  konaklama: {
+    slug: 'oteller', label: 'Konaklama', emoji: '🏨', plural: 'Oteller', heroPlural: 'Otelleri', color: '#5A7A56',
+    eyebrow: "Assos'ta Konaklama",
+    heroSub: "Tarihi taş evlerden butik konsepte, her bütçeye uygun Assos konaklama rehberi.",
+    intro: "Behramkale'nin antik surları arasında kalan taş otellerden, Kadırga Koyu'nun sakinliğine açılan butik pansiyonlara — Assos'ta konaklama seçenekleri hem tarihi doku hem modern konfor sunuyor. Fiyat, konum ve manzarayla birlikte bölgenin en iyi otellerini tek sayfada karşılaştırın."
+  },
+  kafe: {
+    slug: 'kafeler', label: 'Kafe', emoji: '☕', plural: 'Kafeler', heroPlural: 'Kafeleri', color: '#C4521A',
+    eyebrow: "Assos'ta Kahve Molası",
+    heroSub: "Manzaralı oturumlar, ev yapımı tatlılar ve gerçek Ege kahvesi.",
+    intro: "Behramkale'nin taş sokaklarından Kadırga Koyu'nun deniz kenarına, Assos'un kafeleri kahve molanızı unutulmaz kılan adresler. Asma altı avlular, gün batımı terası ve yerel tatlarla hazırlanan menüler — her kafede farklı bir Assos ruhu."
+  },
+  restoran: {
+    slug: 'restoranlar', label: 'Restoran', emoji: '🍽', plural: 'Restoranlar', heroPlural: 'Restoranları', color: '#1A6B8A',
+    eyebrow: "Assos'ta Akşam Yemeği",
+    heroSub: "Taze balıktan yerel lezzetlere, Ege mutfağının en iyi adresleri.",
+    intro: "Antik liman'ın taş rıhtımındaki balık lokantalarından, köy evlerinin avlusunda servis edilen mezeli akşam yemeklerine — Assos restoranları geleneksel Ege mutfağını taze deniz ürünleri ve yerel üretim malzemelerle buluşturuyor. Manzara, fiyat ve menüyle birlikte seçim yapın."
+  },
+  kahvalti: {
+    slug: 'kahvalti', label: 'Kahvaltı', emoji: '🌞', plural: 'Kahvaltı', heroPlural: 'Kahvaltı Mekanları', color: '#8A5520',
+    eyebrow: "Assos'ta Köy Kahvaltısı",
+    heroSub: "Ev yapımı reçeller, köy peyniri, taze zeytin ve kuş sesleri.",
+    intro: "Assos'ta sabaha başlamanın en güzel yolu serpme köy kahvaltısı. Kadın kooperatiflerinin el emeği reçelleri, taze fırın ekmeği, Ayvacık köylerinden gelen zeytin ve peynirler — Ege'nin gerçek tatlarıyla güne merhaba deyin. En iyi kahvaltı mekanları çalışma saatleri ve menüleriyle burada."
+  },
+  beach: {
+    slug: 'plajlar', label: 'Plaj', emoji: '🏖', plural: 'Plajlar', heroPlural: 'Plajları', color: '#1A9A8A',
+    eyebrow: "Assos'ta Deniz Keyfi",
+    heroSub: "Berrak koylar, taşlı sahiller ve Ege'nin en güzel mavi tonları.",
+    intro: "Kadırga Koyu'nun berrak sularından Sivrice Plajı'nın ince çakıllarına, Assos bölgesi Türkiye'nin en sakin sahillerine ev sahipliği yapıyor. Beach club'lar, gizli koylar ve aileye uygun plajlar — her yaz günü için bir Assos manzarası."
+  },
+  iskele: {
+    slug: 'iskeleler', label: 'İskele', emoji: '⚓', plural: 'İskeleler', heroPlural: 'İskeleleri', color: '#3A5A8A',
+    eyebrow: "Assos'ta Tarihi Limanlar",
+    heroSub: "Balıkçı tekneleri, gün batımı ve Ege'nin rüzgârı.",
+    intro: "Antik çağdan bu yana Ege'nin ticaret merkezi olan Assos'un iskeleleri bugün hem balıkçı limanı hem buluşma noktası. Tarihi rıhtım taşlarında yürüyüş, teknelerle gün batımı turu ya da taze balık keyfi — Assos'un denizle olan bağı buralarda yaşıyor."
+  }
 };
 // Slug -> category id (reverse lookup icin)
 window.CATEGORY_SLUG_TO_ID = Object.keys(window.CATEGORIES).reduce(function(acc, cat) {
