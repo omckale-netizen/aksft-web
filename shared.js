@@ -1152,6 +1152,12 @@ function renderNav(opts = {}) {
     return '';
   }
   function getMekanPath(id) {
+    // SEO-friendly URL: kategoriye gore /oteller/xxx, /kafeler/xxx vb.
+    var v = (window.DATA && DATA.venues || []).find(function(x){ return x.id === id; });
+    if (v && typeof getVenueUrl === 'function') {
+      // getVenueUrl kok-bazli (/oteller/xxx) dondurur — basePath on eki gerekmez
+      return getVenueUrl(v);
+    }
     return getBasePath() + 'mekanlar/mekan-detay.html?id=' + id;
   }
   function getMekanListPath() {
@@ -2024,9 +2030,13 @@ function initSearch(inputId, opts = {}) {
 
   function getUrl(type, id) {
     const base = window.location.pathname.includes('/mekanlar/') || window.location.pathname.includes('/rotalar/') ? '../' : '';
+    if (type === 'venue') {
+      var v = (window.DATA && DATA.venues || []).find(function(x){ return x.id === id; });
+      if (v && typeof getVenueUrl === 'function') return getVenueUrl(v);
+      return `${base}mekanlar/mekan-detay.html?id=${id}`;
+    }
     if (type === 'route')   return `${base}rotalar/rota-detay.html?id=${id}`;
     if (type === 'place')   return `${base}yerler/yer-detay.html?id=${id}`;
-    if (type === 'venue')   return `${base}mekanlar/mekan-detay.html?id=${id}`;
     if (type === 'village') return `${base}koyler/koy-detay.html?id=${id}`;
     return '#';
   }
@@ -2203,6 +2213,41 @@ function routeCardHTML(r, delay = 0) {
         </div>
       </div>
     </a>`;
+}
+
+/* ═══════════════════
+   SEO-FRIENDLY URL HELPERS (v2 — root-level category paths)
+   /oteller/sunaba-kasri-otel tarzinda
+═══════════════════ */
+// Veritabani kategori ID'si -> URL'de gorunen slug
+var CATEGORY_URL_SLUG = {
+  kafe:      'kafeler',
+  restoran:  'restoranlar',
+  konaklama: 'oteller',
+  kahvalti:  'kahvalti',
+  beach:     'plajlar',
+  iskele:    'iskeleler'
+};
+// Ters cevirim — slug'dan kategori ID'sine
+var URL_SLUG_TO_CATEGORY = {};
+Object.keys(CATEGORY_URL_SLUG).forEach(function(k) { URL_SLUG_TO_CATEGORY[CATEGORY_URL_SLUG[k]] = k; });
+
+// Mekan icin yeni SEO-friendly URL olustur
+// Ornek: { id: 'sunaba-kasri-otel', category: 'konaklama' } -> '/oteller/sunaba-kasri-otel'
+function getVenueUrl(venue) {
+  if (!venue || !venue.id) return '/mekanlar';
+  var slug = CATEGORY_URL_SLUG[venue.category] || 'mekanlar';
+  return '/' + slug + '/' + venue.id;
+}
+
+// Mevcut URL yeni format mi (ornek: /oteller/xxx) yoksa eski mi (mekan-detay.html?id=)
+function isNewVenueUrl() {
+  var p = window.location.pathname;
+  if (!p) return false;
+  // Kategori slug'larindan biriyle basliyorsa yeni formattir
+  return Object.values(CATEGORY_URL_SLUG).some(function(slug) {
+    return p.indexOf('/' + slug + '/') === 0 && p.length > ('/' + slug + '/').length;
+  });
 }
 
 /* ═══════════════════
@@ -3723,7 +3768,7 @@ function renderVenuePage(venueId) {
               const sm = VMETA[s.id] || { g:'linear-gradient(160deg,#1A2744,#2A3A5A)' };
               const scs = CAT_STYLE[s.category] || { bg:'rgba(26,39,68,.08)', color:'#4A5568', label:s.category };
               const nHasImg = s.images && s.images.length > 0;
-              return '<a class="vp-sim-card" href="' + base + 'mekanlar/mekan-detay.html?id=' + s.id + '">' +
+              return '<a class="vp-sim-card" href="' + (typeof getVenueUrl === 'function' ? getVenueUrl(s) : base + 'mekanlar/mekan-detay.html?id=' + s.id) + '">' +
                 '<div class="vp-sim-img" style="background:' + sm.g + ';">' +
                   (nHasImg ? '<img src="' + s.images[0] + '" alt="' + s.title + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s;" onload="this.style.opacity=\'1\'">' : '<span class="vp-sim-emoji">' + s.emoji + '</span>') +
                 '</div>' +
@@ -3746,7 +3791,7 @@ function renderVenuePage(venueId) {
               const sm  = VMETA[s.id] || { g:'linear-gradient(160deg,#1A2744,#2A3A5A)' };
               const scs = CAT_STYLE[s.category] || { bg:'rgba(26,39,68,.08)', color:'#4A5568', label:s.category };
               const simHasImg = s.images && s.images.length > 0;
-              return `<a class="vp-sim-card" href="${base}mekanlar/mekan-detay.html?id=${s.id}">
+              return `<a class="vp-sim-card" href="${typeof getVenueUrl === 'function' ? getVenueUrl(s) : base + 'mekanlar/mekan-detay.html?id=' + s.id}">
                 <div class="vp-sim-img" style="background:${sm.g};">
                   ${simHasImg ? '<img src="' + s.images[0] + '" alt="' + s.title + '" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s;" onload="this.style.opacity=\'1\'">' : '<span class="vp-sim-emoji">' + s.emoji + '</span>'}
                 </div>
@@ -3903,7 +3948,7 @@ function renderVenuePage(venueId) {
 
   /* ── Share dropdown ── */
   (function() {
-    const url = window.location.origin + '/mekanlar/mekan-detay.html?id=' + v.id;
+    const url = window.location.origin + (typeof getVenueUrl === 'function' ? getVenueUrl(v) : '/mekanlar/mekan-detay.html?id=' + v.id);
     const text = v.title + ' - Assos\'u Keşfet';
     const waText = v.title + ' - Assos\'u Keşfet\n' + v.location + '\n\n' + url;
     const dd = document.getElementById('vp-share-dd');
@@ -4577,7 +4622,7 @@ function renderVillagePage(villageId) {
       var shortDesc = (venue.shortDesc || '').substring(0, 70);
       if (shortDesc.length >= 70) shortDesc += '…';
 
-      bodyHtml += '<a href="../mekanlar/mekan-detay.html?id=' + venue.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+      bodyHtml += '<a href="' + (typeof getVenueUrl === 'function' ? getVenueUrl(venue) : '../mekanlar/mekan-detay.html?id=' + venue.id) + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
 
       // Görsel
       if (venue.images && venue.images[0]) {
@@ -5152,7 +5197,7 @@ function renderPlacePage(placeId) {
     bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">';
     placeVenues.forEach(function(venue) {
       var vci = getVenueCatInfo(venue.category); var cs = { bg: vci.color + '14', color: vci.color, label: vci.label, emoji: vci.emoji };
-      bodyHtml += '<a href="../mekanlar/mekan-detay.html?id=' + venue.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+      bodyHtml += '<a href="' + (typeof getVenueUrl === 'function' ? getVenueUrl(venue) : '../mekanlar/mekan-detay.html?id=' + venue.id) + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
       if (venue.images && venue.images[0]) {
         bodyHtml += '<div style="position:relative;height:140px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + venue.images[0] + '" alt="' + venue.title + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1">';
         bodyHtml += '<span style="position:absolute;top:10px;left:10px;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);font-size:.62rem;font-weight:700;color:#fff;">' + cs.emoji + ' ' + cs.label + '</span></div>';
@@ -5171,7 +5216,7 @@ function renderPlacePage(placeId) {
     bodyHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;">';
     nearbyVenues.forEach(function(venue) {
       var vci = getVenueCatInfo(venue.category); var cs = { bg: vci.color + '14', color: vci.color, label: vci.label, emoji: vci.emoji };
-      bodyHtml += '<a href="../mekanlar/mekan-detay.html?id=' + venue.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
+      bodyHtml += '<a href="' + (typeof getVenueUrl === 'function' ? getVenueUrl(venue) : '../mekanlar/mekan-detay.html?id=' + venue.id) + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
       if (venue.images && venue.images[0]) {
         bodyHtml += '<div style="position:relative;height:140px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + venue.images[0] + '" alt="' + venue.title + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1">';
         bodyHtml += '<span style="position:absolute;top:10px;left:10px;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);font-size:.62rem;font-weight:700;color:#fff;">' + cs.emoji + ' ' + cs.label + '</span></div>';

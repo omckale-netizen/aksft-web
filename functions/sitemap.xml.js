@@ -37,21 +37,37 @@ function getField(fields, key) {
 export async function onRequest(context) {
   const today = new Date().toISOString().split('T')[0];
 
-  // Statik sayfalar
+  // Kategori URL slug haritasi — shared.js ile senkron
+  const CATEGORY_URL_SLUG = {
+    kafe:      'kafeler',
+    restoran:  'restoranlar',
+    konaklama: 'oteller',
+    kahvalti:  'kahvalti',
+    beach:     'plajlar',
+    iskele:    'iskeleler',
+  };
+
+  // Statik sayfalar (yeni SEO-friendly URL'lerle)
   const staticPages = [
     { loc: '/',                      changefreq: 'weekly',  priority: '1.0' },
-    { loc: '/mekanlar.html',         changefreq: 'weekly',  priority: '0.9' },
-    { loc: '/yerler.html',           changefreq: 'weekly',  priority: '0.9' },
-    { loc: '/koyler.html',           changefreq: 'weekly',  priority: '0.9' },
-    { loc: '/rotalar.html',          changefreq: 'weekly',  priority: '0.8' },
-    { loc: '/rehber.html',           changefreq: 'monthly', priority: '0.8' },
-    { loc: '/harita.html',           changefreq: 'weekly',  priority: '0.8' },
-    { loc: '/planla.html',           changefreq: 'monthly', priority: '0.7' },
-    { loc: '/blog.html',             changefreq: 'weekly',  priority: '0.7' },
-    { loc: '/hakkimizda.html',       changefreq: 'monthly', priority: '0.5' },
-    { loc: '/iletisim.html',         changefreq: 'monthly', priority: '0.5' },
-    { loc: '/gizlilik.html',         changefreq: 'yearly',  priority: '0.3' },
-    { loc: '/kullanim-kosullari.html',changefreq: 'yearly', priority: '0.3' },
+    { loc: '/mekanlar',              changefreq: 'weekly',  priority: '0.9' },
+    { loc: '/oteller',               changefreq: 'weekly',  priority: '0.85' },
+    { loc: '/kafeler',               changefreq: 'weekly',  priority: '0.85' },
+    { loc: '/restoranlar',           changefreq: 'weekly',  priority: '0.85' },
+    { loc: '/kahvalti',              changefreq: 'weekly',  priority: '0.85' },
+    { loc: '/plajlar',               changefreq: 'weekly',  priority: '0.85' },
+    { loc: '/iskeleler',             changefreq: 'weekly',  priority: '0.85' },
+    { loc: '/yerler',                changefreq: 'weekly',  priority: '0.9' },
+    { loc: '/koyler',                changefreq: 'weekly',  priority: '0.9' },
+    { loc: '/rotalar',               changefreq: 'weekly',  priority: '0.8' },
+    { loc: '/rehber',                changefreq: 'monthly', priority: '0.8' },
+    { loc: '/harita',                changefreq: 'weekly',  priority: '0.8' },
+    { loc: '/planla',                changefreq: 'monthly', priority: '0.7' },
+    { loc: '/blog',                  changefreq: 'weekly',  priority: '0.7' },
+    { loc: '/hakkimizda',            changefreq: 'monthly', priority: '0.5' },
+    { loc: '/iletisim',              changefreq: 'monthly', priority: '0.5' },
+    { loc: '/gizlilik',              changefreq: 'yearly',  priority: '0.3' },
+    { loc: '/kullanim-kosullari',    changefreq: 'yearly',  priority: '0.3' },
   ];
 
   try {
@@ -66,12 +82,14 @@ export async function onRequest(context) {
     // Dinamik sayfalar
     const dynamicPages = [];
 
-    // Mekanlar — sadece yayında olanlar
+    // Mekanlar — sadece yayında olanlar (SEO-friendly URL'lerle)
     for (const v of venues) {
       const status = getField(v.fields, 'status') || (getField(v.fields, 'active') === false ? 'hidden' : 'published');
       if (status !== 'published') continue;
+      const cat = getField(v.fields, 'category') || 'mekanlar';
+      const slug = CATEGORY_URL_SLUG[cat] || 'mekanlar';
       dynamicPages.push({
-        loc: `/mekanlar/mekan-detay.html?id=${v.id}`,
+        loc: `/${slug}/${v.id}`,
         changefreq: 'weekly',
         priority: '0.7',
       });

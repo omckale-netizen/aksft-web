@@ -43,7 +43,7 @@
 </div>
 <div id="footer-placeholder"></div>
 <script src="../firebase-loader.js?v=6"></script>
-<script src="../shared.min.js?v=344"></script>
+<script src="../shared.min.js?v=345"></script>
 <script>
 function pageInit() {
   renderNav({ heroMode: false, basePath: '../' });
@@ -129,6 +129,20 @@ function pageInit() {
     document.title = seoTitle;
     const descMeta = document.querySelector('meta[name="description"]');
     if (descMeta) descMeta.content = seoDesc;
+    // Yeni SEO-friendly URL hesapla (/oteller/xxx tarzinda)
+    var newPath = (typeof getVenueUrl === 'function') ? getVenueUrl(venue) : '/mekanlar/mekan-detay.html?id=' + venueId;
+    var newAbsoluteUrl = 'https://assosukesfet.com' + newPath;
+    // Tarayicida eski URL ile acildiysa yeni URL'e replaceState
+    // (Gercek 301 icin _redirects ile backend reverse lookup gerekir; bu client-side URL guzellestirme)
+    if (location.pathname.indexOf('mekan-detay') > -1) {
+      try { history.replaceState(null, '', newPath); } catch(e) {}
+    }
+
+    // Kategori-ozel hub URL'si (breadcrumb icin)
+    var catSlug = (typeof CATEGORY_URL_SLUG === 'object' && CATEGORY_URL_SLUG[venue.category]) || 'mekanlar';
+    var catHubUrl = 'https://assosukesfet.com/' + catSlug;
+    var catHubLabel = (typeof catLabels === 'object' && catLabels[venue.category]) || 'Mekanlar';
+
     // OG taglarini guncelle
     const ogTitle = document.querySelector('meta[property="og:title"]');
     const ogDesc = document.querySelector('meta[property="og:description"]');
@@ -139,7 +153,7 @@ function pageInit() {
     const twImg = document.querySelector('meta[name="twitter:image"]');
     if (ogTitle) ogTitle.content = seoTitle;
     if (ogDesc) ogDesc.content = seoDesc;
-    if (ogUrl) ogUrl.content = 'https://assosukesfet.com/mekanlar/mekan-detay.html?id=' + venueId;
+    if (ogUrl) ogUrl.content = newAbsoluteUrl;
     if (venue.images && venue.images[0]) {
       if (ogImg) ogImg.content = venue.images[0];
       if (twImg) twImg.content = venue.images[0];
@@ -147,12 +161,12 @@ function pageInit() {
     if (twTitle) twTitle.content = seoTitle;
     if (twDesc) twDesc.content = seoDesc;
     // Canonical URL
-    var canonicalUrl = 'https://assosukesfet.com/mekanlar/mekan-detay.html?id=' + venueId;
+    var canonicalUrl = newAbsoluteUrl;
     var canonicalEl = document.querySelector('link[rel="canonical"]');
     if (!canonicalEl) { canonicalEl = document.createElement('link'); canonicalEl.rel = 'canonical'; document.head.appendChild(canonicalEl); }
     canonicalEl.href = canonicalUrl;
 
-    // Breadcrumb Schema
+    // Breadcrumb Schema — 4 seviye (Anasayfa > Mekanlar > Kategori Hub > Detay)
     var bcSchema = document.createElement('script');
     bcSchema.type = 'application/ld+json';
     bcSchema.textContent = JSON.stringify({
@@ -160,7 +174,8 @@ function pageInit() {
       'itemListElement':[
         {'@type':'ListItem','position':1,'name':'Anasayfa','item':'https://assosukesfet.com'},
         {'@type':'ListItem','position':2,'name':'Mekanlar','item':'https://assosukesfet.com/mekanlar'},
-        {'@type':'ListItem','position':3,'name':venue.title,'item':'https://assosukesfet.com/mekanlar/mekan-detay.html?id='+venueId}
+        {'@type':'ListItem','position':3,'name':catHubLabel,'item':catHubUrl},
+        {'@type':'ListItem','position':4,'name':venue.title,'item':newAbsoluteUrl}
       ]
     });
     document.head.appendChild(bcSchema);
@@ -172,7 +187,7 @@ function pageInit() {
       '@type': schemaTypes[venue.category] || 'LocalBusiness',
       'name': venue.title,
       'description': venue.shortDesc || '',
-      'url': 'https://assosukesfet.com/mekanlar/mekan-detay.html?id=' + venueId,
+      'url': newAbsoluteUrl,
       'address': {
         '@type': 'PostalAddress',
         'addressLocality': venue.location || 'Assos',

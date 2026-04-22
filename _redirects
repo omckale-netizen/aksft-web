@@ -1,0 +1,19 @@
+# Cloudflare Pages _redirects
+# SEO-dostu URL rewrite'lari: /oteller/xxx -> /mekanlar/mekan-detay.html?id=xxx
+# 200 status = internal rewrite (URL bar'da yeni URL gorunur, icerik eski dosyadan gelir)
+
+# ─── MEKAN DETAY ───────────────────────────────────────────
+/oteller/:slug         /mekanlar/mekan-detay.html?id=:slug  200
+/kafeler/:slug         /mekanlar/mekan-detay.html?id=:slug  200
+/restoranlar/:slug     /mekanlar/mekan-detay.html?id=:slug  200
+/kahvalti/:slug        /mekanlar/mekan-detay.html?id=:slug  200
+/plajlar/:slug         /mekanlar/mekan-detay.html?id=:slug  200
+/iskeleler/:slug       /mekanlar/mekan-detay.html?id=:slug  200
+
+# ─── MEKAN KATEGORI HUB SAYFALARI ───────────────────────────
+/oteller               /mekanlar.html?cat=konaklama  200
+/kafeler               /mekanlar.html?cat=kafe       200
+/restoranlar           /mekanlar.html?cat=restoran   200
+/kahvalti              /mekanlar.html?cat=kahvalti   200
+/plajlar               /mekanlar.html?cat=beach      200
+/iskeleler             /mekanlar.html?cat=iskele     200
