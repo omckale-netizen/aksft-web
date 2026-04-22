@@ -77,7 +77,7 @@
 ══════════════════════════════════════ -->
 <section id="hero" class="hero-section" aria-label="Anasayfa hero bölümü">
   <!-- Hero arka plan görseli (admin panelden yüklenir) -->
-  <img id="hero-bg-img" src="" alt="Assos antik kenti panoramik manzara" fetchpriority="high" decoding="async" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0;transition:opacity .35s ease-out;pointer-events:none;" onload="this.style.opacity='0.15'">
+  <img id="hero-bg-img" src="" alt="Assos antik kenti panoramik manzara" fetchpriority="high" decoding="async" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0;transition:opacity .35s ease-out;pointer-events:none;" onload="this.style.opacity='0.22'">
 
   <!-- SVG blur filter for goo effect -->
   <svg style="position:absolute;width:0;height:0;" aria-hidden="true">
@@ -493,14 +493,27 @@ function pageInit() {
     var heroImg = document.getElementById('hero-bg-img');
     var heroSec = document.getElementById('hero');
     if (!heroImg || !heroSec) return;
+    var lastW = window.innerWidth;
     function lockHeroSize() {
       var h = window.innerHeight;
       heroImg.style.height = h + 'px';
       heroSec.style.minHeight = h + 'px';
     }
     lockHeroSize();
-    // Sadece orientation degisiminde yeniden hesapla (scroll'da re-run ETME)
+    // Orientation degisimi
     window.addEventListener('orientationchange', function() { setTimeout(lockHeroSize, 100); });
+    // Resize — sadece GENISLIK degistiyse tekrar hesapla (scroll'da iOS url bar viewport'u degistirir,
+    // ama width sabit kalir; boylece scroll resize tetiklemez).
+    var resizeTimer;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function() {
+        if (window.innerWidth !== lastW) {
+          lastW = window.innerWidth;
+          lockHeroSize();
+        }
+      }, 200);
+    }, { passive: true });
   })();
 
   // Hero arka plan görselini Firebase'den çek
