@@ -23,14 +23,62 @@ function esc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+const FIRESTORE_BASE = 'https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents';
+
+function jsonLdSafe(obj) {
+  return JSON.stringify(obj).replace(/<\/script/gi, '<\\/script').replace(/</g, '\\u003C');
+}
+
+async function injectBlogItemList(request, env) {
+  const assetUrl = new URL(request.url);
+  assetUrl.pathname = '/blog.html';
+  const response = await env.ASSETS.fetch(assetUrl);
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 2500);
+    const resp = await fetch(`${FIRESTORE_BASE}/blog_posts?pageSize=100`, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (!resp.ok) return response;
+    const data = await resp.json();
+    const docs = data.documents || [];
+    const items = docs
+      .map(d => {
+        const id = d.name.split('/').pop();
+        const f = d.fields || {};
+        if (f.status?.stringValue === 'draft' || !f.title?.stringValue) return null;
+        return {
+          url: `https://assosukesfet.com/blog/${id}`,
+          name: f.title.stringValue
+        };
+      })
+      .filter(Boolean)
+      .map((it, i) => ({ '@type': 'ListItem', position: i + 1, ...it }));
+    if (items.length === 0) return response;
+    const schema = {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: "Assos'u Ke\u015ffet Blog",
+      description: '\u00c7anakkale Ayvac\u0131k Assos b\u00f6lgesi gezi rehberi blog yaz\u0131lar\u0131',
+      numberOfItems: items.length,
+      itemListElement: items
+    };
+    const schemaJson = jsonLdSafe(schema);
+    return new HTMLRewriter()
+      .on('head', { element(el) { el.append(`<script type="application/ld+json" data-ssr="itemlist-blog">${schemaJson}</script>`, { html: true }); } })
+      .transform(response);
+  } catch (e) {
+    return response;
+  }
+}
+
 export async function onRequest(context) {
-  const { request, next } = context;
+  const { request, env, next } = context;
   const ua = request.headers.get('user-agent') || '';
   const url = new URL(request.url);
   const slug = url.searchParams.get('yazi');
 
-  // Query yoksa normal akis (blog.html serve edilir)
-  if (!slug) return next();
+  // Query yoksa: blog.html serve et + ItemList JSON-LD inject
+  if (!slug) return injectBlogItemList(request, env);
 
   const newUrl = `https://assosukesfet.com/blog/${slug}`;
 
