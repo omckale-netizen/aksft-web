@@ -126,11 +126,13 @@ function pageInit() {
   if (village) {
     var vt = village.type || 'koy';
     var tl = village.title.toLowerCase();
+    var parentLbl = village.parent === 'kucukkuyu' ? 'Küçükkuyu' : 'Ayvacık';
     var seoName = village.title;
-    if (vt === 'belde') { if (!tl.includes('belde')) seoName += ' Beldesi'; }
-    else if (vt === 'mahalle') { var parentLbl = village.parent === 'kucukkuyu' ? 'Küçükkuyu' : 'Ayvacık'; seoName = parentLbl + ' ' + (tl.includes('mahalle') ? village.title : village.title + ' Mahallesi'); }
-    else { if (!tl.includes('köy') && !tl.includes('koy')) seoName += ' Köyü'; }
-    var seoTitle = seoName + ' — Assos Bölgesi | Assos\'u Keşfet';
+    var categoryLbl;
+    if (vt === 'belde') { if (!tl.includes('belde')) seoName += ' Beldesi'; categoryLbl = parentLbl + ' Beldeleri'; }
+    else if (vt === 'mahalle') { seoName = parentLbl + ' ' + (tl.includes('mahalle') ? village.title : village.title + ' Mahallesi'); categoryLbl = parentLbl + ' Mahalleleri'; }
+    else { if (!tl.includes('köy') && !tl.includes('koy')) seoName += ' Köyü'; categoryLbl = parentLbl + ' Köyleri'; }
+    var seoTitle = seoName + ' | ' + categoryLbl + ' | Assos\'u Keşfet';
     var seoDesc = village.title + ', Ayvacık bölgesinde';
     if (village.shortDesc) seoDesc += '. ' + village.shortDesc;
     if (village.tags && village.tags.length) seoDesc += '. ' + village.tags.join(', ');

@@ -51,8 +51,27 @@ export async function onRequest(context) {
     const doc = await resp.json();
     const f = doc.fields || {};
 
+    // SEO title builder: "Ahmetce Koyu | Ayvacik Koyleri | Assos'u Kesfet"
+    const rawTitle = f.title?.stringValue || 'K\u00f6y';
+    const vType = f.type?.stringValue || 'koy';
+    const vParent = f.parent?.stringValue || '';
+    const parentLabel = vParent === 'kucukkuyu' ? 'K\u00fc\u00e7\u00fckkuyu' : 'Ayvac\u0131k';
+    const tl = rawTitle.toLowerCase();
+    let seoName, categoryLabel;
+    if (vType === 'belde') {
+      seoName = tl.includes('belde') ? rawTitle : rawTitle + ' Beldesi';
+      categoryLabel = parentLabel + ' Beldeleri';
+    } else if (vType === 'mahalle') {
+      seoName = parentLabel + ' ' + (tl.includes('mahalle') ? rawTitle : rawTitle + ' Mahallesi');
+      categoryLabel = parentLabel + ' Mahalleleri';
+    } else {
+      seoName = (tl.includes('k\u00f6y') || tl.includes('koy')) ? rawTitle : rawTitle + ' K\u00f6y\u00fc';
+      categoryLabel = parentLabel + ' K\u00f6yleri';
+    }
+    const titleBuilt = seoName + ' | ' + categoryLabel + " | Assos'u Ke\u015ffet";
+
     if (isBot(ua)) {
-      const title = (f.title?.stringValue || 'K\u00f6y') + " \u2014 Assos B\u00f6lgesi | Assos'u Ke\u015ffet";
+      const title = titleBuilt;
       const desc = (f.shortDesc?.stringValue || f.description?.stringValue || 'Assos b\u00f6lgesinde k\u00f6y detay\u0131.').replace(/<[^>]*>/g, '').substring(0, 200);
       const image = f.image?.stringValue || DEFAULT_IMG;
 
@@ -81,7 +100,7 @@ export async function onRequest(context) {
     }
 
     // Kullanici: koy-detay.html + HTMLRewriter title/meta inject (flicker fix)
-    const title = (f.title?.stringValue || 'K\u00f6y') + " \u2014 Assos B\u00f6lgesi | Assos'u Ke\u015ffet";
+    const title = titleBuilt;
     const desc = (f.shortDesc?.stringValue || f.description?.stringValue || 'Assos b\u00f6lgesinde k\u00f6y detay\u0131.').replace(/<[^>]*>/g, '').substring(0, 200);
     const image = f.image?.stringValue || DEFAULT_IMG;
     const response = await serveAsset(request, env);
