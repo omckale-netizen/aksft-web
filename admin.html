@@ -2299,6 +2299,107 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
         </div>
       </div>
 
+      <!-- AI ile Hub Kategorisi Uretme -->
+      <div class="panel-card" style="max-width:900px;margin-bottom:24px;border:2px solid rgba(196,82,26,.15)">
+        <div class="panel-card-head" style="background:linear-gradient(135deg,rgba(196,82,26,.08),rgba(196,82,26,.02))">
+          <h3>🤖 AI ile Hub Sayfası Oluştur <span style="font-size:.7rem;font-weight:600;color:var(--terra);background:rgba(196,82,26,.12);padding:2px 8px;border-radius:999px;margin-left:8px;vertical-align:middle">Claude Sonnet 4.6</span></h3>
+        </div>
+        <div style="padding:20px">
+          <p style="font-size:.82rem;color:var(--text-muted);line-height:1.7;margin-bottom:18px">
+            Yeni bir kategori için public hub sayfası (<code style="background:rgba(0,0,0,.05);padding:1px 6px;border-radius:4px;font-size:.9em">/kategori-slug</code>) içeriğini AI ile üret. Üretilen metinler: hero, chip'ler, intro, deneyimler ve SSS. Çıktı olarak <b>shared.js</b>, <b>shared.min.js</b> ve <b>functions/[category].js</b>'e yapıştırılacak kod blokları alırsın.
+          </p>
+
+          <!-- Form -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px">
+            <div>
+              <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Kategori ID <span style="color:var(--red)">*</span></label>
+              <input type="text" id="ai-cat-id" placeholder="bar" style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.82rem;font-family:inherit;width:100%" oninput="this.value = this.value.toLowerCase().replace(/[^a-z0-9]/g,'')">
+              <div style="font-size:.65rem;color:var(--text-muted);margin-top:3px">Firestore'da venue.category bu değeri alır</div>
+            </div>
+            <div>
+              <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">URL Slug <span style="color:var(--red)">*</span></label>
+              <input type="text" id="ai-cat-slug" placeholder="bar-ve-pub" style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.82rem;font-family:inherit;width:100%" oninput="this.value = this.value.toLowerCase().replace(/[^a-z0-9-]/g,'')">
+              <div style="font-size:.65rem;color:var(--text-muted);margin-top:3px">URL: /{slug}</div>
+            </div>
+            <div>
+              <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Label (tekil)</label>
+              <input type="text" id="ai-cat-label" placeholder="Bar" style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.82rem;font-family:inherit;width:100%">
+            </div>
+            <div>
+              <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Plural (çoğul)</label>
+              <input type="text" id="ai-cat-plural" placeholder="Barlar" style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.82rem;font-family:inherit;width:100%">
+            </div>
+            <div>
+              <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Hero Plural <span style="color:var(--text-muted)">(-i eki)</span></label>
+              <input type="text" id="ai-cat-hero-plural" placeholder="Barları" style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.82rem;font-family:inherit;width:100%">
+            </div>
+            <div>
+              <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Emoji</label>
+              <input type="text" id="ai-cat-emoji" placeholder="🍸" style="padding:7px 12px;border:1px solid rgba(0,0,0,.1);border-radius:8px;font-size:.82rem;font-family:inherit;width:100%;max-width:80px">
+            </div>
+            <div>
+              <label style="font-size:.72rem;font-weight:600;color:var(--navy);display:block;margin-bottom:4px">Renk</label>
+              <input type="color" id="ai-cat-color" value="#C4521A" style="width:100%;height:34px;border:1px solid rgba(0,0,0,.1);border-radius:8px;cursor:pointer;padding:2px">
+            </div>
+          </div>
+
+          <button id="ai-cat-generate-btn" class="btn btn-primary" onclick="aiGenerateCategory()" style="display:flex;align-items:center;gap:8px">
+            <span>🤖</span><span>AI ile İçerik Üret</span>
+          </button>
+          <div id="ai-cat-status" style="font-size:.8rem;color:var(--text-muted);margin-top:10px;display:none"></div>
+
+          <!-- Preview + Kod çıktısı (gizli, AI üretince açılır) -->
+          <div id="ai-cat-result" style="display:none;margin-top:24px;border-top:1px solid rgba(0,0,0,.06);padding-top:20px">
+            <h4 style="font-size:.92rem;color:var(--navy);margin-bottom:12px">✨ Üretilen İçerik (önizleme + düzenle)</h4>
+
+            <!-- Preview alanları (editable) -->
+            <div id="ai-cat-preview" style="background:rgba(0,0,0,.02);border-radius:10px;padding:16px;margin-bottom:20px;font-size:.82rem"></div>
+
+            <h4 style="font-size:.92rem;color:var(--navy);margin-bottom:12px;margin-top:24px">📋 Kod Çıktısı</h4>
+            <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:14px">Aşağıdaki kodları ilgili dosyalara yapıştırın. Her panelin üstünde talimat var.</p>
+
+            <!-- Kod Panel 1: shared.js -->
+            <div style="margin-bottom:16px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <div style="font-size:.8rem;font-weight:700;color:var(--navy)"><b>1.</b> <code style="background:rgba(0,0,0,.06);padding:1px 6px;border-radius:4px;font-size:.9em">shared.js</code> → <code style="background:rgba(0,0,0,.06);padding:1px 6px;border-radius:4px;font-size:.9em">window.CATEGORIES</code> objesine ekle (son } öncesi)</div>
+                <button class="btn btn-sm" onclick="copyAiCode('ai-code-shared')" style="font-size:.72rem">Kopyala</button>
+              </div>
+              <pre id="ai-code-shared" style="background:#1a2744;color:#d4e0f7;padding:14px;border-radius:8px;font-size:.72rem;overflow-x:auto;max-height:300px;overflow-y:auto;line-height:1.6;margin:0"></pre>
+            </div>
+
+            <!-- Kod Panel 2: shared.min.js -->
+            <div style="margin-bottom:16px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <div style="font-size:.8rem;font-weight:700;color:var(--navy)"><b>2.</b> <code style="background:rgba(0,0,0,.06);padding:1px 6px;border-radius:4px;font-size:.9em">shared.min.js</code> → <code style="background:rgba(0,0,0,.06);padding:1px 6px;border-radius:4px;font-size:.9em">window.CATEGORIES={...</code> içinde son } öncesi virgülle ekle</div>
+                <button class="btn btn-sm" onclick="copyAiCode('ai-code-shared-min')" style="font-size:.72rem">Kopyala</button>
+              </div>
+              <pre id="ai-code-shared-min" style="background:#1a2744;color:#d4e0f7;padding:14px;border-radius:8px;font-size:.7rem;overflow-x:auto;max-height:150px;overflow-y:auto;line-height:1.5;margin:0;word-break:break-all;white-space:pre-wrap"></pre>
+            </div>
+
+            <!-- Kod Panel 3: functions/[category].js -->
+            <div style="margin-bottom:16px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <div style="font-size:.8rem;font-weight:700;color:var(--navy)"><b>3.</b> <code style="background:rgba(0,0,0,.06);padding:1px 6px;border-radius:4px;font-size:.9em">functions/[category].js</code> ve <code style="background:rgba(0,0,0,.06);padding:1px 6px;border-radius:4px;font-size:.9em">functions/[category]/[slug].js</code> whitelist'lerine 1 satır + CATEGORIES objesine entry</div>
+                <button class="btn btn-sm" onclick="copyAiCode('ai-code-functions')" style="font-size:.72rem">Kopyala</button>
+              </div>
+              <pre id="ai-code-functions" style="background:#1a2744;color:#d4e0f7;padding:14px;border-radius:8px;font-size:.72rem;overflow-x:auto;max-height:300px;overflow-y:auto;line-height:1.6;margin:0"></pre>
+            </div>
+
+            <!-- Deploy talimatı -->
+            <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:14px 16px;margin-top:20px">
+              <div style="font-weight:700;color:#16A34A;font-size:.82rem;margin-bottom:8px">🚀 Deploy Adımları</div>
+              <ol style="font-size:.78rem;color:var(--navy);line-height:1.8;margin:0;padding-left:22px">
+                <li>Yukarıdaki 3 kod bloğunu ilgili dosyalara yapıştırın</li>
+                <li>cache bust için <code style="background:rgba(0,0,0,.06);padding:1px 5px;border-radius:3px">shared.min.js?v=</code> sayısını 1 artırın (tüm HTML)</li>
+                <li>GitHub Desktop ile commit + push</li>
+                <li>~2 dakika bekle (Cloudflare Pages deploy)</li>
+                <li><code style="background:rgba(0,0,0,.06);padding:1px 5px;border-radius:3px">/<span id="ai-deploy-slug">slug</span></code> URL'ini aç, kontrol et</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Yer Kategorileri -->
       <div class="panel-card" style="max-width:700px">
         <div class="panel-card-head"><h3>📍 Yer Kategorileri</h3></div>
@@ -8051,6 +8152,240 @@ async function addCategory() {
   renderCatList();
   updateCatSelects();
   showToast('"' + label + '" kategorisi eklendi.', 'success');
+}
+
+/* ══════════════════════════════════════════════════
+   AI ILE KATEGORI HUB SAYFASI URETME
+   Claude Sonnet 4.6 ile dinamik icerik + 3 kod blogu
+══════════════════════════════════════════════════ */
+async function aiGenerateCategory() {
+  var id = document.getElementById('ai-cat-id').value.trim();
+  var slug = document.getElementById('ai-cat-slug').value.trim();
+  var label = document.getElementById('ai-cat-label').value.trim();
+  var plural = document.getElementById('ai-cat-plural').value.trim();
+  var heroPlural = document.getElementById('ai-cat-hero-plural').value.trim() || plural;
+  var emoji = document.getElementById('ai-cat-emoji').value.trim();
+  var color = document.getElementById('ai-cat-color').value || '#C4521A';
+
+  if (!id || !slug || !label || !plural || !emoji) {
+    showToast('ID, slug, label, plural ve emoji zorunlu', 'error');
+    return;
+  }
+
+  var btn = document.getElementById('ai-cat-generate-btn');
+  var status = document.getElementById('ai-cat-status');
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳</span><span>Üretiliyor... (15-25 saniye)</span>';
+  status.style.display = 'block';
+  status.style.color = 'var(--text-muted)';
+  status.textContent = 'Claude Sonnet 4.6 kategori içeriğini üretiyor...';
+
+  try {
+    var resp = await fetch('/api/generate-category', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, slug, label, plural, heroPlural, emoji, color })
+    });
+    var data = await resp.json();
+
+    if (!resp.ok || !data.success) {
+      throw new Error(data.error || 'Bilinmeyen hata');
+    }
+
+    var inputs = { id, slug, label, plural, heroPlural, emoji, color };
+    aiRenderPreview(data.data, inputs);
+    aiGenerateCodeBlocks(data.data, inputs);
+
+    document.getElementById('ai-cat-result').style.display = 'block';
+    document.getElementById('ai-deploy-slug').textContent = slug;
+    status.style.color = '#16A34A';
+    status.textContent = '✅ İçerik başarıyla üretildi. Aşağıdan kodları kopyalayın.';
+
+    // Sayfayi sonuca scroll et
+    setTimeout(function() {
+      document.getElementById('ai-cat-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  } catch(err) {
+    status.style.color = 'var(--red)';
+    status.textContent = '❌ Hata: ' + err.message;
+    showToast('Üretim başarısız: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span>🤖</span><span>AI ile İçerik Üret</span>';
+  }
+}
+
+function aiRenderPreview(d, inputs) {
+  var html = '';
+  var fieldRow = function(label, key, value, multiline) {
+    var input = multiline
+      ? '<textarea data-ai-field="' + key + '" style="width:100%;padding:8px 10px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.78rem;font-family:inherit;resize:vertical;min-height:' + (multiline > 1 ? '80px' : '50px') + '" oninput="aiPreviewChanged()">' + aiEsc(value) + '</textarea>'
+      : '<input type="text" data-ai-field="' + key + '" value="' + aiEsc(value) + '" style="width:100%;padding:7px 10px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.8rem;font-family:inherit" oninput="aiPreviewChanged()">';
+    return '<div style="margin-bottom:12px"><label style="display:block;font-size:.72rem;font-weight:700;color:var(--navy);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">' + label + '</label>' + input + '</div>';
+  };
+
+  html += fieldRow('Eyebrow (üst başlık)', 'eyebrow', d.eyebrow);
+  html += fieldRow('Hero Sub (1 cümle)', 'heroSub', d.heroSub, 1);
+  html += fieldRow('Title (SEO)', 'title', d.title);
+  html += fieldRow('Meta Description', 'desc', d.desc, 1);
+  html += fieldRow('Kısa Intro (~40 kelime)', 'shortIntro', d.shortIntro, 2);
+  html += fieldRow('Uzun Intro (~80-100 kelime)', 'intro', d.intro, 3);
+
+  // Chips
+  html += '<div style="margin-bottom:12px"><label style="display:block;font-size:.72rem;font-weight:700;color:var(--navy);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Hero Chips (6 keyword — virgülle ayır)</label>';
+  html += '<input type="text" data-ai-field="heroChips" value="' + aiEsc(d.heroChips.join(', ')) + '" style="width:100%;padding:7px 10px;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:.8rem;font-family:inherit" oninput="aiPreviewChanged()"></div>';
+
+  // Experiences
+  html += '<div style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(0,0,0,.05)"><div style="font-size:.72rem;font-weight:700;color:var(--navy);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">3 Deneyim Kartı</div>';
+  d.experiences.forEach(function(e, i) {
+    html += '<div style="background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:8px;padding:10px;margin-bottom:8px">';
+    html += '<div style="display:flex;gap:8px;margin-bottom:6px"><input type="text" data-ai-field="exp-emoji-' + i + '" value="' + aiEsc(e.emoji) + '" style="width:50px;padding:5px;border:1px solid rgba(0,0,0,.1);border-radius:5px;font-size:1rem;text-align:center" oninput="aiPreviewChanged()"><input type="text" data-ai-field="exp-title-' + i + '" value="' + aiEsc(e.title) + '" style="flex:1;padding:5px 10px;border:1px solid rgba(0,0,0,.1);border-radius:5px;font-size:.8rem;font-family:inherit;font-weight:600" oninput="aiPreviewChanged()"></div>';
+    html += '<textarea data-ai-field="exp-desc-' + i + '" style="width:100%;padding:5px 10px;border:1px solid rgba(0,0,0,.1);border-radius:5px;font-size:.75rem;font-family:inherit;resize:vertical;min-height:50px" oninput="aiPreviewChanged()">' + aiEsc(e.desc) + '</textarea>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  // FAQs
+  html += '<div style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(0,0,0,.05)"><div style="font-size:.72rem;font-weight:700;color:var(--navy);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">5 Sıkça Sorulan Soru</div>';
+  d.faqs.forEach(function(f, i) {
+    html += '<div style="background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:8px;padding:10px;margin-bottom:8px">';
+    html += '<input type="text" data-ai-field="faq-q-' + i + '" value="' + aiEsc(f.q) + '" style="width:100%;padding:5px 10px;border:1px solid rgba(0,0,0,.1);border-radius:5px;font-size:.8rem;font-family:inherit;font-weight:600;margin-bottom:6px" oninput="aiPreviewChanged()">';
+    html += '<textarea data-ai-field="faq-a-' + i + '" style="width:100%;padding:5px 10px;border:1px solid rgba(0,0,0,.1);border-radius:5px;font-size:.75rem;font-family:inherit;resize:vertical;min-height:80px" oninput="aiPreviewChanged()">' + aiEsc(f.a) + '</textarea>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  // State sakla
+  window._aiGenData = d;
+  window._aiGenInputs = inputs;
+
+  document.getElementById('ai-cat-preview').innerHTML = html;
+}
+
+// Preview'da edit yapildiginda kod bloklarini yenile
+function aiPreviewChanged() {
+  if (!window._aiGenData || !window._aiGenInputs) return;
+  var d = aiCollectPreviewData();
+  aiGenerateCodeBlocks(d, window._aiGenInputs);
+}
+
+function aiCollectPreviewData() {
+  var get = function(key) {
+    var el = document.querySelector('[data-ai-field="' + key + '"]');
+    return el ? el.value : '';
+  };
+  var chipsStr = get('heroChips') || '';
+  var chips = chipsStr.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+  var experiences = [];
+  for (var i = 0; i < 3; i++) {
+    experiences.push({
+      emoji: get('exp-emoji-' + i),
+      title: get('exp-title-' + i),
+      desc: get('exp-desc-' + i)
+    });
+  }
+  var faqs = [];
+  for (var i = 0; i < 5; i++) {
+    faqs.push({
+      q: get('faq-q-' + i),
+      a: get('faq-a-' + i)
+    });
+  }
+  return {
+    eyebrow: get('eyebrow'),
+    heroSub: get('heroSub'),
+    title: get('title'),
+    desc: get('desc'),
+    shortIntro: get('shortIntro'),
+    intro: get('intro'),
+    heroChips: chips,
+    experiences: experiences,
+    faqs: faqs
+  };
+}
+
+function aiEsc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function aiJsonStr(s) {
+  // JS string literal (tek tirnak, apostrof escape)
+  return JSON.stringify(String(s || ''));
+}
+
+function aiGenerateCodeBlocks(d, inputs) {
+  // Block 1: shared.js pretty (CATEGORIES icine yapistirilacak obje)
+  var sharedJs = '  ' + inputs.id + ': {\n';
+  sharedJs += "    slug: '" + inputs.slug + "', label: '" + inputs.label + "', emoji: '" + inputs.emoji + "', plural: '" + inputs.plural + "', heroPlural: '" + inputs.heroPlural + "', color: '" + inputs.color + "',\n";
+  sharedJs += '    eyebrow: ' + aiJsonStr(d.eyebrow) + ',\n';
+  sharedJs += '    heroSub: ' + aiJsonStr(d.heroSub) + ',\n';
+  sharedJs += '    heroChips: [' + d.heroChips.map(aiJsonStr).join(', ') + '],\n';
+  sharedJs += '    shortIntro: ' + aiJsonStr(d.shortIntro) + ',\n';
+  sharedJs += '    experiences: [\n';
+  d.experiences.forEach(function(e, i) {
+    sharedJs += "      { emoji: '" + e.emoji + "', title: " + aiJsonStr(e.title) + ', desc: ' + aiJsonStr(e.desc) + ' }' + (i < 2 ? ',' : '') + '\n';
+  });
+  sharedJs += '    ],\n';
+  sharedJs += '    intro: ' + aiJsonStr(d.intro) + '\n';
+  sharedJs += '  }';
+  document.getElementById('ai-code-shared').textContent = sharedJs;
+
+  // Block 2: shared.min.js (minified tek satir)
+  var minify = function(obj) {
+    return JSON.stringify(obj).replace(/"(\w+)":/g, '$1:');
+  };
+  var minObj = {
+    slug: inputs.slug, label: inputs.label, emoji: inputs.emoji, plural: inputs.plural,
+    heroPlural: inputs.heroPlural, color: inputs.color,
+    eyebrow: d.eyebrow, heroSub: d.heroSub, heroChips: d.heroChips,
+    shortIntro: d.shortIntro, experiences: d.experiences, intro: d.intro
+  };
+  var sharedMin = inputs.id + ':' + minify(minObj);
+  document.getElementById('ai-code-shared-min').textContent = sharedMin;
+
+  // Block 3: functions/[category].js entry + whitelist
+  var fnCode = '// 1) functions/[category].js icinde HUB_CATEGORIES objesine ekle:\n';
+  fnCode += "  " + inputs.slug + ": '" + inputs.id + "',\n\n";
+  fnCode += '// 2) functions/[category]/[slug].js icinde CATEGORIES objesine ekle:\n';
+  fnCode += "  " + inputs.slug + ": '" + inputs.id + "',\n\n";
+  fnCode += '// 3) functions/[category].js icindeki CATEGORIES objesine ekle:\n';
+  fnCode += '  ' + inputs.slug + ': {\n';
+  fnCode += "    id: '" + inputs.id + "', emoji: '" + inputs.emoji + "', plural: '" + inputs.plural + "', heroPlural: '" + inputs.heroPlural + "', color: '" + inputs.color + "',\n";
+  fnCode += '    eyebrow: ' + aiJsonStr(d.eyebrow) + ',\n';
+  fnCode += '    heroSub: ' + aiJsonStr(d.heroSub) + ',\n';
+  fnCode += '    heroChips: [' + d.heroChips.map(aiJsonStr).join(', ') + '],\n';
+  fnCode += '    title: ' + aiJsonStr(d.title) + " + \" | Assos'u Ke\\u015ffet\",\n";
+  fnCode += '    desc: ' + aiJsonStr(d.desc) + ',\n';
+  fnCode += '    shortIntro: ' + aiJsonStr(d.shortIntro) + ',\n';
+  fnCode += '    experiences: [\n';
+  d.experiences.forEach(function(e, i) {
+    fnCode += "      { emoji: '" + e.emoji + "', title: " + aiJsonStr(e.title) + ', desc: ' + aiJsonStr(e.desc) + ' }' + (i < 2 ? ',' : '') + '\n';
+  });
+  fnCode += '    ],\n';
+  fnCode += '    intro: ' + aiJsonStr(d.intro) + ',\n';
+  fnCode += '    faqs: [\n';
+  d.faqs.forEach(function(f, i) {
+    fnCode += '      { q: ' + aiJsonStr(f.q) + ', a: ' + aiJsonStr(f.a) + ' }' + (i < 4 ? ',' : '') + '\n';
+  });
+  fnCode += '    ]\n';
+  fnCode += '  }';
+  document.getElementById('ai-code-functions').textContent = fnCode;
+}
+
+function copyAiCode(preId) {
+  var text = document.getElementById(preId).textContent;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(function() {
+    showToast('Kod kopyalandı! İlgili dosyaya yapıştır.', 'success');
+  }).catch(function() {
+    // Fallback
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); showToast('Kopyalandı', 'success'); } catch(e) { showToast('Kopyalama başarısız', 'error'); }
+    document.body.removeChild(ta);
+  });
 }
 
 function editCategory(idx) {
