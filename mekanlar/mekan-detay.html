@@ -161,9 +161,10 @@ function pageInit() {
     if (venue.phone) descParts.push('İletişim ve yol tarifi');
     const seoDesc = descParts.join('. ').substring(0, 160);
 
-    document.title = seoTitle;
+    // SSR zaten title set ettiyse dokunma (flicker fix)
+    if (document.title === 'Mekan — Assos\'u Keşfet' || !document.title.includes(venue.title)) document.title = seoTitle;
     const descMeta = document.querySelector('meta[name="description"]');
-    if (descMeta) descMeta.content = seoDesc;
+    if (descMeta && descMeta.content.length < 100) descMeta.content = seoDesc;
     // OG taglarini guncelle
     const ogTitle = document.querySelector('meta[property="og:title"]');
     const ogDesc = document.querySelector('meta[property="og:description"]');

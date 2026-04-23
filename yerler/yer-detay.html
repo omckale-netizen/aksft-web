@@ -131,9 +131,10 @@ function pageInit() {
     if (place.tags && place.tags.length) seoDesc += '. ' + place.tags.join(', ');
     seoDesc = seoDesc.substring(0, 160);
 
-    document.title = seoTitle;
+    // SSR zaten title set ettiyse dokunma (flicker fix)
+    if (document.title === 'Gezilecek Yer — Assos\'u Keşfet' || !document.title.includes(place.title)) document.title = seoTitle;
     var dm = document.querySelector('meta[name="description"]');
-    if (dm) dm.content = seoDesc;
+    if (dm && dm.content.length < 100) dm.content = seoDesc;
     var ogT = document.querySelector('meta[property="og:title"]');
     var ogD = document.querySelector('meta[property="og:description"]');
     var ogU = document.querySelector('meta[property="og:url"]');

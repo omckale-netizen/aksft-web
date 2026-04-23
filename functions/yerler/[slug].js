@@ -80,7 +80,23 @@ export async function onRequest(context) {
       return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
     }
 
-    return serveAsset(request, env);
+    // Kullanici: yer-detay.html + HTMLRewriter title/meta inject (flicker fix)
+    const title = (f.title?.stringValue || 'Gezilecek Yer') + " \u2014 Assos B\u00f6lgesi | Assos'u Ke\u015ffet";
+    const desc = (f.shortDesc?.stringValue || f.description?.stringValue || 'Assos b\u00f6lgesinde gezilecek yer detay\u0131.').replace(/<[^>]*>/g, '').substring(0, 200);
+    const image = f.image?.stringValue || DEFAULT_IMG;
+    const response = await serveAsset(request, env);
+    return new HTMLRewriter()
+      .on('title', { element(el) { el.setInnerContent(title); } })
+      .on('meta[name="description"]', { element(el) { el.setAttribute('content', desc); } })
+      .on('link[rel="canonical"]', { element(el) { el.setAttribute('href', pageUrl); } })
+      .on('meta[property="og:title"]', { element(el) { el.setAttribute('content', title); } })
+      .on('meta[property="og:description"]', { element(el) { el.setAttribute('content', desc); } })
+      .on('meta[property="og:url"]', { element(el) { el.setAttribute('content', pageUrl); } })
+      .on('meta[property="og:image"]', { element(el) { el.setAttribute('content', image); } })
+      .on('meta[name="twitter:title"]', { element(el) { el.setAttribute('content', title); } })
+      .on('meta[name="twitter:description"]', { element(el) { el.setAttribute('content', desc); } })
+      .on('meta[name="twitter:image"]', { element(el) { el.setAttribute('content', image); } })
+      .transform(response);
   } catch (e) {
     return serveAsset(request, env);
   }

@@ -496,10 +496,13 @@ async function loadSinglePost(slug) {
     }
     canonicalEl.href = url;
 
-    // SEO title + description
-    document.title = shareTitle;
+    // SEO title + description — SSR (Cloudflare Function HTMLRewriter) zaten set
+    // etti ise dokunma (flicker fix). Default generic title ise guncelle.
+    if (!document.title || document.title.indexOf('Assos Blog \u2014 Gezi Rehberi') !== -1) {
+      document.title = shareTitle;
+    }
     var descMeta = document.querySelector('meta[name="description"]');
-    if (descMeta) descMeta.content = (p.excerpt || p.title || '').substring(0, 160);
+    if (descMeta && descMeta.content.length < 100) descMeta.content = (p.excerpt || p.title || '').substring(0, 160);
 
     // OG meta tag'larını yazıya özel güncelle
     var ogTitle = document.querySelector('meta[property="og:title"]');

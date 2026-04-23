@@ -78,11 +78,20 @@ export async function onRequest(context) {
       }
     }
 
-    if (isBot(ua)) {
-      const title = (f.title?.stringValue || 'Mekan') + " \u2014 Assos | Assos'u Ke\u015ffet";
-      const desc = (f.shortDesc?.stringValue || f.description?.stringValue || 'Assos\'ta mekan detaylar\u0131.').replace(/<[^>]*>/g, '').substring(0, 200);
-      const image = f.image?.stringValue || DEFAULT_IMG;
+    // Kategori etiketi (title icin): konaklama -> Otelleri, kafe -> Kafeleri vb.
+    const CAT_LABELS = { konaklama: 'Otelleri', kafe: 'Kafeleri', restoran: 'Restoranlar\u0131', kahvalti: 'Kahvalt\u0131 Mekanlar\u0131', beach: 'Plajlar\u0131', iskele: '\u0130skeleleri' };
+    const catLabel = CAT_LABELS[expectedCat] || 'Mekanlar\u0131';
+    const title = (f.title?.stringValue || 'Mekan') + " \u2014 Assos " + catLabel + " | Assos'u Ke\u015ffet";
+    const desc = (f.shortDesc?.stringValue || f.description?.stringValue || 'Assos\'ta mekan detaylar\u0131.').replace(/<[^>]*>/g, '').substring(0, 200);
+    // Images field (array)
+    let image = DEFAULT_IMG;
+    if (f.images?.arrayValue?.values?.length > 0) {
+      image = f.images.arrayValue.values[0].stringValue || image;
+    } else if (f.image?.stringValue) {
+      image = f.image.stringValue;
+    }
 
+    if (isBot(ua)) {
       const html = `<!DOCTYPE html><html lang="tr"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -107,7 +116,20 @@ export async function onRequest(context) {
       return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
     }
 
-    return serveAsset(request, env);
+    // Kullanici: mekan-detay.html + HTMLRewriter title/meta inject (flicker fix)
+    const response = await serveAsset(request, env);
+    return new HTMLRewriter()
+      .on('title', { element(el) { el.setInnerContent(title); } })
+      .on('meta[name="description"]', { element(el) { el.setAttribute('content', desc); } })
+      .on('link[rel="canonical"]', { element(el) { el.setAttribute('href', pageUrl); } })
+      .on('meta[property="og:title"]', { element(el) { el.setAttribute('content', title); } })
+      .on('meta[property="og:description"]', { element(el) { el.setAttribute('content', desc); } })
+      .on('meta[property="og:url"]', { element(el) { el.setAttribute('content', pageUrl); } })
+      .on('meta[property="og:image"]', { element(el) { el.setAttribute('content', image); } })
+      .on('meta[name="twitter:title"]', { element(el) { el.setAttribute('content', title); } })
+      .on('meta[name="twitter:description"]', { element(el) { el.setAttribute('content', desc); } })
+      .on('meta[name="twitter:image"]', { element(el) { el.setAttribute('content', image); } })
+      .transform(response);
   } catch (e) {
     return serveAsset(request, env);
   }

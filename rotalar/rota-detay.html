@@ -146,9 +146,10 @@ function pageInit() {
   if (route) {
     const seoTitle = route.title + ' — Assos Gezi Rotası | Assos\'u Keşfet';
     const seoDesc = route.title + ': ' + (route.shortDesc || '') + ' | ' + (route.sure || '') + ', ' + (route.stops?.length || '') + ' durak';
-    document.title = seoTitle;
+    // SSR zaten title set ettiyse dokunma (flicker fix)
+    if (document.title === 'Rota — Assos\'u Keşfet' || !document.title.includes(route.title)) document.title = seoTitle;
     const descMeta = document.querySelector('meta[name="description"]');
-    if (descMeta) descMeta.content = seoDesc;
+    if (descMeta && descMeta.content.length < 100) descMeta.content = seoDesc;
     const ogTitle = document.querySelector('meta[property="og:title"]');
     const ogDesc = document.querySelector('meta[property="og:description"]');
     const ogUrl = document.querySelector('meta[property="og:url"]');
