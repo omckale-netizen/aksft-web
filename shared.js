@@ -3530,7 +3530,7 @@ function renderVenuePage(venueId) {
   document.getElementById('vp-hero').innerHTML = `
     <div class="vp-hero">
       <div class="vp-hero-bg" style="background:${G};"></div>
-      ${v.images && v.images.length > 0 ? '<img src="' + v.images[0] + '" alt="" fetchpriority="high" decoding="async" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0;transition:opacity .7s ease;" onload="this.style.opacity=\'0.25\'">' : ''}
+      ${v.images && v.images.length > 0 ? '<img src="' + v.images[0] + '" alt="' + (v.title || '') + ' — ' + (v.tagText || 'Assos Mekan') + (v.location ? ', ' + v.location : '') + ' | Assos Ayvacık" fetchpriority="high" decoding="async" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0;transition:opacity .7s ease;" onload="this.style.opacity=\'0.25\'">' : ''}
       <div class="vp-topo"></div>
       <div class="vp-vignette"></div>
       <div class="vp-text-overlay"></div>
@@ -4719,7 +4719,7 @@ function renderVillagePage(villageId) {
       // Görsel
       if (venue.images && venue.images[0]) {
         bodyHtml += '<div style="position:relative;height:140px;overflow:hidden;background:rgba(26,39,68,.05);">';
-        bodyHtml += '<img src="' + venue.images[0] + '" alt="' + venue.title + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1">';
+        bodyHtml += '<img src="' + venue.images[0] + '" alt="' + venue.title + ' — ' + cs.label + (v.title ? ' · ' + v.title : '') + ' Assos Ayvacık" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1">';
         // Kategori badge üstte
         bodyHtml += '<span style="position:absolute;top:10px;left:10px;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-size:.62rem;font-weight:700;color:#fff;">' + cs.emoji + ' ' + cs.label + '</span>';
         // Açık/kapalı badge
@@ -4762,7 +4762,7 @@ function renderVillagePage(villageId) {
     villagePlaces.forEach(function(place) {
       bodyHtml += '<a href="/yerler/' + place.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
       if (place.image) {
-        bodyHtml += '<div style="height:120px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + place.image + '" alt="' + (place.title || '') + ' Assos" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1"></div>';
+        bodyHtml += '<div style="height:120px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + place.image + '" alt="' + (place.title || '') + ' — Assos gezilecek yer' + (v.title ? ', ' + v.title : '') + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1"></div>';
       } else {
         bodyHtml += '<div style="height:80px;background:linear-gradient(135deg,rgba(26,39,68,.06),rgba(26,39,68,.02));display:flex;align-items:center;justify-content:center;font-size:2rem;">' + (place.emoji || '🏛') + '</div>';
       }
@@ -5291,7 +5291,7 @@ function renderPlacePage(placeId) {
       var vci = getVenueCatInfo(venue.category); var cs = { bg: vci.color + '14', color: vci.color, label: vci.label, emoji: vci.emoji };
       bodyHtml += '<a href="' + (window.getVenueUrl ? window.getVenueUrl(venue) : ('/mekanlar/mekan-detay.html?id=' + venue.id)) + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
       if (venue.images && venue.images[0]) {
-        bodyHtml += '<div style="position:relative;height:140px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + venue.images[0] + '" alt="' + venue.title + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1">';
+        bodyHtml += '<div style="position:relative;height:140px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + venue.images[0] + '" alt="' + venue.title + ' — ' + cs.label + (p.title ? ' · ' + p.title : '') + ' Assos" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1">';
         bodyHtml += '<span style="position:absolute;top:10px;left:10px;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);font-size:.62rem;font-weight:700;color:#fff;">' + cs.emoji + ' ' + cs.label + '</span></div>';
       } else {
         bodyHtml += '<div style="height:100px;background:' + cs.bg + ';display:flex;align-items:center;justify-content:center;font-size:2.5rem;">' + cs.emoji + '</div>';
@@ -5310,7 +5310,7 @@ function renderPlacePage(placeId) {
       var vci = getVenueCatInfo(venue.category); var cs = { bg: vci.color + '14', color: vci.color, label: vci.label, emoji: vci.emoji };
       bodyHtml += '<a href="' + (window.getVenueUrl ? window.getVenueUrl(venue) : ('/mekanlar/mekan-detay.html?id=' + venue.id)) + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
       if (venue.images && venue.images[0]) {
-        bodyHtml += '<div style="position:relative;height:140px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + venue.images[0] + '" alt="' + venue.title + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1">';
+        bodyHtml += '<div style="position:relative;height:140px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + venue.images[0] + '" alt="' + venue.title + ' — ' + cs.label + ' Assos yakını" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1">';
         bodyHtml += '<span style="position:absolute;top:10px;left:10px;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);font-size:.62rem;font-weight:700;color:#fff;">' + cs.emoji + ' ' + cs.label + '</span></div>';
       } else {
         bodyHtml += '<div style="height:100px;background:' + cs.bg + ';display:flex;align-items:center;justify-content:center;font-size:2.5rem;">' + cs.emoji + '</div>';
@@ -5336,7 +5336,7 @@ function renderPlacePage(placeId) {
     otherPlaces.forEach(function(op) {
       bodyHtml += '<a href="/yerler/' + op.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
       if (op.image) {
-        bodyHtml += '<div style="height:120px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + op.image + '" alt="' + (op.title || '') + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1"></div>';
+        bodyHtml += '<div style="height:120px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + op.image + '" alt="' + (op.title || '') + ' — Assos Ayvacık gezilecek yer" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1"></div>';
       } else {
         bodyHtml += '<div style="height:80px;background:linear-gradient(135deg,rgba(26,39,68,.06),rgba(26,39,68,.02));display:flex;align-items:center;justify-content:center;font-size:2rem;">' + (op.emoji || '🏛') + '</div>';
       }
@@ -5396,7 +5396,7 @@ function renderPlacePage(placeId) {
         var distBadge = op._roadKm ? '<span style="position:absolute;bottom:10px;right:10px;font-size:.62rem;font-weight:700;padding:3px 10px;border-radius:999px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);color:#fff;z-index:1;">~' + op._roadKm + ' km</span>' : '';
         bodyHtml += '<a href="/yerler/' + op.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.07);border-radius:18px;overflow:hidden;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);" onmouseover="this.style.boxShadow=\'0 12px 36px rgba(26,39,68,.1)\';this.style.transform=\'translateY(-4px)\'" onmouseout="this.style.boxShadow=\'none\';this.style.transform=\'\'">';
         if (op.image) {
-          bodyHtml += '<div style="position:relative;height:120px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + op.image + '" alt="' + (op.title || '') + '" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1">' + distBadge + '</div>';
+          bodyHtml += '<div style="position:relative;height:120px;overflow:hidden;background:rgba(26,39,68,.05);"><img src="' + op.image + '" alt="' + (op.title || '') + ' — Assos ören yeri" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease;" loading="lazy" onload="this.style.opacity=1">' + distBadge + '</div>';
         } else {
           bodyHtml += '<div style="position:relative;height:80px;background:linear-gradient(135deg,rgba(26,39,68,.06),rgba(26,39,68,.02));display:flex;align-items:center;justify-content:center;font-size:2rem;">' + (op.emoji || '🏛') + distBadge + '</div>';
         }

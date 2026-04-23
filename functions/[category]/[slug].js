@@ -126,7 +126,12 @@ export async function onRequest(context) {
     const CAT_LABELS = { konaklama: 'Otelleri', kafe: 'Kafeleri', restoran: 'Restoranlar\u0131', kahvalti: 'Kahvalt\u0131 Mekanlar\u0131', beach: 'Plajlar\u0131', iskele: '\u0130skeleleri' };
     const catLabel = CAT_LABELS[expectedCat] || 'Mekanlar\u0131';
     const title = (f.title?.stringValue || 'Mekan') + " \u2014 Assos " + catLabel + " | Assos'u Ke\u015ffet";
-    const desc = (f.shortDesc?.stringValue || f.description?.stringValue || 'Assos\'ta mekan detaylar\u0131.').replace(/<[^>]*>/g, '').substring(0, 200);
+    const rawDesc = f.shortDesc?.stringValue || f.description?.stringValue || '';
+    const venueTitle = f.title?.stringValue || 'Mekan';
+    const venueLoc = f.location?.stringValue || 'Assos';
+    // Dinamik fallback: her sayfada farkli meta desc (duplicate onleme)
+    const fallbackDesc = `${venueTitle} \u2014 ${venueLoc} ${catLabel.replace(/\u0131/g, '\u0131')}. \u00c7al\u0131\u015fma saatleri, iletişim ve konum bilgisiyle Assos rehberi.`;
+    const desc = (rawDesc || fallbackDesc).replace(/<[^>]*>/g, '').substring(0, 200);
     // Images field (array)
     let image = DEFAULT_IMG;
     if (f.images?.arrayValue?.values?.length > 0) {

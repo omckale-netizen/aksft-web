@@ -48,8 +48,12 @@ export async function onRequest(context) {
   // Yazi yoksa: bot icin next(), user icin blog.html (client empty state gosterir)
   if (!fields) return fetchAsset(request, env);
 
-  const title = (fields.title?.stringValue || 'Blog') + " \u2014 Assos'u Ke\u015ffet Blog";
-  const desc = (fields.excerpt?.stringValue || fields.title?.stringValue || 'Assos hakk\u0131nda blog yaz\u0131s\u0131.').substring(0, 200);
+  const blogTitle = fields.title?.stringValue || 'Blog';
+  const blogCat = fields.category?.stringValue || '';
+  const title = blogTitle + " \u2014 Assos'u Ke\u015ffet Blog";
+  // Dinamik fallback desc (duplicate onleme)
+  const blogFallbackDesc = `${blogTitle} \u2014 Assos gezi rehberi blog${blogCat ? ' · ' + blogCat : ''}. Öneriler, gezi ipuçları ve yerel bilgiler.`;
+  const desc = (fields.excerpt?.stringValue || blogFallbackDesc).substring(0, 200);
   const image = fields.coverImage?.stringValue || fields.image?.stringValue || DEFAULT_OG_IMAGE;
 
   // Bot: minimal OG HTML (meta tag'ler, social preview icin yeterli)

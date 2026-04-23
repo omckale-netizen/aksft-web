@@ -42,7 +42,7 @@
 </div>
 <div id="footer-placeholder"></div>
 <script src="../firebase-loader.js?v=6"></script>
-<script src="../shared.min.js?v=358"></script>
+<script src="../shared.min.js?v=359"></script>
 <script>
 // Yer slug'ini URL'den cikar: once path (/yerler/slug), sonra query (?id=slug), sonra hash
 function getYerSlugFromUrl() {
@@ -100,7 +100,7 @@ function pageInit() {
     var suggestions = (window.DATA?.places || []).slice(0, 6);
     var cardsHtml = suggestions.map(function(p) {
       var imgHtml = p.image
-        ? '<img src="' + p.image + '" alt="' + (p.title || '') + '" loading="lazy" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s" onload="this.style.opacity=1">'
+        ? '<img src="' + p.image + '" alt="' + (p.title || '') + ' — Assos Ayvacık gezilecek yer" loading="lazy" style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s" onload="this.style.opacity=1">'
         : '<div style="font-size:2rem;opacity:.55">📍</div>';
       return '<a href="/yerler/' + p.id + '" style="display:block;background:#fff;border:1px solid rgba(26,39,68,.06);border-radius:16px;overflow:hidden;text-decoration:none;color:inherit;transition:transform .25s cubic-bezier(.16,1,.3,1),box-shadow .25s;" onmouseover="this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'0 12px 32px rgba(26,39,68,.08)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'">' +
           '<div style="height:110px;background:linear-gradient(135deg,#06101E,#0C1A30);display:flex;align-items:center;justify-content:center;overflow:hidden">' + imgHtml + '</div>' +

@@ -57,10 +57,16 @@ export async function onRequest(context) {
     const doc = await resp.json();
     const f = doc.fields || {};
 
+    const rotaTitle = f.title?.stringValue || 'Rota';
+    const rotaSure = f.sure?.stringValue || '';
+    const rotaStops = f.stops?.arrayValue?.values?.length || 0;
+    // Dinamik fallback desc (duplicate onleme)
+    const rotaFallbackDesc = `${rotaTitle} \u2014 Assos gezi rotas\u0131${rotaSure ? ', ' + rotaSure : ''}${rotaStops ? ', ' + rotaStops + ' durak' : ''}. Harita, durak durak rehber ve yol tarifi.`;
+
     // Bot: OG meta tag'li HTML
     if (isBot(ua)) {
-      const title = (f.title?.stringValue || 'Rota') + " \u2014 Assos Gezi Rotas\u0131 | Assos'u Ke\u015ffet";
-      const desc = (f.shortDesc?.stringValue || f.description?.stringValue || 'Assos gezi rotas\u0131 detaylar\u0131.').replace(/<[^>]*>/g, '').substring(0, 200);
+      const title = rotaTitle + " \u2014 Assos Gezi Rotas\u0131 | Assos'u Ke\u015ffet";
+      const desc = (f.shortDesc?.stringValue || f.description?.stringValue || rotaFallbackDesc).replace(/<[^>]*>/g, '').substring(0, 200);
       const image = f.image?.stringValue || DEFAULT_IMG;
 
       const html = `<!DOCTYPE html><html lang="tr"><head>
@@ -88,8 +94,8 @@ export async function onRequest(context) {
     }
 
     // Kullanici: rota-detay.html + HTMLRewriter ile title/meta SSR inject (flicker fix)
-    const title = (f.title?.stringValue || 'Rota') + " \u2014 Assos Gezi Rotas\u0131 | Assos'u Ke\u015ffet";
-    const desc = (f.shortDesc?.stringValue || f.description?.stringValue || 'Assos gezi rotas\u0131 detaylar\u0131.').replace(/<[^>]*>/g, '').substring(0, 200);
+    const title = rotaTitle + " \u2014 Assos Gezi Rotas\u0131 | Assos'u Ke\u015ffet";
+    const desc = (f.shortDesc?.stringValue || f.description?.stringValue || rotaFallbackDesc).replace(/<[^>]*>/g, '').substring(0, 200);
     const image = f.image?.stringValue || DEFAULT_IMG;
     const response = await serveAsset(request, env);
     return new HTMLRewriter()

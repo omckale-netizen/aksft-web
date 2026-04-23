@@ -51,9 +51,14 @@ export async function onRequest(context) {
     const doc = await resp.json();
     const f = doc.fields || {};
 
+    const yerTitle = f.title?.stringValue || 'Gezilecek Yer';
+    const yerLoc = f.location?.stringValue || '';
+    // Dinamik fallback desc (duplicate onleme)
+    const yerFallbackDesc = `${yerTitle}${yerLoc ? ', ' + yerLoc : ''} \u2014 Assos Ayvac\u0131k gezilecek yer. Konum, fotoğraf, tarihi bilgi ve gezi rehberi.`;
+
     if (isBot(ua)) {
-      const title = (f.title?.stringValue || 'Gezilecek Yer') + " \u2014 Assos B\u00f6lgesi | Assos'u Ke\u015ffet";
-      const desc = (f.shortDesc?.stringValue || f.description?.stringValue || 'Assos b\u00f6lgesinde gezilecek yer detay\u0131.').replace(/<[^>]*>/g, '').substring(0, 200);
+      const title = yerTitle + " \u2014 Assos B\u00f6lgesi | Assos'u Ke\u015ffet";
+      const desc = (f.shortDesc?.stringValue || f.description?.stringValue || yerFallbackDesc).replace(/<[^>]*>/g, '').substring(0, 200);
       const image = f.image?.stringValue || DEFAULT_IMG;
 
       const html = `<!DOCTYPE html><html lang="tr"><head>
@@ -81,8 +86,8 @@ export async function onRequest(context) {
     }
 
     // Kullanici: yer-detay.html + HTMLRewriter title/meta inject (flicker fix)
-    const title = (f.title?.stringValue || 'Gezilecek Yer') + " \u2014 Assos B\u00f6lgesi | Assos'u Ke\u015ffet";
-    const desc = (f.shortDesc?.stringValue || f.description?.stringValue || 'Assos b\u00f6lgesinde gezilecek yer detay\u0131.').replace(/<[^>]*>/g, '').substring(0, 200);
+    const title = yerTitle + " \u2014 Assos B\u00f6lgesi | Assos'u Ke\u015ffet";
+    const desc = (f.shortDesc?.stringValue || f.description?.stringValue || yerFallbackDesc).replace(/<[^>]*>/g, '').substring(0, 200);
     const image = f.image?.stringValue || DEFAULT_IMG;
     const response = await serveAsset(request, env);
     return new HTMLRewriter()

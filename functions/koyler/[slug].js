@@ -70,9 +70,12 @@ export async function onRequest(context) {
     }
     const titleBuilt = seoName + ' | ' + categoryLabel + " | Assos'u Ke\u015ffet";
 
+    // Dinamik fallback desc
+    const koyFallbackDesc = `${seoName}, ${parentLabel} \u00c7anakkale. Fotoğraf, konum, gezi ipuçları ve çevredeki mekanlar ile k\u00f6y rehberi.`;
+
     if (isBot(ua)) {
       const title = titleBuilt;
-      const desc = (f.shortDesc?.stringValue || f.description?.stringValue || 'Assos b\u00f6lgesinde k\u00f6y detay\u0131.').replace(/<[^>]*>/g, '').substring(0, 200);
+      const desc = (f.shortDesc?.stringValue || f.description?.stringValue || koyFallbackDesc).replace(/<[^>]*>/g, '').substring(0, 200);
       const image = f.image?.stringValue || DEFAULT_IMG;
 
       const html = `<!DOCTYPE html><html lang="tr"><head>
@@ -101,7 +104,7 @@ export async function onRequest(context) {
 
     // Kullanici: koy-detay.html + HTMLRewriter title/meta inject (flicker fix)
     const title = titleBuilt;
-    const desc = (f.shortDesc?.stringValue || f.description?.stringValue || 'Assos b\u00f6lgesinde k\u00f6y detay\u0131.').replace(/<[^>]*>/g, '').substring(0, 200);
+    const desc = (f.shortDesc?.stringValue || f.description?.stringValue || koyFallbackDesc).replace(/<[^>]*>/g, '').substring(0, 200);
     const image = f.image?.stringValue || DEFAULT_IMG;
     const response = await serveAsset(request, env);
     return new HTMLRewriter()
