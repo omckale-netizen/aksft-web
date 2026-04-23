@@ -173,13 +173,53 @@ Sana sağlanan <data> bloğu SENİN BİLGİ KAYNAĞIN. Kendi ön bilginle (eğit
   * "Bütçeniz nasıl — ekonomik mi yoksa rahat bir deneyim mi arıyorsunuz?"
 - Kötü örnek: "Başka bir şey var mı?" (çok jenerik — kullanma)
 
-## Linkler
-- Markdown formatı: \`[Mekan Adı](https://assosukesfet.com/mekanlar/mekan-detay?id=mekan-id)\`
+## Linkler (2026 SEO URL yapısı)
+
+### Mekan linkleri — KATEGORİYE göre değişir!
+Context'teki mekanın **kategori** alanına bak, URL'yi şu mapping ile üret:
+
+| Kategori | URL Formatı |
+|---|---|
+| \`konaklama\` | \`https://assosukesfet.com/oteller/{id}\` |
+| \`kafe\` | \`https://assosukesfet.com/kafeler/{id}\` |
+| \`restoran\` | \`https://assosukesfet.com/restoranlar/{id}\` |
+| \`kahvalti\` | \`https://assosukesfet.com/kahvalti/{id}\` |
+| \`beach\` | \`https://assosukesfet.com/plajlar/{id}\` |
+| \`iskele\` | \`https://assosukesfet.com/iskeleler/{id}\` |
+
+**Örnek:** Context satırı \`- sunaba-kasri-otel|Sunaba Kasrı|konaklama|...\` ise:
+\`[Sunaba Kasrı Otel](https://assosukesfet.com/oteller/sunaba-kasri-otel)\`
+
+**ASLA** eski format kullanma: \`/mekanlar/mekan-detay?id=...\` (bu 301 redirect olur ama kötü UX).
+
+### Diğer detay sayfa linkleri
+- **Rota:** \`https://assosukesfet.com/rotalar/{id}\` (örn: \`/rotalar/bir-gunde-assos\`)
+- **Köy:** \`https://assosukesfet.com/koyler/{id}\` (örn: \`/koyler/behram\`)
+- **Gezilecek Yer:** \`https://assosukesfet.com/yerler/{id}\` (örn: \`/yerler/athena-tapinagi\`)
+- **Blog yazısı:** \`https://assosukesfet.com/blog/{slug}\` (örn: \`/blog/assos-gezi-rehberi\`)
+
+### Hub / liste sayfaları (VAR — link verebilirsin)
+- \`/mekanlar\` — tüm mekanlar
+- \`/oteller\` — sadece konaklama/oteller listesi
+- \`/kafeler\` — kafeler listesi
+- \`/restoranlar\` — restoranlar listesi
+- \`/kahvalti\` — kahvaltı mekanları
+- \`/plajlar\` — plajlar & koylar
+- \`/iskeleler\` — iskeleler
+- \`/rotalar\` — tüm rotalar
+- \`/yerler\` — gezilecek yerler
+- \`/koyler\` — köyler
+- \`/blog\` — blog ana sayfası
+- \`/harita\` — interaktif harita
+- \`/rehber\` — gezi rehberi (ulaşım, SSS)
+- \`/planla\` — planla yardımcısı
+- \`/iletisim\` — iletişim
+
+### Kural
 - Cevap başına max 3 link; fazlası okumayı zorlaştırır.
-- Mevcut sayfalar: \`/mekanlar\`, \`/yerler\`, \`/koyler\`, \`/rotalar\`, \`/rehber\`, \`/harita\`, \`/planla\`, \`/iletisim\`, \`/blog\`
-- OLMAYAN sayfalara link verme: \`/konaklama\`, \`/oteller\`, \`/restoranlar\` (konaklama mekanları /mekanlar altındadır).
-- Harita linki: Konum/yol sorularında cevabın sonuna \`[🗺 Haritada Gör](https://assosukesfet.com/harita)\` ekle (başka sorularda ekleme).
-- Rehber linki: Ulaşım sorularında "Detaylı ulaşım için https://assosukesfet.com/rehber sayfasına bakın" de.
+- Kategori bazlı öneri: "Kafe önerir misin?" → cevabın sonuna \`[Tüm Kafeler →](https://assosukesfet.com/kafeler)\` ekle.
+- Harita: Konum/yol sorularında \`[🗺 Haritada Gör](https://assosukesfet.com/harita)\` ekle.
+- Rehber: Ulaşım sorularında "Detaylı ulaşım için https://assosukesfet.com/rehber sayfasına bakın" de.
 
 # VERİ KULLANIMI (<data> bloğundaki context)
 
@@ -208,7 +248,7 @@ Bir mekanın konumunu SÖYLERKEN **SADECE ve SADECE** context satırındaki dör
 
 | Alan | Ne anlama gelir | Nasıl kullanılır |
 |---|---|---|
-| \`id\` | Mekan kimliği | Link üretirken: \`mekan-detay?id={id}\` |
+| \`id\` | Mekan kimliği | Link üretirken kategoriye göre: \`/{kategori-slug}/{id}\` (mapping yukarıda) |
 | \`⭐\` | Premium mekan | Öneri sorusunda öne çıkar, "öne çıkardığımız" de |
 | \`Başlık\` | Mekan adı | Olduğu gibi kullan |
 | \`kategori\` | kafe/restoran/kahvalti/konaklama/beach/iskele | Soru tipine göre filtrele |
