@@ -51,8 +51,8 @@ export async function onRequest(context) {
   const blogTitle = fields.title?.stringValue || 'Blog';
   const blogCat = fields.category?.stringValue || '';
   const title = blogTitle + " \u2014 Assos'u Ke\u015ffet Blog";
-  // Dinamik fallback ~155 char (SEO ideal uzunluk + duplicate onleme)
-  const blogFallbackDesc = `${blogTitle} \u2014 Assos gezi rehberi blog${blogCat ? ' · ' + blogCat : ''}. Pratik öneriler, gezilecek yer listeleri, sezon tavsiyeleri ve yerel bilgilerle detaylı yazı.`;
+  // Dinamik fallback ~155 char: cografi hiyerarsi + SEO ideal
+  const blogFallbackDesc = `\u00c7anakkale Ayvac\u0131k Assos gezi rehberi blog${blogCat ? ' \u00b7 ' + blogCat : ''}: ${blogTitle}. Pratik \u00f6neriler, gezilecek yer listeleri, sezon tavsiyeleri ve yerel bilgilerle detayl\u0131 yaz\u0131.`;
   const desc = (fields.excerpt?.stringValue || blogFallbackDesc).substring(0, 200);
   const image = fields.coverImage?.stringValue || fields.image?.stringValue || DEFAULT_OG_IMAGE;
 

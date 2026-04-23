@@ -70,8 +70,8 @@ export async function onRequest(context) {
     }
     const titleBuilt = seoName + ' | ' + categoryLabel + " | Assos'u Ke\u015ffet";
 
-    // Dinamik fallback ~145 char (SEO ideal uzunluk + duplicate onleme)
-    const koyFallbackDesc = `${seoName}, ${parentLabel} \u00c7anakkale. Tarihçe, fotoğraflar, ulaşım, konaklama, yeme-içme mekanları ve gezi ipuçlarıyla detaylı k\u00f6y rehberi.`;
+    // Dinamik fallback ~150 char: cografi hiyerarsi + SEO ideal uzunluk
+    const koyFallbackDesc = `\u00c7anakkale ${parentLabel}'a ba\u011fl\u0131 ${seoName}. Tarih\u00e7e, foto\u011fraflar, ula\u015f\u0131m, konaklama, yeme-i\u00e7me mekanlar\u0131 ve gezi ipu\u00e7lar\u0131yla detayl\u0131 Assos k\u00f6y rehberi.`;
 
     if (isBot(ua)) {
       const title = titleBuilt;

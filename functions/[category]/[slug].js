@@ -125,14 +125,18 @@ export async function onRequest(context) {
     // Kategori etiketi (title icin): konaklama -> Otelleri, kafe -> Kafeleri vb.
     const CAT_LABELS = { konaklama: 'Otelleri', kafe: 'Kafeleri', restoran: 'Restoranlar\u0131', kahvalti: 'Kahvalt\u0131 Mekanlar\u0131', beach: 'Plajlar\u0131', iskele: '\u0130skeleleri' };
     const CAT_PLURAL = { konaklama: 'oteller', kafe: 'kafeler', restoran: 'restoranlar', kahvalti: 'kahvalt\u0131 mekanlar\u0131', beach: 'plajlar', iskele: 'iskeleler' };
+    const CAT_SINGULAR = { konaklama: 'otel', kafe: 'kafe', restoran: 'restoran', kahvalti: 'kahvalt\u0131 mekan\u0131', beach: 'plaj', iskele: 'iskele' };
     const catLabel = CAT_LABELS[expectedCat] || 'Mekanlar\u0131';
     const catPlural = CAT_PLURAL[expectedCat] || 'mekanlar';
+    const catSingular = CAT_SINGULAR[expectedCat] || 'mekan';
     const title = (f.title?.stringValue || 'Mekan') + " \u2014 Assos " + catLabel + " | Assos'u Ke\u015ffet";
     const rawDesc = f.shortDesc?.stringValue || f.description?.stringValue || '';
     const venueTitle = f.title?.stringValue || 'Mekan';
-    const venueLoc = f.location?.stringValue || 'Assos';
-    // Dinamik fallback ~155 char (duplicate onleme + SEO ideal uzunluk)
-    const fallbackDesc = `${venueTitle} \u2014 ${venueLoc} ${catLabel}. \u00c7al\u0131\u015fma saatleri, iletişim, menü ve konum bilgisiyle Assos ${catPlural} rehberi. Yol tarifi ve fotoğraflarla keşfedin.`;
+    const venueLoc = f.location?.stringValue || '';
+    // Dinamik fallback ~155 char: cografi hiyerarsi (il/ilce/bolge/mekan) + SEO ideal
+    const fallbackDesc = venueLoc
+      ? `\u00c7anakkale Ayvac\u0131k Assos'ta, ${venueLoc} b\u00f6lgesinde yer alan ${catSingular} ${venueTitle}. \u00c7al\u0131\u015fma saatleri, ileti\u015fim, men\u00fc, konum ve foto\u011fraflarla detayl\u0131 Assos ${catPlural} rehberi.`
+      : `\u00c7anakkale Ayvac\u0131k Assos'ta bir ${catSingular}: ${venueTitle}. \u00c7al\u0131\u015fma saatleri, ileti\u015fim, men\u00fc, konum ve foto\u011fraflarla detayl\u0131 Assos ${catPlural} rehberi.`;
     const desc = (rawDesc || fallbackDesc).replace(/<[^>]*>/g, '').substring(0, 200);
     // Images field (array)
     let image = DEFAULT_IMG;
