@@ -493,7 +493,11 @@ async function generateDynamicSitemap() {
     xml += `  <url><loc>${BASE}${p.loc}</loc><lastmod>${today}</lastmod><changefreq>${p.freq}</changefreq><priority>${p.priority}</priority></url>\n`;
   }
 
+  // Kategori hub sayfalari (public SEO icin onemli, aktif mekani olanlar)
+  // Bu bolum mekanlar fetch'inden sonra doldurulacak (activeCats)
+
   // Mekanlar — Firebase'den cek
+  const _activeCats = new Set();
   try {
     const venuesUrl = 'https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents/venues?pageSize=500';
     const vResp = await fetch(venuesUrl);
@@ -510,6 +514,7 @@ async function generateDynamicSitemap() {
 
         const cat = f.category?.stringValue;
         const catSlug = CATEGORY_SLUG[cat] || 'mekanlar';
+        if (cat && CATEGORY_SLUG[cat]) _activeCats.add(catSlug);
         xml += `  <url>\n    <loc>${BASE}/${catSlug}/${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n`;
         // Gorseller
         const images = f.images?.arrayValue?.values || [];
@@ -524,6 +529,11 @@ async function generateDynamicSitemap() {
       }
     }
   } catch(e) {}
+
+  // Kategori hub sayfalari (SEO icin — aktif mekani olan kategoriler)
+  _activeCats.forEach(slug => {
+    xml += `  <url><loc>${BASE}/${slug}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.85</priority></url>\n`;
+  });
 
   // Rotalar — Firebase'den cek
   try {
