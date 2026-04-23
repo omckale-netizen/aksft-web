@@ -22,6 +22,52 @@ function esc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+function jsonLdSafe(obj) {
+  return JSON.stringify(obj).replace(/<\/script/gi, '<\\/script').replace(/</g, '\\u003C');
+}
+
+function buildTouristTripSchema(f, pageUrl, image, defaultImg) {
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'TouristTrip',
+    name: f.title?.stringValue || 'Rota',
+    description: (f.shortDesc?.stringValue || f.description?.stringValue || '').replace(/<[^>]*>/g, '').substring(0, 300),
+    url: pageUrl,
+    touristType: ['Cultural tourism', 'Nature tourism', 'Sightseeing']
+  };
+  if (image && image !== defaultImg) schema.image = image;
+  if (f.sure?.stringValue) schema.duration = f.sure.stringValue;
+
+  // Itinerary: stops -> ItemList
+  const stops = f.stops?.arrayValue?.values || [];
+  if (stops.length > 0) {
+    schema.itinerary = {
+      '@type': 'ItemList',
+      numberOfItems: stops.length,
+      itemListElement: stops.map((s, i) => {
+        const stopName = s.stringValue || s.mapValue?.fields?.title?.stringValue || `Durak ${i + 1}`;
+        return {
+          '@type': 'ListItem',
+          position: i + 1,
+          item: {
+            '@type': 'TouristAttraction',
+            name: stopName
+          }
+        };
+      })
+    };
+  }
+
+  // Location context
+  schema.partOfTrip = {
+    '@type': 'Place',
+    name: 'Assos, Ayvac\u0131k, \u00c7anakkale',
+    address: { '@type': 'PostalAddress', addressLocality: 'Ayvac\u0131k', addressRegion: '\u00c7anakkale', addressCountry: 'TR' }
+  };
+
+  return schema;
+}
+
 async function serveAsset(request, env) {
   const assetUrl = new URL(request.url);
   assetUrl.pathname = '/rotalar/rota-detay.html';
@@ -63,11 +109,14 @@ export async function onRequest(context) {
     // Dinamik fallback ~150 char: cografi hiyerarsi + SEO ideal
     const rotaFallbackDesc = `\u00c7anakkale Ayvac\u0131k Assos gezi rotas\u0131: ${rotaTitle}${rotaSure ? ', ' + rotaSure : ''}${rotaStops ? ', ' + rotaStops + ' durak' : ''}. Harita, ad\u0131m ad\u0131m rehber, yol tarifi ve \u00f6nerilen mola noktalar\u0131yla g\u00fcnl\u00fck Assos ke\u015ffi.`;
 
+    const image = f.image?.stringValue || DEFAULT_IMG;
+    const ttSchema = buildTouristTripSchema(f, pageUrl, image, DEFAULT_IMG);
+    const ttSchemaJson = jsonLdSafe(ttSchema);
+
     // Bot: OG meta tag'li HTML
     if (isBot(ua)) {
       const title = rotaTitle + " \u2014 Assos Gezi Rotas\u0131 | Assos'u Ke\u015ffet";
       const desc = (f.shortDesc?.stringValue || f.description?.stringValue || rotaFallbackDesc).replace(/<[^>]*>/g, '').substring(0, 200);
-      const image = f.image?.stringValue || DEFAULT_IMG;
 
       const html = `<!DOCTYPE html><html lang="tr"><head>
 <meta charset="UTF-8">
@@ -88,15 +137,15 @@ export async function onRequest(context) {
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(desc)}">
 <meta name="twitter:image" content="${esc(image)}">
+<script type="application/ld+json">${ttSchemaJson}</script>
 </head><body><h1>${esc(title)}</h1><p>${esc(desc)}</p></body></html>`;
 
       return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
     }
 
-    // Kullanici: rota-detay.html + HTMLRewriter ile title/meta SSR inject (flicker fix)
+    // Kullanici: rota-detay.html + HTMLRewriter ile title/meta SSR inject + SSR JSON-LD
     const title = rotaTitle + " \u2014 Assos Gezi Rotas\u0131 | Assos'u Ke\u015ffet";
     const desc = (f.shortDesc?.stringValue || f.description?.stringValue || rotaFallbackDesc).replace(/<[^>]*>/g, '').substring(0, 200);
-    const image = f.image?.stringValue || DEFAULT_IMG;
     const response = await serveAsset(request, env);
     return new HTMLRewriter()
       .on('title', { element(el) { el.setInnerContent(title); } })
@@ -109,6 +158,7 @@ export async function onRequest(context) {
       .on('meta[name="twitter:title"]', { element(el) { el.setAttribute('content', title); } })
       .on('meta[name="twitter:description"]', { element(el) { el.setAttribute('content', desc); } })
       .on('meta[name="twitter:image"]', { element(el) { el.setAttribute('content', image); } })
+      .on('head', { element(el) { el.append(`<script type="application/ld+json" data-ssr="touristtrip">${ttSchemaJson}</script>`, { html: true }); } })
       .transform(response);
   } catch (e) {
     // Hata durumunda asset'e dus (client-side render devam edebilir)

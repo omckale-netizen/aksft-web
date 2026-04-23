@@ -21,6 +21,32 @@ function esc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+function jsonLdSafe(obj) {
+  return JSON.stringify(obj).replace(/<\/script/gi, '<\\/script').replace(/</g, '\\u003C');
+}
+
+function buildTouristDestinationSchema(f, pageUrl, image, defaultImg, seoName, parentLabel) {
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'TouristDestination',
+    name: seoName,
+    description: (f.shortDesc?.stringValue || f.description?.stringValue || '').replace(/<[^>]*>/g, '').substring(0, 300),
+    url: pageUrl,
+    touristType: ['Cultural tourism', 'Nature tourism'],
+    containedInPlace: {
+      '@type': 'AdministrativeArea',
+      name: parentLabel + ', \u00c7anakkale, T\u00fcrkiye'
+    }
+  };
+  if (image && image !== defaultImg) schema.image = image;
+  const lat = f.lat?.doubleValue ?? f.lat?.integerValue;
+  const lng = f.lng?.doubleValue ?? f.lng?.integerValue;
+  if (lat != null && lng != null) {
+    schema.geo = { '@type': 'GeoCoordinates', latitude: Number(lat), longitude: Number(lng) };
+  }
+  return schema;
+}
+
 async function serveAsset(request, env) {
   const assetUrl = new URL(request.url);
   assetUrl.pathname = '/koyler/koy-detay.html';
@@ -73,10 +99,13 @@ export async function onRequest(context) {
     // Dinamik fallback ~150 char: cografi hiyerarsi + SEO ideal uzunluk
     const koyFallbackDesc = `\u00c7anakkale ${parentLabel}'a ba\u011fl\u0131 ${seoName}. Tarih\u00e7e, foto\u011fraflar, ula\u015f\u0131m, konaklama, yeme-i\u00e7me mekanlar\u0131 ve gezi ipu\u00e7lar\u0131yla detayl\u0131 Assos k\u00f6y rehberi.`;
 
+    const image = f.image?.stringValue || DEFAULT_IMG;
+    const tdSchema = buildTouristDestinationSchema(f, pageUrl, image, DEFAULT_IMG, seoName, parentLabel);
+    const tdSchemaJson = jsonLdSafe(tdSchema);
+
     if (isBot(ua)) {
       const title = titleBuilt;
       const desc = (f.shortDesc?.stringValue || f.description?.stringValue || koyFallbackDesc).replace(/<[^>]*>/g, '').substring(0, 200);
-      const image = f.image?.stringValue || DEFAULT_IMG;
 
       const html = `<!DOCTYPE html><html lang="tr"><head>
 <meta charset="UTF-8">
@@ -97,15 +126,15 @@ export async function onRequest(context) {
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(desc)}">
 <meta name="twitter:image" content="${esc(image)}">
+<script type="application/ld+json">${tdSchemaJson}</script>
 </head><body><h1>${esc(title)}</h1><p>${esc(desc)}</p></body></html>`;
 
       return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
     }
 
-    // Kullanici: koy-detay.html + HTMLRewriter title/meta inject (flicker fix)
+    // Kullanici: koy-detay.html + HTMLRewriter title/meta inject + SSR JSON-LD
     const title = titleBuilt;
     const desc = (f.shortDesc?.stringValue || f.description?.stringValue || koyFallbackDesc).replace(/<[^>]*>/g, '').substring(0, 200);
-    const image = f.image?.stringValue || DEFAULT_IMG;
     const response = await serveAsset(request, env);
     return new HTMLRewriter()
       .on('title', { element(el) { el.setInnerContent(title); } })
@@ -118,6 +147,7 @@ export async function onRequest(context) {
       .on('meta[name="twitter:title"]', { element(el) { el.setAttribute('content', title); } })
       .on('meta[name="twitter:description"]', { element(el) { el.setAttribute('content', desc); } })
       .on('meta[name="twitter:image"]', { element(el) { el.setAttribute('content', image); } })
+      .on('head', { element(el) { el.append(`<script type="application/ld+json" data-ssr="touristdestination">${tdSchemaJson}</script>`, { html: true }); } })
       .transform(response);
   } catch (e) {
     return serveAsset(request, env);

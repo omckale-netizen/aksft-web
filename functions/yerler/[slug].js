@@ -21,6 +21,38 @@ function esc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+function jsonLdSafe(obj) {
+  return JSON.stringify(obj).replace(/<\/script/gi, '<\\/script').replace(/</g, '\\u003C');
+}
+
+function buildTouristAttractionSchema(f, pageUrl, image, defaultImg) {
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'TouristAttraction',
+    name: f.title?.stringValue || 'Gezilecek Yer',
+    description: (f.shortDesc?.stringValue || f.description?.stringValue || '').replace(/<[^>]*>/g, '').substring(0, 300),
+    url: pageUrl,
+    touristType: ['Cultural tourism', 'Historical tourism'],
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: f.location?.stringValue || 'Assos',
+      addressRegion: '\u00c7anakkale',
+      addressCountry: 'TR'
+    },
+    containedInPlace: {
+      '@type': 'AdministrativeArea',
+      name: 'Ayvac\u0131k, \u00c7anakkale, T\u00fcrkiye'
+    }
+  };
+  if (image && image !== defaultImg) schema.image = image;
+  const lat = f.lat?.doubleValue ?? f.lat?.integerValue;
+  const lng = f.lng?.doubleValue ?? f.lng?.integerValue;
+  if (lat != null && lng != null) {
+    schema.geo = { '@type': 'GeoCoordinates', latitude: Number(lat), longitude: Number(lng) };
+  }
+  return schema;
+}
+
 async function serveAsset(request, env) {
   const assetUrl = new URL(request.url);
   assetUrl.pathname = '/yerler/yer-detay.html';
@@ -58,10 +90,13 @@ export async function onRequest(context) {
       ? `\u00c7anakkale Ayvac\u0131k Assos'ta, ${yerLoc} b\u00f6lgesinde yer alan ${yerTitle}. Konum, ula\u015f\u0131m, foto\u011fraflar, ziyaret saatleri ve \u00e7evredeki mekanlarla gezi rehberi.`
       : `\u00c7anakkale Ayvac\u0131k Assos'ta gezilecek yer: ${yerTitle}. Konum, ula\u015f\u0131m, foto\u011fraflar, ziyaret saatleri ve \u00e7evredeki mekanlarla gezi rehberi.`;
 
+    const image = f.image?.stringValue || DEFAULT_IMG;
+    const taSchema = buildTouristAttractionSchema(f, pageUrl, image, DEFAULT_IMG);
+    const taSchemaJson = jsonLdSafe(taSchema);
+
     if (isBot(ua)) {
       const title = yerTitle + " \u2014 Assos B\u00f6lgesi | Assos'u Ke\u015ffet";
       const desc = (f.shortDesc?.stringValue || f.description?.stringValue || yerFallbackDesc).replace(/<[^>]*>/g, '').substring(0, 200);
-      const image = f.image?.stringValue || DEFAULT_IMG;
 
       const html = `<!DOCTYPE html><html lang="tr"><head>
 <meta charset="UTF-8">
@@ -82,15 +117,15 @@ export async function onRequest(context) {
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(desc)}">
 <meta name="twitter:image" content="${esc(image)}">
+<script type="application/ld+json">${taSchemaJson}</script>
 </head><body><h1>${esc(title)}</h1><p>${esc(desc)}</p></body></html>`;
 
       return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
     }
 
-    // Kullanici: yer-detay.html + HTMLRewriter title/meta inject (flicker fix)
+    // Kullanici: yer-detay.html + HTMLRewriter title/meta inject + SSR JSON-LD
     const title = yerTitle + " \u2014 Assos B\u00f6lgesi | Assos'u Ke\u015ffet";
     const desc = (f.shortDesc?.stringValue || f.description?.stringValue || yerFallbackDesc).replace(/<[^>]*>/g, '').substring(0, 200);
-    const image = f.image?.stringValue || DEFAULT_IMG;
     const response = await serveAsset(request, env);
     return new HTMLRewriter()
       .on('title', { element(el) { el.setInnerContent(title); } })
@@ -103,6 +138,7 @@ export async function onRequest(context) {
       .on('meta[name="twitter:title"]', { element(el) { el.setAttribute('content', title); } })
       .on('meta[name="twitter:description"]', { element(el) { el.setAttribute('content', desc); } })
       .on('meta[name="twitter:image"]', { element(el) { el.setAttribute('content', image); } })
+      .on('head', { element(el) { el.append(`<script type="application/ld+json" data-ssr="touristattraction">${taSchemaJson}</script>`, { html: true }); } })
       .transform(response);
   } catch (e) {
     return serveAsset(request, env);
