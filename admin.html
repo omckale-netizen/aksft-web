@@ -4252,6 +4252,18 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
               <div style="margin-top:16px;padding:10px 12px;background:rgba(90,122,86,.05);border:1px solid rgba(90,122,86,.15);border-radius:8px;font-size:.7rem;color:var(--text-light);line-height:1.5">
                 💡 <strong>IndexNow otomatik aktif.</strong> Yeni mekan/rota eklendiğinde Bing ve Yandex anında bilgilendirilir — manuel sitemap submit gerekmez.
               </div>
+
+              <!-- Toplu IndexNow: Sitemap'teki TUM URL'leri Bing+Yandex'e anlik bildir -->
+              <div style="margin-top:14px;padding:14px;background:rgba(196,82,26,.06);border:1px solid rgba(196,82,26,.2);border-radius:8px">
+                <div style="font-size:.78rem;font-weight:700;color:var(--navy);margin-bottom:6px">⚡ Toplu IndexNow Push (URL değişimi sonrası)</div>
+                <div style="font-size:.7rem;color:var(--text-muted);line-height:1.55;margin-bottom:10px">
+                  Sitemap'teki tüm URL'leri (132 adet) anlık Bing + Yandex'e bildirir. URL yapısı değiştiğinde toplu güncelleme için idealdir. Google IndexNow'u kullanmaz (ayrıca Search Console kullanılmalı).
+                </div>
+                <button class="btn btn-sm" onclick="bulkIndexNowPush()" id="bulk-indexnow-btn" style="font-size:.78rem;background:linear-gradient(135deg,#C4521A,#A3431A);color:#fff;border:none;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px">
+                  <span>⚡</span><span>Tüm Sitemap'i Pushla</span>
+                </button>
+                <div id="bulk-indexnow-status" style="font-size:.72rem;color:var(--text-muted);margin-top:8px;display:none"></div>
+              </div>
             </div>
           </div>
 
@@ -5313,6 +5325,89 @@ function pingIndexNow(url) {
       })
     }).catch(function(){});
   } catch(e) {}
+}
+
+/* ── Toplu IndexNow Push ── Sitemap'teki tum URL'leri Bing+Yandex'e bildir ── */
+async function bulkIndexNowPush() {
+  var btn = document.getElementById('bulk-indexnow-btn');
+  var status = document.getElementById('bulk-indexnow-status');
+  if (!confirm('Sitemap\'teki TÜM URL\'ler Bing + Yandex IndexNow\'a push edilecek. Devam edilsin mi?')) return;
+
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳</span><span>Sitemap çekiliyor...</span>';
+  status.style.display = 'block';
+  status.style.color = 'var(--text-muted)';
+  status.textContent = 'Sitemap.xml okunuyor...';
+
+  try {
+    // 1. Sitemap'i cek
+    var sitemapResp = await fetch('/sitemap.xml', { cache: 'no-store' });
+    if (!sitemapResp.ok) throw new Error('Sitemap çekilemedi: ' + sitemapResp.status);
+    var sitemapText = await sitemapResp.text();
+
+    // 2. URL'leri parse et
+    var urlMatches = sitemapText.match(/<loc>([^<]+)<\/loc>/g) || [];
+    var urls = urlMatches.map(function(m) {
+      return m.replace(/<\/?loc>/g, '').trim();
+    }).filter(function(u) {
+      return u && u.indexOf('https://assosukesfet.com') === 0;
+    });
+
+    if (urls.length === 0) throw new Error('Sitemap\'te URL bulunamadı');
+
+    status.textContent = urls.length + ' URL bulundu, batch\'ler halinde push ediliyor...';
+    btn.innerHTML = '<span>⏳</span><span>Push ediliyor (0/' + urls.length + ')</span>';
+
+    // 3. IndexNow 10.000 URL/batch destekler, biz 100'lük batch'ler halinde gönderelim
+    var BATCH_SIZE = 100;
+    var sent = 0;
+    var failed = 0;
+    for (var i = 0; i < urls.length; i += BATCH_SIZE) {
+      var batch = urls.slice(i, i + BATCH_SIZE);
+      try {
+        var resp = await fetch('https://api.indexnow.org/indexnow', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            host: 'assosukesfet.com',
+            key: '9db06f4e0bab4c04855ea12029fa4daa',
+            urlList: batch
+          })
+        });
+        if (resp.ok || resp.status === 202) {
+          sent += batch.length;
+        } else {
+          failed += batch.length;
+        }
+      } catch(e) {
+        failed += batch.length;
+      }
+      btn.innerHTML = '<span>⏳</span><span>Push ediliyor (' + sent + '/' + urls.length + ')</span>';
+      // Rate limit önlemi — batch'ler arası 500ms bekle
+      if (i + BATCH_SIZE < urls.length) await new Promise(function(r) { setTimeout(r, 500); });
+    }
+
+    // 4. Sonuç
+    btn.disabled = false;
+    btn.innerHTML = '<span>⚡</span><span>Tüm Sitemap\'i Pushla</span>';
+    if (failed === 0) {
+      status.style.color = '#16A34A';
+      status.innerHTML = '✅ <strong>' + sent + ' URL</strong> başarıyla Bing + Yandex\'e bildirildi. 1-6 saat içinde taranmaya başlar.';
+    } else {
+      status.style.color = '#F59E0B';
+      status.innerHTML = '⚠️ ' + sent + '/' + urls.length + ' URL push edildi, ' + failed + ' hata. Tekrar denenebilir.';
+    }
+    showToast('IndexNow push tamamlandı: ' + sent + '/' + urls.length, failed === 0 ? 'success' : 'warning');
+
+    // Log activity
+    try { logActivity('indexnow_bulk', 'sitemap', sent + ' URL push edildi (' + failed + ' hata)'); } catch(e) {}
+  } catch(err) {
+    btn.disabled = false;
+    btn.innerHTML = '<span>⚡</span><span>Tüm Sitemap\'i Pushla</span>';
+    status.style.color = 'var(--red)';
+    status.textContent = '❌ Hata: ' + err.message;
+    showToast('Push başarısız: ' + err.message, 'error');
+  }
 }
 
 function logActivity(action, target, details, changes) {
