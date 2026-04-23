@@ -28,6 +28,50 @@ const DEFAULT_IMG = 'https://firebasestorage.googleapis.com/v0/b/assosu-kesfet.f
 function isBot(ua) { return ua && BOT_UA.some(b => ua.includes(b)); }
 function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
+// JSON-LD icerigini <script> icine embed ederken </script> kacislari
+function jsonLdSafe(obj) {
+  return JSON.stringify(obj).replace(/<\/script/gi, '<\\/script').replace(/</g, '\\u003C');
+}
+
+const SCHEMA_TYPES = { kafe: 'CafeOrCoffeeShop', restoran: 'Restaurant', kahvalti: 'Restaurant', konaklama: 'Hotel', beach: 'BarOrPub', iskele: 'FoodEstablishment' };
+
+function buildLocalBusinessSchema(f, pageUrl, image, defaultImg) {
+  const cat = f.category?.stringValue;
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': SCHEMA_TYPES[cat] || 'LocalBusiness',
+    name: f.title?.stringValue || 'Mekan',
+    description: (f.shortDesc?.stringValue || f.description?.stringValue || '').replace(/<[^>]*>/g, '').substring(0, 300),
+    url: pageUrl,
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: f.location?.stringValue || 'Assos',
+      addressRegion: '\u00c7anakkale',
+      addressCountry: 'TR'
+    }
+  };
+  if (f.phone?.stringValue) schema.telephone = f.phone.stringValue;
+  if (f.address?.stringValue) schema.address.streetAddress = f.address.stringValue;
+  if (image && image !== defaultImg) schema.image = image;
+  if (f.website?.stringValue) schema.sameAs = [f.website.stringValue];
+  if (f.hours?.stringValue) schema.openingHours = f.hours.stringValue;
+  if (f.weeklyHours?.arrayValue?.values?.length) {
+    schema.openingHoursSpecification = f.weeklyHours.arrayValue.values.map(v => {
+      const wh = v.mapValue?.fields || {};
+      const days = wh.days?.arrayValue?.values?.map(d => d.stringValue).filter(Boolean) || [];
+      const hrs = wh.hours?.stringValue || '';
+      const parts = hrs.split(' - ');
+      return { '@type': 'OpeningHoursSpecification', dayOfWeek: days, opens: parts[0] || '', closes: parts[1] || '' };
+    });
+  }
+  const lat = f.lat?.doubleValue ?? f.lat?.integerValue;
+  const lng = f.lng?.doubleValue ?? f.lng?.integerValue;
+  if (lat != null && lng != null) {
+    schema.geo = { '@type': 'GeoCoordinates', latitude: Number(lat), longitude: Number(lng) };
+  }
+  return schema;
+}
+
 async function serveAsset(request, env) {
   const assetUrl = new URL(request.url);
   assetUrl.pathname = '/mekanlar/mekan-detay.html';
@@ -91,6 +135,10 @@ export async function onRequest(context) {
       image = f.image.stringValue;
     }
 
+    // LocalBusiness JSON-LD schema
+    const lbSchema = buildLocalBusinessSchema(f, pageUrl, image, DEFAULT_IMG);
+    const lbSchemaJson = jsonLdSafe(lbSchema);
+
     if (isBot(ua)) {
       const html = `<!DOCTYPE html><html lang="tr"><head>
 <meta charset="UTF-8">
@@ -111,12 +159,13 @@ export async function onRequest(context) {
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(desc)}">
 <meta name="twitter:image" content="${esc(image)}">
+<script type="application/ld+json">${lbSchemaJson}</script>
 </head><body><h1>${esc(title)}</h1><p>${esc(desc)}</p></body></html>`;
 
       return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
     }
 
-    // Kullanici: mekan-detay.html + HTMLRewriter title/meta inject (flicker fix)
+    // Kullanici: mekan-detay.html + HTMLRewriter title/meta inject + SSR JSON-LD
     const response = await serveAsset(request, env);
     return new HTMLRewriter()
       .on('title', { element(el) { el.setInnerContent(title); } })
@@ -129,6 +178,7 @@ export async function onRequest(context) {
       .on('meta[name="twitter:title"]', { element(el) { el.setAttribute('content', title); } })
       .on('meta[name="twitter:description"]', { element(el) { el.setAttribute('content', desc); } })
       .on('meta[name="twitter:image"]', { element(el) { el.setAttribute('content', image); } })
+      .on('head', { element(el) { el.append(`<script type="application/ld+json" data-ssr="localbusiness">${lbSchemaJson}</script>`, { html: true }); } })
       .transform(response);
   } catch (e) {
     return serveAsset(request, env);

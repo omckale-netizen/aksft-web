@@ -208,7 +208,8 @@ function pageInit() {
     });
     document.head.appendChild(bcSchema);
 
-    // LocalBusiness Schema
+    // LocalBusiness Schema — SSR zaten ekledyse atla (duplicate onle)
+    if (document.querySelector('script[data-ssr="localbusiness"]')) return;
     const schemaTypes = {kafe:'CafeOrCoffeeShop',restoran:'Restaurant',kahvalti:'Restaurant',konaklama:'Hotel',beach:'BarOrPub',iskele:'FoodEstablishment'};
     const schema = {
       '@context': 'https://schema.org',
