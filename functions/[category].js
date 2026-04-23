@@ -215,7 +215,7 @@ export async function onRequest(context) {
     </div>
     <div style="display:flex;flex-direction:column;gap:10px">
       ${c.faqs.map((f, i) => `
-        <details style="background:#FAF7F2;border:1px solid rgba(26,39,68,.06);border-radius:14px;padding:0;overflow:hidden;transition:all .2s"${i === 0 ? ' open' : ''}>
+        <details name="mk-hub-faq-${category}" style="background:#FAF7F2;border:1px solid rgba(26,39,68,.06);border-radius:14px;padding:0;overflow:hidden;transition:all .2s">
           <summary style="cursor:pointer;padding:18px 22px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.95rem;color:#1A2744;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:16px">
             <span>${escapeHtml(f.q)}</span>
             <span style="color:${c.color};font-size:1.2rem;transition:transform .2s;flex-shrink:0">+</span>
@@ -226,6 +226,21 @@ export async function onRequest(context) {
     </div>
   </div>
   <style>.mk-hub-faq details[open] summary span:last-child{transform:rotate(45deg)}.mk-hub-faq summary::-webkit-details-marker{display:none}</style>
+  <script>
+  // Fallback: eski browser'lar details[name] desteklemezse (Chrome <120, Safari <17.2, Firefox <119)
+  // Ayni grup icindeki bir details acildiginda digerlerini kapat.
+  (function(){
+    var group = document.querySelectorAll('.mk-hub-faq details[name="mk-hub-faq-${category}"]');
+    if (!group.length) return;
+    // Native destek testi
+    if ('name' in group[0] && group[0].name) return; // modern destek var, JS gereksiz
+    group.forEach(function(d){
+      d.addEventListener('toggle', function(){
+        if (d.open) group.forEach(function(o){ if (o !== d) o.open = false; });
+      });
+    });
+  })();
+  </script>
 </section>`;
 
   // Breadcrumb JSON-LD (hub 3 seviye)
