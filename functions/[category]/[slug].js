@@ -129,10 +129,14 @@ export async function onRequest(context) {
     const catLabel = CAT_LABELS[expectedCat] || 'Mekanlar\u0131';
     const catPlural = CAT_PLURAL[expectedCat] || 'mekanlar';
     const catSingular = CAT_SINGULAR[expectedCat] || 'mekan';
-    const title = (f.title?.stringValue || 'Mekan') + " \u2014 Assos " + catLabel + " | Assos'u Ke\u015ffet";
     const rawDesc = f.shortDesc?.stringValue || f.description?.stringValue || '';
     const venueTitle = f.title?.stringValue || 'Mekan';
     const venueLoc = f.location?.stringValue || '';
+    // SEO title: "{title}, {location} — Assos {catLabel} | Assos'u Keşfet"
+    // Location varsa ekle (long-tail "Buyukhusun otel" gibi aramalari yakalar)
+    const title = venueLoc
+      ? `${venueTitle}, ${venueLoc} \u2014 Assos ${catLabel} | Assos'u Ke\u015ffet`
+      : `${venueTitle} \u2014 Assos ${catLabel} | Assos'u Ke\u015ffet`;
     // Dinamik fallback ~155 char: cografi hiyerarsi (il/ilce/bolge/mekan) + SEO ideal
     const fallbackDesc = venueLoc
       ? `\u00c7anakkale Ayvac\u0131k Assos'ta, ${venueLoc} b\u00f6lgesinde yer alan ${catSingular} ${venueTitle}. \u00c7al\u0131\u015fma saatleri, ileti\u015fim, men\u00fc, konum ve foto\u011fraflarla detayl\u0131 Assos ${catPlural} rehberi.`

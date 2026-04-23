@@ -155,7 +155,9 @@ function pageInit() {
     const catLabel = catLabels[venue.category] || 'Assos Mekanlar';
     const catSing = catSingular[venue.category] || 'mekan';
     const loc = venue.location || 'Assos';
-    const seoTitle = venue.title + ' — ' + catLabel + ' | Assos\'u Keşfet';
+    const seoTitle = venue.location
+      ? venue.title + ', ' + venue.location + ' — ' + catLabel + ' | Assos\'u Keşfet'
+      : venue.title + ' — ' + catLabel + ' | Assos\'u Keşfet';
     const descParts = [venue.title, loc + ' bölgesinde ' + catSing];
     if (venue.shortDesc) descParts.push(venue.shortDesc);
     if (venue.phone) descParts.push('İletişim ve yol tarifi');
