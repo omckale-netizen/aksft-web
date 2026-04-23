@@ -124,13 +124,15 @@ export async function onRequest(context) {
 
     // Kategori etiketi (title icin): konaklama -> Otelleri, kafe -> Kafeleri vb.
     const CAT_LABELS = { konaklama: 'Otelleri', kafe: 'Kafeleri', restoran: 'Restoranlar\u0131', kahvalti: 'Kahvalt\u0131 Mekanlar\u0131', beach: 'Plajlar\u0131', iskele: '\u0130skeleleri' };
+    const CAT_PLURAL = { konaklama: 'oteller', kafe: 'kafeler', restoran: 'restoranlar', kahvalti: 'kahvalt\u0131 mekanlar\u0131', beach: 'plajlar', iskele: 'iskeleler' };
     const catLabel = CAT_LABELS[expectedCat] || 'Mekanlar\u0131';
+    const catPlural = CAT_PLURAL[expectedCat] || 'mekanlar';
     const title = (f.title?.stringValue || 'Mekan') + " \u2014 Assos " + catLabel + " | Assos'u Ke\u015ffet";
     const rawDesc = f.shortDesc?.stringValue || f.description?.stringValue || '';
     const venueTitle = f.title?.stringValue || 'Mekan';
     const venueLoc = f.location?.stringValue || 'Assos';
-    // Dinamik fallback: her sayfada farkli meta desc (duplicate onleme)
-    const fallbackDesc = `${venueTitle} \u2014 ${venueLoc} ${catLabel.replace(/\u0131/g, '\u0131')}. \u00c7al\u0131\u015fma saatleri, iletişim ve konum bilgisiyle Assos rehberi.`;
+    // Dinamik fallback ~155 char (duplicate onleme + SEO ideal uzunluk)
+    const fallbackDesc = `${venueTitle} \u2014 ${venueLoc} ${catLabel}. \u00c7al\u0131\u015fma saatleri, iletişim, menü ve konum bilgisiyle Assos ${catPlural} rehberi. Yol tarifi ve fotoğraflarla keşfedin.`;
     const desc = (rawDesc || fallbackDesc).replace(/<[^>]*>/g, '').substring(0, 200);
     // Images field (array)
     let image = DEFAULT_IMG;

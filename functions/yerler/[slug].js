@@ -53,8 +53,8 @@ export async function onRequest(context) {
 
     const yerTitle = f.title?.stringValue || 'Gezilecek Yer';
     const yerLoc = f.location?.stringValue || '';
-    // Dinamik fallback desc (duplicate onleme)
-    const yerFallbackDesc = `${yerTitle}${yerLoc ? ', ' + yerLoc : ''} \u2014 Assos Ayvac\u0131k gezilecek yer. Konum, fotoğraf, tarihi bilgi ve gezi rehberi.`;
+    // Dinamik fallback ~150 char (SEO ideal uzunluk + duplicate onleme)
+    const yerFallbackDesc = `${yerTitle}${yerLoc ? ', ' + yerLoc : ''} \u2014 Assos Ayvac\u0131k'ta gezilecek tarihi yer. Konum, ulaşım, fotoğraflar, ziyaret saatleri ve çevredeki mekan önerileriyle rehber.`;
 
     if (isBot(ua)) {
       const title = yerTitle + " \u2014 Assos B\u00f6lgesi | Assos'u Ke\u015ffet";

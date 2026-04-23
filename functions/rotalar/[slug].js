@@ -60,8 +60,8 @@ export async function onRequest(context) {
     const rotaTitle = f.title?.stringValue || 'Rota';
     const rotaSure = f.sure?.stringValue || '';
     const rotaStops = f.stops?.arrayValue?.values?.length || 0;
-    // Dinamik fallback desc (duplicate onleme)
-    const rotaFallbackDesc = `${rotaTitle} \u2014 Assos gezi rotas\u0131${rotaSure ? ', ' + rotaSure : ''}${rotaStops ? ', ' + rotaStops + ' durak' : ''}. Harita, durak durak rehber ve yol tarifi.`;
+    // Dinamik fallback ~145 char (SEO ideal uzunluk + duplicate onleme)
+    const rotaFallbackDesc = `${rotaTitle} \u2014 Assos gezi rotas\u0131${rotaSure ? ', ' + rotaSure : ''}${rotaStops ? ', ' + rotaStops + ' durak' : ''}. Harita, adım adım rehber, yol tarifi ve önerilen mola noktalarıyla günlük Assos keşfi.`;
 
     // Bot: OG meta tag'li HTML
     if (isBot(ua)) {

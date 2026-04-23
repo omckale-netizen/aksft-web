@@ -5131,6 +5131,54 @@ function populateCategoryDropdowns() {
 document.addEventListener('DOMContentLoaded', populateCategoryDropdowns);
 // Erken render durumunda (DOMContentLoaded oncesi dropdown tetiklenmiş olabilir)
 if (document.readyState !== 'loading') populateCategoryDropdowns();
+
+/* ══════════════════════════════════════════════════
+   SEO shortDesc validator + character counter
+   Google meta description ideal uzunluk: 150-160 char
+   ══════════════════════════════════════════════════ */
+window.initSeoCounter = function(inputId) {
+  var el = document.getElementById(inputId);
+  if (!el || el.dataset.seoCounted) return;
+  el.dataset.seoCounted = '1';
+  var counter = document.createElement('div');
+  counter.id = inputId + '-seo-counter';
+  counter.style.cssText = 'font-size:.68rem;margin-top:6px;font-weight:600;letter-spacing:.01em;';
+  el.parentNode.insertBefore(counter, el.nextSibling);
+  function update() {
+    var n = el.value.trim().length;
+    var color, msg, icon;
+    if (n === 0) { color = '#94A3B8'; msg = 'Zorunlu — SEO için 150 karakter önerilir'; icon = 'ⓘ'; }
+    else if (n < 100) { color = '#EF4444'; msg = '100 karakterden az — SEO için yetersiz'; icon = '⚠'; }
+    else if (n < 140) { color = '#F59E0B'; msg = '150 karaktere yaklaşın'; icon = '◯'; }
+    else if (n <= 165) { color = '#22C55E'; msg = 'Mükemmel — SEO ideal aralığında'; icon = '✓'; }
+    else { color = '#F59E0B'; msg = 'Google 160 karakter sonrasını kısaltır'; icon = '⚠'; }
+    counter.style.color = color;
+    counter.textContent = icon + ' ' + n + '/160 · ' + msg;
+  }
+  el.addEventListener('input', update);
+  el.addEventListener('change', update);
+  update();
+};
+
+window.validateShortDesc = function(val, entityLabel) {
+  var v = (val || '').trim();
+  if (!v) {
+    alert('Kısa Açıklama boş!\n\n' + entityLabel + ' için SEO açısından zorunlu alan.\nLütfen en az 100, ideal 150 karakterlik bir açıklama girin.');
+    return false;
+  }
+  if (v.length < 100) {
+    return confirm('Kısa Açıklama yalnızca ' + v.length + ' karakter.\n\nSEO için en az 100 karakter önerilir (ideal 150-160). Google meta description olarak kullanır; kısa açıklamalar arama sonuçlarında "thin content" sinyali verebilir.\n\nYine de kaydedilsin mi?');
+  }
+  return true;
+};
+
+// 3 shortDesc textarea icin counter devreye al
+document.addEventListener('DOMContentLoaded', function() {
+  ['f-shortDesc', 'rf-shortDesc', 'vpf-shortDesc', 'bf-excerpt'].forEach(function(id) { window.initSeoCounter(id); });
+});
+if (document.readyState !== 'loading') {
+  ['f-shortDesc', 'rf-shortDesc', 'vpf-shortDesc', 'bf-excerpt'].forEach(function(id) { window.initSeoCounter(id); });
+}
 </script>
 <script>
 /* ══════════════════════════════════════════════════
@@ -14998,6 +15046,10 @@ const CAT_DEFAULTS = {
 
 async function saveVenue(e) {
   e.preventDefault();
+  // SEO: shortDesc zorunlu + min 100 char soft-check
+  if (typeof window.validateShortDesc === 'function') {
+    if (!window.validateShortDesc(document.getElementById('f-shortDesc').value, 'Mekan')) return;
+  }
   const submitBtn = document.querySelector('#venue-form button[type="submit"]');
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Kaydediliyor...'; }
   try {
@@ -15310,6 +15362,10 @@ function closeRouteModal() {
 
 async function saveRoute(e) {
   e.preventDefault();
+  // SEO: shortDesc zorunlu + min 100 char soft-check
+  if (typeof window.validateShortDesc === 'function') {
+    if (!window.validateShortDesc(document.getElementById('rf-shortDesc').value, 'Rota')) return;
+  }
   try {
   const id = document.getElementById('rf-id').value || generateId(document.getElementById('rf-title').value);
 
@@ -15933,6 +15989,11 @@ function vpRemoveImage() {
 
 async function saveVP(e) {
   e.preventDefault();
+  // SEO: shortDesc zorunlu + min 100 char soft-check
+  if (typeof window.validateShortDesc === 'function') {
+    var _vpLabel = currentVPTab === 'places' ? 'Gezilecek Yer' : 'Köy';
+    if (!window.validateShortDesc(document.getElementById('vpf-shortDesc').value, _vpLabel)) return;
+  }
   try {
   const isPlaces = currentVPTab === 'places';
   const id = document.getElementById('vpf-id').value || generateId(document.getElementById('vpf-title').value);
@@ -17247,6 +17308,10 @@ async function saveBlogPost(e) {
   e.preventDefault();
   const slug = document.getElementById('bf-slug').value.trim();
   if (!slug) { showToast('Slug boş olamaz.', 'error'); return; }
+  // SEO: excerpt zorunlu + min 100 char soft-check
+  if (typeof window.validateShortDesc === 'function') {
+    if (!window.validateShortDesc(document.getElementById('bf-excerpt').value, 'Blog')) return;
+  }
 
   const status = document.getElementById('bf-status').value;
   const tagsStr = document.getElementById('bf-tags').value;
