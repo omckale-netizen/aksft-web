@@ -93,6 +93,26 @@
     .ara-empty-link{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1.5px solid rgba(26,39,68,.12);border-radius:12px;padding:12px 20px;font-size:.82rem;font-weight:600;color:var(--navy);text-decoration:none;transition:all .2s;}
     .ara-empty-link:hover{border-color:var(--terra);color:var(--terra);transform:translateY(-2px);}
 
+    /* Autocomplete dropdown */
+    .ara-dropdown{position:absolute;top:calc(100% + 6px);left:0;right:0;background:rgba(13,20,35,.96);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(255,255,255,.08);border-radius:14px;overflow:hidden;overflow-y:auto;max-height:380px;box-shadow:0 16px 48px rgba(0,0,0,.45);display:none;z-index:500;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent;}
+    .ara-dropdown::-webkit-scrollbar{width:4px;}
+    .ara-dropdown::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px;}
+    .ara-dropdown.open{display:block;animation:araDdFade .18s ease;}
+    @keyframes araDdFade{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
+    .ara-dd-group{padding:9px 14px 5px;font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,237,224,.3);}
+    .ara-dd-item{display:flex;align-items:center;gap:12px;padding:11px 14px;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.04);color:inherit;transition:background .15s;cursor:pointer;}
+    .ara-dd-item:last-child{border-bottom:none;}
+    .ara-dd-item.active,.ara-dd-item:hover,.ara-dd-item:focus{background:rgba(255,255,255,.06);outline:none;}
+    .ara-dd-emoji{font-size:1.25rem;flex-shrink:0;width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.05);border-radius:10px;}
+    .ara-dd-text{flex:1;min-width:0;}
+    .ara-dd-title{font-size:.88rem;font-weight:600;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .ara-dd-title mark{background:rgba(212,147,90,.28);color:var(--terra-light);padding:0 2px;border-radius:3px;}
+    .ara-dd-sub{font-size:.7rem;color:rgba(245,237,224,.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+    .ara-dd-type{font-size:.6rem;font-weight:700;padding:3px 9px;border-radius:999px;flex-shrink:0;letter-spacing:.05em;}
+    .ara-dd-seeall{display:block;padding:11px 14px;font-size:.78rem;font-weight:600;color:var(--terra-light);text-decoration:none;text-align:center;background:rgba(196,82,26,.08);border-top:1px solid rgba(255,255,255,.06);}
+    .ara-dd-seeall:hover{background:rgba(196,82,26,.15);}
+    .ara-dd-empty{padding:18px;text-align:center;font-size:.82rem;color:rgba(245,237,224,.5);}
+
     /* Popular / suggestions */
     .ara-popular{max-width:900px;margin:40px auto 0;padding:0 24px;}
     .ara-pop-label{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,237,224,.5);margin-bottom:10px;}
@@ -127,9 +147,10 @@
         <p class="ara-sub" id="ara-sub">Mekan, gezilecek yer, köy ve rota arasında aramak için yaz.</p>
         <div class="ara-inputwrap" id="ara-inputwrap">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(245,237,224,.45)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input type="text" class="ara-input" id="ara-input" placeholder="Kadırga, kahvaltı, müze..." autocomplete="off" aria-label="Arama">
+          <input type="text" class="ara-input" id="ara-input" placeholder="Kadırga, kahvaltı, müze..." autocomplete="off" aria-label="Arama" aria-autocomplete="list" aria-controls="ara-dropdown" aria-expanded="false">
           <button class="ara-clear" onclick="araClear()" aria-label="Temizle">✕</button>
           <button class="ara-input-btn" onclick="araSubmit()">Keşfet</button>
+          <div class="ara-dropdown" id="ara-dropdown" role="listbox"></div>
         </div>
         <script>
           // Flicker fix: URL'deki ?q= parametresini input + title + sub'a anlik set et
@@ -192,9 +213,163 @@
       }
 
       document.getElementById('ara-input').addEventListener('input', updateClearBtn);
-      document.getElementById('ara-input').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') { e.preventDefault(); araSubmit(); }
+      initAutocomplete();
+    }
+
+    /* ── Autocomplete (canli oneri dropdown) ── */
+    var _ddActive = -1;
+    var _ddTimer = null;
+    var _ddResults = [];
+
+    function initAutocomplete() {
+      var inp = document.getElementById('ara-input');
+      var dd = document.getElementById('ara-dropdown');
+      var wrap = document.getElementById('ara-inputwrap');
+      if (!inp || !dd) return;
+
+      inp.addEventListener('input', function() {
+        clearTimeout(_ddTimer);
+        var q = inp.value.trim();
+        _ddTimer = setTimeout(function() { renderAutocomplete(q); }, 120);
       });
+      inp.addEventListener('focus', function() {
+        var q = inp.value.trim();
+        if (q.length >= 2) renderAutocomplete(q);
+      });
+      inp.addEventListener('keydown', function(e) {
+        var items = dd.querySelectorAll('.ara-dd-item');
+        if (e.key === 'Enter') {
+          if (_ddActive >= 0 && items[_ddActive]) {
+            e.preventDefault();
+            window.location.href = items[_ddActive].href;
+          } else {
+            e.preventDefault();
+            araSubmit();
+          }
+          return;
+        }
+        if (e.key === 'Escape') {
+          closeAutocomplete();
+          return;
+        }
+        if (e.key === 'ArrowDown' && items.length) {
+          e.preventDefault();
+          _ddActive = Math.min(_ddActive + 1, items.length - 1);
+          highlightAutocomplete();
+        }
+        if (e.key === 'ArrowUp' && items.length) {
+          e.preventDefault();
+          _ddActive = Math.max(_ddActive - 1, 0);
+          highlightAutocomplete();
+        }
+      });
+
+      document.addEventListener('click', function(e) {
+        if (!wrap.contains(e.target)) closeAutocomplete();
+      });
+    }
+
+    function closeAutocomplete() {
+      var dd = document.getElementById('ara-dropdown');
+      var inp = document.getElementById('ara-input');
+      dd.classList.remove('open');
+      if (inp) inp.setAttribute('aria-expanded', 'false');
+      _ddActive = -1;
+    }
+
+    function highlightAutocomplete() {
+      var items = document.querySelectorAll('#ara-dropdown .ara-dd-item');
+      items.forEach(function(el, i) {
+        if (i === _ddActive) { el.classList.add('active'); el.scrollIntoView({ block: 'nearest' }); }
+        else el.classList.remove('active');
+      });
+    }
+
+    function searchForDropdown(q) {
+      if (!window.DATA || !q || q.length < 2) return [];
+      var ql = q.toLowerCase();
+      var out = [];
+      (DATA.venues || []).forEach(function(v) {
+        var hay = [v.title, v.shortDesc, v.category, v.location, (v.tags || []).join(' '), (v.keywords || []).join(' ')].join(' ').toLowerCase();
+        if (hay.indexOf(ql) > -1) out.push({ type: 'venue', id: v.id, title: v.title, sub: v.location || '', emoji: v.emoji || '📍', _v: v });
+      });
+      (DATA.places || []).forEach(function(p) {
+        var hay = [p.title, p.shortDesc, p.description, p.location, (p.tags || []).join(' '), (p.keywords || []).join(' ')].join(' ').toLowerCase();
+        if (hay.indexOf(ql) > -1) out.push({ type: 'place', id: p.id, title: p.title, sub: p.location || p.shortDesc || '', emoji: p.emoji || '🏛' });
+      });
+      (DATA.villages || []).forEach(function(v) {
+        var hay = [v.title, v.shortDesc, v.description, (v.tags || []).join(' '), (v.keywords || []).join(' ')].join(' ').toLowerCase();
+        if (hay.indexOf(ql) > -1) out.push({ type: 'village', id: v.id, title: v.title, sub: v.shortDesc || '', emoji: v.emoji || '🏘' });
+      });
+      (DATA.routes || []).forEach(function(r) {
+        var hay = [r.title, r.shortDesc, r.description, (r.keywords || []).join(' ')].join(' ').toLowerCase();
+        if (hay.indexOf(ql) > -1) out.push({ type: 'route', id: r.id, title: r.title, sub: r.shortDesc || '', emoji: r.emoji || '🗺' });
+      });
+      // Başlıkta geçenleri önce sırala
+      out.sort(function(a, b) {
+        var ai = a.title.toLowerCase().indexOf(ql), bi = b.title.toLowerCase().indexOf(ql);
+        if (ai < 0) ai = 999; if (bi < 0) bi = 999;
+        return ai - bi;
+      });
+      return out.slice(0, 8);
+    }
+
+    function ddHighlight(text, q) {
+      if (!text || !q) return escHtml(text || '');
+      var idx = text.toLowerCase().indexOf(q.toLowerCase());
+      if (idx < 0) return escHtml(text);
+      return escHtml(text.slice(0, idx)) + '<mark>' + escHtml(text.slice(idx, idx + q.length)) + '</mark>' + escHtml(text.slice(idx + q.length));
+    }
+
+    function renderAutocomplete(q) {
+      var dd = document.getElementById('ara-dropdown');
+      var inp = document.getElementById('ara-input');
+      if (!q || q.length < 2) { closeAutocomplete(); return; }
+      _ddResults = searchForDropdown(q);
+      _ddActive = -1;
+
+      var typeBadge = {
+        venue:   { text: 'Mekan', bg: 'rgba(212,147,90,.18)', color: '#D4935A' },
+        place:   { text: 'Yer',   bg: 'rgba(36,144,184,.18)', color: '#5FB7D9' },
+        village: { text: 'Köy',   bg: 'rgba(127,184,123,.18)', color: '#9ED19A' },
+        route:   { text: 'Rota',  bg: 'rgba(196,82,26,.18)',   color: '#E8A07A' }
+      };
+      var groupNames = { venue: 'Mekanlar', place: 'Yerler', village: 'Köyler', route: 'Rotalar' };
+      var order = ['venue', 'place', 'village', 'route'];
+
+      if (_ddResults.length === 0) {
+        dd.innerHTML = '<div class="ara-dd-empty">"<strong style="color:var(--cream)">' + escHtml(q) + '</strong>" icin oneri yok — Enter ile tam aramayi deneyin</div>' +
+          '<a class="ara-dd-seeall" href="/ara.html?q=' + encodeURIComponent(q) + '">Arama sayfasinda dene →</a>';
+      } else {
+        var groups = {};
+        _ddResults.forEach(function(r) { (groups[r.type] = groups[r.type] || []).push(r); });
+        var html = '';
+        order.forEach(function(t) {
+          if (!groups[t]) return;
+          html += '<div class="ara-dd-group">' + groupNames[t] + '</div>';
+          groups[t].forEach(function(r) {
+            var url;
+            if (t === 'route')        url = '/rotalar/' + encodeURIComponent(r.id);
+            else if (t === 'village') url = '/koyler/' + encodeURIComponent(r.id);
+            else if (t === 'place')   url = '/yerler/' + encodeURIComponent(r.id);
+            else if (t === 'venue' && window.getVenueUrl) url = window.getVenueUrl(r._v || { id: r.id, category: (r._v && r._v.category) });
+            else url = '/mekanlar/mekan-detay.html?id=' + encodeURIComponent(r.id);
+            var b = typeBadge[t];
+            html += '<a class="ara-dd-item" href="' + url + '" role="option">' +
+              '<div class="ara-dd-emoji">' + r.emoji + '</div>' +
+              '<div class="ara-dd-text">' +
+                '<div class="ara-dd-title">' + ddHighlight(r.title, q) + '</div>' +
+                (r.sub ? '<div class="ara-dd-sub">' + escHtml(r.sub) + '</div>' : '') +
+              '</div>' +
+              '<span class="ara-dd-type" style="background:' + b.bg + ';color:' + b.color + '">' + b.text + '</span>' +
+            '</a>';
+          });
+        });
+        html += '<a class="ara-dd-seeall" href="/ara.html?q=' + encodeURIComponent(q) + '">Tum sonuclari gor →</a>';
+        dd.innerHTML = html;
+      }
+      dd.classList.add('open');
+      if (inp) inp.setAttribute('aria-expanded', 'true');
     }
 
     function updateClearBtn() {
@@ -207,6 +382,7 @@
       document.getElementById('ara-input').value = '';
       document.getElementById('ara-input').focus();
       updateClearBtn();
+      if (typeof closeAutocomplete === 'function') closeAutocomplete();
     }
 
     function araSubmit() {
@@ -226,6 +402,7 @@
       var newUrl = '/ara.html?q=' + encodeURIComponent(q);
       if (location.pathname.replace(/\/$/, '').endsWith('/ara.html') || location.pathname.endsWith('/ara')) {
         history.replaceState(null, '', newUrl);
+        if (typeof closeAutocomplete === 'function') closeAutocomplete();
         runSearch(q);
       } else {
         location.href = newUrl;
