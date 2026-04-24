@@ -95,5 +95,6 @@ export async function onRequest(context) {
     .on('meta[name="twitter:title"]', { element(el) { el.setAttribute('content', title); } })
     .on('meta[name="twitter:description"]', { element(el) { el.setAttribute('content', desc); } })
     .on('meta[name="twitter:image"]', { element(el) { el.setAttribute('content', image); } })
+    .on('[data-hub-only]', { element(el) { el.remove(); } })
     .transform(response);
 }
