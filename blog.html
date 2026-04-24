@@ -120,6 +120,9 @@
 </head>
 <body>
 
+<!-- Scroll progress bar (sadece blog detayinda gorunur, JS aktif eder) -->
+<div class="bp-scroll-progress" id="bp-scroll-progress" aria-hidden="true"></div>
+
 <div id="nav-placeholder"></div>
 
 <section class="blog-hero">
@@ -172,6 +175,10 @@ if (getBlogSlugFromUrl()) {
 </section>
 
 <style>
+/* ── Blog scroll progress bar ── */
+.bp-scroll-progress{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,#C4521A,#D4935A);z-index:9999;transition:width .1s linear;pointer-events:none;box-shadow:0 1px 3px rgba(196,82,26,.25);display:none;}
+.bp-scroll-progress.active{display:block;}
+
 /* ── Blog TOC (Icindekiler) ── */
 .bp-layout{max-width:680px;margin:0 auto;padding:40px 24px 80px;}
 .bp-article{min-width:0;}
@@ -554,6 +561,8 @@ async function loadSinglePost(slug) {
 
     // Icindekiler (TOC) — icerik uzun ve >=3 baslik varsa goster
     try { buildBlogToc(bpEl); } catch(e) { console.warn('TOC error:', e); }
+    // Scroll progress bar — uzun yazilarda
+    try { initBlogScrollProgress(); } catch(e) {}
 
     // FAQ <details> exclusive mode: birine tiklayinca digeri kapansin
     // Ayni parent icindeki tum <details>'leri ayni name ile grupla (Chrome 120+/Safari 17+ native)
@@ -740,6 +749,30 @@ window.bpNativeShare = function(btn, url, title) {
     })
     .catch(function(){ /* user cancelled */ });
 };
+
+/* ── Blog scroll progress bar — uzun yazilarda aktif ── */
+function initBlogScrollProgress() {
+  var bar = document.getElementById('bp-scroll-progress');
+  if (!bar) return;
+  var h = document.documentElement;
+  function scrollable() { return h.scrollHeight - h.clientHeight; }
+  if (scrollable() < 500) return; // kisa yazida gosterme
+  bar.classList.add('active');
+  var ticking = false;
+  function update() {
+    var s = scrollable();
+    if (s <= 0) { bar.style.width = '0%'; ticking = false; return; }
+    var pct = Math.min(100, Math.max(0, (h.scrollTop / s) * 100));
+    bar.style.width = pct + '%';
+    ticking = false;
+  }
+  window.addEventListener('scroll', function() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  }, { passive: true });
+  update();
+}
 
 /* ── Blog TOC builder ── */
 function buildBlogToc(contentEl) {
