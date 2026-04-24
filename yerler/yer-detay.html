@@ -130,7 +130,7 @@ function pageInit() {
     var _titleFirst = (place.title || '').toLowerCase().split(' ')[0];
     var _locFirst = _cleanLoc.toLowerCase().split(' ')[0];
     var _effectiveLoc = (_cleanLoc && _locFirst === _titleFirst) ? '' : _cleanLoc;
-    var YER_CAT_LABEL = { muze: 'Müze', doga: 'Doğal Alan', tarihi: 'Tarihi Yer', 'tarihi-yer': 'Tarihi Yer', orenyeri: 'Ören Yeri', iskele: 'İskele', koy: 'Plaj & Koy', plaj: 'Plaj' };
+    var YER_CAT_LABEL = { muze: 'Müze', doga: 'Doğal Alan', tarihi: 'Ören Yeri', 'tarihi-yer': 'Tarihi Yer', orenyeri: 'Ören Yeri', iskele: 'İskele', koy: 'Plaj & Koy', plaj: 'Plaj' };
     var _catLabel = YER_CAT_LABEL[place.category] || 'Gezilecek Yer';
     var _titleHasAssos = /assos/i.test(place.title || '');
     var _assosPrefix = _titleHasAssos ? '' : 'Assos ';

@@ -93,7 +93,7 @@ export async function onRequest(context) {
     const locFirstWord = cleanLoc.toLowerCase().split(' ')[0];
     const effectiveLoc = (cleanLoc && locFirstWord === titleFirstWord) ? '' : cleanLoc;
     // Kategori -> keyword label
-    const YER_CAT_LABEL = { muze: 'M\u00fcze', doga: 'Do\u011fal Alan', tarihi: 'Tarihi Yer', 'tarihi-yer': 'Tarihi Yer', orenyeri: '\u00d6ren Yeri', iskele: '\u0130skele', koy: 'Plaj & Koy', plaj: 'Plaj' };
+    const YER_CAT_LABEL = { muze: 'M\u00fcze', doga: 'Do\u011fal Alan', tarihi: '\u00d6ren Yeri', 'tarihi-yer': 'Tarihi Yer', orenyeri: '\u00d6ren Yeri', iskele: '\u0130skele', koy: 'Plaj & Koy', plaj: 'Plaj' };
     const catLabel = YER_CAT_LABEL[yerCat] || 'Gezilecek Yer';
     const titleHasAssos = /assos/i.test(yerTitle);
     const assosPrefix = titleHasAssos ? '' : 'Assos ';
