@@ -4115,6 +4115,18 @@ function renderVenuePage(venueId) {
   })();
 
   window.vpToggleShare = function() {
+    // Mobilde (touch cihaz) native share — iOS/Android sistem paylas menusu
+    var isTouch = window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    if (isTouch && navigator.share) {
+      var shareUrl = window.location.origin + (window.getVenueUrl ? window.getVenueUrl(v) : ('/mekanlar/mekan-detay.html?id=' + v.id));
+      navigator.share({
+        title: v.title,
+        text: v.title + ' — Assos\'u Keşfet',
+        url: shareUrl
+      }).catch(function(){ /* kullanici iptal etti, sessiz */ });
+      return;
+    }
+    // Desktop: mevcut custom dropdown (WhatsApp/FB/X/Kopyala)
     const dd = document.getElementById('vp-share-dd');
     dd.classList.toggle('open');
   };
