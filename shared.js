@@ -6099,3 +6099,122 @@ function renderPlacePage(placeId) {
     if (!skipSave) saveHistory(text, type);
   }
 })();
+
+/* ═══════════════════════════════════════════════════
+   GLOBAL MODAL KEYBOARD HANDLER — WCAG 2.1.2 + 2.4.3
+   - Esc: acik modal/overlay/drawer'i kapatir
+   - Tab: focus modal icinde trap eder (arka plana gitmez)
+   - Shift+Tab: terse yonde trap
+   Apply edilen selector'ler: .drawer.open, .popup-overlay.open,
+   .route-overlay.open, #vp-lightbox.open, .modal.open, [aria-modal="true"]
+═══════════════════════════════════════════════════ */
+(function() {
+  var MODAL_SELECTORS = [
+    '#vp-lightbox.open',
+    '.route-overlay.open',
+    '.popup-overlay.open',
+    '.save-drawer.open',
+    '.drawer.open',
+    '.modal.open',
+    '[aria-modal="true"]:not([hidden])'
+  ];
+
+  function findTopmostModal() {
+    // Son eklenen modal ustte olsun diye reverse order
+    for (var i = 0; i < MODAL_SELECTORS.length; i++) {
+      var els = document.querySelectorAll(MODAL_SELECTORS[i]);
+      if (els.length > 0) {
+        // Birden fazla varsa en son eklenen (DOM order'da son) en ustte
+        return els[els.length - 1];
+      }
+    }
+    return null;
+  }
+
+  function getFocusable(container) {
+    var list = container.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"]), details, summary'
+    );
+    return Array.prototype.filter.call(list, function(el) {
+      // Sadece gorunur olanlar
+      return el.offsetWidth > 0 || el.offsetHeight > 0 || el === document.activeElement;
+    });
+  }
+
+  function closeModal(modal) {
+    // Oncelikli: spesifik close fonksiyonu varsa kullan
+    if (modal.id === 'vp-lightbox' && typeof window.vpCloseLightbox === 'function') {
+      window.vpCloseLightbox();
+      return;
+    }
+    if (modal.id === 'popup-overlay' && typeof window.closePanel === 'function') {
+      window.closePanel();
+      return;
+    }
+    if (modal.classList.contains('route-overlay') && typeof window.closeRoute === 'function') {
+      window.closeRoute();
+      return;
+    }
+    // Fallback: class remove
+    modal.classList.remove('open');
+    modal.dispatchEvent(new CustomEvent('modal:close', { bubbles: true }));
+  }
+
+  document.addEventListener('keydown', function(e) {
+    var modal = findTopmostModal();
+    if (!modal) return;
+
+    if (e.key === 'Escape' || e.key === 'Esc') {
+      e.preventDefault();
+      e.stopPropagation();
+      closeModal(modal);
+      return;
+    }
+
+    if (e.key === 'Tab') {
+      var focusable = getFocusable(modal);
+      if (focusable.length === 0) {
+        e.preventDefault();
+        modal.focus && modal.focus();
+        return;
+      }
+      var first = focusable[0];
+      var last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  }, true); // capture phase — diger Esc handler'lardan once calissin
+
+  // Modal acildiginda ilk focusable element'e focus ver
+  // MutationObserver ile class degisikliklerini izle
+  var obs = new MutationObserver(function(mutations) {
+    mutations.forEach(function(m) {
+      if (m.type !== 'attributes' || m.attributeName !== 'class') return;
+      var el = m.target;
+      if (!(el instanceof Element)) return;
+      // Eger class 'open' eklendiyse ve modal selector'lerine uyuyorsa
+      var matches = MODAL_SELECTORS.some(function(sel) { try { return el.matches(sel); } catch(e) { return false; } });
+      if (!matches) return;
+      // 100ms gecikme — animation/transition'a izin ver
+      setTimeout(function() {
+        var focusable = getFocusable(el);
+        if (focusable.length > 0 && !el.contains(document.activeElement)) {
+          focusable[0].focus();
+        }
+      }, 150);
+    });
+  });
+
+  // document.body icindeki class degisimlerini observe et
+  document.addEventListener('DOMContentLoaded', function() {
+    obs.observe(document.body, { attributes: true, attributeFilter: ['class'], subtree: true });
+  });
+  if (document.readyState !== 'loading') {
+    obs.observe(document.body, { attributes: true, attributeFilter: ['class'], subtree: true });
+  }
+})();
