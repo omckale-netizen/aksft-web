@@ -126,9 +126,19 @@ function pageInit() {
 
   var place = (window.DATA?.places || []).find(function(p) { return p.id === placeId; });
   if (place) {
-    var seoTitle = place.title + ' — Assos Bölgesi | Assos\'u Keşfet';
+    var _cleanLoc = (place.location || '').replace(/\s*\(Assos\)\s*/gi, '').trim();
+    var _titleFirst = (place.title || '').toLowerCase().split(' ')[0];
+    var _locFirst = _cleanLoc.toLowerCase().split(' ')[0];
+    var _effectiveLoc = (_cleanLoc && _locFirst === _titleFirst) ? '' : _cleanLoc;
+    var YER_CAT_LABEL = { muze: 'Müze', doga: 'Doğal Alan', tarihi: 'Tarihi Yer', 'tarihi-yer': 'Tarihi Yer', orenyeri: 'Ören Yeri', iskele: 'İskele', koy: 'Plaj & Koy', plaj: 'Plaj' };
+    var _catLabel = YER_CAT_LABEL[place.category] || 'Gezilecek Yer';
+    var _titleHasAssos = /assos/i.test(place.title || '');
+    var _assosPrefix = _titleHasAssos ? '' : 'Assos ';
+    var seoTitle = _effectiveLoc
+      ? place.title + ', ' + _effectiveLoc + ' — ' + _assosPrefix + _catLabel + ' | Assos\'u Keşfet'
+      : place.title + ' — ' + _assosPrefix + _catLabel + ' | Assos\'u Keşfet';
     var seoDesc = place.title;
-    if (place.location) seoDesc += ', ' + place.location;
+    if (_effectiveLoc) seoDesc += ', ' + _effectiveLoc;
     if (place.shortDesc) seoDesc += '. ' + place.shortDesc;
     if (place.tags && place.tags.length) seoDesc += '. ' + place.tags.join(', ');
     seoDesc = seoDesc.substring(0, 160);

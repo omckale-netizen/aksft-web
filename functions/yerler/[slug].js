@@ -84,18 +84,35 @@ export async function onRequest(context) {
     const f = doc.fields || {};
 
     const yerTitle = f.title?.stringValue || 'Gezilecek Yer';
-    const yerLoc = f.location?.stringValue || '';
-    // Dinamik fallback ~150 char: cografi hiyerarsi (il/ilce/bolge) + SEO ideal
-    const yerFallbackDesc = yerLoc
-      ? `\u00c7anakkale Ayvac\u0131k Assos'ta, ${yerLoc} b\u00f6lgesinde yer alan ${yerTitle}. Konum, ula\u015f\u0131m, foto\u011fraflar, ziyaret saatleri ve \u00e7evredeki mekanlarla gezi rehberi.`
-      : `\u00c7anakkale Ayvac\u0131k Assos'ta gezilecek yer: ${yerTitle}. Konum, ula\u015f\u0131m, foto\u011fraflar, ziyaret saatleri ve \u00e7evredeki mekanlarla gezi rehberi.`;
+    const rawLoc = f.location?.stringValue || '';
+    const yerCat = f.category?.stringValue || '';
+    // Location sanitize: "Behramkale (Assos)" -> "Behramkale"
+    const cleanLoc = rawLoc.replace(/\s*\(Assos\)\s*/gi, '').trim();
+    // Location, title ile ayni kelimeyle basliyorsa omit et (Babakale Kalesi, Babakale -> skip)
+    const titleFirstWord = yerTitle.toLowerCase().split(' ')[0];
+    const locFirstWord = cleanLoc.toLowerCase().split(' ')[0];
+    const effectiveLoc = (cleanLoc && locFirstWord === titleFirstWord) ? '' : cleanLoc;
+    // Kategori -> keyword label
+    const YER_CAT_LABEL = { muze: 'M\u00fcze', doga: 'Do\u011fal Alan', tarihi: 'Tarihi Yer', 'tarihi-yer': 'Tarihi Yer', orenyeri: '\u00d6ren Yeri', iskele: '\u0130skele', koy: 'Plaj & Koy', plaj: 'Plaj' };
+    const catLabel = YER_CAT_LABEL[yerCat] || 'Gezilecek Yer';
+    const titleHasAssos = /assos/i.test(yerTitle);
+    const assosPrefix = titleHasAssos ? '' : 'Assos ';
+    // SEO title: "{title}[, {loc}] — [Assos ]{catLabel} | Assos'u Kesfet"
+    const titleBuilt = effectiveLoc
+      ? `${yerTitle}, ${effectiveLoc} \u2014 ${assosPrefix}${catLabel} | Assos'u Ke\u015ffet`
+      : `${yerTitle} \u2014 ${assosPrefix}${catLabel} | Assos'u Ke\u015ffet`;
+
+    // Dinamik fallback ~155 char: cografi hiyerarsi + kategori
+    const yerFallbackDesc = effectiveLoc
+      ? `\u00c7anakkale Ayvac\u0131k Assos'ta, ${effectiveLoc} b\u00f6lgesindeki ${catLabel.toLowerCase()}: ${yerTitle}. Konum, ula\u015f\u0131m, foto\u011fraflar, ziyaret saatleri ve \u00e7evredeki mekanlarla detayl\u0131 gezi rehberi.`
+      : `\u00c7anakkale Ayvac\u0131k Assos'ta ${catLabel.toLowerCase()}: ${yerTitle}. Konum, ula\u015f\u0131m, foto\u011fraflar, ziyaret saatleri ve \u00e7evredeki mekanlarla gezi rehberi.`;
 
     const image = f.image?.stringValue || DEFAULT_IMG;
     const taSchema = buildTouristAttractionSchema(f, pageUrl, image, DEFAULT_IMG);
     const taSchemaJson = jsonLdSafe(taSchema);
 
     if (isBot(ua)) {
-      const title = yerTitle + " \u2014 Assos B\u00f6lgesi | Assos'u Ke\u015ffet";
+      const title = titleBuilt;
       const desc = (f.shortDesc?.stringValue || f.description?.stringValue || yerFallbackDesc).replace(/<[^>]*>/g, '').substring(0, 200);
 
       const html = `<!DOCTYPE html><html lang="tr"><head>
@@ -124,7 +141,7 @@ export async function onRequest(context) {
     }
 
     // Kullanici: yer-detay.html + HTMLRewriter title/meta inject + SSR JSON-LD
-    const title = yerTitle + " \u2014 Assos B\u00f6lgesi | Assos'u Ke\u015ffet";
+    const title = titleBuilt;
     const desc = (f.shortDesc?.stringValue || f.description?.stringValue || yerFallbackDesc).replace(/<[^>]*>/g, '').substring(0, 200);
     const response = await serveAsset(request, env);
     return new HTMLRewriter()
