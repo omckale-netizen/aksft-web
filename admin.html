@@ -3147,6 +3147,50 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--page-bg);color:
           <button class="modal-close" onclick="closeBlogModal()">&times;</button>
         </div>
         <div class="modal-body" style="max-height:75vh;overflow-y:auto">
+
+          <!-- AI Blog Generator Panel -->
+          <div id="blog-ai-panel" style="background:linear-gradient(135deg,#FFF5EE 0%,#FFEEDD 100%);border:1.5px solid rgba(196,82,26,.2);border-radius:14px;padding:18px 20px;margin-bottom:20px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+              <span style="font-size:1.4rem">🤖</span>
+              <div>
+                <div style="font-weight:800;color:#1A2744;font-size:.95rem">AI ile Blog Yazısı Üret</div>
+                <div style="font-size:.72rem;color:#718096">Claude Sonnet 4.6 ile SEO-optimize yazı. Günlük limit: 10.</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+              <div>
+                <label style="font-size:.72rem;color:#4A5568;font-weight:700;display:block;margin-bottom:4px">Konu / Başlık Fikri</label>
+                <input type="text" id="ai-blog-topic" placeholder="Örn: Assos Hava Durumu" style="width:100%;padding:8px 10px;font-size:.85rem;border:1px solid rgba(0,0,0,.1);border-radius:8px">
+              </div>
+              <div>
+                <label style="font-size:.72rem;color:#4A5568;font-weight:700;display:block;margin-bottom:4px">Birincil Keyword</label>
+                <input type="text" id="ai-blog-primary-kw" placeholder="Örn: assos hava durumu" style="width:100%;padding:8px 10px;font-size:.85rem;border:1px solid rgba(0,0,0,.1);border-radius:8px">
+              </div>
+            </div>
+            <div style="margin-bottom:10px">
+              <label style="font-size:.72rem;color:#4A5568;font-weight:700;display:block;margin-bottom:4px">Destek Keywords (virgülle, opsiyonel)</label>
+              <input type="text" id="ai-blog-secondary-kw" placeholder="Örn: assos ne zaman gidilir, assos deniz suyu, assos yaz" style="width:100%;padding:8px 10px;font-size:.85rem;border:1px solid rgba(0,0,0,.1);border-radius:8px">
+            </div>
+            <div style="margin-bottom:12px">
+              <label style="font-size:.72rem;color:#4A5568;font-weight:700;display:block;margin-bottom:4px">İçerik Yönlendirmesi (opsiyonel)</label>
+              <input type="text" id="ai-blog-angle" placeholder="Örn: Mevsim mevsim tablo ile anlat, aile odaklı yazı, vs." style="width:100%;padding:8px 10px;font-size:.85rem;border:1px solid rgba(0,0,0,.1);border-radius:8px">
+            </div>
+            <div style="display:flex;gap:10px;align-items:center">
+              <button type="button" id="ai-blog-generate-btn" onclick="aiGenerateBlog()" style="background:linear-gradient(135deg,#C4521A,#A3431A);color:#fff;border:none;padding:10px 22px;border-radius:10px;font-weight:700;cursor:pointer;font-size:.85rem">✨ Yazı Üret</button>
+              <span id="ai-blog-status" style="font-size:.78rem;color:#718096"></span>
+            </div>
+            <div id="ai-blog-preview" style="display:none;margin-top:14px;padding:14px;background:#fff;border-radius:10px;border:1px solid rgba(0,0,0,.06);font-size:.82rem">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                <strong style="color:#1A2744">Önizleme</strong>
+                <div style="display:flex;gap:8px">
+                  <button type="button" onclick="aiApplyBlogToForm()" style="background:#22C55E;color:#fff;border:none;padding:6px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:.76rem">✓ Formu Doldur</button>
+                  <button type="button" onclick="document.getElementById('ai-blog-preview').style.display='none'" style="background:rgba(0,0,0,.06);color:#4A5568;border:none;padding:6px 12px;border-radius:8px;font-weight:600;cursor:pointer;font-size:.76rem">Kapat</button>
+                </div>
+              </div>
+              <div id="ai-blog-preview-content"></div>
+            </div>
+          </div>
+
           <form id="blog-form" onsubmit="saveBlogPost(event)">
             <div class="form-row">
               <div class="form-group" style="flex:2">
@@ -17302,6 +17346,116 @@ function autoBlogSlug() {
   document.getElementById('bf-slug').value = title.toLowerCase()
     .replace(/ç/g,'c').replace(/ğ/g,'g').replace(/ı/g,'i').replace(/ö/g,'o').replace(/ş/g,'s').replace(/ü/g,'u')
     .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+}
+
+// AI Blog Generator — Claude Sonnet 4.6 ile SEO-optimize yazi uretir
+window._aiBlogLastData = null;
+async function aiGenerateBlog() {
+  const topic = document.getElementById('ai-blog-topic').value.trim();
+  const primaryKw = document.getElementById('ai-blog-primary-kw').value.trim();
+  const secondaryRaw = document.getElementById('ai-blog-secondary-kw').value.trim();
+  const angle = document.getElementById('ai-blog-angle').value.trim();
+  const secondary = secondaryRaw ? secondaryRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+  if (!topic) { showToast('Konu zorunlu', 'error'); return; }
+  if (!primaryKw) { showToast('Birincil keyword zorunlu', 'error'); return; }
+
+  const btn = document.getElementById('ai-blog-generate-btn');
+  const status = document.getElementById('ai-blog-status');
+  btn.disabled = true;
+  btn.textContent = '⏳ Üretiliyor...';
+  status.textContent = 'Claude API\u0027den yanit bekleniyor (30-60 saniye)...';
+  status.style.color = '#718096';
+
+  try {
+    const resp = await fetch('/api/generate-blog', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic: topic,
+        primaryKeyword: primaryKw,
+        secondaryKeywords: secondary,
+        contentAngle: angle
+      })
+    });
+    const result = await resp.json();
+
+    if (!resp.ok || !result.success) {
+      status.textContent = '❌ ' + (result.error || 'Hata olustu');
+      status.style.color = '#EF4444';
+      btn.disabled = false;
+      btn.textContent = '✨ Yazı Üret';
+      return;
+    }
+
+    window._aiBlogLastData = result.data;
+    aiRenderBlogPreview(result.data);
+    status.textContent = '✅ Üretildi — formu doldurmak icin "Formu Doldur" tuşla';
+    status.style.color = '#22C55E';
+    btn.disabled = false;
+    btn.textContent = '🔄 Tekrar Üret';
+  } catch(err) {
+    status.textContent = '❌ Baglanti hatasi: ' + err.message;
+    status.style.color = '#EF4444';
+    btn.disabled = false;
+    btn.textContent = '✨ Yazı Üret';
+  }
+}
+
+function aiRenderBlogPreview(data) {
+  const box = document.getElementById('ai-blog-preview');
+  const content = document.getElementById('ai-blog-preview-content');
+  const contentPreview = (data.content || '').substring(0, 800);
+  const contentLength = (data.content || '').length;
+  const wordCount = (data.content || '').replace(/<[^>]+>/g, ' ').trim().split(/\s+/).length;
+  content.innerHTML =
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;font-size:.78rem">' +
+      '<div><strong>Başlık:</strong> ' + escAttr(data.title || '') + '</div>' +
+      '<div><strong>Slug:</strong> <code>' + escAttr(data.slug || '') + '</code></div>' +
+      '<div><strong>Kategori:</strong> ' + escAttr(data.category || '') + ' ' + (data.emoji || '') + '</div>' +
+      '<div><strong>Uzunluk:</strong> ~' + wordCount + ' kelime / ' + contentLength + ' kar</div>' +
+    '</div>' +
+    '<div style="margin-bottom:10px;padding:10px;background:rgba(0,0,0,.03);border-radius:8px;font-size:.8rem">' +
+      '<strong>Excerpt:</strong> ' + escAttr(data.excerpt || '') + ' <span style="color:#A0AEC0">(' + (data.excerpt||'').length + ' kar)</span>' +
+    '</div>' +
+    '<div style="margin-bottom:10px;font-size:.78rem"><strong>Tags:</strong> ' + (Array.isArray(data.tags) ? data.tags.map(t => '<span style="display:inline-block;background:rgba(196,82,26,.08);color:#C4521A;padding:2px 8px;border-radius:999px;margin:0 4px 4px 0;font-weight:600">' + escAttr(t) + '</span>').join('') : '') + '</div>' +
+    '<details style="margin-top:10px">' +
+      '<summary style="cursor:pointer;font-weight:700;color:#1A2744;font-size:.82rem;padding:6px 0">İçerik önizleme (HTML)</summary>' +
+      '<div style="max-height:400px;overflow-y:auto;margin-top:8px;padding:14px;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:8px;font-size:.85rem;line-height:1.6">' +
+        (data.content || '') +
+      '</div>' +
+    '</details>';
+  box.style.display = 'block';
+}
+
+function aiApplyBlogToForm() {
+  const data = window._aiBlogLastData;
+  if (!data) { showToast('Uretilen veri yok', 'error'); return; }
+
+  document.getElementById('bf-title').value = data.title || '';
+  document.getElementById('bf-slug').value = data.slug || '';
+  document.getElementById('bf-excerpt').value = data.excerpt || '';
+  if (data.emoji) document.getElementById('bf-emoji').value = data.emoji;
+  if (Array.isArray(data.tags)) document.getElementById('bf-tags').value = data.tags.join(', ');
+
+  // Kategori select — metin eşleşmesine göre seç
+  const catSel = document.getElementById('bf-category');
+  if (catSel && data.category) {
+    const target = data.category.toLowerCase();
+    const opts = Array.from(catSel.options);
+    const match = opts.find(o => o.text.toLowerCase() === target || o.value.toLowerCase() === target.replace(/[^a-z0-9]/g, '-'));
+    if (match) catSel.value = match.value;
+  }
+
+  // Content editor
+  document.getElementById('bf-content-editor').innerHTML = data.content || '';
+  document.getElementById('bf-content').value = data.content || '';
+
+  showToast('Form dolduruldu — kapak gorseli ekleyip kaydedin', 'success');
+
+  // Preview'i kapat, form'a scroll
+  document.getElementById('ai-blog-preview').style.display = 'none';
+  document.getElementById('bf-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 async function saveBlogPost(e) {
