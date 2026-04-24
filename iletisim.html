@@ -94,6 +94,14 @@
           </div>
         </div>
 
+        <!-- Form tamamlanma progress bari -->
+        <div class="ct-progress" aria-hidden="true">
+          <div class="ct-progress-head">
+            <span class="ct-progress-label">Form tamamlanma</span>
+            <span class="ct-progress-count"><span id="ct-prog-done">0</span>/5 alan</span>
+          </div>
+          <div class="ct-progress-track"><div class="ct-progress-fill" id="ct-prog-fill"></div></div>
+        </div>
         <form id="contact-form" onsubmit="submitContact(event)" novalidate>
           <!-- Honeypot — botlar doldurur, kullanıcılar görmez -->
           <div style="position:absolute;left:-9999px;top:-9999px;opacity:0;height:0;overflow:hidden;" aria-hidden="true">
@@ -328,8 +336,8 @@
 .ct-field:last-child{margin-bottom:0}
 .ct-field label{font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-mid);margin-left:2px}
 .ct-input-wrap{position:relative}
-.ct-phone-wrap{display:flex;gap:8px;align-items:center;width:100%}
-.ct-phone-code{width:105px;min-width:105px;max-width:105px;padding:12px 8px;border:1.5px solid rgba(26,39,68,.08);border-radius:12px;font-size:16px;font-family:inherit;background:rgba(255,255,255,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--navy);cursor:pointer;outline:none;transition:all .25s;-webkit-appearance:none;appearance:none;flex-shrink:0}
+.ct-phone-wrap{display:flex;gap:6px;align-items:center;width:100%}
+.ct-phone-code{width:86px;min-width:86px;max-width:86px;padding:12px 6px 12px 10px;border:1.5px solid rgba(26,39,68,.08);border-radius:12px;font-size:15px;font-family:inherit;background:rgba(255,255,255,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--navy);cursor:pointer;outline:none;transition:all .25s;-webkit-appearance:none;appearance:none;flex-shrink:0}
 .ct-phone-code:focus{border-color:var(--terra);box-shadow:0 0 0 3px rgba(196,82,26,.08)}
 .ct-phone-wrap input[type="tel"]{flex:1;min-width:0;width:100%;padding:12px 15px;border:1.5px solid rgba(26,39,68,.08);border-radius:12px;font-size:16px;font-family:inherit;background:rgba(255,255,255,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--navy);outline:none;transition:all .25s}
 .ct-phone-wrap input[type="tel"]:focus{border-color:var(--terra);box-shadow:0 0 0 3px rgba(196,82,26,.08),0 4px 12px rgba(196,82,26,.06);background:rgba(255,255,255,.9)}
@@ -351,6 +359,15 @@
 .ct-field-error input,.ct-field-error select,.ct-field-error textarea{border-color:#E53E3E !important;background:rgba(229,62,62,.04) !important;box-shadow:0 0 0 3px rgba(229,62,62,.08) !important;animation:ctShake .4s}
 @keyframes ctShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
 .ct-field-hint{font-size:.72rem;color:#E53E3E;margin-top:3px;padding-left:2px;opacity:0;max-height:0;overflow:hidden;transition:opacity .2s ease,max-height .2s ease}
+/* ── Form progress bar ── */
+.ct-progress{margin:0 0 18px;padding:12px 14px;background:rgba(26,39,68,.025);border:1px solid rgba(26,39,68,.06);border-radius:12px}
+.ct-progress-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.ct-progress-label{font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-mid)}
+.ct-progress-count{font-size:.72rem;font-weight:700;color:var(--navy)}
+.ct-progress-track{width:100%;height:6px;background:rgba(26,39,68,.06);border-radius:999px;overflow:hidden}
+.ct-progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--terra),#D4682E);border-radius:999px;transition:width .3s cubic-bezier(.16,1,.3,1),background .2s}
+.ct-progress.is-complete .ct-progress-fill{background:linear-gradient(90deg,#38A169,#48BB78)}
+.ct-progress.is-complete .ct-progress-count{color:#38A169}
 .ct-field-error .ct-field-hint{opacity:1;max-height:48px;margin-top:5px}
 .ct-field-valid input:not(:focus),.ct-field-valid select:not(:focus),.ct-field-valid textarea:not(:focus){border-color:rgba(56,161,105,.4) !important}
 .ct-field-valid .ct-input-wrap input{padding-right:36px !important}
@@ -519,6 +536,7 @@ async function submitContact(e) {
   if (hpField && hpField.value) {
     // Bot — sessizce başarılı göster ama gönderme
     document.getElementById('contact-form').reset();
+    if (window._ctUpdateProgress) window._ctUpdateProgress();
     openSuccessModal();
     return;
   }
@@ -618,6 +636,7 @@ async function submitContact(e) {
     await db.collection('messages').add(msg);
     status.innerHTML = '';
     document.getElementById('contact-form').reset();
+    if (window._ctUpdateProgress) window._ctUpdateProgress();
     openSuccessModal();
   } catch(err) {
     status.innerHTML = '<span style="color:#E53E3E;font-weight:600">⚠️ Gönderme hatası. Lütfen tekrar deneyin veya doğrudan info@assosukesfet.com adresine yazın.</span>';
@@ -648,6 +667,38 @@ function closeSuccessModal() {
 }
 function _ctModalEsc(e) { if (e.key === 'Escape') closeSuccessModal(); }
 function _ctModalBgClick(e) { if (e.target.id === 'ct-success-modal') closeSuccessModal(); }
+
+/* ── Form progress tracking ── */
+(function initCtProgress() {
+  var fields = [
+    { check: function() { return document.getElementById('ct-name').value.trim().length >= 2; } },
+    { check: function() { var v = document.getElementById('ct-email').value.trim(); return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); } },
+    { check: function() { return typeof validatePhone === 'function' && validatePhone(); } },
+    { check: function() { return document.getElementById('ct-message').value.trim().length >= 10; } },
+    { check: function() { return document.getElementById('ct-consent').checked; } }
+  ];
+  function update() {
+    var done = 0;
+    fields.forEach(function(f) { try { if (f.check()) done++; } catch(e) {} });
+    var pct = Math.round((done / fields.length) * 100);
+    var fill = document.getElementById('ct-prog-fill');
+    var count = document.getElementById('ct-prog-done');
+    var wrap = document.querySelector('.ct-progress');
+    if (fill) fill.style.width = pct + '%';
+    if (count) count.textContent = done;
+    if (wrap) wrap.classList.toggle('is-complete', done === fields.length);
+  }
+  ['ct-name','ct-email','ct-phone','ct-phone-code','ct-message','ct-consent'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', update);
+    el.addEventListener('change', update);
+  });
+  // Ilk render
+  update();
+  // Baska yerlerden (ornek: reset) tetiklenebilsin
+  window._ctUpdateProgress = update;
+})();
 
 /* ── Inline (anlik) form validation ── */
 (function initCtInlineValidation() {
