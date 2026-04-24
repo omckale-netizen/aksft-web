@@ -132,14 +132,18 @@
           <button class="ara-input-btn" onclick="araSubmit()">Keşfet</button>
         </div>
         <script>
-          // Flicker fix: URL'deki ?q= parametresini input'a anlik set et
-          // (pageInit 'dataReady' bekler — arada 500ms+ placeholder gorunurdu).
+          // Flicker fix: URL'deki ?q= parametresini input + title + sub'a anlik set et
+          // (pageInit 'dataReady' bekler — arada 500ms+ "Ne ariyorsun?" gorunurdu).
           (function(){
             try {
               var q = new URLSearchParams(location.search).get('q');
               if (q) {
                 var el = document.getElementById('ara-input');
                 if (el) { el.value = q; el.closest('.ara-inputwrap').classList.add('has-value'); }
+                var ttl = document.getElementById('ara-title');
+                if (ttl) ttl.innerHTML = '"<em>' + q.replace(/[<>"']/g, '') + '</em>"';
+                var sub = document.getElementById('ara-sub');
+                if (sub) sub.textContent = 'Aranıyor…';
               }
             } catch(e) {}
           })();
