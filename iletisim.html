@@ -98,7 +98,7 @@
         <div class="ct-progress" aria-hidden="true">
           <div class="ct-progress-head">
             <span class="ct-progress-label">Form tamamlanma</span>
-            <span class="ct-progress-count"><span id="ct-prog-done">0</span>/5 alan</span>
+            <span class="ct-progress-count"><span id="ct-prog-done">0</span>/6 alan</span>
           </div>
           <div class="ct-progress-track"><div class="ct-progress-fill" id="ct-prog-fill"></div></div>
         </div>
@@ -125,10 +125,11 @@
           </div>
           <div class="ct-row">
             <div class="ct-field">
-              <label>Konu</label>
+              <label>Konu *</label>
               <div class="ct-input-wrap">
                 <span class="ct-input-icon">📋</span>
-                <select id="ct-subject">
+                <select id="ct-subject" required>
+                  <option value="" disabled selected>Konu seçin…</option>
                   <option value="Genel">Genel</option>
                   <option value="Öneri">Öneri</option>
                   <option value="Şikayet">Şikayet</option>
@@ -286,7 +287,7 @@
     </div>
 
     <div class="fade-up" style="text-align:center;margin-top:36px;">
-      <a href="#" onclick="document.getElementById('ct-subject').value='Mekan Ekleme Talebi';document.getElementById('ct-name').focus();window.scrollTo({top:0,behavior:'smooth'});return false;" style="display:inline-flex;align-items:center;gap:8px;padding:14px 32px;border-radius:13px;background:var(--terra);color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;font-weight:700;text-decoration:none;transition:all .2s;box-shadow:0 6px 20px rgba(196,82,26,.3);" onmouseover="this.style.background='#D4682E';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#C4521A';this.style.transform=''">
+      <a href="#" onclick="var s=document.getElementById('ct-subject');s.value='Mekan Ekleme Talebi';s.dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('ct-name').focus();window.scrollTo({top:0,behavior:'smooth'});return false;" style="display:inline-flex;align-items:center;gap:8px;padding:14px 32px;border-radius:13px;background:var(--terra);color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:.88rem;font-weight:700;text-decoration:none;transition:all .2s;box-shadow:0 6px 20px rgba(196,82,26,.3);" onmouseover="this.style.background='#D4682E';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#C4521A';this.style.transform=''">
         Mekanımı Eklemek İstiyorum →
       </a>
       <p style="font-size:.72rem;color:rgba(245,237,224,.25);margin-top:14px;">Ücretsiz başvuru · 24 saat içinde dönüş</p>
@@ -337,7 +338,7 @@
 .ct-field label{font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-mid);margin-left:2px}
 .ct-input-wrap{position:relative}
 .ct-phone-wrap{display:flex;gap:6px;align-items:center;width:100%}
-.ct-phone-code{width:86px;min-width:86px;max-width:86px;padding:12px 6px 12px 10px;border:1.5px solid rgba(26,39,68,.08);border-radius:12px;font-size:15px;font-family:inherit;background:rgba(255,255,255,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--navy);cursor:pointer;outline:none;transition:all .25s;-webkit-appearance:none;appearance:none;flex-shrink:0}
+.ct-phone-code{width:90px;min-width:90px;max-width:90px;padding:12px 20px 12px 8px;border:1.5px solid rgba(26,39,68,.08);border-radius:12px;font-size:14px;font-family:inherit;background-color:rgba(255,255,255,.6);background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%234A5870' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--navy);cursor:pointer;outline:none;transition:all .25s;-webkit-appearance:none;appearance:none;flex-shrink:0}
 .ct-phone-code:focus{border-color:var(--terra);box-shadow:0 0 0 3px rgba(196,82,26,.08)}
 .ct-phone-wrap input[type="tel"]{flex:1;min-width:0;width:100%;padding:12px 15px;border:1.5px solid rgba(26,39,68,.08);border-radius:12px;font-size:16px;font-family:inherit;background:rgba(255,255,255,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--navy);outline:none;transition:all .25s}
 .ct-phone-wrap input[type="tel"]:focus{border-color:var(--terra);box-shadow:0 0 0 3px rgba(196,82,26,.08),0 4px 12px rgba(196,82,26,.06);background:rgba(255,255,255,.9)}
@@ -673,6 +674,7 @@ function _ctModalBgClick(e) { if (e.target.id === 'ct-success-modal') closeSucce
   var fields = [
     { check: function() { return document.getElementById('ct-name').value.trim().length >= 2; } },
     { check: function() { var v = document.getElementById('ct-email').value.trim(); return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); } },
+    { check: function() { return !!document.getElementById('ct-subject').value; } },
     { check: function() { return typeof validatePhone === 'function' && validatePhone(); } },
     { check: function() { return document.getElementById('ct-message').value.trim().length >= 10; } },
     { check: function() { return document.getElementById('ct-consent').checked; } }
@@ -688,7 +690,7 @@ function _ctModalBgClick(e) { if (e.target.id === 'ct-success-modal') closeSucce
     if (count) count.textContent = done;
     if (wrap) wrap.classList.toggle('is-complete', done === fields.length);
   }
-  ['ct-name','ct-email','ct-phone','ct-phone-code','ct-message','ct-consent'].forEach(function(id) {
+  ['ct-name','ct-email','ct-subject','ct-phone','ct-phone-code','ct-message','ct-consent'].forEach(function(id) {
     var el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('input', update);
@@ -705,6 +707,7 @@ function _ctModalBgClick(e) { if (e.target.id === 'ct-success-modal') closeSucce
   var validators = {
     'ct-name':    function(v) { v = v.trim(); if (!v) return 'Ad Soyad zorunlu.'; if (v.length < 2) return 'En az 2 karakter.'; return null; },
     'ct-email':   function(v) { v = v.trim(); if (!v) return 'E-posta zorunlu.'; if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return 'Geçerli bir e-posta girin (ornek@mail.com).'; return null; },
+    'ct-subject': function(v) { return v ? null : 'Lütfen bir konu seçin.'; },
     'ct-message': function(v) { v = v.trim(); if (!v) return 'Mesaj zorunlu.'; if (v.length < 10) return 'Mesajınız en az 10 karakter olmalı.'; return null; }
   };
 
