@@ -4715,7 +4715,7 @@ function renderVillagePage(villageId) {
   heroHtml += '<h1 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;font-size:clamp(2rem,5vw,3.2rem);color:#F5EDE0;letter-spacing:-.03em;line-height:1.05;margin-bottom:8px;">' + heroTitle + '</h1>';
 
   // Location
-  heroHtml += '<p style="font-size:.82rem;color:rgba(245,237,224,.4);margin-bottom:16px;display:flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(245,237,224,.4)" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>Ayvacık, Çanakkale</p>';
+  heroHtml += '<p style="font-size:.82rem;color:rgba(245,237,224,.4);margin-bottom:16px;display:flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(245,237,224,.4)" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg><span translate="no" style="white-space:nowrap">Ayvacık, Çanakkale</span></p>';
 
   // Short description
   if (v.shortDesc) {
