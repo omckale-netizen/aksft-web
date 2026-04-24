@@ -160,17 +160,19 @@ if (getBlogSlugFromUrl()) {
 <!-- Yazı detay -->
 <section id="blog-post-section" style="display:none">
   <div class="bp-layout">
-    <div id="bp-img-wrap" class="post-img"></div>
     <details class="bp-toc" id="bp-toc" aria-label="İçindekiler" hidden>
       <summary class="bp-toc-summary"><span class="bp-toc-summary-text">İçindekiler</span><span class="bp-toc-caret">▾</span></summary>
       <div class="bp-toc-inner"></div>
     </details>
-    <article class="bp-article">
-      <div id="bp-content" class="post-content"></div>
-      <div id="bp-tags" class="post-tags" style="display:none"></div>
-      <div id="bp-share" class="post-share"></div>
-      <div id="bp-related" style="display:none"></div>
-    </article>
+    <div class="bp-right">
+      <div id="bp-img-wrap" class="post-img"></div>
+      <article class="bp-article">
+        <div id="bp-content" class="post-content"></div>
+        <div id="bp-tags" class="post-tags" style="display:none"></div>
+        <div id="bp-share" class="post-share"></div>
+        <div id="bp-related" style="display:none"></div>
+      </article>
+    </div>
   </div>
 </section>
 
@@ -180,8 +182,11 @@ if (getBlogSlugFromUrl()) {
 .bp-scroll-progress.active{display:block;}
 
 /* ── Blog TOC (Icindekiler) ── */
-.bp-layout{max-width:680px;margin:0 auto;padding:40px 24px 80px;}
-.bp-article{min-width:0;}
+.bp-layout{max-width:680px;margin:0 auto;padding:40px 24px 80px;display:flex;flex-direction:column;}
+.bp-right{display:contents;}
+#bp-img-wrap{order:1;}
+.bp-toc{order:2;}
+.bp-article{order:3;min-width:0;}
 .bp-toc{margin-bottom:28px;background:rgba(26,39,68,.035);border:1px solid rgba(26,39,68,.08);border-radius:14px;overflow:hidden;}
 .bp-toc[hidden]{display:none;}
 .bp-toc summary{list-style:none;cursor:pointer;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.88rem;color:#1A2744;}
@@ -201,11 +206,12 @@ if (getBlogSlugFromUrl()) {
 /* Scroll target offset — sticky nav altina saklanmasin */
 .post-content h2,.post-content h3{scroll-margin-top:90px;}
 @media(min-width:1024px){
-  /* Desktop: grid layout + TOC position:sticky — scroll ile birlikte takip eder */
+  /* Desktop: grid — col1=TOC (sticky), col2=bp-right (image+article stacked) */
   .bp-layout{display:grid;grid-template-columns:220px minmax(0,680px);gap:40px;max-width:940px;align-items:start;}
-  #bp-img-wrap{grid-column:2 / 3;grid-row:1;}
-  .bp-article{grid-column:2 / 3;grid-row:2;max-width:680px;min-width:0;}
-  .bp-toc{grid-column:1;grid-row:1 / -1;margin:0;background:transparent;border:none;border-radius:0;overflow:visible;position:sticky;top:96px;max-height:calc(100vh - 120px);overflow-y:auto;padding-right:8px;scrollbar-width:thin;scrollbar-color:rgba(26,39,68,.15) transparent;}
+  .bp-right{display:block;grid-column:2;min-width:0;}
+  #bp-img-wrap,.bp-article{order:initial;}
+  .bp-article{max-width:680px;min-width:0;}
+  .bp-toc{grid-column:1;margin:0;background:transparent;border:none;border-radius:0;overflow:visible;position:sticky;top:96px;max-height:calc(100vh - 120px);overflow-y:auto;padding-right:8px;scrollbar-width:thin;scrollbar-color:rgba(26,39,68,.15) transparent;}
   .bp-toc::-webkit-scrollbar{width:4px;}
   .bp-toc::-webkit-scrollbar-thumb{background:rgba(26,39,68,.15);border-radius:4px;}
   .bp-toc summary{display:none;}
