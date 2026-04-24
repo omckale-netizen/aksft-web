@@ -85,8 +85,8 @@
     .blog-skel-desc{height:12px;width:95%}
     .blog-skel-desc-2{height:12px;width:70%}
     /* Shimmer animation */
-    .blog-skel-img::after,.blog-skel-line::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.6) 50%,transparent);background-size:200% 100%;animation:blogShimmer 1.6s infinite;}
-    @keyframes blogShimmer{0%{background-position:-100% 0}100%{background-position:200% 0}}
+    .blog-skel-img::after,.blog-skel-line::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35) 50%,transparent);background-size:200% 100%;animation:akShimmer 1.5s infinite linear;}
+    @keyframes akShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
     @media(max-width:640px){
       .blog-skel{flex-direction:column}
       .blog-skel-img{width:100%;min-height:160px;height:160px}

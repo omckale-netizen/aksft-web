@@ -65,10 +65,10 @@
     .ara-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(26,39,68,.1);}
     .ara-card-img{position:relative;aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;overflow:hidden;}
     /* Shimmer sadece görseli olan ve henüz yüklenmemiş kartlarda — emoji-only kartlarda efekt yok */
-    .ara-card-img.has-img:not(.is-loaded)::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08) 50%,transparent);background-size:200% 100%;animation:araShimmer 1.8s infinite ease-in-out;pointer-events:none;z-index:0;}
+    .ara-card-img.has-img:not(.is-loaded)::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35) 50%,transparent);background-size:200% 100%;animation:akShimmer 1.5s infinite linear;pointer-events:none;z-index:0;}
     .ara-card-img img{width:100%;height:100%;object-fit:cover;position:relative;z-index:1;opacity:0;transition:opacity .5s ease;}
     .ara-card-img img.loaded{opacity:1;}
-    @keyframes araShimmer{0%{background-position:-100% 0;}100%{background-position:200% 0;}}
+    @keyframes akShimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
     .ara-card-emoji{font-size:2.4rem;}
     .ara-card-cat{position:absolute;top:10px;left:10px;font-size:.58rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 10px;border-radius:999px;color:#fff;backdrop-filter:blur(8px);z-index:2;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15);}
     .ara-card-status{position:absolute;top:10px;right:10px;display:inline-flex;align-items:center;gap:5px;font-size:.58rem;font-weight:700;letter-spacing:.05em;padding:3px 9px;border-radius:999px;backdrop-filter:blur(8px);z-index:2;}
