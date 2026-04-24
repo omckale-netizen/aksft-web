@@ -73,8 +73,13 @@
     .ara-card-emoji{font-size:2.4rem;}
     .ara-card-cat{position:absolute;top:10px;left:10px;font-size:.58rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 10px;border-radius:999px;color:#fff;backdrop-filter:blur(8px);z-index:2;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15);}
     .ara-card-status{position:absolute;top:10px;right:10px;display:inline-flex;align-items:center;gap:5px;font-size:.58rem;font-weight:700;letter-spacing:.05em;padding:3px 9px;border-radius:999px;backdrop-filter:blur(8px);z-index:2;}
-    .ara-status-dot{width:5px;height:5px;border-radius:50%;box-shadow:0 0 4px currentColor;}
+    .ara-status-dot{width:5px;height:5px;border-radius:50%;box-shadow:0 0 4px currentColor;flex-shrink:0;}
     @keyframes araStatusPulse{0%,100%{opacity:1}50%{opacity:.4}}
+    /* Mobilde kategori ile status cakismasin — status bottom-right'a tasinir */
+    @media(max-width:640px){
+      .ara-card-status{top:auto;bottom:10px;right:10px;font-size:.54rem;padding:3px 8px;}
+      .ara-card-cat{max-width:65%;font-size:.55rem;padding:3px 8px;}
+    }
     .ara-card-body{padding:12px 16px 14px;}
     .ara-card-title{font-weight:700;font-size:.92rem;color:var(--navy);margin-bottom:4px;line-height:1.3;}
     .ara-card-sub{font-size:.74rem;color:var(--text-muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
