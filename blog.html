@@ -847,6 +847,11 @@ function buildBlogToc(contentEl) {
     if (currentActive && linkMap[currentActive]) linkMap[currentActive].classList.remove('active');
     if (id && linkMap[id]) linkMap[id].classList.add('active');
     currentActive = id;
+    // URL hash'i kaydırma konumuna gore otomatik guncelle — F5 sonrasi kullanici
+    // kaldigi yere donsun (yalnizca yeterince asagi kaydirilmissa)
+    if (id && window.pageYOffset > 200) {
+      try { history.replaceState(null, '', '#' + id); } catch(e) {}
+    }
   }
   function updateActive() {
     var best = null, bestTop = -Infinity;
