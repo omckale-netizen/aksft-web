@@ -537,6 +537,13 @@ async function submitContact(e) {
   if (hpField && hpField.value) {
     // Bot — sessizce başarılı göster ama gönderme
     document.getElementById('contact-form').reset();
+    // Yesil border + tik ve kirmizi uyari izlerini temizle
+    document.querySelectorAll('.ct-field-valid,.ct-field-error').forEach(function(el) {
+      el.classList.remove('ct-field-valid','ct-field-error');
+    });
+    document.querySelectorAll('.ct-field-hint').forEach(function(el) { el.textContent = ''; });
+    var phoneErr = document.getElementById('ct-phone-error');
+    if (phoneErr) phoneErr.textContent = '';
     if (window._ctUpdateProgress) window._ctUpdateProgress();
     openSuccessModal();
     return;
@@ -637,6 +644,13 @@ async function submitContact(e) {
     await db.collection('messages').add(msg);
     status.innerHTML = '';
     document.getElementById('contact-form').reset();
+    // Yesil border + tik ve kirmizi uyari izlerini temizle
+    document.querySelectorAll('.ct-field-valid,.ct-field-error').forEach(function(el) {
+      el.classList.remove('ct-field-valid','ct-field-error');
+    });
+    document.querySelectorAll('.ct-field-hint').forEach(function(el) { el.textContent = ''; });
+    var phoneErr = document.getElementById('ct-phone-error');
+    if (phoneErr) phoneErr.textContent = '';
     if (window._ctUpdateProgress) window._ctUpdateProgress();
     openSuccessModal();
   } catch(err) {
