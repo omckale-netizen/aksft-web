@@ -4066,6 +4066,32 @@ function renderVenuePage(venueId) {
     if (e.key === 'ArrowRight') vpLbNav(1);
     if (e.key === 'ArrowLeft') vpLbNav(-1);
   });
+  // Swipe gesture (mobil)
+  (function() {
+    var lb = document.getElementById('vp-lightbox');
+    if (!lb) return;
+    var sx = 0, sy = 0, st = 0, active = false, swiped = false;
+    lb.addEventListener('touchstart', function(e) {
+      if (!lb.classList.contains('open')) return;
+      var t = e.touches[0];
+      sx = t.clientX; sy = t.clientY; st = Date.now();
+      active = true; swiped = false;
+    }, { passive: true });
+    lb.addEventListener('touchend', function(e) {
+      if (!active || !lb.classList.contains('open')) { active = false; return; }
+      active = false;
+      var t = e.changedTouches[0];
+      var dx = t.clientX - sx, dy = t.clientY - sy, dt = Date.now() - st;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5 && dt < 600) {
+        swiped = true;
+        vpLbNav(dx < 0 ? 1 : -1);
+      }
+    }, { passive: true });
+    // Swipe sonrası sentetik click ile kapanmayı engelle
+    lb.addEventListener('click', function(e) {
+      if (swiped) { e.stopPropagation(); e.preventDefault(); swiped = false; }
+    }, true);
+  })();
 
   /* ── Sticky bar ── */
   (function() {
