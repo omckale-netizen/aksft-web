@@ -1362,7 +1362,6 @@ function renderNav(opts = {}) {
   const MAX_VILLAGE_SAVES = 15;
   window.togglePlaceSave = function (id, e) {
     if (e) { e.preventDefault(); e.stopPropagation(); }
-    var isSavedAfter = null;
     try {
       const saved = new Set(JSON.parse(localStorage.getItem(SD_PLACE_KEY) || '[]'));
       if (!saved.has(id)) {
@@ -1374,7 +1373,6 @@ function renderNav(opts = {}) {
         if (!isVillage && savedPlaceCount >= MAX_PLACE_SAVES) { alert('En fazla ' + MAX_PLACE_SAVES + ' yer kaydedebilirsiniz.'); return; }
       }
       if (saved.has(id)) saved.delete(id); else saved.add(id);
-      isSavedAfter = saved.has(id);
       localStorage.setItem(SD_PLACE_KEY, JSON.stringify([...saved]));
       // Buton güncelle
       document.querySelectorAll('.place-save-btn[data-id="' + id + '"]').forEach(function(btn) {
@@ -1387,9 +1385,6 @@ function renderNav(opts = {}) {
     } catch {}
     window.updateSaveNavCount();
     if (window.syncFavToFirebase) setTimeout(window.syncFavToFirebase, 300);
-    if (isSavedAfter !== null && window._akSaveToast) {
-      window._akSaveToast(isSavedAfter, function() { window.togglePlaceSave(id); });
-    }
   };
 
   window.isPlaceSaved = function (id) {
@@ -1403,12 +1398,10 @@ function renderNav(opts = {}) {
   const MAX_VENUE_SAVES = 15;
   window.toggleVenueSave = function (id, e) {
     if (e) { e.preventDefault(); e.stopPropagation(); }
-    var isSavedAfter = null;
     try {
       const saved = new Set(JSON.parse(localStorage.getItem(SD_KEY) || '[]'));
       if (!saved.has(id) && saved.size >= MAX_VENUE_SAVES) { alert('En fazla ' + MAX_VENUE_SAVES + ' mekan kaydedebilirsiniz.'); return; }
       if (saved.has(id)) saved.delete(id); else saved.add(id);
-      isSavedAfter = saved.has(id);
       localStorage.setItem(SD_KEY, JSON.stringify([...saved]));
       document.querySelectorAll('.venue-save-btn[data-id="' + id + '"]').forEach(function(btn) {
         var isSaved = saved.has(id);
@@ -1420,9 +1413,6 @@ function renderNav(opts = {}) {
     } catch {}
     window.updateSaveNavCount();
     if (window.syncFavToFirebase) window.syncFavToFirebase();
-    if (isSavedAfter !== null && window._akSaveToast) {
-      window._akSaveToast(isSavedAfter, function() { window.toggleVenueSave(id); });
-    }
   };
 
   // Tum favori butonlarini localStorage ile senkronlastir
@@ -4140,7 +4130,6 @@ function renderVenuePage(venueId) {
     }
     if (window.updateSaveNavCount) window.updateSaveNavCount();
     if (window.syncFavToFirebase) window.syncFavToFirebase();
-    if (window._akSaveToast) window._akSaveToast(isSavedNow, function() { window.vpToggleSave(); });
   };
 
   /* ── Share dropdown ── */
@@ -6254,116 +6243,4 @@ function renderPlacePage(placeId) {
   if (document.readyState !== 'loading') {
     obs.observe(document.body, { attributes: true, attributeFilter: ['class'], subtree: true });
   }
-})();
-
-/* ══════════════════════════════════════
-   akToast — Global alt orta toast sistemi
-   ══════════════════════════════════════
-   Kullanim: akToast({ icon:'♥', msg:'Kaydedildi',
-     action:{ label:'Görüntüle →', onClick: fn } });
-   Ayni anda bir toast — yeni gelen oncekini hemen degistirir. */
-(function initAkToast() {
-  var currentToast = null;
-
-  function injectStyles() {
-    if (document.getElementById('ak-toast-styles')) return;
-    var s = document.createElement('style');
-    s.id = 'ak-toast-styles';
-    s.textContent = [
-      '#ak-toast-root{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:10000;pointer-events:none;max-width:calc(100vw - 32px);}',
-      '.ak-toast{pointer-events:auto;background:#1A2744;color:#F5EDE0;padding:13px 16px;border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,.35);display:flex;align-items:center;gap:12px;min-width:260px;max-width:380px;font-family:"Plus Jakarta Sans",sans-serif;animation:akToastIn .25s cubic-bezier(.16,1,.3,1);}',
-      '.ak-toast.ak-toast-out{animation:akToastOut .22s ease forwards;}',
-      '.ak-toast-icon{font-size:1.15rem;flex-shrink:0;line-height:1;}',
-      '.ak-toast-msg{flex:1;font-size:.84rem;font-weight:600;line-height:1.4;}',
-      '.ak-toast-action{color:#D4935A;text-decoration:none;font-size:.76rem;font-weight:700;padding:7px 12px;border-radius:9px;background:rgba(212,147,90,.14);border:none;cursor:pointer;font-family:inherit;flex-shrink:0;white-space:nowrap;transition:background .15s,color .15s;}',
-      '.ak-toast-action:hover{background:rgba(212,147,90,.26);color:#E8A07A;}',
-      '@keyframes akToastIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}',
-      '@keyframes akToastOut{to{opacity:0;transform:translateY(10px);}}',
-      '@media(max-width:640px){#ak-toast-root{bottom:14px;left:14px;right:14px;transform:none;max-width:none;}.ak-toast{min-width:0;width:100%;}}'
-    ].join('');
-    document.head.appendChild(s);
-  }
-
-  function ensureRoot() {
-    var r = document.getElementById('ak-toast-root');
-    if (r) return r;
-    r = document.createElement('div');
-    r.id = 'ak-toast-root';
-    r.setAttribute('role', 'status');
-    r.setAttribute('aria-live', 'polite');
-    r.setAttribute('aria-atomic', 'true');
-    document.body.appendChild(r);
-    return r;
-  }
-
-  function closeCurrent(immediate) {
-    if (!currentToast) return;
-    clearTimeout(currentToast.timer);
-    var el = currentToast.el;
-    currentToast = null;
-    if (immediate) {
-      if (el && el.parentElement) el.remove();
-      return;
-    }
-    if (!el) return;
-    el.classList.add('ak-toast-out');
-    setTimeout(function() { if (el && el.parentElement) el.remove(); }, 220);
-  }
-
-  function esc(s) {
-    return String(s == null ? '' : s)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  window.akToast = function(opts) {
-    if (!opts) return;
-    injectStyles();
-    var root = ensureRoot();
-    closeCurrent(true); // yenisi hemen gelsin (stack yok)
-
-    var el = document.createElement('div');
-    el.className = 'ak-toast';
-    var html = '';
-    if (opts.icon) html += '<span class="ak-toast-icon" aria-hidden="true">' + esc(opts.icon) + '</span>';
-    html += '<span class="ak-toast-msg">' + esc(opts.msg || '') + '</span>';
-    if (opts.action && opts.action.label) {
-      if (opts.action.href) {
-        html += '<a class="ak-toast-action" href="' + esc(opts.action.href) + '">' + esc(opts.action.label) + '</a>';
-      } else {
-        html += '<button type="button" class="ak-toast-action" data-ak-action>' + esc(opts.action.label) + '</button>';
-      }
-    }
-    el.innerHTML = html;
-
-    var actionBtn = el.querySelector('button[data-ak-action]');
-    if (actionBtn && opts.action && typeof opts.action.onClick === 'function') {
-      actionBtn.addEventListener('click', function() {
-        try { opts.action.onClick(); } catch(e) {}
-        closeCurrent();
-      });
-    }
-
-    root.appendChild(el);
-    var duration = opts.duration || 2800;
-    currentToast = { el: el, timer: setTimeout(function() { closeCurrent(); }, duration) };
-  };
-
-  // Kaydet/favori toast kisayolu — her yerden kullanilabilir
-  window._akSaveToast = function(isSavedNow, undoFn) {
-    if (!window.akToast) return;
-    if (isSavedNow) {
-      window.akToast({
-        icon: '♥',
-        msg: 'Kaydedildi',
-        action: { label: 'Görüntüle →', onClick: function() { if (window.openSaveDrawer) window.openSaveDrawer(); } }
-      });
-    } else {
-      window.akToast({
-        icon: '↩',
-        msg: 'Kayıtlardan çıkarıldı',
-        action: { label: 'Geri al', onClick: undoFn },
-        duration: 3500
-      });
-    }
-  };
 })();
