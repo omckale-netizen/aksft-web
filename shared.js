@@ -5093,6 +5093,16 @@ function renderVillagePage(villageId) {
         '<span id="vg-copy-lbl">Kopyala</span></button>';
   }
   window.vgToggleShare = function() {
+    // Mobilde native share (iOS/Android sistem paylas menusu)
+    var isTouch = window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    if (isTouch && navigator.share) {
+      navigator.share({
+        title: v.title,
+        text: v.title + ' — Assos\'u Keşfet',
+        url: window.location.href
+      }).catch(function(){});
+      return;
+    }
     var d = document.getElementById('vg-share-dd');
     d.classList.toggle('open');
   };
@@ -5524,6 +5534,16 @@ function renderPlacePage(placeId) {
       '<button class="vp-share-opt" onclick="navigator.clipboard.writeText(\'' + plUrl + '\');this.querySelector(\'#pl-copy-lbl\').textContent=\'Kopyalandı!\';setTimeout(function(){document.getElementById(\'pl-copy-lbl\').textContent=\'Kopyala\'},2000)"><span class="vp-share-opt-icon" style="background:rgba(255,255,255,.15)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></span><span id="pl-copy-lbl">Kopyala</span></button>';
   }
   window.plToggleShare = function() {
+    // Mobilde native share (iOS/Android sistem paylas menusu)
+    var isTouch = window.matchMedia && window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    if (isTouch && navigator.share) {
+      navigator.share({
+        title: p.title,
+        text: p.title + ' — Assos\'u Keşfet',
+        url: window.location.href
+      }).catch(function(){});
+      return;
+    }
     var d = document.getElementById('pl-share-dd');
     d.classList.toggle('open');
   };
