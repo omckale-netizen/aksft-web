@@ -17425,20 +17425,60 @@ async function aiGenerateBlog() {
 function aiRenderBlogPreview(data) {
   const box = document.getElementById('ai-blog-preview');
   const content = document.getElementById('ai-blog-preview-content');
-  const contentPreview = (data.content || '').substring(0, 800);
   const contentLength = (data.content || '').length;
   const wordCount = (data.content || '').replace(/<[^>]+>/g, ' ').trim().split(/\s+/).length;
+  const imgPrompt = data.imagePrompt || '';
+  const unsplashKws = Array.isArray(data.unsplashKeywords) ? data.unsplashKeywords : [];
+  const faqsCount = Array.isArray(data.faqs) ? data.faqs.length : 0;
+
+  // Build image section HTML
+  let imgSection = '';
+  if (imgPrompt || unsplashKws.length) {
+    imgSection = '<div style="margin:12px 0;padding:14px;background:linear-gradient(135deg,rgba(26,107,138,.06),rgba(36,144,184,.04));border:1px solid rgba(26,107,138,.15);border-radius:10px">' +
+      '<div style="font-weight:800;color:#1A6B8A;font-size:.88rem;margin-bottom:10px">📸 Blog Görseli için AI Kaynakları</div>';
+
+    if (imgPrompt) {
+      const geminiUrl = 'https://gemini.google.com/app?q=' + encodeURIComponent(imgPrompt);
+      imgSection +=
+        '<div style="margin-bottom:12px">' +
+          '<div style="font-size:.72rem;color:#4A5568;font-weight:700;margin-bottom:4px">🤖 AI Prompt (Gemini / Imagen / Midjourney için) — fotoğrafik, 16:9</div>' +
+          '<div style="padding:10px;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:8px;font-size:.8rem;line-height:1.5;color:#1A2744;margin-bottom:6px;font-family:\'SF Mono\',Menlo,monospace;white-space:pre-wrap;word-break:break-word" id="ai-img-prompt-text">' + escHtml(imgPrompt) + '</div>' +
+          '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+            '<button type="button" onclick="aiCopyImagePrompt()" style="background:#1A6B8A;color:#fff;border:none;padding:6px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:.76rem">📋 Prompt Kopyala</button>' +
+            '<a href="' + escAttr(geminiUrl) + '" target="_blank" rel="noopener" style="background:rgba(26,107,138,.12);color:#1A6B8A;padding:6px 14px;border-radius:8px;font-weight:700;font-size:.76rem;text-decoration:none;display:inline-flex;align-items:center;gap:4px">✨ Gemini\'de Aç</a>' +
+            '<a href="https://aistudio.google.com/app/prompts/new_image" target="_blank" rel="noopener" style="background:rgba(26,107,138,.08);color:#1A6B8A;padding:6px 14px;border-radius:8px;font-weight:700;font-size:.76rem;text-decoration:none">🎨 Google AI Studio</a>' +
+          '</div>' +
+        '</div>';
+    }
+
+    if (unsplashKws.length > 0) {
+      const kwSearch = unsplashKws.join(' ');
+      const unsplashUrl = 'https://unsplash.com/s/photos/' + encodeURIComponent(kwSearch);
+      imgSection +=
+        '<div style="padding-top:10px;border-top:1px solid rgba(0,0,0,.06)">' +
+          '<div style="font-size:.72rem;color:#4A5568;font-weight:700;margin-bottom:4px">🔍 Unsplash Anahtar Kelimeleri (gerçek fotoğraf için)</div>' +
+          '<div style="margin-bottom:6px">' +
+            unsplashKws.map(k => '<span style="display:inline-block;background:#fff;color:#1A6B8A;border:1px solid rgba(26,107,138,.2);padding:3px 10px;border-radius:999px;margin:0 4px 4px 0;font-size:.74rem;font-weight:600">' + escHtml(k) + '</span>').join('') +
+          '</div>' +
+          '<a href="' + escAttr(unsplashUrl) + '" target="_blank" rel="noopener" style="background:#1A6B8A;color:#fff;padding:6px 14px;border-radius:8px;font-weight:700;font-size:.76rem;text-decoration:none;display:inline-flex;align-items:center;gap:4px">🔗 Unsplash\'te Ara</a>' +
+        '</div>';
+    }
+
+    imgSection += '</div>';
+  }
+
   content.innerHTML =
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;font-size:.78rem">' +
-      '<div><strong>Başlık:</strong> ' + escAttr(data.title || '') + '</div>' +
-      '<div><strong>Slug:</strong> <code>' + escAttr(data.slug || '') + '</code></div>' +
-      '<div><strong>Kategori:</strong> ' + escAttr(data.category || '') + ' ' + (data.emoji || '') + '</div>' +
-      '<div><strong>Uzunluk:</strong> ~' + wordCount + ' kelime / ' + contentLength + ' kar</div>' +
+      '<div><strong>Başlık:</strong> ' + escHtml(data.title || '') + '</div>' +
+      '<div><strong>Slug:</strong> <code>' + escHtml(data.slug || '') + '</code></div>' +
+      '<div><strong>Kategori:</strong> ' + escHtml(data.category || '') + ' ' + (data.emoji || '') + '</div>' +
+      '<div><strong>Uzunluk:</strong> ~' + wordCount + ' kelime / ' + contentLength + ' kar · ' + faqsCount + ' FAQ</div>' +
     '</div>' +
     '<div style="margin-bottom:10px;padding:10px;background:rgba(0,0,0,.03);border-radius:8px;font-size:.8rem">' +
-      '<strong>Excerpt:</strong> ' + escAttr(data.excerpt || '') + ' <span style="color:#A0AEC0">(' + (data.excerpt||'').length + ' kar)</span>' +
+      '<strong>Excerpt:</strong> ' + escHtml(data.excerpt || '') + ' <span style="color:#A0AEC0">(' + (data.excerpt||'').length + ' kar)</span>' +
     '</div>' +
-    '<div style="margin-bottom:10px;font-size:.78rem"><strong>Tags:</strong> ' + (Array.isArray(data.tags) ? data.tags.map(t => '<span style="display:inline-block;background:rgba(196,82,26,.08);color:#C4521A;padding:2px 8px;border-radius:999px;margin:0 4px 4px 0;font-weight:600">' + escAttr(t) + '</span>').join('') : '') + '</div>' +
+    '<div style="margin-bottom:10px;font-size:.78rem"><strong>Tags:</strong> ' + (Array.isArray(data.tags) ? data.tags.map(t => '<span style="display:inline-block;background:rgba(196,82,26,.08);color:#C4521A;padding:2px 8px;border-radius:999px;margin:0 4px 4px 0;font-weight:600">' + escHtml(t) + '</span>').join('') : '') + '</div>' +
+    imgSection +
     '<details style="margin-top:10px">' +
       '<summary style="cursor:pointer;font-weight:700;color:#1A2744;font-size:.82rem;padding:6px 0">İçerik önizleme (HTML)</summary>' +
       '<div style="max-height:400px;overflow-y:auto;margin-top:8px;padding:14px;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:8px;font-size:.85rem;line-height:1.6">' +
@@ -17446,6 +17486,29 @@ function aiRenderBlogPreview(data) {
       '</div>' +
     '</details>';
   box.style.display = 'block';
+}
+
+function aiCopyImagePrompt() {
+  const el = document.getElementById('ai-img-prompt-text');
+  if (!el) return;
+  const text = el.textContent || '';
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() {
+      showToast('Prompt kopyalandı — Gemini\'ye yapıştır', 'success');
+    }).catch(function() {
+      fallbackCopy(text);
+    });
+  } else {
+    fallbackCopy(text);
+  }
+  function fallbackCopy(t) {
+    const ta = document.createElement('textarea');
+    ta.value = t;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); showToast('Prompt kopyalandı', 'success'); } catch(e) { showToast('Kopyalama başarısız', 'error'); }
+    document.body.removeChild(ta);
+  }
 }
 
 function aiApplyBlogToForm() {

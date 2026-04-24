@@ -167,32 +167,50 @@ Sorular MUTLAKA yazının ana konusuna ait uzun-kuyruk (long-tail) Google aramal
 - Tüm HTML inline, class/style YOK
 - Script tag KOYMA, sadece HTML
 
+## GÖRSEL PROMPT'LARI (ZORUNLU)
+
+Üretilen blog yazısının ANA KONUSUNA UYGUN, **İNGİLİZCE**, **FOTOĞRAFİK / GERÇEKÇİ** bir görsel prompt'u hazırla. Amaç: Google Gemini (Imagen 3), Midjourney veya DALL-E 3 gibi araçlara yapıştırılacak.
+
+### imagePrompt kuralları (İngilizce, 60-100 kelime)
+1. **Photorealistic** — fotoğrafik stil. "Editorial photograph", "National Geographic style", "cinematic travel photography" gibi terimler kullan. İllüstrasyon/resim/painting/cartoon/3D render DEĞİL.
+2. **16:9 aspect ratio** — prompt'un sonunda "--ar 16:9" veya "16:9 aspect ratio, cinematic widescreen" yaz.
+3. **Blog konusuna uygun sahne** — hava durumu yazısı ise bölgenin atmosferi, rota yazısı ise panoramik yol/manzara, yemek yazısı ise rustik Ege sofrası vb.
+4. **Coğrafi doğruluk** — Çanakkale Ayvacık Assos (Ege kıyısı, Kaz Dağları, taş köyler, mavi deniz, zeytinlikler) referans al. Yunan adası DEĞİL — "Turkish Aegean coast, Mount Ida in background, olive groves".
+5. **Işık + kompozisyon** — "golden hour lighting", "soft morning light", "dramatic sky", "wide panoramic composition", "shallow depth of field" gibi spesifik detaylar.
+6. **No people veya minimal people** — insanları genelde kaçın (model fotoğrafı olmasın).
+7. **Lens/kamera detayları** — "shot on 35mm film", "DSLR", "Canon EOS R5" gibi gerçekçilik artırıcı detaylar.
+8. **ÖZEL YERLER YERINE ATMOSFER** — Athena Tapınağı yazma (AI hatalı render eder), "ancient Greek temple ruins on rocky cliffs" yaz. Kadırga Koyu yazma, "hidden Aegean cove with turquoise water" yaz. Genel atmosfer, spesifik yer yok.
+
+### unsplashKeywords kuralları (İngilizce, 3-5 kelime öbeği)
+- Gerçek fotoğraf arama için Unsplash'te yazılacak kelimeler
+- Her biri 1-3 kelime, spesifik
+- Örnek: ["aegean turkey coast", "greek ruins sunset", "turkish stone village", "olive grove sunset", "mediterranean beach"]
+- Konuya uygun, İngilizce
+
 ## Çıktı Şeması (JSON)
 {
   "title": "SEO başlık (55-70 kar, primary keyword içerir)",
-  "slug": "url-friendly-slug-kebab-case (sadece a-z 0-9 ve -)",
+  "slug": "url-friendly-slug-kebab-case",
   "excerpt": "Meta description — 140-160 karakter, keyword-rich, CTA'lı",
-  "category": "Kategori adı (örn: 'Gezi Rehberi', 'Yeme İçme', 'Konaklama', 'Tarih & Kültür', 'Mevsim Rehberi')",
-  "tags": ["5-7 tag, her biri 1-2 kelime, mixed: Assos, Ayvacık, konu-specific"],
+  "category": "Kategori adı (örn: 'Gezi Rehberi', 'Yeme İçme', 'Mevsim Rehberi')",
+  "tags": ["5-7 tag"],
   "emoji": "Uygun tek emoji",
-  "content": "Tam HTML içerik. H1 ile başlar, ~800-1100 kelime, 5-8 H2, tablolar, MIN 6 internal link, ZORUNLU FAQ bölümü.",
-  "faqs": [
-    { "q": "Soru 1 (long-tail keyword)", "a": "Cevap (50-80 kelime)" }
-  ]
+  "content": "Tam HTML içerik. 800-1100 kelime, MIN 6 internal link, ZORUNLU FAQ bölümü.",
+  "faqs": [ { "q": "...", "a": "..." } ],
+  "imagePrompt": "English photorealistic prompt, 60-100 words, 16:9, National Geographic editorial style, specific to blog topic. NO illustration/painting/cartoon. End with '16:9 aspect ratio, cinematic widescreen'.",
+  "unsplashKeywords": ["3-5 English search phrases"]
 }
 
-faqs alanı: FAQ bölümünde verdiğin 4-6 soru-cevabın JSON karşılığı. Bu schema'ya ayrıca eklenecek. Her biri content içindekiyle AYNI olmalı.
-
 KURALLAR (tekrar):
-- JSON dışında hiçbir metin döndürme — ne açıklama ne kod bloku sarması
-- content HTML doğru parse edilebilir olmalı (kaçış karakterleri dikkat)
-- title'a "Assos'u Keşfet" EKLEME (otomatik eklenecek)
-- excerpt 140-160 karakter olmalı, daha az/çok değil
-- İlk paragraf featured snippet için 40-60 kelime, direkt cevap
-- content içinde MIN 6 <a href="/..."> internal link
-- content içinde ZORUNLU <h2>Sıkça Sorulan Sorular</h2> bölümü + 4-6 <details>
-- Türkçe yazım hatası YOK (ılık, sisli, sıcak kullan — ilik, sislí, sicak değil)
-- faqs array'i content'teki FAQ ile birebir uyumlu`;
+- JSON dışında hiçbir metin döndürme
+- content HTML doğru parse edilebilir
+- title'a "Assos'u Keşfet" EKLEME
+- excerpt 140-160 karakter
+- content içinde MIN 6 <a href="/..."> + ZORUNLU FAQ bölümü
+- Türkçe yazım hatası YOK (ılık, sisli, sıcak)
+- faqs array'i content'teki FAQ ile birebir uyumlu
+- imagePrompt İNGİLİZCE + PHOTOREALISTIC + 16:9
+- unsplashKeywords İNGİLİZCE + 3-5 adet`;
 
   const secondaryKwStr = Array.isArray(secondaryKeywords) && secondaryKeywords.length > 0
     ? secondaryKeywords.join(', ')
@@ -248,6 +266,11 @@ Yukarıdaki JSON şemasına göre blog yazısını üret. Sadece geçerli JSON d
     if (!Array.isArray(parsed.tags)) {
       parsed.tags = String(parsed.tags).split(',').map(s => s.trim()).filter(Boolean);
     }
+    if (!Array.isArray(parsed.unsplashKeywords)) {
+      parsed.unsplashKeywords = parsed.unsplashKeywords ? String(parsed.unsplashKeywords).split(',').map(s => s.trim()).filter(Boolean) : [];
+    }
+    if (!parsed.imagePrompt) parsed.imagePrompt = '';
+    if (!Array.isArray(parsed.faqs)) parsed.faqs = [];
 
     // Limit guncelle
     try {
