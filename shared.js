@@ -617,15 +617,50 @@ document.addEventListener('dataReady', _fetchSiteLogo);
       }
     }
 
-    /* Global form focus ring — WCAG 2.1 Level AA klavye navigasyon için görsel feedback */
+    /* Global focus ring — WCAG 2.1 Level AA klavye navigasyon için görsel feedback */
     input:focus-visible, textarea:focus-visible, select:focus-visible {
       outline: 2px solid var(--terra, #C4521A) !important;
       outline-offset: 2px;
     }
+    /* Butonlar, linkler, interactive elementler — klavye (Tab) ile focus alinca gorunur cerceve */
+    a:focus-visible, button:focus-visible, [role="button"]:focus-visible, [tabindex]:not([tabindex="-1"]):focus-visible, summary:focus-visible, details:focus-visible {
+      outline: 2px solid var(--terra, #C4521A);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
     /* Mouse kullanan kullanıcıları rahatsız etmesin — :focus-visible sadece klavye navigasyonunda
-       görünür (modern tarayıcı davranışı). Eski Safari için fallback aşağıda. */
+       görünür (modern tarayıcı davranışı). */
     input:focus:not(:focus-visible), textarea:focus:not(:focus-visible), select:focus:not(:focus-visible) {
       outline: none;
+    }
+
+    /* iOS auto-zoom fix — input/textarea/select min 16px (Safari 16px alti zoom yapar) */
+    input, textarea, select {
+      font-size: max(16px, 1em);
+    }
+
+    /* Skip link — Tab ile focus alinca sol ustte belirir, kullaniciya "icerige atla" secenegi verir
+       WCAG 2.4.1 — screen reader ve klavye kullanicilari icin zorunlu */
+    .skip-link {
+      position: fixed;
+      top: -100px;
+      left: 12px;
+      z-index: 9999;
+      background: var(--terra, #C4521A);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: .88rem;
+      text-decoration: none;
+      box-shadow: 0 8px 28px rgba(196,82,26,.4);
+      transition: top .2s ease;
+    }
+    .skip-link:focus, .skip-link:focus-visible {
+      top: 12px;
+      outline: 3px solid rgba(245,237,224,.6);
+      outline-offset: 2px;
     }
     :root {
       --navy:#1A2744;--navy-deep:#0D1829;--navy-mid:#243255;
@@ -1072,6 +1107,22 @@ function renderNav(opts = {}) {
 
   const placeholder = document.getElementById('nav-placeholder');
   if (placeholder) placeholder.outerHTML = navHTML;
+
+  /* Skip link — WCAG 2.4.1, sadece Tab ile focus alinca gorunur */
+  if (!document.getElementById('ak-skip-link')) {
+    const skipLink = document.createElement('a');
+    skipLink.id = 'ak-skip-link';
+    skipLink.className = 'skip-link';
+    skipLink.href = '#main-content';
+    skipLink.textContent = 'İçeriğe geç';
+    document.body.insertBefore(skipLink, document.body.firstChild);
+    // main-content anchor yoksa ilk <main> veya <section>'a id ekle
+    if (!document.getElementById('main-content')) {
+      const target = document.querySelector('main, section[id], .main-content');
+      if (target && !target.id) target.id = 'main-content';
+      else if (target && target.id) skipLink.href = '#' + target.id;
+    }
+  }
 
   /* ── Save drawer CSS (once) ── */
   if (!document.getElementById('save-drawer-styles')) {
