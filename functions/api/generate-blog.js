@@ -113,23 +113,59 @@ Her yazıda "Çanakkale Ayvacık Assos" hiyerarşisini doğal şekilde geçir. B
 ## Stil Kuralları — KRİTİK
 1. **Featured snippet hedefli ilk paragraf**: H1'den hemen sonra gelen ilk paragraf, sorulan sorunun kısa ve net cevabını verir (40-60 kelime). Google SERP'te 0. sırada gösterilebilir.
 2. **Coğrafi hiyerarşi**: İlk paragrafta "Çanakkale Ayvacık Assos" geçer.
-3. **Doğal Türkçe**: Reklam dili değil, kılavuz/rehber üslubu.
+3. **Doğal Türkçe**: Reklam dili değil, kılavuz/rehber üslubu. YAZIM HATALARINA DİKKAT (özellikle Türkçe diakritikler: sisli, sıcak, ılık — sislí, sicak, ilik değil).
 4. **Keyword-rich ama doğal**: Primary keyword başlık + H1 + ilk paragraf + 3-5 kez doğal geçer. Keyword stuffing YOK.
 5. **Yapısal içerik**: 5-8 H2 başlığı, en az 1 tablo veya liste, kalın/italik vurgular.
-6. **İç linkler**: 3-5 internal link (yukarıdaki paternlerden uygun olanları).
-7. **E-E-A-T sinyali**: Spesifik sayı/tarih/mesafe ver (genel "çok güzel" demek yerine "2.500 yıllık", "86 km uzaklıkta").
-8. **Uzunluk**: 700-1000 kelime — ne çok kısa (thin) ne çok uzun (dağınık).
+6. **İç linkler (ZORUNLU, MİNİMUM 6 TANE)**: Metinde bir yer/mekan/blog adı geçtiğinde MUTLAKA <a href="/..."> ile sarmalayacaksın. Örnekler:
+   - "Behramkale" → <a href="/koyler/behramkale">Behramkale</a>
+   - "Kadırga Koyu" → <a href="/yerler/kadirga-koyu">Kadırga Koyu</a>
+   - "Adatepe" → <a href="/koyler/adatepe">Adatepe</a>
+   - "Babakale" → <a href="/koyler/babakale">Babakale</a>
+   - "Athena Tapınağı" → <a href="/yerler/athena-tapinagi">Athena Tapınağı</a>
+   - "Sivrice" → <a href="/yerler/sivrice">Sivrice</a>
+   - "Assos otelleri" veya "oteller" → <a href="/oteller">Assos otelleri</a>
+   - "kahvaltı mekanları" → <a href="/kahvalti">Assos kahvaltı mekanları</a>
+   - "gezi rotaları" → <a href="/rotalar">Assos gezi rotaları</a>
+   - "1 Günlük Gezi Planı" → <a href="/blog/assos-1-gunluk-gezi-plani">1 Günlük Gezi Planı</a>
+   - "kış tatili" → <a href="/blog/assosa-kisin-gitmek">kışın Assos rehberi</a>
+   - İlk geçişte link ver, tekrarlarda zorunlu değil.
+7. **E-E-A-T sinyali**: Spesifik sayı/tarih/mesafe ver ("2.500 yıllık", "86 km uzaklıkta", "MÖ 530'da", "25-30°C"). Yağış mm, güneş saati, nem %, sıcaklık min-max gibi rakamsal veriler ZENGİN EKLE.
+8. **Uzunluk**: 800-1100 kelime — ne çok kısa (thin) ne çok uzun (dağınık).
 9. **Mekan isimleri serbest**: Bu blog yazısında gerçek mekan/otel isimleri geçebilir (kategori hub'larından farklı olarak).
-10. **Action items**: Sonuç bölümünde kullanıcıya somut "şimdi ne yap" önerileri.
+10. **Action items**: Sonuç bölümünde kullanıcıya somut "şimdi ne yap" önerileri — her öneride en az 1 internal link.
+
+## ZORUNLU BÖLÜM: Sıkça Sorulan Sorular (FAQ)
+
+İçeriğin SONUÇ bölümünden HEMEN ÖNCE şu yapıda bir FAQ bölümü ekle:
+
+<h2>Sıkça Sorulan Sorular</h2>
+<details>
+  <summary>Soru 1 metni (long-tail keyword içeren)</summary>
+  <p>Cevap — 50-80 kelime, spesifik, yararlı, keyword doğal geçer.</p>
+</details>
+<details>
+  <summary>Soru 2</summary>
+  <p>Cevap...</p>
+</details>
+(4-6 soru-cevap)
+
+Sorular MUTLAKA yazının ana konusuna ait uzun-kuyruk (long-tail) Google aramalarını hedeflemeli. Örn konu "Assos hava durumu" ise:
+- "Assos'ta yaz ayları ne kadar sıcak olur?"
+- "Assos deniz suyu hangi aylarda yüzmeye uygun?"
+- "Assos'u kışın ziyaret etmeye değer mi?"
+- "Assos'a gitmek için en iyi ay hangisi?"
+- "Assos yağışlı mı, hangi aylar yağışlı?"
 
 ## HTML Format Kuralları
 - <h1>...</h1> (tek, başlıkla uyumlu)
 - <h2>, <h3> (yapısal bölümler)
 - <p>, <ul>, <ol>, <li>
 - <strong>, <em>
-- <a href="/...">internal link</a>
+- <a href="/...">internal link</a> — MİNİMUM 6 TANE
 - <table><thead><tr><th>...</th></tr></thead><tbody>...</tbody></table>
+- <details><summary>...</summary><p>...</p></details> — FAQ için
 - Tüm HTML inline, class/style YOK
+- Script tag KOYMA, sadece HTML
 
 ## Çıktı Şeması (JSON)
 {
@@ -139,15 +175,24 @@ Her yazıda "Çanakkale Ayvacık Assos" hiyerarşisini doğal şekilde geçir. B
   "category": "Kategori adı (örn: 'Gezi Rehberi', 'Yeme İçme', 'Konaklama', 'Tarih & Kültür', 'Mevsim Rehberi')",
   "tags": ["5-7 tag, her biri 1-2 kelime, mixed: Assos, Ayvacık, konu-specific"],
   "emoji": "Uygun tek emoji",
-  "content": "Tam HTML içerik. H1 ile başlar, ~700-1000 kelime, 5-8 H2, tablolar, iç linkler."
+  "content": "Tam HTML içerik. H1 ile başlar, ~800-1100 kelime, 5-8 H2, tablolar, MIN 6 internal link, ZORUNLU FAQ bölümü.",
+  "faqs": [
+    { "q": "Soru 1 (long-tail keyword)", "a": "Cevap (50-80 kelime)" }
+  ]
 }
+
+faqs alanı: FAQ bölümünde verdiğin 4-6 soru-cevabın JSON karşılığı. Bu schema'ya ayrıca eklenecek. Her biri content içindekiyle AYNI olmalı.
 
 KURALLAR (tekrar):
 - JSON dışında hiçbir metin döndürme — ne açıklama ne kod bloku sarması
 - content HTML doğru parse edilebilir olmalı (kaçış karakterleri dikkat)
 - title'a "Assos'u Keşfet" EKLEME (otomatik eklenecek)
 - excerpt 140-160 karakter olmalı, daha az/çok değil
-- İlk paragraf featured snippet için 40-60 kelime, direkt cevap`;
+- İlk paragraf featured snippet için 40-60 kelime, direkt cevap
+- content içinde MIN 6 <a href="/..."> internal link
+- content içinde ZORUNLU <h2>Sıkça Sorulan Sorular</h2> bölümü + 4-6 <details>
+- Türkçe yazım hatası YOK (ılık, sisli, sıcak kullan — ilik, sislí, sicak değil)
+- faqs array'i content'teki FAQ ile birebir uyumlu`;
 
   const secondaryKwStr = Array.isArray(secondaryKeywords) && secondaryKeywords.length > 0
     ? secondaryKeywords.join(', ')
@@ -172,7 +217,7 @@ Yukarıdaki JSON şemasına göre blog yazısını üret. Sadece geçerli JSON d
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 6000,
+        max_tokens: 8000,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }]
       })
