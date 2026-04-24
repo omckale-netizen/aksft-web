@@ -157,12 +157,12 @@ if (getBlogSlugFromUrl()) {
 <!-- Yazı detay -->
 <section id="blog-post-section" style="display:none">
   <div class="bp-layout">
+    <div id="bp-img-wrap" class="post-img"></div>
     <details class="bp-toc" id="bp-toc" aria-label="İçindekiler" hidden>
       <summary class="bp-toc-summary"><span class="bp-toc-summary-text">İçindekiler</span><span class="bp-toc-caret">▾</span></summary>
       <div class="bp-toc-inner"></div>
     </details>
     <article class="bp-article">
-      <div id="bp-img-wrap" class="post-img"></div>
       <div id="bp-content" class="post-content"></div>
       <div id="bp-tags" class="post-tags" style="display:none"></div>
       <div id="bp-share" class="post-share"></div>
@@ -196,8 +196,9 @@ if (getBlogSlugFromUrl()) {
 @media(min-width:1024px){
   /* Desktop: grid layout + TOC position:sticky — scroll ile birlikte takip eder */
   .bp-layout{display:grid;grid-template-columns:220px minmax(0,680px);gap:40px;max-width:940px;align-items:start;}
-  .bp-article{max-width:680px;min-width:0;}
-  .bp-toc{margin:0;background:transparent;border:none;border-radius:0;overflow:visible;position:sticky;top:96px;max-height:calc(100vh - 120px);overflow-y:auto;padding-right:8px;scrollbar-width:thin;scrollbar-color:rgba(26,39,68,.15) transparent;}
+  #bp-img-wrap{grid-column:2 / 3;grid-row:1;}
+  .bp-article{grid-column:2 / 3;grid-row:2;max-width:680px;min-width:0;}
+  .bp-toc{grid-column:1;grid-row:1 / -1;margin:0;background:transparent;border:none;border-radius:0;overflow:visible;position:sticky;top:96px;max-height:calc(100vh - 120px);overflow-y:auto;padding-right:8px;scrollbar-width:thin;scrollbar-color:rgba(26,39,68,.15) transparent;}
   .bp-toc::-webkit-scrollbar{width:4px;}
   .bp-toc::-webkit-scrollbar-thumb{background:rgba(26,39,68,.15);border-radius:4px;}
   .bp-toc summary{display:none;}
@@ -275,6 +276,8 @@ if (getBlogSlugFromUrl()) {
 .ps-btn.xb:hover{background:rgba(0,0,0,.07);border-color:rgba(0,0,0,.12)}
 .ps-btn.cp{background:rgba(196,82,26,.04);color:#C4521A;border-color:rgba(196,82,26,.1)}
 .ps-btn.cp:hover{background:rgba(196,82,26,.1);border-color:rgba(196,82,26,.16)}
+.ps-btn.ns{background:rgba(26,39,68,.05);color:#1A2744;border-color:rgba(26,39,68,.1)}
+.ps-btn.ns:hover{background:rgba(26,39,68,.1);border-color:rgba(26,39,68,.18)}
 .bp-related{margin-top:48px;padding-top:36px;border-top:1px solid rgba(0,0,0,.06)}
 .bp-related-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:#718096;margin-bottom:18px;text-align:center}
 .bp-related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
@@ -669,10 +672,14 @@ async function loadSinglePost(slug) {
     if (twDesc) twDesc.content = (p.excerpt || p.title || '').substring(0, 160);
     if (shareImg && twImg) twImg.content = shareImg;
 
+    var nativeShareBtn = (typeof navigator.share === 'function')
+      ? '<button type="button" onclick="bpNativeShare(this,'+JSON.stringify(url).replace(/"/g,'&quot;')+','+JSON.stringify(p.title||'').replace(/"/g,'&quot;')+')" class="ps-btn ns" style="cursor:pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg><span>Paylaş</span></button>'
+      : '';
     document.getElementById('bp-share').innerHTML =
       '<div class="post-share-wrap">' +
         '<div class="post-share-title">Bu yazıyı paylaş</div>' +
         '<div class="post-share">' +
+          nativeShareBtn +
           '<a href="https://wa.me/?text='+encodeURIComponent(p.title+'\n'+url)+'" target="_blank" rel="noopener noreferrer" class="ps-btn wa"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.528 5.855L0 24l6.335-1.52C8.034 23.46 9.98 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.846 0-3.584-.479-5.104-1.32l-.369-.21-3.76.902.948-3.668-.223-.374A9.944 9.944 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>WhatsApp</a>' +
           '<a href="https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(url)+'" target="_blank" rel="noopener noreferrer" class="ps-btn fb"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>Facebook</a>' +
           '<a href="https://twitter.com/intent/tweet?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(p.title)+'" target="_blank" rel="noopener noreferrer" class="ps-btn xb"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>X</a>' +
@@ -720,6 +727,19 @@ async function loadSinglePost(slug) {
   // Icerik hazir — sayfayi goster
   document.body.style.opacity = '1';
 }
+
+/* ── Native share (Paylas) ── */
+window.bpNativeShare = function(btn, url, title) {
+  if (typeof navigator.share !== 'function') return;
+  navigator.share({ title: title || document.title, url: url })
+    .then(function(){
+      try {
+        var sp = btn.querySelector('span');
+        if (sp) { var prev = sp.textContent; sp.textContent = 'Paylaşıldı!'; setTimeout(function(){ sp.textContent = prev; }, 1500); }
+      } catch(e) {}
+    })
+    .catch(function(){ /* user cancelled */ });
+};
 
 /* ── Blog TOC builder ── */
 function buildBlogToc(contentEl) {
