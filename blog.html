@@ -157,15 +157,54 @@ if (getBlogSlugFromUrl()) {
 <!-- Yazı detay -->
 <section id="blog-post-section" style="display:none">
   <div style="max-width:800px;margin:-30px auto 0;padding:0 24px;position:relative;z-index:3" id="bp-img-wrap" class="post-img"></div>
-  <article style="max-width:680px;margin:0 auto;padding:40px 24px 80px">
-    <div id="bp-content" class="post-content"></div>
-    <div id="bp-tags" class="post-tags" style="display:none"></div>
-    <div id="bp-share" class="post-share"></div>
-    <div id="bp-related" style="display:none"></div>
-  </article>
+  <div class="bp-layout">
+    <details class="bp-toc" id="bp-toc" aria-label="İçindekiler" hidden>
+      <summary class="bp-toc-summary"><span class="bp-toc-summary-text">İçindekiler</span><span class="bp-toc-caret">▾</span></summary>
+      <div class="bp-toc-inner"></div>
+    </details>
+    <article class="bp-article">
+      <div id="bp-content" class="post-content"></div>
+      <div id="bp-tags" class="post-tags" style="display:none"></div>
+      <div id="bp-share" class="post-share"></div>
+      <div id="bp-related" style="display:none"></div>
+    </article>
+  </div>
 </section>
 
 <style>
+/* ── Blog TOC (Icindekiler) ── */
+.bp-layout{max-width:680px;margin:0 auto;padding:40px 24px 80px;}
+.bp-article{min-width:0;}
+.bp-toc{margin-bottom:28px;background:rgba(26,39,68,.035);border:1px solid rgba(26,39,68,.08);border-radius:14px;overflow:hidden;}
+.bp-toc[hidden]{display:none;}
+.bp-toc summary{list-style:none;cursor:pointer;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.88rem;color:#1A2744;}
+.bp-toc summary::-webkit-details-marker{display:none;}
+.bp-toc summary::marker{display:none;content:'';}
+.bp-toc-caret{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;color:#C4521A;background:rgba(196,82,26,.1);border-radius:6px;font-size:.9rem;transition:transform .2s;}
+.bp-toc[open] .bp-toc-caret{transform:rotate(180deg);}
+.bp-toc-inner{padding:4px 16px 14px;}
+.bp-toc-title{font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#718096;margin:4px 0 10px;display:none;}
+.bp-toc-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px;}
+.bp-toc-list li{list-style:none;margin:0;padding:0;}
+.bp-toc-list a{display:block;padding:6px 10px;font-size:.8rem;line-height:1.4;color:#4A5870;text-decoration:none;border-left:2px solid transparent;border-radius:0 6px 6px 0;transition:color .15s,background .15s,border-color .15s;}
+.bp-toc-list a:hover{color:#C4521A;background:rgba(196,82,26,.05);text-decoration:none;}
+.bp-toc-list a.active{color:#C4521A;font-weight:700;border-left-color:#C4521A;background:rgba(196,82,26,.07);}
+.bp-toc-list .toc-h3{padding-left:22px;font-size:.74rem;color:#718096;}
+.bp-toc-list .toc-h3.active{color:#C4521A;}
+/* Scroll target offset — sticky nav altina saklanmasin */
+.post-content h2,.post-content h3{scroll-margin-top:90px;}
+@media(min-width:1280px){
+  /* Desktop: TOC fixed olarak sol gutter'da — article merkezde kalir, image ile hizali */
+  .bp-toc{position:fixed;top:110px;left:max(24px,calc(50% - 620px));width:240px;max-height:calc(100vh - 140px);overflow-y:auto;margin:0;background:transparent;border:none;border-radius:0;padding:0 10px 10px 0;scrollbar-width:thin;scrollbar-color:rgba(26,39,68,.15) transparent;z-index:5;}
+  .bp-toc::-webkit-scrollbar{width:4px;}
+  .bp-toc::-webkit-scrollbar-thumb{background:rgba(26,39,68,.15);border-radius:4px;}
+  .bp-toc summary{display:none;}
+  .bp-toc-inner{padding:0;}
+  .bp-toc-title{display:block;}
+  .bp-toc-list a{font-size:.78rem;}
+  .bp-toc-list .toc-h3{font-size:.72rem;}
+}
+
 .post-content{font-size:1rem;color:#4A5870;line-height:1.85}
 .post-content h2{font-size:1.3rem;font-weight:800;color:#1A2744;margin:32px 0 12px}
 .post-content h3{font-size:1.1rem;font-weight:700;color:#1A2744;margin:24px 0 10px}
@@ -507,6 +546,9 @@ async function loadSinglePost(slug) {
     var bpEl = document.getElementById('bp-content');
     bpEl.innerHTML = contentHtml;
 
+    // Icindekiler (TOC) — icerik uzun ve >=3 baslik varsa goster
+    try { buildBlogToc(bpEl); } catch(e) { console.warn('TOC error:', e); }
+
     // FAQ <details> exclusive mode: birine tiklayinca digeri kapansin
     // Ayni parent icindeki tum <details>'leri ayni name ile grupla (Chrome 120+/Safari 17+ native)
     bpEl.querySelectorAll('details').forEach(function(d) {
@@ -674,6 +716,99 @@ async function loadSinglePost(slug) {
   }
   // Icerik hazir — sayfayi goster
   document.body.style.opacity = '1';
+}
+
+/* ── Blog TOC builder ── */
+function buildBlogToc(contentEl) {
+  var tocEl = document.getElementById('bp-toc');
+  if (!tocEl || !contentEl) return;
+  var headings = contentEl.querySelectorAll('h2, h3');
+  if (headings.length < 3) { tocEl.hidden = true; return; }
+
+  function slugifyTr(s) {
+    return String(s || '')
+      .toLowerCase()
+      .replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ş/g,'s')
+      .replace(/ı/g,'i').replace(/ö/g,'o').replace(/ç/g,'c')
+      .replace(/[^a-z0-9]+/g,'-')
+      .replace(/^-+|-+$/g,'')
+      .slice(0, 60) || 'heading';
+  }
+  var seen = {};
+  var items = [];
+  Array.prototype.forEach.call(headings, function(h) {
+    if (!h.id) {
+      var base = slugifyTr(h.textContent || ''), id = base, n = 2;
+      while (seen[id] || document.getElementById(id)) { id = base + '-' + (n++); }
+      h.id = id;
+    }
+    seen[h.id] = true;
+    items.push({ level: h.tagName === 'H2' ? 2 : 3, id: h.id, text: h.textContent || '' });
+  });
+
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  var listHtml = items.map(function(it) {
+    return '<li><a href="#' + it.id + '" data-toc-id="' + it.id + '" class="' + (it.level === 3 ? 'toc-h3' : 'toc-h2') + '">' + esc(it.text) + '</a></li>';
+  }).join('');
+  var inner = tocEl.querySelector('.bp-toc-inner');
+  if (inner) inner.innerHTML = '<div class="bp-toc-title">Icindekiler</div><ul class="bp-toc-list">' + listHtml + '</ul>';
+  tocEl.hidden = false;
+
+  // Desktop: otomatik acik; mobile: kapali
+  var mq = window.matchMedia('(min-width:1280px)');
+  tocEl.open = mq.matches;
+  if (mq.addEventListener) mq.addEventListener('change', function(e) { tocEl.open = e.matches; });
+
+  // Click: smooth scroll + mobile'da collapse
+  var linkMap = {};
+  tocEl.querySelectorAll('a[data-toc-id]').forEach(function(a) {
+    linkMap[a.getAttribute('data-toc-id')] = a;
+    a.addEventListener('click', function(e) {
+      var id = a.getAttribute('data-toc-id');
+      var target = document.getElementById(id);
+      if (!target) return;
+      e.preventDefault();
+      var y = target.getBoundingClientRect().top + window.pageYOffset - 84;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+      history.replaceState(null, '', '#' + id);
+      if (!mq.matches) tocEl.open = false;
+    });
+  });
+
+  // Active highlight — scroll ile uste en yakin h2/h3'u isaretle
+  var currentActive = null;
+  function setActive(id) {
+    if (currentActive === id) return;
+    if (currentActive && linkMap[currentActive]) linkMap[currentActive].classList.remove('active');
+    if (id && linkMap[id]) linkMap[id].classList.add('active');
+    currentActive = id;
+  }
+  function updateActive() {
+    var best = null, bestTop = -Infinity;
+    for (var i = 0; i < headings.length; i++) {
+      var top = headings[i].getBoundingClientRect().top;
+      if (top <= 120) { if (top > bestTop) { bestTop = top; best = headings[i].id; } }
+    }
+    if (!best && headings.length) best = headings[0].id;
+    setActive(best);
+  }
+  var scrollTimer = null;
+  window.addEventListener('scroll', function() {
+    if (scrollTimer) return;
+    scrollTimer = requestAnimationFrame(function() { scrollTimer = null; updateActive(); });
+  }, { passive: true });
+  updateActive();
+
+  // Hash ile gelmisse hedefe scroll
+  if (location.hash && document.getElementById(location.hash.slice(1))) {
+    setTimeout(function() {
+      var t = document.getElementById(location.hash.slice(1));
+      if (t) {
+        var y = t.getBoundingClientRect().top + window.pageYOffset - 84;
+        window.scrollTo({ top: y, behavior: 'auto' });
+      }
+    }, 60);
+  }
 }
 
 var blogInited = false;
