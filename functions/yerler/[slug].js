@@ -67,6 +67,14 @@ export async function onRequest(context) {
 
   if (slug === 'yer-detay' || slug === 'yer-detay.html') return next();
 
+  // Slug redirects (eski slug -> yeni slug, SEO juice korur)
+  const SLUG_REDIRECTS = {
+    'athena-tapinagi': 'assos-antik-kenti'
+  };
+  if (SLUG_REDIRECTS[slug]) {
+    return Response.redirect(`https://assosukesfet.com/yerler/${SLUG_REDIRECTS[slug]}`, 301);
+  }
+
   try {
     const docUrl = `https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents/places/${encodeURIComponent(slug)}`;
     const controller = new AbortController();
