@@ -74,6 +74,7 @@
     .ara-card-cat{position:absolute;top:10px;left:10px;font-size:.58rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 10px;border-radius:999px;color:#fff;backdrop-filter:blur(8px);z-index:2;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15);}
     .ara-card-status{position:absolute;top:10px;right:10px;display:inline-flex;align-items:center;gap:5px;font-size:.58rem;font-weight:700;letter-spacing:.05em;padding:3px 9px;border-radius:999px;backdrop-filter:blur(8px);z-index:2;}
     .ara-status-dot{width:5px;height:5px;border-radius:50%;box-shadow:0 0 4px currentColor;}
+    @keyframes araStatusPulse{0%,100%{opacity:1}50%{opacity:.4}}
     .ara-card-body{padding:12px 16px 14px;}
     .ara-card-title{font-weight:700;font-size:.92rem;color:var(--navy);margin-bottom:4px;line-height:1.3;}
     .ara-card-sub{font-size:.74rem;color:var(--text-muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
@@ -266,7 +267,7 @@
           var statusInfo = null;
           try {
             if (v.category === 'konaklama') statusInfo = null;
-            else if (v.seasonal && typeof isVenueOpen === 'function' && isVenueOpen(v) === false) statusInfo = { label: 'Sezon dışı', color: '#fff', bg: 'rgba(29,78,216,.92)' };
+            else if (v.seasonal && typeof isVenueOpen === 'function' && isVenueOpen(v) === false) statusInfo = { label: 'Sezon dışı', dot: '#63B3ED' };
             else if (typeof isVenueOpen === 'function') {
               var openNow = isVenueOpen(v);
               if (openNow === true) {
@@ -277,16 +278,15 @@
                   var nowM = new Date().getHours() * 60 + new Date().getMinutes();
                   var openM = parseInt(hm[1], 10) * 60 + parseInt(hm[2], 10);
                   var closeM = parseInt(hm[3], 10) * 60 + parseInt(hm[4], 10);
-                  // Gece yarisi gecisi: close<open + nowM>=open -> 24h ekle
                   if (closeM < openM && nowM >= openM) closeM += 24 * 60;
                   var minsLeft = closeM - nowM;
                   if (minsLeft > 0 && minsLeft <= 60) {
-                    statusInfo = { label: 'Yakında kapanıyor', color: '#fff', bg: 'rgba(245,158,11,.92)' };
+                    statusInfo = { label: 'Yakında kapanıyor', dot: '#FBBF24', pulse: true };
                   }
                 }
-                if (!statusInfo) statusInfo = { label: 'Açık', color: '#fff', bg: 'rgba(22,163,74,.92)' };
+                if (!statusInfo) statusInfo = { label: 'Açık', dot: '#4ADE80' };
               }
-              else if (openNow === false) statusInfo = { label: 'Kapalı', color: '#fff', bg: 'rgba(185,28,28,.92)' };
+              else if (openNow === false) statusInfo = { label: 'Kapalı', dot: '#F87171' };
             }
           } catch(e) {}
           out.push({ type: 'venue', id: v.id, title: v.title, sub: v.location || v.shortDesc || '', emoji: v.emoji || '📍', image: (v.images && v.images[0]) || '', badge: 'Mekan', cat: cat, status: statusInfo });
@@ -378,10 +378,11 @@
           if (it.cat && it.cat.label) {
             catHtml = '<span class="ara-card-cat" style="background:' + (it.cat.color || '#C4521A') + ';">' + (it.cat.emoji ? it.cat.emoji + ' ' : '') + escHtml(it.cat.label) + '</span>';
           }
-          // Açık/Kapalı durumu (sadece venue) — sol altta
+          // Açık/Kapalı durumu (sadece venue) — glass tarzı (mekanlar hub ile tutarli)
           var statusHtml = '';
           if (it.status) {
-            statusHtml = '<span class="ara-card-status" style="background:' + it.status.bg + ';color:' + it.status.color + ';border:1px solid ' + it.status.color + '66"><span class="ara-status-dot" style="background:' + it.status.color + '"></span>' + escHtml(it.status.label) + '</span>';
+            var pulseAnim = it.status.pulse ? ';animation:araStatusPulse 1.5s infinite' : '';
+            statusHtml = '<span class="ara-card-status" style="background:rgba(15,23,42,.55);color:rgba(255,255,255,.95);border:1px solid rgba(255,255,255,.18)"><span class="ara-status-dot" style="background:' + it.status.dot + ';box-shadow:0 0 6px ' + it.status.dot + pulseAnim + '"></span>' + escHtml(it.status.label) + '</span>';
           }
           // Yeni URL formati: /rotalar/slug, /koyler/slug, /yerler/slug, /kategori/slug
           var _detayUrl;
