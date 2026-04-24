@@ -17351,11 +17351,13 @@ function removeBlogImage() {
   showBlogImgPreview('');
 }
 
-function closeBlogModal() {
-  var title = (document.getElementById('bf-title').value || '').trim();
-  var content = window._rteSourceMode ? (document.getElementById('bf-content').value || '').trim() : (document.getElementById('bf-content-editor').innerHTML || '').trim();
-  var hasContent = title || (content && content !== '<br>' && content !== '<p><br></p>');
-  if (hasContent && !confirm('Yazıyı kaydetmeden çıkmak istediğinize emin misiniz?')) return;
+function closeBlogModal(force) {
+  if (!force) {
+    var title = (document.getElementById('bf-title').value || '').trim();
+    var content = window._rteSourceMode ? (document.getElementById('bf-content').value || '').trim() : (document.getElementById('bf-content-editor').innerHTML || '').trim();
+    var hasContent = title || (content && content !== '<br>' && content !== '<p><br></p>');
+    if (hasContent && !confirm('Yazıyı kaydetmeden çıkmak istediğinize emin misiniz?')) return;
+  }
   document.getElementById('blog-modal').classList.remove('show');
   editingBlogId = null;
 }
@@ -17597,7 +17599,7 @@ async function saveBlogPost(e) {
     await db.collection('blog_posts').doc(slug).set(post, { merge: true });
     logActivity('blog_' + (editingBlogId ? 'guncelle' : 'ekle'), slug, post.title);
     if (post.status === 'published') pingIndexNow('https://assosukesfet.com/blog/' + slug);
-    closeBlogModal();
+    closeBlogModal(true);
     renderBlogTable();
     showToast('Yazı kaydedildi!', 'success');
   } catch(err) {
