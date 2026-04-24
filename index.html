@@ -967,28 +967,36 @@ async function loadHomeBlog() {
     const PICK_COUNT = 3;
     const today = Math.floor(Date.now() / 86400000);
 
-    // Deterministik hash (id + day seed) — aynı gün herkes aynı skoru alır
+    // FNV-1a hash — daha iyi distribution (onceki djb2 varyanti adjacent gunler icin cok benzer hash uretiyor)
     function hashStr(s) {
-      var h = 0;
-      for (var i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) & 0xffffffff;
-      return Math.abs(h);
+      var h = 0x811c9dc5;
+      for (var i = 0; i < s.length; i++) {
+        h ^= s.charCodeAt(i);
+        h = (h * 0x01000193) >>> 0;
+      }
+      return h;
     }
 
     // Belirli bir gün için puanlanmış sıralı liste üretir
-    // Puan = günlük deterministik hash + yaş bonusu + kategori çeşitliliği
     function rankForDay(list, day) {
       var scored = list.map(function(doc) {
         var p = doc.data();
         var id = doc.id;
-        // Günlük rastgelelik seed'i
-        var rand = hashStr(id + '_d' + day) / 0x7fffffff; // 0..1
-        // Yaşlılık bonusu: yeni postlar +, eski postlar az eksi
-        var pubTime = p.publishedAt ? new Date(p.publishedAt).getTime() : 0;
+        // Günlük rastgelelik: id hash'i ile day hash'i XOR — adjacent gunler cok farkli sonuc verir
+        var idHash = hashStr(id);
+        var dayHash = hashStr('day_' + day);
+        var mixed = ((idHash ^ dayHash) * 0x45d9f3b) >>> 0;
+        var rand = mixed / 0x100000000; // 0..1
+        // Yaşlılık bonusu (publishedAt Timestamp objesi olabilir — guvenli okuma)
+        var pubTime = 0;
+        if (p.publishedAt) {
+          if (typeof p.publishedAt.toDate === 'function') pubTime = p.publishedAt.toDate().getTime();
+          else if (p.publishedAt.seconds) pubTime = p.publishedAt.seconds * 1000;
+          else { var d = new Date(p.publishedAt); pubTime = isNaN(d) ? 0 : d.getTime(); }
+        }
         var ageDays = pubTime ? Math.floor((Date.now() - pubTime) / 86400000) : 365;
-        var freshness = Math.max(0, 1 - ageDays / 365) * 0.3; // 0..0.3
-        // Featured/pinned bonusu
+        var freshness = Math.max(0, 1 - ageDays / 365) * 0.3;
         var featBonus = p.featured ? 0.25 : 0;
-        // Toplam skor: günlük karma (0..1) + yaşlılık + featured
         var score = rand * 0.7 + freshness + featBonus;
         return { doc: doc, id: id, score: score, category: p.category || '_' };
       });
