@@ -813,7 +813,7 @@ function buildBlogToc(contentEl) {
     return '<li><a href="#' + it.id + '" data-toc-id="' + it.id + '" class="' + (it.level === 3 ? 'toc-h3' : 'toc-h2') + '">' + esc(it.text) + '</a></li>';
   }).join('');
   var inner = tocEl.querySelector('.bp-toc-inner');
-  if (inner) inner.innerHTML = '<div class="bp-toc-title">Icindekiler</div><ul class="bp-toc-list">' + listHtml + '</ul>';
+  if (inner) inner.innerHTML = '<div class="bp-toc-title">İçindekiler</div><ul class="bp-toc-list">' + listHtml + '</ul>';
   tocEl.hidden = false;
 
   // Desktop: otomatik acik; mobile: kapali
