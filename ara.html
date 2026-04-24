@@ -269,7 +269,21 @@
             else if (v.seasonal && typeof isVenueOpen === 'function' && isVenueOpen(v) === false) statusInfo = { label: 'Sezon dışı', color: '#fff', bg: 'rgba(29,78,216,.92)' };
             else if (typeof isVenueOpen === 'function') {
               var openNow = isVenueOpen(v);
-              if (openNow === true) statusInfo = { label: 'Açık', color: '#fff', bg: 'rgba(22,163,74,.92)' };
+              if (openNow === true) {
+                // 1 saat icinde kapanacak mi?
+                var tHours = typeof getVenueTodayHours === 'function' ? getVenueTodayHours(v) : '';
+                var hm = (tHours || '').match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
+                if (hm) {
+                  var nowM = new Date().getHours() * 60 + new Date().getMinutes();
+                  var closeM = parseInt(hm[3], 10) * 60 + parseInt(hm[4], 10);
+                  if (closeM < parseInt(hm[1], 10) * 60 + parseInt(hm[2], 10)) closeM += 24 * 60;
+                  var minsLeft = closeM - nowM;
+                  if (minsLeft > 0 && minsLeft <= 60) {
+                    statusInfo = { label: 'Yakında kapanıyor', color: '#fff', bg: 'rgba(245,158,11,.92)' };
+                  }
+                }
+                if (!statusInfo) statusInfo = { label: 'Açık', color: '#fff', bg: 'rgba(22,163,74,.92)' };
+              }
               else if (openNow === false) statusInfo = { label: 'Kapalı', color: '#fff', bg: 'rgba(185,28,28,.92)' };
             }
           } catch(e) {}

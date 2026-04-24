@@ -3243,6 +3243,17 @@ function renderVenuePage(venueId) {
     if (isNowOpen === true) {
       const match = (todayHours || '').match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
       const closeText = match ? saatEki(match[3], match[4], 'yonelme') + ' kadar' : '';
+      // 1 saat icinde kapanacak mi? -> turuncu "yakinda kapaniyor" badge
+      if (match) {
+        var nowM = new Date().getHours() * 60 + new Date().getMinutes();
+        var closeM = parseInt(match[3], 10) * 60 + parseInt(match[4], 10);
+        // Gece yarisi gecisi (orn: 20:00-02:00)
+        if (closeM < parseInt(match[1], 10) * 60 + parseInt(match[2], 10)) closeM += 24 * 60;
+        var minsLeft = closeM - nowM;
+        if (minsLeft > 0 && minsLeft <= 60) {
+          return '<span class="vp-open-badge vp-closing">Yakında kapanıyor · ' + minsLeft + ' dk kaldı</span>';
+        }
+      }
       return '<span class="vp-open-badge vp-open">Açık' + (closeText ? ' · ' + closeText : '') + '</span>';
     } else if (isNowOpen === false) {
       if (todayHours && todayHours.toLowerCase().includes('kapal')) {
@@ -3327,6 +3338,9 @@ function renderVenuePage(venueId) {
       .vp-open-badge::before{content:'';width:7px;height:7px;border-radius:50%;flex-shrink:0;}
       .vp-open{background:rgba(34,197,94,.18);border:1px solid rgba(34,197,94,.35);color:#4ADE80;}
       .vp-open::before{background:#4ADE80;box-shadow:0 0 6px rgba(34,197,94,.6);}
+      .vp-closing{background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.4);color:#FBBF24;}
+      .vp-closing::before{background:#FBBF24;box-shadow:0 0 6px rgba(245,158,11,.6);animation:vpClosingPulse 1.5s infinite}
+      @keyframes vpClosingPulse{0%,100%{opacity:1}50%{opacity:.4}}
       .vp-closed{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#F87171;}
       .vp-closed::before{background:#F87171;box-shadow:0 0 6px rgba(239,68,68,.5);}
       /* glass hours card */
