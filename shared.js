@@ -610,10 +610,10 @@ document.addEventListener('dataReady', _fetchSiteLogo);
         align-items: center;
         justify-content: center;
       }
-      /* Küçük save/favori butonlarının tıklama alanı */
+      /* Küçük save/favori butonlarının tıklama alanı — WCAG 2.5.5 min 44px */
       .mk-fc-save, .mk-vc-save, .place-save-btn, .save-icon-btn {
-        min-width: 40px;
-        min-height: 40px;
+        min-width: 44px;
+        min-height: 44px;
       }
     }
 
