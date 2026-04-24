@@ -138,16 +138,18 @@ Her yazıda "Çanakkale Ayvacık Assos" hiyerarşisini doğal şekilde geçir. B
 
 İçeriğin SONUÇ bölümünden HEMEN ÖNCE şu yapıda bir FAQ bölümü ekle:
 
+Tum <details> etiketlerinde name="post-faq-group" attribute'u KULLAN (exclusive accordion icin, birine tiklayinca digeri kapanir):
+
 <h2>Sıkça Sorulan Sorular</h2>
-<details>
+<details name="post-faq-group">
   <summary>Soru 1 metni (long-tail keyword içeren)</summary>
   <p>Cevap — 50-80 kelime, spesifik, yararlı, keyword doğal geçer.</p>
 </details>
-<details>
+<details name="post-faq-group">
   <summary>Soru 2</summary>
   <p>Cevap...</p>
 </details>
-(4-6 soru-cevap)
+(4-6 soru-cevap, HEPSI name="post-faq-group")
 
 Sorular MUTLAKA yazının ana konusuna ait uzun-kuyruk (long-tail) Google aramalarını hedeflemeli. Örn konu "Assos hava durumu" ise:
 - "Assos'ta yaz ayları ne kadar sıcak olur?"

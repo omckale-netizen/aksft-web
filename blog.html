@@ -507,6 +507,26 @@ async function loadSinglePost(slug) {
     var bpEl = document.getElementById('bp-content');
     bpEl.innerHTML = contentHtml;
 
+    // FAQ <details> exclusive mode: birine tiklayinca digeri kapansin
+    // Ayni parent icindeki tum <details>'leri ayni name ile grupla (Chrome 120+/Safari 17+ native)
+    bpEl.querySelectorAll('details').forEach(function(d) {
+      var parent = d.parentElement;
+      if (!parent.dataset.faqGrouped) {
+        parent.dataset.faqGrouped = '1';
+        parent.querySelectorAll(':scope > details').forEach(function(sib) { sib.setAttribute('name', 'post-faq-group'); });
+      }
+    });
+    // Eski tarayici fallback: toggle event ile siblingleri kapat
+    bpEl.addEventListener('toggle', function(e) {
+      var d = e.target;
+      if (!d || d.tagName !== 'DETAILS' || !d.open) return;
+      var parent = d.parentElement;
+      if (!parent) return;
+      parent.querySelectorAll(':scope > details[open]').forEach(function(other) {
+        if (other !== d) other.open = false;
+      });
+    }, true);
+
     // /blog/slug URL'indeyken 'harita.html', 'mekanlar.html' gibi relative
     // linkler /blog/harita.html seklinde yanlis resolve oluyor. Blog
     // icerigindeki tum relative href'leri site koku bazli absolute yap.
