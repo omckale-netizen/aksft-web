@@ -156,13 +156,13 @@ if (getBlogSlugFromUrl()) {
 
 <!-- Yazı detay -->
 <section id="blog-post-section" style="display:none">
-  <div style="max-width:800px;margin:-30px auto 0;padding:0 24px;position:relative;z-index:3" id="bp-img-wrap" class="post-img"></div>
   <div class="bp-layout">
     <details class="bp-toc" id="bp-toc" aria-label="İçindekiler" hidden>
       <summary class="bp-toc-summary"><span class="bp-toc-summary-text">İçindekiler</span><span class="bp-toc-caret">▾</span></summary>
       <div class="bp-toc-inner"></div>
     </details>
     <article class="bp-article">
+      <div id="bp-img-wrap" class="post-img"></div>
       <div id="bp-content" class="post-content"></div>
       <div id="bp-tags" class="post-tags" style="display:none"></div>
       <div id="bp-share" class="post-share"></div>
@@ -193,9 +193,11 @@ if (getBlogSlugFromUrl()) {
 .bp-toc-list .toc-h3.active{color:#C4521A;}
 /* Scroll target offset — sticky nav altina saklanmasin */
 .post-content h2,.post-content h3{scroll-margin-top:90px;}
-@media(min-width:1280px){
-  /* Desktop: TOC fixed olarak sol gutter'da — article merkezde kalir, image ile hizali */
-  .bp-toc{position:fixed;top:110px;left:max(24px,calc(50% - 620px));width:240px;max-height:calc(100vh - 140px);overflow-y:auto;margin:0;background:transparent;border:none;border-radius:0;padding:0 10px 10px 0;scrollbar-width:thin;scrollbar-color:rgba(26,39,68,.15) transparent;z-index:5;}
+@media(min-width:1024px){
+  /* Desktop: grid layout + TOC position:sticky — scroll ile birlikte takip eder */
+  .bp-layout{display:grid;grid-template-columns:220px minmax(0,680px);gap:40px;max-width:940px;align-items:start;}
+  .bp-article{max-width:680px;min-width:0;}
+  .bp-toc{margin:0;background:transparent;border:none;border-radius:0;overflow:visible;position:sticky;top:96px;max-height:calc(100vh - 120px);overflow-y:auto;padding-right:8px;scrollbar-width:thin;scrollbar-color:rgba(26,39,68,.15) transparent;}
   .bp-toc::-webkit-scrollbar{width:4px;}
   .bp-toc::-webkit-scrollbar-thumb{background:rgba(26,39,68,.15);border-radius:4px;}
   .bp-toc summary{display:none;}
@@ -254,6 +256,7 @@ if (getBlogSlugFromUrl()) {
   .post-content details summary::after{width:26px;height:26px;font-size:1.15rem}
   .post-content details > *:not(summary){padding:0 18px 16px;font-size:.88rem}
 }
+#bp-img-wrap{margin:-70px 0 32px;position:relative;z-index:3}
 .post-img img{width:100%;border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.15);opacity:0;transition:opacity .5s}
 .post-img img.loaded{opacity:1}
 .post-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:32px;padding-top:24px;border-top:1px solid rgba(0,0,0,.06)}
@@ -755,7 +758,7 @@ function buildBlogToc(contentEl) {
   tocEl.hidden = false;
 
   // Desktop: otomatik acik; mobile: kapali
-  var mq = window.matchMedia('(min-width:1280px)');
+  var mq = window.matchMedia('(min-width:1024px)');
   tocEl.open = mq.matches;
   if (mq.addEventListener) mq.addEventListener('change', function(e) { tocEl.open = e.matches; });
 
@@ -768,10 +771,15 @@ function buildBlogToc(contentEl) {
       var target = document.getElementById(id);
       if (!target) return;
       e.preventDefault();
-      var y = target.getBoundingClientRect().top + window.pageYOffset - 84;
-      window.scrollTo({ top: y, behavior: 'smooth' });
+      // Mobilde TOC acikken once kapat (reflow yapilsin), sonra hedefi hesapla
+      // (Aksi halde kapanma sirasinda sayfa yukari kayar ve overshoot olur.)
+      var needsClose = !mq.matches && tocEl.open;
+      if (needsClose) tocEl.open = false;
+      requestAnimationFrame(function() {
+        var y = target.getBoundingClientRect().top + window.pageYOffset - 84;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      });
       history.replaceState(null, '', '#' + id);
-      if (!mq.matches) tocEl.open = false;
     });
   });
 
