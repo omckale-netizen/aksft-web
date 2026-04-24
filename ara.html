@@ -131,6 +131,19 @@
           <button class="ara-clear" onclick="araClear()" aria-label="Temizle">✕</button>
           <button class="ara-input-btn" onclick="araSubmit()">Keşfet</button>
         </div>
+        <script>
+          // Flicker fix: URL'deki ?q= parametresini input'a anlik set et
+          // (pageInit 'dataReady' bekler — arada 500ms+ placeholder gorunurdu).
+          (function(){
+            try {
+              var q = new URLSearchParams(location.search).get('q');
+              if (q) {
+                var el = document.getElementById('ara-input');
+                if (el) { el.value = q; el.closest('.ara-inputwrap').classList.add('has-value'); }
+              }
+            } catch(e) {}
+          })();
+        </script>
         <div class="ara-popular" id="ara-popular" style="padding:0;margin-top:18px;display:none">
           <div class="ara-pop-label">Popüler aramalar</div>
           <div class="ara-pop-row">
