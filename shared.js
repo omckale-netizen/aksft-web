@@ -3246,9 +3246,12 @@ function renderVenuePage(venueId) {
       // 1 saat icinde kapanacak mi? -> turuncu "yakinda kapaniyor" badge
       if (match) {
         var nowM = new Date().getHours() * 60 + new Date().getMinutes();
+        var openM = parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
         var closeM = parseInt(match[3], 10) * 60 + parseInt(match[4], 10);
-        // Gece yarisi gecisi (orn: 20:00-02:00)
-        if (closeM < parseInt(match[1], 10) * 60 + parseInt(match[2], 10)) closeM += 24 * 60;
+        // Gece yarisi gecisi (orn: 20:00-02:00): eger close<open ve nowM ogleden sonra
+        // ise gece yarisini gececek -> 24h ekle. Ama nowM<close ise (erken sabah)
+        // mekan hala dunkü oturumun icinde, closeM aynen kalir.
+        if (closeM < openM && nowM >= openM) closeM += 24 * 60;
         var minsLeft = closeM - nowM;
         if (minsLeft > 0 && minsLeft <= 60) {
           return '<span class="vp-open-badge vp-closing">Yakında kapanıyor · ' + minsLeft + ' dk kaldı</span>';

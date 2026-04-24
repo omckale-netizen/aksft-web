@@ -414,8 +414,9 @@ function pageInit() {
       var hm = (th || '').match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
       if (hm) {
         var nowM = new Date().getHours() * 60 + new Date().getMinutes();
+        var oM = parseInt(hm[1], 10) * 60 + parseInt(hm[2], 10);
         var cM = parseInt(hm[3], 10) * 60 + parseInt(hm[4], 10);
-        if (cM < parseInt(hm[1], 10) * 60 + parseInt(hm[2], 10)) cM += 24 * 60;
+        if (cM < oM && nowM >= oM) cM += 24 * 60;
         var ml = cM - nowM;
         if (ml > 0 && ml <= 60) {
           return { isOpen: true, badge: '<span class="mk-vc-status" style="background:rgba(15,23,42,.55);color:rgba(255,255,255,.95);border:1px solid rgba(255,255,255,.18);"><span style="width:5px;height:5px;border-radius:50%;background:#FBBF24;box-shadow:0 0 6px rgba(245,158,11,.8);flex-shrink:0;"></span>Yakında kapanıyor</span>' };

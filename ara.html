@@ -275,8 +275,10 @@
                 var hm = (tHours || '').match(/(\d{2}):(\d{2})\s*[–-]\s*(\d{2}):(\d{2})/);
                 if (hm) {
                   var nowM = new Date().getHours() * 60 + new Date().getMinutes();
+                  var openM = parseInt(hm[1], 10) * 60 + parseInt(hm[2], 10);
                   var closeM = parseInt(hm[3], 10) * 60 + parseInt(hm[4], 10);
-                  if (closeM < parseInt(hm[1], 10) * 60 + parseInt(hm[2], 10)) closeM += 24 * 60;
+                  // Gece yarisi gecisi: close<open + nowM>=open -> 24h ekle
+                  if (closeM < openM && nowM >= openM) closeM += 24 * 60;
                   var minsLeft = closeM - nowM;
                   if (minsLeft > 0 && minsLeft <= 60) {
                     statusInfo = { label: 'Yakında kapanıyor', color: '#fff', bg: 'rgba(245,158,11,.92)' };
