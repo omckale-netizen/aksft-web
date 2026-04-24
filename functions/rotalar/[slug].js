@@ -106,8 +106,14 @@ export async function onRequest(context) {
     const rotaTitle = f.title?.stringValue || 'Rota';
     const rotaSure = f.sure?.stringValue || '';
     const rotaStops = f.stops?.arrayValue?.values?.length || 0;
-    // Dinamik fallback ~150 char: cografi hiyerarsi + SEO ideal
-    const rotaFallbackDesc = `\u00c7anakkale Ayvac\u0131k Assos gezi rotas\u0131: ${rotaTitle}${rotaSure ? ', ' + rotaSure : ''}${rotaStops ? ', ' + rotaStops + ' durak' : ''}. Harita, ad\u0131m ad\u0131m rehber, yol tarifi ve \u00f6nerilen mola noktalar\u0131yla g\u00fcnl\u00fck Assos ke\u015ffi.`;
+    // SEO title: sure + "Assos Gezisi/Gezi Rotasi" (title zaten "Rota" iceriyorsa duplikasyon olmasin)
+    const titleHasRota = /rota/i.test(rotaTitle);
+    const keywordTail = titleHasRota ? 'Assos Gezisi' : 'Assos Gezi Rotas\u0131';
+    const sureTail = rotaSure ? rotaSure + ' ' : '';
+    const titleBuilt = `${rotaTitle} \u2014 ${sureTail}${keywordTail} | Assos'u Ke\u015ffet`;
+
+    // Dinamik fallback ~150 char: cografi hiyerarsi + SEO (durak sayisi yok, arama terimi degil)
+    const rotaFallbackDesc = `\u00c7anakkale Ayvac\u0131k Assos gezi rotas\u0131: ${rotaTitle}${rotaSure ? ' \u00b7 ' + rotaSure : ''}. Ad\u0131m ad\u0131m rehber, harita, yol tarifi ve \u00f6nerilen mola noktalar\u0131yla g\u00fcn\u00fcbirlik Assos ke\u015ffini planlay\u0131n.`;
 
     const image = f.image?.stringValue || DEFAULT_IMG;
     const ttSchema = buildTouristTripSchema(f, pageUrl, image, DEFAULT_IMG);
@@ -115,7 +121,7 @@ export async function onRequest(context) {
 
     // Bot: OG meta tag'li HTML
     if (isBot(ua)) {
-      const title = rotaTitle + " \u2014 Assos Gezi Rotas\u0131 | Assos'u Ke\u015ffet";
+      const title = titleBuilt;
       const desc = (f.shortDesc?.stringValue || f.description?.stringValue || rotaFallbackDesc).replace(/<[^>]*>/g, '').substring(0, 200);
 
       const html = `<!DOCTYPE html><html lang="tr"><head>
@@ -144,7 +150,7 @@ export async function onRequest(context) {
     }
 
     // Kullanici: rota-detay.html + HTMLRewriter ile title/meta SSR inject + SSR JSON-LD
-    const title = rotaTitle + " \u2014 Assos Gezi Rotas\u0131 | Assos'u Ke\u015ffet";
+    const title = titleBuilt;
     const desc = (f.shortDesc?.stringValue || f.description?.stringValue || rotaFallbackDesc).replace(/<[^>]*>/g, '').substring(0, 200);
     const response = await serveAsset(request, env);
     return new HTMLRewriter()

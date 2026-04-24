@@ -146,8 +146,12 @@ function pageInit() {
 
   const route = (window.DATA?.routes || []).find(r => r.id === routeId);
   if (route) {
-    const seoTitle = route.title + ' — Assos Gezi Rotası | Assos\'u Keşfet';
-    const seoDesc = route.title + ': ' + (route.shortDesc || '') + ' | ' + (route.sure || '') + ', ' + (route.stops?.length || '') + ' durak';
+    const _hasRota = /rota/i.test(route.title || '');
+    const _keywordTail = _hasRota ? 'Assos Gezisi' : 'Assos Gezi Rotası';
+    const _sureTail = route.sure ? route.sure + ' ' : '';
+    const seoTitle = (route.title || 'Rota') + ' — ' + _sureTail + _keywordTail + ' | Assos\'u Keşfet';
+    const _shortBase = (route.shortDesc || 'Çanakkale Ayvacık Assos gezi rotası').replace(/\s+/g, ' ').trim();
+    const seoDesc = (route.title || 'Rota') + ' — ' + _shortBase + (route.sure ? ' · ' + route.sure : '') + '. Adım adım rehber ve harita ile Assos keşfi.';
     // SSR zaten title set ettiyse dokunma (flicker fix)
     if (document.title === 'Rota — Assos\'u Keşfet' || !document.title.includes(route.title)) document.title = seoTitle;
     const descMeta = document.querySelector('meta[name="description"]');
