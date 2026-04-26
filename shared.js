@@ -2571,7 +2571,19 @@ function renderRoutePage(routeId) {
   }
   const p = ROUTE_PAL[routeId] || ROUTE_PAL['bir-gunde-assos'];
 
-  document.title = r.title + ' — Assos Gezi Rotası | Assos\'u Keşfet';
+  // SSR ile ayni mantik: 2x Assos limit + value keyword. Sure title'a yazilmaz.
+  (function _setRotaTitle() {
+    var _tA = /assos/i.test(r.title || '');
+    var _tR = /(rota|gezi|tur)/i.test(r.title || '');
+    var _tail;
+    if (_tA && _tR) _tail = 'Detaylı Rehber';
+    else if (_tA) _tail = 'Gezi Rotası ve Detaylı Rehber';
+    else if (_tR) _tail = 'Detaylı Assos Rehberi';
+    else _tail = 'Assos Gezi Rotası ve Rehberi';
+    var newTitle = (r.title || 'Rota') + ' — ' + _tail + ' | Assos\'u Keşfet';
+    // SSR zaten dogru title set ettiyse degistirmeden geç (flicker fix)
+    if (document.title !== newTitle) document.title = newTitle;
+  })();
 
   /* ── Inject page styles ── */
   if (!document.getElementById('rp-styles')) {
