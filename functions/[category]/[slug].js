@@ -141,7 +141,12 @@ export async function onRequest(context) {
     const fallbackDesc = venueLoc
       ? `\u00c7anakkale Ayvac\u0131k Assos'ta, ${venueLoc} b\u00f6lgesinde yer alan ${catSingular} ${venueTitle}. \u00c7al\u0131\u015fma saatleri, ileti\u015fim, men\u00fc, konum ve foto\u011fraflarla detayl\u0131 Assos ${catPlural} rehberi.`
       : `\u00c7anakkale Ayvac\u0131k Assos'ta bir ${catSingular}: ${venueTitle}. \u00c7al\u0131\u015fma saatleri, ileti\u015fim, men\u00fc, konum ve foto\u011fraflarla detayl\u0131 Assos ${catPlural} rehberi.`;
-    const desc = (rawDesc || fallbackDesc).replace(/<[^>]*>/g, '').substring(0, 200);
+    // Kisa shortDesc'i fallback ile zenginlestir — Google generic uretmesin
+    const _baseDesc = (rawDesc || '').replace(/<[^>]*>/g, '').trim();
+    const _enrichedDesc = _baseDesc.length >= 120
+      ? _baseDesc
+      : (_baseDesc ? `${_baseDesc} ${fallbackDesc}` : fallbackDesc);
+    const desc = _enrichedDesc.substring(0, 200);
     // Images field (array)
     let image = DEFAULT_IMG;
     if (f.images?.arrayValue?.values?.length > 0) {
@@ -175,7 +180,7 @@ export async function onRequest(context) {
 <meta name="twitter:description" content="${esc(desc)}">
 <meta name="twitter:image" content="${esc(image)}">
 <script type="application/ld+json">${lbSchemaJson}</script>
-</head><body><h1>${esc(title)}</h1><p>${esc(desc)}</p></body></html>`;
+</head><body><h1>${esc(venueTitle)}</h1><p>${esc(desc)}</p></body></html>`;
 
       return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
     }

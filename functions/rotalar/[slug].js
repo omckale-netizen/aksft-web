@@ -119,10 +119,16 @@ export async function onRequest(context) {
     const ttSchema = buildTouristTripSchema(f, pageUrl, image, DEFAULT_IMG);
     const ttSchemaJson = jsonLdSafe(ttSchema);
 
+    // Kisa shortDesc'i fallback ile zenginlestir — Google generic description uretmesin
+    const _baseDesc = (f.shortDesc?.stringValue || f.description?.stringValue || '').replace(/<[^>]*>/g, '').trim();
+    const _enrichedDesc = _baseDesc.length >= 120
+      ? _baseDesc
+      : (_baseDesc ? `${_baseDesc} ${rotaFallbackDesc}` : rotaFallbackDesc);
+
     // Bot: OG meta tag'li HTML
     if (isBot(ua)) {
       const title = titleBuilt;
-      const desc = (f.shortDesc?.stringValue || f.description?.stringValue || rotaFallbackDesc).replace(/<[^>]*>/g, '').substring(0, 200);
+      const desc = _enrichedDesc.substring(0, 200);
 
       const html = `<!DOCTYPE html><html lang="tr"><head>
 <meta charset="UTF-8">
@@ -144,14 +150,14 @@ export async function onRequest(context) {
 <meta name="twitter:description" content="${esc(desc)}">
 <meta name="twitter:image" content="${esc(image)}">
 <script type="application/ld+json">${ttSchemaJson}</script>
-</head><body><h1>${esc(title)}</h1><p>${esc(desc)}</p></body></html>`;
+</head><body><h1>${esc(rotaTitle)}</h1><p>${esc(desc)}</p></body></html>`;
 
       return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
     }
 
     // Kullanici: rota-detay.html + HTMLRewriter ile title/meta SSR inject + SSR JSON-LD
     const title = titleBuilt;
-    const desc = (f.shortDesc?.stringValue || f.description?.stringValue || rotaFallbackDesc).replace(/<[^>]*>/g, '').substring(0, 200);
+    const desc = _enrichedDesc.substring(0, 200);
     const response = await serveAsset(request, env);
     return new HTMLRewriter()
       .on('title', { element(el) { el.setInnerContent(title); } })

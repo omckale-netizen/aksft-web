@@ -53,7 +53,12 @@ export async function onRequest(context) {
   const title = blogTitle + " \u2014 Assos'u Ke\u015ffet Blog";
   // Dinamik fallback ~155 char: cografi hiyerarsi + SEO ideal
   const blogFallbackDesc = `\u00c7anakkale Ayvac\u0131k Assos gezi rehberi blog${blogCat ? ' \u00b7 ' + blogCat : ''}: ${blogTitle}. Pratik \u00f6neriler, gezilecek yer listeleri, sezon tavsiyeleri ve yerel bilgilerle detayl\u0131 yaz\u0131.`;
-  const desc = (fields.excerpt?.stringValue || blogFallbackDesc).substring(0, 200);
+  // Kisa excerpt'i fallback ile zenginlestir — Google generic uretmesin
+  const _baseDesc = (fields.excerpt?.stringValue || '').replace(/<[^>]*>/g, '').trim();
+  const _enrichedDesc = _baseDesc.length >= 120
+    ? _baseDesc
+    : (_baseDesc ? `${_baseDesc} ${blogFallbackDesc}` : blogFallbackDesc);
+  const desc = _enrichedDesc.substring(0, 200);
   const image = fields.coverImage?.stringValue || fields.image?.stringValue || DEFAULT_OG_IMAGE;
 
   // Bot: minimal OG HTML (meta tag'ler, social preview icin yeterli)
@@ -77,7 +82,7 @@ export async function onRequest(context) {
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(desc)}">
 <meta name="twitter:image" content="${esc(image)}">
-</head><body><h1>${esc(title)}</h1><p>${esc(desc)}</p></body></html>`;
+</head><body><h1>${esc(blogTitle)}</h1><p>${esc(desc)}</p></body></html>`;
 
     return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
   }
