@@ -146,12 +146,17 @@ function pageInit() {
 
   const route = (window.DATA?.routes || []).find(r => r.id === routeId);
   if (route) {
-    const _hasRota = /rota/i.test(route.title || '');
-    const _keywordTail = _hasRota ? 'Assos Gezisi' : 'Assos Gezi Rotası';
-    const _sureTail = route.sure ? route.sure + ' ' : '';
-    const seoTitle = (route.title || 'Rota') + ' — ' + _sureTail + _keywordTail + ' | Assos\'u Keşfet';
+    // Assos odakli tail, 2x Assos max. Sure yazilmaz.
+    const _tAssos = /assos/i.test(route.title || '');
+    const _tRotaTip = /(rota|gezi|tur)/i.test(route.title || '');
+    let _keywordTail;
+    if (_tAssos && _tRotaTip) _keywordTail = 'Detaylı Rehber';
+    else if (_tAssos) _keywordTail = 'Gezi Rotası ve Detaylı Rehber';
+    else if (_tRotaTip) _keywordTail = 'Detaylı Assos Rehberi';
+    else _keywordTail = 'Assos Gezi Rotası ve Rehberi';
+    const seoTitle = (route.title || 'Rota') + ' — ' + _keywordTail + ' | Assos\'u Keşfet';
     const _shortBase = (route.shortDesc || 'Çanakkale Ayvacık Assos gezi rotası').replace(/\s+/g, ' ').trim();
-    const seoDesc = (route.title || 'Rota') + ' — ' + _shortBase + (route.sure ? ' · ' + route.sure : '') + '. Adım adım rehber ve harita ile Assos keşfi.';
+    const seoDesc = (route.title || 'Rota') + ' — ' + _shortBase + '. Adım adım rehber ve harita ile Assos keşfi.';
     // SSR zaten title set ettiyse dokunma (flicker fix)
     if (document.title === 'Rota — Assos\'u Keşfet' || !document.title.includes(route.title)) document.title = seoTitle;
     const descMeta = document.querySelector('meta[name="description"]');

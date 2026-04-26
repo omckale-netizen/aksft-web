@@ -104,16 +104,27 @@ export async function onRequest(context) {
     const f = doc.fields || {};
 
     const rotaTitle = f.title?.stringValue || 'Rota';
-    const rotaSure = f.sure?.stringValue || '';
     const rotaStops = f.stops?.arrayValue?.values?.length || 0;
-    // SEO title: sure + "Assos Gezisi/Gezi Rotasi" (title zaten "Rota" iceriyorsa duplikasyon olmasin)
-    const titleHasRota = /rota/i.test(rotaTitle);
-    const keywordTail = titleHasRota ? 'Assos Gezisi' : 'Assos Gezi Rotas\u0131';
-    const sureTail = rotaSure ? rotaSure + ' ' : '';
-    const titleBuilt = `${rotaTitle} \u2014 ${sureTail}${keywordTail} | Assos'u Ke\u015ffet`;
+    // SEO title: Assos odakli keyword tail. Title'a gore tail dinamik degisir,
+    // 2x Assos limit (keyword stuffing'i onle). Sure yazilmaz (degisken).
+    const tHasAssos = /assos/i.test(rotaTitle);
+    const tHasRotaTip = /(rota|gezi|tur)/i.test(rotaTitle);
+    let keywordTail;
+    if (tHasAssos && tHasRotaTip) keywordTail = 'Detayl\u0131 Rehber';
+    else if (tHasAssos) keywordTail = 'Gezi Rotas\u0131 ve Detayl\u0131 Rehber';
+    else if (tHasRotaTip) keywordTail = 'Detayl\u0131 Assos Rehberi';
+    else keywordTail = 'Assos Gezi Rotas\u0131 ve Rehberi';
+    const titleBuilt = `${rotaTitle} \u2014 ${keywordTail} | Assos'u Ke\u015ffet`;
 
-    // Dinamik fallback ~150 char: cografi hiyerarsi + SEO (durak sayisi yok, arama terimi degil)
-    const rotaFallbackDesc = `\u00c7anakkale Ayvac\u0131k Assos gezi rotas\u0131: ${rotaTitle}${rotaSure ? ' \u00b7 ' + rotaSure : ''}. Ad\u0131m ad\u0131m rehber, harita, yol tarifi ve \u00f6nerilen mola noktalar\u0131yla g\u00fcn\u00fcbirlik Assos ke\u015ffini planlay\u0131n.`;
+    // Durak isimlerini cek — local SEO icin description'a eklenecek
+    const stopNames = (f.stops?.arrayValue?.values || [])
+      .slice(0, 3)
+      .map(s => s.mapValue?.fields?.title?.stringValue)
+      .filter(Boolean);
+    const stopsPart = stopNames.length ? ` Rota: ${stopNames.join(' \u2192 ')}${rotaStops > 3 ? ' ve daha fazlasi' : ''}.` : '';
+
+    // Dinamik fallback ~150 char: cografi hiyerarsi + SEO + durak isimleri (sure yok)
+    const rotaFallbackDesc = `\u00c7anakkale Ayvac\u0131k Assos gezi rotas\u0131: ${rotaTitle}.${stopsPart} Ad\u0131m ad\u0131m rehber, harita ve yol tarifiyle g\u00fcn\u00fcbirlik Assos ke\u015ffi.`;
 
     const image = f.image?.stringValue || DEFAULT_IMG;
     const ttSchema = buildTouristTripSchema(f, pageUrl, image, DEFAULT_IMG);

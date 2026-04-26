@@ -46,8 +46,26 @@ export async function onRequest(context) {
 
     const doc = await resp.json();
     const f = doc.fields || {};
-    const title = (f.title?.stringValue || 'Rota') + " \u2014 Assos Gezi Rotas\u0131 | Assos'u Ke\u015ffet";
-    const desc = (f.shortDesc?.stringValue || f.description?.stringValue || '').replace(/<[^>]*>/g, '').substring(0, 200) || 'Assos gezi rotas\u0131 detaylar\u0131.';
+    const rotaTitle = f.title?.stringValue || 'Rota';
+    const rotaStops = f.stops?.arrayValue?.values?.length || 0;
+    // Assos odakli, 2x Assos max keyword stuffing onleme. Sure yazilmaz.
+    const tHasAssos = /assos/i.test(rotaTitle);
+    const tHasRotaTip = /(rota|gezi|tur)/i.test(rotaTitle);
+    let keywordTail;
+    if (tHasAssos && tHasRotaTip) keywordTail = 'Detayl\u0131 Rehber';
+    else if (tHasAssos) keywordTail = 'Gezi Rotas\u0131 ve Detayl\u0131 Rehber';
+    else if (tHasRotaTip) keywordTail = 'Detayl\u0131 Assos Rehberi';
+    else keywordTail = 'Assos Gezi Rotas\u0131 ve Rehberi';
+    const title = `${rotaTitle} \u2014 ${keywordTail} | Assos'u Ke\u015ffet`;
+    const stopNames = (f.stops?.arrayValue?.values || [])
+      .slice(0, 3)
+      .map(s => s.mapValue?.fields?.title?.stringValue)
+      .filter(Boolean);
+    const stopsPart = stopNames.length ? ` Rota: ${stopNames.join(' \u2192 ')}${rotaStops > 3 ? ' ve daha fazlasi' : ''}.` : '';
+    const fallbackDesc = `\u00c7anakkale Ayvac\u0131k Assos gezi rotas\u0131: ${rotaTitle}.${stopsPart} Ad\u0131m ad\u0131m rehber, harita ve yol tarifiyle g\u00fcn\u00fcbirlik Assos ke\u015ffi.`;
+    const baseDesc = (f.shortDesc?.stringValue || f.description?.stringValue || '').replace(/<[^>]*>/g, '').trim();
+    const enriched = baseDesc.length >= 120 ? baseDesc : (baseDesc ? `${baseDesc} ${fallbackDesc}` : fallbackDesc);
+    const desc = enriched.substring(0, 200);
     const image = f.image?.stringValue || DEFAULT_IMG;
 
     const html = `<!DOCTYPE html><html lang="tr"><head>
@@ -68,7 +86,7 @@ export async function onRequest(context) {
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(desc)}">
 <meta name="twitter:image" content="${esc(image)}">
-</head><body><p>${esc(title)}</p></body></html>`;
+</head><body><h1>${esc(rotaTitle)}</h1><p>${esc(desc)}</p></body></html>`;
 
     return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
   } catch (e) {
