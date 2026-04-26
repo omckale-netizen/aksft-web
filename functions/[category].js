@@ -334,6 +334,9 @@ export async function onRequest(context) {
     .on('.mk-hero-card', { element(el) { el.setAttribute('style', 'display:none'); } })
     // Hero'dan sonra deneyim/stil kartlari (3 kart, lokasyon bagimsiz)
     .on('.mk-hero', { element(el) { el.after(experiencesHtml, { html: true }); } })
+    // Mekanlar hub'a ozel elementleri kaldir (FAQ section + CollectionPage/FAQPage
+    // JSON-LD schemas). Kategori sayfasinda kategoriye ozel FAQ + schema kullanilir.
+    .on('[data-mekanlar-only]', { element(el) { el.remove(); } })
     // FAQ section'u footer'dan hemen once (tum mekanlar listesinden sonra)
     .on('#footer-placeholder', { element(el) { el.before(faqHtml, { html: true }); } })
     // Body'e hub flag
