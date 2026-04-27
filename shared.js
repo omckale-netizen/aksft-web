@@ -1501,6 +1501,14 @@ function renderNav(opts = {}) {
       window.resyncFavButtons();
     }
   });
+  // Multi-tab gercek zamanli sync — diger tab'da favori toggle olunca anlik yansisin
+  window.addEventListener('storage', function(e) {
+    if (!e || !e.key) return;
+    if (e.key === SD_KEY || e.key === SD_PLACE_KEY) {
+      try { window.resyncFavButtons(); } catch(err) {}
+      try { if (window.updateSaveNavCount) window.updateSaveNavCount(); } catch(err) {}
+    }
+  });
 
   // Focus trap yardimci — klavye kullanicilari icin accessibility
   // Tab tuşu modal/drawer icinde kalır, arka plana kaçmaz

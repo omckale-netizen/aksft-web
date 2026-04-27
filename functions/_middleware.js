@@ -144,7 +144,7 @@ export async function onRequest(context) {
           );
         }
         await env.CHAT_KV.put(loginKey, String(attempts + 1), { expirationTtl: 300 });
-      } catch(e) {}
+      } catch(e) { console.error('[sitemap] Firestore fetch failed:', e && e.message || e); }
     }
     // Cookie var — devam et
   }
@@ -528,7 +528,7 @@ async function generateDynamicSitemap() {
         xml += '  </url>\n';
       }
     }
-  } catch(e) {}
+  } catch(e) { console.error('[sitemap] Firestore fetch failed:', e && e.message || e); }
 
   // Kategori hub sayfalari (SEO icin — aktif mekani olan kategoriler)
   _activeCats.forEach(slug => {
@@ -547,7 +547,7 @@ async function generateDynamicSitemap() {
         xml += `  <url><loc>${BASE}/rotalar/${id}</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>\n`;
       }
     }
-  } catch(e) {}
+  } catch(e) { console.error('[sitemap] Firestore fetch failed:', e && e.message || e); }
 
   // Yerler — Firebase'den cek
   try {
@@ -568,7 +568,7 @@ async function generateDynamicSitemap() {
         xml += '  </url>\n';
       }
     }
-  } catch(e) {}
+  } catch(e) { console.error('[sitemap] Firestore fetch failed:', e && e.message || e); }
 
   // Koyler — Firebase'den cek
   try {
@@ -589,7 +589,7 @@ async function generateDynamicSitemap() {
         xml += '  </url>\n';
       }
     }
-  } catch(e) {}
+  } catch(e) { console.error('[sitemap] Firestore fetch failed:', e && e.message || e); }
 
   // Blog yazilari — Firebase'den cek
   try {
@@ -613,7 +613,7 @@ async function generateDynamicSitemap() {
         xml += '  </url>\n';
       }
     }
-  } catch(e) {}
+  } catch(e) { console.error('[sitemap] Firestore fetch failed:', e && e.message || e); }
 
   xml += '</urlset>';
 
