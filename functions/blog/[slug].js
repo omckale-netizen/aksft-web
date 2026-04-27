@@ -45,8 +45,13 @@ export async function onRequest(context) {
     }
   } catch (e) { /* Firestore hatasi: fields null kalir, client-side fallback */ }
 
-  // Yazi yoksa: bot icin next(), user icin blog.html (client empty state gosterir)
-  if (!fields) return fetchAsset(request, env);
+  // Yazi yoksa:
+  //   Bot -> 410 Gone (silinen yazi dizinden dussun, soft 404 olmasin)
+  //   User -> blog.html (client-side "Bulunamadi" UI)
+  if (!fields) {
+    if (bot) return gone410Blog();
+    return fetchAsset(request, env);
+  }
 
   const blogTitle = fields.title?.stringValue || 'Blog';
   const blogCat = fields.category?.stringValue || '';
@@ -102,4 +107,42 @@ export async function onRequest(context) {
     .on('meta[name="twitter:image"]', { element(el) { el.setAttribute('content', image); } })
     .on('[data-hub-only]', { element(el) { el.remove(); } })
     .transform(response);
+}
+
+// 410 Gone — silinen blog yazilari icin bot response (SEO: dizinden dussun)
+function gone410Blog() {
+  const html = `<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Blog Yaz\u0131s\u0131 Bulunamad\u0131 \u2014 Assos'u Ke\u015ffet</title>
+  <link rel="icon" href="/icon.png" type="image/png">
+  <style>
+    body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:linear-gradient(180deg,#FAFAF8 0%,#FFF5EE 50%,#FFECD2 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 24px;color:#1A2744}
+    .box{text-align:center;max-width:500px}
+    .icon{width:140px;height:140px;margin:0 auto 32px;border-radius:50%;background:linear-gradient(135deg,#fff,#FFF5EE);box-shadow:0 8px 32px rgba(196,82,26,.12);display:flex;align-items:center;justify-content:center;font-size:3rem}
+    h1{font-size:1.75rem;margin:0 0 12px;font-weight:800;letter-spacing:-.02em}
+    p{color:#718096;font-size:1rem;line-height:1.7;margin:0 0 40px}
+    a{display:inline-block;background:linear-gradient(135deg,#C4521A,#A3431A);color:#fff;padding:16px 36px;border-radius:14px;text-decoration:none;font-weight:700;box-shadow:0 4px 16px rgba(196,82,26,.3)}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="icon">\u{1F4DD}</div>
+    <h1>Blog Yaz\u0131s\u0131 Bulunamad\u0131</h1>
+    <p>Arad\u0131\u011f\u0131n\u0131z yaz\u0131 kald\u0131r\u0131lm\u0131\u015f veya art\u0131k yay\u0131nda de\u011fil.</p>
+    <a href="/blog">T\u00fcm Blog Yaz\u0131lar\u0131 \u2192</a>
+  </div>
+</body>
+</html>`;
+  return new Response(html, {
+    status: 410,
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'public, max-age=3600',
+      'X-Robots-Tag': 'noindex, nofollow',
+    },
+  });
 }

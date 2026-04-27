@@ -2560,7 +2560,10 @@ function renderRoutePage(routeId) {
   if (!window.DATA) { console.error('DATA not loaded'); return; }
   const r = DATA.routes.find(x => x.id === routeId);
   if (!r) {
-    var noindex = document.createElement('meta'); noindex.name = 'robots'; noindex.content = 'noindex, nofollow'; document.head.appendChild(noindex);
+    // NOT: noindex EKLENMEZ — static data.js stale olabilir (yeni eklenen rotalar
+    // gec senkron olur). SSR zaten gercekten silinen rotalar icin 410 dondurur,
+    // client-side noindex eklemek SSR'nin gosterdigi gecerli sayfalari dizinden
+    // dusurur (ornek: babakale-kalesi case).
     document.title = 'Rota Bulunamadı — Assos\u2019u Keşfet';
     var footer = document.getElementById('footer-placeholder'); if (footer) footer.style.display = 'none';
     var body = document.querySelector('main') || document.body;
@@ -2993,8 +2996,9 @@ function notFoundHTML(label, icon, backUrl, backLabel) {
 function renderVenuePage(venueId) {
   const v = (DATA.venues || []).find(x => x.id === venueId);
   if (!v) {
-    // SEO: noindex ekle — silinen mekan Google indeksinden düşsün
-    var noindex = document.createElement('meta'); noindex.name = 'robots'; noindex.content = 'noindex, nofollow'; document.head.appendChild(noindex);
+    // NOT: noindex EKLENMEZ — static data.js stale olabilir. SSR (functions/[category]/[slug].js)
+    // gercekten silinen mekanlar icin 410 dondurur. Client-side noindex inject etmek
+    // SSR'nin gosterdigi gecerli sayfalari Google'dan dusurur.
     document.title = 'Mekan Bulunamadı — Assos\u2019u Keşfet';
     document.getElementById('vp-hero').innerHTML = '';
     var footer = document.getElementById('footer-placeholder'); if (footer) footer.style.display = 'none';
@@ -4669,7 +4673,8 @@ function renderVillagePage(villageId) {
   ensureVpStyles();
   var v = (DATA.villages || []).find(function(x) { return x.id === villageId; });
   if (!v) {
-    var noindex = document.createElement('meta'); noindex.name = 'robots'; noindex.content = 'noindex, nofollow'; document.head.appendChild(noindex);
+    // NOT: noindex EKLENMEZ — static data.js stale olabilir; SSR 410 ile gercek
+    // not-found'u handle eder. Client-side inject edersek gecerli sayfalar dusebilir.
     document.title = 'Köy Bulunamadı — Assos\u2019u Keşfet';
     var footer = document.getElementById('footer-placeholder'); if (footer) footer.style.display = 'none';
     document.getElementById('village-hero').innerHTML = '';
@@ -5178,7 +5183,9 @@ function renderPlacePage(placeId) {
   ensureVpStyles();
   var p = (DATA.places || []).find(function(x) { return x.id === placeId; });
   if (!p) {
-    var noindex = document.createElement('meta'); noindex.name = 'robots'; noindex.content = 'noindex, nofollow'; document.head.appendChild(noindex);
+    // NOT: noindex EKLENMEZ — static data.js stale olabilir (babakale-kalesi case).
+    // SSR 410 ile gercek not-found'u handle eder. Client-side inject etmek
+    // SSR'in basariyla render ettigi yeni eklenen yerleri dizinden dusurur.
     document.title = 'Yer Bulunamadı — Assos\u2019u Keşfet';
     var footer = document.getElementById('footer-placeholder'); if (footer) footer.style.display = 'none';
     document.getElementById('place-hero').innerHTML = '';

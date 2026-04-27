@@ -45,7 +45,7 @@
 </div>
 <div id="footer-placeholder"></div>
 <script src="../firebase-loader.js?v=6"></script>
-<script src="../shared.min.js?v=362"></script>
+<script src="../shared.min.js?v=363"></script>
 <script>
 // Mekan slug'ini URL'den cikar: once path (/kategori/slug), sonra query (?id=slug), sonra hash
 // Path parsing window.CATEGORY_SLUG_TO_ID ile guvenli (shared.min.js yuklendikten sonra calisir)
@@ -70,9 +70,9 @@ function pageInit() {
   let venueId = parsed ? parsed.slug : null;
 
   function renderMekanBulunamadi() {
-    var noindex = document.querySelector('meta[name="robots"]');
-    if (!noindex) { noindex = document.createElement('meta'); noindex.name = 'robots'; document.head.appendChild(noindex); }
-    noindex.content = 'noindex, nofollow';
+    // NOT: noindex EKLENMEZ — static data.js stale olabilir. SSR 410 ile gercek
+    // not-found'u handle eder. Client-side inject etmek SSR'in dogru render
+    // ettigi yeni mekanlari Google'dan dusurur.
     document.title = 'Mekan Bulunamadı — Assos\u2019u Keşfet';
     document.getElementById('vp-hero').innerHTML = '';
     var footer = document.getElementById('footer-placeholder'); if (footer) footer.style.display = 'none';

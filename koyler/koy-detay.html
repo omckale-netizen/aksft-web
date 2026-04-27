@@ -44,7 +44,7 @@
 </div>
 <div id="footer-placeholder"></div>
 <script src="../firebase-loader.js?v=6"></script>
-<script src="../shared.min.js?v=362"></script>
+<script src="../shared.min.js?v=363"></script>
 <script>
 // Koy slug'ini URL'den cikar: once path (/koyler/slug), sonra query (?id=slug), sonra hash
 function getKoySlugFromUrl() {
@@ -82,10 +82,10 @@ function pageInit() {
   document.addEventListener('dataReady', checkAndRender);
 
   function renderKoyBulunamadi() {
+    // NOT: noindex EKLENMEZ — static data.js stale olabilir; SSR gercek not-found
+    // icin 410 doner. Client-side inject edersek SSR'in render ettigi gecerli
+    // sayfalari Google'dan dusururuz (babakale-kalesi case).
     document.title = 'Köy Bulunamadı — Assos\'u Keşfet';
-    var mr = document.querySelector('meta[name="robots"]');
-    if (!mr) { mr = document.createElement('meta'); mr.name = 'robots'; document.head.appendChild(mr); }
-    mr.content = 'noindex, nofollow';
 
     document.getElementById('village-hero').innerHTML =
       '<section style="position:relative;overflow:hidden;padding:130px 24px 60px;text-align:center;background:linear-gradient(150deg,#06101E 0%,#0A1A10 45%,#0C1E14 100%);">' +

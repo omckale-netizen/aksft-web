@@ -44,7 +44,7 @@
 </div>
 <div id="footer-placeholder"></div>
 <script src="../firebase-loader.js?v=6"></script>
-<script src="../shared.min.js?v=362"></script>
+<script src="../shared.min.js?v=363"></script>
 <script>
 // Rota slug'ini URL'den cikar: once path (/rotalar/slug), sonra query (?id=slug), sonra hash
 function getRotaSlugFromUrl() {
@@ -86,15 +86,9 @@ function pageInit() {
   document.addEventListener('dataReady', checkAndRender);
 
   function renderRotaBulunamadi() {
-    // Meta/title update
+    // NOT: noindex EKLENMEZ — static data.js stale olabilir; SSR 410 ile
+    // gercek not-found'u handle eder (babakale-kalesi case).
     document.title = 'Rota Bulunamadı — Assos\'u Keşfet';
-    var metaRobots = document.querySelector('meta[name="robots"]');
-    if (!metaRobots) {
-      metaRobots = document.createElement('meta');
-      metaRobots.name = 'robots';
-      document.head.appendChild(metaRobots);
-    }
-    metaRobots.content = 'noindex, nofollow';
 
     // Hero (dark)
     var heroEl = document.getElementById('route-hero');
