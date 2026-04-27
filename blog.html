@@ -621,9 +621,11 @@ async function loadSinglePost(slug) {
         'url': 'https://assosukesfet.com',
         'logo': { '@type': 'ImageObject', 'url': 'https://assosukesfet.com/icon-512.png' }
       };
+      // "Haber" kategorisi -> NewsArticle (Google Discover / News tab icin daha uygun)
+      var schemaType = (p.category === 'Haber') ? 'NewsArticle' : 'Article';
       var articleSchema = {
         '@context': 'https://schema.org',
-        '@type': 'Article',
+        '@type': schemaType,
         'headline': (p.title || '').substring(0, 110),
         'description': (p.excerpt || p.title || '').substring(0, 200),
         'url': url,
