@@ -42,6 +42,7 @@
 .ab-why-item:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(196,82,26,.1)}
 .ab-why-num{display:block;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.6rem,3vw,2.2rem);color:#C4521A;letter-spacing:-.02em;line-height:1;margin-bottom:6px}
 .ab-why-lbl{font-size:.72rem;font-weight:600;color:#718096;letter-spacing:.04em;text-transform:uppercase}
+.ab-why-extra{display:block;font-size:.62rem;color:#A0AEC0;font-weight:500;margin-top:4px;font-style:italic}
 .ab-why-footer{font-size:.88rem;color:#718096;line-height:1.75;font-style:italic;max-width:680px;margin:0 auto}
 .ab-cta{margin:80px 0 0}
 .ab-cta-inner{background:linear-gradient(135deg,#C4521A,#A3431A);border-radius:24px;padding:48px 40px;display:grid;grid-template-columns:1fr auto;gap:36px;align-items:center;box-shadow:0 16px 48px rgba(196,82,26,.25);position:relative;overflow:hidden}
@@ -242,8 +243,9 @@
           <span class="ab-why-lbl">yıl tarih</span>
         </div>
         <div class="ab-why-item">
-          <span class="ab-why-num">15+</span>
-          <span class="ab-why-lbl">taş köy</span>
+          <span class="ab-why-num" id="aw-koy-count">—</span>
+          <span class="ab-why-lbl">köy</span>
+          <span class="ab-why-extra" id="aw-koy-detail"></span>
         </div>
         <div class="ab-why-item">
           <span class="ab-why-num">10+</span>
@@ -302,8 +304,30 @@ function pageInit() {
     if (typeof DATA === 'undefined') return;
     if (DATA.routes)   document.getElementById('hk-stat-rotalar').textContent  = DATA.routes.length + '+';
     if (DATA.venues)   document.getElementById('hk-stat-mekanlar').textContent = DATA.venues.length + '+';
-    if (DATA.villages) document.getElementById('hk-stat-koyler').textContent   = DATA.villages.length + '+';
+    if (DATA.villages) {
+      // Sadece type='koy' veya type yok olanlari say (mahalle ve belde haric)
+      var koyCount = DATA.villages.filter(function(v){ return !v.type || v.type === 'koy'; }).length;
+      document.getElementById('hk-stat-koyler').textContent = koyCount + '+';
+    }
     if (DATA.places)   document.getElementById('hk-stat-yerler').textContent   = DATA.places.length + '+';
+
+    // "Neden Assos" bolumu: koy/mahalle/belde dinamik
+    if (DATA.villages) {
+      var byType = { koy: 0, mahalle: 0, belde: 0 };
+      DATA.villages.forEach(function(v) {
+        var t = v.type || 'koy';
+        if (byType[t] !== undefined) byType[t]++;
+      });
+      var nKoy = document.getElementById('aw-koy-count');
+      if (nKoy) nKoy.textContent = byType.koy + '+';
+      var nKoyDetail = document.getElementById('aw-koy-detail');
+      if (nKoyDetail) {
+        var parts = [];
+        if (byType.mahalle > 0) parts.push(byType.mahalle + ' mahalle');
+        if (byType.belde > 0) parts.push(byType.belde + ' belde');
+        nKoyDetail.textContent = parts.length ? '+ ' + parts.join(', ') : '';
+      }
+    }
   })();
 }
 document.addEventListener('dataReady', pageInit);
