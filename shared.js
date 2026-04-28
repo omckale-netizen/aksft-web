@@ -5821,6 +5821,55 @@ function renderPlacePage(placeId) {
   }
   updateLimit();
 
+  // Blog yazilari cache — chatbot icin (30dk)
+  var _blogChatCache = null;
+  var _blogChatCacheTime = 0;
+  var _blogChatFetchInflight = false;
+  async function _fetchBlogForChat() {
+    // 30dk cache
+    if (_blogChatCache && Date.now() - _blogChatCacheTime < 300000) return _blogChatCache;
+    if (_blogChatFetchInflight) return _blogChatCache;
+    // Once localStorage cache (blog.html ile paylasilan)
+    try {
+      var raw = localStorage.getItem('assos_blog_posts_v1');
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (parsed && parsed.data && Array.isArray(parsed.data) && parsed.ts && (Date.now() - parsed.ts < 300000)) {
+          _blogChatCache = parsed.data;
+          _blogChatCacheTime = Date.now();
+          return _blogChatCache;
+        }
+      }
+    } catch(e) {}
+    // Firestore fresh fetch
+    if (typeof firebase === 'undefined' || !firebase.firestore) return _blogChatCache || null;
+    _blogChatFetchInflight = true;
+    try {
+      var snap = await firebase.firestore().collection('blog_posts').limit(50).get();
+      var posts = [];
+      snap.forEach(function(doc) {
+        var d = doc.data();
+        if (d.status !== 'published') return;
+        posts.push({
+          id: doc.id,
+          title: d.title || '',
+          category: d.category || '',
+          excerpt: ((d.excerpt || '') + '').replace(/<[^>]*>/g, '').substring(0, 140),
+          tags: Array.isArray(d.tags) ? d.tags.slice(0, 6) : [],
+          publishedAt: d.publishedAt || d.createdAt || ''
+        });
+      });
+      // En yeni 25 yazi
+      posts.sort(function(a, b) { return String(b.publishedAt || '').localeCompare(String(a.publishedAt || '')); });
+      posts = posts.slice(0, 25);
+      _blogChatCache = posts;
+      _blogChatCacheTime = Date.now();
+      try { localStorage.setItem('assos_blog_posts_v1', JSON.stringify({ data: posts, ts: Date.now() })); } catch(e) {}
+      return posts;
+    } catch(e) { return _blogChatCache || null; }
+    finally { _blogChatFetchInflight = false; }
+  }
+
   // Site context — optimize edilmiş (token tasarrufu + premium önceliklendirme)
   var _cachedContext = null;
   var _contextTime = 0;
@@ -5872,7 +5921,15 @@ function renderPlacePage(placeId) {
     var routes = (DATA.routes || []).slice(0, 10);
     if (routes.length) ctx += 'ROTALAR:\n' + routes.map(function(r) {
       return '- ' + r.id + '|' + r.title + '|' + (r.sure||'') + '|' + (r.stops ? r.stops.length + ' durak' : '');
-    }).join('\n');
+    }).join('\n') + '\n';
+    // Blog yazilari (chatbot icin async cache'ten)
+    if (_blogChatCache && _blogChatCache.length) {
+      var blogs = _blogChatCache.slice(0, 20);
+      ctx += 'BLOG:\n' + blogs.map(function(b) {
+        var tagsPart = (b.tags && b.tags.length) ? '|tags:' + b.tags.join(',') : '';
+        return '- ' + b.id + '|' + b.title + '|' + (b.category||'') + '|' + (b.excerpt||'') + tagsPart;
+      }).join('\n');
+    }
     _cachedContext = ctx;
     _contextTime = Date.now();
     return ctx;
@@ -5891,6 +5948,8 @@ function renderPlacePage(placeId) {
       var chatBody = document.getElementById('ai-chat-body');
       if (chatBody) setTimeout(function() { chatBody.scrollTop = chatBody.scrollHeight; }, 100);
       if (window.innerWidth > 768) document.getElementById('ai-chat-input').focus();
+      // Blog cache'i background'da yukle — sonraki sorgular blog yazilarindan da faydalanir
+      try { _fetchBlogForChat(); _cachedContext = null; } catch(e) {}
     }
   };
 
