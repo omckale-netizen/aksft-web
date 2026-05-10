@@ -152,8 +152,8 @@ function pageInit() {
   function applySeoMeta() {
   const venue = (window.DATA?.venues || []).find(v => v.id === venueId);
   if (venue) {
-    const catLabels = {kafe:'Assos Kafeler',restoran:'Assos Restoranlar',kahvalti:'Assos Kahvaltı Mekanları',konaklama:'Assos Otelleri',beach:'Assos Beach Club',iskele:'Assos İskeleler',dondurmaci:'Assos Dondurmacıları',hediyelik:'Assos Hediyelik Eşya'};
-    const catSingular = {kafe:'kafe',restoran:'restoran',kahvalti:'kahvaltı mekanı',konaklama:'otel',beach:'beach club',iskele:'iskele',dondurmaci:'dondurmacı',hediyelik:'hediyelik eşya mağazası'};
+    const catLabels = {kafe:'Assos Kafeler',restoran:'Assos Restoranlar',kahvalti:'Assos Kahvaltı Mekanları',konaklama:'Assos Konaklama',beach:'Assos Beach Club',iskele:'Assos İskeleler',dondurmaci:'Assos Dondurmacıları',hediyelik:'Assos Hediyelik Eşya'};
+    const catSingular = {kafe:'kafe',restoran:'restoran',kahvalti:'kahvaltı mekanı',konaklama:'konaklama tesisi',beach:'beach club',iskele:'iskele',dondurmaci:'dondurmacı',hediyelik:'hediyelik eşya mağazası'};
     const catLabel = catLabels[venue.category] || 'Assos Mekanlar';
     const catSing = catSingular[venue.category] || 'mekan';
     const loc = venue.location || 'Assos';
