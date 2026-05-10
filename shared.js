@@ -3631,7 +3631,9 @@ function renderVenuePage(venueId) {
       <div class="vp-hero-top">
         ${(function(){
           var _vc = v.category && window.CATEGORIES ? window.CATEGORIES[v.category] : null;
-          var _bh = _vc ? base + _vc.slug : base + 'mekanlar.html';
+          // Absolute path — base relative path'i bazi kategori URL'lerinde
+          // dogru cozulmuyordu (/kafeler/X'ten geri tusu /kafeler/kafeler uretiyordu)
+          var _bh = _vc ? '/' + _vc.slug : '/mekanlar';
           var _bl = _vc ? '← ' + _vc.plural : '← Mekanlar';
           return '<a href="' + _bh + '" class="vp-back-btn">' + _bl + '</a>';
         })()}
@@ -4717,7 +4719,7 @@ function renderVillagePage(villageId) {
 
   // Top bar — back + actions (mekan detaydaki ile birebir aynı)
   heroHtml += '<div class="vp-hero-top">';
-  heroHtml += '<a href="../koyler.html" class="vp-back-btn">← Köyler</a>';
+  heroHtml += '<a href="/koyler" class="vp-back-btn">← Köyler</a>';
   heroHtml += '<div class="vp-hero-acts">';
   heroHtml += '<button id="vg-save-btn" class="vp-act-btn" aria-label="Kaydet" aria-pressed="false" onclick="vgToggleSave()"><span id="vg-save-icon">♡</span> <span id="vg-save-label">Kaydet</span></button>';
   heroHtml += '<div class="vp-share-wrap" id="vg-share-wrap"><button class="vp-share-btn" onclick="vgToggleShare()">↑ Paylaş</button><div class="vp-share-dd" id="vg-share-dd"></div></div>';
@@ -5223,7 +5225,7 @@ function renderPlacePage(placeId) {
 
   // Top bar
   heroHtml += '<div class="vp-hero-top">';
-  heroHtml += '<a href="../yerler.html" class="vp-back-btn">← Gezilecek Yerler</a>';
+  heroHtml += '<a href="/yerler" class="vp-back-btn">← Gezilecek Yerler</a>';
   heroHtml += '<div class="vp-hero-acts">';
   heroHtml += '<button id="pl-save-btn" class="vp-act-btn" aria-label="Kaydet" aria-pressed="false" onclick="plToggleSave()"><span id="pl-save-icon">♡</span> <span id="pl-save-label">Kaydet</span></button>';
   heroHtml += '<div class="vp-share-wrap" id="pl-share-wrap"><button class="vp-share-btn" onclick="plToggleShare()">↑ Paylaş</button><div class="vp-share-dd" id="pl-share-dd"></div></div>';
