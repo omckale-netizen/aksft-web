@@ -5389,6 +5389,41 @@ async function loadDataFromFirestore() {
     if (!draftData.villages) draftData.villages = [];
     if (!draftData.routes) draftData.routes = [];
   }
+  // Bir kerelik migration: createdAt'i olmayan eski mekanlara pivot tarih ata
+  migrateVenueCreatedAt();
+}
+
+// Bir kerelik migration — eski mekanlara createdAt yaz, dashboard "Son Eklenenler"
+// widget'i dogru sirayla calissin. localStorage flag ile sadece bir kez calisir.
+async function migrateVenueCreatedAt() {
+  var FLAG = 'aksft_venues_createdAt_migrated_v1';
+  try { if (localStorage.getItem(FLAG)) return; } catch(e) { return; }
+  if (!draftData.venues || draftData.venues.length === 0) return;
+  var missing = draftData.venues
+    .filter(function(v){ return !v.createdAt && !v.submittedAt; })
+    .sort(function(a, b){ return (a.id || '').localeCompare(b.id || ''); });
+  if (missing.length === 0) {
+    try { localStorage.setItem(FLAG, '1'); } catch(e) {}
+    return;
+  }
+  // Pivot: 2024-01-01, her venue +1 gun. ID-alfabetik sirayla deterministik.
+  var pivot = new Date('2024-01-01T00:00:00.000Z').getTime();
+  var writes = missing.map(function(v, i){
+    var dateStr = new Date(pivot + i * 86400000).toISOString();
+    v.createdAt = dateStr;
+    return db.collection('venues').doc(v.id).set({ createdAt: dateStr }, { merge: true })
+      .catch(function(e){ console.warn('Migration write fail:', v.id, e); });
+  });
+  await Promise.allSettled(writes);
+  try { localStorage.setItem(FLAG, '1'); } catch(e) {}
+  console.log('[Migration] ' + missing.length + ' mekana createdAt yazildi.');
+  // Dashboard acikken yeniden render
+  try {
+    var dashPage = document.getElementById('page-dashboard');
+    if (dashPage && dashPage.classList.contains('active') && typeof renderDashboard === 'function') {
+      renderDashboard();
+    }
+  } catch(e) {}
 }
 
 // Dashboard icin arka planda veri tazele — her genel bakis acilista cagrilir.
