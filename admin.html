@@ -8245,7 +8245,9 @@ const DEFAULT_CATS = [
   { id:'kahvalti', label:'Kahvalti', emoji:'🌞', color:'#8A5520' },
   { id:'konaklama', label:'Konaklama', emoji:'🏨', color:'#5A7A56' },
   { id:'beach', label:'Beach', emoji:'🏖', color:'#1A9A8A' },
-  { id:'iskele', label:'Iskele', emoji:'⚓', color:'#3A5A8A' }
+  { id:'iskele', label:'Iskele', emoji:'⚓', color:'#3A5A8A' },
+  { id:'dondurmaci', label:'Dondurmaci', emoji:'🍦', color:'#E8A07A' },
+  { id:'hediyelik', label:'Hediyelik Esya', emoji:'🎁', color:'#9C5A8A' }
 ];
 
 let placeCategories = [];
@@ -8263,9 +8265,20 @@ async function loadCategories() {
     const doc = await db.collection('settings').doc('venue_categories').get();
     if (doc.exists && doc.data().list) {
       venueCategories = doc.data().list;
+      // Migration: DEFAULT_CATS'teki ama list'te eksik kategorileri ekle
+      // migratedIds: daha once migrate edilmis (ve kullanici silmis olabilecek) ID'ler — bir daha geri gelmesin
+      const data = doc.data();
+      const migratedIds = data.migratedIds || [];
+      const existingIds = new Set(venueCategories.map(c => c.id));
+      const toAdd = DEFAULT_CATS.filter(c => !existingIds.has(c.id) && migratedIds.indexOf(c.id) === -1);
+      if (toAdd.length > 0) {
+        venueCategories = venueCategories.concat(toAdd);
+        const newMigrated = migratedIds.concat(toAdd.map(c => c.id));
+        await db.collection('settings').doc('venue_categories').set({ list: venueCategories, migratedIds: newMigrated }, { merge: true });
+      }
     } else {
       venueCategories = DEFAULT_CATS;
-      await db.collection('settings').doc('venue_categories').set({ list: venueCategories }, { merge: true });
+      await db.collection('settings').doc('venue_categories').set({ list: venueCategories, migratedIds: DEFAULT_CATS.map(c => c.id) }, { merge: true });
     }
   } catch(e) { venueCategories = DEFAULT_CATS; }
   // Yer kategorileri
