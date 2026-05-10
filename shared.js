@@ -11,7 +11,7 @@
 ═══════════════════════════════════════════ */
 window.CATEGORIES = {
   konaklama: {
-    slug: 'oteller', label: 'Konaklama', emoji: '🏨', plural: 'Oteller', heroPlural: 'Otelleri', color: '#5A7A56',
+    slug: 'konaklama', label: 'Konaklama', emoji: '🏨', plural: 'Konaklama Tesisleri', heroPlural: 'Konaklama Tesisleri', color: '#5A7A56',
     eyebrow: "Assos Konaklama Rehberi",
     heroSub: "Behramkale taş evlerinden Kadırga butik otellerine — Assos'un en iyi konaklama adresleri.",
     heroChips: ['Butik Otel', 'Taş Ev Pansiyon', 'Deniz Manzaralı', 'Behramkale', 'Kadırga Koyu', 'Ekonomik'],

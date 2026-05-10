@@ -3,12 +3,14 @@
 // Firestore'dan mekanin kategorisini cekip dogru yeni URL'e 301 redirect.
 
 const CATEGORY_SLUG = {
-  konaklama: 'oteller',
+  konaklama: 'konaklama',
   kafe: 'kafeler',
   restoran: 'restoranlar',
   kahvalti: 'kahvalti',
   beach: 'plajlar',
-  iskele: 'iskeleler'
+  iskele: 'iskeleler',
+  dondurmaci: 'dondurmacilar',
+  hediyelik: 'hediyelik-esya'
 };
 
 export async function onRequest(context) {

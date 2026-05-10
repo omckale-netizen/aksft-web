@@ -5,13 +5,13 @@
 // whitelist'te olmadigi icin next() ile static asset'e birakilir.
 
 const CATEGORIES = {
-  oteller: {
-    id: 'konaklama', emoji: '🏨', plural: 'Oteller', heroPlural: 'Otelleri', color: '#5A7A56',
+  konaklama: {
+    id: 'konaklama', emoji: '🏨', plural: 'Konaklama Tesisleri', heroPlural: 'Konaklama Tesisleri', color: '#5A7A56',
     eyebrow: "Assos Konaklama Rehberi",
-    heroSub: "Behramkale taş evlerinden Kadırga butik otellerine — Assos'un en iyi konaklama adresleri.",
+    heroSub: "Behramkale taş evlerinden Kadırga butik otellerine, kamping ve bungalovlara — Assos'un tüm konaklama seçenekleri.",
     heroChips: ['Butik Otel', 'Taş Ev Pansiyon', 'Deniz Manzaralı', 'Behramkale', 'Kadırga Koyu', 'Ekonomik'],
-    title: "Assos Otelleri — Konaklama & Pansiyon Rehberi | Assos'u Keşfet",
-    desc: "Assos otelleri ve pansiyonları: Behramkale taş evleri, Kadırga butik oteller, Babakale deniz manzaralı konaklama. Fiyat, konum ve iletişim bilgisiyle rehber.",
+    title: "Assos Konaklama — Otel, Pansiyon, Taş Ev & Kamping Rehberi | Assos'u Keşfet",
+    desc: "Assos konaklama rehberi: butik oteller, taş ev pansiyonlar, Kadırga sahil otelleri, Adatepe yayla evleri, kamping ve bungalov seçenekleri. Fiyat, konum ve iletişim bilgisiyle tek sayfada.",
     shortIntro: "Assos'ta konaklama seçimi sadece yer değil, atmosfer seçimi. Tarihi doku, deniz kenarı ya da doğa içinde — hangi tarzda bir tatil istediğinize göre konaklama stilinizi seçin.",
     experiences: [
       { emoji: '🏛', title: 'Tarihi Doku', desc: '200-300 yıllık taş ev pansiyonlarda antik köy atmosferi. Dar sokaklar, avlulu odalar, Ege mimarisi.' },

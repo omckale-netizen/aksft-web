@@ -3,7 +3,7 @@
 
 const FIRESTORE_BASE = 'https://firestore.googleapis.com/v1/projects/assosu-kesfet/databases/(default)/documents';
 
-const CAT_SLUG = { konaklama: 'oteller', kafe: 'kafeler', restoran: 'restoranlar', kahvalti: 'kahvalti', beach: 'plajlar', iskele: 'iskeleler' };
+const CAT_SLUG = { konaklama: 'konaklama', kafe: 'kafeler', restoran: 'restoranlar', kahvalti: 'kahvalti', beach: 'plajlar', iskele: 'iskeleler', dondurmaci: 'dondurmacilar', hediyelik: 'hediyelik-esya' };
 
 function jsonLdSafe(obj) {
   return JSON.stringify(obj).replace(/<\/script/gi, '<\\/script').replace(/</g, '\\u003C');

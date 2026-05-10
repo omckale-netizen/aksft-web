@@ -7,7 +7,7 @@
 // User -> mekanlar/mekan-detay.html asset serve (client-side parse)
 
 const CATEGORIES = {
-  oteller:        'konaklama',
+  konaklama:      'konaklama',
   kafeler:        'kafe',
   restoranlar:    'restoran',
   kahvalti:       'kahvalti',
@@ -15,6 +15,10 @@ const CATEGORIES = {
   iskeleler:      'iskele',
   dondurmacilar:  'dondurmaci',
   'hediyelik-esya': 'hediyelik'
+};
+// Eski slug aliaslari — 301 redirect ile yeni slug'a yonlendir
+const LEGACY_CATEGORY_SLUGS = {
+  oteller: 'konaklama'
 };
 
 const BOT_UA = [
@@ -85,6 +89,11 @@ export async function onRequest(context) {
   const category = params.category;
   const slug = params.slug;
 
+  // Legacy slug (eski /oteller/...) -> yeni slug'a 301 redirect
+  if (LEGACY_CATEGORY_SLUGS[category]) {
+    const newCat = LEGACY_CATEGORY_SLUGS[category];
+    return Response.redirect(`https://assosukesfet.com/${newCat}/${slug}`, 301);
+  }
   // Whitelist kontrol: bu catch-all sadece mekan kategorilerini handle eder.
   // Diger iki-seviye path'ler (rotalar/X, koyler/X, yerler/X, blog/X) specific
   // function'larda yakalanir (daha oncelikli). Ama emniyet icin fallback.
@@ -131,9 +140,9 @@ export async function onRequest(context) {
     }
 
     // Kategori etiketi (title icin): konaklama -> Otelleri, kafe -> Kafeleri vb.
-    const CAT_LABELS = { konaklama: 'Otelleri', kafe: 'Kafeleri', restoran: 'Restoranlar\u0131', kahvalti: 'Kahvalt\u0131 Mekanlar\u0131', beach: 'Plajlar\u0131', iskele: '\u0130skeleleri', dondurmaci: 'Dondurmac\u0131lar\u0131', hediyelik: 'Hediyelik E\u015fya Ma\u011fazalar\u0131' };
-    const CAT_PLURAL = { konaklama: 'oteller', kafe: 'kafeler', restoran: 'restoranlar', kahvalti: 'kahvalt\u0131 mekanlar\u0131', beach: 'plajlar', iskele: 'iskeleler', dondurmaci: 'dondurmac\u0131lar', hediyelik: 'hediyelik e\u015fya' };
-    const CAT_SINGULAR = { konaklama: 'otel', kafe: 'kafe', restoran: 'restoran', kahvalti: 'kahvalt\u0131 mekan\u0131', beach: 'plaj', iskele: 'iskele', dondurmaci: 'dondurmac\u0131', hediyelik: 'hediyelik e\u015fya' };
+    const CAT_LABELS = { konaklama: 'Konaklama Tesisleri', kafe: 'Kafeleri', restoran: 'Restoranlar\u0131', kahvalti: 'Kahvalt\u0131 Mekanlar\u0131', beach: 'Plajlar\u0131', iskele: '\u0130skeleleri', dondurmaci: 'Dondurmac\u0131lar\u0131', hediyelik: 'Hediyelik E\u015fya Ma\u011fazalar\u0131' };
+    const CAT_PLURAL = { konaklama: 'konaklama tesisleri', kafe: 'kafeler', restoran: 'restoranlar', kahvalti: 'kahvalt\u0131 mekanlar\u0131', beach: 'plajlar', iskele: 'iskeleler', dondurmaci: 'dondurmac\u0131lar', hediyelik: 'hediyelik e\u015fya' };
+    const CAT_SINGULAR = { konaklama: 'konaklama tesisi', kafe: 'kafe', restoran: 'restoran', kahvalti: 'kahvalt\u0131 mekan\u0131', beach: 'plaj', iskele: 'iskele', dondurmaci: 'dondurmac\u0131', hediyelik: 'hediyelik e\u015fya' };
     const catLabel = CAT_LABELS[expectedCat] || 'Mekanlar\u0131';
     const catPlural = CAT_PLURAL[expectedCat] || 'mekanlar';
     const catSingular = CAT_SINGULAR[expectedCat] || 'mekan';

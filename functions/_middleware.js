@@ -102,6 +102,14 @@ export async function onRequest(context) {
   const url = new URL(request.url);
   const path = url.pathname;
 
+  // ═══ Legacy slug 301 redirect: /oteller -> /konaklama ═══
+  // /oteller (hub) -> /konaklama
+  // /oteller/<slug> (detay) -> /konaklama/<slug>
+  if (path === '/oteller' || path === '/oteller/' || path.startsWith('/oteller/')) {
+    const newPath = '/konaklama' + path.slice('/oteller'.length).replace(/\/$/, '');
+    return Response.redirect(url.origin + newPath + url.search, 301);
+  }
+
   // ═══ Admin Gate Koruması ═══
   const adminPaths = ['/admin', '/admin.html', '/admin-login', '/admin-login.html'];
   if (adminPaths.includes(path)) {
@@ -504,7 +512,7 @@ async function generateDynamicSitemap() {
     if (vResp.ok) {
       const vData = await vResp.json();
       const docs = vData.documents || [];
-      const CATEGORY_SLUG = {konaklama:'oteller',kafe:'kafeler',restoran:'restoranlar',kahvalti:'kahvalti',beach:'plajlar',iskele:'iskeleler',dondurmaci:'dondurmacilar',hediyelik:'hediyelik-esya'};
+      const CATEGORY_SLUG = {konaklama:'konaklama',kafe:'kafeler',restoran:'restoranlar',kahvalti:'kahvalti',beach:'plajlar',iskele:'iskeleler',dondurmaci:'dondurmacilar',hediyelik:'hediyelik-esya'};
       for (const doc of docs) {
         const f = doc.fields || {};
         const id = doc.name.split('/').pop();

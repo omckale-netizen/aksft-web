@@ -88,7 +88,7 @@ Her yazıda "Çanakkale Ayvacık Assos" hiyerarşisini doğal şekilde geçir. B
 - /rotalar — Hazır Gezi Rotaları
 - /yerler — Gezilecek Yerler
 - /mekanlar — Tüm Mekanlar
-- /oteller — Assos Otelleri
+- /konaklama — Assos Konaklama (otel, pansiyon, kamping, taş ev)
 - /kafeler — Assos Kafeleri
 - /restoranlar — Assos Restoranları
 - /kahvalti — Assos Kahvaltı Mekanları
@@ -123,7 +123,7 @@ Her yazıda "Çanakkale Ayvacık Assos" hiyerarşisini doğal şekilde geçir. B
    - "Babakale" → <a href="/koyler/babakale">Babakale</a>
    - "Athena Tapınağı" → <a href="/yerler/athena-tapinagi">Athena Tapınağı</a>
    - "Sivrice" → <a href="/yerler/sivrice">Sivrice</a>
-   - "Assos otelleri" veya "oteller" → <a href="/oteller">Assos otelleri</a>
+   - "Assos konaklama" veya "konaklama" → <a href="/konaklama">Assos konaklama</a>
    - "kahvaltı mekanları" → <a href="/kahvalti">Assos kahvaltı mekanları</a>
    - "gezi rotaları" → <a href="/rotalar">Assos gezi rotaları</a>
    - "1 Günlük Gezi Planı" → <a href="/blog/assos-1-gunluk-gezi-plani">1 Günlük Gezi Planı</a>

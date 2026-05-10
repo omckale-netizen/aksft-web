@@ -84,8 +84,8 @@ Assos ve çevresi hakkında detaylı gezi yazıları:
 
 - `/` — Anasayfa (hero, rotalar, mekanlar, yerler, köyler, blog)
 - `/mekanlar` — Tüm mekanlar listesi (kategori ve durum filtresi)
-- `/{kategori}/{id}` — Mekan detay sayfası (kategori: oteller, kafeler, restoranlar, kahvalti, plajlar, iskeleler)
-- `/oteller`, `/kafeler`, `/restoranlar`, `/kahvalti`, `/plajlar`, `/iskeleler` — Kategori bazlı mekan listesi
+- `/{kategori}/{id}` — Mekan detay sayfası (kategori: konaklama, kafeler, restoranlar, kahvalti, plajlar, iskeleler, dondurmacilar, hediyelik-esya)
+- `/konaklama`, `/kafeler`, `/restoranlar`, `/kahvalti`, `/plajlar`, `/iskeleler`, `/dondurmacilar`, `/hediyelik-esya` — Kategori bazlı mekan listesi
 - `/rotalar` — Gezi rotaları listesi
 - `/rotalar/{id}` — Rota detay sayfası
 - `/yerler` — Gezilecek yerler listesi

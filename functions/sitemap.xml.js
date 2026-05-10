@@ -95,7 +95,7 @@ export async function onRequest(context) {
     const dynamicPages = [];
 
     // Mekanlar — sadece yayında olanlar (yeni URL formati: /kategori/slug)
-    const CATEGORY_SLUG = { konaklama:'oteller', kafe:'kafeler', restoran:'restoranlar', kahvalti:'kahvalti', beach:'plajlar', iskele:'iskeleler', dondurmaci:'dondurmacilar', hediyelik:'hediyelik-esya' };
+    const CATEGORY_SLUG = { konaklama:'konaklama', kafe:'kafeler', restoran:'restoranlar', kahvalti:'kahvalti', beach:'plajlar', iskele:'iskeleler', dondurmaci:'dondurmacilar', hediyelik:'hediyelik-esya' };
     for (const v of venues) {
       const status = getField(v.fields, 'status') || (getField(v.fields, 'active') === false ? 'hidden' : 'published');
       if (status !== 'published') continue;

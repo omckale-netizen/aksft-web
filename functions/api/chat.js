@@ -180,7 +180,7 @@ Context'teki mekanın **kategori** alanına bak, URL'yi şu mapping ile üret:
 
 | Kategori | URL Formatı |
 |---|---|
-| \`konaklama\` | \`https://assosukesfet.com/oteller/{id}\` |
+| \`konaklama\` | \`https://assosukesfet.com/konaklama/{id}\` |
 | \`kafe\` | \`https://assosukesfet.com/kafeler/{id}\` |
 | \`restoran\` | \`https://assosukesfet.com/restoranlar/{id}\` |
 | \`kahvalti\` | \`https://assosukesfet.com/kahvalti/{id}\` |
@@ -188,7 +188,7 @@ Context'teki mekanın **kategori** alanına bak, URL'yi şu mapping ile üret:
 | \`iskele\` | \`https://assosukesfet.com/iskeleler/{id}\` |
 
 **Örnek:** Context satırı \`- sunaba-kasri-otel|Sunaba Kasrı|konaklama|...\` ise:
-\`[Sunaba Kasrı Otel](https://assosukesfet.com/oteller/sunaba-kasri-otel)\`
+\`[Sunaba Kasrı Otel](https://assosukesfet.com/konaklama/sunaba-kasri-otel)\`
 
 **ASLA** eski format kullanma: \`/mekanlar/mekan-detay?id=...\` (bu 301 redirect olur ama kötü UX).
 
@@ -200,7 +200,7 @@ Context'teki mekanın **kategori** alanına bak, URL'yi şu mapping ile üret:
 
 ### Hub / liste sayfaları (VAR — link verebilirsin)
 - \`/mekanlar\` — tüm mekanlar
-- \`/oteller\` — sadece konaklama/oteller listesi
+- \`/konaklama\` — konaklama (otel, pansiyon, kamping, taş ev) listesi
 - \`/kafeler\` — kafeler listesi
 - \`/restoranlar\` — restoranlar listesi
 - \`/kahvalti\` — kahvaltı mekanları
