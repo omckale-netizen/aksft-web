@@ -217,6 +217,14 @@ function pageInit() {
   (function() {
     var orenYerleri = (DATA.places || []).filter(function(p) { return p.mustSee || p.category === 'tarihi' || p.category === 'orenyeri'; });
     if (orenYerleri.length === 0) return;
+    // Günlük rotasyon — eklenmeye göre değil, her gün farklı bir mekan başta
+    var _daySeed = Math.floor(Date.now() / 86400000);
+    var _s = _daySeed || 1;
+    for (var _i = orenYerleri.length - 1; _i > 0; _i--) {
+      _s = (_s * 16807) % 2147483647;
+      var _j = _s % (_i + 1);
+      var _t = orenYerleri[_i]; orenYerleri[_i] = orenYerleri[_j]; orenYerleri[_j] = _t;
+    }
     var section = document.getElementById('yl-must-see');
     var grid = document.getElementById('yl-must-see-grid');
     if (!section || !grid) return;

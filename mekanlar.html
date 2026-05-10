@@ -526,7 +526,12 @@ function pageInit() {
     var vs = getActiveVenues().filter(v => v.featured || isPremiumActive(v));
     // Hub sayfasi (activeCat != 'all') -> sadece aktif kategori featured
     if (activeCat !== 'all') vs = vs.filter(v => v.category === activeCat);
-    const featured = vs.sort((a,b) => (isPremiumActive(b)?1:0) - (isPremiumActive(a)?1:0));
+    // Premium üstte, geri kalan featured günlük rotasyonla
+    const daySeed = Math.floor(Date.now() / 86400000);
+    const featured = [
+      ...vs.filter(v => isPremiumActive(v)),
+      ...mkSeededShuffle(vs.filter(v => !isPremiumActive(v)), daySeed)
+    ];
     var featSection = document.querySelector('.mk-featured');
     if (featured.length === 0) { if (featSection) featSection.style.display = 'none'; return; }
     if (featSection) featSection.style.display = '';
@@ -616,6 +621,18 @@ function pageInit() {
   /* ══════════════════════════════════════════
      RENDER: GRID
   ══════════════════════════════════════════ */
+  // LCG seed shuffle — aynı seed ile aynı sıra, deterministik
+  function mkSeededShuffle(arr, seed) {
+    const a = arr.slice();
+    let s = seed || 1;
+    for (let i = a.length - 1; i > 0; i--) {
+      s = (s * 16807) % 2147483647;
+      const j = s % (i + 1);
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
   function renderGrid() {
     const saved  = getSaved();
     let venues   = getActiveVenues();
@@ -636,8 +653,18 @@ function pageInit() {
       }
     }
 
-    // Premium üstte
-    venues.sort((a,b) => (isPremiumActive(b)?1:0) - (isPremiumActive(a)?1:0));
+    // Tier sıralama: 1) Premium 2) Featured 3) Günlük rotasyon (geri kalanı)
+    // Seed = gunun tarihi -> aynı gün herkes aynı sırayı görür, ertesi gün rotasyon
+    const daySeed = Math.floor(Date.now() / 86400000);
+    const shuffled = mkSeededShuffle(
+      venues.filter(v => !isPremiumActive(v) && !v.featured),
+      daySeed
+    );
+    venues = [
+      ...venues.filter(v => isPremiumActive(v)),
+      ...mkSeededShuffle(venues.filter(v => !isPremiumActive(v) && v.featured), daySeed),
+      ...shuffled
+    ];
     document.getElementById('mk-count').textContent = venues.length + ' mekan';
 
     const grid  = document.getElementById('mk-grid');
