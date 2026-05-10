@@ -2431,12 +2431,14 @@ function routeCardHTML(r, delay = 0) {
    VENUE CATEGORY HELPER
 ═══════════════════ */
 var VENUE_CAT_FALLBACK = {
-  kafe:      { label:'Kafe', emoji:'☕', color:'#C4521A' },
-  restoran:  { label:'Restoran', emoji:'🍽', color:'#1A6B8A' },
-  kahvalti:  { label:'Kahvaltı', emoji:'🌞', color:'#8A5520' },
-  konaklama: { label:'Konaklama', emoji:'🏨', color:'#5A7A56' },
-  beach:     { label:'Beach', emoji:'🏖', color:'#1A9A8A' },
-  iskele:    { label:'İskele', emoji:'⚓', color:'#3A5A8A' }
+  kafe:       { label:'Kafe', emoji:'☕', color:'#C4521A' },
+  restoran:   { label:'Restoran', emoji:'🍽', color:'#1A6B8A' },
+  kahvalti:   { label:'Kahvaltı', emoji:'🌞', color:'#8A5520' },
+  konaklama:  { label:'Konaklama', emoji:'🏨', color:'#5A7A56' },
+  beach:      { label:'Beach', emoji:'🏖', color:'#1A9A8A' },
+  iskele:     { label:'İskele', emoji:'⚓', color:'#3A5A8A' },
+  dondurmaci: { label:'Dondurmacı', emoji:'🍦', color:'#E8A07A' },
+  hediyelik:  { label:'Hediyelik Eşya', emoji:'🎁', color:'#9C5A8A' }
 };
 function getVenueCatInfo(catId) {
   if (window.DATA && DATA.venueCategories) {
@@ -3062,12 +3064,14 @@ function renderVenuePage(venueId) {
 
   /* ── Category colours ── */
   const CAT_STYLE = {
-    kafe:      { bg:'rgba(196,82,26,.1)',   color:'#C4521A',  label:'Kafe' },
-    restoran:  { bg:'rgba(26,107,138,.1)',  color:'#1A6B8A',  label:'Restoran' },
-    kahvalti:  { bg:'rgba(212,147,90,.12)', color:'#8A5520',  label:'Kahvaltı' },
-    konaklama: { bg:'rgba(90,122,86,.12)',  color:'#5A7A56',  label:'Konaklama' },
-    beach:     { bg:'rgba(26,158,138,.1)',  color:'#1A9A8A',  label:'Beach' },
-    iskele:    { bg:'rgba(26,39,68,.08)',   color:'#3A5A8A',  label:'İskele' },
+    kafe:       { bg:'rgba(196,82,26,.1)',   color:'#C4521A',  label:'Kafe' },
+    restoran:   { bg:'rgba(26,107,138,.1)',  color:'#1A6B8A',  label:'Restoran' },
+    kahvalti:   { bg:'rgba(212,147,90,.12)', color:'#8A5520',  label:'Kahvaltı' },
+    konaklama:  { bg:'rgba(90,122,86,.12)',  color:'#5A7A56',  label:'Konaklama' },
+    beach:      { bg:'rgba(26,158,138,.1)',  color:'#1A9A8A',  label:'Beach' },
+    iskele:     { bg:'rgba(26,39,68,.08)',   color:'#3A5A8A',  label:'İskele' },
+    dondurmaci: { bg:'rgba(232,160,122,.14)', color:'#B86038', label:'Dondurmacı' },
+    hediyelik:  { bg:'rgba(156,90,138,.12)',  color:'#7A3A6A', label:'Hediyelik' },
   };
   const cs = CAT_STYLE[v.category] || { bg:'rgba(26,39,68,.08)', color:'#4A5568', label:v.category };
 

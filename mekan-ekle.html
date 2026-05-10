@@ -147,6 +147,8 @@ a{color:var(--terra);text-decoration:none}
               <option value="konaklama">🏨 Konaklama</option>
               <option value="beach">🏖 Beach Club</option>
               <option value="iskele">⚓ İskele</option>
+              <option value="dondurmaci">🍦 Dondurmacı</option>
+              <option value="hediyelik">🎁 Hediyelik Eşya</option>
             </select>
           </div>
           <div class="me-field"><label class="me-label">Konum *</label>
@@ -309,7 +311,7 @@ firebase.initializeApp({apiKey:"AIzaSyCXqgczplchzjClAZt-Wl2eqgqmUMhLVJs",authDom
 var db=firebase.firestore();
 var step=1,maxStep=6,imgs=[],editDocId=null,editRefNo='';
 var DAYS=['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
-var CAT_LABELS={kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach Club',iskele:'İskele'};
+var CAT_LABELS={kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach Club',iskele:'İskele',dondurmaci:'Dondurmacı',hediyelik:'Hediyelik Eşya'};
 
 // Init
 (async function(){

@@ -45,7 +45,7 @@
 </div>
 <div id="footer-placeholder"></div>
 <script src="../firebase-loader.js?v=6"></script>
-<script src="../shared.min.js?v=370"></script>
+<script src="../shared.min.js?v=371"></script>
 <script>
 // Mekan slug'ini URL'den cikar: once path (/kategori/slug), sonra query (?id=slug), sonra hash
 // Path parsing window.CATEGORY_SLUG_TO_ID ile guvenli (shared.min.js yuklendikten sonra calisir)
@@ -152,8 +152,8 @@ function pageInit() {
   function applySeoMeta() {
   const venue = (window.DATA?.venues || []).find(v => v.id === venueId);
   if (venue) {
-    const catLabels = {kafe:'Assos Kafeler',restoran:'Assos Restoranlar',kahvalti:'Assos Kahvaltı Mekanları',konaklama:'Assos Otelleri',beach:'Assos Beach Club',iskele:'Assos İskeleler'};
-    const catSingular = {kafe:'kafe',restoran:'restoran',kahvalti:'kahvaltı mekanı',konaklama:'otel',beach:'beach club',iskele:'iskele'};
+    const catLabels = {kafe:'Assos Kafeler',restoran:'Assos Restoranlar',kahvalti:'Assos Kahvaltı Mekanları',konaklama:'Assos Otelleri',beach:'Assos Beach Club',iskele:'Assos İskeleler',dondurmaci:'Assos Dondurmacıları',hediyelik:'Assos Hediyelik Eşya'};
+    const catSingular = {kafe:'kafe',restoran:'restoran',kahvalti:'kahvaltı mekanı',konaklama:'otel',beach:'beach club',iskele:'iskele',dondurmaci:'dondurmacı',hediyelik:'hediyelik eşya mağazası'};
     const catLabel = catLabels[venue.category] || 'Assos Mekanlar';
     const catSing = catSingular[venue.category] || 'mekan';
     const loc = venue.location || 'Assos';
@@ -214,7 +214,7 @@ function pageInit() {
 
     // LocalBusiness Schema — SSR zaten ekledyse atla (duplicate onle)
     if (document.querySelector('script[data-ssr="localbusiness"]')) return;
-    const schemaTypes = {kafe:'CafeOrCoffeeShop',restoran:'Restaurant',kahvalti:'Restaurant',konaklama:'Hotel',beach:'BarOrPub',iskele:'FoodEstablishment'};
+    const schemaTypes = {kafe:'CafeOrCoffeeShop',restoran:'Restaurant',kahvalti:'Restaurant',konaklama:'Hotel',beach:'BarOrPub',iskele:'FoodEstablishment',dondurmaci:'IceCreamShop',hediyelik:'Store'};
     const schema = {
       '@context': 'https://schema.org',
       '@type': schemaTypes[venue.category] || 'LocalBusiness',
