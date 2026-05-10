@@ -13781,8 +13781,14 @@ function renderDashboard() {
     }).join('');
   }
 
-  /* Son eklenenler */
-  const recent = v.slice(-5).reverse();
+  /* Son eklenenler — createdAt'e gore (yoksa Firestore dizi sirasi fallback) */
+  const recent = v.slice().sort((a, b) => {
+    const ad = a.createdAt || a.submittedAt || '';
+    const bd = b.createdAt || b.submittedAt || '';
+    if (ad && !bd) return -1;
+    if (!ad && bd) return 1;
+    return bd.localeCompare(ad);
+  }).slice(0, 5);
   document.getElementById('recent-venues').innerHTML = recent.length === 0
     ? '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:.88rem">Henuz mekan yok.</div>'
     : recent.map(x => `
@@ -15273,6 +15279,7 @@ async function saveVenue(e) {
       showToast('Bu ID ile baska bir mekan zaten var.', 'error');
       return;
     }
+    venue.createdAt = new Date().toISOString();
     draftData.venues.push(venue);
     logActivity('mekan_ekle', venue.id, venue.title);
     await saveVenueToFirestore(venue);
