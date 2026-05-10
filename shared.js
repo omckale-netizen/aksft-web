@@ -3137,7 +3137,11 @@ function renderVenuePage(venueId) {
   const highlights = generateHighlights(v.tags, v.description || v.shortDesc);
 
   /* ── Related data ── */
-  const similar      = (DATA.venues || []).filter(x => x.id !== v.id && x.category === v.category).slice(0,6);
+  // Komsu mekanlar (ayni lokasyon) — once hesapla, similar listeden cikar
+  const neighbors = (DATA.venues || []).filter(x => x.id !== v.id && x.location && v.location && x.location.toLowerCase() === v.location.toLowerCase()).slice(0, 4);
+  const _neighborIds = new Set(neighbors.map(n => n.id));
+  // Benzer mekanlar (ayni kategori) — komsulari haric tut, ust uste listelemeyi onle
+  const similar      = (DATA.venues || []).filter(x => x.id !== v.id && x.category === v.category && !_neighborIds.has(x.id)).slice(0,6);
   const relatedRoutes = DATA.routes.filter(r => (r.relatedVenues||[]).includes(v.id));
 
   /* ── Paths ── */
@@ -3947,9 +3951,8 @@ function renderVenuePage(venueId) {
           '</div>'
         ) : ''}
 
-        <!-- Komşu Mekanlar (aynı konum) -->
+        <!-- Komşu Mekanlar (aynı konum) — yukarida hesaplandi -->
         ${(() => {
-          const neighbors = (DATA.venues || []).filter(x => x.id !== v.id && x.location && v.location && x.location.toLowerCase() === v.location.toLowerCase()).slice(0, 4);
           if (neighbors.length === 0) return '';
           return '<div class="vp-section fade-up">' +
             '<div class="vp-eyebrow">Komşu Mekanlar</div>' +
