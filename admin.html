@@ -5167,6 +5167,8 @@ window.CATEGORIES = {
   restoran:  { slug: 'restoranlar', label: 'Restoran',  emoji: '🍽', plural: 'Restoranlar', color: '#1A6B8A' },
   kahvalti:  { slug: 'kahvalti',    label: 'Kahvaltı',  emoji: '🌞', plural: 'Kahvaltı',    color: '#8A5520' },
   beach:     { slug: 'plajlar',     label: 'Plaj',      emoji: '🏖', plural: 'Plajlar',     color: '#1A9A8A' },
+  dondurmaci:{ slug: 'dondurmacilar', label: 'Dondurmacı', emoji: '🍦', plural: 'Dondurmacılar', color: '#E8A07A' },
+  hediyelik: { slug: 'hediyelik-esya', label: 'Hediyelik Eşya', emoji: '🎁', plural: 'Hediyelik Eşya', color: '#9C5A8A' },
   iskele:    { slug: 'iskeleler',   label: 'İskele',    emoji: '⚓', plural: 'İskeleler',   color: '#3A5A8A' }
 };
 window.getVenueUrl = function(v) {
@@ -21826,7 +21828,7 @@ function pickVenueModal() {
         return;
       }
       listEl.innerHTML = filtered.map(function(v) {
-        var catLabel = { kafe:'☕ Kafe', restoran:'🍽 Restoran', kahvalti:'🌞 Kahvaltı', konaklama:'🏨 Konaklama', beach:'🏖 Beach', iskele:'⚓ İskele' }[v.category] || v.category || '';
+        var catLabel = { kafe:'☕ Kafe', restoran:'🍽 Restoran', kahvalti:'🌞 Kahvaltı', konaklama:'🏨 Konaklama', beach:'🏖 Beach', iskele:'⚓ İskele', dondurmaci:'🍦 Dondurmacı', hediyelik:'🎁 Hediyelik Eşya' }[v.category] || v.category || '';
         var statusDot = getVenueStatusKey && getVenueStatusKey(v) === 'published' ? '<span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;margin-right:6px" title="Yayinda"></span>' : '';
         return '<div data-venue-id="' + escAttr(v.id) + '" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;cursor:pointer;transition:background .15s" onmouseenter="this.style.background=\'rgba(26,39,68,.05)\'" onmouseleave="this.style.background=\'\'">' +
           '<span style="font-size:1.4rem;width:32px;text-align:center">' + (v.emoji || '📍') + '</span>' +

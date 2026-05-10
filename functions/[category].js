@@ -136,6 +136,50 @@ const CATEGORIES = {
       { q: "Gün batımı için hangi iskele en güzel?", a: "Assos bölgesinde günbatımı için en iyi iskele seçimi zevke göre değişir. Behramkale antik limanı klasik bir tercihtir; taş rıhtımdan izlenen günbatımı, surlar ve Athena Tapınağı siluetiyle birleşir — en çok fotoğraflanan noktalardan biridir. Babakale iskelesi Türkiye'nin en batı noktası olduğu için günbatımını en son burada görürsünüz; 10-15 dakika daha uzun süre izleme şansı verir. Ahmetçe iskelesi sakinlik ve minimum turist ile birebirdir, günbatımı sırasında genelde yerli halkla paylaşırsınız. Sokakağzı Koyu'nun küçük iskelesi ise gizli cennet deneyimidir. Yaz aylarında (Haziran-Ağustos) günbatımı saat 19:30-20:30, ilkbahar ve sonbaharda 18:00-19:00 arasıdır. Altın saat (günbatımından 30 dk önce) ve mavi saat (sonrası) fotoğraf için en güzel zamanlardır. Günbatımı sonrası akşam yemeği için iskele restoranlarında rezervasyon önerilir." },
       { q: "Ahmetçe iskelesi ziyaret edilebilir mi, nasıl bir yer?", a: "Ahmetçe, Assos bölgesinin en sakin ve otantik sahil köylerinden biridir, iskelesi ziyarete açıktır ve günübirlik gezi için ideal. Köy meydanında küçük bir balıkçı barınağı, birkaç kafe-restoran ve geleneksel köy evleri bulunur. İskelede yerel balıkçılarla sohbet etmek, taze balık almak veya basit balık sandviçi yemek mümkündür. Köyde ünlü Ahmetçe Kadın Kooperatifi bulunur; organik ürünler, el emeği reçel ve serpme köy kahvaltısıyla ünlüdür (mutlaka rezervasyon alın). Küçük ama şirin bir sahili vardır, yüzmek mümkündür ama plaj beach club konseptinde değil doğaldır. Turist yoğunluğu çok düşüktür, özellikle hafta içi gelirseniz kalabalıkla karşılaşmazsınız. Behramkale'den araçla 20 dakika (18 km) mesafededir; sahil yolundan ulaşılır. Fotoğraf, sakin öğle yemeği ve organik alışveriş için mükemmel bir durak." }
     ]
+  },
+  dondurmacilar: {
+    id: 'dondurmaci', emoji: '🍦', plural: 'Dondurmacılar', heroPlural: 'Dondurmacıları', color: '#E8A07A',
+    eyebrow: "Assos Dondurmacı Rehberi",
+    heroSub: "Ev yapımı maraş dondurması, doğal meyveli külahlar ve serin Ege molası — Assos'un en sevilen dondurmacıları.",
+    heroChips: ['Ev Yapımı', 'Maraş Dondurması', 'Meyveli', 'Doğal', 'Behramkale', 'Sahil'],
+    title: "Assos Dondurmacıları — Ev Yapımı & Maraş Dondurması | Assos'u Keşfet",
+    desc: "Assos dondurmacıları: Behramkale ve Kadırga sahilinde ev yapımı dondurma, geleneksel maraş usulü servis ve mevsim meyveli sorbeler. Konum ve menüyle Assos dondurma rehberi.",
+    shortIntro: "Assos'ta sıcak yaz günlerinde sahile inerken ya da köy meydanında mola verirken, geleneksel ve doğal dondurma deneyimi sizi bekliyor.",
+    experiences: [
+      { emoji: '🍦', title: 'Ev Yapımı Tat', desc: 'Yöresel sütlerden üretilen el yapımı dondurmalar. Yapay aroma yok, sadece gerçek meyve ve süt.' },
+      { emoji: '🥄', title: 'Maraş Usulü', desc: 'Ezilmiş, yoğun kıvamlı geleneksel maraş dondurması. Sahibinin ustalıkla servis ettiği gösteri.' },
+      { emoji: '🍓', title: 'Meyveli Külah', desc: 'Mevsim meyveleriyle hazırlanan sorbe ve külahlar. Çocuklar için renkli, yetişkinler için ferahlatıcı.' }
+    ],
+    intro: "Assos dondurmacıları, Behramkale köy meydanından Kadırga sahiline kadar yaz mevsiminde en çok aranan duraklardır. Yöresel sütlerle üretilen ev yapımı dondurmalar, geleneksel maraş usulü servis ve mevsim meyveleriyle hazırlanan sorbeler — gün boyu sahil yürüyüşlerinden sonra ya da köy gezileri sırasında ferahlatıcı bir mola için ideal. Çalışma saatleri ve konum bilgileriyle Assos'un en iyi dondurmacılarını tek sayfada keşfedin.",
+    faqs: [
+      { q: "Assos'ta dondurmacılar hangi saatler arası açık?", a: "Assos dondurmacıları yaz sezonunda (Haziran-Eylül) genellikle 11:00-23:00 arası açıktır. Hafta sonu ve özellikle akşam saatlerinde (19:00-22:00) yoğunluk fazladır. Behramkale köy meydanındaki dondurmacılar gün boyu hizmet verirken, Kadırga ve Sivrice sahilindeki dondurmacılar plaj saatleriyle uyumludur. Kış sezonunda (Kasım-Mart) çoğu dondurmacı kapalıdır; sadece köy merkezinde 1-2 dondurmacı yıl boyu hizmet verebilir." },
+      { q: "Maraş dondurması nerede en iyi?", a: "Behramkale köy meydanı çevresindeki dondurmacılar geleneksel maraş usulü servisle ünlüdür. Sahip ustalığıyla bıçakla kesip uzatma gösterileri yapan, ezilmiş ve yoğun kıvamlı maraş dondurmasını burada deneyebilirsiniz. Kadırga sahilinde de butik dondurmacılar bulunur. Fiyatlar tek top 50-80 TL, çift top 80-130 TL aralığında değişir." },
+      { q: "Çocuklar için meyveli dondurma var mı?", a: "Evet, Assos dondurmacılarının çoğu mevsim meyveleriyle hazırlanan sorbe ve renkli külahlar sunar. Yaz aylarında çilek, karpuz, şeftali ve kavun ana mevsim aromalarıdır. Şekersiz veya az şekerli seçenekler de bazı dondurmacılarda bulunur. Renkli külah seçenekleri çocuklar için özellikle popülerdir." },
+      { q: "Ev yapımı dondurma ile fabrika dondurma fark nedir?", a: "Assos dondurmacılarının çoğu ev yapımı dondurma sunar — yerli süt, gerçek meyve ve doğal aromayla yapılır. Fabrika dondurmaya göre daha yoğun lezzet, daha az tatlı ve doğal renge sahiptir. Erime süresi de daha hızlıdır çünkü stabilizör eklenmez. Fiyat olarak 10-30% daha pahalı olabilir ama lezzet farkı belirgindir." },
+      { q: "Behramkale ve sahilde dondurmacı var mı?", a: "Evet, Behramkale köy meydanında 2-3, Kadırga sahilinde 2 ve Sivrice'de 1 dondurmacı bulunur. Antik liman bölgesinde balık restoranlarının yanında dondurma servisi sunan kafeler de mevcuttur. Akşam yemeği sonrası tatlı için iskeledeki dondurmacılar tercih edilir; sahil yürüyüşü sırasında soğuk bir dondurma keyifli bir mola olur." }
+    ]
+  },
+  'hediyelik-esya': {
+    id: 'hediyelik', emoji: '🎁', plural: 'Hediyelik Eşya', heroPlural: 'Hediyelik Eşya Mağazaları', color: '#9C5A8A',
+    eyebrow: "Assos Hediyelik Eşya Rehberi",
+    heroSub: "Yöresel zeytinyağı, el sanatları, taş köy hatıraları — Assos'tan götüreceğiniz özgün hediyeler.",
+    heroChips: ['Zeytinyağı', 'El Sanatları', 'Sabun', 'Seramik', 'Behramkale', 'Yerel Üretim'],
+    title: "Assos Hediyelik Eşya — Zeytinyağı, El Sanatları & Yöresel Ürünler | Assos'u Keşfet",
+    desc: "Assos hediyelik eşya: Adatepe zeytinyağı, Behramkale el yapımı sabun, kadın kooperatifi reçelleri ve antik motifli seramikler. Yerel üretici mağazaları rehberi.",
+    shortIntro: "Assos'tan dönerken yanınızda götüreceğiniz hediye, bir hatıradan fazlası — bölgenin kültürünü ve emeğini anlatan bir parça.",
+    experiences: [
+      { emoji: '🫒', title: 'Yerel Zeytinyağı', desc: 'Adatepe ve köylerden soğuk sıkım organik zeytinyağı, sabun ve zeytin ürünleri. Gerçek üretici, gerçek ürün.' },
+      { emoji: '🧶', title: 'El Sanatları', desc: 'Köylü kadınların ördüğü kazaklar, dokuduğu kilimler, yaptığı reçeller. Hediye almak, yerel ekonomiyi desteklemek.' },
+      { emoji: '🏺', title: 'Seramik & Hatıra', desc: 'Antik motifli seramikler, küçük heykeller, taş köy fotoğraf çerçeveleri. Assos atmosferini eve taşıyın.' }
+    ],
+    intro: "Assos'tan götüreceğiniz hediyelik eşyalar bölgenin ruhunu yansıtır: Adatepe köyünün soğuk sıkım zeytinyağı, Behramkale köyünden el yapımı sabunlar, kadın kooperatiflerinin örgüsü ve dokumaları, antik motifli seramikler ve küçük taş köy hatıraları. Yerel üretici işletmelerden alacağınız her ürün, hem özgün bir hediye hem de bölge ekonomisine doğrudan katkı. Assos'taki hediyelik eşya mağazaları, butikler ve yerel üretici noktaları tek sayfada — adres, çalışma saati ve ürün çeşitleriyle.",
+    faqs: [
+      { q: "Assos'ta nereden orijinal zeytinyağı alabilirim?", a: "Adatepe Zeytinyağı Müzesi köyün hemen girişinde bulunur ve burada doğrudan üretici fiyatına soğuk sıkım zeytinyağı alabilirsiniz. Behramkale ve civar köylerin küçük üretici dükkânları da otantik seçimlerdir. Yerel kooperatif noktalarında 1L şişe 250-450 TL aralığında değişir, kalitesine göre. Etiket üzerinde 'soğuk sıkım' ve üretim tarihi mutlaka kontrol edilmeli." },
+      { q: "El sanatları ve örgü ürünleri nerede satılır?", a: "Behramkale, Adatepe ve Ahmetçe köylerinde kadın kooperatifi noktaları bulunur. Kadın eliyle yapılan kazak, çorap, kilim, lavanta sabunu ve organik reçeller burada satılır. Özellikle Ahmetçe Kadın Kooperatifi reçelleriyle ünlüdür. Fiyatlar büyük şehir hediyelik mağazalarına göre çok daha uygundur ve doğrudan üreticiye gitmiş olursunuz." },
+      { q: "Hediyelik mağazaları hangi saatler arası açık?", a: "Yaz sezonunda (Mayıs-Eylül) genelde 09:00-21:00 arası açıktırlar. Behramkale antik kent çevresindeki mağazalar turist akışıyla uyumlu olarak akşam saatlerine kadar açık kalır. Kış aylarında saatler 10:00-18:00'e çekilir, hafta içi bazı mağazalar kapalı olabilir. Pazar günleri yaz sezonunda en kalabalıktır." },
+      { q: "Antik motifli seramik ve heykel nereden alınır?", a: "Behramkale köy içindeki butik mağazalar ve Athena Tapınağı çıkışındaki dükkânlar antik motifli seramikler, küçük heykeller ve fotoğraf çerçeveleri satar. Çoğu el yapımıdır ve Assos'a özel motifler içerir (sütunlar, mitolojik figürler). Fiyatlar 100-1500 TL aralığında değişir, boyuta ve detaya göre. Hediyelik için 200-500 TL bandında çok seçenek bulunur." },
+      { q: "Yerel sabun ve doğal ürünler nereden alınır?", a: "Adatepe ve Behramkale köylerinde defne sabunu, zeytinyağı sabunu ve lavanta sabunu üreten küçük atölyeler vardır. Kadın kooperatiflerinin sabunları doğal yağlar, bitki özleri ve bal ile yapılır. Tek sabun 30-80 TL, set halinde (3-5 adet) 150-350 TL. Ev hediyesi olarak çok tercih edilir." }
+    ]
   }
 };
 

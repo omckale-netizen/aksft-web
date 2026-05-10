@@ -504,7 +504,7 @@ async function generateDynamicSitemap() {
     if (vResp.ok) {
       const vData = await vResp.json();
       const docs = vData.documents || [];
-      const CATEGORY_SLUG = {konaklama:'oteller',kafe:'kafeler',restoran:'restoranlar',kahvalti:'kahvalti',beach:'plajlar',iskele:'iskeleler'};
+      const CATEGORY_SLUG = {konaklama:'oteller',kafe:'kafeler',restoran:'restoranlar',kahvalti:'kahvalti',beach:'plajlar',iskele:'iskeleler',dondurmaci:'dondurmacilar',hediyelik:'hediyelik-esya'};
       for (const doc of docs) {
         const f = doc.fields || {};
         const id = doc.name.split('/').pop();

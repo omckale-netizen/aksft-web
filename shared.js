@@ -75,6 +75,32 @@ window.CATEGORIES = {
     ],
     intro: "Assos plajları, Kadırga Koyu'nun ünlü berrak sularından Sivrice Plajı'nın ince çakıllarına, Türkiye'nin en temiz Ege sahillerini barındırıyor. Sokakağzı Koyu'nun sakinliğinden Kaleiçi Beach Club'ın konforuna, gizli koylardan çocuklu aileye uygun sığ plajlara — her tatil zevkine uygun Assos koyu ve plajı. Plaj girişleri, şemsiye-şezlong fiyatları, yeme-içme olanakları ve ulaşım bilgileriyle tatilinizi buradan planlayın. Assos'ta denize girilecek en iyi yerler tek listede."
   },
+  dondurmaci: {
+    slug: 'dondurmacilar', label: 'Dondurmacı', emoji: '🍦', plural: 'Dondurmacılar', heroPlural: 'Dondurmacıları', color: '#E8A07A',
+    eyebrow: "Assos Dondurmacı Rehberi",
+    heroSub: "Ev yapımı maraş dondurması, doğal meyveli külahlar ve serin Ege molası — Assos'un en sevilen dondurmacıları.",
+    heroChips: ['Ev Yapımı', 'Maraş Dondurması', 'Meyveli', 'Doğal', 'Behramkale', 'Sahil'],
+    shortIntro: "Assos'ta sıcak yaz günlerinde sahile inerken ya da köy meydanında mola verirken, geleneksel ve doğal dondurma deneyimi sizi bekliyor.",
+    experiences: [
+      { emoji: '🍦', title: 'Ev Yapımı Tat', desc: 'Yöresel sütlerden üretilen el yapımı dondurmalar. Yapay aroma yok, sadece gerçek meyve ve süt.' },
+      { emoji: '🥄', title: 'Maraş Usulü', desc: 'Ezilmiş, yoğun kıvamlı geleneksel maraş dondurması. Sahibinin ustalıkla servis ettiği gösteri.' },
+      { emoji: '🍓', title: 'Meyveli Külah', desc: 'Mevsim meyveleriyle hazırlanan sorbe ve külahlar. Çocuklar için renkli, yetişkinler için ferahlatıcı.' }
+    ],
+    intro: "Assos dondurmacıları, Behramkale köy meydanından Kadırga sahiline kadar yaz mevsiminde en çok aranan duraklardır. Yöresel sütlerle üretilen ev yapımı dondurmalar, geleneksel maraş usulü servis ve mevsim meyveleriyle hazırlanan sorbeler — gün boyu sahil yürüyüşlerinden sonra ya da köy gezileri sırasında ferahlatıcı bir mola için ideal. Çalışma saatleri ve konum bilgileriyle Assos'un en iyi dondurmacılarını tek sayfada keşfedin."
+  },
+  hediyelik: {
+    slug: 'hediyelik-esya', label: 'Hediyelik Eşya', emoji: '🎁', plural: 'Hediyelik Eşya', heroPlural: 'Hediyelik Eşya Mağazaları', color: '#9C5A8A',
+    eyebrow: "Assos Hediyelik Eşya Rehberi",
+    heroSub: "Yöresel zeytinyağı, el sanatları, taş köy hatıraları — Assos'tan götüreceğiniz özgün hediyeler.",
+    heroChips: ['Zeytinyağı', 'El Sanatları', 'Sabun', 'Seramik', 'Behramkale', 'Yerel Üretim'],
+    shortIntro: "Assos'tan dönerken yanınızda götüreceğiniz hediye, bir hatıradan fazlası — bölgenin kültürünü ve emeğini anlatan bir parça.",
+    experiences: [
+      { emoji: '🫒', title: 'Yerel Zeytinyağı', desc: 'Adatepe ve köylerden soğuk sıkım organik zeytinyağı, sabun ve zeytin ürünleri. Gerçek üretici, gerçek ürün.' },
+      { emoji: '🧶', title: 'El Sanatları', desc: 'Köylü kadınların ördüğü kazaklar, dokuduğu kilimler, yaptığı reçeller. Hediye almak, yerel ekonomiyi desteklemek.' },
+      { emoji: '🏺', title: 'Seramik & Hatıra', desc: 'Antik motifli seramikler, küçük heykeller, taş köy fotoğraf çerçeveleri. Assos atmosferini eve taşıyın.' }
+    ],
+    intro: "Assos'tan götüreceğiniz hediyelik eşyalar bölgenin ruhunu yansıtır: Adatepe köyünün soğuk sıkım zeytinyağı, Behramkale köyünden el yapımı sabunlar, kadın kooperatiflerinin örgüsü ve dokumaları, antik motifli seramikler ve küçük taş köy hatıraları. Yerel üretici işletmelerden alacağınız her ürün, hem özgün bir hediye hem de bölge ekonomisine doğrudan katkı. Assos'taki hediyelik eşya mağazaları, butikler ve yerel üretici noktaları tek sayfada — adres, çalışma saati ve ürün çeşitleriyle."
+  },
   iskele: {
     slug: 'iskeleler', label: 'İskele', emoji: '⚓', plural: 'İskeleler', heroPlural: 'İskeleleri', color: '#3A5A8A',
     eyebrow: "Assos Tarihi İskeleler",
