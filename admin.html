@@ -10559,7 +10559,7 @@ function renderPendingList(items) {
   var filtered = items;
   if (statusFilter !== 'all') filtered = filtered.filter(function(i) { return i.status === statusFilter; });
   if (q) filtered = filtered.filter(function(i) { return (i.title || '').toLowerCase().includes(q) || (i.refNo || '').toLowerCase().includes(q) || (i.ownerEmail || '').toLowerCase().includes(q) || (i.ownerName || '').toLowerCase().includes(q); });
-  var catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskele'};
+  var catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskele',dondurmaci:'Dondurmacı',hediyelik:'Hediyelik'};
   var statusLabels = { pending: { label:'Bekliyor', bg:'rgba(212,147,90,.1)', color:'#975A16', icon:'⏳' }, updated: { label:'Düzenlendi — İnceleme Bekliyor', bg:'rgba(56,161,105,.08)', color:'#276749', icon:'🔄' }, revision: { label:'Revizyon Bekleniyor', bg:'rgba(49,130,206,.08)', color:'#2B6CB0', icon:'📝' }, approved: { label:'Onaylandı', bg:'rgba(56,161,105,.1)', color:'#276749', icon:'✅' }, rejected: { label:'Reddedildi', bg:'rgba(229,62,62,.08)', color:'#C53030', icon:'❌' }, trashed: { label:'Çöp', bg:'rgba(113,128,150,.08)', color:'#718096', icon:'🗑' } };
   if (filtered.length === 0) { listEl.innerHTML = '<div class="panel-card" style="padding:32px;text-align:center;color:var(--text-muted)">' + (q ? 'Aramayla eşleşen sonuç yok.' : 'Bu durumda talep yok.') + '</div>'; return; }
   listEl.innerHTML = filtered.map(function(item) {
@@ -10671,7 +10671,7 @@ function previewPendingVenue(id) {
   db.collection('pending_venues').doc(id).get().then(function(doc) {
     if (!doc.exists) { showToast('Talep bulunamadı', 'error'); return; }
     var d = doc.data();
-    var catLabels = {kafe:'☕ Kafe',restoran:'🍽 Restoran',kahvalti:'🌞 Kahvaltı',konaklama:'🏨 Konaklama',beach:'🏖 Beach Club',iskele:'⚓ İskele'};
+    var catLabels = {kafe:'☕ Kafe',restoran:'🍽 Restoran',kahvalti:'🌞 Kahvaltı',konaklama:'🏨 Konaklama',beach:'🏖 Beach Club',iskele:'⚓ İskele',dondurmaci:'🍦 Dondurmacı',hediyelik:'🎁 Hediyelik Eşya'};
     var phoneStr = (d.phones || []).map(function(p) { return esc(p.number) + (p.whatsapp ? ' (WhatsApp)' : '') + (p.label ? ' — ' + esc(p.label) : ''); }).join('<br>') || '—';
     var tagsHtml = (d.tags || []).map(function(t) { return '<span style="display:inline-block;padding:3px 10px;border-radius:999px;background:rgba(26,39,68,.06);font-size:.72rem;font-weight:600;color:#4A5870;margin:2px">' + esc(t) + '</span>'; }).join('') || '—';
     var imgsHtml = (d.images || []).map(function(url) { var safeUrl = /^https?:\/\//i.test(url) ? url : ''; return safeUrl ? '<img src="' + esc(safeUrl) + '" style="width:120px;height:80px;object-fit:cover;border-radius:8px;border:1px solid rgba(0,0,0,.06)" loading="lazy">' : ''; }).join('') || '<span style="color:var(--text-muted)">Görsel yüklenmemiş</span>';
@@ -10853,7 +10853,7 @@ async function afterVenueSaveApproval(venue) {
     // Onay maili gönder
     if (data.ownerEmail) {
       var venueUrl = 'https://assosukesfet.com' + (window.getVenueUrl ? window.getVenueUrl(venue) : ('/mekanlar/mekan-detay.html?id=' + venue.id));
-      var catEmojis = {kafe:'☕',restoran:'🍽',kahvalti:'🌞',konaklama:'🏨',beach:'🏖',iskele:'⚓'};
+      var catEmojis = {kafe:'☕',restoran:'🍽',kahvalti:'🌞',konaklama:'🏨',beach:'🏖',iskele:'⚓',dondurmaci:'🍦',hediyelik:'🎁'};
       var catEmoji = catEmojis[venue.category] || '🏪';
       try {
         var html = buildMailHtml(catEmoji + ' ' + venue.title + ' Artık Assos\'u Keşfet\'te!',
@@ -11749,7 +11749,7 @@ function toggleBulkMail() {
     var catSel = document.getElementById('compose-bulk-cat');
     var cats = {};
     (draftData.venues || []).forEach(function(v) { if (v.ownerEmail && v.category) cats[v.category] = true; });
-    var catLabels = {kafe:'Kafeler',restoran:'Restoranlar',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskeleler'};
+    var catLabels = {kafe:'Kafeler',restoran:'Restoranlar',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskeleler',dondurmaci:'Dondurmacılar',hediyelik:'Hediyelik Eşya'};
     catSel.innerHTML = '<option value="all">Tüm Kategoriler</option>' +
       Object.keys(cats).map(function(c) { return '<option value="' + c + '">' + (catLabels[c] || c) + '</option>'; }).join('');
     updateBulkCount();
@@ -12120,7 +12120,7 @@ async function sendComposeMail() {
 async function sendVenueWelcomeMail(venue) {
   var ownerName = venue.ownerName || 'Değerli İşletme Sahibi';
   var venueUrl = 'https://assosukesfet.com' + (window.getVenueUrl ? window.getVenueUrl(venue) : ('/mekanlar/mekan-detay.html?id=' + venue.id));
-  var catLabels = {kafe:'kafe',restoran:'restoran',kahvalti:'kahvaltı mekanı',konaklama:'konaklama tesisi',beach:'beach club',iskele:'iskele'};
+  var catLabels = {kafe:'kafe',restoran:'restoran',kahvalti:'kahvaltı mekanı',konaklama:'konaklama tesisi',beach:'beach club',iskele:'iskele',dondurmaci:'dondurmacı',hediyelik:'hediyelik eşya mağazası'};
   var catLabel = catLabels[venue.category] || 'mekan';
 
   var bodyText = 'Merhaba ' + ownerName + ',\n\n' +
@@ -13667,9 +13667,9 @@ function renderDashboard() {
   const vi = draftData.villages || [];
   const p = draftData.places || [];
 
-  const catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskele'};
-  const catEmojis = {kafe:'☕',restoran:'🍽',kahvalti:'🌞',konaklama:'🏨',beach:'🏖',iskele:'⚓'};
-  const catColors = {kafe:'#C4521A',restoran:'#1A6B8A',kahvalti:'#D4935A',konaklama:'#5A7A56',beach:'#1A9A8A',iskele:'#3A5A8A'};
+  const catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskele',dondurmaci:'Dondurmacı',hediyelik:'Hediyelik'};
+  const catEmojis = {kafe:'☕',restoran:'🍽',kahvalti:'🌞',konaklama:'🏨',beach:'🏖',iskele:'⚓',dondurmaci:'🍦',hediyelik:'🎁'};
+  const catColors = {kafe:'#C4521A',restoran:'#1A6B8A',kahvalti:'#D4935A',konaklama:'#5A7A56',beach:'#1A9A8A',iskele:'#3A5A8A',dondurmaci:'#E8A07A',hediyelik:'#9C5A8A'};
 
   /* Stats — doğru sayılar */
   const published = v.filter(x => getVenueStatusKey(x) === 'published').length;
@@ -14111,7 +14111,7 @@ function updateBulkBar() {
 function bulkChangeCategory() {
   const cat = document.getElementById('bulk-cat-select').value;
   if (!cat) { showToast('Kategori secin.', 'error'); return; }
-  const catEmojis = {kafe:'☕',restoran:'🍽',kahvalti:'🌞',konaklama:'🏨',beach:'🏖',iskele:'⚓'};
+  const catEmojis = {kafe:'☕',restoran:'🍽',kahvalti:'🌞',konaklama:'🏨',beach:'🏖',iskele:'⚓',dondurmaci:'🍦',hediyelik:'🎁'};
   showConfirm('Kategori Değiştir', bulkSelected.length + ' mekanin kategorisi "' + cat + '" olarak degistirilecek. Devam?', async () => {
     for (const id of bulkSelected) {
       const v = draftData.venues.find(x => x.id === id);
@@ -14218,7 +14218,7 @@ function renderVenueTable(resetPage) {
   const catFilter = document.getElementById('venue-cat-filter')?.value || 'all';
   const locFilter = document.getElementById('venue-loc-filter')?.value || 'all';
   const activeFilter = document.getElementById('venue-active-filter')?.value || 'all';
-  const catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskele'};
+  const catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskele',dondurmaci:'Dondurmacı',hediyelik:'Hediyelik'};
 
   // Konum filtre dropdown'ını doldur (ilk çağrıda)
   var locSel = document.getElementById('venue-loc-filter');
@@ -14591,7 +14591,7 @@ function generateId(title) {
     .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 }
 
-const CAT_EMOJIS = { kafe:'☕', restoran:'🍽', kahvalti:'🌞', konaklama:'🏨', beach:'🏖', iskele:'⚓' };
+const CAT_EMOJIS = { kafe:'☕', restoran:'🍽', kahvalti:'🌞', konaklama:'🏨', beach:'🏖', iskele:'⚓', dondurmaci:'🍦', hediyelik:'🎁' };
 
 /* ── Tag chips sistemi ── */
 const PRESET_TAGS = [
@@ -15103,12 +15103,14 @@ function loadFacilitiesData(facilities) {
 
 /* Category style defaults */
 const CAT_DEFAULTS = {
-  kafe:      { iconBg:'rgba(196,82,26,0.1)',  tagBg:'rgba(196,82,26,0.1)',  tagColor:'#C4521A', tagText:'Kafe' },
-  restoran:  { iconBg:'rgba(26,107,138,0.1)',  tagBg:'rgba(26,107,138,0.1)',  tagColor:'#1A6B8A', tagText:'Restoran' },
-  kahvalti:  { iconBg:'rgba(212,147,90,0.12)', tagBg:'rgba(212,147,90,0.15)', tagColor:'#8A5520', tagText:'Kahvalti' },
-  konaklama: { iconBg:'rgba(90,122,86,0.12)',  tagBg:'rgba(90,122,86,0.12)',  tagColor:'#5A7A56', tagText:'Konaklama' },
-  beach:     { iconBg:'rgba(26,107,138,0.1)',  tagBg:'rgba(26,107,138,0.1)',  tagColor:'#1A9A8A', tagText:'Beach' },
-  iskele:    { iconBg:'rgba(26,39,68,0.08)',   tagBg:'rgba(26,39,68,0.08)',   tagColor:'#3A5A8A', tagText:'Iskele' }
+  kafe:       { iconBg:'rgba(196,82,26,0.1)',  tagBg:'rgba(196,82,26,0.1)',  tagColor:'#C4521A', tagText:'Kafe' },
+  restoran:   { iconBg:'rgba(26,107,138,0.1)',  tagBg:'rgba(26,107,138,0.1)',  tagColor:'#1A6B8A', tagText:'Restoran' },
+  kahvalti:   { iconBg:'rgba(212,147,90,0.12)', tagBg:'rgba(212,147,90,0.15)', tagColor:'#8A5520', tagText:'Kahvalti' },
+  konaklama:  { iconBg:'rgba(90,122,86,0.12)',  tagBg:'rgba(90,122,86,0.12)',  tagColor:'#5A7A56', tagText:'Konaklama' },
+  beach:      { iconBg:'rgba(26,107,138,0.1)',  tagBg:'rgba(26,107,138,0.1)',  tagColor:'#1A9A8A', tagText:'Beach' },
+  iskele:     { iconBg:'rgba(26,39,68,0.08)',   tagBg:'rgba(26,39,68,0.08)',   tagColor:'#3A5A8A', tagText:'Iskele' },
+  dondurmaci: { iconBg:'rgba(232,160,122,0.14)', tagBg:'rgba(232,160,122,0.14)', tagColor:'#B86038', tagText:'Dondurmaci' },
+  hediyelik:  { iconBg:'rgba(156,90,138,0.12)',  tagBg:'rgba(156,90,138,0.12)',  tagColor:'#7A3A6A', tagText:'Hediyelik' }
 };
 
 async function saveVenue(e) {
@@ -20700,7 +20702,7 @@ function sgGenerate() {
 
   var title = item.title || '';
   var emoji = item.emoji || '📍';
-  var catEmojis = {kafe:'☕',restoran:'🍽',kahvalti:'🌞',konaklama:'🏡',beach:'🏖',iskele:'⚓'};
+  var catEmojis = {kafe:'☕',restoran:'🍽',kahvalti:'🌞',konaklama:'🏡',beach:'🏖',iskele:'⚓',dondurmaci:'🍦',hediyelik:'🎁'};
   var catEmoji = catEmojis[category] || emoji;
   var loc = location || 'Assos Bölgesi';
 
@@ -21223,7 +21225,7 @@ function generateLlmsFullTxt() {
   var statusEl = document.getElementById('llms-status');
   if (statusEl) statusEl.textContent = 'Oluşturuluyor...';
   var v = draftData.venues || [], r = draftData.routes || [], vi = draftData.villages || [], p = draftData.places || [];
-  var catLabels = {kafe:'Kafeler',restoran:'Restoranlar',kahvalti:'Kahvaltı Mekanları',konaklama:'Konaklama',beach:'Plajlar',iskele:'İskeleler'};
+  var catLabels = {kafe:'Kafeler',restoran:'Restoranlar',kahvalti:'Kahvaltı Mekanları',konaklama:'Konaklama',beach:'Plajlar',iskele:'İskeleler',dondurmaci:'Dondurmacılar',hediyelik:'Hediyelik Eşya'};
   var lines = [];
   lines.push('# Assos\'u Keşfet — Tam İçerik Rehberi');
   lines.push('');
@@ -21588,7 +21590,7 @@ function computeDataHash() {
 async function autoUpdateLlmsFile(currentHash) {
   try {
     var v = draftData.venues || [], r = draftData.routes || [], vi = draftData.villages || [], p = draftData.places || [];
-    var catLabels = {kafe:'Kafeler',restoran:'Restoranlar',kahvalti:'Kahvaltı Mekanları',konaklama:'Konaklama',beach:'Plajlar',iskele:'İskeleler'};
+    var catLabels = {kafe:'Kafeler',restoran:'Restoranlar',kahvalti:'Kahvaltı Mekanları',konaklama:'Konaklama',beach:'Plajlar',iskele:'İskeleler',dondurmaci:'Dondurmacılar',hediyelik:'Hediyelik Eşya'};
     var lines = [];
     lines.push('# Assos\'u Keşfet — Tam İçerik Rehberi');
     lines.push('');
@@ -21888,7 +21890,7 @@ async function generateReport(type) {
   }
   var eventsSnap = await eventsQuery.limit(5000).get();
   var events = eventsSnap.docs.map(function(d) { return d.data(); });
-  var catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskele'};
+  var catLabels = {kafe:'Kafe',restoran:'Restoran',kahvalti:'Kahvaltı',konaklama:'Konaklama',beach:'Beach',iskele:'İskele',dondurmaci:'Dondurmacı',hediyelik:'Hediyelik'};
   var periodLabel = analyticsPeriod === 0 ? 'Tüm Zamanlar' : 'Son ' + analyticsPeriod + ' Gün';
   var reportDate = new Date().toLocaleDateString('tr-TR', { day:'numeric', month:'long', year:'numeric' });
 
