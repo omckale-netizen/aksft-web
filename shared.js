@@ -3629,7 +3629,12 @@ function renderVenuePage(venueId) {
 
       <div class="vp-hero-wrap">
       <div class="vp-hero-top">
-        <a href="${base}mekanlar.html" class="vp-back-btn">← Mekanlar</a>
+        ${(function(){
+          var _vc = v.category && window.CATEGORIES ? window.CATEGORIES[v.category] : null;
+          var _bh = _vc ? base + _vc.slug : base + 'mekanlar.html';
+          var _bl = _vc ? '← ' + _vc.plural : '← Mekanlar';
+          return '<a href="' + _bh + '" class="vp-back-btn">' + _bl + '</a>';
+        })()}
         <div class="vp-hero-acts">
           <button id="vp-save-btn" class="vp-act-btn${isSaved?' saved':''}" aria-label="${isSaved?'Kayıtlardan çıkar':'Kaydet'}" aria-pressed="${isSaved?'true':'false'}" onclick="vpToggleSave()">
             <span id="vp-save-icon">${isSaved?'♥':'♡'}</span>
