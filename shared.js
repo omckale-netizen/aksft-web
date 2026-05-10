@@ -5301,7 +5301,7 @@ function renderPlacePage(placeId) {
     bodyHtml += '<div style="padding:16px;border-radius:14px;background:' + (isYaz ? 'rgba(196,82,26,.06)' : 'rgba(0,0,0,.02)') + ';border:1.5px solid ' + (isYaz ? 'rgba(196,82,26,.2)' : 'rgba(0,0,0,.05)') + ';position:relative;">';
     if (isYaz) bodyHtml += '<span style="position:absolute;top:10px;right:10px;font-size:.55rem;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--terra);color:#fff;letter-spacing:.05em;">AKTİF</span>';
     bodyHtml += '<div style="font-size:.72rem;font-weight:700;color:' + (isYaz ? 'var(--terra)' : 'var(--text-muted)') + ';margin-bottom:8px;">☀️ Yaz Sezonu</div>';
-    bodyHtml += '<div style="font-size:.65rem;color:var(--text-muted);margin-bottom:6px;">1 Mayıs – 1 Ekim</div>';
+    bodyHtml += '<div style="font-size:.65rem;color:var(--text-muted);margin-bottom:6px;">1 Mayıs – 30 Eylül</div>';
     bodyHtml += '<div style="font-size:1rem;font-weight:800;color:var(--navy);">' + (oy.yazAcilis || '08:30') + ' – ' + (oy.yazKapanis || '20:00') + '</div>';
     bodyHtml += '<div style="font-size:.65rem;color:var(--text-muted);margin-top:4px;">Gişe Kapanışı: 19:30</div>';
     bodyHtml += '</div>';
@@ -5309,7 +5309,7 @@ function renderPlacePage(placeId) {
     bodyHtml += '<div style="padding:16px;border-radius:14px;background:' + (!isYaz ? 'rgba(26,107,138,.06)' : 'rgba(0,0,0,.02)') + ';border:1.5px solid ' + (!isYaz ? 'rgba(26,107,138,.2)' : 'rgba(0,0,0,.05)') + ';position:relative;">';
     if (!isYaz) bodyHtml += '<span style="position:absolute;top:10px;right:10px;font-size:.55rem;font-weight:800;padding:2px 8px;border-radius:999px;background:#1A6B8A;color:#fff;letter-spacing:.05em;">AKTİF</span>';
     bodyHtml += '<div style="font-size:.72rem;font-weight:700;color:' + (!isYaz ? '#1A6B8A' : 'var(--text-muted)') + ';margin-bottom:8px;">❄️ Kış Sezonu</div>';
-    bodyHtml += '<div style="font-size:.65rem;color:var(--text-muted);margin-bottom:6px;">Ekim – Mayıs</div>';
+    bodyHtml += '<div style="font-size:.65rem;color:var(--text-muted);margin-bottom:6px;">1 Ekim – 30 Nisan</div>';
     bodyHtml += '<div style="font-size:1rem;font-weight:800;color:var(--navy);">' + (oy.kisAcilis || '08:30') + ' – ' + (oy.kisKapanis || '17:30') + '</div>';
     bodyHtml += '<div style="font-size:.65rem;color:var(--text-muted);margin-top:4px;">Gişe Kapanışı: 17:00</div>';
     bodyHtml += '</div>';
