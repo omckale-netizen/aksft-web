@@ -34,6 +34,16 @@ function getField(fields, key) {
   return null;
 }
 
+// Lastmod date — entity'nin gercek updatedAt/createdAt'inden YYYY-MM-DD
+// Yoksa fallback (build today). ISO timestamp ya da YYYY-MM-DD kabul eder.
+function getLastmod(fields, fallback) {
+  const raw = getField(fields, 'updatedAt') || getField(fields, 'editedAt') || getField(fields, 'createdAt') || getField(fields, 'submittedAt') || getField(fields, 'publishedAt');
+  if (!raw) return fallback;
+  // ISO 8601 (2024-01-15T12:34:56.789Z) -> YYYY-MM-DD
+  const m = String(raw).match(/^(\d{4}-\d{2}-\d{2})/);
+  return m ? m[1] : fallback;
+}
+
 function getFirstImage(fields) {
   // Tekil image field (blog, place, village, route)
   const single = getField(fields, 'image') || getField(fields, 'coverImage');
@@ -103,23 +113,31 @@ export async function onRequest(context) {
       const catSlug = CATEGORY_SLUG[cat] || 'mekanlar';
       dynamicPages.push({
         loc: `/${catSlug}/${v.id}`,
+        lastmod: getLastmod(v.fields, today),
         changefreq: 'weekly',
         priority: '0.7',
         images: getAllImages(v.fields, 6),
         title: getField(v.fields, 'title') || '',
       });
     }
-    // Kategori hub sayfalari
+    // Kategori hub sayfalari — lastmod = bu kategorideki en son guncellenen venue
     const activeCats = new Set(venues.map(v => getField(v.fields, 'category')).filter(Boolean));
+    const catLastmod = {};
+    venues.forEach(v => {
+      const cat = getField(v.fields, 'category');
+      const lm = getLastmod(v.fields, today);
+      if (cat && (!catLastmod[cat] || lm > catLastmod[cat])) catLastmod[cat] = lm;
+    });
     activeCats.forEach(cat => {
       const slug = CATEGORY_SLUG[cat];
-      if (slug) dynamicPages.push({ loc: '/' + slug, changefreq: 'weekly', priority: '0.8', images: [] });
+      if (slug) dynamicPages.push({ loc: '/' + slug, lastmod: catLastmod[cat] || today, changefreq: 'weekly', priority: '0.8', images: [] });
     });
 
     // Yerler
     for (const p of places) {
       dynamicPages.push({
         loc: `/yerler/${p.id}`,
+        lastmod: getLastmod(p.fields, today),
         changefreq: 'monthly',
         priority: '0.7',
         images: getAllImages(p.fields, 6),
@@ -131,6 +149,7 @@ export async function onRequest(context) {
     for (const k of villages) {
       dynamicPages.push({
         loc: `/koyler/${k.id}`,
+        lastmod: getLastmod(k.fields, today),
         changefreq: 'monthly',
         priority: '0.6',
         images: getAllImages(k.fields, 6),
@@ -142,6 +161,7 @@ export async function onRequest(context) {
     for (const r of routes) {
       dynamicPages.push({
         loc: `/rotalar/${r.id}`,
+        lastmod: getLastmod(r.fields, today),
         changefreq: 'monthly',
         priority: '0.6',
         images: getAllImages(r.fields, 6),
@@ -156,6 +176,7 @@ export async function onRequest(context) {
       if (status === 'draft') continue;
       dynamicPages.push({
         loc: `/blog/${b.id}`,
+        lastmod: getLastmod(b.fields, today),
         changefreq: 'monthly',
         priority: '0.6',
         images: getAllImages(b.fields, 3),
@@ -175,7 +196,7 @@ ${allPages.map(p => {
     </image:image>`).join('\n');
   return `  <url>
     <loc>${BASE_URL}${p.loc}</loc>
-    <lastmod>${today}</lastmod>
+    <lastmod>${p.lastmod || today}</lastmod>
     <changefreq>${p.changefreq}</changefreq>
     <priority>${p.priority}</priority>${imgTags ? '\n' + imgTags : ''}
   </url>`;

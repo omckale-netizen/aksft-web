@@ -478,6 +478,14 @@ async function generateDynamicSitemap() {
   const BASE = 'https://assosukesfet.com';
   const today = new Date().toISOString().split('T')[0];
 
+  // Firestore field'larindan gercek lastmod cikar (ISO timestamp -> YYYY-MM-DD)
+  function lastmodFrom(f) {
+    const raw = f?.updatedAt?.stringValue || f?.editedAt?.stringValue || f?.createdAt?.stringValue || f?.submittedAt?.stringValue || f?.publishedAt?.stringValue;
+    if (!raw) return today;
+    const m = String(raw).match(/^(\d{4}-\d{2}-\d{2})/);
+    return m ? m[1] : today;
+  }
+
   // Statik sayfalar
   const staticPages = [
     { loc: '/', priority: '1.0', freq: 'weekly' },
@@ -522,8 +530,9 @@ async function generateDynamicSitemap() {
 
         const cat = f.category?.stringValue;
         const catSlug = CATEGORY_SLUG[cat] || 'mekanlar';
+        const venueLm = lastmodFrom(f);
         if (cat && CATEGORY_SLUG[cat]) _activeCats.add(catSlug);
-        xml += `  <url>\n    <loc>${BASE}/${catSlug}/${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n`;
+        xml += `  <url>\n    <loc>${BASE}/${catSlug}/${id}</loc>\n    <lastmod>${venueLm}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n`;
         // Gorseller
         const images = f.images?.arrayValue?.values || [];
         for (const img of images) {
@@ -551,8 +560,9 @@ async function generateDynamicSitemap() {
       const rData = await rResp.json();
       const docs = rData.documents || [];
       for (const doc of docs) {
+        const f = doc.fields || {};
         const id = doc.name.split('/').pop();
-        xml += `  <url><loc>${BASE}/rotalar/${id}</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>\n`;
+        xml += `  <url><loc>${BASE}/rotalar/${id}</loc><lastmod>${lastmodFrom(f)}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>\n`;
       }
     }
   } catch(e) { console.error('[sitemap] Firestore fetch failed:', e && e.message || e); }
@@ -567,7 +577,7 @@ async function generateDynamicSitemap() {
       for (const doc of docs) {
         const f = doc.fields || {};
         const id = doc.name.split('/').pop();
-        xml += `  <url>\n    <loc>${BASE}/yerler/${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n`;
+        xml += `  <url>\n    <loc>${BASE}/yerler/${id}</loc>\n    <lastmod>${lastmodFrom(f)}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n`;
         const imgUrl = f.image?.stringValue;
         if (imgUrl) {
           const title = f.title?.stringValue || id;
@@ -588,7 +598,7 @@ async function generateDynamicSitemap() {
       for (const doc of docs) {
         const f = doc.fields || {};
         const id = doc.name.split('/').pop();
-        xml += `  <url>\n    <loc>${BASE}/koyler/${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n`;
+        xml += `  <url>\n    <loc>${BASE}/koyler/${id}</loc>\n    <lastmod>${lastmodFrom(f)}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n`;
         const imgUrl = f.image?.stringValue;
         if (imgUrl) {
           const title = f.title?.stringValue || id;
@@ -612,7 +622,7 @@ async function generateDynamicSitemap() {
         const status = f.status?.stringValue;
         if (status !== 'published') continue;
 
-        xml += `  <url>\n    <loc>${BASE}/blog/${id}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n`;
+        xml += `  <url>\n    <loc>${BASE}/blog/${id}</loc>\n    <lastmod>${lastmodFrom(f)}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n`;
         const imgUrl = f.image?.stringValue;
         if (imgUrl) {
           const title = f.title?.stringValue || id;

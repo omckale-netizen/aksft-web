@@ -65,6 +65,48 @@ function buildTouristTripSchema(f, pageUrl, image, defaultImg) {
     address: { '@type': 'PostalAddress', addressLocality: 'Ayvac\u0131k', addressRegion: '\u00c7anakkale', addressCountry: 'TR' }
   };
 
+  // Freshness sinyali
+  const created = f.createdAt?.stringValue;
+  const updated = f.updatedAt?.stringValue || f.editedAt?.stringValue || created;
+  if (created) schema.datePublished = created;
+  if (updated) schema.dateModified = updated;
+
+  return schema;
+}
+
+// HowTo schema \u2014 rotalar icin Google'da rich snippet (step-by-step)
+// TouristTrip yaninda ek olarak servisi yapilir (ikisi de gecerlidir).
+function buildHowToSchema(f, pageUrl, image, defaultImg) {
+  const stops = f.stops?.arrayValue?.values || [];
+  if (stops.length === 0) return null;
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: f.title?.stringValue || 'Assos Gezi Rotas\u0131',
+    description: (f.shortDesc?.stringValue || f.description?.stringValue || '').replace(/<[^>]*>/g, '').substring(0, 300),
+    url: pageUrl,
+    inLanguage: 'tr-TR'
+  };
+  if (image && image !== defaultImg) schema.image = image;
+  if (f.sure?.stringValue) schema.totalTime = f.sure.stringValue;
+  // Step listesi
+  schema.step = stops.map((s, i) => {
+    const stop = s.mapValue?.fields || {};
+    const stopName = s.stringValue || stop.title?.stringValue || `Durak ${i + 1}`;
+    const stopDesc = stop.desc?.stringValue || stop.description?.stringValue || '';
+    return {
+      '@type': 'HowToStep',
+      position: i + 1,
+      name: stopName,
+      text: stopDesc || stopName,
+      url: pageUrl + '#durak-' + (i + 1)
+    };
+  });
+  // Freshness
+  const created = f.createdAt?.stringValue;
+  const updated = f.updatedAt?.stringValue || f.editedAt?.stringValue || created;
+  if (created) schema.datePublished = created;
+  if (updated) schema.dateModified = updated;
   return schema;
 }
 
@@ -129,6 +171,8 @@ export async function onRequest(context) {
     const image = f.image?.stringValue || DEFAULT_IMG;
     const ttSchema = buildTouristTripSchema(f, pageUrl, image, DEFAULT_IMG);
     const ttSchemaJson = jsonLdSafe(ttSchema);
+    const howToSchema = buildHowToSchema(f, pageUrl, image, DEFAULT_IMG);
+    const howToSchemaJson = howToSchema ? jsonLdSafe(howToSchema) : null;
 
     // Kisa shortDesc'i fallback ile zenginlestir — Google generic description uretmesin
     const _baseDesc = (f.shortDesc?.stringValue || f.description?.stringValue || '').replace(/<[^>]*>/g, '').trim();
@@ -160,7 +204,8 @@ export async function onRequest(context) {
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(desc)}">
 <meta name="twitter:image" content="${esc(image)}">
-<script type="application/ld+json">${ttSchemaJson}</script>
+<script type="application/ld+json">${ttSchemaJson}</script>${howToSchemaJson ? `
+<script type="application/ld+json">${howToSchemaJson}</script>` : ''}
 </head><body><h1>${esc(rotaTitle)}</h1><p>${esc(desc)}</p></body></html>`;
 
       return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
@@ -181,7 +226,10 @@ export async function onRequest(context) {
       .on('meta[name="twitter:title"]', { element(el) { el.setAttribute('content', title); } })
       .on('meta[name="twitter:description"]', { element(el) { el.setAttribute('content', desc); } })
       .on('meta[name="twitter:image"]', { element(el) { el.setAttribute('content', image); } })
-      .on('head', { element(el) { el.append(`<script type="application/ld+json" data-ssr="touristtrip">${ttSchemaJson}</script>`, { html: true }); } })
+      .on('head', { element(el) {
+        el.append(`<script type="application/ld+json" data-ssr="touristtrip">${ttSchemaJson}</script>`, { html: true });
+        if (howToSchemaJson) el.append(`<script type="application/ld+json" data-ssr="howto">${howToSchemaJson}</script>`, { html: true });
+      } })
       .transform(response);
   } catch (e) {
     // Hata durumunda asset'e dus (client-side render devam edebilir)

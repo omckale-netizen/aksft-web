@@ -44,6 +44,11 @@ function buildTouristDestinationSchema(f, pageUrl, image, defaultImg, seoName, p
   if (lat != null && lng != null) {
     schema.geo = { '@type': 'GeoCoordinates', latitude: Number(lat), longitude: Number(lng) };
   }
+  // Freshness sinyali
+  const created = f.createdAt?.stringValue;
+  const updated = f.updatedAt?.stringValue || f.editedAt?.stringValue || created;
+  if (created) schema.datePublished = created;
+  if (updated) schema.dateModified = updated;
   return schema;
 }
 

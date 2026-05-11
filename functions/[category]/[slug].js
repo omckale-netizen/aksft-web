@@ -75,6 +75,11 @@ function buildLocalBusinessSchema(f, pageUrl, image, defaultImg) {
   if (lat != null && lng != null) {
     schema.geo = { '@type': 'GeoCoordinates', latitude: Number(lat), longitude: Number(lng) };
   }
+  // Freshness sinyali — Google fresh content boost
+  const created = f.createdAt?.stringValue || f.submittedAt?.stringValue;
+  const updated = f.updatedAt?.stringValue || f.editedAt?.stringValue || created;
+  if (created) schema.datePublished = created;
+  if (updated) schema.dateModified = updated;
   return schema;
 }
 
