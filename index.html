@@ -937,11 +937,33 @@ function pageInit() {
       const shuffled = [...rest].sort((a, b) => seededHash(a.id) - seededHash(b.id));
       return [...shuffledPriority, ...shuffled];
     }
+    // Kategori bazinda yiginma onleyici round-robin (interleave):
+    // 1. round'da her kategoriden 1, 2. round'da her kategoriden 1, ...
+    // Bos kategoriler atlanir. Anasayfada kafe yiginmasi olmaz.
+    function interleaveByCategory(venues, categories) {
+      const buckets = {};
+      categories.forEach(c => buckets[c] = []);
+      venues.forEach(v => { if (buckets[v.category]) buckets[v.category].push(v); });
+      // Kategori sirasini da gunluk seed ile karistir (her gun farkli kategori bassa)
+      const orderedCats = [...categories].sort((a, b) => seededHash('cat_' + a) - seededHash('cat_' + b));
+      const result = [];
+      let hasMore = true;
+      while (hasMore) {
+        hasMore = false;
+        for (const cat of orderedCats) {
+          if (buckets[cat].length > 0) {
+            result.push(buckets[cat].shift());
+            hasMore = true;
+          }
+        }
+      }
+      return result;
+    }
 
     /* 1. Yeme-İçme (kafe, restoran, kahvalti, beach, iskele) */
-    const foodCats = ['kafe', 'restoran', 'kahvalti', 'beach', 'iskele'];
+    const foodCats = ['kafe', 'restoran', 'kahvalti', 'beach', 'iskele', 'dondurmaci', 'hediyelik'];
     const activeVenues = DATA.venues.filter(v => v.active !== false);
-    const foodVenues = dailySorted(activeVenues.filter(v => foodCats.includes(v.category)));
+    const foodVenues = interleaveByCategory(dailySorted(activeVenues.filter(v => foodCats.includes(v.category))), foodCats);
     const foodGrid = document.getElementById('hp-food-grid');
     if (foodGrid) foodGrid.innerHTML = foodVenues.map(venueCard).join('');
 
