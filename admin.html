@@ -8277,12 +8277,12 @@ let venueCategories = [];
 const DEFAULT_CATS = [
   { id:'kafe', label:'Kafe', emoji:'☕', color:'#C4521A' },
   { id:'restoran', label:'Restoran', emoji:'🍽', color:'#1A6B8A' },
-  { id:'kahvalti', label:'Kahvalti', emoji:'🌞', color:'#8A5520' },
+  { id:'kahvalti', label:'Kahvaltı', emoji:'🌞', color:'#8A5520' },
   { id:'konaklama', label:'Konaklama', emoji:'🏨', color:'#5A7A56' },
   { id:'beach', label:'Beach', emoji:'🏖', color:'#1A9A8A' },
-  { id:'iskele', label:'Iskele', emoji:'⚓', color:'#3A5A8A' },
-  { id:'dondurmaci', label:'Dondurmaci', emoji:'🍦', color:'#E8A07A' },
-  { id:'hediyelik', label:'Hediyelik Esya', emoji:'🎁', color:'#9C5A8A' }
+  { id:'iskele', label:'İskele', emoji:'⚓', color:'#3A5A8A' },
+  { id:'dondurmaci', label:'Dondurmacı', emoji:'🍦', color:'#E8A07A' },
+  { id:'hediyelik', label:'Hediyelik Eşya', emoji:'🎁', color:'#9C5A8A' }
 ];
 
 let placeCategories = [];
@@ -8326,10 +8326,44 @@ async function loadCategories() {
       await db.collection('settings').doc('place_categories').set({ list: placeCategories }, { merge: true });
     }
   } catch(e) { placeCategories = DEFAULT_PLACE_CATS; }
+  // Bir kerelik label fix migration — Turkce karakterleri duzelt
+  await fixCategoryLabelsV1();
   renderCatList();
   renderPlaceCatList();
   updateCatSelects();
   updatePlaceCatSelects();
+}
+
+// Eski yanlis yazilmis Turkce label'lari duzelt (Firestore'da hem kategori
+// hem venue tagText). Bir kerelik calisir, localStorage flag.
+async function fixCategoryLabelsV1() {
+  var FLAG = 'aksft_labels_fixed_v1';
+  try { if (localStorage.getItem(FLAG)) return; } catch(e) { return; }
+  var FIX = {
+    'Dondurmaci': 'Dondurmacı',
+    'Hediyelik Esya': 'Hediyelik Eşya',
+    'Kahvalti': 'Kahvaltı',
+    'Iskele': 'İskele'
+  };
+  var catChanged = false;
+  for (var i = 0; i < venueCategories.length; i++) {
+    var c = venueCategories[i];
+    if (FIX[c.label]) { c.label = FIX[c.label]; catChanged = true; }
+  }
+  if (catChanged) {
+    try { await db.collection('settings').doc('venue_categories').set({ list: venueCategories }, { merge: true }); } catch(e) {}
+  }
+  var venuesToFix = (draftData.venues || []).filter(function(v){ return v.tagText && FIX[v.tagText]; });
+  var promises = venuesToFix.map(function(v){
+    v.tagText = FIX[v.tagText];
+    return db.collection('venues').doc(v.id).set({ tagText: v.tagText }, { merge: true })
+      .catch(function(e){ console.warn('tagText fix fail:', v.id, e); });
+  });
+  await Promise.allSettled(promises);
+  try { localStorage.setItem(FLAG, '1'); } catch(e) {}
+  if (catChanged || venuesToFix.length > 0) {
+    console.log('[Migration] Label fix: ' + venuesToFix.length + ' venue + ' + (catChanged ? 'kategori' : '0 kategori'));
+  }
 }
 
 function catAutoId(val) {
@@ -15159,11 +15193,11 @@ function loadFacilitiesData(facilities) {
 const CAT_DEFAULTS = {
   kafe:       { iconBg:'rgba(196,82,26,0.1)',  tagBg:'rgba(196,82,26,0.1)',  tagColor:'#C4521A', tagText:'Kafe' },
   restoran:   { iconBg:'rgba(26,107,138,0.1)',  tagBg:'rgba(26,107,138,0.1)',  tagColor:'#1A6B8A', tagText:'Restoran' },
-  kahvalti:   { iconBg:'rgba(212,147,90,0.12)', tagBg:'rgba(212,147,90,0.15)', tagColor:'#8A5520', tagText:'Kahvalti' },
+  kahvalti:   { iconBg:'rgba(212,147,90,0.12)', tagBg:'rgba(212,147,90,0.15)', tagColor:'#8A5520', tagText:'Kahvaltı' },
   konaklama:  { iconBg:'rgba(90,122,86,0.12)',  tagBg:'rgba(90,122,86,0.12)',  tagColor:'#5A7A56', tagText:'Konaklama' },
   beach:      { iconBg:'rgba(26,107,138,0.1)',  tagBg:'rgba(26,107,138,0.1)',  tagColor:'#1A9A8A', tagText:'Beach' },
-  iskele:     { iconBg:'rgba(26,39,68,0.08)',   tagBg:'rgba(26,39,68,0.08)',   tagColor:'#3A5A8A', tagText:'Iskele' },
-  dondurmaci: { iconBg:'rgba(232,160,122,0.14)', tagBg:'rgba(232,160,122,0.14)', tagColor:'#B86038', tagText:'Dondurmaci' },
+  iskele:     { iconBg:'rgba(26,39,68,0.08)',   tagBg:'rgba(26,39,68,0.08)',   tagColor:'#3A5A8A', tagText:'İskele' },
+  dondurmaci: { iconBg:'rgba(232,160,122,0.14)', tagBg:'rgba(232,160,122,0.14)', tagColor:'#B86038', tagText:'Dondurmacı' },
   hediyelik:  { iconBg:'rgba(156,90,138,0.12)',  tagBg:'rgba(156,90,138,0.12)',  tagColor:'#7A3A6A', tagText:'Hediyelik' }
 };
 
