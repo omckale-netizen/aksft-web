@@ -6,7 +6,7 @@
   <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://www.gstatic.com">
-  <link rel="stylesheet" href="/fonts.css?v=1">
+  <link rel="preload" href="/fonts.css?v=1" as="style" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="/fonts.css?v=1"></noscript>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="/icon.png" sizes="48x48" type="image/png"><link rel="icon" href="/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=2">
@@ -423,8 +423,8 @@
 
 <div id="footer-placeholder"></div>
 
-<script src="firebase-loader.js?v=6"></script>
-<script src="shared.min.js?v=372"></script>
+<script defer src="firebase-loader.js?v=6"></script>
+<script defer src="shared.min.js?v=372"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>
 function pageInit() {

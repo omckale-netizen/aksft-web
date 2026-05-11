@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   <link rel="dns-prefetch" href="https://www.gstatic.com">
-  <link rel="stylesheet" href="/fonts.css?v=1">
+  <link rel="preload" href="/fonts.css?v=1" as="style" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="/fonts.css?v=1"></noscript>
   <title>Arama — Assos'u Keşfet</title>
   <meta name="description" content="Assos'ta mekan, gezilecek yer, köy ve rota arayın.">
   <meta name="robots" content="noindex, follow">
@@ -186,8 +186,8 @@
   </main>
   <div id="footer-placeholder"></div>
 
-  <script src="firebase-loader.js?v=6"></script>
-  <script src="shared.min.js?v=372"></script>
+  <script defer src="firebase-loader.js?v=6"></script>
+  <script defer src="shared.min.js?v=372"></script>
   <script>
     function pageInit() {
       renderNav({ heroMode: false });
