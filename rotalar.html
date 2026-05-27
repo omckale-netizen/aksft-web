@@ -87,13 +87,21 @@
   <div style="max-width:1280px;margin:0 auto;">
     <div class="scroll-x" style="display:flex;gap:8px;padding-bottom:4px;margin-bottom:40px;" role="group" aria-label="Filtreler">
       <button class="filter-btn active" onclick="filterRoutes(this,'all')" style="background:var(--navy);border-color:var(--navy);color:var(--cream);">Tümü</button>
-      <button class="filter-btn" onclick="filterRoutes(this,'kolay')"    style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🚶 Kolay</button>
-      <button class="filter-btn" onclick="filterRoutes(this,'orta')"     style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🧗 Orta</button>
-      <button class="filter-btn" onclick="filterRoutes(this,'yarim-gun')" style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">⏳ Yarım Gün</button>
-      <button class="filter-btn" onclick="filterRoutes(this,'tam-gun')"  style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">📅 Tam Gün</button>
-      <button class="filter-btn" onclick="filterRoutes(this,'deniz')"    style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🌊 Deniz</button>
-      <button class="filter-btn" onclick="filterRoutes(this,'tarih')"    style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🏛 Tarih</button>
-      <button class="filter-btn" onclick="filterRoutes(this,'koy')"      style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🏘 Köy</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'kolay')"      style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🚶 Kolay</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'orta')"       style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🧗 Orta</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'yarim-gun')"  style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">⏳ Yarım Gün</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'tam-gun')"    style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">📅 Tam Gün</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'coklu-gun')"  style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">📆 Hafta Sonu</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'aile')"       style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">👨‍👩‍👧 Aile</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'cift')"       style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">💑 Çift</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'foto')"       style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">📷 Foto</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'lezzet')"     style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🍽 Lezzet</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'doga')"       style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🌿 Doğa</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'deniz')"      style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🌊 Deniz</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'tarih')"      style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🏛 Tarih</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'koy')"        style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🏘 Köy</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'yaz')"        style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">☀️ Yaz</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'sonbahar')"   style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🍂 Sonbahar</button>
     </div>
     <div id="routes-grid" class="card-grid"></div>
     <div id="no-routes" style="display:none;text-align:center;padding:60px 0;">
@@ -276,10 +284,18 @@ function pageInit() {
     kolay:       r => r.zorluk === 'Kolay' || r.zorluk === 'Çok Kolay',
     orta:        r => r.zorluk === 'Orta',
     'yarim-gun': r => r.sure.includes('saat') && !r.sure.toLowerCase().includes('gün'),
-    'tam-gun':   r => r.sure.toLowerCase().includes('gün'),
-    deniz:       r => (r.keywords||[]).some(k => ['deniz','koy','yüzme'].includes(k)),
-    tarih:       r => (r.keywords||[]).some(k => ['antik','tarih','tapınak','arkeoloji'].includes(k)),
+    'tam-gun':   r => r.sure.toLowerCase().includes('gün') && !((r.days || 1) >= 2),
+    'coklu-gun': r => (r.days || 1) >= 2 || /\b(gün|gece)\b/i.test(r.sure) && /[23]\s*(gün|gece)/i.test(r.sure),
+    deniz:       r => (r.keywords||[]).some(k => ['deniz','koy','yüzme'].includes(k)) || (r.audience||[]).includes('yaz'),
+    tarih:       r => (r.keywords||[]).some(k => ['antik','tarih','tapınak','arkeoloji'].includes(k)) || (r.audience||[]).includes('tarih'),
     koy:         r => (r.keywords||[]).some(k => ['köy','village','taş ev'].includes(k)),
+    aile:        r => (r.audience||[]).includes('aile-cocuklu'),
+    cift:        r => (r.audience||[]).includes('cift-romantik'),
+    foto:        r => (r.audience||[]).includes('foto'),
+    lezzet:      r => (r.audience||[]).includes('lezzet'),
+    doga:        r => (r.audience||[]).includes('doga'),
+    yaz:         r => r.season === 'yaz' || (r.audience||[]).includes('yaz'),
+    sonbahar:    r => r.season === 'ilkbahar-sonbahar' || (r.season||'').toLowerCase().includes('sonbahar')
   };
 
   const RT_FILTER_KEY = 'rt_filter_cat';
