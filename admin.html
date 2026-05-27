@@ -5391,6 +5391,42 @@ async function loadDataFromFirestore() {
   }
   // Bir kerelik migration: createdAt'i olmayan eski mekanlara pivot tarih ata
   migrateVenueCreatedAt();
+  // Yeni rotalari Firestore'a ekle (Hafta Sonu, Kaz Daglari)
+  migrateNewRoutesV1();
+}
+
+// Yeni eklenen 2 rotayi (data.js'te var) Firestore'a kopyala — bir kerelik
+async function migrateNewRoutesV1() {
+  var FLAG = 'aksft_routes_haftasonu_kaz_v1';
+  try { if (localStorage.getItem(FLAG)) return; } catch(e) { return; }
+  var TARGET_IDS = ['haftasonu-assos-3-gun', 'kaz-daglari-dogal-rotasi'];
+  // Mevcut routes'ta var mi?
+  var existing = (draftData.routes || []).filter(function(r){ return TARGET_IDS.indexOf(r.id) > -1; });
+  if (existing.length >= TARGET_IDS.length) {
+    try { localStorage.setItem(FLAG, '1'); } catch(e) {}
+    return;
+  }
+  // data.js (window.DATA) icinden rotalari al
+  if (!window.DATA || !window.DATA.routes) return;
+  var existingIds = (draftData.routes || []).map(function(r){ return r.id; });
+  var toAdd = window.DATA.routes.filter(function(r){
+    return TARGET_IDS.indexOf(r.id) > -1 && existingIds.indexOf(r.id) === -1;
+  });
+  if (toAdd.length === 0) {
+    try { localStorage.setItem(FLAG, '1'); } catch(e) {}
+    return;
+  }
+  var writes = toAdd.map(function(r){
+    r.createdAt = new Date().toISOString();
+    r.active = true;
+    if (!draftData.routes) draftData.routes = [];
+    draftData.routes.push(r);
+    return db.collection('routes').doc(r.id).set(r)
+      .catch(function(e){ console.warn('[Migration] Route fail:', r.id, e); });
+  });
+  await Promise.allSettled(writes);
+  try { localStorage.setItem(FLAG, '1'); } catch(e) {}
+  console.log('[Migration] ' + toAdd.length + ' yeni rota Firestore\'a eklendi:', toAdd.map(function(r){ return r.id; }).join(', '));
 }
 
 // Bir kerelik migration — eski mekanlara createdAt yaz, dashboard "Son Eklenenler"
