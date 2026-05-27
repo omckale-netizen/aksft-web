@@ -70,6 +70,7 @@ function pageInit() {
     var exists = (window.DATA?.places || []).some(function(p) { return p.id === placeId; });
     if (exists) {
       renderPlacePage(placeId);
+      injectEcoNotice(placeId);
     } else if (window.DATA && window.DATA.places) {
       renderYerBulunamadi();
     } else {
@@ -78,6 +79,32 @@ function pageInit() {
   }
   checkAndRender();
   document.addEventListener('dataReady', checkAndRender);
+
+  // Müze ve ören yerlerine "çevreyi koruyalım" uyarisi inject et
+  function injectEcoNotice(pid) {
+    var place = (window.DATA?.places || []).find(function(p){ return p.id === pid; });
+    if (!place) return;
+    var cat = place.category;
+    if (cat !== 'muze' && cat !== 'tarihi' && cat !== 'orenyeri') return;
+    // Onceden eklediysek dokunma
+    if (document.getElementById('eco-notice')) return;
+    var body = document.getElementById('place-body');
+    if (!body) return;
+    var notice = document.createElement('div');
+    notice.id = 'eco-notice';
+    notice.style.cssText = 'max-width:900px;margin:0 auto;padding:0 24px;';
+    notice.innerHTML =
+      '<div style="margin:24px 0 8px;background:linear-gradient(135deg,rgba(45,138,78,.08),rgba(45,138,78,.02));border:1px solid rgba(45,138,78,.18);border-radius:16px;padding:18px 22px;">' +
+        '<div style="display:flex;align-items:flex-start;gap:14px;">' +
+          '<span style="font-size:1.5rem;line-height:1;flex-shrink:0;">🌿</span>' +
+          '<div>' +
+            '<h3 style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:700;font-size:.92rem;color:#1F6B3A;margin:0 0 6px;">Doğamıza ve Tarihimize Sahip Çıkalım</h3>' +
+            '<p style="font-size:.78rem;color:var(--text-mid,#4A5568);line-height:1.7;margin:0;">Bu özel mekanı geleceğe taşımak hepimizin sorumluluğu. Lütfen <strong>çöplerinizi yanınızda götürün</strong>, antik yapılara ve doğal alanlara zarar vermeyin, alev kaynaklarından uzak durun. Temiz bir Assos için teşekkürler.</p>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    body.insertBefore(notice, body.firstChild);
+  }
 
   function renderYerBulunamadi() {
     // NOT: noindex EKLENMEZ — static data.js stale olabilir; SSR 410 ile
