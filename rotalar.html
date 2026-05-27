@@ -85,23 +85,16 @@
 <!-- FILTERS + GRID -->
 <section style="padding:64px 24px 100px;background:var(--navy-deep);">
   <div style="max-width:1280px;margin:0 auto;">
-    <div class="scroll-x" style="display:flex;gap:8px;padding-bottom:4px;margin-bottom:40px;" role="group" aria-label="Filtreler">
-      <button class="filter-btn active" onclick="filterRoutes(this,'all')" style="background:var(--navy);border-color:var(--navy);color:var(--cream);">Tümü</button>
-      <button class="filter-btn" onclick="filterRoutes(this,'kolay')"      style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🚶 Kolay</button>
-      <button class="filter-btn" onclick="filterRoutes(this,'orta')"       style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🧗 Orta</button>
-      <button class="filter-btn" onclick="filterRoutes(this,'yarim-gun')"  style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">⏳ Yarım Gün</button>
-      <button class="filter-btn" onclick="filterRoutes(this,'tam-gun')"    style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">📅 Tam Gün</button>
-      <button class="filter-btn" onclick="filterRoutes(this,'coklu-gun')"  style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">📆 Hafta Sonu</button>
-      <button class="filter-btn" onclick="filterRoutes(this,'aile')"       style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">👨‍👩‍👧 Aile</button>
-      <button class="filter-btn" onclick="filterRoutes(this,'cift')"       style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">💑 Çift</button>
-      <button class="filter-btn" onclick="filterRoutes(this,'foto')"       style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">📷 Foto</button>
-      <button class="filter-btn" onclick="filterRoutes(this,'lezzet')"     style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🍽 Lezzet</button>
-      <button class="filter-btn" onclick="filterRoutes(this,'doga')"       style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🌿 Doğa</button>
-      <button class="filter-btn" onclick="filterRoutes(this,'deniz')"      style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🌊 Deniz</button>
-      <button class="filter-btn" onclick="filterRoutes(this,'tarih')"      style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🏛 Tarih</button>
-      <button class="filter-btn" onclick="filterRoutes(this,'koy')"        style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🏘 Köy</button>
-      <button class="filter-btn" onclick="filterRoutes(this,'yaz')"        style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">☀️ Yaz</button>
-      <button class="filter-btn" onclick="filterRoutes(this,'sonbahar')"   style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🍂 Sonbahar</button>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:40px;" role="group" aria-label="Filtreler">
+      <button class="filter-btn active" onclick="filterRoutes(this,'all')"      style="background:var(--navy);border-color:var(--navy);color:var(--cream);">Tümü</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'cift')"            style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">💑 Çift</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'aile')"            style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">👨‍👩‍👧 Aile</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'tarih')"           style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🏛 Tarih</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'doga')"            style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🌿 Doğa</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'deniz')"           style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🌊 Deniz</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'lezzet')"          style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">🍽 Lezzet</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'foto')"            style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">📷 Foto</button>
+      <button class="filter-btn" onclick="filterRoutes(this,'coklu-gun')"       style="background:rgba(245,237,224,.06);border-color:rgba(245,237,224,.12);color:rgba(245,237,224,.6);">📆 Hafta Sonu</button>
     </div>
     <div id="routes-grid" class="card-grid"></div>
     <div id="no-routes" style="display:none;text-align:center;padding:60px 0;">
